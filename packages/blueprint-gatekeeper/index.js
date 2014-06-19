@@ -18,12 +18,7 @@ nconf.defaults ({
 var env = process.env.NODE_ENV || 'development';
 nconf.env ().file ({file: './config/' + env + '.json'}).argv ();
 
-// Create a new server using the provide configuration.
+// Create a new server, and start using node configuration.
 var app = server ();
-app.configure (nconf.get ());
+app.start (nconf.get ());
 
-// Start listening for requests.
-var port = nconf.get ('port');
-app.listen (port)
-
-console.log ('listening on port ' + port);

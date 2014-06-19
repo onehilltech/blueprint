@@ -46,7 +46,7 @@ function Server () {
   this.app_ = undefined;
 }
 
-Server.prototype.configure = function (opts) {
+Server.prototype.start = function (opts) {
   // Connect to the database.
   connect (opts);
 
@@ -65,11 +65,11 @@ Server.prototype.configure = function (opts) {
   // Set the application's router.
   console.log ('running version ' + opts.version + ' of the routes');
   require ('./routes/v' + opts.version) (this.app_);
-};
 
-Server.prototype.listen = function (port) {
-  this.http_ = this.app_.listen (port);
-}
+  // Start listening for requests.
+  this.http_ = this.app_.listen (opts.port);
+  console.log ('listening on port ' + opts.port);
+};
 
 // Create the application, and set the default configuration.
 
