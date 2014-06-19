@@ -43,35 +43,39 @@ mongoose.connection.on ('error', function (err) {
  * around the Express server.
  */
 function Server () {
-  this.app_ = undefined;
+  this.app_ = express ();
 }
 
+/**
+ * Start the server. This method configures the server using the provided
+ * options, and starts listening for requests.
+ */
 Server.prototype.start = function (opts) {
+  function init (app) {
+    // Configure the application.
+    app.use (morgan (opts.morgan));
+    app.use (bodyParser (opts.bodyParser));
+    app.use (cookieParser (opts.cookieParser));
+    app.use (session (opts.session));
+
+    app.use (passport.initialize ());
+    app.use (passport.session ());
+
+    // Set the application's router.
+    console.log ('running version ' + opts.version + ' of the routes');
+    require ('./routes/v' + opts.version) (app);
+  }
+
+  // Initialize the application.
+  init (this.app_);
+
   // Connect to the database.
   connect (opts);
-
-  // Create a new express http server.
-  this.app_ = express ();
-
-  // Configure the application.
-  this.app_.use (morgan (opts.morgan));
-  this.app_.use (bodyParser (opts.bodyParser));
-  this.app_.use (cookieParser (opts.cookieParser));
-  this.app_.use (session (opts.session));
-
-  this.app_.use (passport.initialize ());
-  this.app_.use (passport.session ());
-
-  // Set the application's router.
-  console.log ('running version ' + opts.version + ' of the routes');
-  require ('./routes/v' + opts.version) (this.app_);
 
   // Start listening for requests.
   this.http_ = this.app_.listen (opts.port);
   console.log ('listening on port ' + opts.port);
 };
-
-// Create the application, and set the default configuration.
 
 module.exports = exports = function () {
   return new Server ();
