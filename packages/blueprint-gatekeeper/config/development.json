@@ -1,0 +1,31 @@
+{
+  "connstr" : "mongodb://localhost/passport-control-dev",
+  "version" : 1,
+
+  "mongodb" : {
+    "db": { 
+      "native_parser" : true 
+    },
+    "server": { 
+      "auto_reconnect" : true, 
+      "keepAlive" : 1, 
+      "poolSize" : 5 
+    },
+    "replset": { 
+      "keepAlive" : 1 
+    }    
+  },
+  
+  "morgan" : { 
+    "format" : "dev", 
+    "immediate" : true 
+  }, 
+  
+  "session" : { 
+    "secret": "abc123", 
+    "key": "sid", 
+    "cookie": { 
+      "secure": false 
+    }
+  }
+}
