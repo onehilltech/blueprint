@@ -78,7 +78,6 @@ describe ('oauth2 strategy', function () {
 
     // Start listening for requests.
     server = app.listen (5000);
-
     return done ();
   });
 

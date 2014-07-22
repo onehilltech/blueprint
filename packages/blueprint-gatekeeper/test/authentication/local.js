@@ -18,9 +18,7 @@ describe ('local strategy', function () {
 
   before (function (done) {
     User.create (tester, function (err, user) {
-      // Check for an error.
-      if (err) 
-        return done (err);
+      if (err) return done (err);
 
       // Save the user's id.
       tester.id = user.id;
@@ -41,7 +39,6 @@ describe ('local strategy', function () {
 
     // Start listening for requests.
     server = app.listen (5000);
-
     return done ();
   });
 
