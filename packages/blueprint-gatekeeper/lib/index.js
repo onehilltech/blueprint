@@ -14,10 +14,8 @@ nconf.defaults ({
   'NODE_ENV' : 'development'
 });
 
-nconf.argv ()
-     .env ()
-     .file ({ file: './config/' + nconf.get ('NODE_ENV') + '.json' });
-
+var env = process.env.NODE_ENV || 'development';
+nconf.env ().file ({file: './config/' + env + '.json'}).argv ();
 
 if (nconf.get ('daemon')) {
   // Create a new server is running in server mode.
