@@ -1,13 +1,17 @@
- var request    = require ('supertest'),
-     superagent = require ('superagent'),
-     assert     = require ('assert'),
-     seed       = require ('../../seeds/default'),
-     mayipass   = require ('../../../');
+var request    = require ('supertest'),
+    superagent = require ('superagent'),
+    assert     = require ('assert');
+
+var seed = require ('../seeds/default'),
+    app  = require ('../app'),
+    auth = require ('../../lib/router/auth');
+
+app.use (auth ());
 
 ///////////////////////////////////////////////////////////////////////////////
 // Begin Test Cases
 
-describe ('routes.v1.auth', function () {
+describe ('router.auth', function () {
   var agent = superagent.agent ();
 
   before (function (done) {
@@ -18,7 +22,7 @@ describe ('routes.v1.auth', function () {
     seed.unseed (done);
   });
 
-  describe ('POST /v1/auth/login', function () {
+  describe ('POST /auth/login', function () {
     /**
      * Test creating an event. This test case will create 4 events that
      * will be used in later test cases.
@@ -26,8 +30,8 @@ describe ('routes.v1.auth', function () {
     it ('should login the user', function (done) {
       user = seed.data.users[0];
 
-      request (mayipass.server)
-        .post ('/v1/auth/login')
+      request (app)
+        .post ('/auth/login')
         .send ({email: user.email, password: user.password})
         .expect (302)
         .end (function (err, res) {
@@ -45,12 +49,12 @@ describe ('routes.v1.auth', function () {
     it ('should not login user because of incorrect password', function (done) {
       user = seed.data.users[0];
 
-      request (mayipass.server)
-        .post ('/v1/auth/login')
+      request (app)
+        .post ('/auth/login')
         .send ({email: user.email, password: '1'})
         .expect (302)
         .end (function (err, res) {
-          assert.equal (res.headers.location, '/v1/auth/login');
+          assert.equal (res.headers.location, '/auth/login');
           done ()
         });
     });
@@ -62,25 +66,25 @@ describe ('routes.v1.auth', function () {
     it ('should not login user because of incorrect email', function (done) {
       user = seed.data.users[0];
 
-      request (mayipass.server)
-        .post ('/v1/auth/login')
+      request (app)
+        .post ('/auth/login')
         .send ({email: 'who@email.me', password: user.password})
         .expect (302)
         .end (function (err, res) {
-          assert.equal (res.headers.location, '/v1/auth/login');
-          done ()
+          assert.equal (res.headers.location, '/auth/login');
+          return done ()
         });
     });
   });
 
-  describe ('GET /v1/auth/logout', function () {
+  describe ('GET /auth/logout', function () {
     it ('should logout the user', function (done) {
-      var req = request (mayipass.server).get ('/v1/auth/logout');
+      var req = request (app).get ('/auth/logout');
       agent.attachCookies (req);
 
       req.expect (302).end (function (err, res) {
-          assert.equal (res.headers.location, '/v1/auth/login');
-          done ()
+        assert.equal (res.headers.location, '/auth/login');
+        return done ();
       });
     });
   });
