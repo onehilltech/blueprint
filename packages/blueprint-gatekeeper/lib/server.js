@@ -20,8 +20,6 @@ function Server () {
  * options, and starts listening for requests.
  */
 Server.prototype.start = function (opts) {
-  var version = opts.version || 1;
-
   function init (app) {
     console.log ('initializing the server application');
 
