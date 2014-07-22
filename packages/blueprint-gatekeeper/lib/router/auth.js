@@ -1,5 +1,6 @@
 var passport = require ('passport'),
     express  = require ('express'),
+    login    = require ('connect-ensure-login'),
     local    = require ('../authentication/local');
 
 // Use the local authentication strategy.
@@ -18,10 +19,7 @@ module.exports = exports = function (opts) {
       res.redirect ('/');
     });
 
-  router.get ('/auth/logout', function (req, res, next) {
-    if (!req.session)
-      return next (new Error ('Session must be enabled on app server'));
-
+  var logout = function (req, res) {
     req.session.destroy (function (err) {
       if (err)
         return res.send (400, {message: 'Failed to logout user'});
@@ -29,10 +27,12 @@ module.exports = exports = function (opts) {
       // Logout the current user (in Passport).
       req.logout ();
       res.redirect ('/auth/login');
-      
-      return next ();
     });
-  }); 
+  }
+
+  router.get ('/auth/logout', 
+    [ login.ensureLoggedIn (),
+      logout]);
 
   return router;
 };
