@@ -5,7 +5,7 @@ var mongoose     = require ('mongoose'),
     morgan       = require ('morgan'),
     bodyParser   = require ('body-parser'),
     passport     = require ('passport'),
-    User         = require ('passport-control-common').models.User;
+    User         = require ('./models/user');
 
 // Define the serialization/deserialization methods.
 passport.serializeUser (function (user, done) {

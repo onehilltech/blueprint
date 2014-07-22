@@ -2,7 +2,7 @@ var passport      = require ('passport'),
     oauth2orize   = require ('oauth2orize'),
     login         = require ('connect-ensure-login'),
     ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy,
-    oauth2model   = require ('passport-control-common').models.oauth2;
+    oauth2model   = require ('../../models/oauth2');
 
 var TOKEN_LENGTH = 256;
 

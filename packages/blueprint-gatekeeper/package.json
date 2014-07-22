@@ -1,10 +1,10 @@
 {
   "name": "passport-control",
   "description": "An authentication server for Web application programming interfaces (APIs)",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
 
-  "main" : "./index.js",
+  "main" : "./lib",
   
   "repository" :  { 
     "type" : "git", 
@@ -25,9 +25,6 @@
     "passport-oauth2-client-password": "0.1.x",
     "oauth2orize": "1.0.x",
 
-    "passport-control-common": "git+ssh://git@bitbucket.org:onehilltech/passport-control-common.git#v0.2.2",
-    "passport-control-client": "git+ssh://git@bitbucket.org:onehilltech/passport-control-client.git#v0.1.2",
-
     "connect": "3.0.x",
     "connect-ensure-login": "0.1.x",
 
@@ -35,6 +32,7 @@
 
     "morgan": "1.0.x"
   },
+
   "devDependencies": {
     "async": "0.9.x",
     "supertest": "0.12.x",

@@ -1,5 +1,5 @@
 var passport = require ('passport'),
-    local    = require ('passport-control-client').auth.local;
+    local    = require ('../../authentication/local');
 
 // Use the local authentication strategy.
 passport.use (local ());
