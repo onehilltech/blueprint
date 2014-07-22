@@ -31,7 +31,7 @@ app.get ('/protected/data',
 ///////////////////////////////////////////////////////////////////////////////
 // Begin Test Cases
 
-describe ('routes.v1.auth', function () {
+describe ('router.oauth2', function () {
   var agent = superagent.agent ();
   var transaction, code, access_data;
   var user = seed.data.users[0];
