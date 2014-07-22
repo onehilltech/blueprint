@@ -1,7 +1,7 @@
 An authentication client and module for Express.js _application programming 
 interfaces (APIs)_. Mayipass implements the OAuth 2.0 protocol atop of MongoDB, 
-and is designed to be deployed with any services that wants to expose an API 
-for clients to remotely communicate with their service over the Internet.
+and is designed to be deployed with any service that wants to expose an API 
+for clients via the Internet.
 
 OAuth 2.0 Resource Protection
 ==============================
