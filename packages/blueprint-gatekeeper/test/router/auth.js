@@ -6,7 +6,7 @@ var seed = require ('../seeds/default'),
     app  = require ('../app'),
     auth = require ('../../lib/router/auth');
 
-app.use (auth ());
+app.use (auth (app.config.router.auth));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Begin Test Cases

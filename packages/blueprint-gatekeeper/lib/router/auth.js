@@ -13,26 +13,34 @@ module.exports = exports = function (opts) {
   var router = express.Router ();
   opts = opts || {};
 
-  router.post ('/auth/login', 
-    passport.authenticate ('local', { failureRedirect: '/auth/login' }),
+  var login_route = opts.loginRoute || '/auth/login';
+  var login_success_redirect = opts.loginSuccessRedirect || '/';
+
+  var logout_route = opts.logoutRoute || '/auth/logout';
+  var logout_success_redirect = opts.logoutSuccessRedirect || login_route;
+
+  router.post (login_route, 
+    passport.authenticate ('local', { failureRedirect: login_route }),
     function (req, res) {
-      res.redirect ('/');
+      res.redirect (login_success_redirect);
     });
 
-  var logout = function (req, res) {
-    req.session.destroy (function (err) {
-      if (err)
-        return res.send (400, {message: 'Failed to logout user'});
+  function perform_logout () {
+    return function (req, res) {
+      req.session.destroy (function (err) {
+        if (err)
+          return res.send (400, {message: 'Failed to logout user'});
 
-      // Logout the current user (in Passport).
-      req.logout ();
-      res.redirect ('/auth/login');
-    });
+        // Logout the current user (in Passport).
+        req.logout ();
+        res.redirect (logout_success_redirect);
+      });
+    }
   }
 
-  router.get ('/auth/logout', 
-    [ login.ensureLoggedIn (),
-      logout]);
+  router.get (logout_route, 
+    [ login.ensureLoggedIn ({redirectTo: login_route}),
+      perform_logout ()]);
 
   return router;
 };

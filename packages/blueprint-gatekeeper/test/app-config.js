@@ -24,5 +24,12 @@ module.exports = exports =  {
     cookie: { 
       secure: false 
     }
+  },
+
+  router : {
+    auth : {
+      loginRoute : '/auth/login',
+      logoutRoute : '/auth/logout'
+    }
   }
 }

@@ -18,3 +18,4 @@ app.use (passport.initialize ());
 app.use (passport.session ());
 
 module.exports = exports = app;
+exports.config = config;
