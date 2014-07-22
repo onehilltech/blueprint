@@ -1,0 +1,17 @@
+{
+  "connstr" : "mongodb://localhost/passport-test",
+
+  "mongodb" : {
+    "db": { 
+      "native_parser" : true 
+    },
+    "server": { 
+      "auto_reconnect" : true, 
+      "keepAlive" : 1, 
+      "poolSize" : 5 
+    },
+    "replset": { 
+      "keepAlive" : 1 
+    }    
+  }
+}
