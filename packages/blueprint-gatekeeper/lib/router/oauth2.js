@@ -2,7 +2,7 @@ var passport      = require ('passport'),
     express       = require ('express'),
     oauth2orize   = require ('oauth2orize'),
     login         = require ('connect-ensure-login'),
-    ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy,
+    client        = require ('../authentication/client'),
     oauth2model   = require ('../models/oauth2');
 
 var TOKEN_LENGTH = 256;
@@ -27,13 +27,13 @@ function generate_token (len) {
   var charlen = chars.length;
 
   for (var i = 0; i < len; ++i) {
-    buf.push (chars[getRandomInt (0, charlen - 1)]);
+    buf.push (chars[get_random_int (0, charlen - 1)]);
   }
 
   return buf.join ('');
 }
 
-function getRandomInt (min, max) {
+function get_random_int (min, max) {
   return Math.floor (Math.random () * (max - min + 1)) + min;
 }
 
@@ -148,25 +148,8 @@ server.exchange ('refresh_token', oauth2orize.exchange.refreshToken (function (c
   });
 }));
 
-passport.use (new ClientPasswordStrategy (
-  function (id, secret, done) {
-    oauth2model.Client.findById (id, function (err, client) {
-      if (err) 
-        return done (err);
-
-      if (!client) 
-        return done (null, false);
-
-      // Check the secret. We do not store the secret in a crypted format
-      // since it prevents the client from being able to see the secret when
-      // managing their account.
-      if (client.secret !== secret) 
-        return done (null, false);
-
-      return done (null, client);
-    });
-  }
-));
+// Use the client authentication strategy.
+passport.use (client ());
 
 // Configure the router to support the paths in this module. All the 
 // paths in this module begin with /auth. Any other path is not part 
