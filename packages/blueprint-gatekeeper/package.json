@@ -41,6 +41,6 @@
     "mocha": "1.x.x"
   },
   "scripts" : {
-    "test" : "mocha --recursive test/ --reporter spec"
+    "test" : "env NODE_ENV=test mocha --recursive test/ --reporter spec"
   }
 }
