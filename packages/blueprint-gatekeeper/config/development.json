@@ -1,6 +1,5 @@
 {
-  "connstr" : "mongodb://localhost/passport-control-dev",
-  "version" : 1,
+  "connstr" : "mongodb://localhost/passport-test",
 
   "mongodb" : {
     "db": { 
@@ -16,16 +15,21 @@
     }    
   },
   
-  "morgan" : { 
-    "format" : "dev", 
-    "immediate" : true 
-  }, 
-  
-  "session" : { 
-    "secret": "abc123", 
-    "key": "sid", 
-    "cookie": { 
-      "secure": false 
-    }
+  "daemon" : {
+    "port" : 5000,
+    "version" : 1,
+
+    "morgan" : { 
+      "format" : "dev", 
+      "immediate" : true 
+    }, 
+    
+    "session" : { 
+      "secret": "abc123", 
+      "key": "sid", 
+      "cookie": { 
+        "secure": false 
+      }
+    }    
   }
 }
