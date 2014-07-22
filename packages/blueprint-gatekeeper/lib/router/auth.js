@@ -1,12 +1,19 @@
 var passport = require ('passport'),
-    local    = require ('../../authentication/local');
+    express  = require ('express'),
+    local    = require ('../authentication/local');
 
 // Use the local authentication strategy.
 passport.use (local ());
 
-module.exports = function (prefix, router) {
+module.exports = exports = function (opts) {
+  console.log ('configuring local authentication routes');
+
+  // Create a router for these routes.
+  var router = express.Router ();
+  opts = opts || {};
+
   router.post ('/auth/login', 
-    passport.authenticate ('local', { failureRedirect: prefix + '/auth/login' }),
+    passport.authenticate ('local', { failureRedirect: '/auth/login' }),
     function (req, res) {
       res.redirect ('/');
     });
@@ -19,7 +26,9 @@ module.exports = function (prefix, router) {
 
       // Logout the current user (in Passport).
       req.logout ();
-      res.redirect (prefix + '/auth/login');
+      res.redirect ('/auth/login');
     });
   }); 
+
+  return router;
 };

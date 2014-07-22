@@ -1,8 +1,9 @@
 var passport      = require ('passport'),
+    express       = require ('express'),
     oauth2orize   = require ('oauth2orize'),
     login         = require ('connect-ensure-login'),
     ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy,
-    oauth2model   = require ('../../models/oauth2');
+    oauth2model   = require ('../models/oauth2');
 
 var TOKEN_LENGTH = 256;
 
@@ -171,7 +172,12 @@ passport.use (new ClientPasswordStrategy (
 // paths in this module begin with /auth. Any other path is not part 
 // of this module.
 
-module.exports = function (prefix, router) {
+module.exports = exports = function (opts) {
+  console.log ('configuring OAuth 2.0 routes');
+
+  opts = opts || {};
+  var router = express.Router ();
+
   router.get ('/oauth2/authorize', [
       login.ensureLoggedIn (),
       server.authorization (function (client_id, redirect_uri, done) {
@@ -216,6 +222,8 @@ module.exports = function (prefix, router) {
     [ passport.authenticate (['oauth2-client-password'], { session: false }),
       server.token (),
       server.errorHandler () ]);
+
+  return router;
 };
 
 
