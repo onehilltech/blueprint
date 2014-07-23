@@ -5,18 +5,6 @@ var nconf    = require ('nconf'),
 
 var User = models.User;
 
-// Connect to the database. The database configuration comes from a 
-// configuration file. Setup the callback for different events on the 
-// connection.
-var connect = function (opts) {
-  console.log ('database connection is ' + opts.connstr);
-  mongoose.connect (opts.connstr, opts.mongodb);
-}
-
-mongoose.connection.on ('error', function (err) {
-  console.log (err);
-});
-
 // Define the serialization/deserialization methods.
 passport.serializeUser (function (user, done) {
   done (null, user.id);
@@ -46,10 +34,6 @@ exports.Server = Server;
 var env = process.env.NODE_ENV || 'development';
 nconf.env ().file ({file: './config/' + env + '.json'}).argv ();
 var config = nconf.get ();
-
-// Connect to the database using the current configuration.
-console.log ('connecting to database');
-connect (config);
 
 if (nconf.get ('daemon')) {
   // Create a new server is running in server mode.

@@ -17,5 +17,11 @@ app.use (session (config.session));
 app.use (passport.initialize ());
 app.use (passport.session ());
 
+// Connect to the database.
+console.log ('database connection is ' + config.connstr);
+mongoose.connect (config.connstr, config.mongodb);
+
+// Export symbols from the module.
 module.exports = exports = app;
 exports.config = config;
+

@@ -1,9 +1,18 @@
-var passport     = require ('passport'),
-    express      = require ('express'),
-    session      = require ('express-session'),
-    cookieParser = require ('cookie-parser'),
-    morgan       = require ('morgan'),
-    bodyParser   = require ('body-parser');
+var passport = require ('passport');
+var mongoose = require ('mongoose');
+var express = require ('express');
+var session = require ('express-session');
+var cookieParser = require ('cookie-parser');
+var morgan = require ('morgan');
+var bodyParser = require ('body-parser');
+
+mongoose.connection.on ('error', function (err) {
+  console.log (err);
+});
+
+mongoose.connection.on ('disconnect', function () {
+  console.log ('connection to database terminated');
+});
 
 /**
  * @class Server
@@ -39,6 +48,10 @@ Server.prototype.start = function (opts) {
 
   // Initialize the application.
   init (this.app_);
+
+  // Connect to the database.
+  console.log ('database connection is ' + opts.connstr);
+  mongoose.connect (opts.connstr, opts.mongodb);
 
   // Start listening for requests.
   this.http_ = this.app_.listen (opts.port);
