@@ -8,7 +8,7 @@
   
   "repository" :  { 
     "type" : "git", 
-    "url" : "https://bitbucket.org/onehilltech/mayipass.git"
+    "url" : "https://bitbucket.org/onehilltech/passport-control.git"
   },
   
   "dependencies": {
@@ -22,7 +22,10 @@
     "mongoose": "3.8.x",
 
     "passport" : "0.2.x",
+    "passport-http-bearer": "1.x.x",
+    "passport-local" : "1.x.x",
     "passport-oauth2-client-password": "0.1.x",
+     
     "oauth2orize": "1.0.x",
 
     "connect": "3.0.x",
