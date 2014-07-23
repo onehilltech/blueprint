@@ -1,7 +1,7 @@
 {
   "name": "passport-control",
   "description": "An authentication server for Web application programming interfaces (APIs)",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
 
   "main" : "./lib",
@@ -25,7 +25,7 @@
     "passport-http-bearer": "1.x.x",
     "passport-local" : "1.x.x",
     "passport-oauth2-client-password": "0.1.x",
-     
+
     "oauth2orize": "1.0.x",
 
     "connect": "3.0.x",
