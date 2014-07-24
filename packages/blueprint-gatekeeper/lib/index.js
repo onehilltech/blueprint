@@ -3,7 +3,7 @@ var nconf    = require ('nconf'),
     mongoose = require ('mongoose'),
     models   = require ('./models');
 
-var User = models.User;
+var Account = models.Account;
 
 // Define the serialization/deserialization methods.
 passport.serializeUser (function (user, done) {
@@ -11,7 +11,7 @@ passport.serializeUser (function (user, done) {
 });
 
 passport.deserializeUser (function (id, done) {
-  User.findById (id, function (err, user) {
+  Account.findById (id, function (err, user) {
     if (err)
       return done (err);
 

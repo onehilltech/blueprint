@@ -1,11 +1,11 @@
-var LocalStrategy = require ('passport-local').Strategy,
-    User          = require ('../models/user');
+var LocalStrategy = require ('passport-local').Strategy;
+var Account = require ('../models/account');
 
 module.exports = function (opts) {
   var opts = opts || {usernameField: 'email'};
 
   return new LocalStrategy (opts, function (username, password, done) {
-    User.findOne ({ email: username }, function (err, user) {
+    Account.findOne ({ email: username }, function (err, user) {
       if (err) 
         return done (err);
 

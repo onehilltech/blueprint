@@ -21,19 +21,19 @@ server.deserializeClient (function (id, done) {
   });
 });
 
-function generate_token (len) {
+function generateToken (len) {
   var buf = [];
   var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   var charlen = chars.length;
 
   for (var i = 0; i < len; ++i) {
-    buf.push (chars[get_random_int (0, charlen - 1)]);
+    buf.push (chars[getRandomInt (0, charlen - 1)]);
   }
 
   return buf.join ('');
 }
 
-function get_random_int (min, max) {
+function getRandomInt (min, max) {
   return Math.floor (Math.random () * (max - min + 1)) + min;
 }
 
@@ -54,15 +54,15 @@ function get_random_int (min, max) {
 // Authorization Codes
 server.grant ('code', oauth2orize.grant.code (function (client, redirect_uri, user, ares, done) {
   // Generate a new authorization code.
-  var code = generate_token (16);
+  var code = generateToken (16);
 
   // Store the authorization code in the database. We are going to have
   // to retrieve it later when giving out the token.
   var ac = new oauth2model.AuthorizationCode ({
     code : code,
-    client : client._id,
+    client : client.id,
     redirect_uri : redirect_uri,
-    user : user._id
+    account : user.id
   });
 
   ac.save (function (err) {
@@ -84,7 +84,7 @@ server.exchange ('code', oauth2orize.exchange.code (function (client, code, redi
 
   var query = {
     code : code,
-    client : client._id,
+    client : client.id,
     redirect_uri : redirect_uri,
   };
 
@@ -105,13 +105,13 @@ server.exchange ('code', oauth2orize.exchange.code (function (client, code, redi
       if (err)
         return done (err);
 
-      var token = generate_token (TOKEN_LENGTH);
-      var refresh_token = generate_token (TOKEN_LENGTH);
+      var token = generateToken (TOKEN_LENGTH);
+      var refresh_token = generateToken (TOKEN_LENGTH);
 
       var access_token = new oauth2model.AccessToken ({
         token : token,
         refresh_token : refresh_token,
-        user : code.user,
+        account : code.account,
         client : code.client
       });
 
@@ -131,7 +131,7 @@ server.exchange ('refresh_token', oauth2orize.exchange.refreshToken (function (c
   // Locate the original access token that corresponds to this refresh
   // token. If we cannot find the original access token, then we need to
   // return an error to the user.
-  oauth2model.AccessToken.findOne ({client : client._id, refresh_token: refresh_token}, function (err, at) {
+  oauth2model.AccessToken.findOne ({client : client.id, refresh_token: refresh_token}, function (err, at) {
     if (err)
       return done (err);
 
@@ -139,8 +139,8 @@ server.exchange ('refresh_token', oauth2orize.exchange.refreshToken (function (c
       return done (null, false);
 
     // Generate a new token and refresh token.
-    at.token = generate_token (TOKEN_LENGTH);
-    at.refresh_token = generate_token (TOKEN_LENGTH);
+    at.token = generateToken (TOKEN_LENGTH);
+    at.refresh_token = generateToken (TOKEN_LENGTH);
 
     at.save (function (err) {
       return err ? done (err) : done (null, at.token, at.refresh_token);
@@ -185,11 +185,11 @@ module.exports = exports = function (opts) {
         res.send (200, { 
           transactionID: req.oauth2.transactionID, 
           user: {
-            _id: req.user._id,
+            id: req.user.id,
             email : req.user.email,
           }, 
           client: {
-            _id : req.oauth2.client._id,
+            id : req.oauth2.client.id,
             name : req.oauth2.client.name,
           }
         });

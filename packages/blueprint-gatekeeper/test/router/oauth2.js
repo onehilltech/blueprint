@@ -24,7 +24,7 @@ app.get ('/protected/data',
     // `BearerStrategy`. It is typically used to indicate scope of the token,
     // and used in access control checks. For illustrative purposes, this
     // example simply returns the scope in the response.
-    res.json ({ id: req.user._id, name: req.user.email, scope: req.authInfo.scope })
+    res.json ({ id: req.user.id, name: req.user.email, scope: req.authInfo.scope })
   }
 );
 
@@ -76,7 +76,7 @@ describe ('router.oauth2', function () {
 
       var client = seed.data.clients[0];
 
-      req.query ({response_type: 'code', client_id: client._id, redirect_uri: client.redirect_uri})
+      req.query ({response_type: 'code', client_id: client.id, redirect_uri: client.redirect_uri})
         .expect (200)
         .end (function (err, res) {
           if (err) return done (err);
@@ -87,10 +87,10 @@ describe ('router.oauth2', function () {
           transaction = body.transactionID;
           assert.equal (8, transaction.length);
 
-          assert.equal (user._id, body.user._id);
+          assert.equal (user.id, body.user.id);
           assert.equal (user.email, body.user.email);
 
-          assert.equal (client._id, body.client._id);
+          assert.equal (client.id, body.client.id);
           assert.equal (client.name, body.client.name);
 
           // Save the cookies for the next request.
@@ -104,7 +104,7 @@ describe ('router.oauth2', function () {
 
       var client = seed.data.clients[2];
 
-      req.query ({response_type: 'code', client_id: client._id, redirect_uri: client.redirect_uri})
+      req.query ({response_type: 'code', client_id: client.id, redirect_uri: client.redirect_uri})
          .expect (500, done);
     });
   });
@@ -144,7 +144,7 @@ describe ('router.oauth2', function () {
       var client = seed.data.clients[0];
 
       var data = {
-        client_id: client._id,
+        client_id: client.id,
         client_secret: client.secret, 
         grant_type: 'code',
         code: code, 
@@ -171,7 +171,7 @@ describe ('router.oauth2', function () {
       request (app)
         .get ('/protected/data')
         .set ('Authorization', 'Bearer ' + access_data.access_token)
-        .expect (200, {id : user._id, name: user.email, scope: '*'}, done);
+        .expect (200, {id : user.id, name: user.email, scope: '*'}, done);
     });
 
     it ('should not access protected resource (reason: missing token)', function (done) {
@@ -184,7 +184,7 @@ describe ('router.oauth2', function () {
       var client = seed.data.clients[0];
 
       var data = {
-        client_id: client._id,
+        client_id: client.id,
         client_secret: client.secret, 
         grant_type: 'refresh_token',
         refresh_token: access_data.refresh_token

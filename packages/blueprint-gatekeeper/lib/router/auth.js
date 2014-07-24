@@ -13,16 +13,16 @@ module.exports = exports = function (opts) {
   var router = express.Router ();
   opts = opts || {};
 
-  var login_route = opts.loginRoute || '/auth/login';
-  var login_success_redirect = opts.loginSuccessRedirect || '/';
+  var loginRoute = opts.loginRoute || '/auth/login';
+  var loginSuccessRedirect = opts.loginSuccessRedirect || '/';
 
-  var logout_route = opts.logoutRoute || '/auth/logout';
-  var logout_success_redirect = opts.logoutSuccessRedirect || login_route;
+  var logoutRoute = opts.logoutRoute || '/auth/logout';
+  var logoutSuccessRedirect = opts.logoutSuccessRedirect || loginRoute;
 
-  router.post (login_route, 
-    passport.authenticate ('local', { failureRedirect: login_route }),
+  router.post (loginRoute, 
+    passport.authenticate ('local', { failureRedirect: loginRoute }),
     function (req, res) {
-      res.redirect (login_success_redirect);
+      res.redirect (loginSuccessRedirect);
     });
 
   function perform_logout () {
@@ -33,13 +33,13 @@ module.exports = exports = function (opts) {
 
         // Logout the current user (in Passport).
         req.logout ();
-        res.redirect (logout_success_redirect);
+        res.redirect (logoutSuccessRedirect);
       });
     }
   }
 
-  router.get (logout_route, 
-    [ login.ensureLoggedIn ({redirectTo: login_route}),
+  router.get (logoutRoute, 
+    [ login.ensureLoggedIn ({redirectTo: loginRoute}),
       perform_logout ()]);
 
   return router;

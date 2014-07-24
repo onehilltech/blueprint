@@ -1,7 +1,2 @@
-module.exports = exports = {
-  // export the common models/schemas
-  User : require ('./user'),
-
-  // export the subdirectories
-  oauth2 : require ('./oauth2')
-};
+exports.Account = require ('./account');
+exports.oauth2 = require ('./oauth2');

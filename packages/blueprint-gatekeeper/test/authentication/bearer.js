@@ -8,7 +8,7 @@ var request     = require ('supertest'),
 var Schema = mongoose.Schema;
 
 var lib         = require ('../../'),
-    User        = lib.models.User,
+    Account     = lib.models.Account,
     Client      = lib.models.oauth2.Client,
     AccessToken = lib.models.oauth2.AccessToken;
 
@@ -35,12 +35,12 @@ describe ('oauth2 strategy', function () {
   };
 
   before (function (done) {
-    User.create (tester, function (err, user) {
+    Account.create (tester, function (err, user) {
       if (err) return done (err);
       tester.id = user.id;
 
       // Set the access token user id.
-      access_token.user = user._id;
+      access_token.account = user.id;
       return done ();
     });
   });
@@ -51,7 +51,7 @@ describe ('oauth2 strategy', function () {
       client.id = cli.id;
 
       // Set the access token user id.
-      access_token.client = cli._id;
+      access_token.client = cli.id;
       return done ();
     });
   });
@@ -82,7 +82,7 @@ describe ('oauth2 strategy', function () {
   });
 
   after (function (done) {
-    User.remove ({}, function (err) {
+    Account.remove ({}, function (err) {
       return done (err);
     });
   });

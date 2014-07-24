@@ -5,7 +5,7 @@
 
 var app  = require ('../app'),
     lib  = require ('../../'),
-    User = lib.models.User;
+    Account = lib.models.Account;
 
 describe ('local strategy', function () {
   var local = lib.auth.local;
@@ -17,7 +17,7 @@ describe ('local strategy', function () {
   };
 
   before (function (done) {
-    User.create (tester, function (err, user) {
+    Account.create (tester, function (err, user) {
       if (err) return done (err);
 
       // Save the user's id.
@@ -43,7 +43,7 @@ describe ('local strategy', function () {
   });
 
   after (function (done) {
-    User.remove ({}, function (err) {
+    Account.remove ({}, function (err) {
       return done (err);
     });
   });

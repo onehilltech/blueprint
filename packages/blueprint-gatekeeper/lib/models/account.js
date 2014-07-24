@@ -4,7 +4,7 @@ var mongoose = require ('mongoose'),
 /**
  * Factory function for the 'user' schema.
  */
-function create_schema () {
+function createSchema () {
   var SALT_WORK_FACTOR = 10;
   var Schema = mongoose.Schema;
 
@@ -58,8 +58,8 @@ function create_schema () {
 }
 
 // Create the user collection, and export it from this module.
-const COLLECTION_NAME = 'user';
-var schema = create_schema ();
+const COLLECTION_NAME = 'account';
+var schema = createSchema ();
 var model = mongoose.model (COLLECTION_NAME, schema);
 
 module.exports = exports = model;

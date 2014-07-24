@@ -1,10 +1,10 @@
-var request    = require ('supertest'),
-    superagent = require ('superagent'),
-    assert     = require ('assert');
+var request = require ('supertest');
+var superagent = require ('superagent');
+var assert = require ('assert');
 
-var seed = require ('../seeds/default'),
-    app  = require ('../app'),
-    auth = require ('../../lib/router/auth');
+var seed = require ('../seeds/default');
+var app  = require ('../app');
+var auth = require ('../../lib/router/auth');
 
 app.use (auth (app.config.router.auth));
 

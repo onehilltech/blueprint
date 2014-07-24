@@ -1,6 +1,6 @@
-var async = require ('async'),
-    User  = require ('../../lib/models/user'),
-    oauth2model = require ('../../lib/models/oauth2');
+var async = require ('async');
+var User = require ('../../lib/models/account');
+var oauth2model = require ('../../lib/models/oauth2');
 
 var users = [
   { email: 'john.doe@test.me', password: '123456789' },
@@ -32,8 +32,8 @@ exports.seed = function (opts, done) {
         if (err)
           return callback (err);
 
-        users[0]._id = user0._id.toString ();
-        users[1]._id = user1._id.toString ();
+        users[0].id = user0.id;
+        users[1].id = user1.id;
         return callback ();
       });
     },
@@ -42,15 +42,15 @@ exports.seed = function (opts, done) {
         if (err)
           return callback (err);
 
-        clients[0]._id = client1._id.toString ();
-        clients[1]._id = client2._id.toString ();
-        clients[2]._id = client3._id.toString ();
+        clients[0].id = client1.id;
+        clients[1].id = client2.id;
+        clients[2].id = client3.id;
 
         return callback ();
       });
     }],
     function (err, results) {
-      return err ? done (err) : done ();
+      return done (err);
     });
 }
 
@@ -66,7 +66,7 @@ exports.unseed = function (done) {
       User.remove ({}, function (err) { callback (err); });
     }],
     function (err, results) {
-      return err ? done (err) : done ();
+      return done (err);
     });
 }
 
