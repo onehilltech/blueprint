@@ -9,7 +9,7 @@ function createSchema () {
   var Schema = mongoose.Schema;
 
   var schema = new Schema ({
-    code : {type: String, unique: true},
+    code : {type: String, unique: true, index : true},
     client : {type: Schema.Types.ObjectId, ref: Client.mdoelName},
     redirect_uri : {type: String, trim: true},
     account : {type: Schema.Types.ObjectId, ref: Account.modelName, unique: true},
