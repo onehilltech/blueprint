@@ -5,6 +5,8 @@ var passport      = require ('passport'),
     client        = require ('../authentication/client'),
     oauth2model   = require ('../models/oauth2');
 
+var utils = require ('../utils');
+
 var TOKEN_LENGTH = 256;
 
 // Create OAuth 2.0 server
@@ -20,22 +22,6 @@ server.deserializeClient (function (id, done) {
     return err ? done (err) : done (null, client);
   });
 });
-
-function generateToken (len) {
-  var buf = [];
-  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var charlen = chars.length;
-
-  for (var i = 0; i < len; ++i) {
-    buf.push (chars[getRandomInt (0, charlen - 1)]);
-  }
-
-  return buf.join ('');
-}
-
-function getRandomInt (min, max) {
-  return Math.floor (Math.random () * (max - min + 1)) + min;
-}
 
 // Register supported grant types.
 //
@@ -54,7 +40,7 @@ function getRandomInt (min, max) {
 // Authorization Codes
 server.grant ('code', oauth2orize.grant.code (function (client, redirect_uri, user, ares, done) {
   // Generate a new authorization code.
-  var code = generateToken (16);
+  var code = utils.generateToken (16);
 
   // Store the authorization code in the database. We are going to have
   // to retrieve it later when giving out the token.
@@ -105,8 +91,8 @@ server.exchange ('code', oauth2orize.exchange.code (function (client, code, redi
       if (err)
         return done (err);
 
-      var token = generateToken (TOKEN_LENGTH);
-      var refresh_token = generateToken (TOKEN_LENGTH);
+      var token = utils.generateToken (TOKEN_LENGTH);
+      var refresh_token = utils.generateToken (TOKEN_LENGTH);
 
       var access_token = new oauth2model.AccessToken ({
         token : token,
@@ -139,8 +125,8 @@ server.exchange ('refresh_token', oauth2orize.exchange.refreshToken (function (c
       return done (null, false);
 
     // Generate a new token and refresh token.
-    at.token = generateToken (TOKEN_LENGTH);
-    at.refresh_token = generateToken (TOKEN_LENGTH);
+    at.token = utils.generateToken (TOKEN_LENGTH);
+    at.refresh_token = utils.generateToken (TOKEN_LENGTH);
 
     at.save (function (err) {
       return err ? done (err) : done (null, at.token, at.refresh_token);

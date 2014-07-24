@@ -25,6 +25,7 @@ passport.deserializeUser (function (id, done) {
 // Export the client symbols.
 exports.models = models;
 exports.auth   = require ('./authentication');
+exports.utils  = require ('./utils');
 
 // Export the server factory.
 var Server = require ('./server');
