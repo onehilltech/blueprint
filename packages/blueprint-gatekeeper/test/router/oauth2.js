@@ -24,7 +24,7 @@ app.get ('/protected/data',
     // `BearerStrategy`. It is typically used to indicate scope of the token,
     // and used in access control checks. For illustrative purposes, this
     // example simply returns the scope in the response.
-    res.json ({ id: req.user.id, name: req.user.email, scope: req.authInfo.scope })
+    res.json ({ id: req.user, scope: req.authInfo.scope })
   }
 );
 
@@ -171,7 +171,7 @@ describe ('router.oauth2', function () {
       request (app)
         .get ('/protected/data')
         .set ('Authorization', 'Bearer ' + access_data.access_token)
-        .expect (200, {id : user.id, name: user.email, scope: '*'}, done);
+        .expect (200, {id : user.id, scope: '*'}, done);
     });
 
     it ('should not access protected resource (reason: missing token)', function (done) {

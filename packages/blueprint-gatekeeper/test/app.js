@@ -9,7 +9,7 @@ var express      = require ('express'),
 
 // Create the application, and set the default configuration.
 var app = express ();
-app.use (morgan (config.morgan));
+app.use (morgan (config.morgan.format));
 app.use (bodyParser (config.bodyParser));
 app.use (cookieParser (config.cookieParser));
 app.use (session (config.session));
