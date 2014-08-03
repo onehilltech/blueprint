@@ -172,7 +172,7 @@ module.exports = exports = function (opts) {
           transactionID: req.oauth2.transactionID, 
           user: {
             id: req.user.id,
-            email : req.user.email,
+            username : req.user.username,
           }, 
           client: {
             id : req.oauth2.client.id,

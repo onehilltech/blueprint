@@ -1,10 +1,10 @@
 var async = require ('async');
-var User = require ('../../lib/models/account');
+var Account = require ('../../lib/models/account');
 var oauth2model = require ('../../lib/models/oauth2');
 
 var users = [
-  { email: 'john.doe@test.me', password: '123456789' },
-  { email: 'jack.black@test.me', password: '0987654321' },
+  { username: 'john.doe@test.me', password: '123456789' },
+  { username: 'jack.black@test.me', password: '0987654321' },
 ];
 
 var clients = [
@@ -14,7 +14,7 @@ var clients = [
 ];
 
 exports.data = {
-  users : users,
+  users   : users,
   clients : clients
 };
 
@@ -28,7 +28,7 @@ exports.seed = function (opts, done) {
   // cases throughout this test suite.
   async.series ([
     function (callback) {
-      User.create (users, function (err, user0, user1) {
+      Account.create (users, function (err, user0, user1) {
         if (err)
           return callback (err);
 
@@ -63,7 +63,7 @@ exports.unseed = function (done) {
       oauth2model.Client.remove ({}, function (err) { callback (err); });
     },
     function (callback) {
-      User.remove ({}, function (err) { callback (err); });
+      Account.remove ({}, function (err) { callback (err); });
     }],
     function (err, results) {
       return done (err);

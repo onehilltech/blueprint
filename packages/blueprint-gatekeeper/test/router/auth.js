@@ -32,7 +32,7 @@ describe ('router.auth', function () {
 
       request (app)
         .post ('/auth/login')
-        .send ({email: user.email, password: user.password})
+        .send ({username: user.username, password: user.password})
         .expect (302)
         .end (function (err, res) {
           assert.equal (res.headers.location, '/');
@@ -51,7 +51,7 @@ describe ('router.auth', function () {
 
       request (app)
         .post ('/auth/login')
-        .send ({email: user.email, password: '1'})
+        .send ({username: user.username, password: '1'})
         .expect (302)
         .end (function (err, res) {
           assert.equal (res.headers.location, '/auth/login');
@@ -63,12 +63,12 @@ describe ('router.auth', function () {
      * Test logging in a user with an incorrect email address. We should be
      * redirected to the login page.
      */
-    it ('should not login user because of incorrect email', function (done) {
+    it ('should not login user because of invalid username', function (done) {
       user = seed.data.users[0];
 
       request (app)
         .post ('/auth/login')
-        .send ({email: 'who@email.me', password: user.password})
+        .send ({username: 'who@email.me', password: user.password})
         .expect (302)
         .end (function (err, res) {
           assert.equal (res.headers.location, '/auth/login');

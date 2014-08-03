@@ -25,7 +25,7 @@ module.exports = exports = function (opts) {
       res.redirect (loginSuccessRedirect);
     });
 
-  function perform_logout () {
+  function performLogout () {
     return function (req, res) {
       req.session.destroy (function (err) {
         if (err)
@@ -40,7 +40,7 @@ module.exports = exports = function (opts) {
 
   router.get (logoutRoute, 
     [ login.ensureLoggedIn ({redirectTo: loginRoute}),
-      perform_logout ()]);
+      performLogout ()]);
 
   return router;
 };

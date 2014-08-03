@@ -44,9 +44,10 @@ describe ('router.oauth2', function () {
 
       request (app)
         .post ('/auth/login')
-        .send ({email: user.email, password: user.password})
+        .send ({username: user.username, password: user.password})
         .end (function (err, res) {
-          if (err) return done (err);
+          if (err) 
+            return done (err);
 
           agent.saveCookies (res);
           return done ()
@@ -88,7 +89,7 @@ describe ('router.oauth2', function () {
           assert.equal (8, transaction.length);
 
           assert.equal (user.id, body.user.id);
-          assert.equal (user.email, body.user.email);
+          assert.equal (user.username, body.user.username);
 
           assert.equal (client.id, body.client.id);
           assert.equal (client.name, body.client.name);

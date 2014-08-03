@@ -3,26 +3,25 @@
      assert     = require ('assert'),
      passport   = require ('passport');
 
-var app  = require ('../app'),
-    lib  = require ('../../'),
-    Account = lib.models.Account;
+var app  = require ('../app');
+var lib  = require ('../../');
+var Account = lib.models.Account;
 
 describe ('local strategy', function () {
   var local = lib.auth.local;
   var server;
 
-  var tester = {
-    email : 'test@me.com',
-    password : '123abc'
-  };
+  var accounts = [
+    { username : 'test@me.com', password : '123abc' },
+    { username : 'disabled@test.me', password : 'abc123', disabled : true }
+  ];
+
+  var testAccount = accounts[0];
+  var disabledAccount = accounts[1];
 
   before (function (done) {
-    Account.create (tester, function (err, user) {
-      if (err) return done (err);
-
-      // Save the user's id.
-      tester.id = user.id;
-      return done ();
+    Account.create (accounts, function (err, account0, account1) {
+      return done (err);
     });
   });
 
@@ -61,18 +60,32 @@ describe ('local strategy', function () {
   });
 
   describe ('authentication', function () {
-    it ('should return unauthorized access', function (done) {
-      request (app)
-        .post ('/account/login')
-        .send ({email: tester.email, password: 'invalid'})
-        .expect (401, { }, done);
-    });
-
     it ('should authenticate the username/password', function (done) {
       request (app)
         .post ('/account/login')
-        .send ({email: tester.email, password: tester.password})
-        .expect (200, {result : true}, done);
+        .send ({username: testAccount.username, password: testAccount.password})
+        .expect (200, done);
+    });
+
+    it ('should return unauthorized access because username does not exist', function (done) {
+      request (app)
+        .post ('/account/login')
+        .send ({username: 'unknown@user.com', password: '1234567890'})
+        .expect (401, done);
+    });
+
+    it ('should return unauthorized access because of invalid password', function (done) {
+      request (app)
+        .post ('/account/login')
+        .send ({username: testAccount.username, password: 'invalid'})
+        .expect (401, done);
+    });
+
+    it ('should return unauthorized access because account is disabled', function (done) {
+      request (app)
+        .post ('/account/login')
+        .send ({username: disabledAccount.username, password: disabledAccount.password})
+        .expect (401, done);
     });
   });
 });
