@@ -1,6 +1,6 @@
-var express = require ('express'),
-    auth    = require ('./auth'),
-    oauth2  = require ('./oauth2');
+var express = require ('express');
+var login = require ('./auth');
+var oauth2  = require ('./oauth2');
 
 module.exports = exports = function (opts) {
   console.log (opts);
@@ -8,9 +8,7 @@ module.exports = exports = function (opts) {
   opts = opts || {};
   var router = express.Router ();
 
-  console.log (opts);
-  
-  router.use (auth (opts.auth));
+  router.use (login (opts.auth);
   router.use (oauth2 (opts.oauth2));
    
   return router;
