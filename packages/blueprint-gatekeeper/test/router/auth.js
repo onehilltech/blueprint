@@ -1,5 +1,4 @@
 var request = require ('supertest');
-var superagent = require ('superagent');
 var assert = require ('assert');
 
 var seed = require ('../seeds/default');
@@ -12,8 +11,6 @@ app.use (auth (app.config.router.auth));
 // Begin Test Cases
 
 describe ('router.auth', function () {
-  var agent = superagent.agent ();
-
   before (function (done) {
     seed.seed (done);
   });
@@ -23,6 +20,8 @@ describe ('router.auth', function () {
   });
 
   describe ('POST /auth/login', function () {
+    var loginClient = seed.data.clients[3];
+
     /**
      * Test creating an event. This test case will create 4 events that
      * will be used in later test cases.
@@ -32,13 +31,16 @@ describe ('router.auth', function () {
 
       request (app)
         .post ('/auth/login')
-        .send ({username: user.username, password: user.password})
-        .expect (302)
+        .send ({username: user.username, password: user.password, client: loginClient.id, client_secret: loginClient.secret})
+        .expect (200)
         .end (function (err, res) {
-          assert.equal (res.headers.location, '/');
+          if (err)
+            return done (err);
 
-          agent.saveCookies (res);
-          done ()
+          assert.equal (res.body.token.length, 256);
+          assert.equal (res.body.refresh_token.length, 256);
+
+          return done ();
         });
     });
 
@@ -51,11 +53,11 @@ describe ('router.auth', function () {
 
       request (app)
         .post ('/auth/login')
-        .send ({username: user.username, password: '1'})
+        .send ({username: user.username, password: '1', client: loginClient.id, client_secret: loginClient.secret})
         .expect (302)
         .end (function (err, res) {
           assert.equal (res.headers.location, '/auth/login');
-          done ()
+          return done ()
         });
     });
  
@@ -68,7 +70,7 @@ describe ('router.auth', function () {
 
       request (app)
         .post ('/auth/login')
-        .send ({username: 'who@email.me', password: user.password})
+        .send ({username: 'who@email.me', password: user.password, client: loginClient.id, client_secret: loginClient.secret})
         .expect (302)
         .end (function (err, res) {
           assert.equal (res.headers.location, '/auth/login');
@@ -80,7 +82,6 @@ describe ('router.auth', function () {
   describe ('GET /auth/logout', function () {
     it ('should logout the user', function (done) {
       var req = request (app).get ('/auth/logout');
-      agent.attachCookies (req);
 
       req.expect (302).end (function (err, res) {
         assert.equal (res.headers.location, '/auth/login');

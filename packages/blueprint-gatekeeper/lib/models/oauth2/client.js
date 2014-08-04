@@ -7,10 +7,11 @@ function create_schema () {
   var Schema = mongoose.Schema;
 
   var schema = new Schema ({
-    name : {type: String, trim: true},
+    name : {type: String, trim: true },
     secret : {type: String},
     redirect_uri : {type: String, required: true},
-    disabled : {type: Boolean, default: false}
+    disabled : {type: Boolean, default: false},
+    direct_login : {type: Boolean, default: false}
   });
 
   return schema;  

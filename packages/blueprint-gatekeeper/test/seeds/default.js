@@ -10,7 +10,8 @@ var users = [
 var clients = [
   {name: 'Test Client 1', secret: 'abc123', redirect_uri: 'http://localhost:5000/client1/redirect'},
   {name: 'Test Client 2', secret: 'xyz890', redirect_uri: 'http://localhost:5000/client2/redirect'},
-  {name: 'Test Client 3 (disabled)', secret: 'xyz890', redirect_uri: 'http://localhost:5000/client3/redirect', disabled: true}
+  {name: 'Test Client 3 (disabled)', secret: 'xyz890', redirect_uri: 'http://localhost:5000/client3/redirect', disabled: true},
+  {name: 'Test Client 4 (direct login)', secret: '12xdft', redirect_uri: 'http://localhost:5000/client4/redirect', direct_login: true}
 ];
 
 exports.data = {
@@ -38,14 +39,15 @@ exports.seed = function (opts, done) {
       });
     },
     function (callback) {
-      oauth2model.Client.create (clients, function (err, client1, client2, client3) {
+      oauth2model.Client.create (clients, function (err, client1, client2, client3, client4) {
         if (err)
           return callback (err);
 
         clients[0].id = client1.id;
         clients[1].id = client2.id;
         clients[2].id = client3.id;
-
+        clients[3].id = client4.id;
+        
         return callback ();
       });
     }],
