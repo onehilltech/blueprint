@@ -1,5 +1,4 @@
  var request    = require ('supertest'),
-     superagent = require ('superagent'),
      assert     = require ('assert'),
      passport   = require ('passport'),
      url        = require ('url');
@@ -32,7 +31,6 @@ app.get ('/protected/data',
 // Begin Test Cases
 
 describe ('router.oauth2', function () {
-  var agent = superagent.agent ();
   var transaction, code, access_data;
   var user = seed.data.users[0];
 
@@ -42,14 +40,14 @@ describe ('router.oauth2', function () {
       if (err)
         return done (err);
 
+      var client = seed.data.clients[3];
       request (app)
         .post ('/auth/login')
-        .send ({username: user.username, password: user.password})
+        .send ({username: user.username, password: user.password, client: client.id, client_secret: client.secret})
         .end (function (err, res) {
           if (err) 
             return done (err);
 
-          agent.saveCookies (res);
           return done ()
         });      
     });
@@ -58,8 +56,6 @@ describe ('router.oauth2', function () {
   after (function (done) {
     // Logout the first user, then unseed the database.
     var req = request (app).get ('/auth/logout');
-    agent.attachCookies (req);
-
     req.end (function (err, res) {
       if (err) return done (err);
 
@@ -73,15 +69,13 @@ describe ('router.oauth2', function () {
   describe ('POST /oauth2/authorize', function () {
     it ('should return the transaction id, user, and client of the request', function (done) {
       var req = request (app).get ('/oauth2/authorize');
-      agent.attachCookies (req);
-
       var client = seed.data.clients[0];
 
       req.query ({response_type: 'code', client_id: client.id, redirect_uri: client.redirect_uri})
         .expect (200)
         .end (function (err, res) {
-          if (err) return done (err);
-          agent.saveCookies (res);
+          if (err) 
+            return done (err);
 
           // Make sure we have a transaction id of the correct length.
           var body = res.body;
@@ -100,13 +94,11 @@ describe ('router.oauth2', function () {
     });
 
     it ('should return a bad request since client is disabled', function (done) {
-      var req = request (app).get ('/oauth2/authorize');
-      agent.attachCookies (req);
-
       var client = seed.data.clients[2];
-
-      req.query ({response_type: 'code', client_id: client.id, redirect_uri: client.redirect_uri})
-         .expect (500, done);
+      request (app)
+        .get ('/oauth2/authorize')
+        .query ({response_type: 'code', client_id: client.id, redirect_uri: client.redirect_uri})
+        .expect (500, done);
     });
   });
 
@@ -115,13 +107,13 @@ describe ('router.oauth2', function () {
    */
   describe ('POST /oauth2/decision', function () {
     it ('should return a code as part of the redirect uri', function (done) {
-      var req = request (app).post ('/oauth2/decision');
-      agent.attachCookies (req);
-
-      req.send ({transaction_id: transaction})
+      request (app)
+        .post ('/oauth2/decision')
+        .send ({transaction_id: transaction})
         .expect (302)
         .end (function (err, res) {
-          if (err) return done (err);
+          if (err) 
+            return done (err);
 
           // Save the code portion of the URI.
           var uri = url.parse (res.headers.location, true);
