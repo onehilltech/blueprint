@@ -2,13 +2,15 @@
  * Module dependencies.
  */
 
-var SchemaType = require('../schematype')
-  , CastError = SchemaType.CastError
-  , MongooseBuffer = require('../types').Buffer
-  , Binary = MongooseBuffer.Binary
-  , Query = require('../query')
-  , utils = require('../utils')
-  , Document
+var utils = require('../utils');
+
+var MongooseBuffer = require('../types').Buffer;
+var Query = require('../query');
+var SchemaType = require('../schematype');
+
+var Binary = MongooseBuffer.Binary;
+var CastError = SchemaType.CastError;
+var Document;
 
 /**
  * Buffer SchemaType constructor
@@ -99,9 +101,10 @@ SchemaBuffer.prototype.cast = function (value, doc, init) {
     return value;
   } else if (value instanceof Binary) {
     var ret = new MongooseBuffer(value.value(true), [this.path, doc]);
-    ret.subtype(value.sub_type);
-    // do not override Binary subtypes. users set this
-    // to whatever they want.
+    if (typeof value.sub_type !== 'number') {
+      throw new CastError('buffer', value, this.path);
+    }
+    ret._subtype = value.sub_type;
     return ret;
   }
 
@@ -130,15 +133,16 @@ function handleArray (val) {
   });
 }
 
-SchemaBuffer.prototype.$conditionalHandlers = {
-    '$ne' : handleSingle
-  , '$in' : handleArray
-  , '$nin': handleArray
-  , '$gt' : handleSingle
-  , '$lt' : handleSingle
-  , '$gte': handleSingle
-  , '$lte': handleSingle
-};
+SchemaBuffer.prototype.$conditionalHandlers =
+  utils.options(SchemaType.prototype.$conditionalHandlers, {
+    '$gt' : handleSingle,
+    '$gte': handleSingle,
+    '$in' : handleArray,
+    '$lt' : handleSingle,
+    '$lte': handleSingle,
+    '$ne' : handleSingle,
+    '$nin': handleArray
+  });
 
 /**
  * Casts contents for queries.

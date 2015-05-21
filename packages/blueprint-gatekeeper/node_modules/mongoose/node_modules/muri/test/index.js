@@ -303,7 +303,16 @@ describe('muri', function(){
     assert.equal(true, val.options.journal);
     assert.equal(50, val.options.wtimeoutMS);
     done();
-  })
+  });
+
+  it('ipv6', function(done) {
+    var uri = 'mongodb://[::1]:27017/test';
+    var val = muri(uri);
+    assert.equal(1, val.hosts.length);
+    assert.equal('::1', val.hosts[0].host);
+    assert.equal(27017, val.hosts[0].port);
+    done();
+  });
 
   it('has a version', function(done){
     assert.ok(muri.version);

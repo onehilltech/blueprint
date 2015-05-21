@@ -152,6 +152,11 @@ SchemaArray.prototype.cast = function (value, doc, init) {
 
     return value;
   } else {
+    // gh-2442: if we're loading this from the db and its not an array, mark
+    // the whole array as modified.
+    if (!!doc && !!init) {
+      doc.markModified(this.path);
+    }
     return this.cast([value], doc, init);
   }
 };
@@ -187,9 +192,9 @@ SchemaArray.prototype.castForQuery = function ($conditional, value) {
     if (Array.isArray(val)) {
       val = val.map(function (v) {
         if (method) v = method.call(caster, v);
-        return isMongooseObject(v)
-          ? v.toObject()
-          : v;
+        return isMongooseObject(v) ?
+          v.toObject({ virtuals: false }) :
+          v;
       });
 
     } else if (method) {
@@ -197,9 +202,9 @@ SchemaArray.prototype.castForQuery = function ($conditional, value) {
     }
   }
 
-  return val && isMongooseObject(val)
-    ? val.toObject()
-    : val;
+  return val && isMongooseObject(val) ?
+    val.toObject({ virtuals: false }) :
+    val;
 };
 
 /*!
@@ -313,8 +318,20 @@ function cast$all (val) {
 }
 
 function cast$elemMatch (val) {
-  if (val.$in) {
-    val.$in = this.castForQuery('$in', val.$in);
+  var hasDollarKey = false;
+  var keys = Object.keys(val);
+  var numKeys = keys.length;
+  var key;
+  var value;
+  for (var i = 0; i < numKeys; ++i) {
+    var key = keys[i];
+    var value = val[key];
+    if (key.indexOf('$') === 0 && value) {
+      val[key] = this.castForQuery(key, value);
+      hasDollarKey = true;
+    }
+  }
+  if (hasDollarKey) {
     return val;
   }
 
@@ -337,6 +354,20 @@ handle.$all = cast$all;
 handle.$options = String;
 handle.$elemMatch = cast$elemMatch;
 handle.$geoIntersects = cast$geoIntersects;
+handle.$or = handle.$and = function(val) {
+  if (!Array.isArray(val)) {
+    throw new TypeError('conditional $or/$and require array');
+  }
+
+  var ret = [];
+  for (var i = 0; i < val.length; ++i) {
+    var query = new Query(val[i]);
+    query.cast(this.casterConstructor);
+    ret.push(query._conditions);
+  }
+
+  return ret;
+};
 
 handle.$near =
 handle.$nearSphere = cast$near;
@@ -347,14 +378,15 @@ handle.$geoWithin = cast$within;
 handle.$size =
 handle.$maxDistance = castToNumber;
 
-handle.$regex =
-handle.$ne =
-handle.$in =
-handle.$nin =
+handle.$eq =
 handle.$gt =
 handle.$gte =
+handle.$in =
 handle.$lt =
-handle.$lte = SchemaArray.prototype.castForQuery;
+handle.$lte =
+handle.$ne =
+handle.$nin =
+handle.$regex = SchemaArray.prototype.castForQuery;
 
 /*!
  * Module exports.

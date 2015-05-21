@@ -96,7 +96,10 @@ CursorStream.prototype._next = function () {
  * @api private
  */
 CursorStream.prototype._onNextObject = function (err, doc) {
-  if(err) return this.destroy(err);
+  if(err) {
+    this.destroy(err);
+    return this.emit('end');
+  }
 
   // when doc is null we hit the end of the cursor
   if(!doc && (this._cursor.state == 1 || this._cursor.state == 2)) {
@@ -150,8 +153,8 @@ CursorStream.prototype.destroy = function (err) {
 
   this._cursor.close();
 
-  if(err) {
-    this.emit('error', err);
+  if(err && this.listeners('error').length > 0) {
+    return this.emit('error', err);
   }
 
   this.emit('close');

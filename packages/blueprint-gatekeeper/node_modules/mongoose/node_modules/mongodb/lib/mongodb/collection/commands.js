@@ -1,5 +1,6 @@
 var shared = require('./shared')
   , utils = require('../utils')
+  , f = require('util').format
   , DbCommand = require('../commands/db_command').DbCommand;
 
 var stats = function stats(options, callback) {
@@ -30,6 +31,7 @@ var count = function count(query, options, callback) {
   options = args.length ? args.shift() || {} : {};
   var skip = options.skip;
   var limit = options.limit;
+  var hint = options.hint;
   var maxTimeMS = options.maxTimeMS;
 
   // Final query
@@ -42,6 +44,7 @@ var count = function count(query, options, callback) {
   // Add limit and skip if defined
   if(typeof skip == 'number') cmd.skip = skip;
   if(typeof limit == 'number') cmd.limit = limit;
+  if(hint) cmd.hint = hint;
 
   // Ensure we have the right read preference inheritance
   options.readPreference = shared._getReadConcern(this, options);
@@ -101,10 +104,7 @@ var rename = function rename (newName, options, callback) {
     // We have an error
     if(doc.errmsg) return callback(utils.toError(doc), null);
     try {
-      if(options.new_collection)
-        return callback(null, new Collection(self.db, newName, self.db.pkFactory));
-      self.collectionName = newName;
-      callback(null, self);      
+      return callback(null, new Collection(self.db, newName, self.db.pkFactory));
     } catch(err) {
       return callback(utils.toError(err), null);
     }
@@ -112,11 +112,12 @@ var rename = function rename (newName, options, callback) {
 };
 
 var options = function options(callback) {
-  this.db.collectionsInfo(this.collectionName, function (err, cursor) {
-    if (err) return callback(err);
-    cursor.nextObject(function (err, document) {
-      callback(err, document && document.options || null);
-    });
+  var self = this;
+
+  self.db.listCollections({name: self.collectionName}).toArray(function(err, collections) {
+    if(err) return callback(err);
+    if(collections.length == 0) return callback(utils.toError(f("collection %s.%s not found", self.db.databaseName, self.collectionName)));
+    callback(err, collections[0].options || null);      
   });
 };
 

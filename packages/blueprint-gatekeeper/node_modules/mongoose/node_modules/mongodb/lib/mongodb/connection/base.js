@@ -5,7 +5,8 @@ var EventEmitter = require('events').EventEmitter
   , mongodb_gssapi_authenticate = require('../auth/mongodb_gssapi.js').authenticate
   , mongodb_sspi_authenticate = require('../auth/mongodb_sspi.js').authenticate
   , mongodb_plain_authenticate = require('../auth/mongodb_plain.js').authenticate
-  , mongodb_x509_authenticate = require('../auth/mongodb_x509.js').authenticate;
+  , mongodb_x509_authenticate = require('../auth/mongodb_x509.js').authenticate
+  , mongodb_scram_authenticate = require('../auth/mongodb_scram.js').authenticate;
 
 var id = 0;
 
@@ -278,12 +279,17 @@ var Base = function Base() {
     Base._callBackStore = new CallbackStore();
   }
 
+  // Create a new auth store
+  var auth = new AuthStore();
+
+  Object.defineProperty(this, "auth", {enumerable: true
+    , get: function() { return auth; }
+  });
+
   // Create a new callback store  
   this._callBackStore = new CallbackStore();
   // All commands not being executed
   this._commandsStore = new NonExecutedOperationStore(this);
-  // Create a new auth store
-  this.auth = new AuthStore();
   // Contains all the dbs attached to this server config
   this._dbStore = new DbStore();
 }
@@ -317,10 +323,12 @@ var _apply_auths_serially = function(self, db, auths, callback) {
     }
   } else if(auth.authMechanism == 'MONGODB-CR') {
     mongodb_cr_authenticate(db, auth.username, auth.password, auth.authdb, options, callback);
+  } else if(auth.authMechanism == 'SCRAM-SHA-1') {
+    mongodb_scram_authenticate(db, auth.username, auth.password, auth.authdb, options, callback);
   } else if(auth.authMechanism == 'PLAIN') {
-    mongodb_plain_authenticate(db, auth.username, auth.password, auth.authdb, options, callback);
+    mongodb_plain_authenticate(db, auth.username, auth.password, options, callback);
   } else if(auth.authMechanism == 'MONGODB-X509') {
-    mongodb_x509_authenticate(db, auth.username, auth.password, auth.authdb, options, callback);
+    mongodb_x509_authenticate(db, auth.username, auth.password, options, callback);
   }
 }
 
@@ -356,7 +364,7 @@ Base.prototype.__executeAllServerSpecificErrorCallbacks = function(host, port, e
   for(var j = 0; j < keys.length; j++) {
     var info = this._callBackStore._notReplied[keys[j]];
 
-    if(info.connection) {
+    if(info && info.connection) {
       // Unpack the connection settings
       var _host = info.connection.socketOptions.host;
       var _port = info.connection.socketOptions.port;

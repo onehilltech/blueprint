@@ -3,6 +3,8 @@
  */
 
 var mquery = require('mquery');
+// Hack for Automattic/mongoose#2864
+delete mquery.prototype.then;
 var util = require('util');
 var events = require('events');
 var mongo = require('mongodb');
@@ -169,12 +171,12 @@ Query.prototype.toConstructor = function toConstructor () {
  *
  * ####Example
  *
- *     query.$where('this.comments.length > 10 || this.name.length > 5')
+ *     query.$where('this.comments.length === 10 || this.name.length === 5')
  *
  *     // or
  *
  *     query.$where(function () {
- *       return this.comments.length > 10 || this.name.length > 5;
+ *       return this.comments.length === 10 || this.name.length === 5;
  *     })
  *
  * ####NOTE:
@@ -693,18 +695,22 @@ Query.prototype.toConstructor = function toConstructor () {
  */
 
 /**
- * Specifies which document fields to include or exclude
+ * Specifies which document fields to include or exclude (also known as the query "projection")
  *
  * When using string syntax, prefixing a path with `-` will flag that path as excluded. When a path does not have the `-` prefix, it is included. Lastly, if a path is prefixed with `+`, it forces inclusion of the path, which is useful for paths excluded at the [schema level](/docs/api.html#schematype_SchemaType-select).
  *
  * ####Example
  *
- *     // include a and b, exclude c
- *     query.select('a b -c');
+ *     // include a and b, exclude other fields
+ *     query.select('a b');
+ *
+ *     // exclude c and d, include other fields
+ *     query.select('-c -d');
  *
  *     // or you may use object notation, useful when
  *     // you have keys already prefixed with a "-"
- *     query.select({a: 1, b: 1, c: 0});
+ *     query.select({ a: 1, b: 1 });
+ *     query.select({ c: 0, d: 0 });
  *
  *     // force inclusion of field excluded at schema level
  *     query.select('+path')
@@ -1070,24 +1076,25 @@ function completeMany (model, docs, fields, self, pop, promise) {
  *     });
  *
  * @param {Object|Query} [criteria] mongodb selector
+ * @param {Object} [projection] optional fields to return (http://bit.ly/1HotzBo)
  * @param {Function} [callback]
  * @return {Query} this
  * @see findOne http://docs.mongodb.org/manual/reference/method/db.collection.findOne/
  * @api public
  */
 
-Query.prototype.findOne = function (conditions, fields, options, callback) {
+Query.prototype.findOne = function (conditions, projection, options, callback) {
   if ('function' == typeof conditions) {
     callback = conditions;
     conditions = null;
-    fields = null;
+    projection = null;
     options = null;
   }
 
-  if ('function' == typeof fields) {
-    callback = fields;
+  if ('function' == typeof projection) {
+    callback = projection;
     options = null;
-    fields = null;
+    projection = null;
   }
 
   if ('function' == typeof options) {
@@ -1104,8 +1111,8 @@ Query.prototype.findOne = function (conditions, fields, options, callback) {
     this.setOptions(options);
   }
 
-  if (fields) {
-    this.select(fields);
+  if (projection) {
+    this.select(projection);
   }
 
   if (mquery.canMerge(conditions)) {
@@ -1137,7 +1144,7 @@ Query.prototype.findOne = function (conditions, fields, options, callback) {
   this._fields = this._castFields(this._fields);
 
   var options = this._mongooseOptions;
-  var fields = this._fieldsForExec();
+  var projection = this._fieldsForExec();
   var self = this;
 
   // don't pass in the conditions because we already merged them in
@@ -1148,7 +1155,7 @@ Query.prototype.findOne = function (conditions, fields, options, callback) {
     if (!options.populate) {
       return true === options.lean
         ? promise.complete(doc)
-        : completeOne(self.model, doc, fields, self, null, promise);
+        : completeOne(self.model, doc, projection, self, null, promise);
     }
 
     var pop = helpers.preparePopulationOptionsMQ(self, options);
@@ -1157,7 +1164,7 @@ Query.prototype.findOne = function (conditions, fields, options, callback) {
 
       return true === options.lean
         ? promise.complete(doc)
-        : completeOne(self.model, doc, fields, self, pop, promise);
+        : completeOne(self.model, doc, projection, self, pop, promise);
     });
   })
 
@@ -1202,7 +1209,9 @@ Query.prototype.count = function (conditions, callback) {
   try {
     this.cast(this.model);
   } catch (err) {
-    callback(err);
+    if (callback) {
+      callback(err);
+    }
     return this;
   }
 
@@ -1265,6 +1274,9 @@ Query.prototype.distinct = function (conditions, field, callback) {
   try {
     this.cast(this.model);
   } catch (err) {
+    if (!callback) {
+      throw err;
+    }
     callback(err);
     return this;
   }
@@ -1388,7 +1400,7 @@ function completeOne (model, doc, fields, self, pop, promise) {
     { populated: pop }
     : undefined;
 
-  var casted = helpers.createModel(model, doc, fields)
+  var casted = helpers.createModel(model, doc, fields);
   casted.init(doc, opts, function (err) {
     if (err) return promise.error(err);
     promise.complete(casted);
@@ -1506,6 +1518,9 @@ Query.prototype._findAndModify = function (type, callback) {
   } else {
     if (!('new' in opts)) opts.new = true;
     if (!('upsert' in opts)) opts.upsert = false;
+    if (opts['new'] || opts.upsert) {
+      opts.remove = false;
+    }
 
     castedDoc = castDoc(this, opts.overwrite);
     if (!castedDoc) {
@@ -1572,6 +1587,25 @@ Query.prototype._findAndModify = function (type, callback) {
 
   return promise;
 }
+
+/**
+ * Override mquery.prototype._mergeUpdate to handle mongoose objects in
+ * updates.
+ *
+ * @param {Object} doc
+ * @api private
+ */
+
+Query.prototype._mergeUpdate = function(doc) {
+  if (!this._update) this._update = {};
+  if (doc instanceof Query) {
+    if (doc._update) {
+      utils.mergeClone(this._update, doc._update);
+    }
+  } else {
+    utils.mergeClone(this._update, doc);
+  }
+};
 
 /*!
  * The mongodb driver 1.3.23 only supports the nested array sort
@@ -1831,7 +1865,7 @@ Query.prototype._castUpdate = function _castUpdate (obj, overwrite) {
     , i = ops.length
     , ret = {}
     , hasKeys
-    , val
+    , val;
 
   while (i--) {
     var op = ops[i];
@@ -1878,7 +1912,7 @@ Query.prototype._castUpdate = function _castUpdate (obj, overwrite) {
       // user passes {} and wants to clobber the whole document
       // Also, _walkUpdatePath expects an operation, so give it $set since that
       // is basically what we're doing
-      this._walkUpdatePath(ret, '$set');
+      this._walkUpdatePath(ret.$set || ret, '$set');
     } else {
       var msg = 'Invalid atomic update value for ' + op + '. '
               + 'Expected an object, received ' + typeof val;
@@ -1907,7 +1941,7 @@ Query.prototype._walkUpdatePath = function _walkUpdatePath (obj, op, pref) {
     , hasKeys = false
     , schema
     , key
-    , val
+    , val;
 
   var strict = 'strict' in this._mongooseOptions
     ? this._mongooseOptions.strict
@@ -1958,10 +1992,14 @@ Query.prototype._walkUpdatePath = function _walkUpdatePath (obj, op, pref) {
         // $currentDate can take an object
         obj[key] = this._castUpdateVal(schema, val, op);
       } else {
-        hasKeys |= this._walkUpdatePath(val, op, prefix + key);
+        // gh-2314
+        // we should be able to set a schema-less field
+        // to an empty object literal
+        hasKeys |= this._walkUpdatePath(val, op, prefix + key) ||
+                   (utils.isObject(val) && Object.keys(val).length === 0);
       }
     } else {
-      schema = '$each' === key
+      schema = ('$each' === key || '$or' === key || '$and' === key)
         ? this._getSchema(pref)
         : this._getSchema(prefix + key);
 
@@ -2002,8 +2040,9 @@ Query.prototype._castUpdateVal = function _castUpdateVal (schema, val, op, $cond
       : val
   }
 
-  if (schema.caster && op in castOps &&
-    (utils.isObject(val) || Array.isArray(val))) {
+  var cond = schema.caster && op in castOps &&
+    (utils.isObject(val) || Array.isArray(val));
+  if (cond) {
     // Cast values for ops that add data to MongoDB.
     // Ensures embedded documents get ObjectIds etc.
     var tmp = schema.cast(val);
@@ -2559,6 +2598,8 @@ Query.prototype._castFields = function _castFields (fields) {
  */
 
 Query.prototype.stream = function stream (opts) {
+  this._applyPaths();
+  this._fields = this._castFields(this._fields);
   return new QueryStream(this, opts);
 }
 

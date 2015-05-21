@@ -9,6 +9,7 @@
  */
 
 var path = require('path')
+  , escapeRe = require('escape-string-regexp')
   , utils = require('./utils');
 
 /**
@@ -220,7 +221,7 @@ Mocha.prototype._growl = function(runner, reporter) {
 
 Mocha.prototype.grep = function(re){
   this.options.grep = 'string' == typeof re
-    ? new RegExp(utils.escapeRegexp(re))
+    ? new RegExp(escapeRe(re))
     : re;
   return this;
 };
@@ -367,6 +368,16 @@ Mocha.prototype.enableTimeouts = function(enabled) {
 
 Mocha.prototype.asyncOnly = function(){
   this.options.asyncOnly = true;
+  return this;
+};
+
+/**
+ * Disable syntax highlighting (in browser).
+ * @returns {Mocha}
+ * @api public
+ */
+Mocha.prototype.noHighlighting = function() {
+  this.options.noHighlighting = true;
   return this;
 };
 

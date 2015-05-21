@@ -2,7 +2,9 @@ var shared = require('./shared')
   , utils = require('../utils');
 
 var geoNear = function geoNear(x, y, options, callback) {
-  var args = Array.prototype.slice.call(arguments, 2);
+  var point = typeof(x) == 'object' && x
+    , args = Array.prototype.slice.call(arguments, point?1:2);
+
   callback = args.pop();
   // Fetch all commands
   options = args.length ? args.shift() || {} : {};
@@ -10,14 +12,21 @@ var geoNear = function geoNear(x, y, options, callback) {
   // Build command object
   var commandObject = {
     geoNear:this.collectionName,
-    near: [x, y]
+    near: point || [x, y]
   }
 
   // Ensure we have the right read preference inheritance
   options.readPreference = shared._getReadConcern(this, options);
 
-  // Remove read preference from hash if it exists
-  commandObject = utils.decorateCommand(commandObject, options, {readPreference: true});
+  // Exclude readPreference and existing options to prevent user from
+  // shooting themselves in the foot
+  var exclude = {
+    readPreference: true,
+    geoNear: true,
+    near: true
+  };
+
+  commandObject = utils.decorateCommand(commandObject, options, exclude);
 
   // Execute the command
   this.db.command(commandObject, options, function (err, res) {

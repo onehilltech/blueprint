@@ -32,9 +32,9 @@ var Db = require('./db').Db
  */
 function MongoClient(serverConfig, options) {
   if(serverConfig != null) {
-    options = options == null ? {} : options;
+    options = options ? options : {};
     // If no write concern is set set the default to w:1
-    if(options != null && !options.journal && !options.w && !options.fsync) {
+    if('w' in options === false) {
       options.w = 1;
     }
     
@@ -105,7 +105,7 @@ MongoClient.prototype.open = function(callback) {
 }
 
 /**
- * Close the current db connection, including all the child db instances. Emits close event if no callback is provided.
+ * Close the current db connection, including all the child db instances. Emits close event and calls optional callback.
  *
  * @param {Function} callback this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from the close method or null if an error occured.
  * @return {null}

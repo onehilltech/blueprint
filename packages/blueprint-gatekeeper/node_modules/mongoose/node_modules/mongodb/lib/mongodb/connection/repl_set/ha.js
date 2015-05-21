@@ -1,4 +1,5 @@
 var DbCommand = require('../../commands/db_command').DbCommand
+  , ServerCapabilities = require('../server_capabilities').ServerCapabilities
   , format = require('util').format;
 
 var HighAvailabilityProcess = function(replset, options) {  
@@ -79,6 +80,18 @@ HighAvailabilityProcess.prototype.start = function() {
 
     if(self.state == HighAvailabilityProcess.STOPPED) {
       _server.close();
+    }
+
+    // Ensure server capabilities object is on all connections
+    if(_server.isMasterDoc) {
+      // Set server capabilities
+      _server.serverCapabilities = new ServerCapabilities(_server.isMasterDoc);
+
+      // Set server capabilities on all the connections
+      var connections = _server.allRawConnections();
+      for(var i = 0; i < connections.length; i++) {
+        connections[i].serverCapabilities = _server.serverCapabilities;
+      }      
     }
 
     if(err) {
@@ -280,6 +293,18 @@ var _reconnect_servers = function(self, reconnect_servers) {
       _server.close();
     }
 
+    // Ensure server capabilities object is on all connections
+    if(_server.isMasterDoc) {
+      // Set server capabilities
+      _server.serverCapabilities = new ServerCapabilities(_server.isMasterDoc);
+
+      // Set server capabilities on all the connections
+      var connections = _server.allRawConnections();
+      for(var i = 0; i < connections.length; i++) {
+        connections[i].serverCapabilities = _server.serverCapabilities;
+      }      
+    }
+
     // If we connected let's check what kind of server we have
     if(!err) {
       _apply_auths(self, db, _server, function(err, result) {
@@ -361,14 +386,13 @@ var _apply_auths = function(self, _db, _server, _callback) {
     var pending = self.replset.auth.length();
     var connections = _server.allRawConnections();
     var pendingAuthConn = connections.length;
-
     // Connection function
-    var connectionFunction = function(_auth, _connection, __callback) {
-      var pending = _auth.length();
+    var connectionFunction = function(auth, _connection, __callback) {
+      var pending = auth.length();
 
       for(var j = 0; j < pending; j++) {
         // Get the auth object
-        var _auth = _auth.get(j);
+        var _auth = auth.get(j);
         // Unpack the parameter
         var username = _auth.username;
         var password = _auth.password;

@@ -472,6 +472,10 @@ exports.readPref = function readPref (pref, tags) {
     pref = pref[0];
   }
 
+  if (pref instanceof ReadPref) {
+    return pref;
+  }
+
   switch (pref) {
     case 'p':
       pref = 'primary';
@@ -680,5 +684,36 @@ exports.buffer.areEqual = function (a, b) {
     if (a[i] !== b[i]) return false;
   }
   return true;
+}
+
+/**
+ * merges to with a copy of from
+ *
+ * @param {Object} to
+ * @param {Object} from
+ * @api private
+ */
+
+exports.mergeClone = function(to, from) {
+  var keys = Object.keys(from)
+    , i = keys.length
+    , key
+
+  while (i--) {
+    key = keys[i];
+    if ('undefined' === typeof to[key]) {
+      // make sure to retain key order here because of a bug handling the $each
+      // operator in mongodb 2.4.4
+      to[key] = exports.clone(from[key], { retainKeyOrder : 1});
+    } else {
+      if (exports.isObject(from[key])) {
+        exports.mergeClone(to[key], from[key]);
+      } else {
+        // make sure to retain key order here because of a bug handling the
+        // $each operator in mongodb 2.4.4
+        to[key] = exports.clone(from[key], { retainKeyOrder : 1});
+      }
+    }
+  }
 }
 

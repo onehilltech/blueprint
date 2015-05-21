@@ -2,9 +2,11 @@
  * Module requirements.
  */
 
-var SchemaType = require('../schematype');
-var CastError = SchemaType.CastError;
 var utils = require('../utils');
+
+var SchemaType = require('../schematype');
+
+var CastError = SchemaType.CastError;
 
 /**
  * Date SchemaType constructor.
@@ -93,16 +95,19 @@ SchemaDate.prototype.cast = function (value) {
   var date;
 
   // support for timestamps
-  if (value instanceof Number || 'number' == typeof value 
-      || String(value) == Number(value))
-    date = new Date(Number(value));
+  if (typeof value !== 'undefined') {
+    if (value instanceof Number || 'number' == typeof value
+        || String(value) == Number(value)) {
+      date = new Date(Number(value));
+    } else if (value.toString) {
+      // support for date strings
+      date = new Date(value.toString());
+    }
 
-  // support for date strings
-  else if (value.toString)
-    date = new Date(value.toString());
-
-  if (date.toString() != 'Invalid Date')
-    return date;
+    if (date.toString() != 'Invalid Date') {
+      return date;
+    }
+  }
 
   throw new CastError('date', value, this.path);
 };
@@ -124,16 +129,17 @@ function handleArray (val) {
   });
 }
 
-SchemaDate.prototype.$conditionalHandlers = {
-    '$lt': handleSingle
-  , '$lte': handleSingle
-  , '$gt': handleSingle
-  , '$gte': handleSingle
-  , '$ne': handleSingle
-  , '$in': handleArray
-  , '$nin': handleArray
-  , '$all': handleArray
-};
+SchemaDate.prototype.$conditionalHandlers =
+  utils.options(SchemaType.prototype.$conditionalHandlers, {
+    '$all': handleArray,
+    '$gt': handleSingle,
+    '$gte': handleSingle,
+    '$in': handleArray,
+    '$lt': handleSingle,
+    '$lte': handleSingle,
+    '$ne': handleSingle,
+    '$nin': handleArray
+  });
 
 
 /**

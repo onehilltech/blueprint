@@ -9,7 +9,7 @@ var ObjectID = require('bson').ObjectID
 var testForFields = {
     limit: 1, sort: 1, fields:1, skip: 1, hint: 1, explain: 1, snapshot: 1, timeout: 1, tailable: 1, tailableRetryInterval: 1
   , numberOfRetries: 1, awaitdata: 1, exhaust: 1, batchSize: 1, returnKey: 1, maxScan: 1, min: 1, max: 1, showDiskLoc: 1
-  , comment: 1, raw: 1, readPreference: 1, partial: 1, read: 1, dbName: 1, oplogReplay: 1, connection: 1
+  , comment: 1, raw: 1, readPreference: 1, partial: 1, read: 1, dbName: 1, oplogReplay: 1, connection: 1, maxTimeMS: 1, transforms:1
 };
 
 //
@@ -32,7 +32,7 @@ var find = function find () {
   }
 
   if(len === 2 && !Array.isArray(fields)) {
-    var fieldKeys = Object.getOwnPropertyNames(fields);
+    var fieldKeys = Object.keys(fields);
     var is_option = false;
 
     for(var i = 0; i < fieldKeys.length; i++) {
@@ -136,8 +136,13 @@ var find = function find () {
   // Set slaveok if needed
   if(o.readPreference == "secondary" || o.read == "secondaryOnly") o.slaveOk = true;
 
+  // Ensure the query is an object
+  if(selector != null && typeof selector != 'object') {
+    throw utils.toError("query selector must be an object");
+  }
+
   // Set the selector
-  o.selector = selector;  
+  o.selector = selector;
 
   // Create precursor
   var scope = new Scope(this, {}, fields, o);
@@ -152,7 +157,7 @@ var findOne = function findOne () {
   var args = Array.prototype.slice.call(arguments, 0);
   var callback = args.pop();
   var cursor = this.find.apply(this, args).limit(-1).batchSize(1);
-  
+
   // Return the item
   cursor.nextObject(function(err, item) {
     if(err != null) return callback(utils.toError(err), null);
@@ -160,9 +165,9 @@ var findOne = function findOne () {
   });
 };
 
-var parallelCollectionScan = function parallelCollectionScan (options, callback) {  
+var parallelCollectionScan = function parallelCollectionScan (options, callback) {
   var self = this;
-  
+
   if(typeof options == 'function') {
     callback = options;
     options = {numCursors: 1};
@@ -174,7 +179,7 @@ var parallelCollectionScan = function parallelCollectionScan (options, callback)
 
   // Set read preference if we set one
   options.readPreference = shared._getReadConcern(this, options);
-  
+
   // Create command object
   var commandObject = {
       parallelCollectionScan: this.collectionName

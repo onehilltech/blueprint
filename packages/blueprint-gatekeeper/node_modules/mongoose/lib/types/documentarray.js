@@ -28,7 +28,7 @@ function MongooseDocumentArray (values, path, doc) {
 
   // Values always have to be passed to the constructor to initialize, since
   // otherwise MongooseArray#push will mark the array as modified to the parent.
-  arr.push.apply(arr, values);
+  arr = arr.concat(values);
   arr.__proto__ = MongooseDocumentArray.prototype;
 
   arr._atomics = {};
@@ -186,6 +186,15 @@ MongooseDocumentArray.prototype.notify = function notify (event) {
     var i = self.length;
     while (i--) {
       if (!self[i]) continue;
+      switch(event) {
+        // only swap for save event for now, we may change this to all event types later
+        case 'save':
+          val = self[i];
+          break;
+        default:
+          // NO-OP
+          break;
+      }
       self[i].emit(event, val);
     }
   }
