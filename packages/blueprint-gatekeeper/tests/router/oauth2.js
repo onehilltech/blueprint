@@ -1,15 +1,18 @@
- var request    = require ('supertest'),
-     assert     = require ('assert'),
-     passport   = require ('passport'),
-     url        = require ('url');
+ var request    = require ('supertest')
+   , assert     = require ('assert')
+   , passport   = require ('passport')
+   , url        = require ('url')
+   , winston    = require ('winston')
+   ;
 
-var seed   = require ('../seeds/default'),
-    app    = require ('../app'),
-    bearer = require ('../../lib/authentication/bearer'),
-    auth   = require ('../../lib/router/auth'),
-    oauth2 = require ('../../lib/router/oauth2');
+var seed   = require ('../seeds/default')
+  , app    = require ('../app')
+  , bearer = require ('../../libs/authentication/bearer')
+  , local  = require ('../../libs/authentication/local')
+  , oauth2 = require ('../../libs/router/oauth2')
+  ;
 
-// Add OAuth 2.0 support to the application for testing.
+// Enable OAuth 2.0 on the server.
 app.use (oauth2 ());
 
 // Use the bearer authentication strategy for these routes.
@@ -34,32 +37,27 @@ describe ('router.oauth2', function () {
   var transaction, code, access_data;
   var user = seed.data.users[0];
 
+  var client = seed.data.clients[0];
+  var disabledClient = seed.data.clients[2];
+
   before (function (done) {
     // Seed the database, then login the first user.
     seed.seed (function (err) {
-      if (err)
-        return done (err);
+      if (err) return done (err);
 
-      var client = seed.data.clients[3];
       request (app)
         .post ('/auth/login')
         .send ({username: user.username, password: user.password, client: client.id, client_secret: client.secret})
-        .end (function (err, res) {
-          if (err) 
-            return done (err);
-
-          return done ()
-        });      
+        .end (done);
     });
   });
 
   after (function (done) {
     // Logout the first user, then unseed the database.
     var req = request (app).get ('/auth/logout');
-    req.end (function (err, res) {
-      if (err) return done (err);
 
-      return seed.unseed (done);
+    req.end (function (err, res) {
+      return seed.unseed (done)
     });
   });
 
@@ -69,7 +67,6 @@ describe ('router.oauth2', function () {
   describe ('POST /oauth2/authorize', function () {
     it ('should return the transaction id, user, and client of the request', function (done) {
       var req = request (app).get ('/oauth2/authorize');
-      var client = seed.data.clients[0];
 
       req.query ({response_type: 'code', client_id: client.id, redirect_uri: client.redirect_uri})
         .expect (200)
@@ -94,10 +91,9 @@ describe ('router.oauth2', function () {
     });
 
     it ('should return a bad request since client is disabled', function (done) {
-      var client = seed.data.clients[2];
       request (app)
         .get ('/oauth2/authorize')
-        .query ({response_type: 'code', client_id: client.id, redirect_uri: client.redirect_uri})
+        .query ({response_type: 'code', client_id: disabledClient.id, redirect_uri: disabledClient.redirect_uri})
         .expect (500, done);
     });
   });
@@ -134,8 +130,6 @@ describe ('router.oauth2', function () {
    */
   describe ('POST /oauth2/token', function () {
     it ('should return an access token', function (done) {
-      var client = seed.data.clients[0];
-
       var data = {
         client_id: client.id,
         client_secret: client.secret, 
@@ -174,8 +168,6 @@ describe ('router.oauth2', function () {
     });
 
     it ('should return refresh the access token', function (done) {
-      var client = seed.data.clients[0];
-
       var data = {
         client_id: client.id,
         client_secret: client.secret, 

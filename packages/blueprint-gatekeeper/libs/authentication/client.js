@@ -1,5 +1,5 @@
 var ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy,
-    Client = require ('../models/oauth2/client');
+    Client = require ('../models/client');
 
 module.exports = exports = function () {
   return new ClientPasswordStrategy (

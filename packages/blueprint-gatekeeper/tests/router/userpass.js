@@ -1,16 +1,18 @@
-var request = require ('supertest');
-var assert = require ('assert');
+var request = require ('supertest')
+  , assert = require ('assert')
+  , winston = require ('winston')
+  ;
 
-var seed = require ('../seeds/default');
-var app  = require ('../app');
-var auth = require ('../../lib/router/auth');
+var seed = require ('../seeds/default')
+  , userpass = require ('../../libs/router/userpass')
+  , app  = require ('../app');
 
-app.use (auth (app.config.router.auth));
+app.use (userpass (app.config.router.auth));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Begin Test Cases
 
-describe ('router.auth', function () {
+describe ('router.userpass', function () {
   before (function (done) {
     seed.seed (done);
   });
@@ -21,17 +23,23 @@ describe ('router.auth', function () {
 
   describe ('POST /auth/login', function () {
     var loginClient = seed.data.clients[3];
+    var user = seed.data.users[0];
 
     /**
      * Test creating an event. This test case will create 4 events that
      * will be used in later test cases.
      */
     it ('should login the user', function (done) {
-      user = seed.data.users[0];
+      var data = {
+        username: user.username,
+        password: user.password,
+        client: loginClient.id,
+        client_secret: loginClient.secret
+      };
 
       request (app)
         .post ('/auth/login')
-        .send ({username: user.username, password: user.password, client: loginClient.id, client_secret: loginClient.secret})
+        .send (data)
         .expect (200)
         .end (function (err, res) {
           if (err)
@@ -49,8 +57,6 @@ describe ('router.auth', function () {
      * redirected to the login page.
      */
     it ('should not login user because of incorrect password', function (done) {
-      user = seed.data.users[0];
-
       request (app)
         .post ('/auth/login')
         .send ({username: user.username, password: '1', client: loginClient.id, client_secret: loginClient.secret})
@@ -66,8 +72,6 @@ describe ('router.auth', function () {
      * redirected to the login page.
      */
     it ('should not login user because of invalid username', function (done) {
-      user = seed.data.users[0];
-
       request (app)
         .post ('/auth/login')
         .send ({username: 'who@email.me', password: user.password, client: loginClient.id, client_secret: loginClient.secret})

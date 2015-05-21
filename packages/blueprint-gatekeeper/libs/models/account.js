@@ -50,7 +50,7 @@ schema.methods.verifyPassword = function (password, callback) {
 };
 
 // Create the user collection, and export it from this module.
-const COLLECTION_NAME = 'account';
+const COLLECTION_NAME = 'gatekeeper_account';
 var model = mongoose.model (COLLECTION_NAME, schema);
 
 module.exports = exports = model;

@@ -1,11 +1,12 @@
-var express      = require ('express'),
-    bodyParser   = require ('body-parser'),
-    mongoose     = require ('mongoose'),
-    passport     = require ('passport'),
-    morgan       = require ('morgan'),
-    session      = require ('express-session'),
-    cookieParser = require ('cookie-parser'),
-    config       = require ('./app-config');
+var express      = require ('express')
+  , bodyParser   = require ('body-parser')
+  , mongoose     = require ('mongoose')
+  , passport     = require ('passport')
+  , morgan       = require ('morgan')
+  , winston      = require ('winston')
+  , session      = require ('express-session')
+  , cookieParser = require ('cookie-parser')
+  , config       = require ('./app-config');
 
 // Create the application, and set the default configuration.
 var app = express ();
@@ -18,7 +19,7 @@ app.use (passport.initialize ());
 app.use (passport.session ());
 
 // Connect to the database.
-console.log ('database connection is ' + config.connstr);
+winston.info ('database connection is ' + config.connstr);
 mongoose.connect (config.connstr, config.mongodb);
 
 // Export symbols from the module.

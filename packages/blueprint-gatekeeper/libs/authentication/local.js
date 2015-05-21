@@ -1,40 +1,31 @@
-var winston = require ('winston');
-var LocalStrategy = require ('passport-local').Strategy;
-var Account = require ('../models/account');
+var winston = require ('winston')
+  , LocalStrategy = require ('passport-local').Strategy
+  , Account = require ('../models/account');
 
 module.exports = function (opts) {
   var opts = opts || {};
 
   return new LocalStrategy (opts, function (username, password, done) {
-    winston.info ('authenticating username %s', username);
+    winston.info ('using password authentication for %s', username);
 
     Account.findOne ({ username: username }, function (err, user) {
-      if (err) {
-        winston.error (err);
+      if (err)
         return done (err);
-      }
 
-      if (!user) {
-        winston.error ('username %s does not exist', username);
-        return done (null, false, { message: 'Incorrect username' });
-      }
+      if (!user)
+        return done (null, false, { message: 'User does not exist' });
 
-      if (user.disabled) {
-        winston.error ('%s account is disabled; access not authorized', username);    
-        return done (null, false, { message: 'Account is disabled'});    
-      }
+      if (user.disabled)
+        return done (null, false, { message: 'User account is disabled'});
 
       user.verifyPassword (password, function (err, match) {
-        if (err) {
-          winston.error (err);
+        if (err)
           return done (err);
-        }
 
-        if (!match) {
-          winston.error ('password for %s does not match', username);
-          return done (null, false, {message: 'Incorrect password'});
-        }
+        if (!match)
+          return done (null, false, { message: 'Incorrect password'});
 
+        winston.info ('password authentication for %s successful', username);
         return done (null, user);
       });
     });

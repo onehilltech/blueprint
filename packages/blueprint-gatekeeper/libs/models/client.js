@@ -17,7 +17,7 @@ function create_schema () {
   return schema;  
 }
 
-const COLLECTION_NAME = 'oauth2_client';
+const COLLECTION_NAME = 'gatekeeper_client';
 var schema = create_schema ();
 var model = mongoose.model (COLLECTION_NAME, schema);
 

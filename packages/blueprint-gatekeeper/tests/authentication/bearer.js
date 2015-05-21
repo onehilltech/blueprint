@@ -1,16 +1,16 @@
-var request     = require ('supertest'),
-    superagent  = require ('superagent'),
-    assert      = require ('assert'),
-    passport    = require ('passport'),
-    mongoose    = require ('mongoose'),
-    app         = require ('../app');
+var request     = require ('supertest')
+  , assert      = require ('assert')
+  , passport    = require ('passport')
+  , mongoose    = require ('mongoose')
+  , app         = require ('../app');
 
 var Schema = mongoose.Schema;
 
-var lib         = require ('../../'),
-    Account     = lib.models.Account,
-    Client      = lib.models.oauth2.Client,
-    AccessToken = lib.models.oauth2.AccessToken;
+var lib         = require ('../../libs')
+  , AccessToken = lib.models.AccessToken
+  , Account     = lib.models.Account
+  , Client      = lib.models.Client
+  ;
 
 describe ('oauth2 strategy', function () {
   var bearer = lib.auth.bearer;

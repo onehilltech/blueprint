@@ -1,5 +1,5 @@
 var BearerStrategy = require ('passport-http-bearer').Strategy,
-    AccessToken    = require ('../models/oauth2/access-token');
+    AccessToken    = require ('../models/access-token');
 
 module.exports = function () {
   return new BearerStrategy (function (access_token, done) {

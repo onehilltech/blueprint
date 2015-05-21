@@ -4,7 +4,7 @@
   "version": "0.6.0",
   "private": true,
 
-  "main" : "./lib",
+  "main" : "app.js",
   
   "repository" :  { 
     "type" : "git", 
@@ -45,6 +45,6 @@
     "mocha": "1.x.x"
   },
   "scripts" : {
-    "test" : "env NODE_ENV=test mocha --recursive test/ --reporter spec"
+    "test" : "env NODE_ENV=test mocha --recursive tests/ --reporter spec"
   }
 }

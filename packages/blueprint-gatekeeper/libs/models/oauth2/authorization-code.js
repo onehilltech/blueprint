@@ -1,5 +1,5 @@
 var mongoose = require ('mongoose');
-var Client = require ('./client');
+var Client = require ('./../client');
 var Account = require ('../account');
 
 /**

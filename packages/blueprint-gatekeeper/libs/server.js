@@ -5,13 +5,33 @@ var session = require ('express-session');
 var cookieParser = require ('cookie-parser');
 var morgan = require ('morgan');
 var bodyParser = require ('body-parser');
+var winston = require ('winston');
+
+// Define the serialization/deserialization methods. The serialization method
+// just returns to user id. The deserialization method locates the account by
+// the user id.
+passport.serializeUser (function (user, done) {
+  done (null, user.id);
+});
+
+passport.deserializeUser (function (id, done) {
+  Account.findById (id, function (err, user) {
+    if (err)
+      return done (err);
+
+    if (!user)
+      return done (new Error ('User does not exist'));
+
+    done (null, user);
+  });
+});
 
 mongoose.connection.on ('error', function (err) {
-  console.log (err);
+  winston.error (err);
 });
 
 mongoose.connection.on ('disconnect', function () {
-  console.log ('connection to database terminated');
+  winston.debug ('connection to database terminated');
 });
 
 /**
@@ -43,19 +63,25 @@ Server.prototype.start = function (opts) {
 
     // Initialize the application router.
     var router = require ('./router');   
-    app.use (router (opts.router)); 
+    app.use (router (opts.router));
+
+    // Define the error handler.
+    app.use (function(err, req, res, next) {
+      winston.error (err.stack);
+      res.status (500).send ('Something broke!');
+    });
   }
 
   // Initialize the application.
   init (this.app_);
 
   // Connect to the database.
-  console.log ('database connection is ' + opts.connstr);
+  winston.debug ('database connection is ' + opts.connstr);
   mongoose.connect (opts.connstr, opts.mongodb);
 
   // Start listening for requests.
   this.http_ = this.app_.listen (opts.port);
-  console.log ('listening on port ' + opts.port);
+  winston.debug ('listening on port ' + opts.port);
 };
 
 module.exports = exports = function () {

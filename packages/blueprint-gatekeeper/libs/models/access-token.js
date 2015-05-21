@@ -1,6 +1,7 @@
-var mongoose = require ('mongoose');
-var Client = require ('./client');
-var Account = require ('../account');
+var mongoose = require ('mongoose')
+  , Client = require ('./client')
+  , Account = require ('./account')
+  ;
 
 /**
  * Factory function for creating the 'oauth2_accesstoken' schema.
@@ -19,7 +20,7 @@ function createSchema () {
   return schema;
 }
 
-const COLLECTION_NAME = 'oauth2_accesstoken';
+const COLLECTION_NAME = 'gatekeeper_accesstoken';
 var schema = createSchema ();
 var model = mongoose.model (COLLECTION_NAME, schema);
 

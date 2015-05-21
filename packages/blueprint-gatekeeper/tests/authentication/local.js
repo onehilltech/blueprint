@@ -1,10 +1,9 @@
  var request    = require ('supertest'),
-     superagent = require ('superagent'),
      assert     = require ('assert'),
      passport   = require ('passport');
 
 var app  = require ('../app');
-var lib  = require ('../../');
+var lib  = require ('../../libs');
 var Account = lib.models.Account;
 
 describe ('local strategy', function () {

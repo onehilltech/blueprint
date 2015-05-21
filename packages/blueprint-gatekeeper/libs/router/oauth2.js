@@ -1,9 +1,12 @@
-var passport      = require ('passport'),
-    express       = require ('express'),
-    oauth2orize   = require ('oauth2orize'),
-    login         = require ('connect-ensure-login'),
-    client        = require ('../authentication/client'),
-    oauth2model   = require ('../models/oauth2');
+var passport = require ('passport')
+  , express = require ('express')
+  , winston = require ('winston')
+  , oauth2orize = require ('oauth2orize')
+  , login = require ('connect-ensure-login')
+  , client = require ('../authentication/client')
+  , userpass = require ('./userpass')
+  , oauth2model = require ('../models/oauth2')
+  ;
 
 var utils = require ('../utils');
 
@@ -134,6 +137,41 @@ server.exchange ('refresh_token', oauth2orize.exchange.refreshToken (function (c
   });
 }));
 
+var authorization = server.authorization (function (client_id, redirect_uri, done) {
+  winston.info ('performing client authorization');
+
+  oauth2model.Client.findById (client_id, function (err, client) {
+    if (err)
+      return done (err);
+
+    // For security purposes,check that redirect URI provided by the
+    // client matches one registered with the server.
+    if (client.redirect_uri !== redirect_uri)
+      return done (new Error ('Redirect uri does not match'));
+
+    // Make sure the client is not disabled before we begin a new transaction
+    // for authorizing access to our protected resources.
+    if (client.disabled)
+      return done (new Error ('Client access is disabled'));
+
+    return done (null, client, redirect_uri);
+  });
+});
+
+function finalizeAuthorization (req, res) {
+  res.send (200, {
+    transactionID: req.oauth2.transactionID,
+    user: {
+      id: req.user.id,
+      username : req.user.username,
+    },
+    client: {
+      id : req.oauth2.client.id,
+      name : req.oauth2.client.name,
+    }
+  });
+}
+
 // Use the client authentication strategy.
 passport.use (client ());
 
@@ -142,44 +180,16 @@ passport.use (client ());
 // of this module.
 
 module.exports = exports = function (opts) {
-  console.log ('configuring OAuth 2.0 routes');
-
   opts = opts || {};
   var router = express.Router ();
 
+  // Make sure we include the username/password routes
+  router.use (userpass (opts));
+
   router.get ('/oauth2/authorize', [
       login.ensureLoggedIn (),
-      server.authorization (function (client_id, redirect_uri, done) {
-        oauth2model.Client.findById (client_id, function (err, client) {
-          if (err)
-            return done (err);
-
-          // For security purposes,check that redirect URI provided by the
-          // client matches one registered with the server. 
-          if (client.redirect_uri !== redirect_uri)
-            return done (new Error ('redirect uri does not match'));
-
-          // Make sure the client is not disabled before we begin a new transaction
-          // for authorizing access to our protected resources.
-          if (client.disabled)
-            return done (new Error ('client access is disabled'));
-
-          return done (null, client, redirect_uri);
-        });
-      }),
-      function (req, res) {
-        res.send (200, { 
-          transactionID: req.oauth2.transactionID, 
-          user: {
-            id: req.user.id,
-            username : req.user.username,
-          }, 
-          client: {
-            id : req.oauth2.client.id,
-            name : req.oauth2.client.name,
-          }
-        });
-      }
+      authorization,
+      finalizeAuthorization
     ]
   );
 

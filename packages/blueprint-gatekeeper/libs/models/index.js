@@ -1,2 +1,5 @@
 exports.Account = require ('./account');
-exports.oauth2 = require ('./oauth2');
+exports.AccessToken = require ('./access-token');
+exports.Client = require ('./client');
+
+exports.OAuth2 = require ('./oauth2');

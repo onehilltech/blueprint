@@ -1,6 +1,6 @@
 var async = require ('async');
-var Account = require ('../../lib/models/account');
-var oauth2model = require ('../../lib/models/oauth2');
+var Account = require ('../../libs/models/account');
+var oauth2model = require ('../../libs/models/oauth2');
 
 var users = [
   { username: 'john.doe@test.me', password: '123456789' },
