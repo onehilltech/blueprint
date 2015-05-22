@@ -102,8 +102,8 @@ UsernamePasswordRouter.prototype.router = function () {
   // the user cannot be logged in.
   router.post (
     this.loginRoute,
-    passport.authenticate ('oauth2-client-password'),
-    passport.authenticate ('local'),
+    passport.authenticate ('oauth2-client-password', {session: false}),
+    passport.authenticate ('local', { session: false }),
     this.finalizeLogin ()
   );
 
@@ -111,7 +111,7 @@ UsernamePasswordRouter.prototype.router = function () {
   // order to successfully logout the user. Upon logout, the token is no longer valid.
   router.post (
     this.logoutRoute,
-    passport.authenticate ('bearer'),
+    passport.authenticate ('bearer', { session: false }),
     this.finalizeLogout ()
   );
 
