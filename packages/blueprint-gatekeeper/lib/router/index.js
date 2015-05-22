@@ -1,6 +1,6 @@
 var express = require ('express')
   , winston = require ('winston')
-  , userpass = require ('./auth/userpass')
+  , userpass = require ('./auth/password')
   , oauth2 = require ('./auth/oauth2')
   ;
 
