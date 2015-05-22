@@ -1,8 +1,8 @@
 var async       = require ('async')
   , winston     = require ('winston')
-  , AccessToken = require ('../../libs/models/access-token')
-  , Account     = require ('../../libs/models/account')
-  , Client      = require ('../../libs/models/client')
+  , AccessToken = require ('../../lib/models/access-token')
+  , Account     = require ('../../lib/models/account')
+  , Client      = require ('../../lib/models/client')
   ;
 
 var users = [

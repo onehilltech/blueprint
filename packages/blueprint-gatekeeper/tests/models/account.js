@@ -1,5 +1,5 @@
 var assert = require ('assert');
-var lib = require ('../../libs');
+var lib = require ('../../lib');
 var Account = lib.models.Account;
 
 describe ('Account', function () {

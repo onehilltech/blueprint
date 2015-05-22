@@ -1,11 +1,11 @@
 var nconf = require ('nconf')
   , winston = require ('winston')
-  , models = require ('./libs/models');
+  , models = require ('./lib/models');
 
 var Account = models.Account;
 
 // Export the server factory.
-var Server = require ('./libs/server');
+var Server = require ('./lib/server');
 exports.Server = Server;
 
 // Load the node configuration.

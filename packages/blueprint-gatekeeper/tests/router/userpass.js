@@ -5,7 +5,7 @@ var request = require ('supertest')
 
 var seed     = require ('../seeds/default')
   , config   = require ('../config')
-  , Server   = require ('../../libs/server')
+  , Server   = require ('../../lib/server')
   ;
 
 ///////////////////////////////////////////////////////////////////////////////

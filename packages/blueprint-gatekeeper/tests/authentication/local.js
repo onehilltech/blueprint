@@ -4,9 +4,9 @@
    , winston = require ('winston')
    ;
 
- var Server = require ('../../libs/server')
-   , lib  = require ('../../libs')
-   , config = require ('../config')
+ var Server  = require ('../../lib/server')
+   , lib     = require ('../../lib')
+   , config  = require ('../config')
    , Account = lib.models.Account
    ;
 
