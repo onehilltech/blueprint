@@ -44,11 +44,15 @@ mongoose.connection.on ('disconnect', function () {
 /**
  * @class Server
  *
- * Wrapper class for the server object. The server is a wrapper
- * around the Express server.
+ * Wrapper class for the server object. The server is a wrapper around the
+ * Express server.
  */
 function Server (opts) {
-  this._opts = opts || {};
+  if (!opts)
+    throw new Error ('Must provide options for the server');
+
+  // Take the options, or use the default options.
+  this._opts = opts;
   this.app = express ();
 
   winston.info ('initializing the server application');
