@@ -4,74 +4,42 @@ var passport = require ('passport')
   , login = require ('connect-ensure-login')
   ;
 
-var local = require ('../authentication/local')
-  , Client = require ('../models/client')
+var auth = require ('../authentication');
+
+var Client = require ('../models/client')
   , AccessToken = require ('../models/access-token')
   , utils = require ('../utils')
   ;
 
 const DEFAULT_TOKEN_LENGTH = 256;
+const DEFAULT_LOGIN_ROUTE  = '/auth/login';
+const DEFAULT_LOGOUT_ROUTE = '/auth/logout';
 
-// Use the local authentication strategy.
-passport.use (local ());
+// Load the different authentication strategies needed. The local () strategy
+// is for the username/password login. The bearer () is for authenticating the
+// tokens for logout. The client () is for authenticating the client enabling
+// access to the resources.
+passport.use (auth.bearer ());
+passport.use (auth.client ());
+passport.use (auth.local ());
 
 /**
- * @class UsernamePasswordStrategy
+ * @class UsernamePasswordRouter
  *
  * @param opts
  * @constructor
  */
-function UsernamePasswordStrategy (opts) {
+function UsernamePasswordRouter (opts) {
   this._opts = opts || {};
 
-  this.loginRoute = opts.loginRoute || '/auth/login';
-  this.loginSuccessRedirect = opts.loginSuccessRedirect || '/';
+  this.loginRoute = this._opts.loginRoute || DEFAULT_LOGIN_ROUTE;
+  this.loginSuccessRedirect = this._opts.loginSuccessRedirect || '/';
 
-  this.logoutRoute = opts.logoutRoute || '/auth/logout';
-  this.logoutSuccessRedirect = opts.logoutSuccessRedirect || this.loginRoute;
+  this.logoutRoute = this._opts.logoutRoute || DEFAULT_LOGOUT_ROUTE;
+  this.logoutSuccessRedirect = this._opts.logoutSuccessRedirect || this.loginRoute;
 
-  this.tokenLength = opts.tokenLength || DEFAULT_TOKEN_LENGTH;
-  this.clients = opts.clients || [];
-}
-
-/**
- * Authenticate if the client accessing the route is actually allowed
- * to access it. This is done by checking if the client is in the
- * authorized list of clients set at deployment time.
- */
-UsernamePasswordStrategy.prototype.authenticateClient = function () {
-  var _this = this;
-
-  return function (req, res, next) {
-    var clientId = req.body.client;
-    var clientSecret = req.body.client_secret;
-
-    winston.info ('authenticating login client %s', clientId);
-
-    if (!clientId || !clientSecret)
-      return next (new Error ('Missing client credentials'));
-
-    Client.findById (clientId, function (err, client) {
-      // Make sure there are no errors and direct login is supported by
-      // the client.
-      if (err)
-        return next (err);
-
-      if (!client)
-        return res.send (400, 'Client does not exist');
-
-      if (!client.direct_login)
-        return res.send (403, 'Client does not support direct login');
-
-      if (client.secret !== clientSecret)
-        return res.send (400, 'Client secret is incorrect');
-
-      winston.info ('client authentication successful');
-      req.client = client;
-
-      return next ();
-    });
-  };
+  this.tokenLength = this._opts.tokenLength || DEFAULT_TOKEN_LENGTH;
+  this.clients = this._opts.clients || [];
 }
 
 /**
@@ -79,33 +47,28 @@ UsernamePasswordStrategy.prototype.authenticateClient = function () {
  * access token for the user, and store it in the database. The client
  * performing the login will be set as the hosting client.
  */
-UsernamePasswordStrategy.prototype.finalizeLogin = function () {
+UsernamePasswordRouter.prototype.finalizeLogin = function () {
   var _this = this;
 
   return function (req, res, next) {
-    try {
-      winston.info ('finalizing the login process');
+    winston.info ('finalizing the login process');
 
-      var token = new AccessToken ({
-        token : utils.generateToken (_this.tokenLength),
-        refresh_token : utils.generateToken (_this.tokenLength),
-        account : req.user,
-        client : req.client
-      });
+    var token = new AccessToken ({
+      token : utils.generateToken (_this.tokenLength),
+      refresh_token : utils.generateToken (_this.tokenLength),
+      account : req.user.id,
+      client : req.client.id
+    });
 
-      winston.info ('saving access/refresh token to the database');
+    winston.info ('saving access/refresh token to the database');
 
-      token.save (function (err) {
-        if (err)
-          return next (err);
+    token.save (function (err) {
+      if (err)
+        return next (err);
 
-        winston.info ('sending access/refresh token to user');
-        res.send (200, {token: token.token, refresh_token: token.refresh_token});
-      });
-    }
-    catch (err) {
-      winston.error (err.message);
-    }
+      winston.info ('sending access/refresh token to user');
+      res.send (200, {token: token.token, refresh_token: token.refresh_token});
+    });
   };
 };
 
@@ -115,17 +78,16 @@ UsernamePasswordStrategy.prototype.finalizeLogin = function () {
  *
  * @returns {Function}
  */
-UsernamePasswordStrategy.prototype.finalizeLogout = function () {
-  return function (req, res) {
-    req.session.destroy (function (err) {
+UsernamePasswordRouter.prototype.finalizeLogout = function () {
+  return function (req, res, next) {
+    winston.info ('removing access token from the database');
+    AccessToken.findByIdAndRemove (req.authInfo.token_id, function (err) {
       if (err)
-        return res.send (400, {message: 'Failed to logout user'});
+        return next (err);
 
-      // Logout the current user (in Passport).
-      req.logout ();
-      res.redirect (redirectUri);
+      res.send (200, {});
     });
-  }
+  };
 };
 
 /**
@@ -133,23 +95,30 @@ UsernamePasswordStrategy.prototype.finalizeLogout = function () {
  *
  * @returns {Router}
  */
-UsernamePasswordStrategy.prototype.router = function () {
+UsernamePasswordRouter.prototype.router = function () {
   var router = express.Router ();
 
+  // Define the login route. We must validate the client making the login request
+  // for the user, and the username/password for the user. If either fails, then
+  // the user cannot be logged in.
   router.post (
     this.loginRoute,
-    this.authenticateClient (),
-    passport.authenticate ('local', { failureRedirect: this.loginRoute }),
-    this.finalizeLogin ());
+    passport.authenticate ('oauth2-client-password'),
+    passport.authenticate ('local'),
+    this.finalizeLogin ()
+  );
 
-  router.get (
+  // Define the logout route. We must have a valid access token (i.e., Bearer) in
+  // order to successfully logout the user. Upon logout, the token is no longer valid.
+  router.post (
     this.logoutRoute,
-    passport.authenticate ('bearer', { failureRedirect: this.loginRoute }),
-    this.finalizeLogout ());
+    passport.authenticate ('bearer'),
+    this.finalizeLogout ()
+  );
 
   return router;
 };
 
 module.exports = exports = function (opts) {
-  return new UsernamePasswordStrategy (opts).router ();
+  return new UsernamePasswordRouter (opts).router ();
 };

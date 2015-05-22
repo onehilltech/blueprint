@@ -1,5 +1,6 @@
 module.exports = exports =  {
-  connstr : 'mongodb://localhost/passportcontrol-test',
+  connstr : 'mongodb://localhost/gatekeeper-test',
+  port : 5000,
   
   mongodb : {
     db : {

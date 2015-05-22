@@ -3,22 +3,28 @@ var request = require ('supertest')
   , winston = require ('winston')
   ;
 
-var seed = require ('../seeds/default')
-  , userpass = require ('../../libs/router/userpass')
-  , app  = require ('../app');
-
-app.use (userpass (app.config.router.auth));
+var seed     = require ('../seeds/default')
+  , config   = require ('../config')
+  , Server   = require ('../../libs/server')
+  ;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Begin Test Cases
 
-describe ('router.userpass', function () {
+describe ('UsernamePasswordRouter', function () {
+  var accessToken;
+  var server = new Server (config);
+
   before (function (done) {
+    server.start ();
     seed.seed (done);
   });
 
   after (function (done) {
-    seed.unseed (done);
+    seed.unseed (function (err) {
+      server.stop ();
+      return done (err);
+    });
   });
 
   describe ('POST /auth/login', function () {
@@ -33,20 +39,22 @@ describe ('router.userpass', function () {
       var data = {
         username: user.username,
         password: user.password,
-        client: loginClient.id,
+        client_id: loginClient.id,
         client_secret: loginClient.secret
       };
 
-      request (app)
+      request (server.app)
         .post ('/auth/login')
         .send (data)
         .expect (200)
         .end (function (err, res) {
-          if (err)
-            return done (err);
+          if (err) return done (err);
 
           assert.equal (res.body.token.length, 256);
           assert.equal (res.body.refresh_token.length, 256);
+
+          // Save the access token for the logout test.
+          accessToken = res.body.token;
 
           return done ();
         });
@@ -57,14 +65,10 @@ describe ('router.userpass', function () {
      * redirected to the login page.
      */
     it ('should not login user because of incorrect password', function (done) {
-      request (app)
+      request (server.app)
         .post ('/auth/login')
         .send ({username: user.username, password: '1', client: loginClient.id, client_secret: loginClient.secret})
-        .expect (302)
-        .end (function (err, res) {
-          assert.equal (res.headers.location, '/auth/login');
-          return done ()
-        });
+        .expect (401, done);
     });
  
     /**
@@ -72,25 +76,32 @@ describe ('router.userpass', function () {
      * redirected to the login page.
      */
     it ('should not login user because of invalid username', function (done) {
-      request (app)
+      request (server.app)
         .post ('/auth/login')
         .send ({username: 'who@email.me', password: user.password, client: loginClient.id, client_secret: loginClient.secret})
-        .expect (302)
-        .end (function (err, res) {
-          assert.equal (res.headers.location, '/auth/login');
-          return done ()
-        });
+        .expect (401, done);
     });
   });
 
-  describe ('GET /auth/logout', function () {
-    it ('should logout the user', function (done) {
-      var req = request (app).get ('/auth/logout');
+  describe ('POST /auth/logout', function () {
+    it ('should should not logout user because of missing token', function (done) {
+      request (server.app)
+        .post ('/auth/logout')
+        .expect (401, done);
+    });
 
-      req.expect (302).end (function (err, res) {
-        assert.equal (res.headers.location, '/auth/login');
-        return done ();
-      });
+    it ('should logout the user', function (done) {
+      request (server.app)
+        .post ('/auth/logout')
+        .set ('Authorization', 'Bearer ' + accessToken)
+        .expect (200, done);
+    });
+
+    it ('should not logout user twice', function (done) {
+      request (server.app)
+        .post ('/auth/logout')
+        .set ('Authorization', 'Bearer ' + accessToken)
+        .expect (401, done);
     });
   });
 });

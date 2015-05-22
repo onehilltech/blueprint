@@ -1,11 +1,13 @@
-var passport = require ('passport');
-var mongoose = require ('mongoose');
-var express = require ('express');
-var session = require ('express-session');
-var cookieParser = require ('cookie-parser');
-var morgan = require ('morgan');
-var bodyParser = require ('body-parser');
-var winston = require ('winston');
+var passport = require ('passport')
+  , mongoose = require ('mongoose')
+  , express = require ('express')
+  , cookieParser = require ('cookie-parser')
+  , morgan = require ('morgan')
+  , bodyParser = require ('body-parser')
+  , winston = require ('winston')
+  ;
+
+//var session = require ('express-session')
 
 // Define the serialization/deserialization methods. The serialization method
 // just returns to user id. The deserialization method locates the account by
@@ -40,50 +42,53 @@ mongoose.connection.on ('disconnect', function () {
  * Wrapper class for the server object. The server is a wrapper
  * around the Express server.
  */
-function Server () {
-  this.app_ = express ();
+function Server (opts) {
+  this._opts = opts || {};
+  this.app = express ();
+
+  winston.info ('initializing the server application');
+
+  // Configure the application.
+  this.app.use (morgan (this._opts.morgan));
+  this.app.use (bodyParser (this._opts.bodyParser));
+  this.app.use (cookieParser (this._opts.cookieParser));
+  this.app.use (passport.initialize ());
+
+  // Initialize the application router.
+  var router = require ('./router');
+  this.app.use (router (this._opts.router));
+
+  // Define the error handler.
+  this.app.use (function (err, req, res, next) {
+    winston.error (err.stack);
+    res.status (500).send ('Something broke!');
+  });
 }
 
 /**
  * Start the server. This method configures the server using the provided
  * options, and starts listening for requests.
  */
-Server.prototype.start = function (opts) {
-  function init (app) {
-    console.log ('initializing the server application');
-
-    // Configure the application.
-    app.use (morgan (opts.morgan));
-    app.use (bodyParser (opts.bodyParser));
-    app.use (cookieParser (opts.cookieParser));
-    app.use (session (opts.session));
-
-    app.use (passport.initialize ());
-    app.use (passport.session ());
-
-    // Initialize the application router.
-    var router = require ('./router');   
-    app.use (router (opts.router));
-
-    // Define the error handler.
-    app.use (function(err, req, res, next) {
-      winston.error (err.stack);
-      res.status (500).send ('Something broke!');
-    });
-  }
-
-  // Initialize the application.
-  init (this.app_);
-
+Server.prototype.start = function () {
   // Connect to the database.
-  winston.debug ('database connection is ' + opts.connstr);
-  mongoose.connect (opts.connstr, opts.mongodb);
+  winston.info ('connecting to database ' + this._opts.connstr);
+  mongoose.connect (this._opts.connstr, this._opts.mongodb);
 
   // Start listening for requests.
-  this.http_ = this.app_.listen (opts.port);
-  winston.debug ('listening on port ' + opts.port);
+  this.http_ = this.app.listen (this._opts.port);
+  winston.info ('listening on port ' + this._opts.port);
 };
 
-module.exports = exports = function () {
-  return new Server ();
+/**
+ * Stop the server. This method closes the database connection, and stops
+ * listening for events.
+ */
+Server.prototype.stop = function () {
+  // Close the database connection.
+  mongoose.connection.close ();
+
+  // Stop listening for events.
+  this.http_.close ();
 }
+
+module.exports = exports = Server;

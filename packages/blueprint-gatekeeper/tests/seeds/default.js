@@ -1,6 +1,9 @@
-var async = require ('async');
-var Account = require ('../../libs/models/account');
-var oauth2model = require ('../../libs/models/oauth2');
+var async       = require ('async')
+  , winston     = require ('winston')
+  , AccessToken = require ('../../libs/models/access-token')
+  , Account     = require ('../../libs/models/account')
+  , Client      = require ('../../libs/models/client')
+  ;
 
 var users = [
   { username: 'john.doe@test.me', password: '123456789' },
@@ -39,7 +42,7 @@ exports.seed = function (opts, done) {
       });
     },
     function (callback) {
-      oauth2model.Client.create (clients, function (err, client1, client2, client3, client4) {
+      Client.create (clients, function (err, client1, client2, client3, client4) {
         if (err)
           return callback (err);
 
@@ -59,10 +62,10 @@ exports.seed = function (opts, done) {
 exports.unseed = function (done) {
   async.series ([
     function (callback) {
-      oauth2model.AccessToken.remove ({}, function (err) { callback (err); });
+      AccessToken.remove ({}, function (err) { callback (err); });
     },
     function (callback) {
-      oauth2model.Client.remove ({}, function (err) { callback (err); });
+      Client.remove ({}, function (err) { callback (err); });
     },
     function (callback) {
       Account.remove ({}, function (err) { callback (err); });

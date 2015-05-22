@@ -6,21 +6,25 @@
    ;
 
 var seed   = require ('../seeds/default')
-  , app    = require ('../app')
+  , config = require ('../config')
+  , Server = require ('../../libs/server')
   , bearer = require ('../../libs/authentication/bearer')
   , local  = require ('../../libs/authentication/local')
   , oauth2 = require ('../../libs/router/oauth2')
   ;
 
+passport.use (bearer ());
+
+var server = new Server (config);
+
 // Enable OAuth 2.0 on the server.
-app.use (oauth2 ());
+server.app.use (oauth2 ());
 
 // Use the bearer authentication strategy for these routes.
-passport.use (bearer ());
-app.use ('/protected/data', passport.authenticate ('bearer', {session: false}));
+server.app.use ('/protected/data', passport.authenticate ('bearer', {session: false}));
 
 // Create a protected resource
-app.get ('/protected/data',
+server.app.get ('/protected/data',
   function (req, res) {
     // req.authInfo is set using the `info` argument supplied by
     // `BearerStrategy`. It is typically used to indicate scope of the token,
@@ -33,7 +37,7 @@ app.get ('/protected/data',
 ///////////////////////////////////////////////////////////////////////////////
 // Begin Test Cases
 
-describe ('router.oauth2', function () {
+describe ('OAuth20Strategy', function () {
   var transaction, code, access_data;
   var user = seed.data.users[0];
 
@@ -41,11 +45,14 @@ describe ('router.oauth2', function () {
   var disabledClient = seed.data.clients[2];
 
   before (function (done) {
+    // Start the server.
+    server.start ();
+
     // Seed the database, then login the first user.
     seed.seed (function (err) {
       if (err) return done (err);
 
-      request (app)
+      request (server.app)
         .post ('/auth/login')
         .send ({username: user.username, password: user.password, client: client.id, client_secret: client.secret})
         .end (done);
@@ -53,11 +60,13 @@ describe ('router.oauth2', function () {
   });
 
   after (function (done) {
-    // Logout the first user, then unseed the database.
-    var req = request (app).get ('/auth/logout');
-
-    req.end (function (err, res) {
-      return seed.unseed (done)
+    request (server.app)
+      .post ('/auth/logout')
+      .end (function (err, res) {
+        seed.unseed (function (err) {
+          server.stop ();
+          return done ();
+        });
     });
   });
 
@@ -66,7 +75,7 @@ describe ('router.oauth2', function () {
    */
   describe ('POST /oauth2/authorize', function () {
     it ('should return the transaction id, user, and client of the request', function (done) {
-      var req = request (app).get ('/oauth2/authorize');
+      var req = request (server.app).get ('/oauth2/authorize');
 
       req.query ({response_type: 'code', client_id: client.id, redirect_uri: client.redirect_uri})
         .expect (200)
@@ -91,7 +100,7 @@ describe ('router.oauth2', function () {
     });
 
     it ('should return a bad request since client is disabled', function (done) {
-      request (app)
+      request (server.app)
         .get ('/oauth2/authorize')
         .query ({response_type: 'code', client_id: disabledClient.id, redirect_uri: disabledClient.redirect_uri})
         .expect (500, done);
@@ -103,7 +112,7 @@ describe ('router.oauth2', function () {
    */
   describe ('POST /oauth2/decision', function () {
     it ('should return a code as part of the redirect uri', function (done) {
-      request (app)
+      request (server.app)
         .post ('/oauth2/decision')
         .send ({transaction_id: transaction})
         .expect (302)
@@ -138,7 +147,7 @@ describe ('router.oauth2', function () {
         redirect_uri: client.redirect_uri
       };
 
-      request (app).post ('/oauth2/token')
+      request (server.app).post ('/oauth2/token')
         .send (data)
         .expect (200)
         .end (function (err, res) {
@@ -155,14 +164,14 @@ describe ('router.oauth2', function () {
     });
 
     it ('should access protected resource', function (done) {
-      request (app)
+      request (server.app)
         .get ('/protected/data')
         .set ('Authorization', 'Bearer ' + access_data.access_token)
         .expect (200, {id : user.id, scope: '*'}, done);
     });
 
     it ('should not access protected resource (reason: missing token)', function (done) {
-      request (app)
+      request (server.app)
         .get ('/protected/data')
         .expect (401, done);
     });
@@ -175,7 +184,7 @@ describe ('router.oauth2', function () {
         refresh_token: access_data.refresh_token
       };
 
-      request (app).post ('/oauth2/token')
+      request (server.app).post ('/oauth2/token')
         .send (data)
         .expect (200)
         .end (function (err, res) {
