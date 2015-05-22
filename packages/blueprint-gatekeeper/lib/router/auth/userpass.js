@@ -3,11 +3,11 @@ var passport = require ('passport')
   , winston = require ('winston')
   ;
 
-var auth = require ('../authentication');
+var auth = require ('../../authentication/index');
 
-var Client = require ('../models/client')
-  , AccessToken = require ('../models/access-token')
-  , utils = require ('../utils')
+var Client = require ('../../models/client')
+  , AccessToken = require ('../../models/access-token')
+  , utils = require ('../../utils')
   ;
 
 const DEFAULT_TOKEN_LENGTH = 256;

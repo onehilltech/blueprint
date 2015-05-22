@@ -1,7 +1,7 @@
 var express = require ('express')
   , winston = require ('winston')
-  , userpass = require ('./userpass')
-  , oauth2 = require ('./oauth2')
+  , userpass = require ('./auth/userpass')
+  , oauth2 = require ('./auth/oauth2')
   ;
 
 module.exports = exports = function (opts) {

@@ -5,18 +5,18 @@ var passport    = require ('passport')
   , oauth2orize = require ('oauth2orize')
   ;
 
-var AccessToken = require ('../models/access-token')
-  , Client      = require ('../models/client')
-  , oauth2      = require ('../models/oauth2')
-  , utils       = require ('../utils')
+var AccessToken = require ('../../models/access-token')
+  , Client      = require ('../../models/client')
+  , oauth2      = require ('../../models/oauth2/index')
+  , utils       = require ('../../utils')
   ;
 
 const ACCESS_TOKEN_LENGTH = 256;
 const CODE_TOKEN_LENGTH = 16;
 
 // Use the client authentication strategy.
-passport.use (require ('../authentication/client') ());
-passport.use (require ('../authentication/local') ());
+passport.use (require ('../../authentication/client') ());
+passport.use (require ('../../authentication/local') ());
 
 /**
  * @class OAuth20Strategy

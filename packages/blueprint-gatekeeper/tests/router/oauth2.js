@@ -10,7 +10,7 @@ var seed   = require ('../seeds/default')
   , Server = require ('../../lib/server')
   , bearer = require ('../../lib/authentication/bearer')
   , local  = require ('../../lib/authentication/local')
-  , oauth2 = require ('../../lib/router/oauth2')
+  , oauth2 = require ('../../lib/router/auth/oauth2')
   ;
 
 passport.use (bearer ());
