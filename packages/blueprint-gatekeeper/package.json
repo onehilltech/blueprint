@@ -15,6 +15,8 @@
     "nconf": "0.6.x",
 
     "express": "4.3.x",
+    "express-session": "1.11.x",
+
     "body-parser": "1.0.x",
     "cookie-parser": "1.0.x",
     
@@ -28,7 +30,6 @@
     "oauth2orize": "1.0.x",
 
     "connect": "3.0.x",
-    "connect-ensure-login": "0.1.x",
 
     "bcrypt": "0.7.x",
 

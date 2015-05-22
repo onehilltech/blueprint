@@ -1,6 +1,7 @@
-var passport = require ('passport')
-  , express = require ('express')
-  , winston = require ('winston')
+var passport    = require ('passport')
+  , local       = require ('passport-local')
+  , express     = require ('express')
+  , winston     = require ('winston')
   , oauth2orize = require ('oauth2orize')
   ;
 
@@ -15,24 +16,28 @@ const CODE_TOKEN_LENGTH = 16;
 
 // Use the client authentication strategy.
 passport.use (require ('../authentication/client') ());
+passport.use (require ('../authentication/local') ());
 
 /**
  * @class OAuth20Strategy
  *
  * The OAuth 2.0 strategy for the framework.
  */
-function OAuth20Strategy () {
+function OAuth20Strategy (opts) {
+  this._opts = opts || {};
+
+  if (this._opts.session === undefined)
+    throw new Error ('Must provide session configuration');
+
   this._server = oauth2orize.createServer ();
 
   // Serialization/deserialization
   this._server.serializeClient (function (client, done) {
-    return done (null, client._id.toString ());
+    return done (null, client.id);
   });
 
   this._server.deserializeClient (function (id, done) {
-    Client.findById (id, function (err, client) {
-      return err ? done (err) : done (null, client);
-    });
+    Client.findById (id, done);
   });
 
   // Register supported grant types.
@@ -146,6 +151,7 @@ function OAuth20Strategy () {
 
   this._authorization = this._server.authorization (function (client_id, redirect_uri, done) {
     winston.info ('performing client authorization');
+
     Client.findById (client_id, function (err, client) {
       if (err)
         return done (err);
@@ -165,13 +171,21 @@ function OAuth20Strategy () {
   });
 }
 
+/**
+ * Finalize user authorization to receiving a token that can be used to access
+ * protected resources.
+ *
+ * @returns {Function}
+ */
 OAuth20Strategy.prototype.finalizeAuthorization = function () {
   return function (req, res) {
+    winston.info ('finalizing the authorization request');
+
     res.send (200, {
       transactionID: req.oauth2.transactionID,
       user: {
         id: req.user.id,
-        username : req.user.username,
+        username : req.user.username
       },
       client: {
         id : req.oauth2.client.id,
@@ -179,6 +193,20 @@ OAuth20Strategy.prototype.finalizeAuthorization = function () {
       }
     });
   };
+};
+
+/**
+ * Create handler method to ensure the user is logged in.
+ *
+ * @returns {Function}
+ */
+OAuth20Strategy.prototype.ensureLoggedIn = function () {
+  return function (req, res, next) {
+    if (!req.isAuthenticated || !req.isAuthenticated ())
+      return res.send (401, {message: 'User is not logged in'});
+
+    return next ();
+  }
 };
 
 /**
@@ -190,14 +218,27 @@ OAuth20Strategy.prototype.router = function () {
   var router = express.Router ();
 
   // Make sure we include the username/password routes
+  //router.use (session (this._opts.session));
+  router.use (passport.session ());
+
+  router.post (
+    '/oauth2/login',
+    passport.authenticate ('local'),
+    function (req, res) {
+      return res.send (200, {});
+    }
+  );
+
   router.get (
     '/oauth2/authorize',
+    this.ensureLoggedIn (),
     this._authorization,
     this.finalizeAuthorization ()
   );
 
   router.post (
     '/oauth2/decision',
+    this.ensureLoggedIn (),
     this._server.decision ()
   );
 

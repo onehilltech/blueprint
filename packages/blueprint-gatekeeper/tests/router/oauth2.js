@@ -17,9 +17,6 @@ passport.use (bearer ());
 
 var server = new Server (config);
 
-// Enable OAuth 2.0 on the server.
-server.app.use (oauth2 ());
-
 // Use the bearer authentication strategy for these routes.
 server.app.use ('/protected/data', passport.authenticate ('bearer', {session: false}));
 
@@ -44,24 +41,19 @@ describe ('OAuth20Strategy', function () {
   var client = seed.data.clients[0];
   var disabledClient = seed.data.clients[2];
 
+  var agent = request.agent (server.app);
+
   before (function (done) {
     // Start the server.
     server.start ();
 
     // Seed the database, then login the first user.
-    seed.seed (function (err) {
-      if (err) return done (err);
-
-      request (server.app)
-        .post ('/auth/login')
-        .send ({username: user.username, password: user.password, client: client.id, client_secret: client.secret})
-        .end (done);
-    });
+    seed.seed (done);
   });
 
   after (function (done) {
-    request (server.app)
-      .post ('/auth/logout')
+    agent
+      .post ('/oauth2/logout')
       .end (function (err, res) {
         seed.unseed (function (err) {
           server.stop ();
@@ -70,14 +62,23 @@ describe ('OAuth20Strategy', function () {
     });
   });
 
+  describe ('POST /oauth2/login', function () {
+    it ('should login the user for OAuth2.0 initiation', function (done) {
+      agent
+        .post ('/oauth2/login')
+        .send ({username : user.username, password : user.password, client_id : client.id, client_secret : client.secret})
+        .expect (200, done);
+    });
+  });
+
   /**
    * Unit tests for /oauth2/authorize
    */
   describe ('POST /oauth2/authorize', function () {
     it ('should return the transaction id, user, and client of the request', function (done) {
-      var req = request (server.app).get ('/oauth2/authorize');
-
-      req.query ({response_type: 'code', client_id: client.id, redirect_uri: client.redirect_uri})
+      agent
+        .get ('/oauth2/authorize')
+        .query ({response_type: 'code', client_id : client.id, redirect_uri: client.redirect_uri})
         .expect (200)
         .end (function (err, res) {
           if (err) 
@@ -100,7 +101,7 @@ describe ('OAuth20Strategy', function () {
     });
 
     it ('should return a bad request since client is disabled', function (done) {
-      request (server.app)
+      agent
         .get ('/oauth2/authorize')
         .query ({response_type: 'code', client_id: disabledClient.id, redirect_uri: disabledClient.redirect_uri})
         .expect (500, done);
@@ -112,7 +113,7 @@ describe ('OAuth20Strategy', function () {
    */
   describe ('POST /oauth2/decision', function () {
     it ('should return a code as part of the redirect uri', function (done) {
-      request (server.app)
+      agent
         .post ('/oauth2/decision')
         .send ({transaction_id: transaction})
         .expect (302)
@@ -147,7 +148,8 @@ describe ('OAuth20Strategy', function () {
         redirect_uri: client.redirect_uri
       };
 
-      request (server.app).post ('/oauth2/token')
+      request (server.app)
+        .post ('/oauth2/token')
         .send (data)
         .expect (200)
         .end (function (err, res) {
@@ -184,11 +186,13 @@ describe ('OAuth20Strategy', function () {
         refresh_token: access_data.refresh_token
       };
 
-      request (server.app).post ('/oauth2/token')
+      request (server.app)
+        .post ('/oauth2/token')
         .send (data)
         .expect (200)
         .end (function (err, res) {
-          if (err) return done (err);
+          if (err)
+            return done (err);
 
           access_data = res.body;
           assert.equal ('Bearer', access_data.token_type);

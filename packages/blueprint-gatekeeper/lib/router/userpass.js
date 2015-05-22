@@ -1,7 +1,6 @@
 var passport = require ('passport')
   , express = require ('express')
   , winston = require ('winston')
-  , login = require ('connect-ensure-login')
   ;
 
 var auth = require ('../authentication');

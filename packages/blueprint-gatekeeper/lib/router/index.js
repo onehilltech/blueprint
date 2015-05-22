@@ -9,10 +9,10 @@ module.exports = exports = function (opts) {
   var router = express.Router ();
 
   winston.info ('adding username/password support to router');
-  router.use (userpass (opts.userpass));
+  router.use (userpass (opts));
 
   winston.info ('adding OAuth 2.0 support to router');
-  router.use (oauth2 (opts.oauth2));
+  router.use (oauth2 (opts));
    
   return router;
 };

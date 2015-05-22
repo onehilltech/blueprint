@@ -17,14 +17,16 @@ module.exports = exports =  {
   morgan : { 
     format : 'dev', 
     immediate : true 
-  }, 
-  
-  session : { 
-    secret: 'abc123', 
-    key: 'sid', 
-    cookie: { 
-      secure: false 
-    }
+  },
+
+  session : {
+    cookie: {
+      secure: false
+    },
+
+    secret : '123abc',
+    resave : true,
+    saveUninitialized: true
   },
 
   router : {

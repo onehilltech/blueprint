@@ -1,39 +1,44 @@
-var passport = require ('passport')
-  , mongoose = require ('mongoose')
-  , express = require ('express')
+var passport     = require ('passport')
+  , mongoose     = require ('mongoose')
+  , express      = require ('express')
+  , session      = require ('express-session')
   , cookieParser = require ('cookie-parser')
-  , morgan = require ('morgan')
-  , bodyParser = require ('body-parser')
-  , winston = require ('winston')
+  , morgan       = require ('morgan')
+  , bodyParser   = require ('body-parser')
+  , winston      = require ('winston')
   ;
 
-//var session = require ('express-session')
+var Account = require ('./models/account');
 
 // Define the serialization/deserialization methods. The serialization method
 // just returns to user id. The deserialization method locates the account by
 // the user id.
 passport.serializeUser (function (user, done) {
+  winston.info ('serializing user: %s', user.id);
   done (null, user.id);
 });
 
 passport.deserializeUser (function (id, done) {
+  winston.info ('deserializing user: %s', id);
+
   Account.findById (id, function (err, user) {
     if (err)
       return done (err);
 
     if (!user)
-      return done (new Error ('User does not exist'));
+      return done (new Error ('Account does not exist'));
 
     done (null, user);
   });
 });
 
+// Define the database connection event handlers.
 mongoose.connection.on ('error', function (err) {
   winston.error (err);
 });
 
 mongoose.connection.on ('disconnect', function () {
-  winston.debug ('connection to database terminated');
+  winston.info ('connection to database terminated');
 });
 
 /**
@@ -52,15 +57,16 @@ function Server (opts) {
   this.app.use (morgan (this._opts.morgan));
   this.app.use (bodyParser (this._opts.bodyParser));
   this.app.use (cookieParser (this._opts.cookieParser));
+  this.app.use (session (this._opts.session));
+
   this.app.use (passport.initialize ());
 
   // Initialize the application router.
   var router = require ('./router');
-  this.app.use (router (this._opts.router));
+  this.app.use (router (this._opts));
 
   // Define the error handler.
   this.app.use (function (err, req, res, next) {
-    winston.error (err.stack);
     res.status (500).send ('Something broke!');
   });
 }
