@@ -1,4 +1,4 @@
 exports.bearer         = require ('./bearer');
 exports.client         = require ('./client');
-exports.clientPassword = require ('./client-password');
+exports.clientPassword = require ('./clientPassword');
 exports.local          = require ('./local');

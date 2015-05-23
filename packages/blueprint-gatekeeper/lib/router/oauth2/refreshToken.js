@@ -13,7 +13,7 @@ const NAME = 'refresh_token';
 
 // Use the client authentication strategy.
 passport.use (require ('../../authentication/client') ());
-passport.use (require ('../../authentication/client-password') ());
+passport.use (require ('../../authentication/clientPassword') ());
 
 function RefreshTokenRouter (opts, server) {
   BaseGrantRouter.call (this, NAME, opts, server);
