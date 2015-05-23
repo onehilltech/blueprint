@@ -1,6 +1,6 @@
 var express = require ('express')
   , winston = require ('winston')
-  , AccessToken = require ('../models/oauth2/access-token')
+  , AccessToken = require ('../models/oauth2/accessToken')
   ;
 
 function MainRouter (opts) {

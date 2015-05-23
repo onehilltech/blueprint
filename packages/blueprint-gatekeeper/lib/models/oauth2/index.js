@@ -1,3 +1,3 @@
-exports.AccessToken = require ('./access-token');
-exports.AuthorizationCode = require ('./authorization-code');
+exports.AccessToken = require ('./accessToken');
+exports.AuthorizationCode = require ('./authorizationCode');
 exports.Client = require ('./client');

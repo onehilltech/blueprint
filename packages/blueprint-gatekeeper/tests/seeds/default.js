@@ -1,6 +1,6 @@
 var async       = require ('async')
   , winston     = require ('winston')
-  , AccessToken = require ('../../lib/models/oauth2/access-token')
+  , AccessToken = require ('../../lib/models/oauth2/accessToken')
   , Account     = require ('../../lib/models/account')
   , Client      = require ('../../lib/models/oauth2/client')
   ;

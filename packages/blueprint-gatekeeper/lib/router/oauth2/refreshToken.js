@@ -5,7 +5,7 @@ var passport    = require ('passport')
   , util        = require ('util')
   ;
 
-var AccessToken = require ('../../models/oauth2/access-token')
+var AccessToken = require ('../../models/oauth2/accessToken')
   , Account     = require ('../../models/account')
   , BaseGrantRouter = require ('./baseGrantRouter');
 
