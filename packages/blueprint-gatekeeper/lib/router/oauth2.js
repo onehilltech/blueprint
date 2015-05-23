@@ -204,6 +204,16 @@ Oauth20Router.prototype.ensureLoggedIn = function () {
 Oauth20Router.prototype.get = function () {
   var router = express.Router ();
 
+  // This endpoint is used by all OAuth 2.0 authentication approaches to
+  // provide a token.
+  router.post('/oauth2/token',
+    [
+      passport.authenticate (['oauth2-client', 'oauth2-client-password'], {session : false}),
+      this._server.token (),
+      this._server.errorHandler()
+    ]
+  );
+
   // We support password authentication. The flow for this authentication is:
   //
   // (1) authorize the trusted client
@@ -250,16 +260,6 @@ Oauth20Router.prototype.get = function () {
       ]
     );
   };
-
-  // This endpoint is used by all OAuth 2.0 authentication approaches to
-  // provide a token.
-  router.post('/oauth2/token',
-    [
-      passport.authenticate (['oauth2-client', 'oauth2-client-password'], {session : false}),
-      this._server.token (),
-      this._server.errorHandler()
-    ]
-  );
 
   return router;
 };
