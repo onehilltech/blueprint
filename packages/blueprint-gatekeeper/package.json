@@ -23,9 +23,10 @@
     "mongoose": "3.8.x",
 
     "passport" : "0.2.x",
+    "passport-strategy": "1.x.x",
     "passport-http-bearer": "1.x.x",
     "passport-local" : "1.x.x",
-    "passport-oauth2-client-password": "0.1.x",
+    "passport-oauth2-client-password": "0.x.x",
 
     "oauth2orize": "1.0.x",
 

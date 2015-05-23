@@ -64,6 +64,7 @@ function Server (opts) {
   this.app.use (session (this._opts.session));
 
   this.app.use (passport.initialize ());
+  this.app.use (passport.session ());
 
   // Initialize the application router.
   var router = require ('./router');

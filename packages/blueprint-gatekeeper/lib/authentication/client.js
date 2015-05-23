@@ -1,31 +1,83 @@
-var winston = require ('winston')
-  , ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy
-  , Client = require ('../models/client')
-  ;
+/**
+ * Module dependencies.
+ */
+var passport = require('passport-strategy')
+  , util = require ('util')
+  , winston = require ('winston')
+  , Client = require ('../models/client');
+
+
+/**
+ * `ClientPasswordStrategy` constructor.
+ *
+ * @api protected
+ */
+function ClientStrategy (options, verify) {
+  if (typeof options == 'function') {
+    verify = options;
+    options = {};
+  }
+  if (!verify)
+    throw new Error('OAuth 2.0 client strategy requires a verify function');
+
+  passport.Strategy.call (this);
+  this.name = 'oauth2-client';
+  this._verify = verify;
+  this._passReqToCallback = options.passReqToCallback;
+}
+
+/**
+ * Inherit from `passport.ClientStrategy`.
+ */
+util.inherits (ClientStrategy, passport.Strategy);
+
+/**
+ * Authenticate request based on client id in the request body.
+ *
+ * @param {Object} req
+ * @api protected
+ */
+ClientStrategy.prototype.authenticate = function(req) {
+  if (!req.body || !req.body['client_id'])
+    return this.fail();
+
+  var clientId = req.body['client_id'];
+  var self = this;
+
+  function verified (err, client, info) {
+    if (err) { return self.error(err); }
+    if (!client) { return self.fail(); }
+    self.success (client, info);
+  }
+
+  if (self._passReqToCallback) {
+    this._verify(req, clientId, verified);
+  } else {
+    this._verify(clientId, verified);
+  }
+}
 
 module.exports = exports = function () {
-  return new ClientPasswordStrategy (
-    function (id, secret, done) {
-      winston.info ('authenticating login client %s', id);
+  return new ClientStrategy (function (id, done) {
+      try {
+        winston.info ('authenticating login client ' + id);
 
-      Client.findById (id, function (err, client) {
-        if (err) 
-          return done (err);
+        Client.findById(id, function (err, client) {
+          if (err)
+            return done(err);
 
-        if (!client) 
-          return done (null, false, {message: 'Client does not exist'});
+          if (!client)
+            return done(null, false, {message: 'Client does not exist'});
 
-        if (client.disabled)
-          return done (null, false, {message: 'Client is disabled'});
+          if (client.disabled)
+            return done(null, false, {message: 'Client is disabled'});
 
-        // Check the secret. We do not store the secret in a crypted format
-        // since it prevents the client from being able to see the secret when
-        // managing their account.
-        if (client.secret !== secret) 
-          return done (null, false, {message: 'Client secret is invalid'});
-
-        return done (null, client);
-      });
-    }
-  );
+          winston.info ('login client ' + id + ' authentication successful');
+          return done (null, client);
+        });
+      }
+      catch (err) {
+        console.log (err.message);
+      }
+    });
 };

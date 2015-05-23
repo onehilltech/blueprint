@@ -49,6 +49,21 @@ schema.methods.verifyPassword = function (password, callback) {
   bcrypt.compare (password, this.password, callback);
 };
 
+schema.statics.authenticate = function (username, password, done) {
+  this.findOne ({ username: username }, function (err, account) {
+    if (err) return done (err);
+    if (!account) return done (new Error ('Account does not exist'));
+    if (account.disabled) return done (new Error ('Account is disabled'));
+
+    account.verifyPassword (password, function (err, match) {
+      if (err) return done(err);
+      if (!match) return done(new Error ('Invalid password'));
+
+      return done (null, account);
+    });
+  });
+};
+
 // Create the user collection, and export it from this module.
 const COLLECTION_NAME = 'gatekeeper_account';
 var model = mongoose.model (COLLECTION_NAME, schema);

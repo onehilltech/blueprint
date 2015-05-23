@@ -10,7 +10,7 @@ var seed   = require ('../seeds/default')
   , Server = require ('../../lib/server')
   , bearer = require ('../../lib/authentication/bearer')
   , local  = require ('../../lib/authentication/local')
-  , oauth2 = require ('../../lib/router/auth/oauth2')
+  , oauth2 = require ('../../lib/models/oauth2')
   ;
 
 passport.use (bearer ());
@@ -34,7 +34,7 @@ server.app.get ('/protected/data',
 ///////////////////////////////////////////////////////////////////////////////
 // Begin Test Cases
 
-describe ('OAuth20Strategy', function () {
+describe ('Oauth20Router', function () {
   var transaction, code, access_data;
   var user = seed.data.users[0];
 
@@ -44,25 +44,65 @@ describe ('OAuth20Strategy', function () {
   var agent = request.agent (server.app);
 
   before (function (done) {
-    // Start the server.
     server.start ();
-
-    // Seed the database, then login the first user.
     seed.seed (done);
   });
 
   after (function (done) {
-    agent
-      .post ('/oauth2/logout')
-      .end (function (err, res) {
-        seed.unseed (function (err) {
-          server.stop ();
-          return done ();
-        });
+    seed.unseed (function (err) {
+      server.stop ();
+      return done (err);
     });
   });
 
-  describe ('POST /oauth2/login', function () {
+  describe ('POST /oauth2/password', function () {
+    var loginClient = seed.data.clients[3];
+    var user = seed.data.users[0];
+
+    it ('should return access token for username/password', function (done) {
+      request (server.app)
+        .post ('/oauth2/password')
+        .send ({grant_type : 'password', username : user.username, password : user.password, client_id : loginClient.id})
+        .expect (200)
+        .end (function (err, res) {
+          if (err) return done (err);
+
+          assert (res.body.access_token, 'missing access token');
+          assert.equal (res.body.access_token.length, 256, 'access token is incorrect length');
+
+          assert (res.body.refresh_token, 'missing refresh token');
+          assert.equal (res.body.refresh_token.length, 256, 'refresh token is incorrect length');
+
+          // Save the access token for the logout test.
+          accessToken = res.body.token;
+
+          return done ();
+        });
+    });
+
+    it ('should not return access token because of incorrect password', function (done) {
+      request (server.app)
+        .post ('/oauth2/password')
+        .send ({grant_type : 'password', username: user.username, password: '1', client_id: loginClient.id})
+        .expect (401, done);
+    });
+
+    it ('should not return access token because of invalid username', function (done) {
+      request (server.app)
+        .post ('/oauth2/password')
+        .send ({grant_type : 'password', username: 'who@email.me', password: user.password, client_id: loginClient.id})
+        .expect (401, done);
+    });
+
+    it ('should not return access token because client is disabled', function (done) {
+      request (server.app)
+        .post ('/oauth2/password')
+        .send ({grant_type : 'password', username: 'who@email.me', password: user.password, client_id: loginClient.id})
+        .expect (401, done);
+    });
+  });
+
+  describe.skip ('POST /oauth2/login', function () {
     it ('should login the user for OAuth2.0 initiation', function (done) {
       agent
         .post ('/oauth2/login')
@@ -71,10 +111,7 @@ describe ('OAuth20Strategy', function () {
     });
   });
 
-  /**
-   * Unit tests for /oauth2/authorize
-   */
-  describe ('POST /oauth2/authorize', function () {
+  describe.skip ('POST /oauth2/authorize', function () {
     it ('should return the transaction id, user, and client of the request', function (done) {
       agent
         .get ('/oauth2/authorize')
@@ -108,10 +145,7 @@ describe ('OAuth20Strategy', function () {
     });
   });
 
-  /**
-   * Unit tests for /oauth2/decision
-   */
-  describe ('POST /oauth2/decision', function () {
+  describe.skip ('POST /oauth2/decision', function () {
     it ('should return a code as part of the redirect uri', function (done) {
       agent
         .post ('/oauth2/decision')
@@ -135,10 +169,7 @@ describe ('OAuth20Strategy', function () {
     });
   });
 
-  /**
-   * Unit tests for /oauth2/token
-   */
-  describe ('POST /oauth2/token', function () {
+  describe.skip ('POST /oauth2/token', function () {
     it ('should return an access token', function (done) {
       var data = {
         client_id: client.id,

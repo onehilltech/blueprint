@@ -1,18 +1,20 @@
 var express = require ('express')
   , winston = require ('winston')
-  , userpass = require ('./auth/password')
-  , oauth2 = require ('./auth/oauth2')
+  , AccessToken = require ('../models/access-token')
   ;
 
-module.exports = exports = function (opts) {
-  opts = opts || {};
+function MainRouter (opts) {
+  this._opts = opts || {};
+}
+
+MainRouter.prototype.get = function () {
   var router = express.Router ();
 
-  winston.info ('adding username/password support to router');
-  router.use (userpass (opts));
+  router.use (require ('./oauth2') (this._opts));
 
-  winston.info ('adding OAuth 2.0 support to router');
-  router.use (oauth2 (opts));
-   
   return router;
+};
+
+module.exports = exports = function (opts) {
+  return new MainRouter (opts).get ();
 };

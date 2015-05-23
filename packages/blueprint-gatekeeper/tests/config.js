@@ -31,8 +31,8 @@ module.exports = exports =  {
 
   router : {
     auth : {
-      loginRoute : '/auth/login',
-      logoutRoute : '/auth/logout'
+      loginRoute : '/oauth2/login',
+      logoutRoute : '/oauth2/logout'
     }
   }
 }
