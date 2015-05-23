@@ -9,9 +9,11 @@ var AccessToken = require ('../../models/oauth2/access-token')
   , Account     = require ('../../models/account')
   , BaseGrantRouter = require ('./baseGrantRouter');
 
-passport.use (require ('../../authentication/client') ());
-
 const NAME = 'refresh_token';
+
+// Use the client authentication strategy.
+passport.use (require ('../../authentication/client') ());
+passport.use (require ('../../authentication/client-password') ());
 
 function RefreshTokenRouter (opts, server) {
   BaseGrantRouter.call (this, NAME, opts, server);

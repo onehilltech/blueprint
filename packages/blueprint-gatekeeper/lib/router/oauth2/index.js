@@ -7,10 +7,6 @@ var passport    = require ('passport')
 var Client = require ('../../models/oauth2/client')
   ;
 
-// Use the client authentication strategy.
-passport.use (require ('../../authentication/client') ());
-passport.use (require ('../../authentication/client-password') ());
-
 /**
  * @class OAuth2Router
  *
