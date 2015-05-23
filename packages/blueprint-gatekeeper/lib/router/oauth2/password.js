@@ -37,9 +37,7 @@ function PasswordRouter (opts, server) {
           return done (new oauth2orize.TokenError (err.message, 'invalid_client'));
 
         winston.log('info', 'client %s generating access/refresh token for %s', client.id, username);
-        AccessToken.generateAndSave (self._tokenLength, client.id, account.id, function (err, accessToken, refreshToken) {
-          return done (err, accessToken, refreshToken, {});
-        });
+        AccessToken.generateAndSave (self._tokenLength, client.id, account.id, done);
       });
     }));
 }
