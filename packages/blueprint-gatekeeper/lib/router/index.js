@@ -10,7 +10,7 @@ function MainRouter (opts) {
 MainRouter.prototype.get = function () {
   var router = express.Router ();
 
-  router.use (require ('./oauth2') (this._opts));
+  router.use (require ('./oauth2/index') (this._opts));
 
   return router;
 };

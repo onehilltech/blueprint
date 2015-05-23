@@ -34,7 +34,7 @@ server.app.get ('/protected/data',
 ///////////////////////////////////////////////////////////////////////////////
 // Begin Test Cases
 
-describe ('Oauth20Router', function () {
+describe ('OAuth2Router', function () {
   var transaction, code, access_data;
   var user = seed.data.users[0];
 
