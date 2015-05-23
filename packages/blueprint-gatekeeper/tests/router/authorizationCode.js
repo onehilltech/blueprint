@@ -34,7 +34,7 @@ server.app.get ('/protected/data',
 ///////////////////////////////////////////////////////////////////////////////
 // Begin Test Cases
 
-describe ('OAuth2Router', function () {
+describe ('AuthorizationCodeRouter', function () {
   var transaction, code, access_data;
   var user = seed.data.users[0];
 
@@ -52,53 +52,6 @@ describe ('OAuth2Router', function () {
     seed.unseed (function (err) {
       server.stop ();
       return done (err);
-    });
-  });
-
-  describe ('POST /oauth2/password', function () {
-    var loginClient = seed.data.clients[3];
-    var user = seed.data.users[0];
-
-    it ('should return access token for username/password', function (done) {
-      request (server.app)
-        .post ('/oauth2/password')
-        .send ({grant_type : 'password', username : user.username, password : user.password, client_id : loginClient.id})
-        .expect (200)
-        .end (function (err, res) {
-          if (err) return done (err);
-
-          assert (res.body.access_token, 'missing access token');
-          assert.equal (res.body.access_token.length, 256, 'access token is incorrect length');
-
-          assert (res.body.refresh_token, 'missing refresh token');
-          assert.equal (res.body.refresh_token.length, 256, 'refresh token is incorrect length');
-
-          // Save the access token for the logout test.
-          accessToken = res.body.token;
-
-          return done ();
-        });
-    });
-
-    it ('should not return access token because of incorrect password', function (done) {
-      request (server.app)
-        .post ('/oauth2/password')
-        .send ({grant_type : 'password', username: user.username, password: '1', client_id: loginClient.id})
-        .expect (401, done);
-    });
-
-    it ('should not return access token because of invalid username', function (done) {
-      request (server.app)
-        .post ('/oauth2/password')
-        .send ({grant_type : 'password', username: 'who@email.me', password: user.password, client_id: loginClient.id})
-        .expect (401, done);
-    });
-
-    it ('should not return access token because client is disabled', function (done) {
-      request (server.app)
-        .post ('/oauth2/password')
-        .send ({grant_type : 'password', username: 'who@email.me', password: user.password, client_id: loginClient.id})
-        .expect (401, done);
     });
   });
 
