@@ -68,19 +68,7 @@ function AuthorizationCodeRouter (opts, server) {
           if (err)
             return done (err);
 
-          var token = utils.generateToken (ACCESS_TOKEN_LENGTH);
-          var refreshToken = utils.generateToken (ACCESS_TOKEN_LENGTH);
-
-          var accessToken = new AccessToken ({
-            token : token,
-            refresh_token : refreshToken,
-            account : code.account,
-            client : code.client
-          });
-
-          accessToken.save (function (err) {
-            return err ? done (err) : done (null, token, refreshToken);
-          });
+          AccessToken.generateAndSave (done);
         });
       });
     }));
