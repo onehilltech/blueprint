@@ -1,23 +1,8 @@
 var mongoose = require ('mongoose')
+  , uid      = require ('uid-safe')
   , Client   = require ('./client')
   , Account  = require ('../account')
   ;
-
-function getRandomInt (min, max) {
-  return Math.floor (Math.random () * (max - min + 1)) + min;
-}
-
-function generateToken (len) {
-  var buf = [];
-  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var charlen = chars.length;
-
-  for (var i = 0; i < len; ++i) {
-    buf.push (chars[getRandomInt (0, charlen - 1)]);
-  }
-
-  return buf.join ('');
-}
 
 /**
  * Factory function for creating the 'oauth2_accesstoken' schema.
@@ -40,8 +25,8 @@ var schema = createSchema ();
 
 
 schema.statics.generateAndSave = function (length, client, user, done) {
-  var token = generateToken (length);
-  var refreshToken = generateToken (length);
+  var token = uid.sync (length);
+  var refreshToken = uid.sync (length);
 
   var accessToken = new this ({
     token : token,
@@ -56,8 +41,8 @@ schema.statics.generateAndSave = function (length, client, user, done) {
 };
 
 schema.methods.refreshAndSave = function (length, done) {
-  var token = this.token = generateToken (length);
-  var refreshToken = this.refresh_token = generateToken (length);
+  var token = this.token = uid.sync (length);
+  var refreshToken = this.refresh_token = uid.sync (length);
 
   this.save (function (err) {
     return done (err, token, refreshToken);

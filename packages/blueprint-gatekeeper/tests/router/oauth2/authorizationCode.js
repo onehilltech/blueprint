@@ -5,12 +5,12 @@
    , winston    = require ('winston')
    ;
 
-var seed   = require ('../seeds/default')
-  , config = require ('../config')
-  , Server = require ('../../lib/server')
-  , bearer = require ('../../lib/authentication/bearer')
-  , local  = require ('../../lib/authentication/local')
-  , oauth2 = require ('../../lib/models/oauth2')
+var seed   = require ('../../seeds/default')
+  , config = require ('../../config')
+  , Server = require ('../../../lib/server')
+  , bearer = require ('../../../lib/authentication/bearer')
+  , local  = require ('../../../lib/authentication/local')
+  , oauth2 = require ('../../../lib/models/oauth2/index')
   ;
 
 passport.use (bearer ());

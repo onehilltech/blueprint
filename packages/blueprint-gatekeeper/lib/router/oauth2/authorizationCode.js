@@ -2,12 +2,12 @@ var passport    = require ('passport')
   , express     = require ('express')
   , winston     = require ('winston')
   , oauth2orize = require ('oauth2orize')
-  , util        = require ('util')
+  , uid         = require ('uid-safe')
   ;
 
-var BaseGrantRouter = require ('baseGrantRouter')
-  , AccessToken = require ('../../models/oauth2/accessToken')
-  , Account     = require ('../../models/account');
+var BaseGrantRouter = require ('./baseGrantRouter')
+  , AccessToken     = require ('../../models/oauth2/accessToken')
+  , Account         = require ('../../models/account');
 
 passport.use (require ('../../authentication/client') ());
 
@@ -23,7 +23,7 @@ function AuthorizationCodeRouter (opts, server) {
 
   this._server.grant ('code',
     oauth2orize.grant.code (function (client, redirect_uri, user, ares, done) {
-      var code = utils.generateToken (self._codeLength);
+      var code = uid.sync (self._codeLength);
 
       // Store the authorization code in the database. We are going to have
       // to retrieve it later when giving out the token.

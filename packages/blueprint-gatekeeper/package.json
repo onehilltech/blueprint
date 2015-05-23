@@ -16,6 +16,8 @@
 
     "express": "4.3.x",
     "express-session": "1.11.x",
+    
+    "uid-safe": "2.x.x",
 
     "body-parser": "1.0.x",
     "cookie-parser": "1.0.x",

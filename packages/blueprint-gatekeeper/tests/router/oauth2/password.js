@@ -5,12 +5,12 @@
    , winston    = require ('winston')
    ;
 
-var seed   = require ('../seeds/default')
-  , config = require ('../config')
-  , Server = require ('../../lib/server')
-  , bearer = require ('../../lib/authentication/bearer')
-  , local  = require ('../../lib/authentication/local')
-  , oauth2 = require ('../../lib/models/oauth2')
+var seed   = require ('../../seeds/default')
+  , config = require ('../../config')
+  , Server = require ('../../../lib/server')
+  , bearer = require ('../../../lib/authentication/bearer')
+  , local  = require ('../../../lib/authentication/local')
+  , oauth2 = require ('../../../lib/models/oauth2/index')
   ;
 
 passport.use (bearer ());
@@ -68,10 +68,10 @@ describe ('PasswordRouter', function () {
           if (err) return done (err);
 
           assert (res.body.access_token, 'missing access token');
-          assert.equal (res.body.access_token.length, 256, 'access token is incorrect length');
+          assert.equal (res.body.access_token.length, 342, 'access token is incorrect length');
 
           assert (res.body.refresh_token, 'missing refresh token');
-          assert.equal (res.body.refresh_token.length, 256, 'refresh token is incorrect length');
+          assert.equal (res.body.refresh_token.length, 342, 'refresh token is incorrect length');
 
           // Save the access token for the logout test.
           accessToken = res.body.token;
