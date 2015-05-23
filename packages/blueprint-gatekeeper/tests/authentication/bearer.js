@@ -5,9 +5,9 @@ var request     = require ('supertest')
   , winston     = require ('winston')
   , Server      = require ('../../lib/server')
   , lib         = require ('../../lib')
-  , AccessToken = lib.models.AccessToken
   , Account     = lib.models.Account
-  , Client      = lib.models.Client
+  , AccessToken = lib.models.oauth2.AccessToken
+  , Client      = lib.models.oauth2.Client
   , config      = require ('../config')
   ;
 

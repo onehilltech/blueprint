@@ -4,7 +4,7 @@
 var passport = require('passport-strategy')
   , util = require ('util')
   , winston = require ('winston')
-  , Client = require ('../models/client');
+  , Client = require ('../models/oauth2/client');
 
 
 /**

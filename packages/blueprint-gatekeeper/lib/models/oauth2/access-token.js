@@ -1,7 +1,23 @@
 var mongoose = require ('mongoose')
-  , Client = require ('./client')
-  , Account = require ('./account')
+  , Client   = require ('./client')
+  , Account  = require ('../account')
   ;
+
+function getRandomInt (min, max) {
+  return Math.floor (Math.random () * (max - min + 1)) + min;
+}
+
+function generateToken (len) {
+  var buf = [];
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charlen = chars.length;
+
+  for (var i = 0; i < len; ++i) {
+    buf.push (chars[getRandomInt (0, charlen - 1)]);
+  }
+
+  return buf.join ('');
+}
 
 /**
  * Factory function for creating the 'oauth2_accesstoken' schema.
@@ -22,21 +38,6 @@ function createSchema () {
 
 var schema = createSchema ();
 
-function getRandomInt (min, max) {
-  return Math.floor (Math.random () * (max - min + 1)) + min;
-}
-
-function generateToken (len) {
-  var buf = [];
-  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var charlen = chars.length;
-
-  for (var i = 0; i < len; ++i) {
-    buf.push (chars[getRandomInt (0, charlen - 1)]);
-  }
-
-  return buf.join ('');
-}
 
 schema.statics.generateAndSave = function (length, client, user, done) {
   var token = generateToken (length);
@@ -63,7 +64,7 @@ schema.methods.refreshAndSave = function (length, done) {
   });
 }
 
-const COLLECTION_NAME = 'gatekeeper_accesstoken';
+const COLLECTION_NAME = 'gatekeeper_oauth2_accesstoken';
 var model = mongoose.model (COLLECTION_NAME, schema);
 
 module.exports = exports = model;

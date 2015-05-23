@@ -1,6 +1,6 @@
 var winston = require ('winston')
   , ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy
-  , Client = require ('../models/client')
+  , Client = require ('../models/oauth2/client')
   ;
 
 module.exports = exports = function () {

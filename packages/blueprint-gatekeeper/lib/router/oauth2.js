@@ -5,9 +5,9 @@ var passport    = require ('passport')
   , oauth2orize = require ('oauth2orize')
   ;
 
-var AccessToken = require ('../models/access-token')
+var AccessToken = require ('../models/oauth2/access-token')
   , Account     = require ('../models/account')
-  , Client      = require ('../models/client')
+  , Client      = require ('../models/oauth2/client')
   , oauth2      = require ('../models/oauth2')
   , utils       = require ('../utils')
   ;
