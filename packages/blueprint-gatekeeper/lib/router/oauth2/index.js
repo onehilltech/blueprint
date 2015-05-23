@@ -1,5 +1,4 @@
-var passport    = require ('passport')
-  , express     = require ('express')
+var express     = require ('express')
   , winston     = require ('winston')
   , oauth2orize = require ('oauth2orize')
   ;
