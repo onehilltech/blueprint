@@ -36,12 +36,12 @@ function RefreshTokenRouter (opts, server) {
 
 util.inherits (RefreshTokenRouter, BaseGrantRouter);
 
-RefreshTokenRouter.prototype.getRouter = function (router) {
+RefreshTokenRouter.prototype.appendRouter = function (router, strategies) {
   // This endpoint is used by all OAuth 2.0 authentication approaches to
   // provide a token.
   router.post('/oauth2/token',
     [
-      passport.authenticate (['oauth2-client'], {session : false}),
+      passport.authenticate (strategies , {session : false}),
       this._server.token (),
       this._server.errorHandler()
     ]

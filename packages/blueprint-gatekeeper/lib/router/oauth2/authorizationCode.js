@@ -113,7 +113,7 @@ AuthorizationCodeRouter.prototype.respondWithTransaction = function () {
 };
 
 
-AuthorizationCodeRouter.prototype.getRouter = function () {
+AuthorizationCodeRouter.prototype.appendRouter = function () {
   var router = express.Router ();
 
 

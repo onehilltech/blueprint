@@ -49,7 +49,7 @@ util.inherits (PasswordRouter, BaseGrantRouter);
  *
  * @returns {*}
  */
-PasswordRouter.prototype.getRouter = function (router) {
+PasswordRouter.prototype.appendRouter = function (router) {
   // The flow for this authentication is:
   //
   // (1) authorize the trusted client
@@ -61,6 +61,14 @@ PasswordRouter.prototype.getRouter = function (router) {
       this._server.errorHandler ()
     ]
   );
+}
+
+BaseGrantRouter.prototype.getSupportsRefreshToken = function () {
+  return true;
+}
+
+BaseGrantRouter.prototype.getRefreshTokenAuthenticateStrategy = function () {
+  return 'oauth2-client';
 }
 
 module.exports = exports = function (opts, server) {

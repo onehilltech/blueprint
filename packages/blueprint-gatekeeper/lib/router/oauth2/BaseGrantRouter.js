@@ -8,8 +8,16 @@ function BaseGrantRouter (name, opts, server) {
   this._tokenLength = this._opts.tokenLength || DEFAULT_TOKEN_LENGTH;
 }
 
-BaseGrantRouter.prototype.getRouter = function (router) {
-  throw new Error ('Subclass must implement getRouter ()');
+BaseGrantRouter.prototype.appendRouter = function (router) {
+  throw new Error ('Subclass must implement appendRouter ()');
+}
+
+BaseGrantRouter.prototype.getSupportsRefreshToken = function () {
+  return false;
+}
+
+BaseGrantRouter.prototype.getRefreshTokenAuthenticateStrategy = function () {
+  return null;
 }
 
 module.exports = exports = BaseGrantRouter;

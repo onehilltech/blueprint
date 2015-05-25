@@ -38,10 +38,15 @@ function OAuth2Router (opts) {
     Client.findById (id, done);
   });
 
+  // Include all the grants expect for the refresh_token grant since the refresh_token
+  // grants depends on the other ones.
+  winston.info ('loading refresh_token grant type');
+  this._refreshTokenGrant = require ('./refreshToken')(this._opts, this._server);
+
+  winston.info ('loading other grant types');
   this._grants = [
-    require ('./refreshToken')(this._opts, this._server),
     require ('./password')(this._opts, this._server)
-  ]
+  ];
 }
 
 /**
@@ -51,11 +56,23 @@ function OAuth2Router (opts) {
  */
 OAuth2Router.prototype.getRouter = function () {
   var router = express.Router ();
+  var refreshTokenAuthStrategies = [];
 
   this._grants.forEach (function (grant, index, arr) {
-    winston.log ('info', 'building routes for [%s]', grant.name);
-    grant.getRouter (router);
+    // If the grant supports refresh token, then add the appropriate
+    // authentication strategy to the collection of known strategies.
+    if (grant.getSupportsRefreshToken ()) {
+      winston.log ('grant type %s supports refresh token', grant.name);
+      refreshTokenAuthStrategies.push(grant.getRefreshTokenAuthenticateStrategy());
+    }
+
+    winston.log ('info', 'appending router for grant type <%s>', grant.name);
+    grant.appendRouter (router);
   });
+
+  // Lastly, append the refresh_token grant, if exists.
+  if (this._refreshTokenGrant)
+    this._refreshTokenGrant.appendRouter (router, refreshTokenAuthStrategies);
 
   return router;
 };
