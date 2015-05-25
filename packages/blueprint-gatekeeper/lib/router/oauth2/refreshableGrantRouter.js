@@ -1,13 +1,9 @@
-var BaseGrantRouter = require ('./baseGrantRouter');
-
-const NAME = 'refresh_token';
-
-// Use the client authentication strategy.
-passport.use (require ('../../authentication/client') ());
-passport.use (require ('../../authentication/clientPassword') ());
+var BaseGrantRouter = require ('./baseGrantRouter')
+  , util = require ('util')
+  ;
 
 function RefreshableGrantRouter (name, opts, server) {
-  BaseGrantRouter.call (this, NAME, opts, server);
+  BaseGrantRouter.call (this, name, opts, server);
 }
 
 util.inherits (RefreshableGrantRouter, BaseGrantRouter);
@@ -20,6 +16,4 @@ RefreshableGrantRouter.prototype.getRefreshTokenAuthenticateStrategy = function 
   throw new Error ('Must implement getRefreshTokenAuthenticateStrategy ()');
 }
 
-module.exports = exports = function (opts, server) {
-  return new RefreshTokenRouter (opts, server);
-};
+module.exports = exports = RefreshableGrantRouter;

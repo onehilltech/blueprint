@@ -22,7 +22,7 @@ const NAME = 'password';
  * @constructor
  */
 function PasswordRouter (opts, server) {
-  BaseGrantRouter.call (this, NAME, opts, server);
+  RefreshableGrantRouter.call (this, NAME, opts, server);
 
   var self = this;
 
@@ -63,11 +63,9 @@ PasswordRouter.prototype.appendRouter = function (router) {
   );
 }
 
-/*
-BaseGrantRouter.prototype.getRefreshTokenAuthenticateStrategy = function () {
+PasswordRouter.prototype.getRefreshTokenAuthenticateStrategy = function () {
   return 'oauth2-client';
 }
-*/
 
 module.exports = exports = function (opts, server) {
   return new PasswordRouter (opts, server);
