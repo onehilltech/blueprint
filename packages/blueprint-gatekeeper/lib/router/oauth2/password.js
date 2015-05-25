@@ -7,7 +7,7 @@ var passport    = require ('passport')
 
 var AccessToken     = require ('../../models/oauth2/accessToken')
   , Account         = require ('../../models/account')
-  , BaseGrantRouter = require ('./baseGrantRouter')
+  , RefreshableGrantRouter = require ('./refreshableGrantRouter')
   ;
 
 passport.use (require ('../../authentication/client') ());
@@ -42,7 +42,7 @@ function PasswordRouter (opts, server) {
     }));
 }
 
-util.inherits (PasswordRouter, BaseGrantRouter);
+util.inherits (PasswordRouter, RefreshableGrantRouter);
 
 /**
  * Get the Express.js router for this router abstraction.
@@ -63,13 +63,11 @@ PasswordRouter.prototype.appendRouter = function (router) {
   );
 }
 
-BaseGrantRouter.prototype.getSupportsRefreshToken = function () {
-  return true;
-}
-
+/*
 BaseGrantRouter.prototype.getRefreshTokenAuthenticateStrategy = function () {
   return 'oauth2-client';
 }
+*/
 
 module.exports = exports = function (opts, server) {
   return new PasswordRouter (opts, server);
