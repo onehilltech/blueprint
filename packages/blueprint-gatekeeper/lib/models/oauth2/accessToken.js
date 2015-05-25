@@ -23,7 +23,6 @@ function createSchema () {
 
 var schema = createSchema ();
 
-
 schema.statics.generateAndSave = function (length, client, user, done) {
   var token = uid.sync (length);
   var refreshToken = uid.sync (length);
@@ -40,14 +39,20 @@ schema.statics.generateAndSave = function (length, client, user, done) {
   });
 };
 
-schema.methods.refreshAndSave = function (length, done) {
-  var token = this.token = uid.sync (length);
-  var refreshToken = this.refresh_token = uid.sync (length);
+schema.statics.refreshAndSave = function (length, client, refreshToken, done) {
+  this.findOne ({client : client, refresh_token: refreshToken}, function (err, at) {
+    if (err)
+      return done (err);
 
-  this.save (function (err) {
-    return done (err, token, refreshToken);
+    // Refresh and save the access token.
+    var newToken = at.token = uid.sync (length);
+    var newRefreshToken = at.refresh_token = uid.sync (length);
+
+    at.save (function (err) {
+      return done (err, newToken, newRefreshToken);
+    });
   });
-}
+};
 
 const COLLECTION_NAME = 'gatekeeper_oauth2_accesstoken';
 var model = mongoose.model (COLLECTION_NAME, schema);

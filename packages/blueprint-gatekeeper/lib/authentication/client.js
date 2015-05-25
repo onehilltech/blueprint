@@ -60,19 +60,19 @@ ClientStrategy.prototype.authenticate = function(req) {
 module.exports = exports = function () {
   return new ClientStrategy (function (id, done) {
       try {
-        winston.info ('authenticating login client ' + id);
+        winston.info ('authorizing/authenticating login client ' + id);
 
         Client.findById(id, function (err, client) {
           if (err)
             return done(err);
 
           if (!client)
-            return done(null, false, {message: 'Client does not exist'});
+            return done(null, false);
 
           if (client.disabled)
-            return done(null, false, {message: 'Client is disabled'});
+            return done(null, false);
 
-          winston.info ('login client ' + id + ' authentication successful');
+          winston.info ('login client ' + id + ' authorization/authentication successful');
           return done (null, client);
         });
       }
