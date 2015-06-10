@@ -18,13 +18,6 @@ var config = nconf.get ();
 // Create a new server, and start it.
 var server = new Server (config);
 
-// Set the template engine for the service.
-server.app.set ('views', path.join (__dirname, '../views'));
-server.app.set ('view engine', 'jade');
-
-// Load the administrator interface.
-server.app.use ('/admin_d', require ('../admin') (config.admin));
-
 server.start (function (err) {
   if (!err)
     winston.log ('info', 'listening on port', config.port);
