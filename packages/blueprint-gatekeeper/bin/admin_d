@@ -23,7 +23,7 @@ app.set ('views', path.join (__dirname, '../views'));
 app.set ('view engine', 'jade');
 
 // Load the administrator interface.
-app.use ('/admin', require ('../admin') (config.admin));
+app.use ('/admin', require ('../lib/admin') (config.admin));
 
 mongoose.connect (config.connstr, config.mongodb, function (err) {
   if (err)

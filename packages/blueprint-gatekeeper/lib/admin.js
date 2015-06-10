@@ -1,5 +1,5 @@
 var express = require ('express')
-  , models  = require ('../lib/models')
+  , models  = require ('./models')
   ;
 
 function AdminRouter (opts) {
