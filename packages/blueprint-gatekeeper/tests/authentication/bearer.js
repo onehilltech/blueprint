@@ -1,9 +1,9 @@
 var request     = require ('supertest')
   , assert      = require ('assert')
   , passport    = require ('passport')
+  , express     = require ('express')
   , mongoose    = require ('mongoose')
   , winston     = require ('winston')
-  , Server      = require ('../../lib/server')
   , lib         = require ('../../lib')
   , Account     = lib.models.Account
   , AccessToken = lib.models.oauth2.AccessToken
@@ -12,7 +12,6 @@ var request     = require ('supertest')
   ;
 
 var Schema = mongoose.Schema;
-
 
 describe ('BearerStrategy', function () {
   var tester = { email : 'test@me.com', password : '123abc' };
@@ -24,45 +23,44 @@ describe ('BearerStrategy', function () {
 
   // Setup the different routes for testing.
   winston.info ('creating new server for test suite');
-  var server = new Server (config);
+  var app = express ();
+  app.use (passport.initialize ());
 
-  server.app.get ('/protected/resource', [
-    passport.authenticate ('bearer', {session: false}),
-    function (req, res) {
-      res.send (200, {result: true});
-    }]);
-
+  app.get ('/protected/resource',
+    [
+      passport.authenticate ('bearer', {session: false}),
+      function (req, res) {
+        res.send (200, {result: true});
+      }
+    ]);
 
   before (function (done) {
-    // Start the server so we can manually add test data.
-    server.start ();
-
-    // Create the test account.
-    Account.create (tester, function (err, user) {
+    mongoose.connect (config.connstr, config.mongodb, function (err) {
       if (err) return done (err);
 
-      winston.info ('test account created');
-
-      tester.id = user.id;
-      access_token.account = user.id;
-
-      // Create the test client.
-      Client.create (client, function (err, cli) {
+      Account.create (tester, function (err, user) {
         if (err) return done (err);
 
-        winston.info ('test client created');
+        tester.id = user.id;
+        access_token.account = user.id;
 
-        client.id = cli.id;
-        access_token.client = cli.id;
-
-        // Create the test access token.
-        AccessToken.create (access_token, function (err, at) {
+        Client.create (client, function (err, cli) {
           if (err) return done (err);
 
-          winston.info ('test access token created');
-          access_token.id = at.id;
+          winston.info ('test client created');
 
-          return done ();
+          client.id = cli.id;
+          access_token.client = cli.id;
+
+          // Create the test access token.
+          AccessToken.create (access_token, function (err, at) {
+            if (err) return done (err);
+
+            winston.info ('test access token created');
+            access_token.id = at.id;
+
+            return done ();
+          });
         });
       });
     });
@@ -72,10 +70,9 @@ describe ('BearerStrategy', function () {
     Account.remove ({}, function (err) {
       Client.remove ({}, function (err) {
         AccessToken.remove ({}, function (err) {
-          winston.info ('stopping the server');
-          server.stop ();
-
-          return done (err);
+          mongoose.connection.close (function (err) {
+            return done (err);
+          });
         });
       });
     });
@@ -91,13 +88,13 @@ describe ('BearerStrategy', function () {
 
   describe ('authentication', function () {
     it ('should return unauthorized access', function (done) {
-      request (server.app)
+      request (app)
         .get ('/protected/resource')
         .expect (401, { }, done);
     });
 
     it ('should authenticate using access token', function (done) {
-      request (server.app)
+      request (app)
         .get ('/protected/resource')
         .set ('Authorization', 'Bearer ' + access_token.token)
         .expect (200, {result : true}, done);
