@@ -50,7 +50,6 @@ function OAuth2Router (opts) {
   winston.info ('loading refresh_token grant type');
   this._refreshTokenGrant = require ('./refreshToken')(this._opts, this._server);
 
-  winston.info ('loading other grant types');
   this._grants = [
     require ('./password')(this._opts, this._server)
   ];

@@ -72,17 +72,19 @@ function Server (opts) {
  * Start the server. This method configures the server using the provided
  * options, and starts listening for requests.
  */
-Server.prototype.start = function () {
+Server.prototype.start = function (callback) {
+  self = this;
+
+  if (callback == undefined)
+    callback = function () {};
+
   // Connect to the database.
   winston.info ('connecting to database ' + this._opts.connstr);
-  mongoose.connect (this._opts.connstr, this._opts.mongodb);
+  mongoose.connect (this._opts.connstr, this._opts.mongodb, function (err) {
+    if (err)
+      return callback (err);
 
-  // Start listening for requests.
-  this.http_ = this.app.listen (this._opts.port, function () {
-    var host;
-    var port;
-
-    winston.info ('listening at http://%s:%s', host, port);
+    self.http_ = self.app.listen (self._opts.port, callback);
   });
 };
 

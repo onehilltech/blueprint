@@ -25,4 +25,7 @@ server.app.set ('view engine', 'jade');
 // Load the administrator interface.
 server.app.use ('/admin', require ('../admin') (config.admin));
 
-server.start ();
+server.start (function (err) {
+  if (!err)
+    winston.log ('info', 'listening on port', config.port);
+});
