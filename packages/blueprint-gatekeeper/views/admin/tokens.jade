@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h2 Access Tokens
+
+   .container
+       each token in tokens
+           .row
+               .col-md-3 token.token
+               .col-md-3 token.refresh_token
+               .col-md-2 token.account
+               .col-md-2 token.client
+               .col-md-2 token.disabled

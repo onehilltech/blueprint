@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+
+var nconf   = require ('nconf')
+  , winston = require ('winston')
+  , path    = require ('path')
+  , express = require ('express')
+  , Server  = require ('./../lib/server')
+  ;
+
+// Load the node configuration.
+var env = process.env.NODE_ENV || 'dev';
+winston.info ('execution environment: ' + env);
+
+var config_file = path.join (__dirname, '../config', env + '.json');
+nconf.env ().file ({file: config_file}).argv ();
+var config = nconf.get ();
+
+// Create a new server, and start it.
+var server = new Server (config);
+
+// Set the template engine for the service.
+server.app.set ('views', path.join (__dirname, '../views'));
+server.app.set ('view engine', 'jade');
+
+// Load the administrator interface.
+server.app.use ('/admin', require ('../admin') (config.admin));
+
+server.start ();

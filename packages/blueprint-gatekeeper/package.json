@@ -3,43 +3,32 @@
   "description": "An authentication server for Web application programming interfaces (APIs)",
   "version": "0.6.0",
   "private": true,
-
-  "main" : "app.js",
-  
-  "repository" :  { 
-    "type" : "git", 
-    "url" : "https://bitbucket.org/onehilltech/passport-control.git"
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/onehilltech/passport-control.git"
   },
-  
   "dependencies": {
     "nconf": "0.6.x",
-
     "express": "4.3.x",
     "express-session": "1.11.x",
-    
+    "jade": "^1.10.0",
     "uid-safe": "2.x.x",
-
     "body-parser": "1.0.x",
     "cookie-parser": "1.0.x",
-    
     "mongoose": "3.8.x",
-
-    "passport" : "0.2.x",
+    "passport": "0.2.x",
     "passport-strategy": "1.x.x",
     "passport-http-bearer": "1.x.x",
-    "passport-local" : "1.x.x",
+    "passport-local": "1.x.x",
     "passport-oauth2-client-password": "0.x.x",
-
     "oauth2orize": "1.0.x",
-
     "connect": "3.0.x",
-
     "bcrypt": "0.7.x",
-
     "morgan": "1.0.x",
-    "winston" : "0.7.x"
+    "winston": "0.7.x",
+    "path": "^0.11.14"
   },
-
   "devDependencies": {
     "async": "0.9.x",
     "supertest": "0.12.x",
@@ -47,7 +36,7 @@
     "superagent": "0.18.x",
     "mocha": "1.x.x"
   },
-  "scripts" : {
-    "test" : "env NODE_ENV=test mocha --recursive tests/ --reporter spec"
+  "scripts": {
+    "test": "env NODE_ENV=test mocha --recursive tests/ --reporter spec"
   }
 }

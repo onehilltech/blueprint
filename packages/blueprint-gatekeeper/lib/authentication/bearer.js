@@ -11,7 +11,7 @@ module.exports = function () {
     // access token, then we need to fail access to the resource. We also
     // need to fail access if the token has been disabled, or is not valid.
     AccessToken.findOne ({token : access_token}, function (err, token) {
-      if (err) 
+      if (err)
         return done (err);
 
       if (!token) 

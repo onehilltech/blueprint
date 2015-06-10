@@ -55,8 +55,6 @@ function Server (opts) {
   this._opts = opts;
   this.app = express ();
 
-  winston.info ('initializing the server application');
-
   // Configure the application.
   this.app.use (morgan (this._opts.morgan));
   this.app.use (bodyParser (this._opts.bodyParser));
@@ -67,13 +65,7 @@ function Server (opts) {
   this.app.use (passport.session ());
 
   // Initialize the application router.
-  var router = require ('./router');
-  this.app.use (router (this._opts));
-
-  // Define the error handler.
-  this.app.use (function (err, req, res, next) {
-    res.status (500).send ('Something broke!');
-  });
+  this.app.use ('/', require ('./router') (this._opts));
 }
 
 /**
@@ -86,8 +78,12 @@ Server.prototype.start = function () {
   mongoose.connect (this._opts.connstr, this._opts.mongodb);
 
   // Start listening for requests.
-  this.http_ = this.app.listen (this._opts.port);
-  winston.info ('listening on port ' + this._opts.port);
+  this.http_ = this.app.listen (this._opts.port, function () {
+    var host;
+    var port;
+
+    winston.info ('listening at http://%s:%s', host, port);
+  });
 };
 
 /**

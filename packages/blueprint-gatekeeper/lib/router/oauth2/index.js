@@ -1,10 +1,16 @@
 var express     = require ('express')
   , winston     = require ('winston')
+  , passport    = require ('passport')
   , oauth2orize = require ('oauth2orize')
   ;
 
-var Client = require ('../../models/oauth2/client')
+var Client      = require ('../../models/oauth2/client')
+  , AccessToken = require ('../../models/oauth2/accessToken')
+  , bearer      = require ('../../authentication/bearer')
   ;
+
+// The Bearer strategy is need for logout.
+passport.use (bearer ());
 
 /**
  * @class OAuth2Router
@@ -50,12 +56,38 @@ function OAuth2Router (opts) {
 }
 
 /**
+ * Logout the current user.
+ *
+ * @returns {Function}
+ */
+OAuth2Router.prototype.logoutUser = function () {
+  return function (req, res) {
+    winston.info ('logging out user ' + req.user);
+
+    AccessToken.findByIdAndRemove (req.authInfo.token_id, function (err) {
+      if (err)
+        return res.status (403).send ();
+      else
+        return res.status (200).send ();
+    });
+  };
+}
+
+/**
  * Create the Router object for this strategy.
  *
  * @returns {Router}
  */
 OAuth2Router.prototype.getRouter = function () {
   var router = express.Router ();
+
+  // Define the logout route for Oauth2.
+  router.get ('/oauth2/logout',
+    [
+      passport.authenticate ('bearer', {session : false}),
+      this.logoutUser ()
+    ]);
+
   var refreshTokenAuthStrategies = [];
 
   this._grants.forEach (function (grant, index, arr) {
@@ -63,7 +95,7 @@ OAuth2Router.prototype.getRouter = function () {
     // authentication strategy to the collection of known strategies.
     if (grant.getSupportsRefreshToken ()) {
       winston.log ('grant type %s supports refresh token', grant.name);
-      refreshTokenAuthStrategies.push(grant.getRefreshTokenAuthenticateStrategy());
+      refreshTokenAuthStrategies.push (grant.getRefreshTokenAuthenticateStrategy());
     }
 
     winston.log ('info', 'appending router for grant type <%s>', grant.name);

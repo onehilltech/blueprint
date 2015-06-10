@@ -4,7 +4,7 @@
    , winston    = require ('winston')
    ;
 
-var seed   = require ('../../seeds/default')
+var seed   = require ('../../../data/seeds/default')
   , config = require ('../../config')
   , Server = require ('../../../lib/server')
   , bearer = require ('../../../lib/authentication/bearer')

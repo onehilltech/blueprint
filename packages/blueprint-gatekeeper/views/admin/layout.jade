@@ -1,0 +1,47 @@
+doctype html
+html(lang="en")
+    head
+        title Gatekeeper Portal
+        link(rel='stylesheet', type='text/css', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css')
+        link(rel='stylesheet', type='text/css', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css')
+
+    body
+        nav(class="navbar navbar-default")
+            .container-fluid
+                .navbar-header
+                    button(type="button", class="navbar-toggle collapsed", data-toggle="collapse", data-target="#bs-example-navbar-collapse-1")
+                        span.sr-only Toggle navigation
+                        span.icon-bar
+                        span.icon-bar
+                        span.icon-bar
+                    a.navbar-brand(href="/admin") Gatekeeper
+        .container
+            .row
+                .col-md-3
+                    ul.list-group
+                        a.list-group-item(href='/admin/clients') Apps &amp; Clients
+                            span#client.badge ?
+                        a.list-group-item(href='/admin/codes') Authorization Codes
+                            span#codes.badge ?
+                        a.list-group-item(href='/admin/tokens') Access Tokens
+                            span#tokens.badge ?
+
+                .col-md-9
+
+                    block content
+
+        script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js")
+        script(type="text/javascript", src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js")
+
+        script.
+            $.get ({
+                url: '/admin/oauth2/summary',
+                headers : {
+                    'Authorization', 'Bearer' + accessToken
+                }
+            }, function (data) {
+                alert (data);
+            });
+
+        script(type="text/javascript")
+            block endscript
