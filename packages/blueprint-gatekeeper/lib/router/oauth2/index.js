@@ -4,9 +4,10 @@ var express     = require ('express')
   , oauth2orize = require ('oauth2orize')
   ;
 
-var Client      = require ('../../models/oauth2/client')
-  , AccessToken = require ('../../models/oauth2/accessToken')
-  , bearer      = require ('../../authentication/bearer')
+var Client           = require ('../../models/oauth2/client')
+  , AccessToken      = require ('../../models/oauth2/accessToken')
+  , bearer           = require ('../../authentication/bearer')
+  , Oauth2Controller = require ('../../controllers/oauth2Controller')
   ;
 
 // The Bearer strategy is need for logout.
@@ -56,36 +57,24 @@ function OAuth2Router (opts) {
 }
 
 /**
- * Logout the current user.
- *
- * @returns {Function}
- */
-OAuth2Router.prototype.logoutUser = function () {
-  return function (req, res) {
-    winston.info ('logging out user ' + req.user);
-
-    AccessToken.findByIdAndRemove (req.authInfo.token_id, function (err) {
-      if (err)
-        return res.status (403).send ();
-      else
-        return res.status (200).send ();
-    });
-  };
-}
-
-/**
  * Create the Router object for this strategy.
  *
  * @returns {Router}
  */
-OAuth2Router.prototype.getRouter = function () {
+OAuth2Router.prototype.makeRouter = function () {
   var router = express.Router ();
+  var controller = new Oauth2Controller (this._opts);
 
   // Define the logout route for Oauth2.
   router.get ('/oauth2/logout',
     [
       passport.authenticate ('bearer', {session : false}),
-      this.logoutUser ()
+      function (req, res) {
+        controller.logoutUser (req.authInfo.token_id, function (err) {
+          var statusCode = err ? 403 : 200;
+          res.status (statusCode).send ();
+        });
+      }
     ]);
 
   var refreshTokenAuthStrategies = [];
@@ -110,7 +99,7 @@ OAuth2Router.prototype.getRouter = function () {
 };
 
 module.exports = exports = function (opts) {
-  return new OAuth2Router (opts).getRouter ();
+  return new OAuth2Router (opts).makeRouter ();
 };
 
 
