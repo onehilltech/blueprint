@@ -14,7 +14,7 @@
     "express-session": "1.11.x",
     "jade": "^1.10.0",
     "uid-safe": "2.x.x",
-    "body-parser": "1.0.x",
+    "body-parser": "^1.0.2",
     "cookie-parser": "1.0.x",
     "mongoose": "3.8.x",
     "passport": "0.2.x",
@@ -27,7 +27,8 @@
     "bcrypt": "0.7.x",
     "morgan": "1.0.x",
     "winston": "0.7.x",
-    "path": "^0.11.14"
+    "path": "^0.11.14",
+    "express-validator": "^2.12.1"
   },
   "devDependencies": {
     "async": "0.9.x",

@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
-var nconf    = require ('nconf')
-  , winston  = require ('winston')
-  , path     = require ('path')
-  , express  = require ('express')
-  , mongoose = require ('mongoose')
+var nconf      = require ('nconf')
+  , winston    = require ('winston')
+  , path       = require ('path')
+  , express    = require ('express')
+  , validation = require ('express-validator')
+  , bodyParser = require ('body-parser')
+  , mongoose   = require ('mongoose')
   ;
 
 // Load the node configuration.
@@ -22,8 +24,12 @@ var app = express ();
 app.set ('views', path.join (__dirname, '../views'));
 app.set ('view engine', 'jade');
 
-// Load the administrator interface.
-app.use ('/admin', require ('../lib/admin') (config.admin));
+app.use (bodyParser.urlencoded ({ extended: false }));
+app.use (bodyParser.json ());
+app.use (validation ());
+
+app.use ('/', require ('../lib/router/admin') (config.admin));
+app.use (express.static (path.join (__dirname, '../public_html')));
 
 mongoose.connect (config.connstr, config.mongodb, function (err) {
   if (err)
