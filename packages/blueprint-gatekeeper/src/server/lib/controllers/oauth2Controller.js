@@ -90,6 +90,20 @@ Oauth2Controller.prototype.getClient = function () {
   };
 }
 
+Oauth2Controller.prototype.updateClient = function () {
+  return function (req, res) {
+    var client = req.client;
+
+    client.name = req.body.name;
+    client.redirect_uri = req.body.redirect_uri;
+    client.email = req.body.email;
+
+    client.save (function (err) {
+      return res.render ('admin/clients/details', {client : client});
+    });
+  }
+};
+
 Oauth2Controller.prototype.enableClient = function () {
   return function (req, res) {
     req.checkBody ('enabled', 'Enabled is a required Boolean').notEmpty ().isBoolean ();

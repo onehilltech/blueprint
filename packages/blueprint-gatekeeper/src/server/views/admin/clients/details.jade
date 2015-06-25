@@ -22,7 +22,7 @@ block content
       | services.
 
    p
-      form.form-horizontal(method="POST", action="/admin/clients/registration")
+      form.form-horizontal(method="POST", action="/clients/#{client.id}")
          div.form-group
             label.col-md-2.control-label(for="name") Name
             div.col-md-10
@@ -47,7 +47,7 @@ block content
          div.form-group
             label.col-md-2.control-label(for="redirect_uri") Redirect URL
             div.col-md-10
-               input#redirect_uri.form-control(type="text", name="redirect_uri", placeholder="Enter redirect URI")
+               input#redirect_uri.form-control(type="text", name="redirect_uri", value="#{client.redirect_uri}")
 
          div.form-group
             div.col-md-offset-2.col-md-10
