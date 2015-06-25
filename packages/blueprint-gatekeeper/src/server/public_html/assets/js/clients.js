@@ -11,5 +11,20 @@ $(function () {
       console.log (data);
     });
   });
+
+  $("#delete-client").on ("click", function (ev) {
+    var url = "/clients/" + ev.target.dataset.clientId;
+
+    $.ajax ({
+      url     : url,
+      type    : 'delete',
+      success : function (response) {
+        window.location.href = "/clients";
+      },
+      error   : function (response) {
+
+      }
+    });
+  });
 });
 

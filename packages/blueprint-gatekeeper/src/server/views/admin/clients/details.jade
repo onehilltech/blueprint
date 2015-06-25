@@ -69,4 +69,33 @@ block content
 
       p Once the client has been deleted, this operation cannot be undone.
 
-      a.btn.btn-sm.btn-block.btn-danger(href="/clients/#{client.id}/delete" role="button") I completely understand, delete the client
+      button.btn.btn-sm.btn-block.btn-danger(type="button", data-toggle="modal", data-target="#myModal") I completely understand, delete the client
+
+      div.modal.fade(id="myModal",tabindex="-1",role="dialog",aria-labelledby="myModalLabel")
+         div.modal-dialog(role="document")
+            div.modal-content
+               div.modal-header
+                  button.close(type="button", data-dismiss="modal", aria-label="Close")
+                     span(aria-hidden="true") &times;
+
+                  h4.modal-title Confirm deletion
+
+               div.modal-body
+                  p
+                     strong Warning!
+                     |  Once you delete the client, you cannot undo the operation. Please make sure this is
+                     | what you really want to do.
+
+                  form.form-horizontal
+                     div.form-group
+                        label.col-md-3.control-label Client name
+                        div.col-md-9
+                           p.form-control-static #{client.name}
+
+                     div.form-group
+                        label.col-md-3.control-label Contact address
+                        div.col-md-9
+                           p.form-control-static #{client.email}
+
+               div.modal-footer
+                  button#delete-client.btn.btn-primary.btn-block.btn-danger(type="button", data-dismiss="modal", data-client-id="#{client.id}") Yes, I really want to delete the client

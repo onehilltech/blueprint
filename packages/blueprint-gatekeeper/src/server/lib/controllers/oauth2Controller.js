@@ -73,10 +73,7 @@ Oauth2Controller.prototype.deleteClient = function () {
     var client = req.client;
 
     client.remove (function (err) {
-      if (err)
-        return res.render ('admin/clients/details', {client : req.client});
-
-      return res.redirect ('/clients');
+      return res.send (200, err ? 'true' : 'false');
     });
   };
 };
@@ -92,6 +89,8 @@ Oauth2Controller.prototype.getClient = function () {
 
 Oauth2Controller.prototype.updateClient = function () {
   return function (req, res) {
+    winston.info (req.body);
+
     var client = req.client;
 
     client.name = req.body.name;

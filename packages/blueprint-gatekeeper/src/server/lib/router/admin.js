@@ -31,13 +31,14 @@ AdminRouter.prototype.get = function () {
   router.get  ('/', oauth2Controller.getHomePage ());
 
   // Define the routes for the clients.
-  router.get  ('/clients', oauth2Controller.getClients ());
-  router.post ('/clients', oauth2Controller.createClient ());
-  router.get  ('/clients/new', oauth2Controller.newClient ());
-  router.get  ('/clients/:client_id', oauth2Controller.getClient ());
-  router.post ('/clients/:client_id', oauth2Controller.updateClient ());
-  router.get  ('/clients/:client_id/delete', oauth2Controller.deleteClient ());
-  router.post ('/clients/:client_id/enable', oauth2Controller.enableClient ());
+  router.get    ('/clients', oauth2Controller.getClients ());
+  router.post   ('/clients', oauth2Controller.createClient ());
+  router.get    ('/clients/new', oauth2Controller.newClient ());
+
+  router.get    ('/clients/:client_id', oauth2Controller.getClient ());
+  router.post   ('/clients/:client_id', oauth2Controller.updateClient ());
+  router.delete ('/clients/:client_id', oauth2Controller.deleteClient ());
+  router.post   ('/clients/:client_id/enable', oauth2Controller.enableClient ());
 
   // Define the routes for the codes.
   router.get ('/codes', function (req, res) {
