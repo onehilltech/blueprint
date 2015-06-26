@@ -87,6 +87,19 @@ Oauth2Controller.prototype.getClient = function () {
   };
 }
 
+Oauth2Controller.prototype.refreshSecret = function () {
+  return function (req, res) {
+    var newSecret = uid.sync (SECRET_LENGTH);
+    var client = req.client;
+
+    // Update the secret, save it, and return it to the client.
+    client.secret = newSecret;
+    client.save (function (err) {
+      return res.send (200, newSecret);
+    });
+  };
+}
+
 Oauth2Controller.prototype.updateClient = function () {
   return function (req, res) {
     winston.info (req.body);

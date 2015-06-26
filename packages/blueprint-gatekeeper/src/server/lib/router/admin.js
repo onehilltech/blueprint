@@ -39,6 +39,7 @@ AdminRouter.prototype.get = function () {
   router.post   ('/clients/:client_id', oauth2Controller.updateClient ());
   router.delete ('/clients/:client_id', oauth2Controller.deleteClient ());
   router.post   ('/clients/:client_id/enable', oauth2Controller.enableClient ());
+  router.get    ('/clients/:client_id/refresh-secret', oauth2Controller.refreshSecret ());
 
   // Define the routes for the codes.
   router.get ('/codes', function (req, res) {

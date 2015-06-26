@@ -53,14 +53,21 @@ block content
             div.col-md-10.input-group
                input#client_id.form-control(type="text", name="client_id", placeholder="#{client.id}", readonly=true)
                span.input-group-btn
-                  button#copy-client-id.btn.btn-default(type="button", data-clipboard-text="#{client.id}") Copy to clipboard
+                  button#copy-client-id.btn.btn-default(type="button", data-clipboard-text="#{client.id}")
+                     span.glyphicon.glyphicon-copy(aria-hidden="true")
 
          div.form-group
             label.col-md-2.control-label(for="secret") Client secret
             div.col-md-10.input-group
-               input#secret.form-control(type="text", name="secret", placeholder="#{client.secret}", readonly=true)
                span.input-group-btn
-                  button#copy-client-secret.btn.btn-default(type="button", data-clipboard-text="#{client.secret}") Copy to clipboard
+                  button#refresh-secret.btn.btn-default(type="button", data-client-id="#{client.id}", data-target="#secret")
+                     span.glyphicon.glyphicon-refresh(aria-hidden="true")
+
+               input#secret.form-control(type="text", name="secret", placeholder="#{client.secret}", readonly=true)
+
+               span.input-group-btn
+                  button#copy-client-secret.btn.btn-default(type="button", data-clipboard-text="#{client.secret}")
+                     span.glyphicon.glyphicon-copy(aria-hidden="true")
 
       hr
 

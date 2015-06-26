@@ -27,6 +27,16 @@ $(function () {
     });
   });
 
+  $("#refresh-secret").on ("click", function (ev) {
+    var clientId = this.dataset.clientId;
+    var target = this.dataset.target;
+    var url = "/clients/" + clientId + "/refresh-secret";
+
+    $.get (url, function (data) {
+      $(target).attr ("placeholder", data);
+    });
+  });
+
   // Setup the "Copy to clipboard" buttons.
   var copyClientId = new ZeroClipboard ($("#copy-client-id"));
   copyClientId.on ("ready", function (readyEvent) {
