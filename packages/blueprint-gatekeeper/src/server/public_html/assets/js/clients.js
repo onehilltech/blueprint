@@ -26,5 +26,20 @@ $(function () {
       }
     });
   });
+
+  // Setup the "Copy to clipboard" buttons.
+  var copyClientId = new ZeroClipboard ($("#copy-client-id"));
+  copyClientId.on ("ready", function (readyEvent) {
+    copyClientId.on ("aftercopy", function (event) {
+      alert (event.target.dataset.clipboardText);
+    } );
+  });
+
+  var copyClientSecret = new ZeroClipboard ($("#copy-client-secret"))
+  copyClientSecret.on ("ready", function (readyEvent) {
+    copyClientSecret.on ("aftercopy", function (event) {
+      alert (event.target.dataset.clipboardText);
+    } );
+  });
 });
 

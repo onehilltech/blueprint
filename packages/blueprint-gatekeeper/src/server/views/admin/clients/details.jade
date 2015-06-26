@@ -4,6 +4,7 @@ block styles
    link(href="/assets/css/bootstrap-switch.min.css", rel="stylesheet")
 block scripts
    script(src="/assets/js/bootstrap-switch.min.js")
+   script(src="/assets/js/zeroclipboard.min.js")
    script(src="/assets/js/clients.js")
 
 block content
@@ -11,15 +12,6 @@ block content
 
    p
       a(href="/clients") Back to clients
-
-   p
-      | Use the
-      strong  client id
-      |  and
-      strong  client secret
-      |  below to access the services using this client. If the client is not secure, such as a
-      | mobile device, then do not use the client secret. Just use the client id to access the
-      | services.
 
    p
       form.form-horizontal(method="POST", action="/clients/#{client.id}")
@@ -34,24 +26,41 @@ block content
                input#email.form-control(type="email", name="email", value="#{client.email}" placeholder="Enter contact email address")
 
          div.form-group
-            label.col-md-2.control-label(for="client_id") Client id
-            div.col-md-10
-               input#client_id.form-control(type="text", name="client_id", placeholder="#{client.id}", readonly=true)
-
-         div.form-group
-            label.col-md-2.control-label(for="secret") Client secret
-            div.col-md-10
-               input#secret.form-control(type="text", name="secret", placeholder="#{client.secret}", readonly=true)
-
-
-         div.form-group
             label.col-md-2.control-label(for="redirect_uri") Redirect URL
             div.col-md-10
-               input#redirect_uri.form-control(type="text", name="redirect_uri", value="#{client.redirect_uri}")
+               input#redirect_uri.form-control(type="url", name="redirect_uri", value="#{client.redirect_uri}")
 
          div.form-group
             div.col-md-offset-2.col-md-10
                button.btn.btn-default.btn-sm(type="submit") Save changes
+
+      hr
+
+      h3 Access Credentials
+
+      p
+         | Use the
+         strong  client id
+         |  and
+         strong  client secret
+         |  below to access the services using this client. If the client is not secure, such as a
+         | mobile device, then do not use the client secret. Just use the client id to access the
+         | services.
+
+      form.form-horizontal
+         div.form-group.input-grou
+            label.col-md-2.control-label(for="client_id") Client id
+            div.col-md-10.input-group
+               input#client_id.form-control(type="text", name="client_id", placeholder="#{client.id}", readonly=true)
+               span.input-group-btn
+                  button#copy-client-id.btn.btn-default(type="button", data-clipboard-text="#{client.id}") Copy to clipboard
+
+         div.form-group
+            label.col-md-2.control-label(for="secret") Client secret
+            div.col-md-10.input-group
+               input#secret.form-control(type="text", name="secret", placeholder="#{client.secret}", readonly=true)
+               span.input-group-btn
+                  button#copy-client-secret.btn.btn-default(type="button", data-clipboard-text="#{client.secret}") Copy to clipboard
 
       hr
 
