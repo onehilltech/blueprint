@@ -32,8 +32,8 @@ AdminRouter.prototype.get = function () {
 
   // Define the routes for the clients.
   router.get    ('/clients', oauth2Controller.getClients ());
-  router.post   ('/clients', oauth2Controller.createClient ());
   router.get    ('/clients/new', oauth2Controller.newClient ());
+  router.post   ('/clients/new', oauth2Controller.createClient ());
 
   router.get    ('/clients/:client_id', oauth2Controller.getClient ());
   router.post   ('/clients/:client_id', oauth2Controller.updateClient ());

@@ -42,13 +42,14 @@ Oauth2Controller.prototype.createClient = function () {
     req.checkBody ('email', 'Contact email acddress is missing').notEmpty ().isEmail ();
     req.checkBody ('redirect_uri', 'Redirect uri is missing').notEmpty ();
 
-    var errors = req.validationErrors ();
+    var errors = req.validationErrors (true);
 
     if (errors) {
       winston.error (util.inspect (errors));
 
       return res.render ('admin/clients/new', {
-        errors: errors
+        input  : req.body,
+        errors : errors
       });
     }
 
