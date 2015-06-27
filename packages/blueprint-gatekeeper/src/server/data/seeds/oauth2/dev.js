@@ -13,7 +13,7 @@ const CONNECTION_STRING = 'mongodb://localhost/gatekeeper-dev';
 mongoose.connect (CONNECTION_STRING);
 
 var accounts = [
-  {_id: new mongoose.Types.ObjectId, username: 'admin_d@gatekeeper.com', password: 'admin_d'},
+  {_id: new mongoose.Types.ObjectId, username: 'gatekeeper_d@gatekeeper.com', password: 'gatekeeper_d'},
 ]
 
 var clients = [
