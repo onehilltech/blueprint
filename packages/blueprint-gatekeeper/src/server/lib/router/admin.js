@@ -13,8 +13,6 @@ AdminRouter.prototype.get = function () {
   var clientController = new ClientController ();
 
   // Define the
-  router.param ('client_id', clientController.lookupClientParam ());
-
   router.get  ('/admin', clientController.getHomePage ());
 
   // Define the routes for the general purpose accounts.
@@ -25,7 +23,8 @@ AdminRouter.prototype.get = function () {
   router.delete ('/accounts/:accountId');
   router.post   ('/accounts/:accountId/enable');*/
 
-  // Define the OAuth 2.0 routes
+  // Define the OAuth 2.0 client routes
+  router.param  ('client_id', clientController.lookupClientParam ());
   router.get    ('/admin/oauth2/clients', clientController.getClients ());
   router.get    ('/admin/oauth2/clients/new', clientController.newClient ());
   router.post   ('/admin/oauth2/clients/new', clientController.createClient ());
