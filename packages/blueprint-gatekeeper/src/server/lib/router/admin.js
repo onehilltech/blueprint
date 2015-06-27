@@ -2,7 +2,7 @@ var express          = require ('express')
   , winston          = require ('winston')
   , AccessToken      = require ('../models/oauth2/accessToken')
   , Client           = require ('../models/oauth2/client')
-  , OAuth2Controller = require ('../controllers/admin/oauth2Controller')
+  , OAuth2Controller = require ('../controllers/oauth2/clientController')
   ;
 
 function AdminRouter (opts) {

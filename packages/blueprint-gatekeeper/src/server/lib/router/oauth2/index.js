@@ -7,7 +7,7 @@ var express     = require ('express')
 var Client           = require ('../../models/oauth2/client')
   , AccessToken      = require ('../../models/oauth2/accessToken')
   , bearer           = require ('../../authentication/bearer')
-  , Oauth2Controller = require ('../../controllers/admin/oauth2Controller')
+  , Oauth2Controller = require ('../../controllers/oauth2/clientController')
   ;
 
 // The Bearer strategy is need for logout.

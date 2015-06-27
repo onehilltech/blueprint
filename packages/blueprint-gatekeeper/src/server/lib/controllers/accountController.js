@@ -1,7 +1,7 @@
 var winston = require ('winston')
   , util    = require ('util')
   , uid     = require ('uid-safe')
-  , Client  = require ('../../models/oauth2/client')
+  , Client  = require ('../models/oauth2/client')
   ;
 
 const SECRET_LENGTH=48;
