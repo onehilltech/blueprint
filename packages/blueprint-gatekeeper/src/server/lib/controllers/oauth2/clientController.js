@@ -6,21 +6,21 @@ var winston = require ('winston')
 
 const SECRET_LENGTH=48;
 
-function Oauth2Controller (opts) {
+function ClientController (opts) {
   this._opts = opts || {};
 }
 
-Oauth2Controller.prototype.getHomePage = function () {
+ClientController.prototype.getHomePage = function () {
   return function (req, res) {
     res.render ('admin/index');
   }
 };
 
-Oauth2Controller.prototype.logoutUser = function (tokenId, done) {
+ClientController.prototype.logoutUser = function (tokenId, done) {
   AccessToken.findByIdAndRemove (tokenId, done);
 };
 
-Oauth2Controller.prototype.getClients = function () {
+ClientController.prototype.getClients = function () {
   return function (req, res) {
     Client.find ({}, function (err, clients) {
       return res.render ('admin/oauth2/clients/index', {clients: clients});
@@ -28,13 +28,13 @@ Oauth2Controller.prototype.getClients = function () {
   };
 };
 
-Oauth2Controller.prototype.newClient = function () {
+ClientController.prototype.newClient = function () {
   return function (req, res) {
     res.render ('admin/oauth2/clients/new');
   };
 };
 
-Oauth2Controller.prototype.createClient = function () {
+ClientController.prototype.createClient = function () {
   return function (req, res) {
     winston.debug ('validating input parameters');
 
@@ -69,7 +69,24 @@ Oauth2Controller.prototype.createClient = function () {
   };
 };
 
-Oauth2Controller.prototype.deleteClient = function () {
+ClientController.prototype.lookupClientParam = function () {
+  return function (req, res, next, client_id) {
+    winston.info ('searching for client ' + client_id);
+
+    Client.findById (client_id, function (err, client) {
+      if (err)
+        return next (err);
+
+      if (!client)
+        return next (new Error ('Client does not exist'))
+
+      req.client = client;
+      next ();
+    });
+  };
+}
+
+ClientController.prototype.deleteClient = function () {
   return function (req, res) {
     var client = req.client;
 
@@ -79,7 +96,7 @@ Oauth2Controller.prototype.deleteClient = function () {
   };
 };
 
-Oauth2Controller.prototype.getClient = function () {
+ClientController.prototype.getClient = function () {
   return function (req, res) {
     if (!req.client)
       return res.redirect ('/admin/oauth2/clients');
@@ -88,7 +105,7 @@ Oauth2Controller.prototype.getClient = function () {
   };
 }
 
-Oauth2Controller.prototype.refreshSecret = function () {
+ClientController.prototype.refreshSecret = function () {
   return function (req, res) {
     var newSecret = uid.sync (SECRET_LENGTH);
     var client = req.client;
@@ -101,7 +118,7 @@ Oauth2Controller.prototype.refreshSecret = function () {
   };
 }
 
-Oauth2Controller.prototype.updateClient = function () {
+ClientController.prototype.updateClient = function () {
   return function (req, res) {
     winston.info (req.body);
 
@@ -117,7 +134,7 @@ Oauth2Controller.prototype.updateClient = function () {
   }
 };
 
-Oauth2Controller.prototype.enableClient = function () {
+ClientController.prototype.enableClient = function () {
   return function (req, res) {
     req.checkBody ('enabled', 'Enabled is a required Boolean').notEmpty ().isBoolean ();
 
@@ -142,5 +159,5 @@ Oauth2Controller.prototype.enableClient = function () {
   };
 }
 
-exports = module.exports = Oauth2Controller;
+exports = module.exports = ClientController;
 
