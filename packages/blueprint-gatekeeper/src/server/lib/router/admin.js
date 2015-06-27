@@ -1,7 +1,8 @@
-var express          = require ('express')
-  , winston          = require ('winston')
-  , AccessToken      = require ('../models/oauth2/accessToken')
-  , ClientController = require ('../controllers/oauth2/clientController')
+var express           = require ('express')
+  , winston           = require ('winston')
+  , AccessToken       = require ('../models/oauth2/accessToken')
+  , AccountController = require ('../controllers/accountController')
+  , ClientController  = require ('../controllers/oauth2/clientController')
   ;
 
 function AdminRouter (opts) {
@@ -10,18 +11,20 @@ function AdminRouter (opts) {
 
 AdminRouter.prototype.get = function () {
   var router = express.Router ();
+
+  var accountController = new AccountController ();
   var clientController = new ClientController ();
 
   // Define the
   router.get  ('/admin', clientController.getHomePage ());
 
-  // Define the routes for the general purpose accounts.
-  /*
-  router.get    ('/accounts');
-  router.post   ('/accounts');
-  router.get    ('/accounts/:accountId');
-  router.delete ('/accounts/:accountId');
-  router.post   ('/accounts/:accountId/enable');*/
+  // Define the account routes.
+  router.param  ('account_id', accountController.lookupAccountParam ());
+  router.get    ('/admin/accounts', accountController.getAccounts ());
+  router.post   ('/admin/accounts/:account_id/enable', accountController.enableAccount ());
+
+  //router.get    ('/admin/accounts/:account_id');
+  //router.delete ('/admin/accounts/:account_id');
 
   // Define the OAuth 2.0 client routes
   router.param  ('client_id', clientController.lookupClientParam ());

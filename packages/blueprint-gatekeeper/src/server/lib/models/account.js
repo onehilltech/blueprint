@@ -7,7 +7,8 @@ var Schema = mongoose.Schema;
 var schema = new Schema ({
   username : { type: String, index: true, unique: true, trim: true },
   password : { type: String, trim: true },
-  disabled : { type: Boolean, default: false }
+  enabled  : { type: Boolean, default: true },
+  scope    : { type: [String], index: true }
 });
 
 /**
