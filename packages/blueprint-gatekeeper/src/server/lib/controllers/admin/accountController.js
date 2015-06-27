@@ -1,7 +1,7 @@
 var winston = require ('winston')
   , util    = require ('util')
   , uid     = require ('uid-safe')
-  , Client  = require ('../models/oauth2/client')
+  , Client  = require ('../../models/oauth2/client')
   ;
 
 const SECRET_LENGTH=48;
@@ -23,14 +23,14 @@ Oauth2Controller.prototype.logoutUser = function (tokenId, done) {
 Oauth2Controller.prototype.getClients = function () {
   return function (req, res) {
     Client.find ({}, function (err, clients) {
-      return res.render ('admin/clients/index', {clients: clients});
+      return res.render ('admin/oauth2/clients/index', {clients: clients});
     })
   };
 };
 
 Oauth2Controller.prototype.newClient = function () {
   return function (req, res) {
-    res.render ('admin/clients/new');
+    res.render ('admin/oauth2/clients/new');
   };
 };
 
@@ -47,7 +47,7 @@ Oauth2Controller.prototype.createClient = function () {
     if (errors) {
       winston.error (util.inspect (errors));
 
-      return res.render ('admin/clients/new', {
+      return res.render ('admin/oauth2/clients/new', {
         input  : req.body,
         errors : errors
       });
@@ -62,9 +62,9 @@ Oauth2Controller.prototype.createClient = function () {
 
     client.save (function (err) {
       if (!err)
-        return res.redirect ('/clients/' + client.id);
+        return res.redirect ('/admin/oauth2/clients/' + client.id);
 
-      return res.render ('admin/clients/new', { errors: errors });
+      return res.render ('admin/oauth2/clients/new', { errors: errors });
     });
   };
 };
@@ -82,9 +82,9 @@ Oauth2Controller.prototype.deleteClient = function () {
 Oauth2Controller.prototype.getClient = function () {
   return function (req, res) {
     if (!req.client)
-      return res.redirect ('/clients');
+      return res.redirect ('/admin/oauth2/clients');
 
-    return res.render ('admin/clients/details', {client : req.client});
+    return res.render ('admin/oauth2/clients/details', {client : req.client});
   };
 }
 
@@ -112,7 +112,7 @@ Oauth2Controller.prototype.updateClient = function () {
     client.email = req.body.email;
 
     client.save (function (err) {
-      return res.render ('admin/clients/details', {client : client});
+      return res.render ('admin/oauth2/clients/details', {client : client});
     });
   }
 };

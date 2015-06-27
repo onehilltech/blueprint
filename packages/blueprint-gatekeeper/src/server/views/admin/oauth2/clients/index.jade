@@ -1,4 +1,4 @@
-extends ../layout.jade
+extends ../../layout.jade
 
 block styles
     link(href="/assets/css/bootstrap-switch.min.css", rel="stylesheet")
@@ -11,7 +11,7 @@ block content
     h2 Registered Clients
 
     p
-        a(href='/clients/new', role="button") Register new client
+        a(href='/admin/oauth2/clients/new', role="button") Register new client
 
         table.table.table-striped
             thead
@@ -27,4 +27,4 @@ block content
                     td
                         input(type="checkbox", name="enabled", checked=client.enabled, data-client-id="#{client.id}" data-size="mini", data-on-text="Enabled", data-off-text="Disabled")
                     td
-                        a.btn.btn-default.btn-xs(href="/clients/#{client.id}" role="button") View details
+                        a.btn.btn-default.btn-xs(href="/admin/oauth2/clients/#{client.id}" role="button") View details

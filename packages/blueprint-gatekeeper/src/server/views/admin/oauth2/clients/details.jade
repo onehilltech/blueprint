@@ -1,4 +1,4 @@
-extends ../layout.jade
+extends ../../layout.jade
 
 block styles
    link(href="/assets/css/bootstrap-switch.min.css", rel="stylesheet")
@@ -11,10 +11,10 @@ block content
    h2 Client Details
 
    p
-      a(href="/clients") Back to clients
+      a(href="/admin/oauth2/clients") Back to clients
 
    p
-      form.form-horizontal(method="POST", action="/clients/#{client.id}")
+      form.form-horizontal(method="POST", action="/admin/oauth2/clients/#{client.id}")
          div.form-group
             label.col-md-2.control-label(for="name") Name
             div.col-md-10
@@ -85,9 +85,9 @@ block content
 
       p Once the client has been deleted, this operation cannot be undone.
 
-      button.btn.btn-sm.btn-block.btn-danger(type="button", data-toggle="modal", data-target="#myModal") I completely understand, delete the client
+      button.btn.btn-sm.btn-block.btn-danger(type="button", data-toggle="modal", data-target="#confirm-deletion") I completely understand, delete the client
 
-      div.modal.fade(id="myModal",tabindex="-1",role="dialog",aria-labelledby="myModalLabel")
+      div#confirm-deletion.modal.fade(tabindex="-1",role="dialog",aria-labelledby="myModalLabel")
          div.modal-dialog(role="document")
             div.modal-content
                div.modal-header
