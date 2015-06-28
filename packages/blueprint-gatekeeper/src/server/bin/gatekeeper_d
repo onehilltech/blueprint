@@ -9,6 +9,9 @@ var nconf      = require ('nconf')
   , mongoose   = require ('mongoose')
   ;
 
+var AdminRouter = require ('../lib/router/admin')
+  ;
+
 // Load the node configuration.
 var env = process.env.NODE_ENV || 'dev';
 winston.info ('execution environment: ' + env);
@@ -28,7 +31,10 @@ app.use (bodyParser.urlencoded ({ extended: false }));
 app.use (bodyParser.json ());
 app.use (validation ());
 
-app.use ('/', require ('../lib/router/admin') (config.admin));
+// Define the dynamic routes.
+app.use ('/', new AdminRouter ().makeRouter ());
+
+// Define the static routes.
 app.use (express.static (path.join (__dirname, '../public_html')));
 
 mongoose.connect (config.connstr, config.mongodb, function (err) {

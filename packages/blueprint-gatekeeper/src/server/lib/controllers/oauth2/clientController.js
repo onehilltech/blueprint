@@ -10,12 +10,6 @@ function ClientController (opts) {
   this._opts = opts || {};
 }
 
-ClientController.prototype.getHomePage = function () {
-  return function (req, res) {
-    res.render ('admin/index');
-  }
-};
-
 ClientController.prototype.logoutUser = function (tokenId, done) {
   AccessToken.findByIdAndRemove (tokenId, done);
 };
@@ -69,7 +63,7 @@ ClientController.prototype.createClient = function () {
   };
 };
 
-ClientController.prototype.lookupClientParam = function () {
+ClientController.prototype.lookupClientByParam = function () {
   return function (req, res, next, client_id) {
     winston.info ('searching for client ' + client_id);
 
