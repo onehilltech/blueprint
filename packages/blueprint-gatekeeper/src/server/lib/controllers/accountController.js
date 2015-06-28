@@ -35,12 +35,25 @@ AccountController.prototype.getAccounts = function () {
   };
 };
 
-AccountController.prototype.getClient = function () {
+AccountController.prototype.getAccount = function () {
   return function (req, res) {
-    if (!req.client)
-      return res.redirect ('/admin/oauth2/clients');
+    if (!req.account)
+      return res.redirect ('/admin/accounts');
 
-    return res.render ('admin/oauth2/clients/details', {client : req.client});
+    var account = req.account;
+    return res.render ('admin/accounts/details', {account : account});
+  };
+}
+
+AccountController.prototype.deleteAccount = function () {
+  return function (req, res) {
+    if (!req.account)
+      return res.status (404).send ();
+
+    var account = req.account;
+    account.remove (function (err) {
+      return res.send (200, err ? false : true);
+    });
   };
 }
 
@@ -68,6 +81,19 @@ AccountController.prototype.enableAccount = function () {
     });
   };
 }
+
+AccountController.prototype.updateScope = function () {
+  return function (req, res) {
+    if (!req.account)
+      return res.status (404).send ();
+
+    var account = req.account;
+    account.scope = req.body.scope;
+    account.save (function (err) {
+      return res.send (200, err ? false : true);
+    });
+  };
+};
 
 exports = module.exports = AccountController;
 

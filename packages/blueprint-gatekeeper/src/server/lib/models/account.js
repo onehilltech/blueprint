@@ -5,8 +5,9 @@ var SALT_WORK_FACTOR = 10;
 var Schema = mongoose.Schema;
 
 var schema = new Schema ({
-  username : { type: String, index: true, unique: true, trim: true },
+  username : { type: String, index: true, unique: true, trim: true, required: true },
   password : { type: String, trim: true },
+  email    : { type: String, index: true, unique: true, trim: true, required: true },
   enabled  : { type: Boolean, default: true },
   scope    : { type: [String], index: true }
 });
@@ -64,6 +65,10 @@ schema.statics.authenticate = function (username, password, done) {
     });
   });
 };
+
+schema.virtual ('hidden_password').get (function () {
+  return new Array (this.password.length).join ('*');
+});
 
 // Create the user collection, and export it from this module.
 const COLLECTION_NAME = 'gatekeeper_account';

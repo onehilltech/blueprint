@@ -21,10 +21,10 @@ AdminRouter.prototype.get = function () {
   // Define the account routes.
   router.param  ('account_id', accountController.lookupAccountParam ());
   router.get    ('/admin/accounts', accountController.getAccounts ());
+  router.get    ('/admin/accounts/:account_id', accountController.getAccount ());
+  router.delete ('/admin/accounts/:account_id', accountController.deleteAccount ());
   router.post   ('/admin/accounts/:account_id/enable', accountController.enableAccount ());
-
-  //router.get    ('/admin/accounts/:account_id');
-  //router.delete ('/admin/accounts/:account_id');
+  router.post   ('/admin/accounts/:account_id/scope', accountController.updateScope ());
 
   // Define the OAuth 2.0 client routes
   router.param  ('client_id', clientController.lookupClientParam ());
