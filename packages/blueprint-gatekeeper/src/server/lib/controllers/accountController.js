@@ -95,5 +95,20 @@ AccountController.prototype.updateScope = function () {
   };
 };
 
+AccountController.prototype.createAccount = function () {
+  return function (req, res) {
+    if (!client)
+      return res.status (404).send ();
+
+    var account = new Account ({
+      username : req.body.username,
+      password : req.body.password,
+      email    : req.body.email
+    });
+
+    account.save
+  };
+}
+
 exports = module.exports = AccountController;
 

@@ -586,6 +586,21 @@ Lexer.prototype = {
     }
   },
 
+
+  /**
+   * Block code.
+   */
+
+  blockCode: function() {
+    var captures;
+    if (captures = /^-\n/.exec(this.input)) {
+      this.consume(captures[0].length - 1);
+      var tok = this.tok('blockCode');
+      this.pipeless = true;
+      return tok;
+    }
+  },
+
   /**
    * Attributes.
    */
@@ -845,6 +860,7 @@ Lexer.prototype = {
         if (isMatch) {
           // consume test along with `\n` prefix if match
           this.consume(str.length + 1);
+          ++this.lineno;
           tokens.push(str.substr(indent.length));
         }
       } while(this.input.length && isMatch);
@@ -916,6 +932,7 @@ Lexer.prototype = {
       || this["while"]()
       || this.tag()
       || this.filter()
+      || this.blockCode()
       || this.code()
       || this.id()
       || this.className()
