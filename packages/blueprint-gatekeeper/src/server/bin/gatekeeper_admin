@@ -1,0 +1,61 @@
+#!/usr/bin/env node
+
+var prompt   = require ('prompt')
+  , winston  = require ('winston')
+  , mongoose = require ('mongoose')
+  ;
+
+var Account = require ('../lib/models/account')
+  , config  = require ('../config')
+  ;
+
+var options = {
+  message : 'gatekeeper'
+};
+
+var schema = {
+  properties : {
+    username : {
+      pattern     : /^[a-zA-Z0-9\s\-\s\_]+$/,
+      message     : 'Username can only contain alphanumerics, dashes, and underscores',
+      required    : true,
+      type        : 'string'
+    },
+    password : {
+      required : true,
+      hidden   : true
+    },
+    email : {
+      required : true
+    }
+  }
+};
+
+prompt.start (options);
+
+prompt.get (schema, function (err, result) {
+  if (err)
+    return winston.error (err);
+
+  // Connect to the database
+  mongoose.connect (config.connstr, config.mongodb, function (err) {
+    if (err)
+      return winston.error (err);
+
+    var account = new Account ({
+      username : result.username,
+      password : result.password,
+      email : result.email,
+      roles : ['admin']
+    });
+
+    winston.info ('saving ' + result.username + ' to the database')
+    account.save (function (err) {
+      if (err)
+        winston.error (err);
+
+      winston.info ('successfully saved ' + result.username + ' to the database')
+      mongoose.connection.close ();
+    });
+  });
+});

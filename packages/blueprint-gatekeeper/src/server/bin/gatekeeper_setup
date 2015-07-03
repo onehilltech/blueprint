@@ -23,7 +23,7 @@ function setupComplete (err) {
   if (err)
     return winston.error (err);
   else
-    winston.info ('setup is complete');
+    winston.info ('gatekeeper_setup is complete');
 }
 
 function performSetup (done) {

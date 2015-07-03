@@ -9,7 +9,8 @@ var schema = new Schema ({
   password : { type: String, trim: true },
   email    : { type: String, index: true, unique: true, trim: true, required: true },
   enabled  : { type: Boolean, default: true },
-  scope    : { type: [String], index: true }
+  scope    : { type: [String]},
+  roles    : { type: [String]}
 });
 
 /**
