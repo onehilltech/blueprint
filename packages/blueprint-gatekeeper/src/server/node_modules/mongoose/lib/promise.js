@@ -1,4 +1,3 @@
-
 /*!
  * Module dependencies
  */
@@ -117,7 +116,7 @@ Promise.prototype.resolve = function (err) {
 /**
  * Adds a single function as a listener to both err and complete.
  *
- * It will be executed with traditional node.js argument position when the promise is resolved. 
+ * It will be executed with traditional node.js argument position when the promise is resolved.
  *
  *     promise.addBack(function (err, args...) {
  *       if (err) return handleError(err);
@@ -140,15 +139,7 @@ Promise.prototype.addBack = Promise.prototype.onResolve;
  * Fulfills this promise with passed arguments.
  *
  * @method fulfill
- * @see https://github.com/aheckmann/mpromise#fulfill
- * @param {any} args
- * @api public
- */
-
-/**
- * Fulfills this promise with passed arguments.
- *
- * @method fulfill
+ * @receiver Promise
  * @see https://github.com/aheckmann/mpromise#fulfill
  * @param {any} args
  * @api public
@@ -162,6 +153,7 @@ Promise.prototype.addBack = Promise.prototype.onResolve;
  * _Deprecated. Use `fulfill` instead._
  *
  * @method complete
+ * @receiver Promise
  * @param {any} args
  * @api public
  * @deprecated

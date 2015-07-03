@@ -2,15 +2,14 @@
  * Module dependencies.
  */
 
-var ReadPref = require('mongodb').ReadPreference
-  , ObjectId = require('./types/objectid')
-  , cloneRegExp = require('regexp-clone')
-  , sliced = require('sliced')
-  , mpath = require('mpath')
-  , ms = require('ms')
-  , MongooseBuffer
-  , MongooseArray
-  , Document
+var ObjectId = require('./types/objectid');
+var cloneRegExp = require('regexp-clone');
+var sliced = require('sliced');
+var mpath = require('mpath');
+var ms = require('ms');
+var MongooseBuffer;
+var MongooseArray;
+var Document;
 
 /*!
  * Produces a collection name from model `name`.
@@ -54,6 +53,7 @@ exports.pluralization = [
   [/(x|ch|ss|sh)$/gi, '$1es'],
   [/(matr|vert|ind)ix|ex$/gi, '$1ices'],
   [/([m|l])ouse$/gi, '$1ice'],
+  [/(kn|w|l)ife$/gi, '$1ives'],
   [/(quiz)$/gi, '$1zes'],
   [/s$/gi, 's'],
   [/([^a-z])$/, '$1'],
@@ -228,7 +228,7 @@ exports.clone = function clone (obj, options) {
   }
 
   if (obj.constructor) {
-    switch (obj.constructor.name) {
+    switch (exports.getFunctionName(obj.constructor)) {
       case 'Object':
         return cloneObject(obj, options);
       case 'Date':
@@ -431,9 +431,9 @@ exports.isMongooseObject = function (v) {
   MongooseBuffer || (MongooseBuffer = require('./types').Buffer);
 
   return v instanceof Document ||
-         v instanceof MongooseArray ||
-         v instanceof MongooseBuffer
-}
+         (v && v.isMongooseArray) ||
+         (v && v.isMongooseBuffer);
+};
 var isMongooseObject = exports.isMongooseObject;
 
 /*!
@@ -455,47 +455,7 @@ exports.expires = function expires (object) {
   }
   object.expireAfterSeconds = when;
   delete object.expires;
-}
-
-/*!
- * Converts arguments to ReadPrefs the driver
- * can understand.
- *
- * @TODO move this into the driver layer
- * @param {String|Array} pref
- * @param {Array} [tags]
- */
-
-exports.readPref = function readPref (pref, tags) {
-  if (Array.isArray(pref)) {
-    tags = pref[1];
-    pref = pref[0];
-  }
-
-  if (pref instanceof ReadPref) {
-    return pref;
-  }
-
-  switch (pref) {
-    case 'p':
-      pref = 'primary';
-      break;
-    case 'pp':
-      pref = 'primaryPreferred';
-      break;
-    case 's':
-      pref = 'secondary';
-      break;
-    case 'sp':
-      pref = 'secondaryPreferred';
-      break;
-    case 'n':
-      pref = 'nearest';
-      break;
-  }
-
-  return new ReadPref(pref, tags);
-}
+};
 
 /*!
  * Populate options constructor
@@ -544,7 +504,7 @@ exports.populate = function populate (path, select, model, match, options) {
       model = path.model;
       path = path.path;
     }
-  } else if ('string' !== typeof model) {
+  } else if ('string' !== typeof model && 'function' !== typeof model) {
     options = match;
     match = model;
     model = undefined;
@@ -666,7 +626,45 @@ exports.array.flatten = function flatten (arr, filter, ret) {
   });
 
   return ret;
-}
+};
+
+/*!
+ * Removes duplicate values from an array
+ *
+ * [1, 2, 3, 3, 5] => [1, 2, 3, 5]
+ * [ ObjectId("550988ba0c19d57f697dc45e"), ObjectId("550988ba0c19d57f697dc45e") ]
+ *    => [ObjectId("550988ba0c19d57f697dc45e")]
+ *
+ * @param {Array} arr
+ * @return {Array}
+ * @private
+ */
+
+exports.array.unique = function(arr) {
+  var primitives = {};
+  var ids = {};
+  var ret = [];
+  var length = arr.length;
+  for (var i = 0; i < length; ++i) {
+    if (typeof arr[i] === 'number' || typeof arr[i] === 'string') {
+      if (primitives[arr[i]]) {
+        continue;
+      }
+      ret.push(arr[i]);
+      primitives[arr[i]] = true;
+    } else if (arr[i] instanceof ObjectId) {
+      if (ids[arr[i].toString()]) {
+        continue;
+      }
+      ret.push(arr[i]);
+      ids[arr[i].toString()] = true;
+    } else {
+      ret.push(arr[i]);
+    }
+  }
+
+  return ret;
+};
 
 /*!
  * Determines if two buffers are equal.
@@ -684,7 +682,20 @@ exports.buffer.areEqual = function (a, b) {
     if (a[i] !== b[i]) return false;
   }
   return true;
-}
+};
+
+exports.getFunctionName = function(fn) {
+  if (fn.name) {
+    return fn.name;
+  }
+  return (fn.toString().trim().match(/^function\s*([^\s(]+)/) || [])[1];
+};
+
+exports.decorate = function(destination, source) {
+  for (var key in source) {
+    destination[key] = source[key];
+  }
+};
 
 /**
  * merges to with a copy of from
@@ -715,5 +726,19 @@ exports.mergeClone = function(to, from) {
       }
     }
   }
-}
+};
+
+/**
+ * Executes a function on each element of an array (like _.each)
+ *
+ * @param {Array} arr
+ * @param {Function} fn
+ * @api private
+ */
+
+exports.each = function(arr, fn) {
+  for (var i = 0; i < arr.length; ++i) {
+    fn(arr[i]);
+  }
+};
 

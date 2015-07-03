@@ -8,28 +8,17 @@
 
 function MongooseError (msg) {
   Error.call(this);
-  Error.captureStackTrace(this, arguments.callee);
+  this.stack = new Error().stack;
   this.message = msg;
   this.name = 'MongooseError';
 };
 
 /*!
- * Formats error messages
- */
-
-MongooseError.prototype.formatMessage = function (msg, path, type, val) {
-  if (!msg) throw new TypeError('message is required');
-
-  return msg.replace(/{PATH}/, path)
-            .replace(/{VALUE}/, String(val||''))
-            .replace(/{TYPE}/, type || 'declared type');
-}
-
-/*!
  * Inherits from Error.
  */
 
-MongooseError.prototype.__proto__ = Error.prototype;
+MongooseError.prototype = Object.create(Error.prototype);
+MongooseError.prototype.constructor = Error;
 
 /*!
  * Module exports.
@@ -60,4 +49,3 @@ MongooseError.VersionError =require('./error/version')
 MongooseError.OverwriteModelError = require('./error/overwriteModel')
 MongooseError.MissingSchemaError = require('./error/missingSchema')
 MongooseError.DivergentArrayError = require('./error/divergentArray')
-

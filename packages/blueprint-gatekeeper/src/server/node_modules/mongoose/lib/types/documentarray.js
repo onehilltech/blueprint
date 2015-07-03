@@ -1,11 +1,9 @@
-
 /*!
  * Module dependencies.
  */
 
 var MongooseArray = require('./array')
-  , driver = global.MONGOOSE_DRIVER_PATH || '../drivers/node-mongodb-native'
-  , ObjectId = require(driver + '/objectid')
+  , ObjectId = require('./objectid')
   , ObjectIdSchema = require('../schema/objectid')
   , utils = require('../utils')
   , util = require('util')
@@ -24,50 +22,58 @@ var MongooseArray = require('./array')
  */
 
 function MongooseDocumentArray (values, path, doc) {
-  var arr = [];
+  var arr = [].concat(values);
 
   // Values always have to be passed to the constructor to initialize, since
   // otherwise MongooseArray#push will mark the array as modified to the parent.
-  arr = arr.concat(values);
-  arr.__proto__ = MongooseDocumentArray.prototype;
+  utils.decorate( arr, MongooseDocumentArray.mixin );
+  arr.isMongooseArray = true;
+  arr.isMongooseDocumentArray = true;
 
   arr._atomics = {};
   arr.validators = [];
   arr._path = path;
 
-  if (doc) {
+  // Because doc comes from the context of another function, doc === global
+  // can happen if there was a null somewhere up the chain (see #3020 && #3034)
+  // RB Jun 17, 2015 updated to check for presence of expected paths instead
+  // to make more proof against unusual node environments
+  if (doc && doc instanceof Document) {
     arr._parent = doc;
     arr._schema = doc.schema.path(path);
     arr._handlers = {
       isNew: arr.notify('isNew'),
       save: arr.notify('save')
-    }
+    };
+
     doc.on('save', arr._handlers.save);
     doc.on('isNew', arr._handlers.isNew);
   }
 
   return arr;
-};
+}
 
 /*!
  * Inherits from MongooseArray
  */
-
-MongooseDocumentArray.prototype.__proto__ = MongooseArray.prototype;
+MongooseDocumentArray.mixin = Object.create( MongooseArray.mixin );
 
 /**
  * Overrides MongooseArray#cast
  *
+ * @method _cast
  * @api private
+ * @receiver MongooseDocumentArray
  */
 
-MongooseDocumentArray.prototype._cast = function (value) {
+MongooseDocumentArray.mixin._cast = function (value, index) {
   if (value instanceof this._schema.casterConstructor) {
     if (!(value.__parent && value.__parentArray)) {
       // value may have been created using array.create()
       value.__parent = this._parent;
       value.__parentArray = this;
     }
+    value.__index = index;
     return value;
   }
 
@@ -78,8 +84,7 @@ MongooseDocumentArray.prototype._cast = function (value) {
       value instanceof ObjectId || !utils.isObject(value)) {
     value = { _id: value };
   }
-
-  return new this._schema.casterConstructor(value, this);
+  return new this._schema.casterConstructor(value, this, undefined, undefined, index);
 };
 
 /**
@@ -89,13 +94,15 @@ MongooseDocumentArray.prototype._cast = function (value) {
  *
  *     var embeddedDoc = m.array.id(some_id);
  *
- * @return {EmbeddedDocument|null} the subdocuent or null if not found.
+ * @return {EmbeddedDocument|null} the subdocument or null if not found.
  * @param {ObjectId|String|Number|Buffer} id
  * @TODO cast to the _id based on schema for proper comparison
+ * @method id
  * @api public
+ * @receiver MongooseDocumentArray
  */
 
-MongooseDocumentArray.prototype.id = function (id) {
+MongooseDocumentArray.mixin.id = function (id) {
   var casted
     , sid
     , _id
@@ -133,10 +140,12 @@ MongooseDocumentArray.prototype.id = function (id) {
  *
  * @param {Object} [options] optional options to pass to each documents `toObject` method call during conversion
  * @return {Array}
+ * @method toObject
  * @api public
+ * @receiver MongooseDocumentArray
  */
 
-MongooseDocumentArray.prototype.toObject = function (options) {
+MongooseDocumentArray.mixin.toObject = function (options) {
   return this.map(function (doc) {
     return doc && doc.toObject(options) || null;
   });
@@ -145,11 +154,13 @@ MongooseDocumentArray.prototype.toObject = function (options) {
 /**
  * Helper for console.log
  *
+ * @method inspect
  * @api public
+ * @receiver MongooseDocumentArray
  */
 
-MongooseDocumentArray.prototype.inspect = function () {
-  return '[' + this.map(function (doc) {
+MongooseDocumentArray.mixin.inspect = function () {
+  return '[' + Array.prototype.map.call(this, function (doc) {
     if (doc) {
       return doc.inspect
         ? doc.inspect()
@@ -165,10 +176,12 @@ MongooseDocumentArray.prototype.inspect = function () {
  * This is the same subdocument constructor used for casting.
  *
  * @param {Object} obj the value to cast to this arrays SubDocument schema
+ * @method create
  * @api public
+ * @receiver MongooseDocumentArray
  */
 
-MongooseDocumentArray.prototype.create = function (obj) {
+MongooseDocumentArray.mixin.create = function (obj) {
   return new this._schema.casterConstructor(obj);
 }
 
@@ -177,10 +190,12 @@ MongooseDocumentArray.prototype.create = function (obj) {
  *
  * @param {String} event
  * @return {Function}
+ * @method notify
  * @api private
+ * @receiver MongooseDocumentArray
  */
 
-MongooseDocumentArray.prototype.notify = function notify (event) {
+MongooseDocumentArray.mixin.notify = function notify (event) {
   var self = this;
   return function notify (val) {
     var i = self.length;

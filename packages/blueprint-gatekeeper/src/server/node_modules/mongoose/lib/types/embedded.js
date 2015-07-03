@@ -2,8 +2,9 @@
  * Module dependencies.
  */
 
-var Document = require('../document')
-  , inspect = require('util').inspect;
+var Document = require('../document_provider')();
+var inspect = require('util').inspect;
+var Promise = require('../promise');
 
 /**
  * EmbeddedDocument constructor.
@@ -15,7 +16,7 @@ var Document = require('../document')
  * @api private
  */
 
-function EmbeddedDocument (obj, parentArr, skipId, fields) {
+function EmbeddedDocument (obj, parentArr, skipId, fields, index) {
   if (parentArr) {
     this.__parentArray = parentArr;
     this.__parent = parentArr._parent;
@@ -23,6 +24,7 @@ function EmbeddedDocument (obj, parentArr, skipId, fields) {
     this.__parentArray = undefined;
     this.__parent = undefined;
   }
+  this.__index = index;
 
   Document.call(this, obj, fields, skipId);
 
@@ -30,13 +32,13 @@ function EmbeddedDocument (obj, parentArr, skipId, fields) {
   this.on('isNew', function (val) {
     self.isNew = val;
   });
-};
+}
 
 /*!
  * Inherit from Document
  */
-
-EmbeddedDocument.prototype.__proto__ = Document.prototype;
+EmbeddedDocument.prototype = Object.create( Document.prototype );
+EmbeddedDocument.prototype.constructor = EmbeddedDocument;
 
 /**
  * Marks the embedded doc modified.
@@ -49,6 +51,7 @@ EmbeddedDocument.prototype.__proto__ = Document.prototype;
  *
  * @param {String} path the path which changed
  * @api public
+ * @receiver EmbeddedDocument
  */
 
 EmbeddedDocument.prototype.markModified = function (path) {
@@ -73,15 +76,15 @@ EmbeddedDocument.prototype.markModified = function (path) {
  * _This is a no-op. Does not actually save the doc to the db._
  *
  * @param {Function} [fn]
- * @return {EmbeddedDocument} this
+ * @return {Promise} resolved Promise
  * @api private
  */
 
-EmbeddedDocument.prototype.save = function(fn) {
-  if (fn)
-    fn(null);
-  return this;
-};
+EmbeddedDocument.prototype.save = function (fn) {
+  var promise = new Promise(fn);
+  promise.fulfill();
+  return promise;
+}
 
 /**
  * Removes the subdocument from its parent array.
@@ -167,23 +170,63 @@ EmbeddedDocument.prototype.invalidate = function (path, err, val, first) {
     throw new Error(msg);
   }
 
-  var index = this.__parentArray.indexOf(this);
-  var parentPath = this.__parentArray._path;
-  var fullPath = [parentPath, index, path].join('.');
-
-  // sniffing arguments:
-  // need to check if user passed a value to keep
-  // our error message clean.
-  if (2 < arguments.length) {
+  var index = this.__index;
+  if (typeof index !== 'undefined') {
+    var parentPath = this.__parentArray._path;
+    var fullPath = [parentPath, index, path].join('.');
     this.__parent.invalidate(fullPath, err, val);
-  } else {
-    this.__parent.invalidate(fullPath, err);
   }
 
-  if (first)
+  if (first) {
     this.$__.validationError = this.ownerDocument().$__.validationError;
+  }
+
   return true;
-}
+};
+
+/**
+ * Marks a path as valid, removing existing validation errors.
+ *
+ * @param {String} path the field to mark as valid
+ * @api private
+ * @method $markValid
+ * @receiver EmbeddedDocument
+ */
+
+EmbeddedDocument.prototype.$markValid = function(path) {
+  if (!this.__parent) {
+    return;
+  }
+
+  var index = this.__index;
+  if (typeof index !== 'undefined') {
+    var parentPath = this.__parentArray._path;
+    var fullPath = [parentPath, index, path].join('.');
+    this.__parent.$markValid(fullPath);
+  }
+};
+
+/**
+ * Checks if a path is invalid
+ *
+ * @param {String} path the field to check
+ * @api private
+ * @method $isValid
+ * @receiver EmbeddedDocument
+ */
+
+EmbeddedDocument.prototype.$isValid = function(path) {
+  var index = this.__index;
+  if (typeof index !== 'undefined') {
+    var parentPath = this.__parentArray._path;
+    var fullPath = [parentPath, index, path].join('.');
+
+    return !this.__parent.$__.validationError ||
+      !this.__parent.$__.validationError.errors[path];
+  }
+
+  return true;
+};
 
 /**
  * Returns the top level document of this sub-document.

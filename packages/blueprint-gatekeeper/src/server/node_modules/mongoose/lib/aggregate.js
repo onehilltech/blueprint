@@ -287,7 +287,7 @@ Aggregate.prototype.unwind = function () {
  *
  * @see $sort http://docs.mongodb.org/manual/reference/aggregation/sort/
  * @param {Object|String} arg
- * @return {Query} this
+ * @return {Aggregate} this
  * @api public
  */
 
@@ -353,14 +353,19 @@ Aggregate.prototype.allowDiskUse = function(value) {
 };
 
 /**
- * Sets the cursor option option for the aggregation query (ignored for < 2.6.0)
+ * Sets the cursor option option for the aggregation query (ignored for < 2.6.0).
+ * Note the different syntax below: .exec() returns a cursor object, and no callback
+ * is necessary.
  *
  * ####Example:
  *
- *     Model.aggregate(..).cursor({ batchSize: 1000 }).exec(callback)
+ *     var cursor = Model.aggregate(..).cursor({ batchSize: 1000 }).exec();
+ *     cursor.each(function(error, doc) {
+ *       // use doc
+ *     });
  *
  * @param {Object} options set the cursor batch size
- * @see mongodb http://docs.mongodb.org/manual/reference/command/aggregate/
+ * @see mongodb http://mongodb.github.io/node-mongodb-native/2.0/api/AggregationCursor.html
  */
 
 Aggregate.prototype.cursor = function(options) {
@@ -403,12 +408,18 @@ Aggregate.prototype.exec = function (callback) {
     return promise;
   }
 
+  prepareDiscriminatorPipeline(this);
+
+  if (this.options && this.options.cursor) {
+    return this._model.collection.aggregate(this._pipeline, this.options || {});
+  }
+
   this._model
     .collection
     .aggregate(this._pipeline, this.options || {}, promise.resolve.bind(promise));
 
   return promise;
-}
+};
 
 /*!
  * Helpers
@@ -435,6 +446,40 @@ function isOperator (obj) {
     return '$' === key[0];
   });
 }
+
+/*!
+ * Adds the appropriate `$match` pipeline step to the top of an aggregate's
+ * pipeline, should it's model is a non-root discriminator type. This is
+ * analogous to the `prepareDiscriminatorCriteria` function in `lib/query.js`.
+ *
+ * @param {Aggregate} aggregate Aggregate to prepare
+ */
+
+function prepareDiscriminatorPipeline (aggregate) {
+  var schema = aggregate._model.schema,
+      discriminatorMapping = schema && schema.discriminatorMapping;
+
+  if (discriminatorMapping && !discriminatorMapping.isRoot) {
+    var originalPipeline = aggregate._pipeline,
+        discriminatorKey = discriminatorMapping.key,
+        discriminatorValue = discriminatorMapping.value;
+
+    // If the first pipeline stage is a match and it doesn't specify a `__t`
+    // key, add the discriminator key to it. This allows for potential
+    // aggregation query optimizations not to be disturbed by this feature.
+    if (originalPipeline[0] && originalPipeline[0].$match &&
+        !originalPipeline[0].$match[discriminatorKey]) {
+      originalPipeline[0].$match[discriminatorKey] = discriminatorValue;
+      // `originalPipeline` is a ref, so there's no need for
+      // aggregate._pipeline = originalPipeline
+    } else {
+      var match = {};
+      match[discriminatorKey] = discriminatorValue;
+      aggregate._pipeline = [{ $match: match }].concat(originalPipeline);
+    }
+  }
+}
+
 
 /*!
  * Exports

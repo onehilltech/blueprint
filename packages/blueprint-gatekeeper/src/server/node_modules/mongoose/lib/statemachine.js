@@ -13,8 +13,6 @@ var utils = require('./utils');
  */
 
 var StateMachine = module.exports = exports = function StateMachine () {
-  this.paths = {};
-  this.states = {};
 }
 
 /*!
@@ -36,6 +34,8 @@ StateMachine.ctor = function () {
 
   var ctor = function () {
     StateMachine.apply(this, arguments);
+    this.paths = {};
+    this.states = {};
     this.stateNames = states;
 
     var i = states.length
@@ -47,7 +47,7 @@ StateMachine.ctor = function () {
     }
   };
 
-  ctor.prototype.__proto__ = StateMachine.prototype;
+  ctor.prototype = new StateMachine();
 
   states.forEach(function (state) {
     // Changes the `path`'s state to `state`.

@@ -1,0 +1,79 @@
+{
+  "name": "bson-ext",
+  "description": "The C++ bson parser for the node.js mongodb driver.",
+  "keywords": [
+    "mongodb",
+    "bson",
+    "parser"
+  ],
+  "version": "0.1.10",
+  "author": {
+    "name": "Christian Amor Kvalheim",
+    "email": "christkv@gmail.com"
+  },
+  "contributors": [],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/christkv/bson-ext.git"
+  },
+  "bugs": {
+    "url": "https://github.com/christkv/bson-ext/issues"
+  },
+  "dependencies": {
+    "nan": "~1.8.0",
+    "node-pre-gyp": "https://github.com/mongodb-js/node-pre-gyp/archive/v0.6.5-appveyor.tar.gz"
+  },
+  "bundledDependecies": [
+    "node-pre-gyp"
+  ],
+  "devDependencies": {
+    "nodeunit": "~0.9.0"
+  },
+  "main": "./index",
+  "directories": {
+    "lib": "./lib/bson"
+  },
+  "engines": {
+    "node": ">=0.8.19"
+  },
+  "scripts": {
+    "install": "(node-pre-gyp install --fallback-to-build) || (node-gyp rebuild 2> builderror.log) || (exit 0)",
+    "test": "nodeunit ./test/node"
+  },
+  "licenses": [
+    {
+      "type": "Apache License, Version 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "binary": {
+    "module_name": "bson",
+    "module_path": "build/Release",
+    "host": "https://bin.mongodb.org",
+    "remote_path": "/js/bson-ext/v{version}",
+    "bucket": "mongodb-dx-public"
+  },
+  "gitHead": "8d67d8edbf8d0e3233b485f3ef4338087f1ba065",
+  "homepage": "https://github.com/christkv/bson-ext",
+  "_id": "bson-ext@0.1.10",
+  "_shasum": "d070fd4bb613d9ff453d5b3640fdd8f5d0cf72df",
+  "_from": "bson-ext@>=0.1.0 <0.2.0",
+  "_npmVersion": "2.11.1",
+  "_nodeVersion": "2.3.0",
+  "_npmUser": {
+    "name": "christkv",
+    "email": "christkv@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "christkv",
+      "email": "christkv@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "d070fd4bb613d9ff453d5b3640fdd8f5d0cf72df",
+    "tarball": "http://registry.npmjs.org/bson-ext/-/bson-ext-0.1.10.tgz"
+  },
+  "_resolved": "https://registry.npmjs.org/bson-ext/-/bson-ext-0.1.10.tgz",
+  "readme": "ERROR: No README data found!"
+}

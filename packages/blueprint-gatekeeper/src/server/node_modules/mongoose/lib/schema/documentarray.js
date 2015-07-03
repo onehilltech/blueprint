@@ -26,14 +26,13 @@ function DocumentArray (key, schema, options) {
     Subdocument.apply(this, arguments);
   }
 
-  EmbeddedDocument.prototype.__proto__ = Subdocument.prototype;
+  EmbeddedDocument.prototype = Object.create(Subdocument.prototype);
   EmbeddedDocument.prototype.$__setSchema(schema);
   EmbeddedDocument.schema = schema;
 
   // apply methods
-  for (var i in schema.methods) {
+  for (var i in schema.methods)
     EmbeddedDocument.prototype[i] = schema.methods[i];
-  }
 
   // apply statics
   for (var i in schema.statics)
@@ -53,13 +52,21 @@ function DocumentArray (key, schema, options) {
     if (!Array.isArray(arr)) arr = [arr];
     return new MongooseDocumentArray(arr, path, this);
   });
-};
+}
+
+/**
+ * This schema type's name, to defend against minifiers that mangle
+ * function names.
+ *
+ * @api private
+ */
+DocumentArray.schemaName = 'DocumentArray';
 
 /*!
  * Inherits from ArrayType.
  */
-
-DocumentArray.prototype.__proto__ = ArrayType.prototype;
+DocumentArray.prototype = Object.create( ArrayType.prototype );
+DocumentArray.prototype.constructor = DocumentArray;
 
 /**
  * Performs local validations first, then validations on each embedded doc
@@ -68,13 +75,13 @@ DocumentArray.prototype.__proto__ = ArrayType.prototype;
  */
 
 DocumentArray.prototype.doValidate = function (array, fn, scope) {
-  var self = this;
-
   SchemaType.prototype.doValidate.call(this, array, function (err) {
-    if (err) return fn(err);
+    if (err) {
+      return fn(err);
+    }
 
-    var count = array && array.length
-      , error;
+    var count = array && array.length;
+    var error;
 
     if (!count) return fn();
 
@@ -86,22 +93,59 @@ DocumentArray.prototype.doValidate = function (array, fn, scope) {
       // sidestep sparse entries
       var doc = array[i];
       if (!doc) {
-        --count || fn();
+        --count || fn(error);
         continue;
       }
 
-      ;(function (i) {
-        doc.validate(function (err) {
-          if (err && !error) {
-            // rewrite the key
-            err.key = self.key + '.' + i + '.' + err.key;
-            return fn(error = err);
-          }
-          --count || fn();
-        });
-      })(i);
+      doc.validate(function (err) {
+        if (err) {
+          error = err;
+        }
+        --count || fn(error);
+      });
     }
   }, scope);
+};
+
+/**
+ * Performs local validations first, then validations on each embedded doc.
+ *
+ * ####Note:
+ *
+ * This method ignores the asynchronous validators.
+ *
+ * @return {MongooseError|undefined}
+ * @api private
+ */
+
+DocumentArray.prototype.doValidateSync = function (array, scope) {
+  var schemaTypeError = SchemaType.prototype.doValidateSync.call(this, array, scope);
+  if (schemaTypeError) return schemaTypeError;
+
+  var count = array && array.length
+    , resultError = null;
+
+  if (!count) return;
+
+  // handle sparse arrays, do not use array.forEach which does not
+  // iterate over sparse elements yet reports array.length including
+  // them :(
+
+  for (var i = 0, len = count; i < len; ++i) {
+    // only first error
+    if ( resultError ) break;
+    // sidestep sparse entries
+    var doc = array[i];
+    if (!doc) continue;
+
+    var subdocValidateError = doc.validateSync();
+
+    if (subdocValidateError) {
+      resultError = subdocValidateError;
+    }
+  }
+
+  return resultError;
 };
 
 /**
@@ -126,7 +170,7 @@ DocumentArray.prototype.cast = function (value, doc, init, prev) {
     return this.cast([value], doc, init, prev);
   }
 
-  if (!(value instanceof MongooseDocumentArray)) {
+  if (!(value && value.isMongooseDocumentArray)) {
     value = new MongooseDocumentArray(value, this.path, doc);
     if (prev && prev._handlers) {
       for (var key in prev._handlers) {
@@ -141,7 +185,7 @@ DocumentArray.prototype.cast = function (value, doc, init, prev) {
     if (!(value[i] instanceof Subdocument) && value[i]) {
       if (init) {
         selected || (selected = scopePaths(this, doc.$__.selected, init));
-        subdoc = new this.casterConstructor(null, value, true, selected);
+        subdoc = new this.casterConstructor(null, value, true, selected, i);
         value[i] = subdoc.init(value[i]);
       } else {
         try {
@@ -152,13 +196,15 @@ DocumentArray.prototype.cast = function (value, doc, init, prev) {
           // handle resetting doc with existing id but differing data
           // doc.array = [{ doc: 'val' }]
           subdoc.set(value[i]);
+          // if set() is hooked it will have no return value
+          // see gh-746
+          value[i] = subdoc;
         } else {
-          subdoc = new this.casterConstructor(value[i], value);
+          subdoc = new this.casterConstructor(value[i], value, undefined, undefined, i);
+          // if set() is hooked it will have no return value
+          // see gh-746
+          value[i] = subdoc;
         }
-
-        // if set() is hooked it will have no return value
-        // see gh-746
-        value[i] = subdoc;
       }
     }
   }
