@@ -8,7 +8,7 @@ var path     = require ('path')
   ;
 
 var Client  = require ('../lib/models/oauth2/client')
-  , config  = require ('../lib/config')
+  , config  = require ('../config')
   ;
 
 const DEFAULT_CLIENT_NAME = "Gatekeeper Webapp";
