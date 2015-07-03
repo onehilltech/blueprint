@@ -1,10 +1,18 @@
-var express = require ('express')
-  , winston = require ('winston')
+var express  = require ('express')
+  , winston  = require ('winston')
+  , passport = require ('passport')
   ;
 
-var AccountController = require ('../controllers/accountController')
-  , AccessToken       = require ('../models/oauth2/accessToken')
+var AdminRouter = require ('./admin')
+  , ApiRouter   = require ('./api')
   ;
+
+var bearer         = require ('../authentication/bearer')
+  , clientPassword = require ('../authentication/clientPassword')
+  ;
+
+passport.use (bearer ());
+passport.use (clientPassword ());
 
 function MainRouter (opts) {
   this._opts = opts || {};
@@ -12,11 +20,10 @@ function MainRouter (opts) {
 
 MainRouter.prototype.makeRouter = function () {
   var router = express.Router ();
-  var accountController = new AccountController ();
 
-  router.post ('/accounts', accountController.createAccount ());
-
-  router.use (require ('./oauth2/index') (this._opts));
+  router.use ('/api', passport.authenticate (['bearer', 'oauth2-client-password'], {session : false}));
+  router.use ('/api', new ApiRouter ().makeRouter ());
+  router.use ('/', new AdminRouter ().makeRouter ());
 
   return router;
 };

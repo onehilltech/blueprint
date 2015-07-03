@@ -1,0 +1,61 @@
+#!/usr/bin/env node
+
+var path     = require ('path')
+  , fs       = require ('fs')
+  , winston  = require ('winston')
+  , nconf    = require ('nconf')
+  , mongoose = require ('mongoose')
+  ;
+
+var Client  = require ('../lib/models/oauth2/client')
+  , config  = require ('../lib/config')
+  ;
+
+const DEFAULT_CLIENT_NAME = "Gatekeeper Webapp";
+const DEFAULT_EMAIL = "contact@gatekeeper.com";
+const DEFAULT_REDIRECT_URI = 'https://localhost/admin/callback';
+
+var dataFile = path.join (__dirname, '../config/webapp.json');
+
+function setupComplete (err) {
+  mongoose.connection.close ();
+
+  if (err)
+    return winston.error (err);
+  else
+    winston.info ('setup is complete');
+}
+
+function performSetup (done) {
+  // Connect to the database
+  mongoose.connect (config.connstr, config.mongodb, function (err) {
+    if (err) return done (err);
+
+    // Create the data file.
+    nconf.file (dataFile);
+
+    // Create the client id and secret for the admin service.
+    winston.info  ('registering gatekeeper web application client');
+    Client.registerNewClient (DEFAULT_CLIENT_NAME, DEFAULT_EMAIL, DEFAULT_REDIRECT_URI, function (err, client) {
+      if (err) return done (err);
+
+      // Update the configuration file.
+      winston.info ('updating web application configuration file')
+      nconf.set ('oauth2:client_id', client.id);
+      nconf.set ('oauth2:client_secret', client.secret);
+
+      // Save the configuration file.
+      winston.info ('saving web application configuration file');
+      nconf.save (done);
+    });
+  });
+}
+
+function configFileExistsCallback (exists) {
+  if (!exists)
+    performSetup (setupComplete);
+  else
+    winston.warn ('gatekeeper service is already configured');
+}
+
+fs.exists (dataFile, configFileExistsCallback);

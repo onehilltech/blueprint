@@ -1,15 +1,19 @@
 #!/usr/bin/env node
 
-var nconf      = require ('nconf')
-  , winston    = require ('winston')
-  , path       = require ('path')
-  , express    = require ('express')
-  , validation = require ('express-validator')
-  , bodyParser = require ('body-parser')
-  , mongoose   = require ('mongoose')
+var nconf        = require ('nconf')
+  , winston      = require ('winston')
+  , path         = require ('path')
+  , express      = require ('express')
+  , validation   = require ('express-validator')
+  , session      = require ('express-session')
+  , bodyParser   = require ('body-parser')
+  , mongoose     = require ('mongoose')
+  , passport     = require ('passport')
+  , cookieParser = require ('cookie-parser')
   ;
 
-var AdminRouter = require ('../lib/router/admin')
+var MainRouter = require ('../lib/router')
+  , Account    = require ('../lib/models/account')
   ;
 
 // Load the node configuration.
@@ -20,6 +24,28 @@ var config_file = path.join (__dirname, '../config', env + '.json');
 nconf.env ().file ({file: config_file}).argv ();
 var config = nconf.get ();
 
+// Define the serialization/deserialization methods. The serialization method
+// just returns to user id. The deserialization method locates the account by
+// the user id.
+passport.serializeUser (function (user, done) {
+  winston.info ('serializing user: %s', user.id);
+  done (null, user.id);
+});
+
+passport.deserializeUser (function (id, done) {
+  winston.info ('deserializing user: %s', id);
+
+  Account.findById (id, function (err, user) {
+    if (err)
+      return done (err);
+
+    if (!user)
+      return done (new Error ('Account does not exist'));
+
+    done (null, user);
+  });
+});
+
 // Create a new server, and start it.
 var app = express ();
 
@@ -27,15 +53,21 @@ var app = express ();
 app.set ('views', path.join (__dirname, '../views'));
 app.set ('view engine', 'jade');
 
+// Define the static routes.
+app.use (express.static (path.join (__dirname, '../public_html')));
+
+app.use (cookieParser (config.cookieParser));
 app.use (bodyParser.urlencoded ({ extended: false }));
 app.use (bodyParser.json ());
 app.use (validation ());
 
-// Define the dynamic routes.
-app.use ('/', new AdminRouter ().makeRouter ());
+app.use (session (config.session));
 
-// Define the static routes.
-app.use (express.static (path.join (__dirname, '../public_html')));
+app.use (passport.initialize ());
+app.use (passport.session ());
+
+// Define the dynamic routes.
+app.use ('/', new MainRouter ().makeRouter ());
 
 mongoose.connect (config.connstr, config.mongodb, function (err) {
   if (err)

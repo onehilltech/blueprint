@@ -1,14 +1,39 @@
 var mongoose = require ('mongoose')
-  , Schema = mongoose.Schema
+  , uid      = require ('uid-safe')
+  , Schema   = mongoose.Schema
   ;
 
+const DEFAULT_SECRET_LENGTH = 128;
+
 var schema = new Schema ({
-  name         : {type: String, required: true, trim: true },
-  email        : {type: String, required: true, trim: true },
+  name         : {type: String, required: true, trim: true, unique: true },
+  email        : {type: String, required: true, trim: true, unique: true },
   secret       : {type: String, required: true },
-  redirect_uri : {type: String, required: true, trim: true },
+  redirect_uri : {type: String, required: true, trim: true, unique: true },
   enabled      : {type: Boolean, default: true }
 });
+
+schema.statics.registerNewClient = function (name, email, redirect_uri, secretLength, done) {
+  if (typeof secretLength === 'function') {
+    done = secretLength;
+    secretLength = undefined;
+  }
+
+  secretLength = secretLength || DEFAULT_SECRET_LENGTH;
+  done = done || function (err, client) { };
+
+  var secret = uid.sync (secretLength);
+  var client = new this ({
+    name : name,
+    email : email,
+    secret : secret,
+    redirect_uri : redirect_uri
+  });
+
+  client.save (function (err) {
+    return err ? done (err) : done (null, client);
+  });
+};
 
 const COLLECTION_NAME = 'gatekeeper_oauth2_client';
 var model = mongoose.model (COLLECTION_NAME, schema);

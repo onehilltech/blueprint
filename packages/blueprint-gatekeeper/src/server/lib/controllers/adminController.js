@@ -1,14 +1,49 @@
-/**
- * Created by hillj on 6/28/15.
- */
+var passport = require ('passport')
+  ;
+
+var local = require ('../authentication/local')
+  ;
+
+passport.use (local ());
 
 function AdminController () {
 
 }
 
-AdminController.prototype.getHomePage = function () {
+AdminController.prototype.viewLoginPage = function () {
   return function (req, res) {
-    res.render ('admin/index');
+    return res.render ('admin/login')
+  };
+};
+
+AdminController.prototype.isLoggedIn = function () {
+  return function (req, res, next) {
+    if (req.isAuthenticated ())
+      return next();
+
+    res.redirect ('/admin/login');
+  };
+}
+
+AdminController.prototype.viewHomePage = function () {
+  return function (req, res) {
+    return res.render ('admin/index');
+  };
+};
+
+AdminController.prototype.authenticate = function () {
+  var opts = {
+    successRedirect : '/admin',
+    failureRedirect : '/admin/login'
+  };
+
+  return passport.authenticate ('local', opts);
+};
+
+AdminController.prototype.logout = function () {
+  return function (req, res) {
+    req.logout ();
+    res.redirect ('/admin');
   };
 };
 

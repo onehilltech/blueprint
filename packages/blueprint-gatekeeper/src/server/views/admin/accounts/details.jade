@@ -3,10 +3,6 @@ extends ../layout.jade
 block styles
     link(href="/assets/css/bootstrap-switch.min.css", rel="stylesheet")
 
-block scripts
-    script(src="/assets/js/bootstrap-switch.min.js")
-    script(src="/assets/js/accounts.js")
-
 block content
     h2 Account Details
 
@@ -88,3 +84,8 @@ block content
 
                 div.modal-footer
                     button#delete-account.btn.btn-primary.btn-block.btn-danger(type="button", data-dismiss="modal", data-account-id="#{account.id}") Yes, I really want to delete the account
+
+block scripts
+    script(src="/assets/js/bootstrap-switch.min.js")
+    script(src="/assets/js/accounts.js")
+

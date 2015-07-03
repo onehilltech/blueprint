@@ -62,18 +62,13 @@ function OAuth2Router (opts) {
  */
 OAuth2Router.prototype.makeRouter = function () {
   var router = express.Router ();
-  var controller = new Oauth2Controller (this._opts);
+  var oauth2Controller = new Oauth2Controller (this._opts);
 
   // Define the logout route for Oauth2.
   router.get ('/oauth2/logout',
     [
       passport.authenticate ('bearer', {session : false}),
-      function (req, res) {
-        controller.logoutUser (req.authInfo.token_id, function (err) {
-          var statusCode = err ? 403 : 200;
-          res.status (statusCode).send ();
-        });
-      }
+      oauth2Controller.logoutUser ()
     ]);
 
   var refreshTokenAuthStrategies = [];

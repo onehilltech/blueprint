@@ -1,20 +1,26 @@
 var winston = require ('winston')
   , util    = require ('util')
-  , uid     = require ('uid-safe')
-  , Client  = require ('../../models/oauth2/client')
+  , uid     = require ('uid-safe');
+
+var Client      = require ('../../models/oauth2/client')
+  , AccessToken = require ('../../models/oauth2/accessToken')
   ;
 
 const SECRET_LENGTH=48;
 
-function ClientController (opts) {
+function Oauth2Controller (opts) {
   this._opts = opts || {};
 }
 
-ClientController.prototype.logoutUser = function (tokenId, done) {
-  AccessToken.findByIdAndRemove (tokenId, done);
+Oauth2Controller.prototype.logoutUser = function () {
+  return function (req, res) {
+    AccessToken.findByIdAndRemove (req.authInfo.token_id, function (err) {
+      return res.send (200, err ? false : true);
+    });
+  };
 };
 
-ClientController.prototype.getClients = function () {
+Oauth2Controller.prototype.getClients = function () {
   return function (req, res) {
     Client.find ({}, function (err, clients) {
       return res.render ('admin/oauth2/clients/index', {clients: clients});
@@ -22,13 +28,13 @@ ClientController.prototype.getClients = function () {
   };
 };
 
-ClientController.prototype.newClient = function () {
+Oauth2Controller.prototype.newClient = function () {
   return function (req, res) {
     res.render ('admin/oauth2/clients/new');
   };
 };
 
-ClientController.prototype.createClient = function () {
+Oauth2Controller.prototype.createClient = function () {
   return function (req, res) {
     winston.debug ('validating input parameters');
 
@@ -63,7 +69,7 @@ ClientController.prototype.createClient = function () {
   };
 };
 
-ClientController.prototype.lookupClientByParam = function () {
+Oauth2Controller.prototype.lookupClientByParam = function () {
   return function (req, res, next, client_id) {
     winston.info ('searching for client ' + client_id);
 
@@ -80,7 +86,7 @@ ClientController.prototype.lookupClientByParam = function () {
   };
 }
 
-ClientController.prototype.deleteClient = function () {
+Oauth2Controller.prototype.deleteClient = function () {
   return function (req, res) {
     var client = req.client;
 
@@ -90,7 +96,7 @@ ClientController.prototype.deleteClient = function () {
   };
 };
 
-ClientController.prototype.getClient = function () {
+Oauth2Controller.prototype.getClient = function () {
   return function (req, res) {
     if (!req.client)
       return res.redirect ('/admin/oauth2/clients');
@@ -99,7 +105,7 @@ ClientController.prototype.getClient = function () {
   };
 }
 
-ClientController.prototype.refreshSecret = function () {
+Oauth2Controller.prototype.refreshSecret = function () {
   return function (req, res) {
     var newSecret = uid.sync (SECRET_LENGTH);
     var client = req.client;
@@ -112,7 +118,7 @@ ClientController.prototype.refreshSecret = function () {
   };
 }
 
-ClientController.prototype.updateClient = function () {
+Oauth2Controller.prototype.updateClient = function () {
   return function (req, res) {
     winston.info (req.body);
 
@@ -128,7 +134,7 @@ ClientController.prototype.updateClient = function () {
   }
 };
 
-ClientController.prototype.enableClient = function () {
+Oauth2Controller.prototype.enableClient = function () {
   return function (req, res) {
     req.checkBody ('enabled', 'Enabled is a required Boolean').notEmpty ().isBoolean ();
 
@@ -153,5 +159,5 @@ ClientController.prototype.enableClient = function () {
   };
 }
 
-exports = module.exports = ClientController;
+exports = module.exports = Oauth2Controller;
 
