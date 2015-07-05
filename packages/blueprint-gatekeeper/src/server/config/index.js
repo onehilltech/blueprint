@@ -8,3 +8,5 @@ var configFile = path.join (__dirname, '../config', env + '.json');
 nconf.env ().file ({file: configFile}).argv ();
 exports = module.exports = nconf.get ();
 
+exports.env = env;
+

@@ -7,22 +7,18 @@ var nconf        = require ('nconf')
   , validation   = require ('express-validator')
   , session      = require ('express-session')
   , bodyParser   = require ('body-parser')
-  , mongoose     = require ('mongoose')
   , passport     = require ('passport')
   , cookieParser = require ('cookie-parser')
+  , morgan       = require ('morgan')
   ;
 
-var MainRouter = require ('../lib/router')
+var config     = require ('../config')
+  , MainRouter = require ('../lib/router')
   , Account    = require ('../lib/models/account')
+  , db         = require ('../lib/db')
   ;
 
-// Load the node configuration.
-var env = process.env.NODE_ENV || 'dev';
-winston.info ('execution environment: ' + env);
-
-var config_file = path.join (__dirname, '../config', env + '.json');
-nconf.env ().file ({file: config_file}).argv ();
-var config = nconf.get ();
+winston.info ('execution environment: ' + config.env);
 
 // Define the serialization/deserialization methods. The serialization method
 // just returns to user id. The deserialization method locates the account by
@@ -54,8 +50,8 @@ app.set ('views', path.join (__dirname, '../views'));
 app.set ('view engine', 'jade');
 
 // Define the static routes.
+app.use (morgan (config.env, config.morgan));
 app.use (express.static (path.join (__dirname, '../public_html')));
-
 app.use (cookieParser (config.cookieParser));
 app.use (bodyParser.urlencoded ({ extended: false }));
 app.use (bodyParser.json ());
@@ -69,9 +65,8 @@ app.use (passport.session ());
 // Define the dynamic routes.
 app.use ('/', new MainRouter ().makeRouter ());
 
-mongoose.connect (config.connstr, config.mongodb, function (err) {
-  if (err)
-    return err;
+db.connect (config.connstr, config.mongodb, function (err) {
+  if (err) return err;
 
   app.listen (config.port, function (err) {
     if (!err)

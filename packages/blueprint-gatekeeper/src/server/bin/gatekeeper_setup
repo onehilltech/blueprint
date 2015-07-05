@@ -4,10 +4,10 @@ var path     = require ('path')
   , fs       = require ('fs')
   , winston  = require ('winston')
   , nconf    = require ('nconf')
-  , mongoose = require ('mongoose')
   ;
 
 var Client  = require ('../lib/models/oauth2/client')
+  , db      = require ('../lib/db')
   , config  = require ('../config')
   ;
 
@@ -18,7 +18,8 @@ const DEFAULT_REDIRECT_URI = 'https://localhost/admin/callback';
 var dataFile = path.join (__dirname, '../config/webapp.json');
 
 function setupComplete (err) {
-  mongoose.connection.close ();
+  // Close our connection to the database.
+  db.close ();
 
   if (err)
     return winston.error (err);
@@ -28,8 +29,9 @@ function setupComplete (err) {
 
 function performSetup (done) {
   // Connect to the database
-  mongoose.connect (config.connstr, config.mongodb, function (err) {
-    if (err) return done (err);
+  db.connect (config.connstr, config.mongodb, function (err) {
+    if (err)
+      return done (err);
 
     // Create the data file.
     nconf.file (dataFile);

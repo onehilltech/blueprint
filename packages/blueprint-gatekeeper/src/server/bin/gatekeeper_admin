@@ -2,10 +2,10 @@
 
 var prompt   = require ('prompt')
   , winston  = require ('winston')
-  , mongoose = require ('mongoose')
   ;
 
 var Account = require ('../lib/models/account')
+  , db      = require ('../lib/db')
   , config  = require ('../config')
   ;
 
@@ -38,7 +38,7 @@ prompt.get (schema, function (err, result) {
     return winston.error (err);
 
   // Connect to the database
-  mongoose.connect (config.connstr, config.mongodb, function (err) {
+  db.connect (config.connstr, config.mongodb, function (err) {
     if (err)
       return winston.error (err);
 
@@ -55,7 +55,7 @@ prompt.get (schema, function (err, result) {
         winston.error (err);
 
       winston.info ('successfully saved ' + result.username + ' to the database')
-      mongoose.connection.close ();
+      db.close ();
     });
   });
 });
