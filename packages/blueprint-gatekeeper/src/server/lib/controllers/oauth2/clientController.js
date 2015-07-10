@@ -20,7 +20,7 @@ Oauth2Controller.prototype.logoutUser = function () {
   };
 };
 
-Oauth2Controller.prototype.getClients = function () {
+Oauth2Controller.prototype.viewClients = function () {
   return function (req, res) {
     Client.find ({}, function (err, clients) {
       return res.render ('admin/oauth2/clients/index', {clients: clients});
@@ -28,9 +28,20 @@ Oauth2Controller.prototype.getClients = function () {
   };
 };
 
+Oauth2Controller.prototype.viewClient = function () {
+  return function (req, res) {
+    if (!req.client)
+      return res.redirect ('/admin/oauth2/clients');
+
+    return res.render ('views/admin/oauth2/clients/details', {
+      client : req.client
+    });
+  };
+};
+
 Oauth2Controller.prototype.newClient = function () {
   return function (req, res) {
-    res.render ('admin/oauth2/clients/new');
+    res.render ('views/admin/oauth2/clients/new');
   };
 };
 
@@ -96,15 +107,6 @@ Oauth2Controller.prototype.deleteClient = function () {
   };
 };
 
-Oauth2Controller.prototype.getClient = function () {
-  return function (req, res) {
-    if (!req.client)
-      return res.redirect ('/admin/oauth2/clients');
-
-    return res.render ('admin/oauth2/clients/details', {client : req.client});
-  };
-}
-
 Oauth2Controller.prototype.refreshSecret = function () {
   return function (req, res) {
     var newSecret = uid.sync (SECRET_LENGTH);
@@ -129,7 +131,7 @@ Oauth2Controller.prototype.updateClient = function () {
     client.email = req.body.email;
 
     client.save (function (err) {
-      return res.render ('admin/oauth2/clients/details', {client : client});
+      res.send (200, err ? false : true);
     });
   }
 };

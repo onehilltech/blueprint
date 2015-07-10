@@ -122,7 +122,7 @@ AccountController.prototype.viewAccounts = function () {
     });
 
     Account.find ({}, function (err, accounts) {
-      return res.render ('admin/accounts/index', {accounts: accounts});
+      return res.render ('views/admin/accounts/index', {accounts: accounts});
     });
   };
 };
@@ -133,7 +133,7 @@ AccountController.prototype.viewAccount = function () {
       return res.redirect ('/admin/accounts');
 
     var account = req.account;
-    return res.render ('admin/accounts/details', {account : account});
+    return res.render ('views/admin/accounts/details', {account : account});
   };
 }
 

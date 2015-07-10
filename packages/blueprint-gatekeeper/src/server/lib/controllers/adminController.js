@@ -10,12 +10,6 @@ function AdminController () {
 
 }
 
-AdminController.prototype.viewLoginPage = function () {
-  return function (req, res) {
-    return res.render ('admin/login')
-  };
-};
-
 AdminController.prototype.isLoggedIn = function () {
   return function (req, res, next) {
     if (req.isAuthenticated ())
@@ -27,7 +21,13 @@ AdminController.prototype.isLoggedIn = function () {
 
 AdminController.prototype.viewHomePage = function () {
   return function (req, res) {
-    return res.render ('admin/index');
+    return res.render ('views/admin/index');
+  };
+};
+
+AdminController.prototype.viewLoginPage = function () {
+  return function (req, res) {
+    return res.render ('views/admin/login')
   };
 };
 

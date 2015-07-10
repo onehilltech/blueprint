@@ -46,7 +46,7 @@ passport.deserializeUser (function (id, done) {
 var app = express ();
 
 // Set the template engine for the service.
-app.set ('views', path.join (__dirname, '../views'));
+app.set ('views', path.join (__dirname, '../jade'));
 app.set ('view engine', 'jade');
 
 // Define the static routes.

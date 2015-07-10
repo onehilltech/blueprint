@@ -1,0 +1,14 @@
+extends ../../layouts/default
+
+block content
+    div.container
+        form(method="post", action="/admin/login")
+            div.form-group
+                label(for="username") Username
+                input#username.form-control(name="username", type="text", placeholder="Username")
+
+            div.form-group
+                label(for="password") Password
+                input#password.form-control(name="password", type="password", placeholder="Password")
+
+            button.btn.btn-default.btn-block(type="submit") Login

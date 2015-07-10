@@ -5,6 +5,7 @@ var express           = require ('express')
 
 function Oauth2AdminRouter (opts) {
   this._opts = opts || {};
+  this.baseuri = '/admin/oauth2';
 }
 
 Oauth2AdminRouter.prototype.makeRouter = function () {
@@ -13,11 +14,11 @@ Oauth2AdminRouter.prototype.makeRouter = function () {
 
   // Define the client administration routes.
   router.param  ('client_id', clientController.lookupClientByParam ());
-  router.get    ('/admin/oauth2/clients', clientController.getClients ());
+  router.get    ('/admin/oauth2/clients', clientController.viewClients ());
   router.get    ('/admin/oauth2/clients/new', clientController.newClient ());
   router.post   ('/admin/oauth2/clients/new', clientController.createClient ());
 
-  router.get    ('/admin/oauth2/clients/:client_id', clientController.getClient ());
+  router.get    ('/admin/oauth2/clients/:client_id', clientController.viewClient ());
   router.post   ('/admin/oauth2/clients/:client_id', clientController.updateClient ());
   router.delete ('/admin/oauth2/clients/:client_id', clientController.deleteClient ());
   router.post   ('/admin/oauth2/clients/:client_id/enable', clientController.enableClient ());
