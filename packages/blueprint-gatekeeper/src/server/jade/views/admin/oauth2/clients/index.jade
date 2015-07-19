@@ -8,23 +8,24 @@ block scripts
     script(src="/assets/js/oauth2/clients.js")
 
 block content
-    h2 Registered Clients
+    div.container
+        h2 Registered Clients
 
-    p
-        a(href='/admin/oauth2/clients/new', role="button") Register new client
+        p
+            a(href='/admin/oauth2/clients/new', role="button") Register new client
 
-        table.table.table-striped
-            thead
-                th Name
-                th Contact address
-                th Client access
-                th Details
+            table.table.table-striped
+                thead
+                    th Name
+                    th Contact address
+                    th Client access
+                    th Details
 
-            for client in clients
-                tr
-                    td #{client.name}
-                    td #{client.email}
-                    td
-                        input(type="checkbox", name="enabled", checked=client.enabled, data-client-id="#{client.id}" data-size="mini", data-on-text="Enabled", data-off-text="Disabled")
-                    td
-                        a.btn.btn-default.btn-xs(href="/admin/oauth2/clients/#{client.id}" role="button") View details
+                for client in clients
+                    tr
+                        td #{client.name}
+                        td #{client.email}
+                        td
+                            input(type="checkbox", name="enabled", checked=client.enabled, data-client-id="#{client.id}" data-size="mini", data-on-text="Enabled", data-off-text="Disabled")
+                        td
+                            a.btn.btn-default.btn-xs(href="/admin/oauth2/clients/#{client.id}" role="button") View details

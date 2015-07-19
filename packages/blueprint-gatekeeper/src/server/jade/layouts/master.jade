@@ -1,4 +1,7 @@
 doctype html
+
+block configuration
+
 html(lang="en")
     head
         title Gatekeeper Portal
@@ -13,13 +16,21 @@ html(lang="en")
 
     body
 
-        nav.navbar.navbar-default
+        nav.navbar.navbar-default.navbar-static-top
             div.container
                 div.navbar-header
+                    unless noNavbarCollapse
+                        button.navbar-toggle.collapsed(type="button", data-toggle="collapse", data-target="#main-navbar-collapse")
+                            span.sr-only Toggle navigation
+                            span.icon-bar
+                            span.icon-bar
+                            span.icon-bar
+
                     a.navbar-brand(href="/admin") Gatekeeper
 
-        div.container
-            block content
+                block navigation
+
+        block content
 
         script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js")
         script(type="text/javascript", src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js")

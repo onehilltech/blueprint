@@ -8,23 +8,24 @@ block scripts
     script(src="/assets/js/accounts.js")
 
 block content
-    h2 Registered Accounts
+    div.container
+        h2 Registered Accounts
 
-    p
-        table.table.table-striped
-            thead
-                th Username
-                th Administrator
-                th Account access
-                th Details
-            for account in accounts
-                tr
-                    td #{account.username}
-                    td
-                        if account.scope.indexOf('admin') != -1
-                            span.glyphicon.glyphicon-ok(aria-hidden="true")
+        p
+            table.table.table-striped
+                thead
+                    th Username
+                    th Administrator
+                    th Account access
+                    th Details
+                for account in accounts
+                    tr
+                        td #{account.username}
+                        td
+                            if account.scope.indexOf('admin') != -1
+                                span.glyphicon.glyphicon-ok(aria-hidden="true")
 
-                    td
-                        input(type="checkbox", name="enabled", checked=account.enabled, data-account-id="#{account.id}" data-size="mini", data-on-text="Enabled", data-off-text="Disabled")
-                    td
-                        a.btn.btn-default.btn-xs(href="/admin/accounts/#{account.id}" role="button") View details
+                        td
+                            input(type="checkbox", name="enabled", checked=account.enabled, data-account-id="#{account.id}" data-size="mini", data-on-text="Enabled", data-off-text="Disabled")
+                        td
+                            a.btn.btn-default.btn-xs(href="/admin/accounts/#{account.id}" role="button") View details

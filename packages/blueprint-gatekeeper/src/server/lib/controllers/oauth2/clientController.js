@@ -23,7 +23,7 @@ Oauth2Controller.prototype.logoutUser = function () {
 Oauth2Controller.prototype.viewClients = function () {
   return function (req, res) {
     Client.find ({}, function (err, clients) {
-      return res.render ('admin/oauth2/clients/index', {clients: clients});
+      return res.render ('views/admin/oauth2/clients/index', {clients: clients});
     })
   };
 };

@@ -4,88 +4,89 @@ block styles
     link(href="/assets/css/bootstrap-switch.min.css", rel="stylesheet")
 
 block content
-    h2 Account Details
+    div.container
+        h2 Account Details
 
-    p
-        a(href="/admin/accounts") Back to accounts
-
-    form.form-horizontal
-        div.form-group
-            label.col-md-2.control-label(for="username") Username
-            div.col-md-10
-                input#username.form-control(type="text", name="username", placeholder="#{account.username}", readonly=true)
-
-        div.form-group
-            label.col-md-2.control-label(for="password") Password
-            div.col-md-10
-                input#password.form-control(type="text", name="password", placeholder="#{account.hidden_password}", readonly=true)
-
-        div.form-group
-            label.col-md-2.control-label(for="email") Email
-            div.col-md-10
-                input#email.form-control(type="text", name="email", placeholder="#{account.email}", readonly=true)
-
-    hr
-
-    h3 Access Control
-
-    p
-        | Enable/disable account access to services. The account is still registered with the service, and its
-        | information can be modified.
-
-    input(type="checkbox", name="enabled", checked=account.enabled, data-account-id="#{account.id}" data-size="mini", data-on-text="Enabled", data-off-text="Disabled")
-
-    h4 Scope
-
-    p
-        | The account scope controls what parts of the service this account can access. Update the comma-separated
-        | list below to change this account scope, and want it can access.
+        p
+            a(href="/admin/accounts") Back to accounts
 
         form.form-horizontal
             div.form-group
-                label.col-md-2.control-label(for="scope") Scope
-                div.col-md-10.input-group
-                    input#scope.form-control(type="text", name="scope", value="#{account.scope}")
-                    span.input-group-btn
-                        button#save-scope.btn.btn-default(type="button", data-account-id="#{account.id}", data-source="#scope")
-                            span.glyphicon.glyphicon-check(aria-hidden="true")
+                label.col-md-2.control-label(for="username") Username
+                div.col-md-10
+                    input#username.form-control(type="text", name="username", placeholder="#{account.username}", readonly=true)
 
-    hr
+            div.form-group
+                label.col-md-2.control-label(for="password") Password
+                div.col-md-10
+                    input#password.form-control(type="text", name="password", placeholder="#{account.hidden_password}", readonly=true)
 
-    h3 Delete Client
+            div.form-group
+                label.col-md-2.control-label(for="email") Email
+                div.col-md-10
+                    input#email.form-control(type="text", name="email", placeholder="#{account.email}", readonly=true)
 
-    p Once the account has been deleted, this operation cannot be undone.
+        hr
 
-    button.btn.btn-sm.btn-block.btn-danger(type="button", data-toggle="modal", data-target="#confirm-deletion") I completely understand, delete the account
+        h3 Access Control
 
-    div#confirm-deletion.modal.fade(tabindex="-1",role="dialog",aria-labelledby="myModalLabel")
-        div.modal-dialog(role="document")
-            div.modal-content
-                div.modal-header
-                    button.close(type="button", data-dismiss="modal", aria-label="Close")
-                        span(aria-hidden="true") &times;
-                    h4.modal-title Confirm deletion
-                div.modal-body
-                    p
-                        strong Warning!
-                        |  Once you delete the account, you cannot undo the operation. Please make sure this is
-                        | what you really want to do.
+        p
+            | Enable/disable account access to services. The account is still registered with the service, and its
+            | information can be modified.
 
-                    form.form-horizontal
-                        div.form-group
-                            label.col-md-3.control-label Username
-                            div.col-md-9
-                                p.form-control-static #{account.username}
+        input(type="checkbox", name="enabled", checked=account.enabled, data-account-id="#{account.id}" data-size="mini", data-on-text="Enabled", data-off-text="Disabled")
 
-                        div.form-group
-                            label.col-md-3.control-label Email
-                            div.col-md-9
-                                p.form-control-static #{account.email}
+        h4 Scope
 
-                div.modal-footer
-                    button#delete-account.btn.btn-primary.btn-block.btn-danger(type="button", data-dismiss="modal", data-account-id="#{account.id}") Yes, I really want to delete the account
+        p
+            | The account scope controls what parts of the service this account can access. Update the comma-separated
+            | list below to change this account scope, and want it can access.
 
-block scripts
-    script(src="/assets/js/bootstrap-switch.min.js")
-    script(src="/assets/js/accounts.js")
+            form.form-horizontal
+                div.form-group
+                    label.col-md-2.control-label(for="scope") Scope
+                    div.col-md-10.input-group
+                        input#scope.form-control(type="text", name="scope", value="#{account.scope}")
+                        span.input-group-btn
+                            button#save-scope.btn.btn-default(type="button", data-account-id="#{account.id}", data-source="#scope")
+                                span.glyphicon.glyphicon-check(aria-hidden="true")
+
+        hr
+
+        h3 Delete Client
+
+        p Once the account has been deleted, this operation cannot be undone.
+
+        button.btn.btn-sm.btn-block.btn-danger(type="button", data-toggle="modal", data-target="#confirm-deletion") I completely understand, delete the account
+
+        div#confirm-deletion.modal.fade(tabindex="-1",role="dialog",aria-labelledby="myModalLabel")
+            div.modal-dialog(role="document")
+                div.modal-content
+                    div.modal-header
+                        button.close(type="button", data-dismiss="modal", aria-label="Close")
+                            span(aria-hidden="true") &times;
+                        h4.modal-title Confirm deletion
+                    div.modal-body
+                        p
+                            strong Warning!
+                            |  Once you delete the account, you cannot undo the operation. Please make sure this is
+                            | what you really want to do.
+
+                        form.form-horizontal
+                            div.form-group
+                                label.col-md-3.control-label Username
+                                div.col-md-9
+                                    p.form-control-static #{account.username}
+
+                            div.form-group
+                                label.col-md-3.control-label Email
+                                div.col-md-9
+                                    p.form-control-static #{account.email}
+
+                    div.modal-footer
+                        button#delete-account.btn.btn-primary.btn-block.btn-danger(type="button", data-dismiss="modal", data-account-id="#{account.id}") Yes, I really want to delete the account
+
+    block scripts
+        script(src="/assets/js/bootstrap-switch.min.js")
+        script(src="/assets/js/accounts.js")
 

@@ -1,57 +1,7 @@
-doctype html
-html(lang="en")
-    head
-        title Gatekeeper Portal
+extends ./master
 
-        link(rel='stylesheet', type='text/css', href='/assets/css/app.css')
-        link(rel='stylesheet', type='text/css', href='/assets/css/normalize.css')
+block configuration
+    - noNavbarCollapse = false;
 
-        link(rel='stylesheet', type='text/css', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css')
-        link(rel='stylesheet', type='text/css', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css')
-
-        script(type='text/javascript').
-            window.accessToken = #{accessToken};
-
-        block styles
-
-    body
-
-        nav.navbar.navbar-default
-            div.container
-                div.navbar-header
-                    button.navbar-toggle.collapsed(type="button", data-toggle="collapse", data-target="#main-navbar-collapse")
-                        span.sr-only Toggle navigation
-                        span.icon-bar
-                        span.icon-bar
-                        span.icon-bar
-                    a.navbar-brand(href="/admin") Gatekeeper
-
-                div#main-navbar-collapse.collapse.navbar-collapse
-                    ul.nav.navbar-nav.navbar-right
-                        li
-                            a(href="/admin/logout") Logout
-
-        div.container
-            div.row
-                div.col-md-3
-                    h4 Main
-
-                    ul.list-group
-                        a.list-group-item(href='/admin/accounts') Accounts
-                            span#accounts.badge ?
-
-                    h4 Oauth 2.0
-
-                    ul.list-group
-                        a.list-group-item(href='/admin/oauth2/clients') Clients
-                            span#client.badge ?
-                        a.list-group-item(href='/admin/oauth2/tokens') Access Tokens
-                            span#tokens.badge ?
-
-                div.col-md-9
-
-                    block content
-
-        script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js")
-        script(type="text/javascript", src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js")
-        block scripts
+block content
+    div.container
