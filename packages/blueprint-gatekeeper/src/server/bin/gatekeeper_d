@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-var nconf        = require ('nconf')
-  , winston      = require ('winston')
+var winston      = require ('winston')
   , path         = require ('path')
   , express      = require ('express')
   , validation   = require ('express-validator')
@@ -12,7 +11,7 @@ var nconf        = require ('nconf')
   , morgan       = require ('morgan')
   ;
 
-var config     = require ('../config')
+var config     = require ('../config').get ()
   , MainRouter = require ('../lib/router')
   , Account    = require ('../lib/models/account')
   , db         = require ('../lib/db')

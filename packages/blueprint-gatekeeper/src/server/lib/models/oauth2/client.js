@@ -35,6 +35,29 @@ schema.statics.registerNewClient = function (name, email, redirect_uri, secretLe
   });
 };
 
+schema.statics.upsertClient = function (name, email, redirect_uri, secretLength, done) {
+  if (typeof secretLength === 'function') {
+    done = secretLength;
+    secretLength = undefined;
+  }
+
+  secretLength = secretLength || DEFAULT_SECRET_LENGTH;
+  done = done || function (err, client) { };
+
+  var secret = uid.sync (secretLength);
+  var client = new this ({
+    name : name,
+    email : email,
+    secret : secret,
+    redirect_uri : redirect_uri
+  });
+
+  var upsertData = client.toObject ();
+  delete upsertData._id;
+
+  this.findOneAndUpdate ({name: client.name}, upsertData, {upsert: true, new: true}, done);
+};
+
 const COLLECTION_NAME = 'gatekeeper_oauth2_client';
 var model = mongoose.model (COLLECTION_NAME, schema);
 

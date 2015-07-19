@@ -6,7 +6,7 @@ var prompt   = require ('prompt')
 
 var Account = require ('../lib/models/account')
   , db      = require ('../lib/db')
-  , config  = require ('../config')
+  , config  = require ('../config').get ()
   ;
 
 var options = {

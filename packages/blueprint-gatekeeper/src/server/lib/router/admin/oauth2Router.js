@@ -12,6 +12,10 @@ Oauth2AdminRouter.prototype.makeRouter = function () {
   var router = express.Router ();
   var clientController = new ClientController ();
 
+  router.get    ('/admin/oauth2', function (req, res) {
+    return res.render ('views/admin/oauth2/index');
+  });
+
   // Define the client administration routes.
   router.param  ('client_id', clientController.lookupClientByParam ());
   router.get    ('/admin/oauth2/clients', clientController.viewClients ());
