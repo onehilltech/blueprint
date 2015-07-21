@@ -1,5 +1,8 @@
 extends ../../layouts/authenticated
 
+block append configuration
+    - var noAccessToken = true;
+
 block content
     div.container
         p Welcome to the Gatekeeper Administrator portal.

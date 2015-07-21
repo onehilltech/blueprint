@@ -4,24 +4,15 @@ var mongoose = require ('mongoose')
   , Account  = require ('../account')
   ;
 
-/**
- * Factory function for creating the 'oauth2_accesstoken' schema.
- */
-function createSchema () {
-  var Schema = mongoose.Schema;
-  
-  var schema = new Schema ({
-    token : {type: String, index: true, unique: true},
-    refresh_token : {type: String, index: true, unique: true},
-    account : {type: Schema.Types.ObjectId, ref: Account.modelName},
-    client : {type: Schema.Types.ObjectId, ref: Client.modelName},
-    disabled : {type: Boolean, default : false}
-  });
+var Schema = mongoose.Schema;
 
-  return schema;
-}
-
-var schema = createSchema ();
+var schema = new Schema ({
+  token         : {type: String, index: true, required: true},
+  refresh_token : {type: String, index: true},
+  client        : {type: Schema.Types.ObjectId, required: true, ref: Client.modelName},
+  account       : {type: Schema.Types.ObjectId, ref: Account.modelName},
+  disabled      : {type: Boolean, required: true, default : false}
+});
 
 schema.statics.generateAndSave = function (length, client, user, done) {
   var token = uid.sync (length);
@@ -37,6 +28,15 @@ schema.statics.generateAndSave = function (length, client, user, done) {
   accessToken.save (function (err) {
     return err ? done (err) : done (null, token, refreshToken);
   });
+};
+
+schema.statics.newClientToken = function (length, client, scope, done) {
+  var token = uid.sync (length);
+  var query = {client : client};
+  var data  = {token: token, client: client};
+  var options = {upsert : true, new : true};
+
+  this.findOneAndUpdate (query, data, options, done);
 };
 
 schema.statics.refreshAndSave = function (length, client, refreshToken, done) {

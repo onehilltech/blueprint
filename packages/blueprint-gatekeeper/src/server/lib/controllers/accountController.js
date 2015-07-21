@@ -1,21 +1,19 @@
 var winston = require ('winston')
   , util    = require ('util')
-  , uid     = require ('uid-safe')
   , http    = require ('http')
   ;
 
-var Account  = require ('../models/account')
+var AdminController = require ('./adminController')
+  , Account = require ('../models/account')
   ;
 
-const SECRET_LENGTH=48;
+const SECRET_LENGTH = 48;
 
 function AccountController (opts) {
   this._opts = opts || {};
-
-  var adminOpts = this._opts.admin || {};
-  this._clientId = adminOpts.clientId;
-  this._clientSecret = adminOpts.clientSecret;
 }
+
+util.inherits (AccountController, AdminController);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // api methods
@@ -29,13 +27,13 @@ AccountController.prototype.lookupAccountParam = function () {
         return next (err);
 
       if (!account)
-        return next (new Error ('Account does not exist'))
+        return next (new Error ('account does not exist'))
 
       req.account = account;
       next ();
     });
   };
-}
+};
 
 AccountController.prototype.deleteAccount = function () {
   return function (req, res) {
@@ -44,7 +42,7 @@ AccountController.prototype.deleteAccount = function () {
 
     var account = req.account;
     account.remove (function (err) {
-      return res.send (200, err ? false : true);
+      return res.status (200).send (err ? false : true);
     });
   };
 }
@@ -69,7 +67,7 @@ AccountController.prototype.enableAccount = function () {
       if (err)
         winston.error (err);
 
-      res.send (200, err ? false : true);
+      res.status (200).send (err ? false : true);
     });
   };
 }
@@ -82,7 +80,7 @@ AccountController.prototype.updateScope = function () {
     var account = req.account;
     account.scope = req.body.scope;
     account.save (function (err) {
-      return res.send (200, err ? false : true);
+      return res.status (200).send (err ? false : true);
     });
   };
 };
@@ -96,7 +94,7 @@ AccountController.prototype.createAccount = function () {
     });
 
     account.save (function (err) {
-      return res.send (200, err ? false : true);
+      return res.status (200).send (err ? false : true);
     });
   };
 }
@@ -105,37 +103,25 @@ AccountController.prototype.createAccount = function () {
 // admin methods
 
 AccountController.prototype.viewAccounts = function () {
+  var self = this;
+
   return function (req, res) {
-    // Use the API to get the accounts. This will ensure the client accessing
-    // the accounts has been granted access.
-    var path = 'http://' + req.headers.host + '/api/accounts';
-    var options = {
-      path : 'http://' + req.headers.host + '/api/accounts'
-    };
-
-    console.log (options);
-
-    http.get (path, function (res) {
-      winston.info (res.statusCode);
-    }).on ('error', function (err) {
-      winston.error (err);
-    });
-
     Account.find ({}, function (err, accounts) {
-      return res.render ('views/admin/accounts/index', {accounts: accounts});
+      self.renderWithAccessToken (req, res, 'views/admin/accounts/index', {accounts : accounts});
     });
   };
 };
 
 AccountController.prototype.viewAccount = function () {
+  var self = this;
+
   return function (req, res) {
     if (!req.account)
       return res.redirect ('/admin/accounts');
 
-    var account = req.account;
-    return res.render ('views/admin/accounts/details', {account : account});
+    self.renderWithAccessToken (req, res, 'views/admin/accounts/details',  {account : req.account});
   };
-}
+};
 
 exports = module.exports = AccountController;
 

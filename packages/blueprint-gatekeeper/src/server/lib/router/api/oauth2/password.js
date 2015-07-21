@@ -56,7 +56,7 @@ PasswordRouter.prototype.appendRouter = function (router) {
   // (2) exchange the credentials for an access token
   router.post ('/oauth2/password',
     [
-      passport.authenticate ('oauth2-client', { session : false }),
+      passport.authenticate (['oauth2-client', 'oauth2-client-password'], { session : false }),
       this._server.token (),
       this._server.errorHandler ()
     ]

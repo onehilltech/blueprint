@@ -1,6 +1,10 @@
-var express = require ('express');
+var express  = require ('express')
+  ;
 
-var AccountRouter = require ('./accountRouter');
+var routerFiles = [
+  './oauth2',
+  './accountRouter'
+];
 
 function ApiRouter (opts) {
   this._opts = opts || {};
@@ -8,7 +12,11 @@ function ApiRouter (opts) {
 
 ApiRouter.prototype.makeRouter = function () {
   var router = express.Router ();
-  router.use ('/', new AccountRouter ().makeRouter ());
+
+  routerFiles.forEach (function (file) {
+    var Router = require (file);
+    router.use (new Router ().makeRouter ());
+  });
 
   return router;
 };

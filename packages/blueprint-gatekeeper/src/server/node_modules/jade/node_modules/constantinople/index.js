@@ -1,25 +1,83 @@
 'use strict'
 
-var detect = require('acorn-globals');
+var acorn = require('acorn');
+var walk = require('acorn/dist/walk');
 
 var lastSRC = '(null)';
 var lastRes = true;
 var lastConstants = undefined;
 
+var STATEMENT_WHITE_LIST = {
+  'EmptyStatement': true,
+  'ExpressionStatement': true,
+};
+var EXPRESSION_WHITE_LIST = {
+  'ParenthesizedExpression': true,
+  'ArrayExpression': true,
+  'ObjectExpression': true,
+  'SequenceExpression': true,
+  'TemplateLiteral': true,
+  'UnaryExpression': true,
+  'BinaryExpression': true,
+  'LogicalExpression': true,
+  'ConditionalExpression': true,
+  'Identifier': true,
+  'Literal': true,
+  'ComprehensionExpression': true,
+  'TaggedTemplateExpression': true,
+  'MemberExpression': true,
+  'CallExpression': true,
+  'NewExpression': true,
+};
 module.exports = isConstant;
 function isConstant(src, constants) {
   src = '(' + src + ')';
   if (lastSRC === src && lastConstants === constants) return lastRes;
   lastSRC = src;
   lastConstants = constants;
+  if (!isExpression(src)) return lastRes = false;
+  var ast;
   try {
-    isExpression(src);
-    return lastRes = (detect(src).filter(function (key) {
-      return !constants || !(key.name in constants);
-    }).length === 0);
+    ast = acorn.parse(src, {
+      ecmaVersion: 6,
+      allowReturnOutsideFunction: true,
+      allowImportExportEverywhere: true,
+      allowHashBang: true
+    });
   } catch (ex) {
     return lastRes = false;
   }
+  var isConstant = true;
+  walk.simple(ast, {
+    Statement: function (node) {
+      if (isConstant) {
+        if (STATEMENT_WHITE_LIST[node.type] !== true) {
+          isConstant = false;
+        }
+      }
+    },
+    Expression: function (node) {
+      if (isConstant) {
+        if (EXPRESSION_WHITE_LIST[node.type] !== true) {
+          isConstant = false;
+        }
+      }
+    },
+    MemberExpression: function (node) {
+      if (isConstant) {
+        if (node.computed) isConstant = false;
+        else if (node.property.name[0] === '_') isConstant = false;
+      }
+    },
+    Identifier: function (node) {
+      if (isConstant) {
+        if (!constants || !(node.name in constants)) {
+          isConstant = false;
+        }
+      }
+    },
+  });
+  return lastRes = isConstant;
 }
 isConstant.isConstant = isConstant;
 

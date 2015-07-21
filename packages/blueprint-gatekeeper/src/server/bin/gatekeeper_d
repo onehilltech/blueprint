@@ -17,25 +17,25 @@ var config     = require ('../config').get ()
   , db         = require ('../lib/db')
   ;
 
-winston.info ('execution environment: ' + config.env);
-
 // Define the serialization/deserialization methods. The serialization method
 // just returns to user id. The deserialization method locates the account by
 // the user id.
+winston.info ('initializing the passport framework');
+
 passport.serializeUser (function (user, done) {
   winston.info ('serializing user: %s', user.id);
   done (null, user.id);
 });
 
 passport.deserializeUser (function (id, done) {
-  winston.info ('deserializing user: %s', id);
+  winston.info ('deserializing user %s', id);
 
   Account.findById (id, function (err, user) {
     if (err)
-      return done (err);
+      return done(err);
 
     if (!user)
-      return done (new Error ('Account does not exist'));
+      return done (new Error ('account does not exist'));
 
     done (null, user);
   });
@@ -45,10 +45,12 @@ passport.deserializeUser (function (id, done) {
 var app = express ();
 
 // Set the template engine for the service.
+winston.info ('initializing the express application');
 app.set ('views', path.join (__dirname, '../jade'));
 app.set ('view engine', 'jade');
 
 // Define the static routes.
+
 app.use (morgan (config.env, config.morgan));
 app.use (express.static (path.join (__dirname, '../public_html')));
 app.use (cookieParser (config.cookieParser));
@@ -62,6 +64,7 @@ app.use (passport.initialize ());
 app.use (passport.session ());
 
 // Define the dynamic routes.
+winston.info ('loading the main router');
 app.use ('/', new MainRouter ().makeRouter ());
 
 db.connect (config.connstr, config.mongodb, function (err) {

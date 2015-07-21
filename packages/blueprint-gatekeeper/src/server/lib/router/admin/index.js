@@ -16,6 +16,7 @@ function AdminRouter (opts) {
 }
 
 AdminRouter.prototype.makeRouter = function () {
+  winston.info ('making administrator router');
   var router = express.Router ();
   var adminController = new AdminController ();
 
@@ -31,9 +32,11 @@ AdminRouter.prototype.makeRouter = function () {
 
   // Load the protected routes (i.e., the routes that require the user to
   // be logged in to access).
+  var self = this;
+
   protectedRoutes.forEach (function (protectedRoute) {
     var ProtectedRouter = require (protectedRoute);
-    var protectedRouter = new ProtectedRouter ();
+    var protectedRouter = new ProtectedRouter (self._opts);
 
     router.use (protectedRouter.baseuri, adminController.isLoggedIn ());
     router.use ('/', protectedRouter.makeRouter ());

@@ -1,14 +1,24 @@
-var express = require ('express');
+var express = require ('express')
+  , util    = require ('util')
+  , winston = require ('winston')
+  ;
 
-var AccountController = require ('../../controllers/accountController');
+var ProtectedRouter   = require ('../protectedRouter')
+  , AccountController = require ('../../controllers/accountController');
 
 function AccountRouter (opts) {
+  ProtectedRouter.call (this);
+
   this._opts = opts || {};
 }
 
+util.inherits (AccountRouter, ProtectedRouter);
+
 AccountRouter.prototype.makeRouter = function () {
+  winston.info ('making account router');
+
   var accountController = new AccountController ();
-  var router = express.Router ();
+  var router = this.newRouter ();
 
   router.param  ('account_id', accountController.lookupAccountParam ());
   router.delete ('/accounts/:account_id', accountController.deleteAccount ());

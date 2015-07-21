@@ -4,13 +4,14 @@ var BearerStrategy = require ('passport-http-bearer').Strategy
   ;
 
 module.exports = function () {
-  return new BearerStrategy (function (access_token, done) {
-    winston.info ('validating access token');
+  return new BearerStrategy (function (accessToken, done) {
+    winston.info ('bearer: validating access token [token=%s]', accessToken);
+
 
     // Locate the access token in our database. If we cannot locate the
     // access token, then we need to fail access to the resource. We also
     // need to fail access if the token has been disabled, or is not valid.
-    AccessToken.findOne ({token : access_token}, function (err, token) {
+    AccessToken.findOne ({token : accessToken}, function (err, token) {
       if (err)
         return done (err);
 
@@ -20,15 +21,14 @@ module.exports = function () {
       if (token.disabled)
         return done (null, false, {message: 'Token is disabled'});
 
-      if (!token.account)
-        return done (null, false, {message: 'Token does not have an account'});
-
       winston.info ('access token validation successful');
 
       // to keep this example simple, restricted scopes are not implemented,
       // and this is just for illustrative purposes
       var info = { scope: '*', token_id : token.id }
-      done (null, token.account, info);
+      var user = token.account || token.client;
+
+      done (null, user, info);
     });
   });
 };

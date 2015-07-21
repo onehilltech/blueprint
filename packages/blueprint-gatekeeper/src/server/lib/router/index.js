@@ -5,14 +5,10 @@ var express  = require ('express')
 
 var AdminRouter = require ('./admin')
   , ApiRouter   = require ('./api')
-  ;
-
-var bearer         = require ('../authentication/bearer')
-  , clientPassword = require ('../authentication/clientPassword')
+  , bearer      = require ('../authentication/bearer')
   ;
 
 passport.use (bearer ());
-passport.use (clientPassword ());
 
 function MainRouter (opts) {
   this._opts = opts || {};
@@ -21,11 +17,7 @@ function MainRouter (opts) {
 MainRouter.prototype.makeRouter = function () {
   var router = express.Router ();
 
-  // Load the administrator router.
-  router.use ('/', new AdminRouter ().makeRouter ());
-
-  // Load the application programming interface router
-  router.use ('/api', passport.authenticate (['bearer', 'oauth2-client-password'], {session : false}));
+  router.use (new AdminRouter (this._opts).makeRouter ());
   router.use ('/api', new ApiRouter ().makeRouter ());
 
   return router;

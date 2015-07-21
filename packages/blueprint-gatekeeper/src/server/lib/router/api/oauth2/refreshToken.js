@@ -41,7 +41,7 @@ RefreshTokenRouter.prototype.appendRouter = function (router, strategies) {
   // provide a token.
   router.post('/oauth2/token',
     [
-      passport.authenticate (strategies , {session : false}),
+      passport.authenticate (strategies, {session : false}),
       this._server.token (),
       this._server.errorHandler()
     ]

@@ -3,12 +3,6 @@
 var acorn = require('acorn');
 var walk = require('acorn/dist/walk');
 
-// polyfill for https://github.com/marijnh/acorn/pull/231
-walk.base.ExportNamedDeclaration = walk.base.ExportDefaultDeclaration = function (node, st, c) {
-  return c(node.declaration, st);
-};
-walk.base.ImportDefaultSpecifier = walk.base.ImportNamespaceSpecifier = function () {};
-
 function isScope(node) {
   return node.type === 'FunctionExpression' || node.type === 'FunctionDeclaration' || node.type === 'Program';
 }
@@ -28,26 +22,16 @@ function reallyParse(source) {
     return acorn.parse(source, {
       ecmaVersion: 6,
       allowReturnOutsideFunction: true,
-      sourceType: 'module'
+      allowImportExportEverywhere: true,
+      allowHashBang: true
     });
   } catch (ex) {
-    if (ex.name !== 'SyntaxError') {
-      throw ex;
-    }
-    try {
-      return acorn.parse(source, {
-        ecmaVersion: 6,
-        allowReturnOutsideFunction: true
-      });
-    } catch (ex) {
-      if (ex.name !== 'SyntaxError') {
-        throw ex;
-      }
-      return acorn.parse(source, {
-        ecmaVersion: 5,
-        allowReturnOutsideFunction: true
-      });
-    }
+    return acorn.parse(source, {
+      ecmaVersion: 5,
+      allowReturnOutsideFunction: true,
+      allowImportExportEverywhere: true,
+      allowHashBang: true
+    });
   }
 }
 module.exports = findGlobals;
@@ -119,22 +103,32 @@ function findGlobals(source) {
       }
     }
   });
-  walk.ancestor(ast, {
-    'Identifier': function (node, parents) {
-      var name = node.name;
-      if (name === 'undefined') return;
-      for (var i = 0; i < parents.length; i++) {
-        if (name === 'arguments' && declaresArguments(parents[i])) {
-          return;
-        }
-        if (parents[i].locals && name in parents[i].locals) {
-          return;
-        }
+  function identifier(node, parents) {
+    var name = node.name;
+    if (name === 'undefined') return;
+    for (var i = 0; i < parents.length; i++) {
+      if (name === 'arguments' && declaresArguments(parents[i])) {
+        return;
       }
-      node.parents = parents;
-      globals.push(node);
-    },
-    ThisExpression: function (node, parents) {
+      if (parents[i].locals && name in parents[i].locals) {
+        return;
+      }
+    }
+    if (
+      parents[parents.length - 2] &&
+      parents[parents.length - 2].type === 'TryStatement' &&
+      parents[parents.length - 2].handler &&
+      node === parents[parents.length - 2].handler.param
+    ) {
+      return;
+    }
+    node.parents = parents;
+    globals.push(node);
+  }
+  walk.ancestor(ast, {
+    'VariablePattern': identifier,
+    'Identifier': identifier,
+    'ThisExpression': function (node, parents) {
       for (var i = 0; i < parents.length; i++) {
         if (declaresThis(parents[i])) {
           return;
