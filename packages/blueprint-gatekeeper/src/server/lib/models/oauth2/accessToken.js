@@ -11,7 +11,7 @@ var schema = new Schema ({
   refresh_token : {type: String, index: true},
   client        : {type: Schema.Types.ObjectId, required: true, ref: Client.modelName},
   account       : {type: Schema.Types.ObjectId, ref: Account.modelName},
-  disabled      : {type: Boolean, required: true, default : false}
+  enabled       : {type: Boolean, required: true, default : true}
 });
 
 schema.statics.generateAndSave = function (length, client, user, done) {
@@ -33,7 +33,7 @@ schema.statics.generateAndSave = function (length, client, user, done) {
 schema.statics.newClientToken = function (length, client, scope, done) {
   var token = uid.sync (length);
   var query = {client : client};
-  var data  = {token: token, client: client};
+  var data  = {token: token, client: client, enabled : true};
   var options = {upsert : true, new : true};
 
   this.findOneAndUpdate (query, data, options, done);

@@ -8,7 +8,7 @@ var Client           = require ('../../../models/oauth2/client')
   , AccessToken      = require ('../../../models/oauth2/accessToken')
   , Account          = require ('../../../models/account')
   , bearer           = require ('../../../authentication/bearer')
-  , Oauth2Controller = require ('../../../controllers/oauth2/clientController')
+  , Oauth2Controller = require ('../../../controllers/oauth2Controller')
   ;
 
 const TOKEN_LENGTH = 128;

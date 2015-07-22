@@ -21,11 +21,12 @@ block content
                     th Client access
                     th Details
 
-                for client in clients
-                    tr
-                        td #{client.name}
-                        td #{client.email}
-                        td
-                            input(type="checkbox", name="enabled", checked=client.enabled, data-client-id="#{client.id}" data-size="mini", data-on-text="Enabled", data-off-text="Disabled")
-                        td
-                            a(href="/admin/oauth2/clients/#{client.id}") View details
+                tbody
+                    for client in clients
+                        tr
+                            td #{client.name}
+                            td #{client.email}
+                            td
+                                input(type="checkbox", name="enabled", checked=client.enabled, data-client-id="#{client.id}" data-size="mini", data-on-text="Enabled", data-off-text="Disabled")
+                            td
+                                a(href="/admin/oauth2/clients/#{client.id}") View details

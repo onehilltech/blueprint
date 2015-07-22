@@ -1,0 +1,22 @@
+extends tokens
+
+block append configuration
+    - var currTab = 'users';
+
+block tokenTable
+    table.table.table-striped.table-condensed
+        thead
+            tr
+                th.col-md-2 User
+                th.col-md-4 Token
+                th.col-md-4 Refresh Token
+                th.col-md-1 Access
+                th.col-md-1
+        tbody
+            for token in tokens
+                tr
+                    td #{token.token}
+                    td #{token.refresh_token}
+                    td: a(href="/admin/account/#{token.account}") #{token.account}
+                    td: input(type="checkbox", name="enabled", checked=token.enabled, data-token-id="#{token.id}" data-size="mini", data-on-text="Enabled", data-off-text="Disabled")
+                    td: button.btn.btn-xs.btn-danger.delete-token(type="button" data-token-id="#{token.id}") Delete token

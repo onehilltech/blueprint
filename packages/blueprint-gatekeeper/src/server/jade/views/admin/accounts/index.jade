@@ -22,7 +22,7 @@ block content
                     tr
                         td #{account.username}
                         td
-                            if account.scope.indexOf('admin') != -1
+                            if account.roles.indexOf('admin') != -1
                                 span.glyphicon.glyphicon-ok(aria-hidden="true")
 
                         td

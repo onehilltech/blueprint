@@ -2,9 +2,9 @@ var winston = require ('winston')
   , util    = require ('util')
   , uid     = require ('uid-safe');
 
-var AdminController = require ('../adminController')
-  , Client          = require ('../../models/oauth2/client')
-  , AccessToken     = require ('../../models/oauth2/accessToken')
+var AdminController = require ('./adminController')
+  , Client          = require ('../models/oauth2/client')
+  , AccessToken     = require ('../models/oauth2/accessToken')
   ;
 
 const SECRET_LENGTH = 48;
@@ -24,10 +24,10 @@ Oauth2Controller.prototype.logoutUser = function () {
 };
 
 Oauth2Controller.prototype.lookupClientByParam = function () {
-  return function (req, res, next, client_id) {
-    winston.info ('searching for client ' + client_id);
+  return function (req, res, next, clientId) {
+    winston.info ('searching for client ' + clientId);
 
-    Client.findById (client_id, function (err, client) {
+    Client.findById (clientId, function (err, client) {
       if (err)
         return next (err);
 
@@ -35,6 +35,23 @@ Oauth2Controller.prototype.lookupClientByParam = function () {
         return next (new Error ('Client does not exist'))
 
       req.client = client;
+      next ();
+    });
+  };
+};
+
+Oauth2Controller.prototype.lookupTokenByParam = function () {
+  return function (req, res, next, tokenId) {
+    winston.info ('searching for token ' + tokenId);
+
+    AccessToken.findById (tokenId, function (err, token) {
+      if (err)
+        return next (err);
+
+      if (!token)
+        return next (new Error ('token does not exist'))
+
+      req.token = token;
       next ();
     });
   };
@@ -99,10 +116,50 @@ Oauth2Controller.prototype.enableClient = function () {
       if (err)
         winston.error (err);
 
-      res.send (200, err ? 'false' : 'true');
+      res.status (200).send (err ? 'false' : 'true');
     });
   };
 }
+
+Oauth2Controller.prototype.enableToken = function () {
+  return function (req, res) {
+    req.checkBody ('enabled', 'Enabled is a required Boolean').notEmpty ().isBoolean ();
+
+    var errors = req.validationErrors ();
+
+    if (errors)
+      return res.send (200, 'false');
+
+    // Sanitize the parameters.
+    req.sanitizeBody ('enabled').toBoolean ();
+
+    // Update the client, and save it.
+    var token = req.token;
+    winston.info ('enabling access token %s [state=%s]', token.id, req.body.enabled);
+
+    token.enabled = req.body.enabled;
+    token.save (function (err) {
+      if (err)
+        winston.error (err);
+
+      res.status (200).send (err ? 'false' : 'true');
+    });
+  };
+};
+
+Oauth2Controller.prototype.deleteToken = function () {
+  return function (req, res) {
+    if (!req.token)
+      return res.status (200).send (false);
+
+    var token = req.token;
+    winston.info ('deleting access token %s', token.id);
+
+    token.remove (function (err) {
+      return res.status (200).send (err ? 'true' : 'false');
+    });
+  };
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Views
@@ -147,7 +204,7 @@ Oauth2Controller.prototype.createClient = function () {
     if (errors) {
       winston.error (util.inspect (errors));
 
-      return res.render ('admin/oauth2/clients/new', {
+      return res.render ('views/admin/oauth2/clients/new', {
         input  : req.body,
         errors : errors
       });
@@ -164,8 +221,37 @@ Oauth2Controller.prototype.createClient = function () {
       if (!err)
         return res.redirect ('/admin/oauth2/clients/' + client.id);
 
-      return res.render ('admin/oauth2/clients/new', { errors: errors });
+      return res.render ('views/admin/oauth2/clients/new', { errors: errors });
     });
+  };
+};
+
+Oauth2Controller.prototype.viewTokens = function () {
+  return function (req, res) {
+    res.redirect ('/admin/oauth2/tokens/clients');
+  };
+};
+
+Oauth2Controller.prototype.viewClientTokens = function () {
+  return function (req, res) {
+    AccessToken
+        .find ({user : {$exists : false }})
+        .populate ('client', '_id name')
+        .exec (function (err, tokens) {
+          res.render ('views/admin/oauth2/tokens/clients', {tokens : tokens});
+        });
+  };
+};
+
+Oauth2Controller.prototype.viewUserTokens = function () {
+  return function (req, res) {
+    AccessToken
+        .find ({user : {$exists : true }})
+        .populate ('account', '_id username')
+        .populate ('client', '_id name')
+        .exec (function (err, tokens) {
+          res.render ('views/admin/oauth2/tokens/users', {tokens : tokens});
+        });
   };
 };
 

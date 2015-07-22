@@ -1,0 +1,49 @@
+extends ../../../../layouts/authenticated
+
+block append styles
+    link(href="/assets/css/bootstrap-switch.min.css", rel="stylesheet")
+
+block append scripts
+    script(src="/assets/js/bootstrap-switch.min.js")
+    script.
+        $(function () {
+            var $enabled = $('input[name="enabled"]');
+            $enabled.bootstrapSwitch ();
+            $enabled.on ('switchChange.bootstrapSwitch', function (event, state) {
+                var url = "/admin/oauth2/tokens/" + this.dataset.tokenId + "/enable";
+                $.ajax ({
+                    type        : 'post',
+                    url         : url,
+                    dataType    : "json",
+                    contentType : "application/json",
+                    data        : JSON.stringify({ enabled : state }),
+                    error       : function (res) {
+                        // TODO reset the toggle button
+                    }
+                });
+            });
+
+            $('.delete-token').on ('click', function (ev) {
+                var url = "/admin/oauth2/tokens/" + ev.target.dataset.tokenId;
+                $.ajax ({
+                    type    : 'delete',
+                    url     : url,
+                    success : function (res) {
+                        window.location.href = window.location.href;
+                    },
+                    error   : function (res) {
+                    }
+                });
+            });
+        });
+
+block content
+    div.container
+        h2 Access Tokens
+
+        ul.nav.nav-tabs
+            li(role="presentation", class={active: currTab === 'clients'}): a(href="/admin/oauth2/tokens/clients") Clients
+            li(role="presentation", class={active: currTab === 'users'}): a(href="/admin/oauth2/tokens/users") Users
+
+        block tokenTable
+
