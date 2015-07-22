@@ -3,12 +3,22 @@
  */
 
 $(function () {
-  $('input[name="enabled"]').bootstrapSwitch ();
+  var enabled = $('input[name="enabled"]');
 
-  $('input[name="enabled"]').on ('switchChange.bootstrapSwitch', function (event, state) {
+  enabled.bootstrapSwitch ();
+  enabled.on ('switchChange.bootstrapSwitch', function (event, state) {
     var url = "/admin/oauth2/clients/" + this.dataset.clientId + "/enable";
-    $.post (url, { enabled : state }, function (data) {
-      console.log (data);
+
+    $.ajax ({
+      headers     : { Authorization : 'Bearer ' + window.accessToken },
+      type        : 'post',
+      url         : url,
+      dataType    : "json",
+      contentType : "application/json",
+      data        : JSON.stringify({ enabled : state }),
+      error       : function (res) {
+        // TODO reset the toggle button
+      }
     });
   });
 
@@ -16,8 +26,9 @@ $(function () {
     var url = "/admin/oauth2/clients/" + ev.target.dataset.clientId;
 
     $.ajax ({
-      url     : url,
+      headers : { Authorization : 'Bearer ' + window.accessToken },
       type    : 'delete',
+      url     : url,
       success : function (response) {
         window.location.href = "/admin/oauth2/clients";
       },

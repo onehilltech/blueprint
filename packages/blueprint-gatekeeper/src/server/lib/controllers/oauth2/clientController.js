@@ -2,80 +2,23 @@ var winston = require ('winston')
   , util    = require ('util')
   , uid     = require ('uid-safe');
 
-var Client      = require ('../../models/oauth2/client')
-  , AccessToken = require ('../../models/oauth2/accessToken')
+var AdminController = require ('../adminController')
+  , Client          = require ('../../models/oauth2/client')
+  , AccessToken     = require ('../../models/oauth2/accessToken')
   ;
 
-const SECRET_LENGTH=48;
+const SECRET_LENGTH = 48;
 
 function Oauth2Controller (opts) {
   this._opts = opts || {};
 }
 
+util.inherits (Oauth2Controller, AdminController);
+
 Oauth2Controller.prototype.logoutUser = function () {
   return function (req, res) {
     AccessToken.findByIdAndRemove (req.authInfo.token_id, function (err) {
-      return res.send (200, err ? false : true);
-    });
-  };
-};
-
-Oauth2Controller.prototype.viewClients = function () {
-  return function (req, res) {
-    Client.find ({}, function (err, clients) {
-      return res.render ('views/admin/oauth2/clients/index', {clients: clients});
-    })
-  };
-};
-
-Oauth2Controller.prototype.viewClient = function () {
-  return function (req, res) {
-    if (!req.client)
-      return res.redirect ('/admin/oauth2/clients');
-
-    return res.render ('views/admin/oauth2/clients/details', {
-      client : req.client
-    });
-  };
-};
-
-Oauth2Controller.prototype.newClient = function () {
-  return function (req, res) {
-    res.render ('views/admin/oauth2/clients/new');
-  };
-};
-
-Oauth2Controller.prototype.createClient = function () {
-  return function (req, res) {
-    winston.debug ('validating input parameters');
-
-    req.checkBody ('name', 'Client name is missing').notEmpty ();
-    req.checkBody ('email', 'Contact email acddress is missing').notEmpty ().isEmail ();
-    req.checkBody ('redirect_uri', 'Redirect uri is missing').notEmpty ();
-
-    var errors = req.validationErrors (true);
-
-    if (errors) {
-      winston.error (util.inspect (errors));
-
-      return res.render ('admin/oauth2/clients/new', {
-        input  : req.body,
-        errors : errors
-      });
-    }
-
-    var client = new Client ({
-      name : req.body.name,
-      email : req.body.email,
-      secret : uid.sync (SECRET_LENGTH),
-      redirect_uri : req.body.redirect_uri
-    });
-
-    client.save (function (err) {
-      if (!err)
-        return res.redirect ('/admin/oauth2/clients/' + client.id);
-
-      return res.render ('admin/oauth2/clients/new', { errors: errors });
+      return res.status (200).send (err ? false : true);
     });
   };
 };
@@ -160,6 +103,71 @@ Oauth2Controller.prototype.enableClient = function () {
     });
   };
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Views
+
+Oauth2Controller.prototype.viewClients = function () {
+  var self = this;
+
+  return function (req, res) {
+    Client.find ({}, function (err, clients) {
+      self.renderWithAccessToken (req, res, 'views/admin/oauth2/clients/index', {clients: clients});
+    })
+  };
+};
+
+Oauth2Controller.prototype.viewClient = function () {
+  var self = this;
+
+  return function (req, res) {
+    if (!req.client)
+      return res.redirect ('/admin/oauth2/clients');
+
+    self.renderWithAccessToken (req, res, 'views/admin/oauth2/clients/details', {client : req.client});
+  };
+};
+
+Oauth2Controller.prototype.newClient = function () {
+  return function (req, res) {
+    res.render ('views/admin/oauth2/clients/new');
+  };
+};
+
+Oauth2Controller.prototype.createClient = function () {
+  return function (req, res) {
+    winston.debug ('validating input parameters');
+
+    req.checkBody ('name', 'Client name is missing').notEmpty ();
+    req.checkBody ('email', 'Contact email acddress is missing').notEmpty ().isEmail ();
+    req.checkBody ('redirect_uri', 'Redirect uri is missing').notEmpty ();
+
+    var errors = req.validationErrors (true);
+
+    if (errors) {
+      winston.error (util.inspect (errors));
+
+      return res.render ('admin/oauth2/clients/new', {
+        input  : req.body,
+        errors : errors
+      });
+    }
+
+    var client = new Client ({
+      name : req.body.name,
+      email : req.body.email,
+      secret : uid.sync (SECRET_LENGTH),
+      redirect_uri : req.body.redirect_uri
+    });
+
+    client.save (function (err) {
+      if (!err)
+        return res.redirect ('/admin/oauth2/clients/' + client.id);
+
+      return res.render ('admin/oauth2/clients/new', { errors: errors });
+    });
+  };
+};
 
 exports = module.exports = Oauth2Controller;
 

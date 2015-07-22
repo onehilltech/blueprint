@@ -4,7 +4,7 @@ var winston = require ('winston')
   ;
 
 var AdminController = require ('./adminController')
-  , Account = require ('../models/account')
+  , Account         = require ('../models/account')
   ;
 
 const SECRET_LENGTH = 48;
@@ -100,7 +100,7 @@ AccountController.prototype.createAccount = function () {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// admin methods
+// Views
 
 AccountController.prototype.viewAccounts = function () {
   var self = this;
