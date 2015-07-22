@@ -43,6 +43,7 @@ AdminController.prototype.isLoggedIn = function () {
     if (req.isAuthenticated ())
       return next();
 
+    req.session.returnTo = req.originalUrl || req.url;
     res.redirect ('/admin/login');
   };
 }
@@ -61,7 +62,7 @@ AdminController.prototype.viewLoginPage = function () {
 
 AdminController.prototype.authenticate = function () {
   var opts = {
-    successRedirect : '/admin',
+    successReturnToOrRedirect : '/admin',
     failureRedirect : '/admin/login'
   };
 
