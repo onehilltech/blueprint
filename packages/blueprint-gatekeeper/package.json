@@ -1,12 +1,12 @@
 {
-  "name": "passport-control",
-  "description": "An authentication server for Web application programming interfaces (APIs)",
-  "version": "0.7.0",
+  "name": "gatekeeper",
+  "description": "Authentication framework for Web application programming interfaces (APIs)",
+  "version": "0.7.2",
   "private": true,
   "main": "./lib",
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/onehilltech/passport-control.git"
+    "url": "https://bitbucket.org/onehilltech/gatekeeper.git"
   },
   "dependencies": {
     "bcrypt": "^0.8.3",
