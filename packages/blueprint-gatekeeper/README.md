@@ -1,5 +1,6 @@
-An authentication server and client module for [Passport](http://passportjs.org/). Gatekeeper 
-implements the OAuth 2.0 protocol atop of MongoDB, and is designed to be deployed with any service 
+An authentication server and client module for [Passport](http://passportjs.org/).
+Gatekeeper implements the [OAuth 2.0](http://oauth.net/2/) protocol atop of 
+[MongoDB](https://www.mongodb.org/), and is designed to be deployed with any service 
 that wants to expose an WebAPI for clients via the Internet.
 
 OAuth 2.0 Resource Protection
