@@ -3,10 +3,10 @@ Gatekeeper implements the [OAuth 2.0](http://oauth.net/2/) protocol atop of
 [MongoDB](https://www.mongodb.org/), and is designed to be deployed with any service 
 that wants to expose a protected WebAPI for clients via the Internet.
 
-OAuth 2.0 Resource Protection
+Single Resource Protection
 ==============================
 
-You can configure OAuth 2.0 to protect individual resources as follows:
+You can configure Gatekeeper to protect a single resources as follows:
 
 ```javascript
 // Load Passport and Gatekeeper modules.
@@ -30,9 +30,13 @@ app.get ('/protected/resource/uri', [
 ]);
 ```
 
-This is good if you do not need to protect a large number of resources, or individual 
-resources are not located under the same base URI. If you need to protect a set of 
-resources that have the same base URI, then use the following approach:
+Base URI Protection
+==============================
+
+Single resource protectection is good if you do not need to protect a large number 
+of resources, or individual resources are not located under the same base URI. 
+If you need to protect a set of resources that have the same base URI, then use 
+the following approach:
 
 ```javascript
 // Load passport and mayipass modules.
