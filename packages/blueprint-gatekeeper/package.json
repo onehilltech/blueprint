@@ -1,7 +1,7 @@
 {
   "name": "passport-control",
   "description": "An authentication server for Web application programming interfaces (APIs)",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "main": "./lib",
   "repository": {
