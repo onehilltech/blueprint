@@ -8,7 +8,7 @@ OAuth 2.0 Resource Protection
 
 You can configure OAuth 2.0 to protect individual resources as follows:
 
-```
+```javascript
 // Load Passport and Gatekeeper modules.
 var passport   = require ('passport')
   , gatekeeper = require ('gatekeeper')
@@ -34,7 +34,7 @@ This is good if you do not need to protect a large number of resources, or indiv
 resources are not located under the same base URI. If you need to protect a set of 
 resources that have the same base URI, then use the following approach:
 
-```
+```javascript
 // Load passport and mayipass modules.
 var passport   = require ('passport')
   , gatekeeper = require ('gatekeeper')
