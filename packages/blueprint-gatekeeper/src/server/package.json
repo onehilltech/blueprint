@@ -3,7 +3,7 @@
   "description": "An authentication server for Web application programming interfaces (APIs)",
   "version": "0.6.0",
   "private": true,
-  "main": "app.js",
+  "main": "./lib",
   "repository": {
     "type": "git",
     "url": "https://bitbucket.org/onehilltech/passport-control.git"
