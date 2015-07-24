@@ -14,7 +14,15 @@ var schema = new Schema ({
   enabled       : {type: Boolean, required: true, default : true}
 });
 
-schema.statics.generateAndSave = function (length, client, user, done) {
+/**
+ * Create a new user token, and save the token to the database.
+ *
+ * @param length
+ * @param client
+ * @param user
+ * @param done
+ */
+schema.statics.newUserToken = function (length, client, user, done) {
   var token = uid.sync (length);
   var refreshToken = uid.sync (length);
 
@@ -30,6 +38,14 @@ schema.statics.generateAndSave = function (length, client, user, done) {
   });
 };
 
+/**
+ * Create a new client token and add it to the database.
+ *
+ * @param length
+ * @param client
+ * @param scope
+ * @param done
+ */
 schema.statics.newClientToken = function (length, client, scope, done) {
   var token = uid.sync (length);
   var query = {client : client};
@@ -39,7 +55,15 @@ schema.statics.newClientToken = function (length, client, scope, done) {
   this.findOneAndUpdate (query, data, options, done);
 };
 
-schema.statics.refreshAndSave = function (length, client, refreshToken, done) {
+/**
+ * Refresh an access token.
+ *
+ * @param length
+ * @param client
+ * @param refreshToken
+ * @param done
+ */
+schema.statics.refresh = function (length, client, refreshToken, done) {
   this.findOne ({client : client, refresh_token: refreshToken}, function (err, at) {
     if (err)
       return done (err);

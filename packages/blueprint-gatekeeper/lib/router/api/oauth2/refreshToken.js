@@ -25,7 +25,7 @@ function RefreshTokenRouter (opts, server) {
       // token. If we cannot find the original access token, then we need to
       // return an error to the user.
       winston.log ('client %s is refreshing access token', client.id);
-      AccessToken.refreshAndSave (self._tokenLength, client.id, refresh_token, function (err, accessToken, refreshToken) {
+      AccessToken.refresh (self._tokenLength, client.id, refresh_token, function (err, accessToken, refreshToken) {
         if (err)
           return done (new oauth2orize.TokenError ('Failed to refresh token', 'invalid_request'));
 

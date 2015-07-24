@@ -68,7 +68,7 @@ function AuthorizationCodeRouter (opts, server) {
           if (err)
             return done (err);
 
-          AccessToken.generateAndSave (done);
+          AccessToken.newUserToken (done);
         });
       });
     }));

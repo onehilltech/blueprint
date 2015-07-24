@@ -31,7 +31,7 @@ function initializeExchanges (server) {
         return done (new oauth2orize.TokenError (err.message, 'invalid_client'));
 
       winston.log('info', 'client %s generating access/refresh token for %s', client.id, username);
-      AccessToken.generateAndSave (TOKEN_LENGTH, client.id, account.id, done);
+      AccessToken.newUserToken (TOKEN_LENGTH, client.id, account.id, done);
     });
   }));
 
@@ -79,7 +79,7 @@ function initializeExchanges (server) {
     // token. If we cannot find the original access token, then we need to
     // return an error to the user.
     winston.log ('info', 'client %s: refreshing access token', client.id);
-    AccessToken.refreshAndSave (TOKEN_LENGTH, client.id, refresh_token, function (err, accessToken, refreshToken) {
+    AccessToken.refresh (TOKEN_LENGTH, client.id, refresh_token, function (err, accessToken, refreshToken) {
       if (err)
         return done (new oauth2orize.TokenError ('Failed to refresh token', 'invalid_request'));
 
