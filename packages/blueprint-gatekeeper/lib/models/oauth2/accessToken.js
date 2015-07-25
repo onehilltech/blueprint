@@ -26,16 +26,11 @@ schema.statics.newUserToken = function (length, client, user, done) {
   var token = uid.sync (length);
   var refreshToken = uid.sync (length);
 
-  var accessToken = new this ({
-    token : token,
-    refresh_token : refreshToken,
-    account : user,
-    client : client
-  });
+  var query   = {account : user, client : client};
+  var data    = {token : token, refresh_token : refreshToken, enabled : true};
+  var options = {upsert : true, new : true};
 
-  accessToken.save (function (err) {
-    return err ? done (err) : done (null, token, refreshToken);
-  });
+  this.findOneAndUpdate (query, data, options, done);
 };
 
 /**
@@ -47,9 +42,9 @@ schema.statics.newUserToken = function (length, client, user, done) {
  * @param done
  */
 schema.statics.newClientToken = function (length, client, scope, done) {
-  var token = uid.sync (length);
-  var query = {client : client};
-  var data  = {token: token, client: client, enabled : true};
+  var token   = uid.sync (length);
+  var query   = {client : client};
+  var data    = {token: token, client: client, enabled : true};
   var options = {upsert : true, new : true};
 
   this.findOneAndUpdate (query, data, options, done);
@@ -64,18 +59,10 @@ schema.statics.newClientToken = function (length, client, scope, done) {
  * @param done
  */
 schema.statics.refresh = function (length, client, refreshToken, done) {
-  this.findOne ({client : client, refresh_token: refreshToken}, function (err, at) {
-    if (err)
-      return done (err);
+  var query = {client : client, refresh_token: refreshToken};
+  var data  = {token : uid.sync (length), refresh_token : uid.sync (length)};
 
-    // Refresh and save the access token.
-    var newToken = at.token = uid.sync (length);
-    var newRefreshToken = at.refresh_token = uid.sync (length);
-
-    at.save (function (err) {
-      return done (err, newToken, newRefreshToken);
-    });
-  });
+  this.findOneAndUpdate (query, data, done);
 };
 
 const COLLECTION_NAME = 'gatekeeper_oauth2_accesstoken';
