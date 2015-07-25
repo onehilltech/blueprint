@@ -1,16 +1,19 @@
 var mongoose = require ('mongoose'),
     bcrypt   = require ('bcrypt');
 
-var SALT_WORK_FACTOR = 10;
+const SALT_WORK_FACTOR = 10;
+const DEFAULT_ROLES = ['user'];
+
 var Schema = mongoose.Schema;
 
 var schema = new Schema ({
   username : { type: String, index: true, unique: true, trim: true, required: true },
-  password : { type: String, trim: true },
+  password : { type: String },
   email    : { type: String, index: true, unique: true, trim: true, required: true },
-  enabled  : { type: Boolean, default: true },
-  scope    : { type: [String]},
-  roles    : { type: [String]}
+
+  // Access control fields.
+  enabled  : { type: Boolean,  default: true },
+  roles    : { type: [String], default: DEFAULT_ROLES}
 });
 
 /**
@@ -47,6 +50,7 @@ schema.pre ('save', function (next) {
  * to verify its correctness.
  *
  * @param[in]           password          The user's password
+ * @param[in]           callback          Callback function
  */
 schema.methods.verifyPassword = function (password, callback) {
   bcrypt.compare (password, this.password, callback);
