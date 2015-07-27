@@ -1,15 +1,14 @@
 var winston       = require ('winston')
-  , LocalStrategy = require ('passport-local').Strategy;
+  , LocalStrategy = require ('passport-local').Strategy
+  , Account = require ('../models/account');
 
-var  Account = require ('../models/account');
-
-module.exports = function (opts) {
-  var opts = opts || {};
+module.exports = function (mongoose) {
+  var model = mongoose.models[Account.modelName];
 
   return new LocalStrategy (opts, function (username, password, done) {
     winston.info ('using password authentication for ' + username);
 
-    Account.findOne ({ username: username }, function (err, user) {
+    model.findOne ({ username: username }, function (err, user) {
       if (err)
         return done (err);
 

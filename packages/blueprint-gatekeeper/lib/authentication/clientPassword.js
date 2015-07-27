@@ -1,14 +1,16 @@
-var winston = require ('winston')
+var winston                = require ('winston')
   , ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy
-  , Client = require ('../models/oauth2/client')
+  , Client                  = require ('../models/oauth2/client')
   ;
 
-module.exports = exports = function () {
+module.exports = exports = function (mongoose) {
+  var model = mongoose.models[Client.modelName];
+
   return new ClientPasswordStrategy (
     function (id, secret, done) {
       winston.info ('authenticating login client %s', id);
 
-      Client.findById (id, function (err, client) {
+      model.findById (id, function (err, client) {
         if (err) 
           return done (err);
 
