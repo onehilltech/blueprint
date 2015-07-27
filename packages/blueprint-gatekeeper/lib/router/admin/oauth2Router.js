@@ -2,7 +2,7 @@ var express = require ('express')
   , winston = require ('winston')
   ;
 
-var OAuth2ViewController = require ('../../controllers/oauth2ViewController')
+var OAuth2ViewController = require ('../../controllers/internal/oauth2ViewController')
   ;
 
 function Oauth2AdminRouter (opts) {

@@ -1,48 +1,43 @@
 var winston = require ('winston')
-  , util    = require ('util')
   , uid     = require ('uid-safe');
 
-var AdminController = require ('./adminViewController')
-  , Client          = require ('../models/oauth2/client')
-  , AccessToken     = require ('../models/oauth2/accessToken')
+var Client      = require ('../models/oauth2/client')
+  , AccessToken = require ('../models/oauth2/accessToken')
   ;
 
 const SECRET_LENGTH = 48;
 
-function Oauth2Controller (opts) {
-  this._opts = opts || {};
+function Oauth2Controller (models) {
+  this._accessTokenModel = models[AccessToken.modelName];
+  this._clientModel = models[Client.modelName];
 }
 
-Oauth2Controller.prototype.logoutUser = function () {
-  return function (req, res) {
-    AccessToken.findByIdAndRemove (req.authInfo.token_id, function (err) {
-      return res.status (200).send (err ? false : true);
-    });
-  };
-};
-
 Oauth2Controller.prototype.lookupClientByParam = function () {
+  var self = this;
+
   return function (req, res, next, clientId) {
     winston.info ('searching for client ' + clientId);
 
-    Client.findById (clientId, function (err, client) {
+    self._clientModel.findById (clientId, function (err, client) {
       if (err)
         return next (err);
 
       if (!client)
-        return next (new Error ('Client does not exist'))
+        return next (new Error ('Client does not exist'));
 
       req.client = client;
-      next ();
+      return next ();
     });
   };
 };
 
 Oauth2Controller.prototype.lookupTokenByParam = function () {
+  var self = this;
+
   return function (req, res, next, tokenId) {
     winston.info ('searching for token ' + tokenId);
 
-    AccessToken.findById (tokenId, function (err, token) {
+    self._accessTokenModel.findById (tokenId, function (err, token) {
       if (err)
         return next (err);
 
@@ -53,20 +48,36 @@ Oauth2Controller.prototype.lookupTokenByParam = function () {
       next ();
     });
   };
-}
+};
+
+Oauth2Controller.prototype.logoutUser = function () {
+  var self = this;
+
+  return function (req, res) {
+    self._accessTokenModel.findByIdAndRemove (req.authInfo.token_id, function (err) {
+      return res.status (200).send (err ? false : true);
+    });
+  };
+};
 
 Oauth2Controller.prototype.deleteClient = function () {
   return function (req, res) {
+    if (!req.client)
+      return res.status (404).send ();
+
     var client = req.client;
 
     client.remove (function (err) {
-      return res.send (200, err ? 'true' : 'false');
+      return res.send (200, err ? false : true);
     });
   };
 };
 
 Oauth2Controller.prototype.refreshSecret = function () {
   return function (req, res) {
+    if (!req.client)
+      return res.status (404).send ();
+
     var newSecret = uid.sync (SECRET_LENGTH);
     var client = req.client;
 
@@ -80,28 +91,31 @@ Oauth2Controller.prototype.refreshSecret = function () {
 
 Oauth2Controller.prototype.updateClient = function () {
   return function (req, res) {
-    winston.info (req.body);
+    if (!req.client)
+      return res.status (404).send ();
 
     var client = req.client;
-
     client.name = req.body.name;
     client.redirect_uri = req.body.redirect_uri;
     client.email = req.body.email;
 
     client.save (function (err) {
-      res.send (200, err ? false : true);
+      res.status (200).send (err ? false : true);
     });
   }
 };
 
 Oauth2Controller.prototype.enableClient = function () {
   return function (req, res) {
+    if (!req.client)
+      return res.status (404).send ();
+
     req.checkBody ('enabled', 'Enabled is a required Boolean').notEmpty ().isBoolean ();
 
     var errors = req.validationErrors ();
 
     if (errors)
-      return res.send (200, 'false');
+      return res.status (400).send (errors);
 
     // Sanitize the parameters.
     req.sanitizeBody ('enabled').toBoolean ();
@@ -111,22 +125,22 @@ Oauth2Controller.prototype.enableClient = function () {
     client.enabled = req.body.enabled;
 
     client.save (function (err) {
-      if (err)
-        winston.error (err);
-
-      res.status (200).send (err ? 'false' : 'true');
+      res.status (200).send (err ? false : true);
     });
   };
-}
+};
 
 Oauth2Controller.prototype.enableToken = function () {
   return function (req, res) {
+    if (!req.token)
+      return res.status (404).send ();
+
     req.checkBody ('enabled', 'Enabled is a required Boolean').notEmpty ().isBoolean ();
 
     var errors = req.validationErrors ();
 
     if (errors)
-      return res.send (200, 'false');
+      return res.status (400).send (errors);
 
     // Sanitize the parameters.
     req.sanitizeBody ('enabled').toBoolean ();
@@ -140,7 +154,7 @@ Oauth2Controller.prototype.enableToken = function () {
       if (err)
         winston.error (err);
 
-      res.status (200).send (err ? 'false' : 'true');
+      res.status (200).send (err ? false : true);
     });
   };
 };
@@ -148,13 +162,13 @@ Oauth2Controller.prototype.enableToken = function () {
 Oauth2Controller.prototype.deleteToken = function () {
   return function (req, res) {
     if (!req.token)
-      return res.status (200).send (false);
+      return res.status (404).send (false);
 
     var token = req.token;
     winston.info ('deleting access token %s', token.id);
 
     token.remove (function (err) {
-      return res.status (200).send (err ? 'true' : 'false');
+      return res.status (200).send (err ? false : true);
     });
   };
 };

@@ -3,9 +3,9 @@ var winston = require ('winston')
   , uid     = require ('uid-safe');
 
 var ViewController   = require ('./viewController')
-  , Oauth2Controller = require ('./oauth2Controller')
-  , Client           = require ('../models/oauth2/client')
-  , AccessToken      = require ('../models/oauth2/accessToken')
+  , Oauth2Controller = require ('./../oauth2Controller')
+  , Client           = require ('../../models/oauth2/client')
+  , AccessToken      = require ('../../models/oauth2/accessToken')
   ;
 
 const SECRET_LENGTH = 48;

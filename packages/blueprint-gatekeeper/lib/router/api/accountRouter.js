@@ -14,10 +14,10 @@ function AccountRouter (opts) {
 
 util.inherits (AccountRouter, ProtectedRouter);
 
-AccountRouter.prototype.makeRouter = function () {
+AccountRouter.prototype.makeRouter = function (models) {
   winston.info ('making account router');
 
-  var accountController = new AccountController ();
+  var accountController = new AccountController (models);
   var router = this.newRouter ();
 
   router.param  ('account_id', accountController.lookupAccountParam ());

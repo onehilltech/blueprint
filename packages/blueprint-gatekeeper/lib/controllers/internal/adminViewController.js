@@ -4,7 +4,7 @@ var passport = require ('passport')
   , util     = require ('util')
   ;
 
-var local          = require ('../authentication/local')
+var local          = require ('../../authentication/local')
   , ViewController = require ('./viewController')
   ;
 

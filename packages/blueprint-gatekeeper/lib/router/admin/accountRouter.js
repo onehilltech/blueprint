@@ -2,7 +2,7 @@ var express           = require ('express')
   , winston           = require ('winston')
   ;
 
-var AccountViewController = require ('../../controllers/accountViewController')
+var AccountViewController = require ('../../controllers/internal/accountViewController')
   ;
 
 function AccountRouter (opts) {

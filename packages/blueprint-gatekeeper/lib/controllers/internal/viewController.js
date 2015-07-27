@@ -3,7 +3,7 @@ var passport = require ('passport')
   , winston  = require ('winston')
   ;
 
-var config = require ('../../config').get ()
+var config = require ('../../../config/index').get ()
   ;
 
 function ViewController () {

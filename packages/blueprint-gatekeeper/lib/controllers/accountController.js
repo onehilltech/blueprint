@@ -8,23 +8,26 @@ var Account = require ('../models/account')
 
 const SECRET_LENGTH = 48;
 
-function AccountController (opts) {
+function AccountController (models) {
   this._opts = opts || {};
+  this._model = models[Account.modelName];
 }
 
 AccountController.prototype.lookupAccountParam = function () {
-  return function (req, res, next, account_id) {
-    winston.info ('searching for account ' + account_id);
+  var self = this;
 
-    Account.findById (account_id, function (err, account) {
+  return function (req, res, next, accountId) {
+    winston.info ('searching for account ' + accountId);
+
+    self._model.findById (accountId, function (err, account) {
       if (err)
         return next (err);
 
       if (!account)
-        return next (new Error ('account does not exist'))
+        return next (new Error ('Account does not exist'));
 
       req.account = account;
-      next ();
+      return next ();
     });
   };
 };
@@ -73,6 +76,7 @@ AccountController.prototype.updateScope = function () {
 
     var account = req.account;
     account.scope = req.body.scope;
+
     account.save (function (err) {
       return res.status (200).send (err ? false : true);
     });
@@ -80,8 +84,10 @@ AccountController.prototype.updateScope = function () {
 };
 
 AccountController.prototype.createAccount = function () {
+  var self = this;
+
   return function (req, res) {
-    var account = new Account ({
+    var account = new self._model ({
       username : req.body.username,
       password : req.body.password,
       email    : req.body.email

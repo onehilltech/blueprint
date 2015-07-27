@@ -124,11 +124,11 @@ function OAuth2Router (opts) {
  *
  * @returns {Router}
  */
-OAuth2Router.prototype.makeRouter = function () {
+OAuth2Router.prototype.makeRouter = function (models) {
   winston.info ('making OAuth 2.0 router');
 
   var router = express.Router ();
-  var oauth2Controller = new Oauth2Controller (this._opts);
+  var oauth2Controller = new Oauth2Controller (models);
 
   // Define the logout route for Oauth2.
   router.get ('/oauth2/logout',

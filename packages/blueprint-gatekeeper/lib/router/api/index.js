@@ -10,12 +10,12 @@ function ApiRouter (opts) {
   this._opts = opts || {};
 }
 
-ApiRouter.prototype.makeRouter = function () {
+ApiRouter.prototype.makeRouter = function (models) {
   var router = express.Router ();
 
   routerFiles.forEach (function (file) {
     var Router = require (file);
-    router.use (new Router ().makeRouter ());
+    router.use (new Router ().makeRouter (models));
   });
 
   return router;

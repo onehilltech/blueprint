@@ -4,7 +4,7 @@ var winston = require ('winston')
   ;
 
 var ViewController    = require ('./viewController')
-  , AccountController = require ('./accountController')
+  , AccountController = require ('./../accountController')
   ;
 
 const SECRET_LENGTH = 48;
