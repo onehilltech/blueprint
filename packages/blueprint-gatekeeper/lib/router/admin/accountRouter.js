@@ -1,6 +1,8 @@
 var express           = require ('express')
   , winston           = require ('winston')
-  , AccountController = require ('../../controllers/accountController')
+  ;
+
+var AccountViewController = require ('../../controllers/accountViewController')
   ;
 
 function AccountRouter (opts) {
@@ -10,12 +12,12 @@ function AccountRouter (opts) {
 
 AccountRouter.prototype.makeRouter = function () {
   var router = express.Router ();
-  var accountController = new AccountController ();
+  var accountViewController = new AccountViewController ();
 
   // Define the account routes.
-  router.param ('account_id', accountController.lookupAccountParam ());
-  router.get   ('/admin/accounts', accountController.viewAccounts ());
-  router.get   ('/admin/accounts/:account_id', accountController.viewAccount ());
+  router.param ('account_id', accountViewController.base.lookupAccountParam ());
+  router.get   ('/admin/accounts', accountViewController.viewAccounts ());
+  router.get   ('/admin/accounts/:account_id', accountViewController.viewAccount ());
   
   return router;
 };

@@ -1,11 +1,10 @@
- var request = require ('supertest')
-   , assert = require ('assert')
+ var request  = require ('supertest')
+   , assert   = require ('assert')
    , passport = require ('passport')
-   , winston = require ('winston')
+   , winston  = require ('winston')
    ;
 
- var Server  = require ('../../lib/server')
-   , lib     = require ('../../lib')
+ var lib     = require ('../../lib')
    , config  = require ('../config')
    , Account = lib.models.Account
    ;

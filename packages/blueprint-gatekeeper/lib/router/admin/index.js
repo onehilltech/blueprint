@@ -3,7 +3,7 @@ var express  = require ('express')
   , passport = require ('passport')
   ;
 
-var AdminController = require ('../../controllers/adminController')
+var AdminViewController = require ('../../controllers/')
   ;
 
 const protectedRoutes = [
@@ -18,17 +18,17 @@ function AdminRouter (opts) {
 AdminRouter.prototype.makeRouter = function () {
   winston.info ('making administrator router');
   var router = express.Router ();
-  var adminController = new AdminController ();
+  var adminViewController = new AdminViewController ();
 
   // Get the home page for the administration portal.
   router.get  ('/admin', [
-    adminController.isLoggedIn (),
-    adminController.viewHomePage ()
+    adminViewController.isLoggedIn (),
+    adminViewController.viewHomePage ()
   ]);
 
-  router.get  ('/admin/login', adminController.viewLoginPage ());
-  router.post ('/admin/login', adminController.authenticate ());
-  router.get  ('/admin/logout', adminController.logout ());
+  router.get  ('/admin/login', adminViewController.viewLoginPage ());
+  router.post ('/admin/login', adminViewController.authenticate ());
+  router.get  ('/admin/logout', adminViewController.logout ());
 
   // Load the protected routes (i.e., the routes that require the user to
   // be logged in to access).
@@ -38,7 +38,7 @@ AdminRouter.prototype.makeRouter = function () {
     var ProtectedRouter = require (protectedRoute);
     var protectedRouter = new ProtectedRouter (self._opts);
 
-    router.use (protectedRouter.baseuri, adminController.isLoggedIn ());
+    router.use (protectedRouter.baseuri, adminViewController.isLoggedIn ());
     router.use ('/', protectedRouter.makeRouter ());
   });
 

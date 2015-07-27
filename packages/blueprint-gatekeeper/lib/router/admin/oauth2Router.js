@@ -1,6 +1,8 @@
-var express           = require ('express')
-  , winston           = require ('winston')
-  , OAuth2Controller  = require ('../../controllers/oauth2Controller')
+var express = require ('express')
+  , winston = require ('winston')
+  ;
+
+var OAuth2ViewController = require ('../../controllers/oauth2ViewController')
   ;
 
 function Oauth2AdminRouter (opts) {
@@ -10,31 +12,31 @@ function Oauth2AdminRouter (opts) {
 
 Oauth2AdminRouter.prototype.makeRouter = function () {
   var router = express.Router ();
-  var oauth2Controller = new OAuth2Controller ();
+  var oauth2ViewController = new OAuth2ViewController ();
 
   router.get    ('/admin/oauth2', function (req, res) {
     return res.render ('views/admin/oauth2/index');
   });
 
   // Define the client administration routes.
-  router.param  ('client_id', oauth2Controller.lookupClientByParam ());
-  router.param  ('token_id', oauth2Controller.lookupTokenByParam ());
+  router.param  ('client_id', oauth2ViewController.base.lookupClientByParam ());
+  router.param  ('token_id', oauth2ViewController.base.lookupTokenByParam ());
 
-  router.get    ('/admin/oauth2/clients', oauth2Controller.viewClients ());
-  router.get    ('/admin/oauth2/clients/new', oauth2Controller.newClient ());
-  router.post   ('/admin/oauth2/clients/new', oauth2Controller.createClient ());
+  router.get    ('/admin/oauth2/clients', oauth2ViewController.viewClients ());
+  router.get    ('/admin/oauth2/clients/new', oauth2ViewController.newClient ());
+  router.post   ('/admin/oauth2/clients/new', oauth2ViewController.createClient ());
 
-  router.get    ('/admin/oauth2/clients/:client_id', oauth2Controller.viewClient ());
-  router.post   ('/admin/oauth2/clients/:client_id', oauth2Controller.updateClient ());
-  router.delete ('/admin/oauth2/clients/:client_id', oauth2Controller.deleteClient ());
-  router.post   ('/admin/oauth2/clients/:client_id/enable', oauth2Controller.enableClient ());
-  router.get    ('/admin/oauth2/clients/:client_id/refresh-secret', oauth2Controller.refreshSecret ());
+  router.get    ('/admin/oauth2/clients/:client_id', oauth2ViewController.viewClient ());
+  router.post   ('/admin/oauth2/clients/:client_id', oauth2ViewController.base.updateClient ());
+  router.delete ('/admin/oauth2/clients/:client_id', oauth2ViewController.base.deleteClient ());
+  router.post   ('/admin/oauth2/clients/:client_id/enable', oauth2ViewController.base.enableClient ());
+  router.get    ('/admin/oauth2/clients/:client_id/refresh-secret', oauth2ViewController.base.refreshSecret ());
 
-  router.get    ('/admin/oauth2/tokens', oauth2Controller.viewTokens ());
-  router.get    ('/admin/oauth2/tokens/clients', oauth2Controller.viewClientTokens ());
-  router.get    ('/admin/oauth2/tokens/users', oauth2Controller.viewUserTokens ());
-  router.delete ('/admin/oauth2/tokens/:token_id', oauth2Controller.deleteToken ());
-  router.post   ('/admin/oauth2/tokens/:token_id/enable', oauth2Controller.enableToken ());
+  router.get    ('/admin/oauth2/tokens', oauth2ViewController.viewTokens ());
+  router.get    ('/admin/oauth2/tokens/clients', oauth2ViewController.viewClientTokens ());
+  router.get    ('/admin/oauth2/tokens/users', oauth2ViewController.viewUserTokens ());
+  router.delete ('/admin/oauth2/tokens/:token_id', oauth2ViewController.base.deleteToken ());
+  router.post   ('/admin/oauth2/tokens/:token_id/enable', oauth2ViewController.base.enableToken ());
 
   return router;
 };

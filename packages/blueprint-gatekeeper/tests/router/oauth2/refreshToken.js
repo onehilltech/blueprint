@@ -25,7 +25,7 @@ var seed   = require ('../../../data/seeds/default')
         return done (err);
 
       // Seed the database with an existing access token.
-      AccessToken.generateAndSave (256, client.id, user.id, function (err, token, refresh) {
+      AccessToken.newUserToken (256, client.id, user.id, function (err, token, refresh) {
         if (err)
           return done (err);
 

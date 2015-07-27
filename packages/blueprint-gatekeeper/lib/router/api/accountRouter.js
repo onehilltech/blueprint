@@ -21,6 +21,7 @@ AccountRouter.prototype.makeRouter = function () {
   var router = this.newRouter ();
 
   router.param  ('account_id', accountController.lookupAccountParam ());
+  router.post   ('/accounts', accountController.createAccount ());
   router.delete ('/accounts/:account_id', accountController.deleteAccount ());
   router.post   ('/accounts/:account_id/enable', accountController.enableAccount ());
   router.post   ('/accounts/:account_id/scope', accountController.updateScope ());

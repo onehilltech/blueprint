@@ -31,7 +31,7 @@ describe ('Oauth2Router', function () {
         if (err)
           return done(err);
 
-        AccessToken.generateAndSave(256, client.id, user.id, function (err, at, rt) {
+        AccessToken.newUserToken(256, client.id, user.id, function (err, at, rt) {
           if (err)
             return done(err);
 

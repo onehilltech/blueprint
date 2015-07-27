@@ -3,8 +3,7 @@ var winston = require ('winston')
   , http    = require ('http')
   ;
 
-var AdminController = require ('./adminController')
-  , Account         = require ('../models/account')
+var Account = require ('../models/account')
   ;
 
 const SECRET_LENGTH = 48;
@@ -12,11 +11,6 @@ const SECRET_LENGTH = 48;
 function AccountController (opts) {
   this._opts = opts || {};
 }
-
-util.inherits (AccountController, AdminController);
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// api methods
 
 AccountController.prototype.lookupAccountParam = function () {
   return function (req, res, next, account_id) {
@@ -97,31 +91,5 @@ AccountController.prototype.createAccount = function () {
       return res.status (200).send (err ? false : true);
     });
   };
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Views
-
-AccountController.prototype.viewAccounts = function () {
-  var self = this;
-
-  return function (req, res) {
-    Account.find ({}, function (err, accounts) {
-      self.renderWithAccessToken (req, res, 'views/admin/accounts/index', {accounts : accounts});
-    });
-  };
 };
-
-AccountController.prototype.viewAccount = function () {
-  var self = this;
-
-  return function (req, res) {
-    if (!req.account)
-      return res.redirect ('/admin/accounts');
-
-    self.renderWithAccessToken (req, res, 'views/admin/accounts/details',  {account : req.account});
-  };
-};
-
-exports = module.exports = AccountController;
 
