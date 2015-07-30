@@ -1,0 +1,19 @@
+{
+  "name": "blueprint.js",
+
+  "author": "James H. Hill",
+
+  "version": "0.0.1",
+
+  "description": "a lightweight framework for creating real-time web applications",
+
+  "main": "./lib",
+
+  "dependencies" : {
+
+  },
+
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+}

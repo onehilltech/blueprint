@@ -1,0 +1,1 @@
+exports.BaseController = require ('./BaseController');
