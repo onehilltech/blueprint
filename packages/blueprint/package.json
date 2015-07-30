@@ -3,7 +3,7 @@
 
   "author": "James H. Hill",
 
-  "version": "0.0.1",
+  "version": "0.0.0",
 
   "description": "a lightweight framework for creating real-time web applications",
 
@@ -15,5 +15,5 @@
 
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  }
 }
