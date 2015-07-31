@@ -29,3 +29,5 @@ BaseController.prototype.handleError = function (err, res, status, message, call
   if (callback)
     this.notifyCallback (err ? err : new Error (message));
 };
+
+module.exports = exports = BaseController;
