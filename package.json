@@ -1,5 +1,5 @@
 {
-  "name": "blueprint.js",
+  "name": "blueprint",
   "author": "James H. Hill",
   "version": "0.0.0",
   "description": "a lightweight framework for creating real-time web applications",
@@ -9,14 +9,15 @@
     "cookie-parser": "^1.3.5",
     "express": "^4.13.1",
     "express-session": "^1.11.3",
-    "morgan": "^1.6.1"
+    "express-validator": "^2.13.0",
+    "morgan": "^1.6.1",
+    "winston": "^1.0.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/onehilltech/blueprint.js.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/onehilltech/blueprint.js.git"
   }
 }
