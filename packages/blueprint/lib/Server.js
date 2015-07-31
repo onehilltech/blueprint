@@ -5,9 +5,14 @@ var express      = require ('express')
   , cookieParser = require ('cookie-parser')
   , morgan       = require ('morgan')
   , winston      = require ('winston')
+  , path         = require ('path')
   ;
 
-function Server (basePath, opts) {
+const PATH_VIEWS = 'views';
+const DEFAULT_VIEW_ENGINE = 'jade';
+const DEFAULT_PORT = 8080;
+
+function Server (appPath, opts) {
   this._opts = opts || {};
   this._app = express ();
 
@@ -24,7 +29,9 @@ function Server (basePath, opts) {
   if (this._opts.session)
     this._app.use (session (config.session));
 
-  this._app.use (express.static (path.join (basePath, '/public_html')));
+  // Setup the location of the views.
+  this._app.set ('views', path.join (appPath, PATH_VIEWS));
+  this._app.set ('view engine', DEFAULT_VIEW_ENGINE);
 }
 
 /**
@@ -34,12 +41,17 @@ Server.prototype.use = function () {
   this._app.use (arguments);
 };
 
+Server.prototype.static = function (path) {
+  this._app.use (express.static (path));
+};
+
 /**
  * Listen for request on the specified port.
  *
  * @param port
  */
 Server.prototype.listen = function (port) {
+  port = port || DEFAULT_PORT;
   var self = this;
 
   this._server = this._app.listen (port, function () {
