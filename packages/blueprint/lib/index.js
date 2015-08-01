@@ -15,11 +15,11 @@ Object.defineProperty (exports, 'env', {
 });
 
 Object.defineProperty (exports, 'models', {
-  get : function () { app.models },
+  get : function () { return app.models },
 });
 
 Object.defineProperty (exports, 'config', {
-  get : function () { app.config },
+  get : function () { return app.config },
 });
 
 exports.Application = function (appPath) {
