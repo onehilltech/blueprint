@@ -38,7 +38,7 @@ function Server (appPath, opts) {
  * Use a middleware with the server.
  */
 Server.prototype.use = function () {
-  this._app.use (arguments);
+  this._app.use.apply (this._app, arguments);
 };
 
 Server.prototype.static = function (path) {
