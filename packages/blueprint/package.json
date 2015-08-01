@@ -10,6 +10,7 @@
     "express": "^4.13.1",
     "express-session": "^1.11.3",
     "express-validator": "^2.13.0",
+    "jade": "^1.11.0",
     "morgan": "^1.6.1",
     "require-all": "^1.1.0",
     "winston": "^1.0.1"
