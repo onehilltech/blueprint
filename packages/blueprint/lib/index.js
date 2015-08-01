@@ -27,3 +27,6 @@ exports.controller = function (controller, base) {
 
   util.inherits (controller, base);
 };
+
+// Export the current environment.
+exports.env = app.env;
