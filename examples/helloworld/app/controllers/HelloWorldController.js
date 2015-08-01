@@ -14,10 +14,4 @@ HelloWorldController.prototype.echoName = function (callback) {
   };
 };
 
-HelloWorldController.prototype.lookupParam = function () {
-  return function (res, req, param, next) {
-    return next ();
-  };
-};
-
 module.exports = exports = HelloWorldController;
