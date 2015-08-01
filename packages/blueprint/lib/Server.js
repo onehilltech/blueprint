@@ -12,10 +12,18 @@ const PATH_VIEWS = 'views';
 const DEFAULT_VIEW_ENGINE = 'jade';
 const DEFAULT_PORT = 8080;
 
+/**
+ * @class Server
+ *
+ * @param appPath
+ * @param opts
+ * @constructor
+ */
 function Server (appPath, opts) {
   this._opts = opts || {};
   this._app = express ();
 
+  // Configure the server based on the options.
   if (this._opts.morgan)
     this._app.use (morgan (this._opts.morgan.format, this._opts.morgan.options));
 
@@ -51,7 +59,7 @@ Server.prototype.static = function (path) {
  * @param port
  */
 Server.prototype.listen = function (port) {
-  port = port || DEFAULT_PORT;
+  port = this._opts.port || DEFAULT_PORT;
   var self = this;
 
   this._server = this._app.listen (port, function () {
