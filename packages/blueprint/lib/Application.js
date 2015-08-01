@@ -18,7 +18,13 @@ var Server        = require ('./Server')
 function Application (appPath) {
   this._appPath = appPath;
   this._server = new Server (this._appPath);
-  this.env = process.env.NODE_ENV
+  this._isInit = false;
+}
+
+Application.prototype.init = function () {
+  if (this._isInit)
+    throw new Error ('application is already initialized');
+
   winston.log ('info', 'application path: %s', this._appPath);
 
   // Load all the models into memory.
@@ -55,7 +61,10 @@ function Application (appPath) {
 
   // Lastly, set the static routes for the server.
   this._server.static (path.join (this._appPath, '../public_html'));
-}
+
+  // The application is now initialized.
+  this._isInit = true
+};
 
 /**
  * Start the application.

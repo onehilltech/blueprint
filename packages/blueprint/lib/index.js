@@ -10,15 +10,23 @@ var app;
 
 exports.BaseController = BaseController;
 
+Object.defineProperty (exports, 'env', {
+  get : function () { return app.env },
+});
+
+Object.defineProperty (exports, 'model', {
+  get : function () { app.models },
+});
+
 exports.Application = function (appPath) {
-  if (app) return app;
+  if (app)
+    return app;
 
   // Create a new application object, and export the models loaded
   // by the application.
   app = new Application (appPath);
-  exports.models = app.models;
+  app.init ();
 
-  // Return the application singleton to the client.
   return app;
 };
 
@@ -30,5 +38,3 @@ exports.controller = function (controller, base) {
   util.inherits (controller, base);
 };
 
-// Export the current environment.
-exports.env = app.env;
