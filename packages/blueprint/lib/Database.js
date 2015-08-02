@@ -8,8 +8,8 @@ function Database (opts) {
 }
 
 Database.prototype.connect = function (callback) {
-  winston.log ('info', 'connecting to database [connstr=%s]', this._opts.connstr);
-  winston.log ('info', 'options = %s', util.inspect (this._opts.options));
+  winston.log ('info', 'database connection: %s', this._opts.connstr);
+  winston.log ('debug', 'database options: %s', util.inspect (this._opts.options));
 
   mongoose.connect (this._opts.connstr, this._opts.options, callback);
 };
