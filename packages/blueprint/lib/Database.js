@@ -17,3 +17,5 @@ Database.prototype.connect = function (callback) {
 Database.prototype.disconnect = function (callback) {
   mongoose.connection.disconnect (callback);
 };
+
+module.exports = exports = Database;
