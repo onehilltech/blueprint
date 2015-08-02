@@ -6,6 +6,7 @@ var winston = require ('winston')
 var Server        = require ('./Server')
   , RouterBuilder = require ('./RouterBuilder')
   , configuration = require ('./Configuration')
+  , Database      = require ('./Database')
   ;
 
 /**
@@ -63,9 +64,9 @@ Application.prototype.init = function () {
 
   winston.info ('building application router from router blueprints');
   var routerBuilder = new RouterBuilder (routersPath, this._controllers);
-  this._mainRouter = routerBuilder.build (routers).getRouter ();
+  this._router = routerBuilder.build (routers).getRouter ();
   this._server = new Server (this._appPath, this._config.server);
-  this._server.use (this._mainRouter);
+  this._server.use (this._router);
 
   this._server.static (path.join (this._appPath, '../public_html'));
 
@@ -92,8 +93,8 @@ Application.prototype.start = function () {
     self._server.listen ();
   }
 
-  if (this._database)
-    this._database.connect (ready);
+  if (this._db)
+    this._db.connect (ready);
   else
     ready ();
 };
