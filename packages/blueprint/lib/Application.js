@@ -67,8 +67,11 @@ Application.prototype.init = function () {
   this._server = new Server (this._appPath, this._config.server);
   this._server.use (this._mainRouter);
 
-  // Lastly, set the static routes for the server.
   this._server.static (path.join (this._appPath, '../public_html'));
+
+  // Initialize the database object if a configuration exists.
+  if (this._config.database)
+    this._db = new Database (this._config.database);
 
   // The application is now initialized.
   this._isInit = true
@@ -80,7 +83,19 @@ Application.prototype.init = function () {
 Application.prototype.start = function () {
   winston.log ('info', 'starting the Blueprint.js application');
 
-  this._server.listen ();
+  var self = this;
+
+  function ready (err) {
+    if (err)
+      winston.error (err);
+
+    self._server.listen ();
+  }
+
+  if (this._database)
+    this._database.connect (ready);
+  else
+    ready ();
 };
 
 /**
