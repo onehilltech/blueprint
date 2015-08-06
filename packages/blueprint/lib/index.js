@@ -42,3 +42,6 @@ exports.controller = function (controller, base) {
   util.inherits (controller, base);
 };
 
+exports.model = function (name, schema) {
+  return app.registerModel (name, schema);
+}
