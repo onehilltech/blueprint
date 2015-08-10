@@ -18,7 +18,7 @@ var Server        = require ('./Server')
  * @constructor
  */
 function Application (appPath) {
-  this._appPath = appPath;
+  this._appPath = path.resolve (appPath);
   this._isInit = false;
 }
 
