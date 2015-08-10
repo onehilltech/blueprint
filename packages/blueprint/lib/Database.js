@@ -25,3 +25,5 @@ Database.prototype.registerModel = function (name, schema) {
 }
 
 module.exports = exports = Database;
+
+exports.Schema = mongoose.Schema;
