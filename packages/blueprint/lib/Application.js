@@ -110,6 +110,10 @@ Application.prototype.__defineGetter__ ('env', function () {
   return process.env.NODE_ENV || 'dev';
 });
 
+Application.prototype.__defineGetter__ ('controllers', function () {
+  return this._controllers;
+});
+
 Application.prototype.registerModel = function (name, schema) {
   return this._db.registerModel (name, schema);
 };

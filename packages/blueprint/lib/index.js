@@ -11,15 +11,19 @@ var app;
 exports.BaseController = BaseController;
 
 Object.defineProperty (exports, 'env', {
-  get : function () { return app.env }
+  get : function () { return app.env; }
 });
 
 Object.defineProperty (exports, 'models', {
-  get : function () { return app.models }
+  get : function () { return app.models; }
 });
 
 Object.defineProperty (exports, 'config', {
-  get : function () { return app.config }
+  get : function () { return app.config; }
+});
+
+Object.defineProperty (exports, 'controllers', {
+  get : function () { return app.controllers; }
 });
 
 exports.Application = function (appPath) {
