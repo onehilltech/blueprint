@@ -25,13 +25,16 @@ function resolveApplicationPath (callback) {
   return false;
 }
 
-// Singleton application for the package.
+// Singleton application for the module. Resolve the location of the
+// application directory, and initialize the application to the resolved
+// location.
 var appPath = resolveApplicationPath ();
 
 if (!appPath)
   throw Error ('Cannot resolve application path');
 
 var app = new Application (appPath);
+app.init ();
 
 exports.BaseController = BaseController;
 
