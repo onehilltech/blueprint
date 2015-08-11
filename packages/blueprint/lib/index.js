@@ -50,6 +50,10 @@ Object.defineProperty (exports, 'config', {
   get : function () { return app.config }
 });
 
+Object.defineProperty (exports, 'Schema', {
+  get : function () { return Application.Schema; }
+});
+
 // Helper method to define different controllers. This method ensures the controller
 // is an instance of BaseController.
 exports.controller = function (controller, base) {
