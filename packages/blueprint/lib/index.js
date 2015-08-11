@@ -1,42 +1,51 @@
 var util = require ('util')
+  , path = require ('path')
+  , fs   = require ('fs')
   ;
 
 var BaseController = require ('./BaseController')
   , Application    = require ('./Application')
   ;
 
+function resolveApplicationPath (callback) {
+  for (var i = 0; i < module.paths.length; ++ i) {
+    var absPath = path.resolve (module.paths[i], '../app');
+
+    try {
+      var stat = fs.lstatSync (absPath);
+
+      if (stat && stat.isDirectory ())
+        return absPath;
+    }
+    catch (ex) {
+      // Do nothing...
+    }
+  }
+
+  return false;
+}
+
 // Singleton application for the package.
-var app;
+var appPath = resolveApplicationPath ();
+
+if (!appPath)
+  throw Error ('Cannot resolve application path');
+
+var app = new Application (appPath);
 
 exports.BaseController = BaseController;
 
 Object.defineProperty (exports, 'env', {
-  get : function () { return app.env; }
+  get : function () { return app.env }
 });
 
 Object.defineProperty (exports, 'models', {
-  get : function () { return app.models; }
+  get : function () { return app.models }
 });
 
 Object.defineProperty (exports, 'config', {
-  get : function () { return app.config; }
+  get : function () { return app.config }
 });
-
-Object.defineProperty (exports, 'controllers', {
-  get : function () { return app.controllers; }
-});
-
-exports.Application = function (appPath) {
-  if (app)
-    return app;
-
-  // Create a new application object, and export the models loaded
-  // by the application.
-  app = new Application (appPath);
-  app.init ();
-
-  return app;
-};
 
 // Helper method to define different controllers. This method ensures the controller
 // is an instance of BaseController.
@@ -46,6 +55,4 @@ exports.controller = function (controller, base) {
   util.inherits (controller, base);
 };
 
-exports.model = function (name, schema) {
-  return app.registerModel (name, schema);
-}
+exports.app = app;
