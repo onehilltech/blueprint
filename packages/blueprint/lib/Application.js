@@ -5,7 +5,7 @@ var winston = require ('winston')
 
 var Server        = require ('./Server')
   , RouterBuilder = require ('./RouterBuilder')
-  , configuration = require ('./Configuration')
+  , Configuration = require ('./Configuration')
   , Database      = require ('./Database')
   ;
 
@@ -30,15 +30,21 @@ Application.prototype.init = function () {
 
   // Load the configuration.
   var configPath = path.join (this._appPath, 'configs');
-  this._config = configuration (configPath, this.env);
+  this._config = Configuration (configPath, this.env);
 
-  // Load all the models into memory.
-  winston.info ('loading application models into memory')
-  this._models = all ({
-    dirname     :  path.join (this._appPath, 'models'),
-    filter      :  /(.+)\.js$/,
-    excludeDirs :  /^\.(git|svn)$/
-  });
+  // Initialize the database object, if a configuration exists. If we
+  // have a database configuration, then we can have models.
+  if (this._config.database) {
+    this._db = new Database (this._config['database']);
+
+    // Load all the models into memory.
+    winston.info('loading application models into memory')
+    this._models = all({
+      dirname: path.join(this._appPath, 'models'),
+      filter: /(.+)\.js$/,
+      excludeDirs: /^\.(git|svn)$/
+    });
+  }
 
   // Load all the controllers into memory.
   winston.info ('loading application controllers into memory')
@@ -47,7 +53,7 @@ Application.prototype.init = function () {
     filter      :  /(.+Controller)\.js$/,
     excludeDirs :  /^\.(git|svn)$/,
     resolve     : function (Controller) {
-      winston.log ('debug', 'instantiating controller %s...', Controller.name);
+      winston.log ('info', 'instantiating controller %s...', Controller.name);
       return new Controller ();
     }
   });
@@ -65,39 +71,42 @@ Application.prototype.init = function () {
   winston.info ('building application router from router blueprints');
   var routerBuilder = new RouterBuilder (routersPath, this._controllers);
   this._router = routerBuilder.build (routers).getRouter ();
-  this._server = new Server (this._appPath, this._config.server);
-  this._server.use (this._router);
-
-  this._server.static (path.join (this._appPath, '../public_html'));
-
-  // Initialize the database object if a configuration exists.
-  if (this._config.database)
-    this._db = new Database (this._config.database);
 
   // The application is now initialized.
-  this._isInit = true
+  this._isInit = true;
 };
 
 /**
  * Start the application.
+ *
+ * @param cb
+ * @returns {Server|exports|module.exports}
  */
-Application.prototype.start = function () {
-  winston.log ('info', 'starting the Blueprint.js application');
+Application.prototype.makeServer = function () {
+  var server = new Server (this._appPath, this._config['server']);
 
+  server.use (this._router);
+  server.static (path.resolve (this._appPath, '../public_html'));
+
+  return server;
+};
+
+Application.prototype.start = function (callback) {
   var self = this;
 
-  function ready (err) {
+  function connected (err) {
     if (err)
-      winston.error (err);
+      return callback (err);
 
-    self._server.listen ();
+    self.makeServer ().listen ();
+    callback (null);
   }
 
   if (this._db)
-    this._db.connect (ready);
+    this._db.connect (connected);
   else
-    ready ();
-};
+    connected (null);
+}
 
 /**
  * Get the models defined by the application.
@@ -114,9 +123,13 @@ Application.prototype.__defineGetter__ ('controllers', function () {
   return this._controllers;
 });
 
-Application.prototype.registerModel = function (name, schema) {
-  return this._db.registerModel (name, schema);
-};
+Application.prototype.__defineGetter__ ('database', function () {
+  return this._db;
+});
+
+Application.prototype.__defineGetter__ ('router', function () {
+  return this._router;
+});
 
 module.exports = exports = Application;
 
