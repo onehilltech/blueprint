@@ -84,9 +84,7 @@ Application.prototype.init = function () {
  */
 Application.prototype.makeServer = function () {
   var server = new Server (this._appPath, this._config['server']);
-
   server.use (this._router);
-  server.static (path.resolve (this._appPath, '../public_html'));
 
   return server;
 };
@@ -102,6 +100,8 @@ Application.prototype.start = function (callback) {
     callback (null);
   }
 
+  // If there is a database, connect to the database. Otherwise, proceed
+  // with acting as if we are connected to an imaginary database.
   if (this._db)
     this._db.connect (connected);
   else
