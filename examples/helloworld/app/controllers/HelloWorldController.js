@@ -9,8 +9,8 @@ function HelloWorldController () {
 blueprint.controller (HelloWorldController);
 
 HelloWorldController.prototype.echoName = function (callback) {
-  return function (req, res) {
-    return res.render ('helloworld', {name: req.body.name});
+  return function echoName (req, res) {
+    return res.render ('helloworld', {name: req.body.whoami});
   };
 };
 

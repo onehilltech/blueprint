@@ -1,7 +1,9 @@
 #!/usr/bin/env node
+var winston = require ('winston');
 
-var blueprint = require ('blueprint')
-  ;
+require ('blueprint').app.start (function (err) {
+  if (err)
+    return winston.log ('error', err);
 
-// Start the application.
-blueprint.app.start ();
+  winston.log ('info', 'application started...');
+});
