@@ -52,7 +52,7 @@ function Server (appPath, opts) {
             throw new Error(util.format('%s is an unsupported middleware type', key));
 
           winston.log('debug', 'bodyParser.%s: %s', key, opts[key]);
-          app.use(f.call(opts, opts[key]));
+          app.use(f.call(bodyParser, opts[key]));
         }
       }
     },
@@ -81,10 +81,10 @@ function Server (appPath, opts) {
   for (var key in this._opts) {
     if (this._opts.hasOwnProperty (key)) {
       // Locate the configurator for this configuration.
-      var func = configurators[key];
+      var configurator = configurators[key];
 
-      if (func)
-        func (this._app, this._opts[key])
+      if (configurator)
+        configurator (this._app, this._opts[key])
     }
   }
 
