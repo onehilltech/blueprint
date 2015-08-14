@@ -1,6 +1,7 @@
-var mongoose = require ('mongoose');
+var blueprint = require ('blueprint')
+  ;
 
-var schema = new mongoose.Schema({
+var schema = new blueprint.Schema({
   /// Author of the book.
   author: {type: String, required: true, trim: true},
 
