@@ -83,11 +83,8 @@ function Server (appPath, opts) {
       // Locate the configurator for this configuration.
       var func = configurators[key];
 
-      if (!func)
-        throw new Error ('unsupported configuration type: ' + key);
-
-      // Call the configurator function.
-      func (this._app, this._opts[key])
+      if (func)
+        func (this._app, this._opts[key])
     }
   }
 
