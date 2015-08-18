@@ -1,28 +1,22 @@
-var express      = require ('express')
-  , winston      = require ('winston')
-  , path         = require ('path')
+var express = require ('express')
+  , winston = require ('winston')
+  , path    = require ('path')
   ;
 
 const DEFAULT_VIEWS_PATH = 'views';
 const DEFAULT_VIEW_ENGINE = 'jade';
-const DEFAULT_PORT = 8080;
 
 /**
- * @class Server
- *
- * @param appPath
- * @param opts
- * @constructor
+ * Factory method for making a new Express server.
  */
-function Server (appPath, opts) {
+module.exports = exports = function (appPath, config) {
   // Store the options, and make sure the default options are set.
-  this._opts = opts || { };
-
-  if (!this._opts.morgan)
-    this._opts.morgan = { format : 'combined' };
+  config = config || { };
+  if (!config.morgan)
+    config.morgan = { format : 'combined' };
 
   // Make a new express application.
-  this._app = express ();
+  var app = express ();
 
   // Configure the different middleware for the server. Some of the middleware
   // is required. Some of the middleware is optional. For the middleware that is
@@ -78,57 +72,19 @@ function Server (appPath, opts) {
     }
   };
 
-  for (var key in this._opts) {
-    if (this._opts.hasOwnProperty (key)) {
+  for (var key in config) {
+    if (config.hasOwnProperty (key)) {
       // Locate the configurator for this configuration.
       var configurator = configurators[key];
 
       if (configurator)
-        configurator (this._app, this._opts[key])
+        configurator (app, config[key])
     }
   }
 
   var viewsPath = path.resolve (appPath, DEFAULT_VIEWS_PATH);
-  this._app.set ('views', viewsPath);
-  this._app.set ('view engine', DEFAULT_VIEW_ENGINE);
+  app.set ('views', viewsPath);
+  app.set ('view engine', DEFAULT_VIEW_ENGINE);
+
+  return app;
 }
-
-/**
- * Use a middleware with the server.
- */
-Server.prototype.use = function () {
-  this._app.use.apply (this._app, arguments);
-};
-
-Server.prototype.static = function (path) {
-  this._app.use (express.static (path));
-};
-
-/**
- * Listen for request on the specified port.
- *
- * @param port
- */
-Server.prototype.listen = function (port) {
-  port = this._opts.port || DEFAULT_PORT;
-  var self = this;
-
-  this._server = this._app.listen (port, function () {
-    var host = self._server.address ().address;
-    var port = self._server.address ().port;
-
-    winston.log ('info', 'listening at http://%s:%s...', host, port);
-  });
-};
-
-/**
- * Get the address of the server.
- */
-Server.prototype.__defineGetter__ ('address', function () {
-  if (!this._server)
-    throw new Error ('must call listen() first');
-
-  return this._server.address ();
-});
-
-module.exports = exports = Server;
