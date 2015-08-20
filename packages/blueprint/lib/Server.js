@@ -91,7 +91,12 @@ module.exports = exports = function (appPath, config) {
       if (!config.session)
         throw new Error ('Session configuration is missing');
 
+      // Configure the Express application to use passport sessions.
       app.use (passport.session ());
+
+      // Configure Passport to serialize and deserialize user sessions.
+      passport.serializeUser (config.passport.session.serializer);
+      passport.deserializeUser (config.passport.session.deserializer);
     }
   }
 
