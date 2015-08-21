@@ -104,7 +104,7 @@ Application.prototype.start = function (callback) {
 
     if (self._config['server']) {
       // Make a new server, and listen in the configured port.
-      var port = self._config['server'] || 8080;
+      var port = self._config['server'].port || 8080;
       self._server = self.makeServer ();
 
       var http = self._server.listen (port, function () {
