@@ -1,6 +1,6 @@
 var winston       = require ('winston')
   , LocalStrategy = require ('passport-local').Strategy
-  , Account = require ('../models/account');
+  , Account = require ('../../app/models/Account');
 
 module.exports = function (mongoose) {
   var model = mongoose.models[Account.modelName];

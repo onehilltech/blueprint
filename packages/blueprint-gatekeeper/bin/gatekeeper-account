@@ -1,0 +1,96 @@
+#!/usr/bin/env node
+'use strict';
+
+var program   = require ('commander')
+  , winston   = require ('winston')
+  , prompt    = require ('prompt')
+  , blueprint = require ('blueprint')
+  ;
+
+var Account = blueprint.models.Account;
+
+program.option ('--debug');
+
+// command: create
+program
+  .command ('create')
+  .description ('create new account')
+  .action (function () {
+    var schema = {
+      properties : {
+        username : {
+          pattern     : /^[a-zA-Z0-9\s\-\s\_]+$/,
+          message     : 'Username can only contain alphanumerics, dashes, and underscores',
+          required    : true,
+          type        : 'string'
+        },
+        password : {
+          required : true,
+          hidden   : true
+        },
+        email : {
+          required : true
+        },
+        roles : {
+          required : true
+        }
+      }
+    };
+
+    prompt.start ();
+    prompt.get (schema, function (err, result) {
+      // Register a new client.
+      var account = new Account ({
+        username : result.username,
+        password : result.password,
+        email : result.email,
+        roles : result.roles.split (',')
+      });
+
+      account.save (function (err, account) {
+        if (!err)
+          return process.exit ();
+
+        winston.log ('error', err.message);
+        process.exit (1);
+      });
+  });
+});
+
+// command: remove
+program
+  .command ('remove <accountId>')
+  .description ('remove an account from the database')
+  .action (function (accountId) {
+
+  Account.remove ({_id : accountId}, function (err) {
+    if (!err)
+      return process.exit ();
+
+    winston.log ('error', err.message);
+    process.exit (1);
+  });
+});
+
+// command: enable
+program
+  .command ('enable <accountId> <state>')
+  .description ('enable/disable account access')
+  .action (function (accountId, state) {
+  state = JSON.parse (state.toLowerCase());
+
+  Account.findByIdAndUpdate (accountId, {enabled: state}, function (err) {
+    if (!err)
+      return process.exit ();
+
+    winston.log ('error', err.message);
+    process.exit (1);
+  });
+});
+
+blueprint.app.database.connect (function (err) {
+  if (err)
+    return winston.log ('error', err);
+
+  program.parse (process.argv);
+});

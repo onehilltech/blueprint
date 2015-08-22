@@ -1,7 +1,7 @@
 var async       = require ('async')
-  , AccessToken = require ('../../lib/models/oauth2/accessToken')
-  , Account     = require ('../../lib/models/account')
-  , Client      = require ('../../lib/models/oauth2/client')
+  , AccessToken = require ('.././accessToken')
+  , Account     = require ('../../app/models/Account')
+  , Client      = require ('.././client')
   ;
 
 var users = [

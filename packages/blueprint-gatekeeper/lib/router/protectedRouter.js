@@ -2,11 +2,6 @@ var passport = require ('passport')
   , express  = require ('express')
   ;
 
-var bearer   = require ('../authentication/bearer')
-  ;
-
-passport.use (bearer ());
-
 function ProtectedRouter () {
 
 }

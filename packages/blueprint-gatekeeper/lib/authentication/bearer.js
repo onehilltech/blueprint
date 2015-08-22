@@ -1,5 +1,5 @@
 var BearerStrategy = require ('passport-http-bearer').Strategy
-  , AccessToken    = require ('../models/oauth2/accessToken')
+  , AccessToken    = require ('.././accessToken')
   , winston        = require ('winston')
   ;
 

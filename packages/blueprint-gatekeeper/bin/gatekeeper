@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+'use strict';
+
+var program = require ('commander');
+
+program
+  .command ('client', 'manage client accounts')
+  .command ('account', 'manage user accounts')
+  .parse (process.argv);

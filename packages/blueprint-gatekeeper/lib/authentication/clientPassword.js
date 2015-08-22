@@ -1,6 +1,6 @@
 var winston                = require ('winston')
   , ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy
-  , Client                  = require ('../models/oauth2/client')
+  , Client                  = require ('.././client')
   ;
 
 module.exports = exports = function (mongoose) {
