@@ -21,6 +21,9 @@ describe ('Oauth2Controller', function () {
   describe ('#getToken (callback)', function (done) {
     const TARGET_URL = '/oauth2/token';
 
+    var accessToken;
+    var refreshToken;
+
     it ('password: should get a token for the username/password', function (done) {
       var data = {
         grant_type : 'password',
@@ -31,13 +34,16 @@ describe ('Oauth2Controller', function () {
 
       request (app)
         .post (TARGET_URL).send (data)
-        .expect ('Content-Type', /json/).expect (200)
+        .expect (200).expect ('Content-Type', /json/)
         .end (function (err, res) {
           if (err)
             return done (err);
 
           expect (res.body).to.have.all.keys (['token_type', 'access_token', 'refresh_token', 'expires_in']);
           expect (res.body).to.have.property ('token_type', 'Bearer');
+
+          accessToken = res.body.access_token;
+          refreshToken = res.body.refresh_token;
 
           return done ();
       });
@@ -97,13 +103,13 @@ describe ('Oauth2Controller', function () {
     it ('client_credentials: should get a token for client credentials', function (done) {
       var data = {
         grant_type : 'client_credentials',
-        client_id : datamodel.rawModels.clients[0].id,
-        client_secret : datamodel.rawModels.clients[0].secret
+        client_id : datamodel.models.clients[0].id,
+        client_secret : datamodel.models.clients[0].secret
       };
 
       request (app)
         .post (TARGET_URL).send (data)
-        .expect ('Content-Type', /json/).expect (200)
+        .expect (200).expect ('Content-Type', /json/)
         .end (function (err, res) {
         if (err)
           return done (err);
@@ -137,6 +143,49 @@ describe ('Oauth2Controller', function () {
       request (app)
         .post (TARGET_URL).send (data)
         .expect (400, done);
+    });
+
+    it ('refresh_token: should refresh the access and refresh token', function (done) {
+      // Get an access and refresh token using username/password.
+      var data = {
+        grant_type : 'password',
+        username   : datamodel.rawModels.accounts[0].username,
+        password   : datamodel.rawModels.accounts[0].password,
+        client_id  : datamodel.models.clients[0].id
+      };
+
+      request (app)
+        .post (TARGET_URL).send (data)
+        .expect (200).expect ('Content-Type', /json/)
+        .end (function (err, res) {
+          if (err)
+            return done (err);
+
+          accessToken = res.body.access_token;
+          refreshToken = res.body.refresh_token;
+
+          data = {
+            grant_type : 'refresh_token',
+            client_id : datamodel.models.clients[0].id,
+            refresh_token : refreshToken
+          };
+
+          request (app)
+            .post (TARGET_URL).send (data)
+            .expect (200).expect ('Content-Type', /json/)
+            .end (function (err, res) {
+              if (err)
+                return done (err);
+
+              expect (res.body).to.have.all.keys (['token_type', 'access_token', 'refresh_token', 'expires_in']);
+              expect (res.body).to.have.property ('token_type', 'Bearer');
+
+              expect (res.body.access_token).to.not.equal (accessToken);
+              expect (res.body.refresh_token).to.not.equal (refreshToken);
+
+              return done ();
+          });
+      });
     });
   });
 });

@@ -37,8 +37,21 @@ function cleanup (done) {
 
 exports.apply = function (done) {
   cleanup (function () {
-    async.series ([
+    async.waterfall ([
         function (callback) {
+          Client.create (rawClients, function (err, clients) {
+            if (err)
+              return callback (err);
+
+            exports.models.clients = clients;
+            callback (null, clients[0]);
+          });
+        },
+        function (client, callback) {
+          // Update the created_by path on the accounts to the first client.
+          for (var i = 0; i < rawAccounts.length; ++ i)
+            rawAccounts[i].created_by = client.id;
+
           // Insert the participants into the database.
           Account.create (rawAccounts, function (err, accounts) {
             if (err)
@@ -47,18 +60,9 @@ exports.apply = function (done) {
             exports.models.accounts = accounts;
             callback (null);
           });
-        },
-        function (callback) {
-          Client.create (rawClients, function (err, clients) {
-            if (err)
-              return callback (err);
-
-            exports.models.clients = clients;
-            callback (null);
-          });
         }
       ],
-      function (err, results) {
+      function (err) {
         return done (err);
       });
   });

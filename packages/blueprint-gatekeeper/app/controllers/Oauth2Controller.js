@@ -10,9 +10,6 @@ var Client      = blueprint.models.Client
   , AccessToken = blueprint.models.oauth2.AccessToken
   ;
 
-const TOKEN_LENGTH  = 128;
-const SECRET_LENGTH = 48;
-
 /**
  * @class Oauth2Controller
  *
@@ -227,7 +224,7 @@ Oauth2Controller.prototype.deleteToken = function (callback) {
 Oauth2Controller.prototype.getToken = function (callback) {
   var self = this;
 
-  function authenticated (req, res, accessToken) {
+  function grantToken (res, accessToken) {
     return res.status (200).json ({
       token_type    : 'Bearer',
       access_token  : accessToken.token,
@@ -236,8 +233,26 @@ Oauth2Controller.prototype.getToken = function (callback) {
     });
   }
 
+  function lookupClient (res, clientId, clientSecret, done) {
+    Client.findById (clientId, function (err, client) {
+      if (err)
+        return self.handleError (err, res, 400, 'Cannot find client', callback);
+
+      if (!client)
+        return self.handleError (null, res, 400, 'Invalid client id', callback);
+
+      if (!client.enabled)
+        return self.handleError (null, res, 401, 'Client is not enabled', callback);
+
+      if (clientSecret && client.secret !== clientSecret)
+        return self.handleError (null, res, 400, 'Client secret is incorrect', callback);
+
+      done (client);
+    });
+  };
+
   /**
-   * Use the client credentials to get an access token.
+   * Implementation of the client_credentials grant type.
    *
    * @param req
    * @param res
@@ -246,38 +261,31 @@ Oauth2Controller.prototype.getToken = function (callback) {
     req.checkBody ('client_id', 'required').notEmpty();
     req.checkBody ('client_secret', 'required').notEmpty();
 
+    var errs = req.validationErrors (true);
+
+    if (errs)
+      return self.handleError (null, res, 400, errs, callback);
+
     var clientId = req.body.client_id;
     var clientSecret = req.body.client_secret;
 
-    Client.findById (clientId, function (err, client) {
-      if (err)
-        return self.handleError (err, res, 500, 'Failed to find client', callback);
-
-      if (!client)
-        return self.handleError (null, res, 404, 'Client does not exist', callback);
-
-      if (client.secret !== clientSecret)
-        return self.handleError (null, res, 400, 'Client secret is invalid', callback);
-
-      if (!client.enabled)
-        return self.handleError (null, res, 401, 'Client is not enabled', callback);
-
+    lookupClient (res, clientId, clientSecret, function (client) {
       // Authenticate the username/password combo. Upon authentication, we
       // are to return the token/refresh_token combo.
       winston.log ('info', 'client %s: exchanging secret for access token', client.id);
 
       // Create a new user token and refresh token.
-      AccessToken.newClientToken (TOKEN_LENGTH, client.id, '*', function (err, accessToken) {
+      AccessToken.newClientToken (client.id, '*', function (err, accessToken) {
         if (err)
           return self.handleError (err, res, 500, 'Failed to generate token', callback);
 
-        return authenticated (req, res, accessToken);
+        return grantToken (res, accessToken);
       });
     });
   }
 
   /**
-   * Use the username/password to get an access token.
+   * Implementation of the password grant type.
    *
    * @param req
    * @param res
@@ -297,16 +305,7 @@ Oauth2Controller.prototype.getToken = function (callback) {
     var password = req.body.password;
 
     // Locate the client and make sure the client is enabled.
-    Client.findById (clientId, function (err, client) {
-      if (err)
-        return self.handleError (err, res, 400, 'Cannot find client', callback);
-
-      if (!client)
-        return self.handleError (null, res, 400, 'Invalid client id', callback);
-
-      if (!client.enabled)
-        return self.handleError (null, res, 401, 'Client is not enabled', callback);
-
+    lookupClient (res, clientId, null, function (client) {
       // Authenticate the username/password combo. Upon authentication, we
       // are to return the token/refresh_token combo.
       winston.log ('info', 'client %s: exchanging username/password for access token [user=%s]', client.id, username);
@@ -333,14 +332,67 @@ Oauth2Controller.prototype.getToken = function (callback) {
             return self.handleError (err, res, 401, 'Password does not match', callback);
 
           // Create a new user token and refresh token.
-          AccessToken.newUserToken (TOKEN_LENGTH, client.id, account.id, function (err, accessToken) {
+          AccessToken.newUserToken (client.id, account.id, function (err, accessToken) {
             if (err)
               return self.handleError (err, res, 500, 'Failed to generate token', callback);
 
-            return authenticated (req, res, accessToken);
+            return grantToken (res, accessToken);
           });
         });
       });
+    });
+  }
+
+  /**
+   * Implementation of the refresh_token grant type.
+   *
+   * @param req
+   * @param res
+   */
+  function refresh_token (req, res) {
+    req.checkBody ('client_id', 'required').notEmpty();
+    req.checkBody ('refresh_token', 'required').notEmpty();
+
+    var errs = req.validationErrors (true);
+
+    if (errs)
+      return self.handleError (null, res, 400, errs, callback);
+
+    var clientId = req.body.client_id;
+    var clientSecret = req.body.client_secret;
+    var refreshToken = req.body.refresh_token;
+
+    AccessToken
+      .findOne ({refresh_token: refreshToken, client : clientId})
+      .populate ('account client')
+      .exec (function (err, at) {
+        if (err)
+          return self.handleError (err, res, 500, 'Failed to locate refresh token', callback);
+
+        if (!at)
+          return self.handleError (err, res, 400, 'Refresh token is invalid', callback);
+
+        // Check the client and account. The client and the account must be enabled. The
+        // client secret must also match, if provided.
+        if (!at.client.enabled)
+          return self.handleError (err, res, 401, 'Client access is disabled', callback);
+
+        if (clientSecret && at.client.secret !== clientSecret)
+          return self.handleError (err, res, 400, 'Client secret is incorrect', callback);
+
+        if (!at.account.enabled)
+          return self.handleError (err, res, 400, 'User account is disabled', callback);
+
+        // Generate a new access and refresh token.
+        at.token = AccessToken.generateToken ();
+        at.refresh_token = AccessToken.generateToken ();
+
+        at.save (function (err, at) {
+          if (err)
+            return self.handleError (err, res, 500, 'Failed to save new token', callback);
+
+          grantToken (res, at);
+        });
     });
   }
 
@@ -353,7 +405,8 @@ Oauth2Controller.prototype.getToken = function (callback) {
 
     var grantTypes = {
       'password' : password,
-      'client_credentials' : client_credentials
+      'client_credentials' : client_credentials,
+      'refresh_token' : refresh_token
     };
 
     // Locate the handler for the grant type.

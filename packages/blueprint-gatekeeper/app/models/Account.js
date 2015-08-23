@@ -15,7 +15,7 @@ var schema = new Schema ({
   username : { type: String, index: true, unique: true, trim: true, required: true },
 
   /// Encrypted password
-  password : { type: String },
+  password : { type: String, required: true},
 
   /// Contact email address
   email    : { type: String, index: true, unique: true, trim: true, required: true },
@@ -24,7 +24,7 @@ var schema = new Schema ({
   created_by : {type: Schema.Types.ObjectId, required: true, ref: Client.modelName},
 
   /// The account is enable.
-  enabled  : { type: Boolean,  default: true },
+  enabled  : { type: Boolean, required: true, default: true },
 
   /// Roles of the user.
   roles    : { type: [String], default: DEFAULT_ROLES}

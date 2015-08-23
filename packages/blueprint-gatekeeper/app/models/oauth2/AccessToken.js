@@ -8,6 +8,8 @@ var Client  = require ('../Client')
   , Account = require ('../Account')
   ;
 
+const DEFAULT_TOKEN_LENGTH = 128;
+
 var Schema = blueprint.Schema;
 
 var schema = new Schema ({
@@ -27,15 +29,19 @@ var schema = new Schema ({
  * @param user
  * @param done
  */
-schema.statics.newUserToken = function (length, client, user, done) {
-  var token = uid.sync (length);
-  var refreshToken = uid.sync (length);
+schema.statics.newUserToken = function (client, user, done) {
+  var token = uid.sync (DEFAULT_TOKEN_LENGTH);
+  var refreshToken = uid.sync (DEFAULT_TOKEN_LENGTH);
 
   var query   = {account : user, client : client};
   var data    = {token : token, refresh_token : refreshToken, enabled : true};
   var options = {upsert : true, new : true};
 
   this.findOneAndUpdate (query, data, options, done);
+};
+
+schema.statics.generateToken = function () {
+  return uid.sync (DEFAULT_TOKEN_LENGTH);
 };
 
 /**
@@ -46,8 +52,8 @@ schema.statics.newUserToken = function (length, client, user, done) {
  * @param scope
  * @param done
  */
-schema.statics.newClientToken = function (length, client, scope, done) {
-  var token   = uid.sync (length);
+schema.statics.newClientToken = function (client, scope, done) {
+  var token   = uid.sync (DEFAULT_TOKEN_LENGTH);
   var query   = {client : client};
   var data    = {token: token, client: client, enabled : true};
   var options = {upsert : true, new : true};
@@ -63,9 +69,9 @@ schema.statics.newClientToken = function (length, client, scope, done) {
  * @param refreshToken
  * @param done
  */
-schema.statics.refresh = function (length, client, refreshToken, done) {
+schema.statics.refresh = function (client, refreshToken, done) {
   var query = {client : client, refresh_token: refreshToken};
-  var data  = {token : uid.sync (length), refresh_token : uid.sync (length)};
+  var data  = {token : uid.sync (DEFAULT_TOKEN_LENGTH), refresh_token : uid.sync (DEFAULT_TOKEN_LENGTH)};
 
   this.findOneAndUpdate (query, data, done);
 };
