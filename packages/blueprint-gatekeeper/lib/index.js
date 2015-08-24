@@ -6,4 +6,4 @@ var blueprint = require ('blueprint')
 module.exports = exports = new blueprint.ApplicationModule ('../app');
 
 // Export the authentication package.
-exports.auth = require ('./auth');
+exports.auth = require ('./authentication');
