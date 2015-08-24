@@ -11,7 +11,7 @@ module.exports = exports = function () {
         if (!client) 
           return done (null, false, {message: 'Client does not exist'});
 
-        if (client.disabled)
+        if (!client.enabled)
           return done (null, false, {message: 'Client is disabled'});
 
         // Check the secret. We do not store the secret in a crypted format

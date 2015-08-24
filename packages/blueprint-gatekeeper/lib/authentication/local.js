@@ -15,7 +15,7 @@ module.exports = function (opts) {
       if (!account)
         return done (null, false, { message: 'User does not exist' });
 
-      if (account.disabled)
+      if (!account.enabled)
         return done (null, false, { message: 'User account is disabled'});
 
       account.verifyPassword (password, function (err, match) {
