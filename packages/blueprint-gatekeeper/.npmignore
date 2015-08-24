@@ -29,7 +29,6 @@ build/Release
 node_modules/
 
 # Runtime directories (non-package directories)
-bin/
 data/
 jade/
 tests/
