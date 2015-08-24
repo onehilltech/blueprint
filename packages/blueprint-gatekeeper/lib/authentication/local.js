@@ -1,32 +1,31 @@
 var winston       = require ('winston')
   , LocalStrategy = require ('passport-local').Strategy
-  , Account = require ('../../app/models/Account');
+  , Account       = require ('../../app/models/Account');
 
-module.exports = function (mongoose) {
-  var model = mongoose.models[Account.modelName];
+module.exports = function (opts) {
+  opts = opts || {};
 
   return new LocalStrategy (opts, function (username, password, done) {
     winston.info ('using password authentication for ' + username);
 
-    model.findOne ({ username: username }, function (err, user) {
+    Account.findOne ({ username: username }, function (err, account) {
       if (err)
         return done (err);
 
-      if (!user)
+      if (!account)
         return done (null, false, { message: 'User does not exist' });
 
-      if (user.disabled)
+      if (account.disabled)
         return done (null, false, { message: 'User account is disabled'});
 
-      user.verifyPassword (password, function (err, match) {
+      account.verifyPassword (password, function (err, match) {
         if (err)
           return done (err);
 
         if (!match)
           return done (null, false, { message: 'Incorrect password'});
 
-        winston.info ('password authentication for %s successful', username);
-        return done (null, user);
+        return done (null, account);
       });
     });
   });

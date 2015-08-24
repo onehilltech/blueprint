@@ -1,16 +1,10 @@
-var winston                = require ('winston')
-  , ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy
-  , Client                  = require ('.././client')
+var ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy
+  , Client                 = require ('../../app/models/Client')
   ;
 
-module.exports = exports = function (mongoose) {
-  var model = mongoose.models[Client.modelName];
-
-  return new ClientPasswordStrategy (
-    function (id, secret, done) {
-      winston.info ('authenticating login client %s', id);
-
-      model.findById (id, function (err, client) {
+module.exports = exports = function () {
+  return new ClientPasswordStrategy (function (id, secret, done) {
+      Client.findById (id, function (err, client) {
         if (err) 
           return done (err);
 
@@ -23,7 +17,7 @@ module.exports = exports = function (mongoose) {
         // Check the secret. We do not store the secret in a crypted format
         // since it prevents the client from being able to see the secret when
         // managing their account.
-        if (client.secret !== secret)
+        if (secret && client.secret !== secret)
           return done (null, false, {message: 'Client secret is invalid'});
 
         return done (null, client);
