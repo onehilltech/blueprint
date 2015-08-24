@@ -30,8 +30,6 @@ node_modules/
 
 # Runtime directories (non-package directories)
 bin/
-config/
 data/
 jade/
-public_html/
 tests/
