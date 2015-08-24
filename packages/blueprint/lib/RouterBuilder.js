@@ -111,26 +111,48 @@ RouterBuilder.prototype.addRouter = function (name, routes) {
       if (!verbFunc)
         throw new Error (util.format ('%s is not a valid http verb', verb));
 
-      if (opts.action) {
-        // Resolve the controller and its method. The format of the action is
-        // 'controller@method'.
-        var controller = resolveController (opts.action);
-        verbFunc.call (self._router, path, controller.invoke ());
-      }
-      else if (opts.view) {
-        // Use a generic callback to render the view. Make sure we save a reference
-        // to the target view since the opts variable will change during the next
-        // iteration.
-        var view = opts.view;
-
-        verbFunc.call (self._router, path, function (req, res) {
-          return res.render (view);
-        });
+      if (verb === 'use') {
+        // This is a special case since the options for the <use> verb is
+        // a single handler, or an array of handlers.
+        verbFunc.call (self._router, path, opts);
       }
       else {
-        winston.error ('[%s]: %s %s must define an action or view property', name, verb, path);
+        if (opts.action) {
+          // Resolve the controller and its method. The format of the action is
+          // 'controller@method'.
+          var controller = resolveController (opts.action);
+          verbFunc.call (self._router, path, controller.invoke ());
+        }
+        else if (opts.view) {
+          // Use a generic callback to render the view. Make sure we save a reference
+          // to the target view since the opts variable will change during the next
+          // iteration.
+          var view = opts.view;
+
+          verbFunc.call (self._router, path, function (req, res) {
+            return res.render (view);
+          });
+        }
+        else {
+          winston.error ('[%s]: %s %s must define an action or view property', name, verb, path);
+        }
       }
     }
+  }
+
+  /**
+   * Process the <use> statement in the router. If the path is defined, then the
+   * handlers are bound to the path. If there is no path, then the handlers are
+   * used for all paths.
+   *
+   * @param path
+   * @param handlers
+   */
+  function processUse (path, handlers) {
+    if (path)
+      self._router.use (path, handlers);
+    else
+      self._router.use (handlers);
   }
 
   /**
@@ -164,17 +186,23 @@ RouterBuilder.prototype.addRouter = function (name, routes) {
 
   for (var key in routes) {
     if (routes.hasOwnProperty (key)) {
-      switch (key[0]) {
-        case '/':
-          processRoute (key, routes[key]);
-          break;
+      if (key === 'use') {
+        // This is a use specification, but without a path. So, process the use
+        // specification without specifying a path.
+        processUse (null, routes[key]);
+      }
+      else {
+        // The first letter of the key is a hint at how to process this
+        // key's value.
+        switch (key[0]) {
+          case '/':
+            processRoute (key, routes[key]);
+            break;
 
-        case ':':
-          processParam (key, routes[key]);
-          break;
-
-        default:
-          throw new Error (String.format ('unsupported key in router [router=%s, key=%s]', name, key));
+          case ':':
+            processParam (key, routes[key]);
+            break;
+        }
       }
     }
   }
