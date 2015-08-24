@@ -1,9 +1,4 @@
-exports.auth   = require ('./authentication');
-exports.models = require ('./models');
-
-var ApiRouter  = require ('./router/api')
+var blueprint = require ('blueprint')
   ;
 
-exports.Router = function (mongoose) {
-  return new ApiRouter ().makeRouter (mongoose.models);
-};
+module.exports = exports = new blueprint.ApplicationModule ('../app');

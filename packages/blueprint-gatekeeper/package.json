@@ -3,7 +3,7 @@
   "description": "Authentication framework for Web application programming interfaces (APIs)",
   "version": "0.8.5",
   "private": true,
-  "main": "./app.js",
+  "main": "./lib",
   "repository": {
     "type": "git",
     "url": "https://bitbucket.org/onehilltech/gatekeeper.git"
