@@ -1,6 +1,5 @@
 var winston     = require ('winston')
   , uid         = require ('uid-safe')
-  , oauth2orize = require ('oauth2orize')
   , passport    = require ('passport')
   , blueprint   = require ('blueprint')
   ;
