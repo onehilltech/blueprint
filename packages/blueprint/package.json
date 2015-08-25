@@ -1,15 +1,12 @@
 {
-  "name": "bookshelf",
+  "name": "blueprint",
   "author": "Blueprint.js",
-  "version": "0.0.0",
-  "description": "a Blueprint.js web application",
+  "version": "0.0.1",
+  "description": "a simple framwork for building web services",
 
-  "main": "./app.js",
+  "main": "./lib",
 
-  "dependencies": {
-    "blueprint": "git@github.com:onehilltech/blueprint.git"
-  },
-  "scripts": {
-    "start": "node ./app.js"
+  "bin" : {
+    "blueprint" : "./bin/blueprint"
   }
 }
