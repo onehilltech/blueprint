@@ -8,19 +8,22 @@ function Database (opts) {
 }
 
 Database.prototype.connect = function (callback) {
-  winston.log ('info', 'database connection: %s', this._opts.connstr);
+  winston.log ('debug', 'database connection: %s', this._opts.connstr);
   winston.log ('debug', 'database options: %s', util.inspect (this._opts.options));
 
   mongoose.connect (this._opts.connstr, this._opts.options, callback);
 };
 
 Database.prototype.disconnect = function (callback) {
-  winston.log ('info', 'disconnecting from database');
+  winston.log ('debug', 'disconnecting from database');
   mongoose.connection.disconnect (callback);
 };
 
 Database.prototype.registerModel = function (name, schema) {
-  winston.log ('info', 'model registration: %s', name);
+  if (mongoose.models[name])
+    return mongoose.models[name];
+
+  winston.log ('debug', 'model registration: %s', name);
   return mongoose.model (name, schema);
 }
 
