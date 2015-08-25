@@ -102,5 +102,3 @@ Application.prototype.__defineGetter__ ('database', function () {
 });
 
 module.exports = exports = Application;
-
-exports.Schema = Database.Schema;

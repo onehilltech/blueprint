@@ -65,7 +65,7 @@ Object.defineProperty (exports, 'controllers', {
 });
 
 Object.defineProperty (exports, 'Schema', {
-  get : function () { return masterprint.Schema; }
+  get : function () { return masterprint.ApplicationModule.Schema; }
 });
 
 /**
