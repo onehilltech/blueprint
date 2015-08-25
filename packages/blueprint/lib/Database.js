@@ -23,7 +23,7 @@ Database.prototype.registerModel = function (name, schema) {
   if (mongoose.models[name])
     return mongoose.models[name];
 
-  winston.log ('debug', 'model registration: %s', name);
+  winston.log ('info', 'model registration: %s', name);
   return mongoose.model (name, schema);
 }
 
