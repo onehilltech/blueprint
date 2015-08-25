@@ -19,7 +19,7 @@ var Server            = require ('./Server')
  * @constructor
  */
 function Application (appPath) {
-  ApplicationModule.call (this.appPath);
+  ApplicationModule.call (this, appPath);
 }
 
 util.inherits (Application, ApplicationModule);
@@ -43,6 +43,7 @@ Application.prototype.init = function () {
     this.models;
   }
 
+  var routersPath = path.resolve (this._appPath, 'routers');
   var routerBuilder = new RouterBuilder (routersPath, this.controllers);
   this._router = routerBuilder.build (this.routers).getRouter ();
 };
