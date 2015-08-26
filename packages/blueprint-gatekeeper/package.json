@@ -12,7 +12,6 @@
     "bcrypt": "^0.8.3",
     "blueprint": "git@github.com:onehilltech/blueprint.git",
     "commander": "^2.8.1",
-    "passport": "^0.2.x",
     "passport-http-bearer": "^1.x.x",
     "passport-local": "^1.x.x",
     "passport-oauth2-client-password": "^0.1.2",
