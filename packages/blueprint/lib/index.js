@@ -28,30 +28,6 @@ var masterprint = parent.require ('blueprint');
 // directory, and initialize the application to the resolved location.
 var app;
 
-/**
- * Resolve the application path for a module.
- *
- * @param callback
- * @returns {*}
- */
-function resolveApplicationPath (callback) {
-  for (var i = 0; i < module.paths.length; ++ i) {
-    var absPath = path.resolve (module.paths[i], '../app');
-
-    try {
-      var stat = fs.lstatSync (absPath);
-
-      if (stat && stat.isDirectory ())
-        return absPath;
-    }
-    catch (ex) {
-      // Do nothing...
-    }
-  }
-
-  return false;
-}
-
 Object.defineProperty (exports, 'env', {
   get : function () { return app.env; }
 });
