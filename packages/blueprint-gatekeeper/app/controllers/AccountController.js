@@ -2,11 +2,9 @@ var winston   = require ('winston')
   , blueprint = require ('blueprint')
   ;
 
-var Account = blueprint.models.Account
-  , Client  = blueprint.models.Client;
+var Account = require ('../models/Account')
+  , Client  = require ('../models/Client')
   ;
-
-const SECRET_LENGTH = 48;
 
 function AccountController () {
 

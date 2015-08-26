@@ -4,9 +4,9 @@ var winston     = require ('winston')
   , blueprint   = require ('blueprint')
   ;
 
-var Client      = blueprint.models.Client
-  , Account     = blueprint.models.Account
-  , AccessToken = blueprint.models.oauth2.AccessToken
+var Client      = require ('../models/Client')
+  , Account     = require ('../models/Account')
+  , AccessToken = require ('../models/oauth2/AccessToken')
   ;
 
 /**
