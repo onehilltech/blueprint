@@ -53,18 +53,18 @@ function RouterBuilder (routerPath, controllers, currPath) {
 }
 
 /**
- * Build the router from a specification.
+ * Add a set of routers to the router builder.
  *
  * @param specs
  * @returns {RouterBuilder}
  */
-RouterBuilder.prototype.build = function (specs) {
-  for (var key in specs) {
-    if (specs.hasOwnProperty(key)) {
+RouterBuilder.prototype.addRouters = function (routers) {
+  for (var key in routers) {
+    if (routers.hasOwnProperty (key)) {
       if (key.endsWith (ROUTER_SUFFIX))
-        this.addRoutes (specs[key]);
+        this._router.use (routers[key]);
       else
-        this.addPath (key, specs[key]);
+        this.addPath (key, routers[key]);
     }
   }
 
@@ -232,7 +232,7 @@ RouterBuilder.prototype.addPath = function (basePath, router) {
   winston.log ('info', 'building router for path %s', targetPath);
 
   var builder = new RouterBuilder (this._routerPath, this._controllers, targetPath);
-  builder.build (router);
+  builder.addRouters (router);
 
   this._router.use (targetPath, builder.getRouter ());
 
