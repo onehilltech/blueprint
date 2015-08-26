@@ -76,8 +76,6 @@ ApplicationModule.prototype.__defineGetter__ ('routers', function () {
     filter      :  /(.+Router)\.js$/,
     excludeDirs :  /^\.(git|svn)$/,
     resolve     : function (routes) {
-      winston.log ('debug', 'building router %s', routes);
-
       var builder = new RouterBuilder (routerPath, this.controllers);
       return builder.addRouter (routes).getRouter ();
     }
