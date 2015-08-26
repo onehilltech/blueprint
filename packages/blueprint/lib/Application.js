@@ -97,8 +97,18 @@ Application.prototype.start = function (callback) {
     connected (null);
 }
 
+/**
+ * Get the application database.
+ */
 Application.prototype.__defineGetter__ ('database', function () {
   return this._db;
+});
+
+/**
+ * Get the application server.
+ */
+Application.prototype.__defineGetter__ ('server', function () {
+  return this._server;
 });
 
 module.exports = exports = Application;
