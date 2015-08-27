@@ -28,22 +28,6 @@ var masterprint = parent.require ('blueprint');
 // directory, and initialize the application to the resolved location.
 var app;
 
-Object.defineProperty (exports, 'env', {
-  get : function () { return app.env; }
-});
-
-Object.defineProperty (exports, 'models', {
-  get : function () { return app.models; }
-});
-
-Object.defineProperty (exports, 'config', {
-  get : function () { return app.config; }
-});
-
-Object.defineProperty (exports, 'controllers', {
-  get : function () { return app.controllers; }
-});
-
 Object.defineProperty (exports, 'Schema', {
   get : function () { return masterprint.ApplicationModule.Schema; }
 });
@@ -54,10 +38,9 @@ Object.defineProperty (exports, 'Schema', {
  */
 Object.defineProperty (exports, 'app', {
   get : function () {
-    if (app)
-      return app;
+    if (!app) throw new Error ('Application is not initialized; must all Application(appPath) first');
 
-    throw new Error ('Application is not initialized; must all Application(appPath) first');
+    return app;
   }
 });
 
