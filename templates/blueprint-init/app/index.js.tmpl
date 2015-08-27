@@ -2,11 +2,9 @@
 
 var winston   = require ('winston')
   , blueprint = require ('blueprint')
-  , path      = require ('path')
   ;
 
-var appPath = path.resolve (__dirname, 'app');
-var app = blueprint.Application (appPath);
+var app = blueprint.Application (__dirname);
 
 app.start (function (err) {
   if (err)
