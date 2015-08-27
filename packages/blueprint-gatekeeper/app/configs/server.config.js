@@ -1,11 +1,5 @@
 module.exports = exports = {
-  validator : {
-
-  },
-
-  bodyParser: {
-    json : {
-
-    }
-  }
+  validator  : { },
+  bodyParser : { json : { } },
+  passport   : {  }
 };

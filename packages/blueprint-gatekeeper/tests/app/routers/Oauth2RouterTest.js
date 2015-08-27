@@ -10,7 +10,7 @@ describe ('Oauth2Controller', function () {
   var app;
 
   before (function (done) {
-    app = blueprint.app.makeServer ();
+    app = blueprint.app.server;
     blueprint.app.database.connect (done);
   });
 

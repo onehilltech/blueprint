@@ -1,6 +1,5 @@
 var winston     = require ('winston')
   , uid         = require ('uid-safe')
-  , passport    = require ('passport')
   , blueprint   = require ('blueprint')
   ;
 
@@ -72,17 +71,19 @@ Oauth2Controller.prototype.lookupTokenByParam = function () {
   };
 };
 
+/**
+ * Logout a user. After this method returns, the token is no longer valid.
+ *
+ * @returns {*[]}
+ */
 Oauth2Controller.prototype.logoutUser = function () {
   var self = this;
 
-  return [
-    passport.authenticate ('bearer', {session : false}),
-    function (req, res) {
-      self._accessTokenModel.findByIdAndRemove (req.authInfo.token_id, function (err) {
-        return res.status (200).send (err ? false : true);
-      });
-    }
-  ];
+  return function (req, res) {
+    self._accessTokenModel.findByIdAndRemove(req.authInfo.token_id, function (err) {
+      return res.status(200).send(err ? false : true);
+    });
+  };
 };
 
 /**

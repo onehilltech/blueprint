@@ -14,6 +14,4 @@ module.exports = exports = {
     resave: true,
     saveUninitialized: true
   }
-
-
 };
