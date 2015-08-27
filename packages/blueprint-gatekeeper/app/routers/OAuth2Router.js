@@ -1,7 +1,9 @@
 var blueprint = require ('blueprint')
+  , auth      = require ('../../lib').auth
   ;
 
 var passport  = blueprint.app.server.middleware.passport;
+passport.use (auth.bearer ());
 
 module.exports = exports = {
   '/oauth2/token' : {

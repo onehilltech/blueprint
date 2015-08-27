@@ -76,12 +76,17 @@ Oauth2Controller.prototype.lookupTokenByParam = function () {
  *
  * @returns {*[]}
  */
-Oauth2Controller.prototype.logoutUser = function () {
+Oauth2Controller.prototype.logoutUser = function (callback) {
   var self = this;
 
   return function (req, res) {
-    self._accessTokenModel.findByIdAndRemove(req.authInfo.token_id, function (err) {
-      return res.status(200).send(err ? false : true);
+    var token = req.authInfo.token;
+
+    token.remove (function (err) {
+      if (err)
+        return self.handleError (res, err, 500, 'Failed to logout user', callback);
+
+      return res.status (200).send (true);
     });
   };
 };

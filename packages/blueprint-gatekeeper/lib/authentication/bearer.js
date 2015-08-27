@@ -33,7 +33,7 @@ module.exports = function () {
 
         // to keep this example simple, restricted scopes are not implemented,
         // and this is just for illustrative purposes
-        var info = {scope: '*', token_id: token.id}
+        var info = {scope: '*', token: token}
         var user = token.account || token.client;
 
         return done (null, user, info);
