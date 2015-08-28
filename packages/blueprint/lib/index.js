@@ -11,10 +11,22 @@ var BaseController    = require ('./BaseController')
 exports.BaseController = BaseController;
 exports.ApplicationModule = ApplicationModule;
 
+function theApp () {
+  return process.mainModule.blueprint;
+}
+
+function verifyInitialized () {
+  if (!theApp ())
+    throw new Error ('Application not initialized; must call Application(appPath) first');
+}
+
 // Singleton application for the module. Resolve the location of the application
 // directory, and initialize the application to the resolved location.
 Object.defineProperty (exports, 'Schema', {
-  get : function () { return process.mainModule.app.Schema; }
+  get : function () {
+    verifyInitialized ();
+    return process.mainModule.app.Schema;
+  }
 });
 
 /**
@@ -23,10 +35,8 @@ Object.defineProperty (exports, 'Schema', {
  */
 Object.defineProperty (exports, 'app', {
   get : function () {
-    if (!process.mainModule.app)
-      throw new Error ('Application is not initialized; must all Application(appPath) first');
-
-    return process.mainModule.app;
+    verifyInitialized ();
+    return theApp ();
   }
 });
 
@@ -46,7 +56,8 @@ exports.controller = function (controller, base) {
  * @param schema
  */
 exports.model = function (name, schema) {
-  return process.mainModule.app.database.registerModel (name, schema);
+  verifyInitialized ();
+  return theApp ().database.registerModel (name, schema);
 }
 
 /**
@@ -57,10 +68,8 @@ exports.model = function (name, schema) {
  * @constructor
  */
 exports.Application = function (appPath) {
-  var app = process.mainModule.blueprint;
-
-  if (app)
-    throw new Error ('Application is already initialized');
+  var app = theApp ();
+  if (app) throw new Error ('Application is already initialized');
 
   // Create a new application, initialize the application, and return the
   // application to the caller.
