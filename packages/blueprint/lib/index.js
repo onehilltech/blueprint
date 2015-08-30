@@ -25,7 +25,7 @@ function verifyInitialized () {
 Object.defineProperty (exports, 'Schema', {
   get : function () {
     verifyInitialized ();
-    return process.mainModule.app.Schema;
+    return theApp ().database.Schema;
   }
 });
 
