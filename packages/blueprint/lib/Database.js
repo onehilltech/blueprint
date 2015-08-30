@@ -27,6 +27,10 @@ Database.prototype.registerModel = function (name, schema) {
   return mongoose.model (name, schema);
 }
 
+Database.prototype.__defineGetter__ ('Schema', function () {
+  return mongoose.Schema;
+});
+
 module.exports = exports = Database;
 
 exports.Schema = mongoose.Schema;
