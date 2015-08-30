@@ -71,16 +71,17 @@ exports.Application = function (appPath) {
   var app = theApp ();
   if (app) throw new Error ('Application is already initialized');
 
-  // Create a new application, initialize the application, and return the
-  // application to the caller.
+  // Create a new application.
   app = new Application (appPath);
-  app.init ();
 
   // Install the application in the main module. We define it as a property
   // so that it cannot be set.
   Object.defineProperty (process.mainModule, 'blueprint', {
     get : function () { return app; }
   });
+
+  // Initialize the application.
+  app.init ();
 
   return app;
 };
