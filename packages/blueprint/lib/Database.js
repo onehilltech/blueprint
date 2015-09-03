@@ -3,20 +3,35 @@ var mongoose = require ('mongoose')
   , util     = require ('util')
   ;
 
+var messenger = Messaging.Messenger ();
+
 function Database (opts) {
   this._opts = opts;
 }
 
 Database.prototype.connect = function (callback) {
+  var self = this;
   winston.log ('debug', 'database connection: %s', this._opts.connstr);
   winston.log ('debug', 'database options: %s', util.inspect (this._opts.options));
 
-  mongoose.connect (this._opts.connstr, this._opts.options, callback);
+  mongoose.connect (this._opts.connstr, this._opts.options, function (err) {
+    if (!err)
+      messenger.emit ('database.connect', self);
+
+    callback ();
+  });
 };
 
 Database.prototype.disconnect = function (callback) {
+  var self = this;
   winston.log ('debug', 'disconnecting from database');
-  mongoose.connection.disconnect (callback);
+
+  mongoose.connection.disconnect (function (err) {
+    if (!err)
+      messenger.emit ('database.disconnect', self);
+
+    callback (err);
+  });
 };
 
 Database.prototype.registerModel = function (name, schema) {
@@ -24,7 +39,11 @@ Database.prototype.registerModel = function (name, schema) {
     return mongoose.models[name];
 
   winston.log ('info', 'model registration: %s', name);
-  return mongoose.model (name, schema);
+
+  var model = mongoose.model (name, schema);
+  messenger.emit ('database.model', this, model);
+
+  return model;
 }
 
 Database.prototype.__defineGetter__ ('Schema', function () {

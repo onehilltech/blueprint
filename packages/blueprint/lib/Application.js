@@ -58,7 +58,7 @@ Application.prototype.init = function () {
   this._server.use (this._router);
 
   // Notify all listeners the application is initialized.
-  messenger.emit ('application.init', this);
+  messenger.emit ('app.init', this);
 };
 
 /**
@@ -83,7 +83,7 @@ Application.prototype.start = function (callback) {
       winston.log ('info', 'listening at http://%s:%s...', host, port);
 
       // Notify all listeners the application has started.
-      messenger.emit ('application.start', self);
+      messenger.emit ('app.start', self);
 
       callback ();
     });
