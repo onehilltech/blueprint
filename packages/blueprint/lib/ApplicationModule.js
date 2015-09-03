@@ -1,6 +1,8 @@
 var winston = require ('winston')
   , path    = require ('path')
   , all     = require ('require-all')
+  , events  = require ('events')
+  , util    = require ('util')
   ;
 
 var RouterBuilder = require ('./RouterBuilder')
@@ -16,9 +18,15 @@ var RouterBuilder = require ('./RouterBuilder')
  * @constructor
  */
 function ApplicationModule (appPath) {
+  // Initialize the base class.
+  events.EventEmitter.call (this);
+
+  // Initialize the application module.
   this._appPath = path.resolve (appPath);
   this._controllers = this._models = this._routers = undefined;
 }
+
+util.inherits (ApplicationModule, events.EventEmitter);
 
 /**
  * Get the models defined by the application.
@@ -29,12 +37,15 @@ ApplicationModule.prototype.__defineGetter__ ('models', function () {
 
   // Load all the models into memory.
   winston.log ('debug', 'loading application models into memory');
+  this.emit ('models.loading');
+
   this._models = all({
     dirname: path.join (this._appPath, 'models'),
     filter: /(.+)\.js$/,
     excludeDirs: /^\.(git|svn)$/
   });
 
+  this.emit ('models.loaded');
   return this._models;
 });
 
@@ -47,6 +58,8 @@ ApplicationModule.prototype.__defineGetter__ ('controllers', function () {
 
   // Load all the controllers into memory.
   winston.log ('debug', 'loading application controllers into memory');
+  this.emit ('controllers.loading');
+
   this._controllers = all ({
     dirname     :  path.join (this._appPath, 'controllers'),
     filter      :  /(.+Controller)\.js$/,
@@ -57,6 +70,7 @@ ApplicationModule.prototype.__defineGetter__ ('controllers', function () {
     }
   });
 
+  this.emit ('controllers.loaded');
   return this._controllers;
 });
 
@@ -69,6 +83,7 @@ ApplicationModule.prototype.__defineGetter__ ('routers', function () {
 
   // Load all the routers into memory.
   winston.log ('debug', 'loading application routers into memory');
+  this.emit ('routers.loading');
 
   var routerPath =  path.join (this._appPath, 'routers');
   var self = this;
@@ -85,6 +100,7 @@ ApplicationModule.prototype.__defineGetter__ ('routers', function () {
     }
   });
 
+  this.emit ('routers.loaded');
   return this._routers;
 });
 
