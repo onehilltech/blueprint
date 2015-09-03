@@ -1,0 +1,14 @@
+{
+  "name": "bookshelf",
+  "author": "Blueprint.js",
+  "version": "0.0.0",
+  "description": "a Blueprint.js web application",
+  "main": "./app.js",
+  "dependencies": {
+    "blueprint": "git@github.com:onehilltech/blueprint.js.git",
+    "winston": "^1.0.1"
+  },
+  "scripts": {
+    "start": "node ./app.js"
+  }
+}
