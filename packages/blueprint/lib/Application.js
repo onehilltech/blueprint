@@ -8,7 +8,10 @@ var Server            = require ('./Server')
   , Configuration     = require ('./Configuration')
   , Database          = require ('./Database')
   , ApplicationModule = require ('./ApplicationModule')
+  , Messaging         = require ('./Messaging')
   ;
+
+var messenger = Messaging.Messenger ();
 
 /**
  * @class Application
@@ -55,7 +58,7 @@ Application.prototype.init = function () {
   this._server.use (this._router);
 
   // Notify all listeners the application is initialized.
-  this.emit ('init');
+  messenger.emit ('application.init', this);
 };
 
 /**
@@ -80,7 +83,7 @@ Application.prototype.start = function (callback) {
       winston.log ('info', 'listening at http://%s:%s...', host, port);
 
       // Notify all listeners the application has started.
-      self.emit ('start');
+      messenger.emit ('application.start', self);
 
       callback ();
     });
