@@ -1,0 +1,14 @@
+{
+  "name": "03_listeners",
+  "author": "hilljh82",
+  "version": "0.0.0",
+  "description": "example Blueprint.js application illustrating messaging service",
+  "main": "./app",
+  "dependencies": {
+    "blueprint": "git@github.com:onehilltech/blueprint.git#issue1",
+    "winston": "^1.0.1"
+  },
+  "scripts": {
+    "start": "node ./app.js"
+  }
+}

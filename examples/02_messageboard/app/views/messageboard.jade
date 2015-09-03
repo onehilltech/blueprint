@@ -1,0 +1,81 @@
+doctype html
+html(lang="en")
+    head
+        title Blueprint.js - MessageBoard
+
+        link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css")
+        link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css")
+        link(rel="stylesheet", href="/assets/css/normalize.css")
+    body
+        div.container(ng-app="examples", ng-controller="MessageController")
+            h1 Blueprint.js - MessageBoard Example
+
+            p
+                | This example illustrates a simple web application that has a backend
+                | database to support its needs, and uses AngularJS.
+
+            form.form
+                div.form-group
+                    label(for="title") Title
+                    input#title.form-control(type="text", name="title", placeholder="Type title here", ng-model="message.title")
+
+                div.form-group
+                    label(for="title") Message
+                    textarea#message.form-control(name="message", placeholder="Type message here", ng-model="message.content")
+
+                button.btn.btn-default(type="submit", ng-click="postMessage()") Post Message
+
+            h2 Message Board
+
+            div.panel.panel-info(ng-repeat="msg in messages")
+                div.panel-heading
+                    h3.panel-title {{msg.title}} @ {{msg.timestamp}}
+                        button.close(type="button" class="close" data-dismiss="alert" aria-label="Close", data-message-id="{{msg._id}}" ng-click="deleteMessage($event)")
+                            span(aria-hidden="true") &times;
+                div.panel-body {{msg.content}}
+
+
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js")
+        script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js")
+        script(src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.4/angular.min.js")
+
+        script.
+            var app = angular.module ('examples', []);
+
+            app.controller ('MessageController', function ($scope, $http) {
+                $scope.master = {title: '', content: ''};
+                $scope.messages = [];
+
+                $scope.resetForm = function () {
+                    $scope.message = angular.copy ($scope.master);
+                };
+
+                $scope.postMessage = function () {
+                    $http.post ('/messages', $scope.message).success (function ($response) {
+                        var messageUri = '/messages/' + $response;
+                        $http.get (messageUri).success (function ($response) {
+                            $scope.messages.push ($response);
+                            $scope.resetForm ();
+                        });
+                    });
+                };
+
+                $scope.getMessages = function () {
+                    $http.get("/messages").success(function ($response) {
+                        $scope.messages = $response;
+                    });
+                };
+
+                $scope.deleteMessage = function ($event) {
+                    var messageId = $event.currentTarget.dataset.messageId;
+                    var messageUrl = '/messages/' + messageId;
+
+                    $http.delete (messageUrl).success (function ($response) {
+                        $scope.getMessages ();
+                    });
+                };
+
+                $scope.resetForm ();
+                $scope.getMessages ();
+            });
+</script>
