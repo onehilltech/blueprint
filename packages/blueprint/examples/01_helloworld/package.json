@@ -3,13 +3,10 @@
   "author": "James H. Hill",
   "version": "1.0.0",
   "description": "Hello, World! example for Blueprint.js",
-  "main": "app.js",
+  "main": "./app",
   "dependencies": {
-    "blueprint": "git@github.com:onehilltech/blueprint.git",
+    "blueprint": "file:../..",
     "winston": "^1.0.1"
-  },
-  "scripts": {
-    "start": "node ./app.js"
   },
   "repository": {
     "type": "git",
