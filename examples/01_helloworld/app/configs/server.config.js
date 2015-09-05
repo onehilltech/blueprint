@@ -1,8 +1,14 @@
 module.exports = exports = {
-  port : 5000,
+  protocols : {
+    http : {
+      port : 5000
+    }
+  },
 
-  bodyParser : {
-    json : { },
-    urlencoded : { extended: false }
+  middleware : {
+    bodyParser : {
+      json : { },
+      urlencoded : { extended: false }
+    }
   }
 };
