@@ -136,6 +136,12 @@ function Protocol (name, protocol, port) {
  * @param callback
  */
 Protocol.prototype.listen = function (port, callback) {
+  if (!callback)
+    callback = port;
+
+  if (typeof port === 'function')
+    port = this._port;
+
   port = port || this._port;
 
   winston.log ('info', '[%s]: listening on port %d...', this._name, port);
