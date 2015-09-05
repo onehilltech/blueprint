@@ -223,6 +223,9 @@ function Server (appPath, config) {
  * @param done
  */
 Server.prototype.listen = function (done) {
+  if (this._protocols.length === 0)
+    winston.log ('warn', 'server has no protocols; cannot receive any requests');
+
   async.each (this._protocols, function (protocol, callback) {
     protocol.listen (callback);
   }, done);
