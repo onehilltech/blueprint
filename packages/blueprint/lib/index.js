@@ -11,12 +11,8 @@ exports.BaseController = BaseController;
 exports.ApplicationModule = ApplicationModule;
 exports.Messaging = Messaging;
 
-// Make sure Blueprint has been initialized in the main module.
-if (!process.mainModule.blueprint)
-  process.mainModule.blueprint = {};
-
 function theApp () {
-  return process.mainModule.blueprint.app;
+  return process.mainModule.blueprint;
 }
 
 function verifyInitialized () {
