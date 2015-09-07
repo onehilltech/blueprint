@@ -1,3 +1,7 @@
 module.exports = exports = {
-  port : 5000
+  protocols : {
+    http : {
+      port : 5000
+    }
+  }
 };
