@@ -1,7 +1,8 @@
 var blueprint = require ('blueprint')
   ;
 
-var Message = blueprint.models.Message;
+var Message = require ('../models/Message')
+  ;
 
 function MessageController () {
   blueprint.BaseController.call (this);
