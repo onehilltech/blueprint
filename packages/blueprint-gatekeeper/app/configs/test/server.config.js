@@ -1,17 +1,23 @@
 module.exports = exports = {
-  port: 5000,
-
-  morgan: {
-    format: 'dev',
-    immediate: true
+  protocols : {
+    http: {
+      port : 5000
+    }
   },
 
-  session: {
-    cookie: {
-      secure: false
+  middleware : {
+    morgan: {
+      format: 'dev',
+      immediate: true
     },
-    secret: '123abc',
-    resave: true,
-    saveUninitialized: true
+
+    session: {
+      cookie: {
+        secure: false
+      },
+      secret: '123abc',
+      resave: true,
+      saveUninitialized: true
+    }
   }
 };

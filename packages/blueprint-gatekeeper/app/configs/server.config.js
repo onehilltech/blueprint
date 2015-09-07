@@ -1,5 +1,7 @@
 module.exports = exports = {
-  validator  : { },
-  bodyParser : { json : { } },
-  passport   : {  }
+  middleware : {
+    validator  : { },
+    bodyParser : { json : { } },
+    passport   : {  }
+  }
 };
