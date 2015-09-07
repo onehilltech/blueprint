@@ -1,11 +1,17 @@
 module.exports = exports = {
-  port : 5000,
-
-  bodyParser : {
-    json :  {}
+  protocols : {
+    http : {
+      port : 5000
+    }
   },
 
-  statics : [
-    '../public_html'
-  ]
+  middleware : {
+    bodyParser : {
+      json :  {}
+    },
+
+    statics : [
+      '../public_html'
+    ]
+  },
 };
