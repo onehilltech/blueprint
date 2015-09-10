@@ -7,29 +7,22 @@ var Application       = require ('../lib/Application')
   ;
 
 describe ('Application', function () {
-  var appModule;
+  var app;
 
   describe ('new Application ()', function () {
-    it ('should create a new application', function (done) {
+    it ('should create a new application', function () {
       var appPath = path.resolve (__dirname, './fixtures/app');
-
-      app = Application (appPath, function (app) {
-        expect (app).to.be.instanceof (ApplicationModule);
-        done ();
-      });
+      app = new Application (appPath);
 
       expect (app).to.be.instanceof (ApplicationModule);
     });
   });
 
-  describe ('#server', function () {
-    it ('should return the configured server', function () {
-      expect (app.server).to.not.be.undefined;
-    });
-  });
+  describe ('#init', function () {
+    it ('should initialize the application', function () {
+      app.init ();
 
-  describe ('#database', function () {
-    it ('should return the configured database', function () {
+      expect (app.server).to.not.be.undefined;
       expect (app.database).to.not.be.undefined;
     });
   });
