@@ -107,20 +107,9 @@ Application.prototype.__defineGetter__ ('database', function () {
  */
 Application.prototype.__defineGetter__ ('server', function () {
   if (!this._server)
-    throw new Error ('application did not configure database');
+    throw new Error ('application did not configure server');
 
   return this._server;
 });
 
-module.exports = exports = function (appPath, callback) {
-  var app = new Application (appPath);
-
-  process.nextTick (function () {
-    app.init ();
-
-    if (callback)
-      callback (app);
-  });
-
-  return app;
-};
+module.exports = exports = Application;

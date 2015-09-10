@@ -53,6 +53,6 @@ Database.prototype.__defineGetter__ ('Schema', function () {
   return mongoose.Schema;
 });
 
+// Export the database, and the different class types.
 module.exports = exports = Database;
-
 exports.Schema = mongoose.Schema;
