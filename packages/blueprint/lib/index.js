@@ -67,21 +67,18 @@ exports.model = function (name, schema) {
  * @param appPath
  * @constructor
  */
-exports.Application = function (appPath) {
+exports.Application = function (appPath, callback) {
   var app = theApp ();
   if (app) throw new Error ('Application is already initialized');
 
   // Create a new application.
-  app = new Application (appPath);
+  app = Application (appPath, callback);
 
   // Install the application in the main module. We define it as a property
   // so that it cannot be set.
   Object.defineProperty (process.mainModule, 'blueprint', {
     get : function () { return app; }
   });
-
-  // Initialize the application.
-  app.init ();
 
   return app;
 };
