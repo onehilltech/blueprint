@@ -3,6 +3,7 @@
   "author": "Blueprint.js",
   "version": "0.0.1",
   "description": "a simple framwork for building web services",
+  "license" : "Apache-2.0",
   "main": "./lib",
   "dependencies": {
     "async": "^1.4.2",
