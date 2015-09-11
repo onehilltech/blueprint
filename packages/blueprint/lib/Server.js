@@ -1,3 +1,5 @@
+'use strict';
+
 var express = require ('express')
   , winston = require ('winston')
   , path    = require ('path')

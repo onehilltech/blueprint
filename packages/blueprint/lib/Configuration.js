@@ -1,3 +1,5 @@
+'use strict';
+
 var extend  = require ('extend')
   , path    = require ('path')
   , all     = require ('require-all')
@@ -22,7 +24,7 @@ module.exports = exports = function (configPath, env) {
   var envConfigPath = path.join (configPath, env);
 
   try {
-    lstat = fs.lstatSync(envConfigPath);
+    var lstat = fs.lstatSync(envConfigPath);
 
     if (lstat.isDirectory()) {
       // Load the configurations specific to the environment.
