@@ -1,10 +1,7 @@
 var blueprint = require ('../../blueprint')
   ;
 
-var Schema = blueprint.Schema;
-console.log (Schema);
-
-var schema = new Schema ({
+var schema = new blueprint.Schema ({
   /// Username for the account.
   firstname : { type: String, trim: true, required: true },
 
