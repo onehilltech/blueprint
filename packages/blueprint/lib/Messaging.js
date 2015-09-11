@@ -3,8 +3,6 @@
 var events = require ('events')
   ;
 
-const DEFAULT_KEY = '_';
-
 /**
  * @class Messaging
  *
@@ -35,7 +33,7 @@ Messaging.prototype.hasMessenger = function (key) {
  * @constructor
  */
 Messaging.prototype.getMessenger = function (key) {
-  key = key || DEFAULT_KEY;
+  key = key || '_';
 
   if (this.hasMessenger (key))
     return this._messengers[key];

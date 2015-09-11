@@ -7,8 +7,8 @@ var express = require ('express')
   , async   = require ('async')
   ;
 
-const DEFAULT_VIEWS_PATH = 'views';
-const DEFAULT_VIEW_ENGINE = 'jade';
+var DEFAULT_VIEWS_PATH  = 'views';
+var DEFAULT_VIEW_ENGINE = 'jade';
 
 /**
  * Configure the middleware for the application.
