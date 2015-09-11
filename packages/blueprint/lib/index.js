@@ -22,8 +22,9 @@ function verifyInitialized () {
     throw new Error ('Application not initialized; must call Application(appPath) first');
 }
 
-// Singleton application for the module. Resolve the location of the application
-// directory, and initialize the application to the resolved location.
+/**
+ * Get the Schema definition for Blueprint.js models.
+ */
 Object.defineProperty (exports, 'Schema', {
   enumerable:   true,
   configurable: true,
