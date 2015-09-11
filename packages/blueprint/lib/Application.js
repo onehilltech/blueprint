@@ -11,8 +11,6 @@ var Server            = require ('./Server')
   , Messaging         = require ('./Messaging')
   ;
 
-var messenger = Messaging.Messenger ();
-
 /**
  * @class Application
  *
@@ -45,6 +43,7 @@ Application.prototype.init = function () {
   // have a database configuration, then we can have models.
   if (this._config.database) {
     this._db = new Database (this._config['database']);
+    this._db.setMessenger (this._messenger);
 
     // Force loading of the models.
     this.models;
@@ -62,7 +61,7 @@ Application.prototype.init = function () {
   this._server.setMainRouter (this._router);
 
   // Notify all listeners the application is initialized.
-  messenger.emit ('app.init', this);
+  this._messenger.emit ('app.init', this);
 };
 
 /**
@@ -79,7 +78,7 @@ Application.prototype.start = function (callback) {
       return callback (err);
 
     self._server.listen (function () {
-      messenger.emit ('app.start', self);
+      this._messenger.emit ('app.start', self);
       process.nextTick (callback);
     });
   }
