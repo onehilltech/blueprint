@@ -29,16 +29,20 @@ describe ('Loader', function () {
     var Messaging = require ('../lib/Messaging');
     var listenerPath = path.resolve (__dirname, './fixtures/app/listeners');
 
-    it ('should load the listeners', function () {
-      var messaging = new Messaging ();
+    var messaging = new Messaging ();
+    var listeners = Loader.loadListeners (listenerPath, messaging);
 
-      var listeners = Loader.loadListeners (listenerPath, messaging);
-      expect (listeners).to.have.property ('app.init');
-      
+    it ('should load listeners for 1 event type', function () {
+      expect(listeners).to.have.keys(['app.init']);
+    });
+
+    it ('should have 2 different messengers', function () {
       expect (messaging.messengers).to.have.keys (['_', 'testTarget']);
+    });
+
+    it ('should only have 1 listener for each messenger', function () {
       expect (messaging.getMessenger ('_').listeners).to.have.length (1);
       expect (messaging.getMessenger ('testTarget').listeners).to.have.length (1);
     });
-
   });
 });
