@@ -26,16 +26,18 @@ describe ('Loader', function () {
   });
 
   describe ('#loadListeners', function () {
+    var Messaging = require ('../lib/Messaging');
+    var listenerPath = path.resolve (__dirname, './fixtures/app/listeners');
+
     it ('should load the listeners', function () {
-      var TestListener = require ('./fixtures/app/listeners/app.init/TestListener');
-      var Messaging = require ('../lib/Messaging');
-
       var messaging = new Messaging ();
-      var listenerPath = path.resolve (__dirname, './fixtures/app/listeners');
-      var listeners = Loader.loadListeners (listenerPath, messaging);
 
+      var listeners = Loader.loadListeners (listenerPath, messaging);
       expect (listeners).to.have.property ('app.init');
+      
+      expect (messaging.messengers).to.have.keys (['_', 'testTarget']);
       expect (messaging.getMessenger ('_').listeners).to.have.length (1);
+      expect (messaging.getMessenger ('testTarget').listeners).to.have.length (1);
     });
 
   });
