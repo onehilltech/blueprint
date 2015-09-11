@@ -1,8 +1,6 @@
 var blueprint = require ('../../blueprint')
   ;
 
-console.log (blueprint);
-
 var Schema = blueprint.Schema;
 
 var schema = new Schema ({
