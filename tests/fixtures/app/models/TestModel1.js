@@ -2,6 +2,7 @@ var blueprint = require ('../../blueprint')
   ;
 
 var Schema = blueprint.Schema;
+console.log (Schema);
 
 var schema = new Schema ({
   /// Username for the account.
