@@ -1,7 +1,7 @@
 var expect = require ('chai').expect
   ;
 
-var Messaging = require ('../lib/Messaging')
+var Messaging = require ('../../lib/Messaging')
   ;
 
 describe ('Messaging', function () {

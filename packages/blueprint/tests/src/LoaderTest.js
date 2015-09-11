@@ -2,13 +2,13 @@ var expect = require ('chai').expect
   , path   = require ('path')
   ;
 
-var Loader = require ('../lib/Loader')
+var Loader = require ('../../lib/Loader')
   ;
 
 describe ('Loader', function () {
   describe ('#loadModels', function () {
     it ('should load the models', function () {
-      var models = Loader.loadModels (path.resolve (__dirname, './fixtures/app/models'));
+      var models = Loader.loadModels (path.resolve (__dirname, '../fixtures/app/models'));
 
       expect (models).to.have.deep.property ('TestModel1')
       expect (models).to.have.deep.property ('inner.TestModel2');
@@ -17,8 +17,8 @@ describe ('Loader', function () {
 
   describe ('#loadControllers', function () {
     it ('should load the controllers', function () {
-      var TestController = require ('./fixtures/app/controllers/TestController');
-      var controllers = Loader.loadControllers(path.resolve (__dirname, './fixtures/app/controllers'));
+      var TestController = require ('../fixtures/app/controllers/TestController');
+      var controllers = Loader.loadControllers(path.resolve (__dirname, '../fixtures/app/controllers'));
 
       expect (controllers).to.have.property ('TestController');
       expect (controllers['TestController']).to.be.instanceof (TestController);
@@ -26,8 +26,8 @@ describe ('Loader', function () {
   });
 
   describe ('#loadListeners', function () {
-    var Messaging = require ('../lib/Messaging');
-    var listenerPath = path.resolve (__dirname, './fixtures/app/listeners');
+    var Messaging = require ('../../lib/Messaging');
+    var listenerPath = path.resolve (__dirname, '../fixtures/app/listeners');
 
     var messaging = new Messaging ();
     var listeners = Loader.loadListeners (listenerPath, messaging);

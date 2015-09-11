@@ -2,8 +2,8 @@ var path   = require ('path')
   , expect = require ('chai').expect
   ;
 
-var ApplicationModule = require ('../lib/ApplicationModule')
-  , RouterBuilder     = require ('../lib/RouterBuilder')
+var ApplicationModule = require ('../../lib/ApplicationModule')
+  , RouterBuilder     = require ('../../lib/RouterBuilder')
   ;
 
 describe ('RouterBuilder', function () {

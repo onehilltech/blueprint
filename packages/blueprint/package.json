@@ -27,7 +27,7 @@
     "blueprint": "./bin/blueprint"
   },
   "scripts": {
-    "test": "mocha --recursive --ui bdd ./tests"
+    "test": "mocha --recursive --ui bdd ./tests/src"
   },
   "repository": {
     "type": "git",

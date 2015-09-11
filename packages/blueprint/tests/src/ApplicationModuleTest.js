@@ -2,7 +2,7 @@ var expect = require ('chai').expect
   , path   = require ('path')
   ;
 
-var ApplicationModule = require ('../lib/ApplicationModule')
+var ApplicationModule = require ('../../lib/ApplicationModule')
   ;
 
 describe ('ApplicationModule', function () {
@@ -10,7 +10,7 @@ describe ('ApplicationModule', function () {
 
   describe ('new ApplicationModule ()', function () {
     it ('should create a new application module', function () {
-      var appPath = path.resolve (__dirname, './fixtures/app');
+      var appPath = path.resolve (__dirname, '../fixtures/app');
       appModule = new ApplicationModule (appPath);
 
       expect (appModule._appPath).to.equal (appPath);
