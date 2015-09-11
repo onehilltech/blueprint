@@ -2,8 +2,8 @@ var expect = require ('chai').expect
   , path   = require ('path')
   ;
 
-var Application       = require ('../lib/Application')
-  , ApplicationModule = require ('../lib/ApplicationModule')
+var Application       = require ('../../lib/Application')
+  , ApplicationModule = require ('../../lib/ApplicationModule')
   ;
 
 describe ('Application', function () {
@@ -11,7 +11,7 @@ describe ('Application', function () {
 
   describe ('new Application ()', function () {
     it ('should create a new application', function () {
-      var appPath = path.resolve (__dirname, './fixtures/app');
+      var appPath = path.resolve (__dirname, '../fixtures/app');
       app = new Application (appPath);
 
       expect (app).to.be.instanceof (ApplicationModule);

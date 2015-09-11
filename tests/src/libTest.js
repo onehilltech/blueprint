@@ -2,7 +2,7 @@ var expect = require ('chai').expect
   , path   = require ('path')
   ;
 
-var blueprint = require ('./fixtures/blueprint')
+var blueprint = require ('../fixtures/blueprint')
   ;
 
 describe ('lib', function () {
