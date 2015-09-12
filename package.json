@@ -27,7 +27,7 @@
     "blueprint": "./bin/blueprint"
   },
   "scripts": {
-    "test": "mocha --recursive --ui bdd ./tests/src"
+    "test": "env NODE_ENV=test mocha --recursive tests/src --reporter spec"
   },
   "repository": {
     "type": "git",
