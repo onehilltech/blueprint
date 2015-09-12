@@ -3,14 +3,14 @@ var blueprint = require ('blueprint')
   , request   = require ('supertest')
   ;
 
-var datamodel = require ('../../fixtures/datamodel')
+var datamodel = require ('../../../fixtures/datamodel')
   ;
 
 describe ('Oauth2Controller', function () {
-  var app;
+  var server;
 
   before(function (done) {
-    app = blueprint.app.server;
+    server = blueprint.app.server;
     blueprint.app.database.connect(done);
   });
 
@@ -19,8 +19,7 @@ describe ('Oauth2Controller', function () {
   });
 
   describe('#getToken (callback)', function (done) {
-    const TARGET_URL = '/oauth2/token';
-
+    var TARGET_URL = '/oauth2/token';
     var accessToken;
     var refreshToken;
 
@@ -32,8 +31,9 @@ describe ('Oauth2Controller', function () {
         client_id: datamodel.models.clients[0].id
       };
 
-      request(app)
-        .post(TARGET_URL).send(data)
+      request(server.app)
+        .post (TARGET_URL)
+        .send (data)
         .expect(200).expect('Content-Type', /json/)
         .end(function (err, res) {
         if (err)
@@ -56,8 +56,9 @@ describe ('Oauth2Controller', function () {
         client_id: datamodel.models.clients[0].id
       };
 
-      request(app)
-        .post(TARGET_URL).send(data)
+      request(server.app)
+        .post(TARGET_URL)
+        .send(data)
         .expect(400, done);
     });
 
@@ -69,8 +70,9 @@ describe ('Oauth2Controller', function () {
         client_id: datamodel.models.clients[2].id
       };
 
-      request(app)
-        .post(TARGET_URL).send(data)
+      request(server.app)
+        .post(TARGET_URL)
+        .send(data)
         .expect(401, done);
     });
 
@@ -82,8 +84,9 @@ describe ('Oauth2Controller', function () {
         client_id: datamodel.models.clients[0].id
       };
 
-      request(app)
-        .post(TARGET_URL).send(data)
+      request(server.app)
+        .post(TARGET_URL)
+        .send(data)
         .expect(401, done);
     });
 
@@ -95,8 +98,9 @@ describe ('Oauth2Controller', function () {
         client_id: datamodel.models.clients[0].id
       };
 
-      request(app)
-        .post(TARGET_URL).send(data)
+      request(server.app)
+        .post(TARGET_URL)
+        .send(data)
         .expect(401, done);
     });
 
@@ -107,7 +111,7 @@ describe ('Oauth2Controller', function () {
         client_secret: datamodel.models.clients[0].secret
       };
 
-      request(app)
+      request(server.app)
         .post(TARGET_URL).send(data)
         .expect(200).expect('Content-Type', /json/)
         .end(function (err, res) {
@@ -128,7 +132,7 @@ describe ('Oauth2Controller', function () {
         client_secret: datamodel.models.clients[2].secret
       };
 
-      request(app)
+      request(server.app)
         .post(TARGET_URL).send(data)
         .expect(401, done);
     });
@@ -140,7 +144,7 @@ describe ('Oauth2Controller', function () {
         client_secret: 'bad_secret'
       };
 
-      request(app)
+      request(server.app)
         .post(TARGET_URL).send(data)
         .expect(400, done);
     });
@@ -154,7 +158,7 @@ describe ('Oauth2Controller', function () {
         client_id: datamodel.models.clients[0].id
       };
 
-      request(app)
+      request(server.app)
         .post(TARGET_URL).send(data)
         .expect(200).expect('Content-Type', /json/)
         .end(function (err, res) {
@@ -170,7 +174,7 @@ describe ('Oauth2Controller', function () {
           refresh_token: refreshToken
         };
 
-        request(app)
+        request(server.app)
           .post(TARGET_URL).send(data)
           .expect(200).expect('Content-Type', /json/)
           .end(function (err, res) {
@@ -203,7 +207,7 @@ describe ('Oauth2Controller', function () {
       };
 
       // First, get an access token for the user.
-      request(app)
+      request(server.app)
         .post('/oauth2/token').send(data)
         .expect(200)
         .end(function (err, res) {
@@ -212,7 +216,7 @@ describe ('Oauth2Controller', function () {
 
           accessToken = res.body.access_token;
 
-          request (app)
+          request (server.app)
             .get ('/oauth2/logout')
             .set ('Authorization', 'Bearer ' + accessToken)
             .expect (200, done);

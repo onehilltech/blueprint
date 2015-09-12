@@ -197,4 +197,25 @@ AccountController.prototype.updateRoles = function (callback) {
   };
 };
 
+AccountController.prototype.setPushNotificationToken = function (callback) {
+  var self = this;
+
+  return function (req, res) {
+    if (!req.account)
+      return self.handleError (null, res, 404, 'account does not exist', callback);
+
+    var network = req.body.network;
+    var token = req.body.token;
+
+    var account = req.account;
+    account.push_notifications[network].token = token;
+    account.save (function (err, account) {
+      if (err)
+        return self.handleError (err, res, 500, 'failed to save push notification details', callback);
+
+      return res.status (200).send (true);
+    });
+  }
+};
+
 module.exports = exports = AccountController;

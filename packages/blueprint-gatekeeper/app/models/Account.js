@@ -27,7 +27,16 @@ var schema = new Schema ({
   enabled  : { type: Boolean, required: true, default: true },
 
   /// Roles of the user.
-  roles    : { type: [String], default: DEFAULT_ROLES}
+  roles    : { type: [String], default: DEFAULT_ROLES},
+
+  /// Push notifications for the account.
+  push_notifications : {
+    /// Token information for Google Cloud Messaging.
+    gcm : { type : String },
+
+    /// Token information for Apple Push Notification Services.
+    apple : { type : String }
+  }
 });
 
 /**

@@ -13,10 +13,14 @@ module.exports = exports = {
   },
 
   '/accounts/:accountId/enable' : {
-    post: {action: 'AccountController@enableAccount'}
+    post : { action: 'AccountController@enableAccount'}
   },
 
   '/accounts/:accountId/roles' : {
-    post: {action: 'AccountController@updateRoles'}
+    post : { action: 'AccountController@updateRoles'}
   },
+
+  '/accounts/:accountId/push-notifications/token' : {
+    post : { action: 'AccountController@setPushNotificationToken'}
+  }
 };

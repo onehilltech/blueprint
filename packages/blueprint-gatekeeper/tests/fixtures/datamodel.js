@@ -1,9 +1,8 @@
-var blueprint = require ('blueprint')
-  , async     = require ('async')
-  , path      = require ('path')
+var async = require ('async')
   ;
 
-blueprint.Application (path.resolve (__dirname, '../../app'));
+var blueprint = require ('./blueprint')
+  ;
 
 var Account = blueprint.app.models.Account
   , Client  = blueprint.app.models.Client
