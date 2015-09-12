@@ -18,7 +18,7 @@ describe ('Oauth2Controller', function () {
     datamodel.apply(done);
   });
 
-  describe('#getToken (callback)', function (done) {
+  describe('#getToken (callback)', function () {
     var TARGET_URL = '/oauth2/token';
     var accessToken;
     var refreshToken;
@@ -193,7 +193,7 @@ describe ('Oauth2Controller', function () {
     });
   });
 
-  describe('#logoutUser (callback)', function (done) {
+  describe('#logoutUser (callback)', function () {
     const TARGET_URL = '/oauth2/logout';
 
     var accessToken;

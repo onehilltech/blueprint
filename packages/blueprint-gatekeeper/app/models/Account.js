@@ -30,12 +30,12 @@ var schema = new Schema ({
   roles    : { type: [String], default: DEFAULT_ROLES},
 
   /// Push notifications for the account.
-  push_notifications : {
+  apn : {
     /// Token information for Google Cloud Messaging.
     gcm : { type : String },
 
     /// Token information for Apple Push Notification Services.
-    apple : { type : String }
+    ios : { type : String }
   }
 });
 

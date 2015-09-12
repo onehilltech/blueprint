@@ -197,6 +197,12 @@ AccountController.prototype.updateRoles = function (callback) {
   };
 };
 
+/**
+ * Set the token for push notifications on the specified network.
+ *
+ * @param callback
+ * @returns {Function}
+ */
 AccountController.prototype.setPushNotificationToken = function (callback) {
   var self = this;
 
@@ -206,12 +212,14 @@ AccountController.prototype.setPushNotificationToken = function (callback) {
 
     var network = req.body.network;
     var token = req.body.token;
-
     var account = req.account;
-    account.push_notifications[network].token = token;
-    account.save (function (err, account) {
+
+    // Update the network token
+    account.apn[network] = token;
+
+    account.save (function (err) {
       if (err)
-        return self.handleError (err, res, 500, 'failed to save push notification details', callback);
+        return self.handleError (err, res, 500, 'failed to save push notification token', callback);
 
       return res.status (200).send (true);
     });
