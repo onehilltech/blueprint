@@ -23,8 +23,14 @@ module.exports = function () {
         if (!token.enabled)
           return done (null, false, {message: 'Token is disabled'});
 
+        if (!token.client)
+          return done (null, false, {message: 'Token is for an unknown client'});
+
         if (!token.client.enabled)
           return done (null, false, {message: 'Client is disabled'});
+
+        if (!token.account)
+          return done (null, false, {message: 'Token is for an unknown account'});
 
         if (!token.account.enabled)
           return done (null, false, {message: 'User account is disabled'});
