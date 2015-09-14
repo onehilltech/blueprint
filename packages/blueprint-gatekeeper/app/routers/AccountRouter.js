@@ -35,7 +35,7 @@ module.exports = exports = {
     post : { action: 'AccountController@updateRoles'}
   },
 
-  '/accounts/:accountId/apn/token' : {
+  '/accounts/:accountId/apn' : {
     post : { action: 'AccountController@setPushNotificationToken'}
   }
 };

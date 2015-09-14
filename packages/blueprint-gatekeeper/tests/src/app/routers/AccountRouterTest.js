@@ -43,10 +43,10 @@ describe ('AccountController', function () {
     ], done);
   });
 
-  describe ('POST /accounts/:accountId/apn/token', function () {
+  describe ('POST /accounts/:accountId/apn', function () {
     it ('should update the token', function (done) {
       request(server.app)
-        .post ('/accounts/' + datamodel.models.accounts[0].id +  '/apn/token')
+        .post ('/accounts/' + datamodel.models.accounts[0].id +  '/apn')
         .set ('Authorization', 'Bearer ' + accessToken)
         .send ({network: 'gcm', token : '1234567890'})
         .expect ('true').expect (200)
