@@ -4,8 +4,9 @@ var async = require ('async')
 var blueprint = require ('./blueprint')
   ;
 
-var Account = blueprint.app.models.Account
-  , Client  = blueprint.app.models.Client
+var Account     = blueprint.app.models.Account
+  , Client      = blueprint.app.models.Client
+  , AccessToken = blueprint.app.models.oauth2.AccessToken
   ;
 
 exports.models = {};
@@ -32,9 +33,9 @@ exports.rawModels = {
 function cleanup (done) {
   async.series ([
       function (cb) { Account.remove ({}, cb); },
-      function (cb) { Client.remove ({}, cb); }
-    ],
-    function (err) { return done (err); });
+      function (cb) { Client.remove ({}, cb); },
+      function (cb) { AccessToken.remove ({}, cb)}
+    ], done);
 }
 
 exports.apply = function (done) {

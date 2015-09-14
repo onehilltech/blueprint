@@ -18,7 +18,7 @@ var schema = new blueprint.Schema({
   redirect_uri: {type: String, required: true, trim: true, unique: true},
 
   /// Enabled state of the client.
-  enabled: {type: Boolean, default: true},
+  enabled: {type: Boolean, default: true, required: true},
 
   /// The different roles of the client.
   roles: {type: [String], default: []}

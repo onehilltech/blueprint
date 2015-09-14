@@ -13,8 +13,6 @@ function AccountController () {
 blueprint.controller (AccountController);
 
 AccountController.prototype.lookupAccountByParam = function (callback) {
-  var self = this;
-
   return function (req, res, next, accountId) {
     winston.log ('info', 'lookup account: %s', accountId);
 
@@ -29,6 +27,27 @@ AccountController.prototype.lookupAccountByParam = function (callback) {
       return next ();
     });
   };
+};
+
+/**
+ * Test if the current user is an administrator.
+ *
+ * @param res
+ * @param res
+ */
+AccountController.prototype.isAdmin = function (user) {
+  return user.roles.indexOf ('admin') !== -1;
+};
+
+/**
+ * Test if the current request has access to the account, or the user that
+ * made the request is an admin.
+ *
+ * @param req
+ * @param res
+ */
+AccountController.prototype.hasAccessToAccount = function (user, account) {
+  return user._id.equals (account._id) || this.isAdmin (user);
 };
 
 /**
@@ -207,8 +226,8 @@ AccountController.prototype.setPushNotificationToken = function (callback) {
   var self = this;
 
   return function (req, res) {
-    if (!req.account)
-      return self.handleError (null, res, 404, 'account does not exist', callback);
+    if (!self.hasAccessToAccount (req.user, req.account))
+      return self.handleError (null, res, 401, 'User does not have access to account', callback);
 
     var network = req.body.network;
     var token = req.body.token;
@@ -219,7 +238,7 @@ AccountController.prototype.setPushNotificationToken = function (callback) {
 
     account.save (function (err) {
       if (err)
-        return self.handleError (err, res, 500, 'failed to save push notification token', callback);
+        return self.handleError (err, res, 500, 'Failed to save push notification token', callback);
 
       return res.status (200).send (true);
     });

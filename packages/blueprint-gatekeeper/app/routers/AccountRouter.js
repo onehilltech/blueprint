@@ -10,14 +10,14 @@ module.exports = exports = {
   ':accountId'    : { action : 'AccountController@lookupAccountByParam' },
   ':rawAccountId' : { property : 'rawAccountId' },
 
-  // Define global middleware.
-  /*
-  use  : [
-    passport.authenticate ('bearer', {session: false})
-  ],*/
 
-  // Define the different routes for the router.
+  // Define the different account routes. We are going to protect all routes
+  // under the /accounts base uri.
   '/accounts' : {
+    use  : [
+      passport.authenticate ('bearer', {session: false})
+    ],
+
     get : {action: 'AccountController@getAccounts'},
     post: {action: 'AccountController@createAccount'}
   },
