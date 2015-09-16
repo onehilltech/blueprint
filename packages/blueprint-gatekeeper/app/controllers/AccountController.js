@@ -121,17 +121,10 @@ AccountController.prototype.getAccount = function (callback) {
   var self = this;
 
   return function (req, res) {
-    var accountId = req.accountId;
+    if (!req.account)
+      return self.handleError (null, res, 404, 'account does not exist', callback);
 
-    Account.findById (accountId, '-__v', function (err, account) {
-      if (err)
-        return self.handleError (err, res, 500, 'could not find account', callback);
-
-      if (!account)
-        return self.handleError (err, res, 404, 'cannot find the account', callback);
-
-      return res.status (200).send (account.toObject ());
-    });
+    res.status (200).send (req.account.toObject ())
   };
 };
 
