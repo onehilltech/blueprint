@@ -1,8 +1,8 @@
 {
   "name": "blueprint",
-  "author": "Blueprint.js",
-  "version": "0.0.1",
-  "description": "a simple framwork for building web services",
+  "author": "One Hill Technologies, LLC",
+  "version": "0.1.0",
+  "description": "a simple framwork for building mean web services",
   "license" : "Apache-2.0",
   "main": "./lib",
   "dependencies": {
@@ -31,7 +31,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/onehilltech/blueprint.js.git"
+    "url": "https://github.com/onehilltech/blueprint.git"
   },
   "devDependencies": {
     "chai": "^3.2.0",
