@@ -80,7 +80,7 @@ Application.prototype.start = function (callback) {
       return callback (err);
 
     self._server.listen (function () {
-      this._messenger.emit ('app.start', self);
+      self._messenger.emit ('app.start', self);
       process.nextTick (callback);
     });
   }
