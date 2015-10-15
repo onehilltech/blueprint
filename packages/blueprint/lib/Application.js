@@ -45,7 +45,7 @@ Application.prototype.init = function () {
   // have a database configuration, then we can have models.
   if (this._config.database) {
     this._db = new Database (this._config['database']);
-    this._db.setMessenger (this._messenger);
+    this._db.setMessenger (this.defaultMessenger);
 
     // Force loading of the models.
     this.models;
@@ -63,7 +63,7 @@ Application.prototype.init = function () {
   this._server.setMainRouter (this._router);
 
   // Notify all listeners the application is initialized.
-  this._messenger.emit ('app.init', this);
+  this.defaultMessenger.emit ('app.init', this);
 };
 
 /**
@@ -80,7 +80,7 @@ Application.prototype.start = function (callback) {
       return callback (err);
 
     self._server.listen (function () {
-      self._messenger.emit ('app.start', self);
+      self.defaultMessenger.emit ('app.start', self);
       process.nextTick (callback);
     });
   }
