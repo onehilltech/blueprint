@@ -1,11 +1,11 @@
 {
-  "name": "bookshelf",
-  "author": "Blueprint.js",
+  "name": "messageboard",
+  "author": "One Hill Technologies, LLC",
   "version": "0.0.0",
   "description": "a Blueprint.js web application",
   "main": "./app",
   "dependencies": {
-    "blueprint": "file:../..",
+    "xpression": "file:../..",
     "winston": "^1.0.1"
   }
 }
