@@ -1,5 +1,5 @@
 module.exports = exports = {
-  connstr: "mongodb://localhost/blueprint-examples-messageboard",
+  connstr: "mongodb://localhost/xpression-examples-messageboard",
 
   options : {
     db: {
