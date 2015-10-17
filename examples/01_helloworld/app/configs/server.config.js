@@ -1,4 +1,4 @@
-var blueprint = require ('blueprint')
+var xpression = require ('xpression')
   ;
 
 module.exports = exports = {
@@ -9,8 +9,8 @@ module.exports = exports = {
     https : {
       port : 5001,
       options : {
-        key  : blueprint.app.resource ('helloworld-key.pem'),
-        cert : blueprint.app.resource ('helloworld-cert.pem')
+        key  : xpression.app.resource ('helloworld-key.pem'),
+        cert : xpression.app.resource ('helloworld-cert.pem')
       }
     }
   },
