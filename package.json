@@ -1,8 +1,8 @@
 {
-  "name": "blueprint",
+  "name": "xpression",
   "author": "One Hill Technologies, LLC",
   "version": "0.1.0",
-  "description": "a simple framwork for building mean web services",
+  "description": "lightweight, simple, elegant framework for building mean applications",
   "license" : "Apache-2.0",
   "main": "./lib",
   "dependencies": {
@@ -24,14 +24,14 @@
     "winston": "^1.0.1"
   },
   "bin": {
-    "blueprint": "./bin/blueprint"
+    "xpression": "./bin/xpression"
   },
   "scripts": {
     "test": "env NODE_ENV=test mocha --recursive tests/src --reporter spec"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/onehilltech/blueprint.git"
+    "url": "https://github.com/onehilltech/xpression.git"
   },
   "devDependencies": {
     "chai": "^3.2.0",
