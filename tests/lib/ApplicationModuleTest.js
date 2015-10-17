@@ -13,7 +13,8 @@ describe ('ApplicationModule', function () {
       var appPath = path.resolve (__dirname, '../fixtures/app');
       appModule = new ApplicationModule (appPath);
 
-      expect (appModule._appPath).to.equal (appPath);
+      expect (appModule.appPath).to.equal (appPath);
+
       expect (appModule._listeners).to.be.undefined;
       expect (appModule._controllers).to.be.undefined;
       expect (appModule._models).to.be.undefined;

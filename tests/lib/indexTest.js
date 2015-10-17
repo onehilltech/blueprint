@@ -8,7 +8,7 @@ var blueprint = require ('../fixtures/blueprint')
 describe ('lib', function () {
   describe ('#app', function () {
     it ('should create a new Application', function () {
-      expect (blueprint.app).to.equal (process.mainModule.blueprint);
+      expect (blueprint.app).to.equal (process.mainModule.blueprint.app);
     });
   });
 });
