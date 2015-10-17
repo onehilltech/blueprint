@@ -10,8 +10,10 @@ var Server            = require ('./Server')
   , Configuration     = require ('./Configuration')
   , Database          = require ('./Database')
   , ApplicationModule = require ('./ApplicationModule')
-  , Messaging         = require ('./Messaging')
+  , Framework         = require ('./Framework')
   ;
+
+var messaging = Framework.getInstance ().messaging;
 
 /**
  * @class Application
@@ -31,39 +33,39 @@ util.inherits (Application, ApplicationModule);
  * Initialize the application.
  */
 Application.prototype.init = function () {
-  winston.log ('info', 'application path: %s', this._appPath);
+  winston.log ('info', 'application path: %s', this.appPath);
 
   // First, load all the listeners. This allows the listeners to receive
   // events about the initialization process.
   this.listeners;
 
   // Load the configuration.
-  var configPath = path.join (this._appPath, 'configs');
+  var configPath = path.join (this.appPath, 'configs');
   this._config = Configuration (configPath, this.env);
 
   // Initialize the database object, if a configuration exists. If we
   // have a database configuration, then we can have models.
   if (this._config.database) {
     this._db = new Database (this._config['database']);
-    this._db.setMessenger (this.defaultMessenger);
+    this._db.setMessenger (messaging);
 
     // Force loading of the models.
     this.models;
   }
 
   // Make the server object.
-  this._server = new Server (this._appPath, this._config['server']);
+  this._server = new Server (this.appPath, this._config['server']);
 
   // Make the router for the application. Then, install the router in the
   // server object.
-  var routersPath = path.resolve (this._appPath, 'routers');
+  var routersPath = path.resolve (this.appPath, 'routers');
   var routerBuilder = new RouterBuilder (routersPath, this.controllers);
 
   this._router = routerBuilder.addRouters (this.routers).getRouter ();
   this._server.setMainRouter (this._router);
 
   // Notify all listeners the application is initialized.
-  this.defaultMessenger.emit ('app.init', this);
+  messaging.emit ('app.init', this);
 };
 
 /**
@@ -80,7 +82,7 @@ Application.prototype.start = function (callback) {
       return callback (err);
 
     self._server.listen (function () {
-      self.defaultMessenger.emit ('app.start', self);
+      messaging.emit ('app.start', self);
       process.nextTick (callback);
     });
   }
