@@ -5,12 +5,17 @@ var Framework = require ('../../lib/Framework')
   ;
 
 describe ('Framework', function () {
-  describe ('new Framework ()', function () {
-    it ('should create a new framework', function () {
-      var framework = new Framework ();
+  describe ('Framework ()', function () {
+    it ('should return the framework instance', function () {
+      var framework = Framework ();
 
-      expect (framework.hasApplication()).to.be.false;
       expect (framework.messaging).to.not.be.undefined;
+    });
+
+    it ('should should be stored in the process module', function () {
+      var framework = Framework ();
+
+      expect (framework).to.equal (process.mainModule.xpression);
     });
   });
 });

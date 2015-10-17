@@ -13,7 +13,7 @@ var Server            = require ('./Server')
   , Framework         = require ('./Framework')
   ;
 
-var messaging = Framework.getInstance ().messaging;
+var messaging = Framework ().messaging;
 
 /**
  * @class Application

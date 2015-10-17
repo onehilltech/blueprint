@@ -27,7 +27,7 @@
     "xpression": "./bin/xpression"
   },
   "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive tests/src --reporter spec"
+    "test": "env NODE_ENV=test mocha --recursive tests/lib --reporter spec"
   },
   "repository": {
     "type": "git",

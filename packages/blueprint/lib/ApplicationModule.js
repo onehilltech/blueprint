@@ -13,7 +13,7 @@ var RouterBuilder = require ('./RouterBuilder')
   , Framework     = require ('./Framework')
   ;
 
-var messaging = Framework.getInstance ().messaging;
+var messaging = Framework ().messaging;
 
 /**
  * @class ApplicationModule
