@@ -1,9 +1,9 @@
 {
   "name": "xpression",
   "author": "One Hill Technologies, LLC",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "lightweight, simple, elegant framework for building mean applications",
-  "license" : "Apache-2.0",
+  "license": "Apache-2.0",
   "main": "./lib",
   "dependencies": {
     "async": "^1.4.2",
