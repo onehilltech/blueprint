@@ -1,12 +1,12 @@
-var blueprint = require ('blueprint')
+var xpression = require ('xpression')
   , util      = require ('util')
   ;
 
 function HelloWorldController () {
-  blueprint.BaseController.call (this);
+  xpression.BaseController.call (this);
 }
 
-blueprint.controller (HelloWorldController);
+xpression.controller (HelloWorldController);
 
 HelloWorldController.prototype.echoName = function (callback) {
   var self = this;
