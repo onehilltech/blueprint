@@ -1,7 +1,7 @@
 Xpression
 ================
 
-[![Build Status](https://travis-ci.org/onehilltech/blueprint.svg?branch=master)](https://travis-ci.org/onehilltech/blueprint)
+[![Build Status](https://travis-ci.org/onehilltech/xpression.svg?branch=master)](https://travis-ci.org/onehilltech/blueprint)
 
 Getting Started
 ----------------
