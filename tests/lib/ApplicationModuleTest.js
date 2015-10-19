@@ -1,14 +1,24 @@
-var expect = require ('chai').expect
-  , path   = require ('path')
+var expect    = require ('chai').expect
+  , path      = require ('path')
+  , xpression = require ('../fixtures/xpression')
   ;
 
-var ApplicationModule = require ('../../lib/ApplicationModule')
+var ApplicationModule = xpression.ApplicationModule
   ;
 
 describe ('ApplicationModule', function () {
   var appModule;
 
-  describe ('new ApplicationModule ()', function () {
+  before (function () {
+    var appPath = path.resolve (__dirname, '../fixtures/app-empty');
+    xpression.Application (appPath);
+  });
+
+  after (function () {
+    xpression.destroy ();
+  });
+
+  describe ('new ApplicationModule', function () {
     it ('should create a new application module', function () {
       var appPath = path.resolve (__dirname, '../fixtures/app');
       appModule = new ApplicationModule (appPath);
