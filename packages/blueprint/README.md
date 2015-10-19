@@ -13,7 +13,13 @@ Installation
 Getting Started
 ----------------
 
-Use the following command to generate the template for your mean web application:
+To get started using Xpression, first generate the template for your mean web
+application:
 
     xpression init
 
+Then, just start the web application:
+
+    node ./app
+    
+See our Wiki for more details on using Xpression.
