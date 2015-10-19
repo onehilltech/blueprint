@@ -1,6 +1,7 @@
 var xpression = require ('../../../xpression')
   ;
 
+console.log (xpression);
 
 var schema = new xpression.Schema ({
   /// Username for the account.
