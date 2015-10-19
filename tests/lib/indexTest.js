@@ -3,7 +3,7 @@ var expect    = require ('chai').expect
   ;
 
 describe ('index', function () {
-  describe ('#', function () {
+  describe ('module.exports', function () {
     it ('should have keys for events', function () {
       var keys = [
         'Application',
@@ -13,7 +13,6 @@ describe ('index', function () {
         'emit',
         'model',
         'on',
-        'destroy'
       ];
 
       expect (xpression).to.have.keys (keys);
