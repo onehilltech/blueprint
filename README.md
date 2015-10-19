@@ -4,7 +4,7 @@ Xpression
 lightweight, simple, elegant framework for building mean applications
 
 [![Build Status](https://travis-ci.org/onehilltech/xpression.svg?branch=master)](https://travis-ci.org/onehilltech/xpression)
-<span class="badge-npmversion"><a href="https://npmjs.org/package/badges" title="View this project on NPM"><img src="https://img.shields.io/npm/v/badges.svg" alt="NPM version" /></a></span>
+[![npm version](https://img.shields.io/npm/v/xpression.svg)](https://npmjs.org/package/xpression)
 
 
 Installation
