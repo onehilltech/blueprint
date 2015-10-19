@@ -1,7 +1,6 @@
 'use strict';
 
 var util   = require ('util')
-  , extend = require ('extend')
   ;
 
 var BaseController    = require ('./BaseController')
@@ -67,8 +66,13 @@ exports.model = function (name, schema) {
  * @constructor
  */
 exports.Application = function (appPath) {
-  if (framework.hasApplication ())
-    throw new Error ('Application is already initialized');
+  if (framework.hasApplication ()) {
+    if (appPath === framework.app.appPath)
+      return framework.app;
+
+    throw new Error (util.format ('Application is already initialized [path=%s]', appPath));
+  }
+
 
   // Create a new application and install it.
   var app = new Application (appPath);
@@ -100,11 +104,3 @@ exports.emit = function () {
 
   emit.apply (messenger, arguments);
 };
-
-/**
- * Destroy the framework. Once this method returns, the Xpression
- * module is no longer usable.
- */
-exports.destroy = function () {
-  framework.destroy ();
-}
