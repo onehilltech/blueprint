@@ -3,7 +3,7 @@ Xpression
 
 lightweight, simple, elegant framework for building mean applications
 
-[![Build Status](https://travis-ci.org/onehilltech/xpression.svg?branch=master)](https://travis-ci.org/onehilltech/blueprint)
+[![Build Status](https://travis-ci.org/onehilltech/xpression.svg?branch=master)](https://travis-ci.org/onehilltech/xpression)
 
 Installation
 ----------------

@@ -1,11 +1,11 @@
-var blueprint = require ('../../../../lib')
+var xpression = require ('../../../../lib')
   ;
 
 function TestController () {
-  blueprint.BaseController.call (this);
+  xpression.BaseController.call (this);
 }
 
-blueprint.controller (TestController);
+xpression.controller (TestController);
 
 TestController.prototype.helloWorld = function (callback) {
   return function echoName (req, res) {
