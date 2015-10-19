@@ -13,8 +13,7 @@ Installation
 Getting Started
 ----------------
 
-To get started using Xpression, first generate the template for your mean web
-application:
+First, generate the template for your mean web application:
 
     xpression init
 
