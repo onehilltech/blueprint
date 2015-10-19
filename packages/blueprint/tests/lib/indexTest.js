@@ -12,7 +12,8 @@ describe ('index', function () {
         'controller',
         'emit',
         'model',
-        'on'
+        'on',
+        'destroy'
       ];
 
       expect (xpression).to.have.keys (keys);
