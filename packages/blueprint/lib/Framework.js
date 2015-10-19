@@ -46,3 +46,10 @@ module.exports = exports = function () {
   process.mainModule.xpression = new Framework ();
   return process.mainModule.xpression;
 };
+
+/**
+ * Destroy the framework.
+ */
+exports.destroy = function () {
+  delete process.mainModule.xpression;
+};
