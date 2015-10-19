@@ -1,10 +1,19 @@
 Xpression
 ================
 
+lightweight, simple, elegant framework for building mean applications
+
 [![Build Status](https://travis-ci.org/onehilltech/xpression.svg?branch=master)](https://travis-ci.org/onehilltech/blueprint)
 
+Installation
+----------------
+
+    npm install xpression --save
+    
 Getting Started
 ----------------
 
-Documentation coming soon. In the meantime, see the examples directory for more 
-information on how Xpression can be used to build mean applications.
+Use the following command to generate the template for your mean web application:
+
+    xpression init
+
