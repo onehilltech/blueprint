@@ -4,10 +4,10 @@
 var program   = require ('commander')
   , winston   = require ('winston')
   , prompt    = require ('prompt')
-  , blueprint = require ('blueprint')
+  , xpression = require ('xpression')
   ;
 
-var Account = blueprint.models.Account;
+var Account = xpression.models.Account;
 
 program.option ('--debug');
 
@@ -88,7 +88,7 @@ program
   });
 });
 
-blueprint.app.database.connect (function (err) {
+xpression.app.database.connect (function (err) {
   if (err)
     return winston.log ('error', err);
 

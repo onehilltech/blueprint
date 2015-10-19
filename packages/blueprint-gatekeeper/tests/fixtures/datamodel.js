@@ -1,12 +1,12 @@
 var async = require ('async')
   ;
 
-var blueprint = require ('./blueprint')
+var xpression = require ('./xpression')
   ;
 
-var Account     = blueprint.app.models.Account
-  , Client      = blueprint.app.models.Client
-  , AccessToken = blueprint.app.models.oauth2.AccessToken
+var Account     = xpression.app.models.Account
+  , Client      = xpression.app.models.Client
+  , AccessToken = xpression.app.models.oauth2.AccessToken
   ;
 
 exports.models = {};

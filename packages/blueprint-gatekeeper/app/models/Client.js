@@ -1,10 +1,10 @@
 var uid       = require ('uid-safe')
-  , blueprint = require ('blueprint')
+  , xpression = require ('xpression')
   ;
 
 const DEFAULT_SECRET_LENGTH = 128;
 
-var schema = new blueprint.Schema({
+var schema = new xpression.Schema({
   /// Name of the client.
   name: {type: String, required: true, trim: true, unique: true},
 
@@ -32,4 +32,4 @@ schema.pre ('validate', function (next) {
 });
 
 const COLLECTION_NAME = 'gatekeeper_client';
-module.exports = exports = blueprint.model (COLLECTION_NAME, schema);
+module.exports = exports = xpression.model (COLLECTION_NAME, schema);

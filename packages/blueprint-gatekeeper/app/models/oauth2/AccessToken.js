@@ -1,16 +1,16 @@
 var uid       = require ('uid-safe')
-  , blueprint = require ('blueprint')
+  , xpression = require ('xpression')
   ;
 
 // We have to manually load the references models since the models
-// will not be accessible via <blueprint> until all models are loaded.
+// will not be accessible via <xpression> until all models are loaded.
 var Client  = require ('../Client')
   , Account = require ('../Account')
   ;
 
 const DEFAULT_TOKEN_LENGTH = 128;
 
-var Schema = blueprint.Schema;
+var Schema = xpression.Schema;
 
 var schema = new Schema ({
   token         : {type: String, index: true, required: true},
@@ -85,4 +85,4 @@ schema.virtual ('expires_in').get (function () {
 });
 
 const COLLECTION_NAME = 'gatekeeper_oauth2_accesstoken';
-module.exports = exports = blueprint.model (COLLECTION_NAME, schema);
+module.exports = exports = xpression.model (COLLECTION_NAME, schema);

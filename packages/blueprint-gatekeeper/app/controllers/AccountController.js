@@ -1,5 +1,5 @@
 var winston   = require ('winston')
-  , blueprint = require ('blueprint')
+  , xpression = require ('xpression')
   ;
 
 var Account = require ('../models/Account')
@@ -10,24 +10,7 @@ function AccountController () {
 
 }
 
-blueprint.controller (AccountController);
-
-AccountController.prototype.lookupAccountByParam = function (callback) {
-  return function (req, res, next, accountId) {
-    winston.log ('info', 'lookup account: %s', accountId);
-
-    Account.findById (accountId, function (err, account) {
-      if (err)
-        return next (err);
-
-      if (!account)
-        return next (new Error ('account does not exist'));
-
-      req.account = account;
-      return next ();
-    });
-  };
-};
+xpression.controller (AccountController);
 
 /**
  * Test if the current user is an administrator.
@@ -60,11 +43,11 @@ AccountController.prototype.getAccounts = function (callback) {
   var self = this;
 
   return function (req, res) {
-    Account.find ({}, '-__v', function (err, accounts) {
+    Account.find ({}, '-__v apn', function (err, accounts) {
       if (err)
-        return self.handleError (err, res, 500, 'cannot get requested account', callback);
+        return self.handleError (err, res, 500, 'Cannot get requested account', callback);
 
-      return res.status (200).send (accounts.toObject ());
+      return res.status (200).json (accounts.toObject ());
     });
   };
 };
@@ -86,13 +69,13 @@ AccountController.prototype.createAccount = function (callback) {
 
     Client.findOne (criteria, function (err, client) {
       if (err)
-        return self.handleError (err, res, 500, 'failed to validate client', callback);
+        return self.handleError (err, res, 500, 'Failed to validate client', callback);
 
       if (!client)
-        return self.handleError (err, res, 401, 'client cannot create accounts', callback);
+        return self.handleError (err, res, 401, 'Client cannot create accounts', callback);
 
       // Create the new account, and include the client that created the account.
-      var account = new self._model ({
+      var account = new Account ({
         username : req.body.username,
         password : req.body.password,
         email    : req.body.email,
@@ -100,9 +83,12 @@ AccountController.prototype.createAccount = function (callback) {
         created_by : clientId
       });
 
-      account.save (function (err) {
+      account.save (function (err, account) {
         if (err)
           return self.handleError (err, res, 500, 'failed to create account', callback);
+
+        // Notify listeners that an account has been created.
+        xpression.emit ('gatekeeper.account.created', account);
 
         return res.status (200).send (true);
       });
@@ -121,10 +107,12 @@ AccountController.prototype.getAccount = function (callback) {
   var self = this;
 
   return function (req, res) {
-    if (!req.account)
-      return self.handleError (null, res, 404, 'account does not exist', callback);
+    Account.findById (req.accountId, function (err, account) {
+      if (err)
+        return self.handleError (null, res, 404, 'account does not exist', callback);
 
-    res.status (200).send (req.account.toObject ())
+      res.status (200).json (account.toObject ())
+    });
   };
 };
 
@@ -138,15 +126,16 @@ AccountController.prototype.deleteAccount = function (callback) {
   var self = this;
 
   return function (req, res) {
-    if (!req.account)
-      return self.handleError (null, res, 404, 'account does not exist', callback);
+    var accountId = req.accountId;
 
-    var account = req.account;
-    account.remove (function (err) {
+    Account.remove ({_id : accountId}, function (err) {
       if (err)
-        return self.handleError (err, res, 500, 'failed to delete the account', callback);
+        return self.handleError (err, res, 404, 'Failed to delete account', callback);
 
-      return res.status (200).send (true);
+      // Notify listeners that an account has been deleted.
+      xpression.emit ('gatekeeper.account.deleted', accountId);
+
+      return res.status (200).json (true);
     });
   };
 };
@@ -171,15 +160,23 @@ AccountController.prototype.enableAccount = function (callback) {
     // Sanitize the parameters.
     req.sanitizeBody ('enabled').toBoolean ();
 
-    // Update the client, and save it.
-    var account = req.account;
-    account.enabled = req.body.enabled;
+    var accountId = req.accountId;
+    var enabled = req.body.enabled;
 
-    account.save (function (err) {
+    var update = {
+      $set : {
+        enabled : enabled
+      }
+    };
+
+    Account.findByIdAndUpdate (accountId, update, function (err) {
       if (err)
-        return self.handleError (err, res, 500, 'failed to enable account', callback);
+        return self.handleError (err, res, 500, 'Failed to enable/disable account', callback);
 
-      res.status (200).send (true);
+      // Notify listeners that an account has been disabled.
+      xpression.emit ('gatekeeper.account.enabled', accountId, enabled);
+
+      res.status (200).json (true);
     });
   };
 };
@@ -193,49 +190,36 @@ AccountController.prototype.enableAccount = function (callback) {
 AccountController.prototype.updateRoles = function (callback) {
   var self = this;
 
+  var ops = {
+    add : function (roles) {
+      return {
+        $addToSet : {
+          roles : roles
+        }
+      }
+    },
+    remove : function (roles) {
+      return {
+        $pull : {
+          roles : { $in : roles }
+        }
+      }
+    }
+  };
+
   return function (req, res) {
-    if (!req.account)
-      return self.handleError (null, res, 404, 'account does not exist', callback);
+    var accountId = req.accountId;
+    var op = req.body.operation;
+    var roles = req.body.roles;
+    var update = ops[op] (roles);
 
-    var account = req.account;
-    account.roles = req.body.roles;
-
-    account.save (function (err) {
+    Account.findByIdAndUpdate (accountId, update, function (err) {
       if (err)
         return self.handleError (err, res, 500, 'failed to update roles', callback);
 
-      return res.status (200).send (true);
+      res.status (200).json (true);
     });
   };
-};
-
-/**
- * Set the token for push notifications on the specified network.
- *
- * @param callback
- * @returns {Function}
- */
-AccountController.prototype.setPushNotificationToken = function (callback) {
-  var self = this;
-
-  return function (req, res) {
-    if (!self.hasAccessToAccount (req.user, req.account))
-      return self.handleError (null, res, 401, 'User does not have access to account', callback);
-
-    var network = req.body.network;
-    var token = req.body.token;
-    var account = req.account;
-
-    // Update the network token
-    account.apn[network] = token;
-
-    account.save (function (err) {
-      if (err)
-        return self.handleError (err, res, 500, 'Failed to save push notification token', callback);
-
-      return res.status (200).send (true);
-    });
-  }
 };
 
 module.exports = exports = AccountController;

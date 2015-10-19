@@ -1,5 +1,5 @@
 var bcrypt    = require ('bcrypt')
-  , blueprint = require ('blueprint')
+  , xpression = require ('xpression')
   ;
 
 var Client = require ('./Client')
@@ -8,7 +8,7 @@ var Client = require ('./Client')
 const SALT_WORK_FACTOR = 10;
 const DEFAULT_ROLES    = ['user'];
 
-var Schema = blueprint.Schema;
+var Schema = xpression.Schema;
 
 var schema = new Schema ({
   /// Username for the account.
@@ -30,7 +30,7 @@ var schema = new Schema ({
   roles    : { type: [String], default: DEFAULT_ROLES},
 
   /// Push notifications for the account.
-  apn : {
+  notifications : {
     /// Token information for Google Cloud Messaging.
     gcm : { type : String },
 
@@ -107,4 +107,4 @@ schema.virtual ('hidden_password').get (function () {
 });
 
 const COLLECTION_NAME  = 'gatekeeper_account';
-module.exports = exports = blueprint.model (COLLECTION_NAME, schema);
+module.exports = exports = xpression.model (COLLECTION_NAME, schema);

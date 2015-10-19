@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "bcrypt": "^0.8.3",
-    "blueprint": "git@github.com:onehilltech/blueprint.git",
     "commander": "^2.8.1",
     "passport-http-bearer": "^1.x.x",
     "passport-local": "^1.x.x",
@@ -21,6 +20,7 @@
     "request": "^2.58.0",
     "uid-safe": "^2.x.x",
     "winston": "^0.7.3",
+    "xpression": "^0.1.11",
     "yargs": "^3.15.0"
   },
   "devDependencies": {
@@ -36,7 +36,7 @@
     "start": "node ./app.js",
     "test": "env NODE_ENV=test mocha --recursive tests/ --reporter spec"
   },
-  "bin" : {
-    "gatekeeper" : "./bin/gatekeeper"
+  "bin": {
+    "gatekeeper": "./bin/gatekeeper"
   }
 }

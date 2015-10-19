@@ -1,14 +1,13 @@
-var blueprint = require ('blueprint')
+var xpression = require ('xpression')
   , auth      = require ('../../lib').auth
   ;
 
-var passport  = blueprint.app.server.middleware.passport;
+var passport  = xpression.app.server.middleware.passport;
 passport.use (auth.bearer ());
 
 module.exports = exports = {
   // Define the router properties.
-  ':accountId'    : { action : 'AccountController@lookupAccountByParam' },
-
+  ':accountId'    : { property : 'accountId' },
 
   // Define the different account routes. We are going to protect all routes
   // under the /accounts base uri.
@@ -33,8 +32,4 @@ module.exports = exports = {
   '/accounts/:accountId/roles' : {
     post : { action: 'AccountController@updateRoles'}
   },
-
-  '/accounts/:accountId/apn' : {
-    post : { action: 'AccountController@setPushNotificationToken'}
-  }
 };

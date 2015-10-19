@@ -1,8 +1,8 @@
-var blueprint = require ('blueprint')
+var xpression = require ('xpression')
   , auth      = require ('../../lib').auth
   ;
 
-var passport  = blueprint.app.server.middleware.passport;
+var passport  = xpression.app.server.middleware.passport;
 passport.use (auth.bearer ());
 
 module.exports = exports = {

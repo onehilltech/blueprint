@@ -1,22 +1,22 @@
-var blueprint = require ('blueprint')
+var xpression = require ('xpression')
   , request   = require ('supertest')
   , expect    = require ('chai').expect
   , async     = require ('async')
   ;
 
 var datamodel = require ('../../../fixtures/datamodel')
-  , Account    = blueprint.app.models.Account;
+  , Account    = xpression.app.models.Account;
   ;
 
-describe ('AccountController', function () {
+describe ('AccountRouter', function () {
   var server;
   var accessToken;
 
   before(function (done) {
     async.series ([
       function (callback) {
-        server = blueprint.app.server;
-        blueprint.app.database.connect(callback);
+        server = xpression.app.server;
+        xpression.app.database.connect(callback);
       },
       function (callback) {
         datamodel.apply (callback);
@@ -40,7 +40,9 @@ describe ('AccountController', function () {
             return callback ();
         });
       }
-    ], done);
+    ], function (err) {
+      return done (err);
+    });
   });
 
   describe ('POST /accounts/:accountId/apn', function () {

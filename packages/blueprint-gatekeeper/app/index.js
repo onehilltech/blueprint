@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 var winston   = require ('winston')
-  , blueprint = require ('blueprint')
+  , xpression = require ('xpression')
   ;
 
-blueprint.Application (__dirname, function (app) {
+xpression.Application (__dirname, function (app) {
   app.start (function (err) {
     if (err)
       return winston.log ('error', err);

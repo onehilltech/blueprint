@@ -1,4 +1,4 @@
-var blueprint = require ('blueprint')
+var xpression = require ('xpression')
   , expect    = require ('chai').expect
   , request   = require ('supertest')
   ;
@@ -6,12 +6,12 @@ var blueprint = require ('blueprint')
 var datamodel = require ('../../../fixtures/datamodel')
   ;
 
-describe ('Oauth2Controller', function () {
+describe ('Oauth2Router', function () {
   var server;
 
   before(function (done) {
-    server = blueprint.app.server;
-    blueprint.app.database.connect(done);
+    server = xpression.app.server;
+    xpression.app.database.connect(done);
   });
 
   beforeEach(function (done) {
