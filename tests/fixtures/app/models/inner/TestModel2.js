@@ -1,7 +1,8 @@
 var xpression = require ('../../../xpression')
   ;
 
-console.log (xpression);
+var undef = xpression === undefined;
+console.log ('is undefined: ' + undef);
 
 var schema = new xpression.Schema ({
   /// Username for the account.
