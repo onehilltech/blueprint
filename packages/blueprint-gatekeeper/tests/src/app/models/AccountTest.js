@@ -4,7 +4,7 @@ var Account = require ('../../../../app/models/Account')
   ;
 
 describe ('Account', function () {
-  describe ('new Account ()', function () {
+  describe ('new Account', function () {
     var account = new Account ();
 
     it ('should create a new Account', function () {

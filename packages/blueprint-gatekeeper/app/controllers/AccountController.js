@@ -43,11 +43,11 @@ AccountController.prototype.getAccounts = function (callback) {
   var self = this;
 
   return function (req, res) {
-    Account.find ({}, '-__v apn', function (err, accounts) {
+    Account.find ({}, '-__v -apn', function (err, accounts) {
       if (err)
         return self.handleError (err, res, 500, 'Cannot get requested account', callback);
 
-      return res.status (200).json (accounts.toObject ());
+      return res.status (200).json (accounts);
     });
   };
 };

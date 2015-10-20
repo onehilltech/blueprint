@@ -29,7 +29,7 @@ MeController.prototype.setPushNotificationToken = function (callback) {
       if (err)
         return self.handleError (err, res, 500, 'Failed to save push notification token', callback);
 
-      return res.status (200).send (true);
+      return res.status (200).json (true);
     });
   }
 };

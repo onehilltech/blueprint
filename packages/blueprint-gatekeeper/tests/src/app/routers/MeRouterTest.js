@@ -8,7 +8,7 @@ var datamodel = require ('../../../fixtures/datamodel')
   , Account    = xpression.app.models.Account;
   ;
 
-describe ('AccountRouter', function () {
+describe ('MeRouter', function () {
   var server;
   var accessToken;
 
@@ -43,19 +43,32 @@ describe ('AccountRouter', function () {
     ], done);
   });
 
-  describe ('GET /accounts', function () {
-    it ('should return all the accounts', function (done) {
+  describe ('POST /me/notifications', function () {
+    it ('should update my notification token', function (done) {
+      var token = '1234567890';
+      var network = 'gcm';
+
+      var data = {
+        network : network,
+        token : token
+      };
+
       request(server.app)
-        .get ('/accounts')
+        .post ('/me/notifications')
+        .send (data)
         .set ('Authorization', 'Bearer ' + accessToken)
-        .expect (200)
+        .expect (200).expect ('true')
         .end (function (err, res) {
           if (err) return done (err);
 
-          var accounts = res.body;
-          expect (accounts).to.have.length (5);
+          var accountId = datamodel.models.accounts[0].id;
 
-          return done ();
+          Account.findById (accountId, function (err, account) {
+            if (err) return done (err);
+
+            expect (account.notifications[network]).to.equal (token)
+            return done ();
+          });
       });
     });
   });
