@@ -2,11 +2,24 @@ var expect = require ('chai').expect
   , path   = require ('path')
   ;
 
-var Loader = require ('../../lib/Loader')
+var xpression = require ('../fixtures/xpression')
+  , Loader    = require ('../../lib/Loader')
   ;
 
 describe ('Loader', function () {
   describe ('#loadModels', function () {
+    // The model loader only works if we have an application in place that has
+    // a database. Otherwise, the xpression.model () method will not function
+    // properly.
+    before (function () {
+      var appPath = path.resolve (__dirname, '../fixtures/app-empty');
+      xpression.Application (appPath);
+    });
+
+    after (function () {
+      xpression.destroy ();
+    });
+
     it ('should load the models', function () {
       var models = Loader.loadModels (path.resolve (__dirname, '../fixtures/app/models'));
 
