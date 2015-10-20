@@ -1,4 +1,8 @@
+var semver = require ('semver')
+  ;
+
 var Messaging = require ('./Messaging')
+  , version   = require ('../package.json').version
   ;
 
 /**
@@ -53,3 +57,8 @@ module.exports = exports = function () {
 exports.destroy = function () {
   delete process.mainModule.xpression;
 };
+
+/**
+ * Define the framework version.
+ */
+exports.version = version;
