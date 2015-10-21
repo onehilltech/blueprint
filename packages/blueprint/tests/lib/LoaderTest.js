@@ -45,8 +45,11 @@ describe ('Loader', function () {
     var messaging = new Messaging ();
     var listeners = Loader.loadListeners (listenerPath, messaging);
 
-    it ('should load listeners for 1 event type', function () {
-      expect(listeners).to.have.keys(['app.init']);
+    it ('should load listeners for 2 event types', function () {
+      expect (listeners).to.have.keys(['app.init', 'custom.event']);
+      expect (listeners['app.init']).to.have.keys (['TestListener', 'TargetListener']);
+      expect (listeners['app.init']['TargetListener']).to.have.property ('targetMessenger');
+      expect (listeners['custom.event']).to.have.keys (['CustomListener1', 'CustomListener2']);
     });
 
     it ('should have 2 different messengers', function () {
