@@ -24,12 +24,12 @@
     "yargs": "^3.29.0"
   },
   "devDependencies": {
-    "async": "^0.9.x",
-    "chai": "^3.2.0",
+    "async": "^1.4.2",
+    "chai": "^3.4.0",
     "mocha": "^2.2.5",
     "sinon": "^1.15.4",
     "superagent": "^0.18.x",
-    "supertest": "^0.12.x",
+    "supertest": "^1.1.0",
     "supertest-session": "^0.0.x"
   },
   "scripts": {
