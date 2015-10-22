@@ -109,3 +109,20 @@ exports.emit = function () {
 exports.destroy = function () {
   Framework.destroy ();
 };
+
+var testing;
+
+/**
+ * Get the testing module. This module is loaded on demand since it is only valid
+ * when we are running tests.
+ */
+Object.defineProperty (exports, 'testing', {
+  get : function () {
+    if (testing)
+      return testing;
+
+    testing = require ('./testing');
+    return testing;
+  }
+});
+
