@@ -57,7 +57,8 @@ Messenger.prototype.on = function (ev, listener) {
  * Emit an event.
  */
 Messenger.prototype.emit = function () {
-  this.emitter.emit (arguments);
+  var emit = this.emitter.emit;
+  emit.apply (this.emitter, arguments);
 };
 
 /**
