@@ -6,6 +6,7 @@ var Messaging = require ('../../lib/Messaging')
 
 describe ('Messaging', function () {
   var messaging;
+  var handle;
 
   beforeEach (function () {
     messaging = new Messaging ();
@@ -34,6 +35,23 @@ describe ('Messaging', function () {
 
     it ('should not have a undefined messenger', function () {
       expect (messaging.hasMessenger ('@')).to.not.be.true;
+    });
+  });
+
+  describe ('#on', function () {
+    it ('should add a listener to the default messenger', function () {
+      handle = messaging.on ('testing', function () { });
+      expect (handle.messenger.emitter.listeners ('testing')).to.have.length (1);
+    });
+
+  });
+
+  describe ('#handle.close', function () {
+    it ('should close the handle, removing the listener', function () {
+      handle = messaging.on ('testing', function () { });
+      handle.close ();
+
+      expect (messaging.getMessenger ().emitter.listeners ('testing')).to.have.length (0);
     });
   });
 });
