@@ -20,7 +20,7 @@
     "request": "^2.65.0",
     "uid-safe": "^2.0.0",
     "winston": "^0.7.3",
-    "xpression": "^0.4.1",
+    "xpression": "^0.5.0",
     "yargs": "^3.29.0"
   },
   "devDependencies": {
