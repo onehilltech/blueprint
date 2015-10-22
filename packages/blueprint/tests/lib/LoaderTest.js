@@ -57,8 +57,8 @@ describe ('Loader', function () {
     });
 
     it ('should only have 1 listener for each messenger', function () {
-      expect (messaging.getMessenger ('_').listeners).to.have.length (1);
-      expect (messaging.getMessenger ('testTarget').listeners).to.have.length (1);
+      expect (messaging.getMessenger ('_').emitter.listeners).to.have.length (1);
+      expect (messaging.getMessenger ('testTarget').emitter.listeners).to.have.length (1);
     });
   });
 });

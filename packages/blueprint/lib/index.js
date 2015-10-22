@@ -92,17 +92,15 @@ exports.Application = function (appPath) {
  * @param cb
  */
 exports.on = function (ev, cb) {
-  framework.messaging.getMessenger ().on (ev, cb);
+  framework.messaging.on (ev, cb);
 };
 
 /**
  * Emit an event over the framework.
  */
 exports.emit = function () {
-  var messenger = framework.messaging.getMessenger ();
-  var emit = messenger.emit;
-
-  emit.apply (messenger, arguments);
+  var emit = framework.messaging.emit;
+  emit.apply (framework.messaging, arguments);
 };
 
 /**
