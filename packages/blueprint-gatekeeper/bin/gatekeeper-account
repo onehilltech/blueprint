@@ -7,9 +7,11 @@ var program   = require ('commander')
   , xpression = require ('xpression')
   ;
 
-var Account = xpression.models.Account;
+xpression.Application (path.resolve (process.cwd (), 'app'))
+  ;
 
-program.option ('--debug');
+var Account = xpression.app.models.Account
+  ;
 
 // command: create
 program

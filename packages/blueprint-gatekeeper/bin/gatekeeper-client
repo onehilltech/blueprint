@@ -8,7 +8,7 @@ var program   = require ('commander')
   , path      = require ('path')
   ;
 
-xpression.Application (path.resolve (__dirname, '../app'))
+xpression.Application (path.resolve (process.cwd (), 'app'))
   ;
 
 var Client = xpression.app.models.Client
