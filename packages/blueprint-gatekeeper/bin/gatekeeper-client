@@ -5,11 +5,14 @@ var program   = require ('commander')
   , winston   = require ('winston')
   , prompt    = require ('prompt')
   , xpression = require ('xpression')
+  , path      = require ('path')
   ;
 
-var Client = xpression.models.Client;
+xpression.Application (path.resolve (__dirname, '../app'))
+  ;
 
-program.option ('--debug');
+var Client = xpression.app.models.Client
+  ;
 
 // command: create
 program
