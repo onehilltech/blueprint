@@ -3,9 +3,6 @@
 
 var program = require ('commander');
 
-program.options ('--database')
-  ;
-
 program
   .command ('client', 'manage client accounts')
   .command ('account', 'manage user accounts')
