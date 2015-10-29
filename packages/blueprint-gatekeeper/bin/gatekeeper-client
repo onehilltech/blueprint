@@ -11,7 +11,7 @@ var program   = require ('commander')
 xpression.Application (path.resolve (process.cwd (), 'app'))
   ;
 
-var Client = xpression.app.models.Client
+var Client = require ('../app/models/Client')
   ;
 
 // command: create

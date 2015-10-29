@@ -10,7 +10,7 @@ var program   = require ('commander')
 xpression.Application (path.resolve (process.cwd (), 'app'))
   ;
 
-var Account = xpression.app.models.Account
+var Account = require ('../app/models/Account')
   ;
 
 // command: create
