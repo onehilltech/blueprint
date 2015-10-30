@@ -10,7 +10,7 @@ lightweight, simple, elegant framework for building mean applications
 Installation
 ----------------
 
-    npm install blueprint --save
+    npm install @onehilltech/blueprint --save
     
 Getting Started
 ----------------
