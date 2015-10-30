@@ -1,7 +1,7 @@
-var xpression = require ('../../../xpression')
+var blueprint = require ('../../../blueprint')
   ;
 
-var schema = new xpression.Schema ({
+var schema = new blueprint.Schema ({
   /// Username for the account.
   firstname : { type: String, trim: true, required: true },
 
@@ -10,4 +10,4 @@ var schema = new xpression.Schema ({
 });
 
 const COLLECTION_NAME  = 'blueprint_testmodel2';
-module.exports = exports = xpression.model (COLLECTION_NAME, schema);
+module.exports = exports = blueprint.model (COLLECTION_NAME, schema);

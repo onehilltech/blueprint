@@ -25,7 +25,7 @@ function Framework () {
       if (app !== undefined)
         return app;
 
-      throw new Error ('Application not initialized; must call xpression.Application (appPath) first');
+      throw new Error ('Application not initialized; must call blueprint.Application (appPath) first');
     },
     set : function (value) {
       app = value;
@@ -44,18 +44,18 @@ function Framework () {
  * main application.
  */
 module.exports = exports = function () {
-  if (process.mainModule.xpression !== undefined)
-    return process.mainModule.xpression;
+  if (process.mainModule.blueprint !== undefined)
+    return process.mainModule.blueprint;
 
-  process.mainModule.xpression = new Framework ();
-  return process.mainModule.xpression;
+  process.mainModule.blueprint = new Framework ();
+  return process.mainModule.blueprint;
 };
 
 /**
  * Destroy the framework.
  */
 exports.destroy = function () {
-  delete process.mainModule.xpression;
+  delete process.mainModule.blueprint;
 };
 
 /**

@@ -1,7 +1,7 @@
-var xpression = require ('xpression')
+var blueprint = require ('blueprint')
   ;
 
-var schema = new xpression.Schema({
+var schema = new blueprint.Schema({
   /// Timestamp of the message.
   timestamp: {type: Date, required: true, default: Date.now},
 
@@ -13,4 +13,4 @@ var schema = new xpression.Schema({
 });
 
 const COLLECTION_NAME = 'message';
-module.exports = exports = xpression.model (COLLECTION_NAME, schema);
+module.exports = exports = blueprint.model (COLLECTION_NAME, schema);

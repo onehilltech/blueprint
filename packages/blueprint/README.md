@@ -1,26 +1,26 @@
-Xpression
+Blueprint
 ================
 
 lightweight, simple, elegant framework for building mean applications
 
-[![Build Status](https://travis-ci.org/onehilltech/xpression.svg?branch=master)](https://travis-ci.org/onehilltech/xpression)
-[![npm version](https://img.shields.io/npm/v/xpression.svg)](https://npmjs.org/package/xpression)
+[![Build Status](https://travis-ci.org/onehilltech/blueprint.svg?branch=master)](https://travis-ci.org/onehilltech/blueprint)
+[![npm version](https://img.shields.io/npm/v/blueprint.svg)](https://npmjs.org/package/blueprint)
 
 
 Installation
 ----------------
 
-    npm install xpression --save
+    npm install blueprint --save
     
 Getting Started
 ----------------
 
 First, generate the template for your mean web application:
 
-    xpression init
+    blueprint init
 
 Then, just start the web application:
 
     node ./app
     
-See our Wiki for more details on using Xpression.
+See our Wiki for more details on using Blueprint.

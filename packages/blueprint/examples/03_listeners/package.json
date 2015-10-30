@@ -5,7 +5,7 @@
   "description": "example Blueprint.js application illustrating messaging service",
   "main": "./app/index.js",
   "dependencies": {
-    "xpression": "file:../..",
+    "blueprint": "file:../..",
     "winston": "^1.0.1"
   }
 }

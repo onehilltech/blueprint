@@ -15,14 +15,14 @@ describe ('Framework', function () {
     it ('should should be stored in the process module', function () {
       var framework = Framework ();
 
-      expect (framework).to.equal (process.mainModule.xpression);
+      expect (framework).to.equal (process.mainModule.blueprint);
     });
   });
 
   describe ('destroy', function () {
     it ('should destroy the framework', function () {
       Framework.destroy ();
-      expect (process.mainModule.xpression).to.be.undefined;
+      expect (process.mainModule.blueprint).to.be.undefined;
     });
   });
 

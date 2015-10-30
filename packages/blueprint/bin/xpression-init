@@ -19,7 +19,7 @@ program
 
 winston.info ('target output: ' + program.path);
 
-var templatePath = path.resolve (__dirname, '../templates/xpression-init');
+var templatePath = path.resolve (__dirname, '../templates/blueprint-init');
 
 function generate (dir, outdir, done) {
   var results = [];
