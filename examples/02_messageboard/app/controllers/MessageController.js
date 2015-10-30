@@ -1,14 +1,14 @@
-var xpression = require ('xpression')
+var blueprint = require ('blueprint')
   ;
 
 var Message = require ('../models/Message')
   ;
 
 function MessageController () {
-  xpression.BaseController.call (this);
+  blueprint.BaseController.call (this);
 }
 
-xpression.controller (MessageController);
+blueprint.controller (MessageController);
 
 MessageController.prototype.setMessageId = function (callback) {
   return function (req, res, next, param) {

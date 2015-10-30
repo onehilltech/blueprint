@@ -5,7 +5,7 @@
   "description": "Hello, World! example for Xpression.js",
   "main": "./app",
   "dependencies": {
-    "xpression": "file:../..",
+    "blueprint": "file:../..",
     "winston": "^1.0.1"
   }
 }

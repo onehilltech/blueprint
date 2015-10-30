@@ -1,9 +1,9 @@
 var expect    = require ('chai').expect
   , path      = require ('path')
-  , xpression = require ('../fixtures/xpression')
+  , blueprint = require ('../fixtures/blueprint')
   ;
 
-var ApplicationModule = xpression.ApplicationModule
+var ApplicationModule = blueprint.ApplicationModule
   ;
 
 describe ('ApplicationModule', function () {
@@ -11,11 +11,11 @@ describe ('ApplicationModule', function () {
 
   before (function () {
     var appPath = path.resolve (__dirname, '../fixtures/app-empty');
-    xpression.Application (appPath);
+    blueprint.Application (appPath);
   });
 
   after (function () {
-    xpression.destroy ();
+    blueprint.destroy ();
   });
 
   describe ('new ApplicationModule', function () {

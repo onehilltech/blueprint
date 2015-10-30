@@ -1,5 +1,5 @@
 var expect    = require ('chai').expect
-  , xpression = require ('../../lib')
+  , blueprint = require ('../../lib')
   ;
 
 describe ('index', function () {
@@ -16,7 +16,7 @@ describe ('index', function () {
         'destroy'
       ];
 
-      expect (xpression).to.have.keys (keys);
+      expect (blueprint).to.have.keys (keys);
     });
   });
 });
