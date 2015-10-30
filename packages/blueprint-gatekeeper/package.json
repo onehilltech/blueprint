@@ -1,16 +1,17 @@
 {
-  "name": "gatekeeper",
+  "name": "@onehilltech/gatekeeper",
   "description": "Authentication framework for Web application programming interfaces (APIs)",
-  "version": "0.8.11",
-  "private": true,
+  "version": "0.9.0",
+  "private": false,
   "main": "./lib",
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/onehilltech/gatekeeper.git"
+    "url": "https://github.com/onehilltech/gatekeeper.git"
   },
   "dependencies": {
     "bcrypt": "^0.8.5",
     "commander": "^2.9.0",
+    "jsonfile": "^2.2.3",
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.x.x",
     "passport-oauth2-client-password": "^0.1.2",
