@@ -5,6 +5,7 @@ var program   = require ('commander')
   , winston   = require ('winston')
   , prompt    = require ('prompt')
   , xpression = require ('xpression')
+  , path      = require ('path')
   ;
 
 xpression.Application (path.resolve (process.cwd (), 'app'))
