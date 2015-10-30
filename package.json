@@ -5,6 +5,10 @@
   "description": "lightweight, simple, elegant framework for building mean applications",
   "license": "Apache-2.0",
   "main": "./lib",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/onehilltech/blueprint.git"
+  },
   "dependencies": {
     "async": "^1.4.2",
     "body-parser": "^1.13.2",
