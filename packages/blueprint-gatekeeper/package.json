@@ -11,7 +11,6 @@
   "dependencies": {
     "@onehilltech/blueprint": "^0.6.3",
     "bcrypt": "^0.8.5",
-    "blueprint": "^2.1.5",
     "commander": "^2.9.0",
     "jsonfile": "^2.2.3",
     "passport-http-bearer": "^1.0.1",
