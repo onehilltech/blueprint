@@ -62,7 +62,9 @@ prompt.get (['email'], function (err, result) {
 
       fs.stat (dataPath, function (err, stats) {
         if (err && err.code === 'ENOENT')
-          return fs.mkdir (dataPath, writeDataFiles);
+          return fs.mkdir (dataPath, function (err) {
+            return writeDataFiles (err, clients);
+          });
 
         if (err) throw err;
 
