@@ -9,13 +9,13 @@ var schema = new xpression.Schema({
   name: {type: String, required: true, trim: true, unique: true},
 
   /// Contact email address for the client.
-  email: {type: String, required: true, trim: true, unique: true},
+  email: {type: String, required: true, trim: true},
 
   /// Client secret.
   secret: {type: String, required: true},
 
   /// Redirect URI for the client.
-  redirect_uri: {type: String, required: true, trim: true, unique: true},
+  redirect_uri: {type: String, trim: true},
 
   /// Enabled state of the client.
   enabled: {type: Boolean, default: true, required: true},
