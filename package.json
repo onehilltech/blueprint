@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint",
   "author": "One Hill Technologies, LLC",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "lightweight, simple, elegant framework for building mean applications",
   "license": "Apache-2.0",
   "main": "./lib",
@@ -33,10 +33,6 @@
   },
   "scripts": {
     "test": "env NODE_ENV=test mocha --recursive tests/lib --reporter spec"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/onehilltech/blueprint.git"
   },
   "devDependencies": {
     "chai": "^3.2.0",
