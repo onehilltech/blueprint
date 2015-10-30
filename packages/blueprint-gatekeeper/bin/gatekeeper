@@ -4,6 +4,7 @@
 var program = require ('commander');
 
 program
-  .command ('client', 'manage client accounts')
-  .command ('account', 'manage user accounts')
+  .command ('setup', 'run me first')
+  .command ('client', 'manage client access to resources')
+  .command ('account', 'manage user access to resources')
   .parse (process.argv);

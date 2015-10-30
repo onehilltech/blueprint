@@ -1,0 +1,75 @@
+#!/usr/bin/env node
+'use strict';
+
+var winston   = require ('winston')
+  , prompt    = require ('prompt')
+  , xpression = require ('xpression')
+  , path      = require ('path')
+  , async     = require ('async')
+  , jsonfile  = require ('jsonfile')
+  , fs        = require ('fs')
+  ;
+
+xpression.Application (path.resolve (process.cwd (), 'app'))
+  ;
+
+var Client = require ('../app/models/Client')
+  ;
+
+prompt.start ();
+
+prompt.get (['email'], function (err, result) {
+  // Create the command-line client, and the web portal client.
+  var clientData = [
+    {name: 'gatekeeper-cli', email: result.email, roles: ['account.create']},
+    {name: 'gatekeeper-webportal', email: result.email, roles: ['account.create']}
+  ];
+
+  xpression.app.database.connect (function (err) {
+    if (err)
+      throw err;
+
+    function writeDataFiles (err, clients) {
+      if (err)
+        throw err;
+
+      var dataFiles = [
+        'data/gatekeeper-cli.data',
+        'data/gatekeeper-webportal.data'
+      ];
+
+      async.forEachOf (dataFiles, function (filename, key, callback) {
+        var index = parseInt (key);
+
+        var data = {
+          client_id: clients[index].id,
+          client_secret: clients[index].secret
+        };
+
+        var dataFile = path.resolve(process.cwd (), filename);
+        jsonfile.writeFile (dataFile, data, {spaces: 2}, callback);
+      }, function (err) {
+        if (err) throw err;
+        process.exit (0);
+      });
+    }
+
+    Client.create (clientData, function (err, clients) {
+      if (err) throw err;
+
+      // Write the client_id and client_secret to the data directory.
+      var dataPath = path.resolve (process.cwd (), 'data');
+
+      fs.stat (dataPath, function (err, stats) {
+        if (err && err.code === 'ENOENT')
+          return fs.mkdir (dataPath, writeDataFiles);
+
+        if (err) throw err;
+
+        if (stats.isDirectory ())
+          writeDataFiles (null, clients);
+      });
+    });
+  });
+});
+
