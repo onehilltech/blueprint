@@ -35,7 +35,7 @@ program
           required : true
         },
         roles : {
-          required : true
+
         }
       }
     };
@@ -46,9 +46,11 @@ program
       var account = new Account ({
         username : result.username,
         password : result.password,
-        email : result.email,
-        roles : result.roles.split (',')
+        email : result.email
       });
+
+      if (result.roles)
+        account.roles = result.roles.split (',');
 
       account.save (function (err, account) {
         if (!err)
