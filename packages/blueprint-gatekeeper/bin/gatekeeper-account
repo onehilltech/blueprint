@@ -6,6 +6,7 @@ var program   = require ('commander')
   , prompt    = require ('prompt')
   , blueprint = require ('@onehilltech/blueprint')
   , path      = require ('path')
+  , jsonfile  = require ('jsonfile')
   ;
 
 blueprint.Application (path.resolve (process.cwd (), 'app'))
@@ -14,88 +15,97 @@ blueprint.Application (path.resolve (process.cwd (), 'app'))
 var Account = require ('../app/models/Account')
   ;
 
+var clientCredentials;
+
+/**
+ * Create a new account in the database.
+ */
+function createAccount () {
+  var schema = {
+    properties: {
+      username: {
+        pattern: /^[a-zA-Z0-9\s\-\s\_]+$/,
+        message: 'Username can only contain alphanumerics, dashes, and underscores',
+        required: true,
+        type: 'string'
+      },
+      password: {
+        required: true,
+        hidden: true
+      },
+      email: {
+        required: true
+      },
+      roles: {}
+    }
+  };
+
+  // Prompt the user for the account information.
+
+  prompt.start ();
+  prompt.get (schema, function (err, result) {
+    // Register a new client.
+    var account = new Account ({
+      username: result.username,
+      password: result.password,
+      email: result.email,
+      created_by: clientCredentials.client_id
+    });
+
+    if (result.roles)
+      account.roles = result.roles.split (',');
+
+    account.save (function (err) {
+      if (err) throw err;
+      process.exit (0);
+    });
+  });
+}
+
+function removeAccount (accountId) {
+  Account.remove ({_id : accountId}, function (err) {
+    if (err) throw err;
+    process.exit (0);
+  });
+}
+
+function enableAccount (accountId, state) {
+  state = JSON.parse (state.toLowerCase());
+
+  Account.findByIdAndUpdate (accountId, {enabled: state}, function (err) {
+    if (err) throw err;
+    process.exit (0);
+  });
+}
+
 // command: create
 program
   .command ('create')
   .description ('create new account')
-  .action (function () {
-    var schema = {
-      properties : {
-        username : {
-          pattern     : /^[a-zA-Z0-9\s\-\s\_]+$/,
-          message     : 'Username can only contain alphanumerics, dashes, and underscores',
-          required    : true,
-          type        : 'string'
-        },
-        password : {
-          required : true,
-          hidden   : true
-        },
-        email : {
-          required : true
-        },
-        roles : {
-
-        }
-      }
-    };
-
-    prompt.start ();
-    prompt.get (schema, function (err, result) {
-      // Register a new client.
-      var account = new Account ({
-        username : result.username,
-        password : result.password,
-        email : result.email
-      });
-
-      if (result.roles)
-        account.roles = result.roles.split (',');
-
-      account.save (function (err, account) {
-        if (!err)
-          return process.exit ();
-
-        winston.log ('error', err.message);
-        process.exit (1);
-      });
-  });
-});
+  .action (createAccount);
 
 // command: remove
 program
   .command ('remove <accountId>')
   .description ('remove an account from the database')
-  .action (function (accountId) {
-
-  Account.remove ({_id : accountId}, function (err) {
-    if (!err)
-      return process.exit ();
-
-    winston.log ('error', err.message);
-    process.exit (1);
-  });
-});
+  .action (removeAccount);
 
 // command: enable
 program
   .command ('enable <accountId> <state>')
   .description ('enable/disable account access')
-  .action (function (accountId, state) {
-  state = JSON.parse (state.toLowerCase());
+  .action (enableAccount);
 
-  Account.findByIdAndUpdate (accountId, {enabled: state}, function (err) {
-    if (!err)
-      return process.exit ();
+// Load the client information.
+var dataFile = path.resolve (process.cwd(), 'data/gatekeeper-cli.data');
+jsonfile.readFile (dataFile, function (err, obj) {
+  if (err) throw err;
+  clientCredentials = obj;
 
-    winston.log ('error', err.message);
-    process.exit (1);
+  blueprint.app.database.connect (function (err) {
+    if (err) throw err;
+
+    program.parse (process.argv);
   });
 });
 
-blueprint.app.database.connect (function (err) {
-  if (err)
-    return winston.log ('error', err);
-
-  program.parse (process.argv);
-});
