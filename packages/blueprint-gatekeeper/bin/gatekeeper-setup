@@ -3,14 +3,14 @@
 
 var winston   = require ('winston')
   , prompt    = require ('prompt')
-  , xpression = require ('xpression')
+  , blueprint = require ('@onehilltech/blueprint')
   , path      = require ('path')
   , async     = require ('async')
   , jsonfile  = require ('jsonfile')
   , fs        = require ('fs')
   ;
 
-xpression.Application (path.resolve (process.cwd (), 'app'))
+blueprint.Application (path.resolve (process.cwd (), 'app'))
   ;
 
 var Client = require ('../app/models/Client')
@@ -25,7 +25,7 @@ prompt.get (['email'], function (err, result) {
     {name: 'gatekeeper-webportal', email: result.email, roles: ['account.create']}
   ];
 
-  xpression.app.database.connect (function (err) {
+  blueprint.app.database.connect (function (err) {
     if (err)
       throw err;
 

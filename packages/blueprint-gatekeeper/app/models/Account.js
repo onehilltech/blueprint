@@ -1,5 +1,5 @@
 var bcrypt    = require ('bcrypt')
-  , xpression = require ('xpression')
+  , blueprint = require ('@onehilltech/blueprint')
   ;
 
 var Client = require ('./Client')
@@ -8,7 +8,7 @@ var Client = require ('./Client')
 const SALT_WORK_FACTOR = 10;
 const DEFAULT_ROLES    = ['user'];
 
-var Schema = xpression.Schema;
+var Schema = blueprint.Schema;
 
 var schema = new Schema ({
   /// Username for the account.
@@ -107,4 +107,4 @@ schema.virtual ('hidden_password').get (function () {
 });
 
 const COLLECTION_NAME  = 'gatekeeper_account';
-module.exports = exports = xpression.model (COLLECTION_NAME, schema);
+module.exports = exports = blueprint.model (COLLECTION_NAME, schema);

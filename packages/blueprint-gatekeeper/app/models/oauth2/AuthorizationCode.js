@@ -1,13 +1,13 @@
-var xpression = require ('xpression')
+var blueprint = require ('@onehilltech/blueprint')
   ;
 
 // We have to manually load the references models since the models
-// will not be accessible via <xpression> until all models are loaded.
+// will not be accessible via <blueprint> until all models are loaded.
 var Client  = require ('../Client')
   , Account = require ('../Account')
   ;
 
-var Schema = xpression.Schema;
+var Schema = blueprint.Schema;
 
 var schema = new Schema ({
   code         : {type: String, unique: true, index : true},
@@ -17,4 +17,4 @@ var schema = new Schema ({
 });
 
 const COLLECTION_NAME = 'gatekeeper_oauth2_authorizationcode';
-module.exports = exports = xpression.model (COLLECTION_NAME, schema);
+module.exports = exports = blueprint.model (COLLECTION_NAME, schema);

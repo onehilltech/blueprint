@@ -1,12 +1,12 @@
 var winston   = require ('winston')
-  , xpression = require ('xpression')
+  , blueprint = require ('@onehilltech/blueprint')
   ;
 
 function MeController () {
 
 }
 
-xpression.controller (MeController);
+blueprint.controller (MeController);
 
 /**
  * Set the token for push notifications on the specified network.

@@ -1,4 +1,4 @@
-var xpression = require ('xpression')
+var blueprint = require ('@onehilltech/blueprint')
   , expect    = require ('chai').expect
   , request   = require ('supertest')
   ;
@@ -10,8 +10,8 @@ describe ('Oauth2Router', function () {
   var server;
 
   before(function (done) {
-    server = xpression.app.server;
-    xpression.app.database.connect(done);
+    server = blueprint.app.server;
+    blueprint.app.database.connect(done);
   });
 
   beforeEach(function (done) {

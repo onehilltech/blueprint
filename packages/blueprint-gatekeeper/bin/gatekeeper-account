@@ -4,11 +4,11 @@
 var program   = require ('commander')
   , winston   = require ('winston')
   , prompt    = require ('prompt')
-  , xpression = require ('xpression')
+  , blueprint = require ('@onehilltech/blueprint')
   , path      = require ('path')
   ;
 
-xpression.Application (path.resolve (process.cwd (), 'app'))
+blueprint.Application (path.resolve (process.cwd (), 'app'))
   ;
 
 var Account = require ('../app/models/Account')
@@ -93,7 +93,7 @@ program
   });
 });
 
-xpression.app.database.connect (function (err) {
+blueprint.app.database.connect (function (err) {
   if (err)
     return winston.log ('error', err);
 

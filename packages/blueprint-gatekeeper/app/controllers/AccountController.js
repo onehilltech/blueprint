@@ -1,5 +1,5 @@
 var winston   = require ('winston')
-  , xpression = require ('xpression')
+  , blueprint = require ('@onehilltech/blueprint')
   ;
 
 var Account = require ('../models/Account')
@@ -10,7 +10,7 @@ function AccountController () {
 
 }
 
-xpression.controller (AccountController);
+blueprint.controller (AccountController);
 
 /**
  * Test if the current user is an administrator.
@@ -88,7 +88,7 @@ AccountController.prototype.createAccount = function (callback) {
           return self.handleError (err, res, 500, 'failed to create account', callback);
 
         // Notify listeners that an account has been created.
-        xpression.emit ('gatekeeper.account.created', account);
+        blueprint.emit ('gatekeeper.account.created', account);
 
         return res.status (200).send (true);
       });
@@ -133,7 +133,7 @@ AccountController.prototype.deleteAccount = function (callback) {
         return self.handleError (err, res, 404, 'Failed to delete account', callback);
 
       // Notify listeners that an account has been deleted.
-      xpression.emit ('gatekeeper.account.deleted', accountId);
+      blueprint.emit ('gatekeeper.account.deleted', accountId);
 
       return res.status (200).json (true);
     });
@@ -174,7 +174,7 @@ AccountController.prototype.enableAccount = function (callback) {
         return self.handleError (err, res, 500, 'Failed to enable/disable account', callback);
 
       // Notify listeners that an account has been disabled.
-      xpression.emit ('gatekeeper.account.enabled', accountId, enabled);
+      blueprint.emit ('gatekeeper.account.enabled', accountId, enabled);
 
       res.status (200).json (true);
     });

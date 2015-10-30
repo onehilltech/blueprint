@@ -1,6 +1,6 @@
 var winston     = require ('winston')
   , uid         = require ('uid-safe')
-  , xpression   = require ('xpression')
+  , blueprint   = require ('@onehilltech/blueprint')
   ;
 
 var Client      = require ('../models/Client')
@@ -18,10 +18,10 @@ var Client      = require ('../models/Client')
  * @constructor
  */
 function Oauth2Controller () {
-  xpression.BaseController.call (this);
+  blueprint.BaseController.call (this);
 }
 
-xpression.controller (Oauth2Controller);
+blueprint.controller (Oauth2Controller);
 
 /**
  * Lookup a client by param.

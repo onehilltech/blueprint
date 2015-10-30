@@ -1,10 +1,10 @@
 var uid       = require ('uid-safe')
-  , xpression = require ('xpression')
+  , blueprint = require ('@onehilltech/blueprint')
   ;
 
 const DEFAULT_SECRET_LENGTH = 128;
 
-var schema = new xpression.Schema({
+var schema = new blueprint.Schema({
   /// Name of the client.
   name: {type: String, required: true, trim: true, unique: true},
 
@@ -32,4 +32,4 @@ schema.pre ('validate', function (next) {
 });
 
 const COLLECTION_NAME = 'gatekeeper_client';
-module.exports = exports = xpression.model (COLLECTION_NAME, schema);
+module.exports = exports = blueprint.model (COLLECTION_NAME, schema);

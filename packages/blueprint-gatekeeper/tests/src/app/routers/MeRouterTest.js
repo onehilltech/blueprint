@@ -1,11 +1,11 @@
-var xpression = require ('xpression')
+var blueprint = require ('@onehilltech/blueprint')
   , request   = require ('supertest')
   , expect    = require ('chai').expect
   , async     = require ('async')
   ;
 
 var datamodel = require ('../../../fixtures/datamodel')
-  , Account    = xpression.app.models.Account;
+  , Account    = blueprint.app.models.Account;
   ;
 
 describe ('MeRouter', function () {
@@ -15,8 +15,8 @@ describe ('MeRouter', function () {
   before(function (done) {
     async.series ([
       function (callback) {
-        server = xpression.app.server;
-        xpression.app.database.connect(callback);
+        server = blueprint.app.server;
+        blueprint.app.database.connect(callback);
       },
       function (callback) {
         datamodel.apply (callback);
