@@ -13,6 +13,18 @@ describe ('AccountRouter', function () {
   var accessToken;
   var clientToken;
 
+  function getToken (data, callback) {
+    request (server.app)
+      .post('/oauth2/token').send (data)
+      .expect (200)
+      .end (function (err, res) {
+        if (err)
+          return callback (err);
+
+        return callback (null, res.body.access_token);
+    });
+  }
+
   before(function (done) {
     async.series ([
       function (callback) {
@@ -30,16 +42,11 @@ describe ('AccountRouter', function () {
           client_id: datamodel.models.clients[0].id
         };
 
-        // Get an access token for all requests.
-        request(server.app)
-          .post('/oauth2/token').send (data)
-          .expect (200)
-          .end (function (err, res) {
-            if (err)
-              return callback(err);
+        getToken (data, function (err, token) {
+          if (err) return callback(err);
 
-            accessToken = res.body.access_token;
-            return callback ();
+          accessToken = token;
+          return callback ();
         });
       },
       function (callback) {
@@ -49,16 +56,11 @@ describe ('AccountRouter', function () {
           client_secret: datamodel.models.clients[0].secret,
         };
 
-        // Get an access token for all requests.
-        request(server.app)
-          .post('/oauth2/token').send (data)
-          .expect (200)
-          .end (function (err, res) {
-            if (err)
-              return callback(err);
+        getToken (data, function (err, token) {
+          if (err) return callback (err);
 
-            clientToken = res.body.access_token;
-            return callback ();
+          clientToken = token;
+          return callback ();
         });
       }
     ], done);
@@ -82,20 +84,20 @@ describe ('AccountRouter', function () {
   });
 
   describe ('POST /accounts', function () {
-    it ('should create a new account', function (done) {
-      var data = {
-        username: 'tester',
-        password: 'tester',
-        email: 'tester@gatekeeper.com'
-      };
+    var accountData = {
+      username: 'tester',
+      password: 'tester',
+      email: 'tester@gatekeeper.com'
+    };
 
+    it ('should create a new account', function (done) {
       request (server.app)
-        .post ('/accounts').send (data)
+        .post ('/accounts').send (accountData)
         .set ('Authorization', 'Bearer ' + clientToken)
         .expect (200, 'true')
         .end (function (err, res) {
           // Make sure the newly created account is in the database.
-          Account.findOne ({username: data.username, email: data.email}, function (err, account) {
+          Account.findOne ({username: accountData.username, email: accountData.email}, function (err, account) {
             if (err) return done (err);
 
             expect (err).to.be.null;
@@ -106,5 +108,22 @@ describe ('AccountRouter', function () {
           });
       });
     });
-  })
+
+    it ('should not create a new account', function (done) {
+      var clientData = {
+        grant_type: 'client_credentials',
+        client_id: datamodel.models.clients[1].id,
+        client_secret: datamodel.models.clients[1].secret
+      };
+
+      getToken (clientData, function (err, token) {
+        if (err) return done (err);
+
+        request (server.app)
+          .post ('/accounts').send (accountData)
+          .set ('Authorization', 'Bearer ' + token)
+          .expect (403, done);
+      });
+    });
+  });
 });
