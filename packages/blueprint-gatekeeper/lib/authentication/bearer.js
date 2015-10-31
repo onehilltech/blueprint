@@ -29,10 +29,8 @@ module.exports = function () {
         if (!token.client.enabled)
           return done (null, false, {message: 'Client is disabled'});
 
-        if (!token.account)
-          return done (null, false, {message: 'Token is for an unknown account'});
-
-        if (!token.account.enabled)
+        // If the token is for an account, then the account must be enabled.
+        if (token.isAccountToken () && !token.account.enabled)
           return done (null, false, {message: 'User account is disabled'});
 
         winston.info ('[bearer]: access token validation successful');
