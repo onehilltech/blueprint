@@ -128,5 +128,5 @@ ApplicationModule.prototype.resource = function (filename, callback) {
     return fs.readFileSync (fullpath);
 };
 
-module.exports = exports = ApplicationModule;
+module.exports = ApplicationModule;
 
