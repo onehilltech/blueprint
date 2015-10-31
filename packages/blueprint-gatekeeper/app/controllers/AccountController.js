@@ -62,36 +62,30 @@ AccountController.prototype.createAccount = function (callback) {
   var self = this;
 
   return function (req, res) {
-    // Check that the client has the create_account role. If the client does not have
-    // this role, then we return an error.
-    var clientId = req.body.client_id;
-    var criteria = {_id: clientId, roles: {'$in': ['account.create']}};
+    // Make sure the client has the account.create role. Otherwise, the client
+    // does not have the correct privileges.
+    var client = req.user;
 
-    Client.findOne (criteria, function (err, client) {
-      if (err)
-        return self.handleError (err, res, 500, 'Failed to validate client', callback);
+    if (-1 === client.roles.indexOf ('account.create'))
+      return self.handleError (null, res, 401, 'Client cannot create accounts', callback);
 
-      if (!client)
-        return self.handleError (err, res, 401, 'Client cannot create accounts', callback);
-
-      // Create the new account, and include the client that created the account.
-      var account = new Account ({
-        email : req.body.email,
-        password : req.body.password,
-        created_by : clientId
-      });
-
-      account.save (function (err, account) {
-        if (err)
-          return self.handleError (err, res, 500, 'failed to create account', callback);
-
-        // Notify listeners that an account has been created.
-        blueprint.emit ('gatekeeper.account.created', account);
-
-        return res.status (200).send (true);
-      });
+    // Create the new account, and include the client that created the account.
+    var account = new Account ({
+      username : req.body.username,
+      password : req.body.password,
+      email : req.body.email,
+      created_by : client
     });
 
+    account.save (function (err, account) {
+      if (err)
+        return self.handleError (err, res, 500, 'Failed to create account', callback);
+
+      // Notify listeners that an account has been created.
+      blueprint.emit ('gatekeeper.account.created', account);
+
+      return res.status (200).json (true);
+    });
   };
 };
 

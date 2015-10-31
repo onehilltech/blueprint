@@ -11,11 +11,14 @@ const DEFAULT_ROLES    = ['user'];
 var Schema = blueprint.Schema;
 
 var schema = new Schema ({
-  /// Contact email address for the account.
-  email : { type: String, index: true, unique: true, trim: true, required: true },
+  /// Username for the account.
+  username : { type: String, required: true, index: true, unique: true},
 
   /// Encrypted password
   password : { type: String, required: true},
+
+  /// Contact email address for the account.
+  email    : { type: String, required: true, index: true, unique: true, trim: true },
 
   /// The client that created the account.
   created_by : {type: Schema.Types.ObjectId, required: true, ref: Client.modelName},

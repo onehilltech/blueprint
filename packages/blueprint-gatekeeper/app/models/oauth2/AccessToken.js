@@ -54,7 +54,7 @@ schema.statics.generateToken = function () {
  */
 schema.statics.newClientToken = function (client, scope, done) {
   var token   = uid.sync (DEFAULT_TOKEN_LENGTH);
-  var query   = {client : client};
+  var query   = {client : client, account: { $exists: false }};
   var data    = {token: token, client: client, enabled : true};
   var options = {upsert : true, new : true};
 
@@ -74,6 +74,24 @@ schema.statics.refresh = function (client, refreshToken, done) {
   var data  = {token : uid.sync (DEFAULT_TOKEN_LENGTH), refresh_token : uid.sync (DEFAULT_TOKEN_LENGTH)};
 
   this.findOneAndUpdate (query, data, done);
+};
+
+/**
+ * Test if the access token is for an account.
+ *
+ * @returns {boolean}
+ */
+schema.methods.isAccountToken = function () {
+  return this.account !== undefined;
+};
+
+/**
+ * Test if the access token is for a client.
+ *
+ * @returns {boolean}
+ */
+schema.methods.isClientToken = function () {
+  return this.account === undefined;
 };
 
 /**

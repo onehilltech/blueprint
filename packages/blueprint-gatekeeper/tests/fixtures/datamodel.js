@@ -12,17 +12,17 @@ var Account     = blueprint.app.models.Account
 exports.models = {};
 
 var rawClients = [
-  {name: 'client1', email: 'contact@client1.com', secret: 'client1', redirect_uri: 'https://client1.com/gatekeeper', roles: ['account_create']},
+  {name: 'client1', email: 'contact@client1.com', secret: 'client1', redirect_uri: 'https://client1.com/gatekeeper', roles: ['account.create']},
   {name: 'client2', email: 'contact@client2.com', secret: 'client2', redirect_uri: 'https://client2.com/gatekeeper'},
   {name: 'client3', email: 'contact@client3.com', secret: 'client3', redirect_uri: 'https://client3.com/gatekeeper', enabled: false}
 ];
 
 var rawAccounts = [
-  {email: 'account1@gatekeeper.com', password: 'account1'},
-  {email: 'account2@gatekeeper.com', password: 'account2'},
-  {email: 'account3@gatekeeper.com', password: 'account3'},
-  {email: 'account4@gatekeeper.com', password: 'account4'},
-  {email: 'account5@gatekeeper.com', password: 'account5', enabled: false},
+  {username: 'account1', email: 'account1@gatekeeper.com', password: 'account1'},
+  {username: 'account2', email: 'account2@gatekeeper.com', password: 'account2'},
+  {username: 'account3', email: 'account3@gatekeeper.com', password: 'account3'},
+  {username: 'account4', email: 'account4@gatekeeper.com', password: 'account4'},
+  {username: 'account5', email: 'account5@gatekeeper.com', password: 'account5', enabled: false},
 ];
 
 exports.rawModels = {
