@@ -306,16 +306,16 @@ Oauth2Controller.prototype.getToken = function (callback) {
       return self.handleError (null, res, 400, errs, callback);
 
     var clientId = req.body.client_id;
-    var username = req.body.username;
+    var email = req.body.username;
     var password = req.body.password;
 
     // Locate the client and make sure the client is enabled.
     lookupClient (res, clientId, null, function (client) {
       // Authenticate the username/password combo. Upon authentication, we
       // are to return the token/refresh_token combo.
-      winston.log ('info', 'client %s: exchanging username/password for access token [user=%s]', client.id, username);
+      winston.log ('info', 'client %s: exchanging username/password for access token [user=%s]', client.id, email);
 
-      Account.findOne ({username: username}, function (err, account) {
+      Account.findOne ({email: email}, function (err, account) {
         // Check the result of the operation. If the account does not exist or the
         // account is disabled, then return the appropriate error message.
         if (err)

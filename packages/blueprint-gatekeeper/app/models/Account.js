@@ -11,14 +11,11 @@ const DEFAULT_ROLES    = ['user'];
 var Schema = blueprint.Schema;
 
 var schema = new Schema ({
-  /// Username for the account.
-  username : { type: String, index: true, unique: true, trim: true, required: true },
+  /// Contact email address for the account.
+  email : { type: String, index: true, unique: true, trim: true, required: true },
 
   /// Encrypted password
   password : { type: String, required: true},
-
-  /// Contact email address
-  email    : { type: String, index: true, unique: true, trim: true, required: true },
 
   /// The client that created the account.
   created_by : {type: Schema.Types.ObjectId, required: true, ref: Client.modelName},
@@ -28,6 +25,22 @@ var schema = new Schema ({
 
   /// Roles of the user.
   roles    : { type: [String], default: DEFAULT_ROLES},
+
+  /// Verification information for the account.
+  verification : {
+    /// Date when the account was verified.
+    when : { type: Date},
+
+    /// Verification token for the account. If the account has been verified, then
+    /// there will be no token.
+    token : {
+      /// The value of the token.
+      value : { type : String},
+
+      /// The date when the verification token expires.
+      expires_at : { type : Date}
+    }
+  },
 
   /// Push notifications for the account.
   notifications : {

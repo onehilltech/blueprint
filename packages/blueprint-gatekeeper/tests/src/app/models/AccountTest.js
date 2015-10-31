@@ -1,6 +1,7 @@
 var expect = require ('chai').expect;
 
-var Account = require ('../../../../app/models/Account')
+var blueprint = require ('../../../fixtures/blueprint')
+  , Account   = require ('../../../../app/models/Account')
   ;
 
 describe ('Account', function () {

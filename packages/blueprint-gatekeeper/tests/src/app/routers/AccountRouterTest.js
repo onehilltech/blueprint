@@ -5,7 +5,7 @@ var blueprint = require ('@onehilltech/blueprint')
   ;
 
 var datamodel = require ('../../../fixtures/datamodel')
-  , Account    = blueprint.app.models.Account;
+  , Account   = blueprint.app.models.Account;
   ;
 
 describe ('AccountRouter', function () {
@@ -24,7 +24,7 @@ describe ('AccountRouter', function () {
       function (callback) {
         var data = {
           grant_type: 'password',
-          username: datamodel.rawModels.accounts[0].username,
+          username: datamodel.rawModels.accounts[0].email,
           password: datamodel.rawModels.accounts[0].password,
           client_id: datamodel.models.clients[0].id
         };

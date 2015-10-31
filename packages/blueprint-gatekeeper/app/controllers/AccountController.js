@@ -65,7 +65,7 @@ AccountController.prototype.createAccount = function (callback) {
     // Check that the client has the create_account role. If the client does not have
     // this role, then we return an error.
     var clientId = req.body.client_id;
-    var criteria = {_id: clientId, roles: {'$in': ['create_account']}};
+    var criteria = {_id: clientId, roles: {'$in': ['account.create']}};
 
     Client.findOne (criteria, function (err, client) {
       if (err)
@@ -76,10 +76,8 @@ AccountController.prototype.createAccount = function (callback) {
 
       // Create the new account, and include the client that created the account.
       var account = new Account ({
-        username : req.body.username,
+        email : req.body.email,
         password : req.body.password,
-        email    : req.body.email,
-
         created_by : clientId
       });
 

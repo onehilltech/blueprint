@@ -18,11 +18,11 @@ var rawClients = [
 ];
 
 var rawAccounts = [
-  {username: 'account1', password: 'account1', email: 'contact@account1.com'},
-  {username: 'account2', password: 'account2', email: 'contact@account2.com'},
-  {username: 'account3', password: 'account3', email: 'contact@account3.com'},
-  {username: 'account4', password: 'account4', email: 'contact@account4.com'},
-  {username: 'account5', password: 'account5', email: 'contact@account5.com', enabled: false},
+  {email: 'account1@gatekeeper.com', password: 'account1'},
+  {email: 'account2@gatekeeper.com', password: 'account2'},
+  {email: 'account3@gatekeeper.com', password: 'account3'},
+  {email: 'account4@gatekeeper.com', password: 'account4'},
+  {email: 'account5@gatekeeper.com', password: 'account5', enabled: false},
 ];
 
 exports.rawModels = {
