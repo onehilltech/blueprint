@@ -9,3 +9,4 @@ module.exports = exports = new blueprint.ApplicationModule (appPath);
 
 // Export the authentication package.
 exports.auth = require ('./authentication');
+exports.Client = require ('./client');
