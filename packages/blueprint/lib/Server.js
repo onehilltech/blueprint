@@ -1,14 +1,15 @@
 'use strict';
 
-var express = require ('express')
-  , winston = require ('winston')
-  , path    = require ('path')
-  , extend  = require ('extend')
-  , async   = require ('async')
+var express     = require ('express')
+  , winston     = require ('winston')
+  , path        = require ('path')
+  , extend      = require ('extend')
+  , async       = require ('async')
+  , consolidate = require ('consolidate')
   ;
 
 var DEFAULT_VIEWS_PATH  = 'views';
-var DEFAULT_VIEW_ENGINE = 'jade';
+var DEFAULT_VIEW_ENGINES = 'jade';
 
 /**
  * Configure the middleware for the application.
@@ -217,12 +218,27 @@ function Server (appPath, config) {
     });
   }
 
-  // Setup the views for the server.
+  // Setup the views for the server, and the view engine. There can be a
+  // single view engine, or there can be multiple view engines. The view
+  // engine must be supported by consolidate.js
   var viewsPath = path.resolve (this._appPath, DEFAULT_VIEWS_PATH);
   this._app.set ('views', viewsPath);
 
   var viewEngine = config.view_engine || DEFAULT_VIEW_ENGINE;
-  this._app.set ('view engine', viewEngine);
+
+  if (viewEngine.constructor === Array) {
+    // We are going to load multiple view engines.
+    var length = viewEngine.length;
+
+    for (var i = 0; i < length; ++ i) {
+      var engine = viewEngine[i];
+      this._app.engine (engine, consolidate[engine]);
+    }
+  }
+  else {
+    // We only need a single view engine.
+    this._app.engine (viewEngine, consolidate[viewEngine]);
+  }
 
   // Set the locals for the server application.
   if (config.locals)
@@ -261,4 +277,4 @@ Server.prototype.__defineGetter__ ('app', function () {
   return this._app;
 });
 
-module.exports = exports = Server;
+module.exports = Server;
