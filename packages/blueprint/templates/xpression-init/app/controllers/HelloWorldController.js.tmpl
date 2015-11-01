@@ -1,4 +1,4 @@
-var blueprint = require ('blueprint')
+var blueprint = require ('@onehilltech/blueprint')
   , util      = require ('util')
   ;
 

@@ -9,7 +9,7 @@ var express     = require ('express')
   ;
 
 var DEFAULT_VIEWS_PATH  = 'views';
-var DEFAULT_VIEW_ENGINES = 'jade';
+var DEFAULT_VIEW_ENGINE = 'jade';
 
 /**
  * Configure the middleware for the application.
