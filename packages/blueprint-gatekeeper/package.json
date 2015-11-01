@@ -9,13 +9,13 @@
     "url": "https://github.com/onehilltech/gatekeeper.git"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^0.6.4",
+    "@onehilltech/blueprint": "^0.7.0",
     "bcrypt": "^0.8.5",
     "commander": "^2.9.0",
     "email-templates": "^2.0.1",
-    "emailjs": "^1.0.0",
     "jade": "^1.11.0",
     "jsonfile": "^2.2.3",
+    "nodemailer": "^1.8.0",
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.x.x",
     "passport-oauth2-client-password": "^0.1.2",
