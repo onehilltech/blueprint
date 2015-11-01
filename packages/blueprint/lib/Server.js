@@ -224,20 +224,19 @@ function Server (appPath, config) {
   var viewsPath = path.resolve (this._appPath, DEFAULT_VIEWS_PATH);
   this._app.set ('views', viewsPath);
 
-  var viewEngine = config.view_engine || DEFAULT_VIEW_ENGINE;
+  var viewEngine = config['view_engine'] || DEFAULT_VIEW_ENGINE;
+  this._app.set ('view engine', viewEngine);
 
-  if (viewEngine.constructor === Array) {
-    // We are going to load multiple view engines.
-    var length = viewEngine.length;
+  if (config['view_engines']) {
+    // We are going to load multiple view engines in addition to the default
+    // view engine for the server.
+    var viewEngines = config['view_engines'];
+    var length = viewEngines.length;
 
     for (var i = 0; i < length; ++ i) {
-      var engine = viewEngine[i];
+      var engine = viewEngines[i];
       this._app.engine (engine, consolidate[engine]);
     }
-  }
-  else {
-    // We only need a single view engine.
-    this._app.engine (viewEngine, consolidate[viewEngine]);
   }
 
   // Set the locals for the server application.
