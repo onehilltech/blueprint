@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var winston   = require ('winston')
-  , blueprint = require ('blueprint')
+  , blueprint = require ('@onehilltech/blueprint')
   ;
 
 var app = new blueprint.Application (__dirname);
