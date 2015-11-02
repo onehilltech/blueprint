@@ -25,7 +25,7 @@ describe ('ApplicationModule', function () {
 
       expect (appModule.appPath).to.equal (appPath);
 
-      expect (appModule._listeners).to.be.undefined;
+      expect (appModule._listeners).to.have.keys (['app.init', 'custom.event'])
       expect (appModule._controllers).to.be.undefined;
       expect (appModule._models).to.be.undefined;
       expect (appModule._routers).to.be.undefined;

@@ -40,10 +40,6 @@ Application.prototype.init = function () {
   var configPath = path.join (this.appPath, 'configs');
   this._config = Configuration (configPath, this.env);
 
-  // Next, load all the listeners. This allows the listeners to receive
-  // events about the initialization process.
-  this.listeners;
-
   // Initialize the database object, if a configuration exists. If we
   // have a database configuration, then we can have models.
   if (this._config['database']) {

@@ -29,6 +29,9 @@ function ApplicationModule (appPath) {
   this._controllers = undefined;
   this._models = undefined;
   this._routers = undefined;
+
+  // Force auto-loading of the listeners.
+  this.listeners;
 }
 
 /**
