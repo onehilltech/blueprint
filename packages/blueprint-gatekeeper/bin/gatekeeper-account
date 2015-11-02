@@ -16,95 +16,103 @@ var gatekeeper = require ('../lib')
   ;
 
 /**
- * Run the main program.
+ * Get a new GatekeeperClient object.
  *
- * @param err
- * @param client
+ * @param callback
  */
-function runProgram (err, client) {
-  if (err) throw err;
+function getGatekeeperClient (callback) {
+  // Load the client information.
+  var dataFile = path.resolve (process.cwd (), 'data/gatekeeper-cli.data');
 
-  function addAccount () {
-    var schema = {
-      properties: {
-        username: {
-          required: true,
-          type: 'string'
-        },
-        password: {
-          required: true,
-          hidden: true,
-          type: 'string'
-        },
-        email: {
-          required: true,
-          type: 'string'
-        },
-        roles: {}
-      }
+  jsonfile.readFile (dataFile, function (err, obj) {
+    if (err) throw err;
+
+    var baseurl = program.baseurl || 'http://localhost:5000';
+
+    var opts = {
+      baseUri : baseurl,
+      clientId : obj.client_id,
+      clientSecret : obj.client_secret
     };
 
-    // Prompt the user for the account information.
+    gatekeeper.newClient (opts, callback);
+  });
+}
 
-    prompt.start ();
+function addAccount () {
+  var schema = {
+    properties: {
+      username: {
+        required: true,
+        type: 'string'
+      },
+      password: {
+        required: true,
+        hidden: true,
+        type: 'string'
+      },
+      email: {
+        required: true,
+        type: 'string'
+      },
+      roles: {}
+    }
+  };
 
-    prompt.get (schema, function (err, result) {
+  // Prompt the user for the account information.
+
+  prompt.start ();
+
+  prompt.get (schema, function (err, result) {
+    getGatekeeperClient (function (err, client) {
+      if (err) throw err;
+
       client.createAccount (result, function (err, result) {
+        if (err) throw err;
         process.exit (0);
       });
     });
-  }
-
-  function removeAccount (accountId) {
-    Account.remove ({_id : accountId}, function (err) {
-      if (err) throw err;
-      process.exit (0);
-    });
-  }
-
-  function enableAccount (accountId, state) {
-    state = JSON.parse (state.toLowerCase());
-
-    Account.findByIdAndUpdate (accountId, {enabled: state}, function (err) {
-      if (err) throw err;
-      process.exit (0);
-    });
-  }
-
-  // command: create
-  program
-    .command ('add')
-    .description ('add a new account')
-    .action (addAccount);
-
-  // command: remove
-  program
-    .command ('remove <accountId>')
-    .description ('remove an exist account')
-    .action (removeAccount);
-
-  // command: enable
-  program
-    .command ('enable <accountId> <state>')
-    .description ('enable/disable access for an existing account')
-    .action (enableAccount);
-
-  program.parse (process.argv);
+  });
 }
 
+/*
+function removeAccount (accountId) {
+  Account.remove ({_id : accountId}, function (err) {
+    if (err) throw err;
+    process.exit (0);
+  });
+}
 
-// Load the client information.
-var dataFile = path.resolve (process.cwd (), 'data/gatekeeper-cli.data');
+function enableAccount (accountId, state) {
+  state = JSON.parse (state.toLowerCase());
 
-jsonfile.readFile (dataFile, function (err, obj) {
-  if (err) throw err;
+  Account.findByIdAndUpdate (accountId, {enabled: state}, function (err) {
+    if (err) throw err;
+    process.exit (0);
+  });
+}
+*/
 
-  var opts = {
-    baseUri : 'http://localhost:5000',
-    clientId : obj.client_id,
-    clientSecret : obj.client_secret
-  };
+program.option ('--baseurl <url>', 'base url of Gatekeeper service');
 
-  gatekeeper.newClient (opts, runProgram);
-});
+// command: create
+program
+  .command ('add')
+  .description ('add a new account')
+  .action (addAccount);
 
+/*
+// command: remove
+program
+  .command ('remove <accountId>')
+  .description ('remove an exist account')
+  .action (removeAccount);
+
+// command: enable
+program
+  .command ('enable <accountId> <state>')
+  .description ('enable/disable access for an existing account')
+  .action (enableAccount);
+*/
+
+program.parse (process.argv);
