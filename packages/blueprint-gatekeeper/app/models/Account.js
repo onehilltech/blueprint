@@ -30,9 +30,9 @@ var schema = new Schema ({
   roles    : { type: [String], default: DEFAULT_ROLES},
 
   /// Verification information for the account.
-  verification : {
+  activation : {
     /// Date when the account was verified.
-    when : { type: Date},
+    when : { type: Date },
 
     /// Verification token for the account. If the account has been verified, then
     /// there will be no token.
@@ -93,6 +93,33 @@ schema.pre ('save', function (next) {
  */
 schema.methods.verifyPassword = function (password, callback) {
   bcrypt.compare (password, this.password, callback);
+};
+
+/**
+ * Test if the account has been activated.
+ *
+ * @returns {boolean}
+ */
+schema.methods.isActivated = function () {
+  return this.activation.when !== undefined;
+};
+
+/**
+ * Test if the activiation token has expired.
+ *
+ * @returns {boolean}
+ */
+schema.methods.activationTokenExpired = function () {
+  var currTime = Date.now ();
+  return this.activation.token.expires_at.getTime () < currTime;
+};
+
+/**
+ * Activate the account.
+ */
+schema.methods.activate = function (callback) {
+  this.activation.when = Date.now ();
+  this.save (callback);
 };
 
 schema.statics.authenticate = function (username, password, done) {

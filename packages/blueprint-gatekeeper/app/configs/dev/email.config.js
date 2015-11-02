@@ -2,7 +2,7 @@ module.exports = {
   from : 'no-reply@gatekeeper.com',
 
   gatekeeper : {
-    baseuri : 'http://localhost/gatekeeper'
+    baseUri : 'http://localhost:5000'
   },
 
   nodemailer : {
@@ -12,4 +12,4 @@ module.exports = {
       pass: '4fe2b7b252ea56722bacf1c2fd1880dc'
     }
   }
-}
+};

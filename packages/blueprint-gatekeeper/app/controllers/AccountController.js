@@ -109,6 +109,46 @@ AccountController.prototype.getAccount = function (callback) {
 };
 
 /**
+ * Activate an account.
+ *
+ * @returns {Function}
+ */
+AccountController.prototype.activateAccount = function () {
+  var self = this;
+
+  return function (req, res) {
+    var accountId = req.accountId;
+
+    // Find the account, and then activate the account. We perform the logic
+    // programmatically so we can gain fine control over what to render to
+    // the client.
+
+    Account.findById (accountId, function (err, account) {
+      if (err)
+        return self.handleError (err, res, 400, 'Failed to activate account');
+
+      if (!account)
+        return self.handleError (err, res, 400, 'Account does not exist');
+
+      if (account.isActivated ())
+        return res.render ('accounts/activation', { status: 'error', message : 'Account already activated'} );
+
+      if (account.activationTokenExpired ())
+        return res.render ('accounts/activation', { status: 'error', message : 'Activation token has expired' } );
+
+      // Proceed with activating the account.
+
+      account.activate (function (err, account) {
+        if (err)
+          return self.handleError (err, res, 500, 'Failed to activate account');n
+
+        return res.render ('accounts/activation', { status: 'info', message: 'Congrats! Your account has been activated' });
+      });
+    });
+  };
+};
+
+/**
  * Delete an existing account.
  *
  * @param callback

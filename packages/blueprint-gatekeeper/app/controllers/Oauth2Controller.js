@@ -65,7 +65,7 @@ Oauth2Controller.prototype.lookupTokenByParam = function () {
       if (!token)
         return next (new Error ('token does not exist'))
 
-      req.token = token;
+      req.clientToken = token;
       next ();
     });
   };
@@ -167,7 +167,7 @@ Oauth2Controller.prototype.enableClient = function () {
 
 Oauth2Controller.prototype.enableToken = function () {
   return function (req, res) {
-    if (!req.token)
+    if (!req.clientToken)
       return res.status (404).send ();
 
     req.checkBody ('enabled', 'Enabled is a required Boolean').notEmpty ().isBoolean ();
@@ -181,7 +181,7 @@ Oauth2Controller.prototype.enableToken = function () {
     req.sanitizeBody ('enabled').toBoolean ();
 
     // Update the client, and save it.
-    var token = req.token;
+    var token = req.clientToken;
     winston.info ('enabling access token %s [state=%s]', token.id, req.body.enabled);
 
     token.enabled = req.body.enabled;
@@ -204,10 +204,10 @@ Oauth2Controller.prototype.deleteToken = function (callback) {
   var self = this;
 
   return function (req, res) {
-    if (!req.token)
+    if (!req.clientToken)
       return self.handleError (null, res, 404, 'Token does not exist', callback);
 
-    var token = req.token;
+    var token = req.clientToken;
     winston.info ('deleting access token %s', token.id);
 
     token.remove (function (err) {

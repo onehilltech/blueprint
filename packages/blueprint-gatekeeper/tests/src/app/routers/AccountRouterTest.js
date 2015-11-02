@@ -87,7 +87,7 @@ describe ('AccountRouter', function () {
     var accountData = {
       username: 'tester',
       password: 'tester',
-      email: 'tester@gatekeeper.com'
+      email: 'james@onehilltech.com'
     };
 
     it ('should create a new account', function (done) {

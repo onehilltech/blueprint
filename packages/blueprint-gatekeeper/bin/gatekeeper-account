@@ -12,100 +12,99 @@ var program   = require ('commander')
 blueprint.Application (path.resolve (process.cwd (), 'app'))
   ;
 
-var Account = require ('../app/models/Account')
+var gatekeeper = require ('../lib')
   ;
 
-var clientCredentials;
-
 /**
- * Create a new account in the database.
+ * Run the main program.
+ *
+ * @param err
+ * @param client
  */
-function createAccount () {
-  var schema = {
-    properties: {
-      username: {
-        pattern: /^[a-zA-Z0-9\s\-\s\_]+$/,
-        message: 'Username can only contain alphanumerics, dashes, and underscores',
-        required: true,
-        type: 'string'
-      },
-      password: {
-        required: true,
-        hidden: true
-      },
-      email: {
-        required: true
-      },
-      roles: {}
-    }
-  };
+function runProgram (err, client) {
+  if (err) throw err;
 
-  // Prompt the user for the account information.
+  function addAccount () {
+    var schema = {
+      properties: {
+        username: {
+          pattern: /^[a-zA-Z0-9\s\-\s\_]+$/,
+          message: 'Username can only contain alphanumerics, dashes, and underscores',
+          required: true,
+          type: 'string'
+        },
+        password: {
+          required: true,
+          hidden: true
+        },
+        email: {
+          required: true
+        },
+        roles: {}
+      }
+    };
 
-  prompt.start ();
-  prompt.get (schema, function (err, result) {
-    // Register a new client.
-    var account = new Account ({
-      username: result.username,
-      password: result.password,
-      email: result.email,
-      created_by: clientCredentials.client_id
+    // Prompt the user for the account information.
+
+    prompt.start ();
+
+    prompt.get (schema, function (err, result) {
+      client.createAccount (result, function (err, result) {
+        process.exit (0);
+      });
     });
+  }
 
-    if (result.roles)
-      account.roles = result.roles.split (',');
-
-    account.save (function (err) {
+  function removeAccount (accountId) {
+    Account.remove ({_id : accountId}, function (err) {
       if (err) throw err;
       process.exit (0);
     });
-  });
+  }
+
+  function enableAccount (accountId, state) {
+    state = JSON.parse (state.toLowerCase());
+
+    Account.findByIdAndUpdate (accountId, {enabled: state}, function (err) {
+      if (err) throw err;
+      process.exit (0);
+    });
+  }
+
+  // command: create
+  program
+    .command ('add')
+    .description ('add a new account')
+    .action (addAccount);
+
+  // command: remove
+  program
+    .command ('remove <accountId>')
+    .description ('remove an exist account')
+    .action (removeAccount);
+
+  // command: enable
+  program
+    .command ('enable <accountId> <state>')
+    .description ('enable/disable access for an existing account')
+    .action (enableAccount);
+
+  program.parse (process.argv);
 }
 
-function removeAccount (accountId) {
-  Account.remove ({_id : accountId}, function (err) {
-    if (err) throw err;
-    process.exit (0);
-  });
-}
-
-function enableAccount (accountId, state) {
-  state = JSON.parse (state.toLowerCase());
-
-  Account.findByIdAndUpdate (accountId, {enabled: state}, function (err) {
-    if (err) throw err;
-    process.exit (0);
-  });
-}
-
-// command: create
-program
-  .command ('create')
-  .description ('create new account')
-  .action (createAccount);
-
-// command: remove
-program
-  .command ('remove <accountId>')
-  .description ('remove an account from the database')
-  .action (removeAccount);
-
-// command: enable
-program
-  .command ('enable <accountId> <state>')
-  .description ('enable/disable account access')
-  .action (enableAccount);
 
 // Load the client information.
-var dataFile = path.resolve (process.cwd(), 'data/gatekeeper-cli.data');
+var dataFile = path.resolve (process.cwd (), 'data/gatekeeper-cli.data');
+
 jsonfile.readFile (dataFile, function (err, obj) {
   if (err) throw err;
-  clientCredentials = obj;
 
-  blueprint.app.database.connect (function (err) {
-    if (err) throw err;
+  var opts = {
+    baseUri : 'http://localhost:5000',
+    clientId : obj.client_id,
+    clientSecret : obj.client_secret
+  };
 
-    program.parse (process.argv);
-  });
+  gatekeeper.newClient (opts, runProgram);
 });
 
