@@ -28,17 +28,17 @@ function runProgram (err, client) {
     var schema = {
       properties: {
         username: {
-          pattern: /^[a-zA-Z0-9\s\-\s\_]+$/,
-          message: 'Username can only contain alphanumerics, dashes, and underscores',
           required: true,
           type: 'string'
         },
         password: {
           required: true,
-          hidden: true
+          hidden: true,
+          type: 'string'
         },
         email: {
-          required: true
+          required: true,
+          type: 'string'
         },
         roles: {}
       }
