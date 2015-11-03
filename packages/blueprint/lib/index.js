@@ -65,7 +65,7 @@ exports.model = function (name, schema) {
  * @param appPath
  * @constructor
  */
-exports.Application = function (appPath) {
+exports.Application = function (name, appPath) {
   if (framework.hasApplication ()) {
     if (appPath === framework.app.appPath)
       return framework.app;
@@ -75,7 +75,7 @@ exports.Application = function (appPath) {
 
 
   // Create a new application and install it.
-  var app = new Application (appPath);
+  var app = new Application (name, appPath);
   framework.app = app;
 
   // Initialize the application.
