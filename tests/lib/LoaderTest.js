@@ -13,7 +13,7 @@ describe ('Loader', function () {
     // properly.
     before (function () {
       var appPath = path.resolve (__dirname, '../fixtures/app-empty');
-      blueprint.Application (appPath);
+      blueprint.Application ('app-empty', appPath);
     });
 
     after (function () {
