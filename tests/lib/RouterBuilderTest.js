@@ -10,7 +10,7 @@ describe ('RouterBuilder', function () {
   var routerBuilder;
 
   describe ('new RouterBuilder ()', function () {
-    var appModule = new ApplicationModule (path.resolve (__dirname, '../fixtures/app'));
+    var appModule = new ApplicationModule ('fixtures', path.resolve (__dirname, '../fixtures/app'));
     var routersPath = path.resolve (__dirname, '../fixtures/app/routers');
     routerBuilder = new RouterBuilder (routersPath, appModule.controllers);
 
