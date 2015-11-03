@@ -2,7 +2,8 @@
 
 var winston = require ('winston')
   , path    = require ('path')
-  , all     = require ('require-all'), fs      = require ('fs')
+  , all     = require ('require-all')
+  , fs      = require ('fs')
   ;
 
 var RouterBuilder = require ('./RouterBuilder')
@@ -22,7 +23,8 @@ var messaging = Framework ().messaging;
  * @param appPath
  * @constructor
  */
-function ApplicationModule (appPath) {
+function ApplicationModule (name, appPath) {
+  this.name = name;
   this.appPath = path.resolve (appPath);
   
   this._listeners = undefined;
@@ -129,6 +131,29 @@ ApplicationModule.prototype.resource = function (filename, callback) {
     return fs.readFile (fullpath, callback);
   else
     return fs.readFileSync (fullpath);
+};
+
+/**
+ * Test if the application module has any views.
+ */
+ApplicationModule.prototype.getSupportsViews = function () {
+  var viewPath = this.getViewsPath ();
+
+  try {
+    var stat = fs.statSync (viewPath);
+    return stat.isDirectory ();
+  }
+  catch (ex) {
+    return false;
+  }
+};
+
+/**
+ * Get the path of the views. This does not test if the path is actually
+ * part of the module. To perform such a test, see getSupportsViews().
+ */
+ApplicationModule.prototype.getViewsPath = function () {
+  return path.resolve (this.appPath, 'views');
 };
 
 module.exports = ApplicationModule;

@@ -23,8 +23,10 @@ var messaging = Framework ().messaging;
  * @param appPath
  * @constructor
  */
-function Application (appPath) {
-  ApplicationModule.call (this, appPath);
+function Application (name, appPath) {
+  ApplicationModule.call (this, name, appPath);
+
+  this._modules = {};
 }
 
 util.inherits (Application, ApplicationModule);
@@ -124,5 +126,17 @@ Application.prototype.__defineGetter__ ('server', function () {
 
   return this._server;
 });
+
+/**
+ * Add a new module to the application.
+ *
+ * @param module
+ */
+Application.prototype.addModule = function (module) {
+  if (this._modules.hasOwnProperty (module.name))
+    throw new Error (util.format ('duplicate module: %s', module.name));
+
+  this._modules[module.name] = module;
+};
 
 module.exports = Application;
