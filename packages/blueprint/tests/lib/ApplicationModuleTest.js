@@ -11,7 +11,7 @@ describe ('ApplicationModule', function () {
 
   before (function () {
     var appPath = path.resolve (__dirname, '../fixtures/app-empty');
-    blueprint.Application (appPath);
+    blueprint.Application ('app-empty', appPath);
   });
 
   after (function () {
@@ -21,7 +21,7 @@ describe ('ApplicationModule', function () {
   describe ('new ApplicationModule', function () {
     it ('should create a new application module', function () {
       var appPath = path.resolve (__dirname, '../fixtures/app');
-      appModule = new ApplicationModule (appPath);
+      appModule = new ApplicationModule ('fixture', appPath);
 
       expect (appModule.appPath).to.equal (appPath);
 
