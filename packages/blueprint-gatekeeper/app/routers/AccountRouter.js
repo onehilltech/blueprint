@@ -29,10 +29,6 @@ module.exports = exports = {
     post : { action: 'AccountController@enableAccount'}
   },
 
-  '/accounts/:accountId/activate' : {
-    get : { action : 'AccountController@activateAccount' }
-  },
-
   '/accounts/:accountId/roles' : {
     post : { action: 'AccountController@updateRoles'}
   },
