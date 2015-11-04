@@ -1,5 +1,7 @@
 var expect    = require ('chai').expect
   , path      = require ('path')
+  , async     = require ('async')
+  , fs        = require ('fs')
   , blueprint = require ('../fixtures/blueprint')
   ;
 
@@ -32,6 +34,29 @@ describe ('ApplicationModule', function () {
 
     it ('should have the name test-app', function () {
       expect (appModule.name).to.equal ('test-app');
+    });
+  });
+
+  describe ('#load', function () {
+    var modulePath = path.resolve (__dirname, '../fixtures/app-module');
+
+    it ('should load an application module into the main application', function (done) {
+      var module = ApplicationModule.load (modulePath);
+      expect (blueprint.app._modules).to.have.keys (['test-app-module']);
+
+      var files = [
+        path.join (appPath, 'data', 'views', 'module-first-level.jade'),
+        path.join (appPath, 'data', 'views', 'inner', 'module-second-level.jade')
+      ];
+
+      async.each (files, function (file, callback) {
+        fs.stat (file, function (err, stat) {
+          if (err) return callback (err);
+          expect (stat.isFile()).to.be.true;
+
+          return callback ();
+        });
+      }, done);
     });
   });
 

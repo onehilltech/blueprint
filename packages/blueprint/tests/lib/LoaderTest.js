@@ -21,7 +21,7 @@ describe ('Loader', function () {
     it ('should load the models', function () {
       var models = Loader.loadModels (path.resolve (__dirname, '../fixtures/app/models'));
 
-      expect (models).to.have.deep.property ('TestModel1')
+      expect (models).to.have.deep.property ('TestModel1');
       expect (models).to.have.deep.property ('inner.TestModel2');
     });
   });
