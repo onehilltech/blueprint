@@ -65,14 +65,13 @@ exports.model = function (name, schema) {
  * @param appPath
  * @constructor
  */
-exports.Application = function (name, appPath) {
+exports.Application = function (appPath) {
   if (framework.hasApplication ()) {
     if (appPath === framework.app.appPath)
       return framework.app;
 
     throw new Error (util.format ('Application is already initialized [path=%s]', appPath));
   }
-
 
   // Create a new application and install it.
   var app = new Application (appPath);
