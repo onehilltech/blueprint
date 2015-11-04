@@ -7,11 +7,11 @@ var ApplicationModule = blueprint.ApplicationModule
   ;
 
 describe ('ApplicationModule', function () {
+  var appPath = path.resolve (__dirname, '../fixtures/app');
   var appModule;
 
   before (function () {
-    var appPath = path.resolve (__dirname, '../fixtures/app-empty');
-    blueprint.Application ('app-empty', appPath);
+    blueprint.Application (appPath);
   });
 
   after (function () {
@@ -20,8 +20,7 @@ describe ('ApplicationModule', function () {
 
   describe ('new ApplicationModule', function () {
     it ('should create a new application module', function () {
-      var appPath = path.resolve (__dirname, '../fixtures/app');
-      appModule = new ApplicationModule ('fixture', appPath);
+      appModule = new ApplicationModule (appPath);
 
       expect (appModule.appPath).to.equal (appPath);
 
@@ -29,6 +28,10 @@ describe ('ApplicationModule', function () {
       expect (appModule._controllers).to.be.undefined;
       expect (appModule._models).to.be.undefined;
       expect (appModule._routers).to.be.undefined;
+    });
+
+    it ('should have the name test-app', function () {
+      expect (appModule.name).to.equal ('test-app');
     });
   });
 

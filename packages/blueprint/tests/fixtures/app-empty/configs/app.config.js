@@ -1,3 +1,3 @@
 module.exports = exports = {
-  name : 'helloworld'
+  name : 'test-app.empty'
 };

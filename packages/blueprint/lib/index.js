@@ -107,6 +107,7 @@ exports.emit = function () {
  * Destroy the framework.
  */
 exports.destroy = function () {
+  framework.releaseApplication ();
   Framework.destroy ();
 };
 
