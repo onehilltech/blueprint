@@ -65,6 +65,16 @@ Application.prototype.init = function () {
   if (this.getSupportsViews ())
     this._server.importViews (this.getViewsPath ());
 
+  // Import the views of all the modules.
+  for (var name in this._modules) {
+    if (this._modules.hasOwnProperty (name)) {
+      var module = this._modules[name];
+
+      if (module.getSupportsViews ())
+        this._server.importViews (module.getViewsPath ());
+    }
+  }
+
   // Make the router for the application. Then, install the router in the
   // server object. Part of loading the routers requires force loading of
   // the controllers. Otherwise, the router builder will not be able to
@@ -146,7 +156,7 @@ Application.prototype.addModule = function (module) {
 
   this._modules[module.name] = module;
 
-  if (module.getSupportsViews ())
+  if (this._server && module.getSupportsViews ())
     this._server.importViews (module.getViewsPath ());
 };
 
