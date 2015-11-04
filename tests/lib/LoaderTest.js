@@ -12,12 +12,10 @@ describe ('Loader', function () {
     // a database. Otherwise, the blueprint.model () method will not function
     // properly.
     before (function () {
-      var appPath = path.resolve (__dirname, '../fixtures/app-empty');
-      blueprint.Application ('app-empty', appPath);
-    });
-
-    after (function () {
       blueprint.destroy ();
+
+      var appPath = path.resolve (__dirname, '../fixtures/app-empty');
+      blueprint.Application (appPath);
     });
 
     it ('should load the models', function () {

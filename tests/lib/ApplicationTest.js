@@ -4,19 +4,21 @@ var expect = require ('chai').expect
   , fs     = require ('fs')
   ;
 
-var Application       = require ('../../lib/Application')
-  , ApplicationModule = require ('../../lib/ApplicationModule')
+var blueprint = require ('../../lib')
   ;
 
 describe ('Application', function () {
+  var appPath = path.resolve (__dirname, '../fixtures/app');
   var app;
+
+  before (function () {
+    blueprint.destroy ();
+    app = blueprint.Application (appPath);
+  });
 
   describe ('new Application ()', function () {
     it ('should create a new application', function () {
-      var appPath = path.resolve (__dirname, '../fixtures/app');
-      app = new Application ('app', appPath);
-
-      expect (app).to.be.instanceof (ApplicationModule);
+      expect (app).to.be.instanceof (blueprint.ApplicationModule);
     });
   });
 
