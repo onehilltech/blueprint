@@ -12,7 +12,8 @@ var RouterBuilder = require ('./RouterBuilder')
   , Framework     = require ('./Framework')
   ;
 
-var messaging = Framework ().messaging;
+var framework = Framework ();
+var messaging = framework.messaging;
 
 /**
  * @class ApplicationModule
@@ -40,6 +41,20 @@ function ApplicationModule (appPath) {
   // Force auto-loading of the listeners.
   this.listeners;
 }
+
+/**
+ * Factory method that loads the application module. The module is also
+ * added to the current application.
+ *
+ * @param path
+ * @return ApplicationModule
+ */
+ApplicationModule.load = function (path) {
+  var appModule = new ApplicationModule (appPath);
+  framework.app.addModule (appModule);
+
+  return appModule;
+};
 
 /**
  * Get the models defined by the application.
