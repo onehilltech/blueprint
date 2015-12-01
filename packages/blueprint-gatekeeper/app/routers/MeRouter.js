@@ -14,6 +14,10 @@ module.exports = exports = {
     ],
   },
 
+  '/me/whoami' : {
+    get  : {action: 'MeController@whoami'}
+  },
+
   '/me/notifications': {
     post : {action: 'MeController@setPushNotificationToken'},
   },

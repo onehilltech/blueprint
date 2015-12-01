@@ -9,6 +9,17 @@ function MeController () {
 blueprint.controller (MeController);
 
 /**
+ * Get the user for the current user.
+ *
+ * @returns {Function}
+ */
+MeController.prototype.whoami = function () {
+  return function whoami (req, res) {
+    res.status (200).json ({_id : req.user.id});
+  };
+};
+
+/**
  * Set the token for push notifications on the specified network.
  *
  * @param callback

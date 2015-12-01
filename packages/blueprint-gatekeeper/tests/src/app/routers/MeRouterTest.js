@@ -43,6 +43,22 @@ describe ('MeRouter', function () {
     ], done);
   });
 
+  describe ('GET /me/whoami', function () {
+    it ('should return my user id', function (done) {
+      request(server.app)
+        .get ('/me/whoami')
+        .set ('Authorization', 'Bearer ' + accessToken)
+        .expect (200)
+        .end (function (err, res) {
+          if (err) return done (err);
+
+          expect (res.body).to.have.keys (['_id']);
+          expect (res.body._id).to.equal (datamodel.models.accounts[0].id);
+          return done ();
+      });
+    });
+  });
+
   describe ('POST /me/notifications', function () {
     it ('should update my notification token', function (done) {
       var token = '1234567890';
