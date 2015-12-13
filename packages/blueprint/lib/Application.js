@@ -11,6 +11,7 @@ var Server            = require ('./Server')
   , ApplicationModule = require ('./ApplicationModule')
   , Framework         = require ('./Framework')
   , Path              = require ('./Path')
+  , Uploader          = require ('./Uploader')
   ;
 
 var messaging = Framework ().messaging;
@@ -41,6 +42,11 @@ Application.prototype.init = function () {
   // all its internal information.
   var dataPath = Path.resolve (this.appPath, 'data');
   dataPath.createIfNotExists ();
+
+  // Initialize the uploader for the application.
+  var uploadPath = Path.resolve (dataPath.path, 'uploads');
+  uploadPath.createIfNotExists ();
+  this._uploader = new Uploader ({dest : uploadPath.path});
 
   // Load all configurations first. This is because other entities in the
   // application may need the configuration object for initialization.
@@ -143,6 +149,10 @@ Application.prototype.__defineGetter__ ('server', function () {
     throw new Error ('application did not configure server');
 
   return this._server;
+});
+
+Application.prototype.__defineGetter__ ('upload', function () {
+  return this._uploader;
 });
 
 /**

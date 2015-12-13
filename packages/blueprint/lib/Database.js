@@ -1,6 +1,9 @@
 var mongoose  = require ('mongoose')
+  , mongo     = require ('mongodb')
   , winston   = require ('winston')
   , util      = require ('util')
+  , fs        = require ('fs')
+  , GridFS    = require ('./GridFS')
   ;
 
 function Database (opts) {
@@ -24,17 +27,8 @@ Database.prototype.connect = function (callback) {
     callback ();
   });
 
-  if (this._opts['gridfs']) {
-    var GridFS = require ('gridfs-stream');
-
-    var conn = mongoose.connection;
-    GridFS.mongo = mongoose.mongo;
-
-    conn.once ('open', function () {
-      winston.log ('debug', 'Initializing GridFS on database connection');
-      this._gridFS = GridFS (conn.db);
-    });
-  }
+  // Initialize GridFS support for the database.
+  this._gridFS = new GridFS (mongoose.connection);
 };
 
 Database.prototype.disconnect = function (callback) {
@@ -42,6 +36,9 @@ Database.prototype.disconnect = function (callback) {
   winston.log ('debug', 'disconnecting from database');
 
   mongoose.connection.disconnect (function (err) {
+    // Delete our instance of GridFS.
+    delete self._gridFS;
+
     if (!err && self._messenger)
       self._messenger.emit ('database.disconnect', self);
 
@@ -65,9 +62,21 @@ Database.prototype.__defineGetter__ ('Schema', function () {
   return mongoose.Schema;
 });
 
+Database.prototype.__defineGetter__ ('gridfs', function () {
+  return this._gridFS;
+});
+
+/**
+ * Create a GridFS write stream to the database.
+ *
+ * @param file
+ * @param metadata
+ * @returns {Stream}
+ */
 Database.prototype.createWriteStream = function (opts) {
   return this._gridFS.createWriteStream (opts);
 };
+
 
 // Export the database, and the different class types.
 module.exports = exports = Database;
