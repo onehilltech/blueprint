@@ -24,8 +24,8 @@ describe ('MeRouter', function () {
       function (callback) {
         var data = {
           grant_type: 'password',
-          username: datamodel.rawModels.accounts[0].username,
-          password: datamodel.rawModels.accounts[0].password,
+          username: datamodel.rawModels.accounts[0].access_credentials.username,
+          password: datamodel.rawModels.accounts[0].access_credentials.password,
           client_id: datamodel.models.clients[0].id
         };
 

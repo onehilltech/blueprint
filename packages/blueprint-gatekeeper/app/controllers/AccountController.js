@@ -71,10 +71,9 @@ AccountController.prototype.createAccount = function (callback) {
 
     // Create the new account, and include the client that created the account.
     var account = new Account ({
-      username : req.body.username,
-      password : req.body.password,
-      email : req.body.email,
-      created_by : client
+      access_credentials : {username : req.body.username, password : req.body.password},
+      profile: {email : req.body.email},
+      internal_use: { created_by : client }
     });
 
     account.save (function (err, account) {

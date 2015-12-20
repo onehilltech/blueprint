@@ -11,41 +11,87 @@ const DEFAULT_ROLES    = ['user'];
 var Schema = blueprint.Schema;
 
 var schema = new Schema ({
-  /// Username for the account.
-  username : { type: String, required: true, index: true, unique: true},
+  /**
+   * Access credentials for the account. This subdocument contains the
+   * account username and password, as well as any access roles for the
+   * user, such as admin.
+   */
 
-  /// Encrypted password
-  password : { type: String, required: true},
+  access_credentials : {
+    /// Username for the account.
+    username : { type: String, required: true, index: true, unique: true},
 
-  /// Contact email address for the account.
-  email    : { type: String, required: true, index: true, unique: true, trim: true },
+    /// Encrypted password
+    password : { type: String, required: true},
 
-  /// The client that created the account.
-  created_by : {type: Schema.Types.ObjectId, required: true, ref: Client.modelName},
+    /// Access roles for the account.
+    roles : { type: [String]}
+  },
 
-  /// The account is enable.
-  enabled  : { type: Boolean, required: true, default: true },
+  /**
+   * Basic profile information for the account. We only care about the
+   * name of the user and their email address. This allows us to display
+   * information about the user.
+   */
 
-  /// Roles of the user.
-  roles    : { type: [String], default: DEFAULT_ROLES},
+  profile : {
+    /// Contact email address for the account.
+    email : { type: String, required: true, trim: true },
 
-  /// Verification information for the account.
-  activation : {
-    /// Date when the account was verified.
-    when : { type: Date },
+    /// The first name of the account holder.
+    first_name : { type: String, trim : true},
 
-    /// Verification token for the account. If the account has been verified, then
-    /// there will be no token.
-    token : {
-      /// The value of the token.
-      value : { type : String},
+    /// The middle name of the account holder.
+    middle_name : { type: String, trim : true},
 
-      /// The date when the verification token expires.
-      expires_at : { type : Date}
+    /// The last name of the account holder.
+    last_name : { type: String, trim : true},
+
+    /// Profile image of the user, which should be a url.
+    image : { type: String, trim: true }
+  },
+
+  /**
+   * Internal housekeeping information. This is only use by the service
+   * to manage the account. This includes information such as what client
+   * created the account, and is the account enabled.
+   *
+   */
+
+  internal_use : {
+    /// The client that created the account.
+    created_by : {type: Schema.Types.ObjectId, required: true, ref: Client.modelName},
+
+    /// Enabled state for the account.
+    enabled : { type: Boolean, required: true, default: true },
+
+    /**
+     * Verification information for the account. An account can be created, but it
+     * may not be verified. A service has the option of allowing unverified accounts
+     * to access its resource, or deny access until the account has been verified.
+     */
+
+    verification : {
+      /// Date when the account was verified.
+      date : { type: Date },
+
+      /// Verification token for the account. If the account has been verified, then
+      /// there will be no token.
+      token : {
+        /// The value of the token.
+        value : { type : String},
+
+        /// The date when the verification token expires.
+        expires_at : { type : Date}
+      }
     }
   },
 
-  /// Push notifications for the account.
+  /**
+   * Push notifications for the account. Push notifications allow a service to
+   * send real-time updates to the client.
+   */
+
   notifications : {
     /// Token information for Google Cloud Messaging.
     gcm : { type : String },
@@ -60,10 +106,10 @@ var schema = new Schema ({
  * help protect the password if the database is somehow hacked.
  */
 schema.pre ('save', function (next) {
-  var user = this;
+  var account = this;
 
   // only hash the password if it has been modified (or is new)
-  if (!user.isModified ('password'))
+  if (!account.isModified ('access_credentials.password'))
     return next ();
 
   // generate a salt
@@ -72,12 +118,12 @@ schema.pre ('save', function (next) {
       return next (err);
 
     // hash the password along with our new salt
-    bcrypt.hash (user.password, salt, function (err, hash) {
+    bcrypt.hash (account.access_credentials.password, salt, function (err, hash) {
       if (err)
         return next (err);
 
-      // override the cleartext password with the hashed one
-      user.password = hash;
+      // override the clear text password with the hashed one
+      account.access_credentials.password = hash;
       next ();
     });
   });
@@ -92,16 +138,16 @@ schema.pre ('save', function (next) {
  * @param[in]           callback          Callback function
  */
 schema.methods.verifyPassword = function (password, callback) {
-  bcrypt.compare (password, this.password, callback);
+  bcrypt.compare (password, this.access_credentials.password, callback);
 };
 
 /**
- * Test if the account has been activated.
+ * Test if the account has been verified.
  *
  * @returns {boolean}
  */
-schema.methods.isActivated = function () {
-  return this.activation.when !== undefined;
+schema.methods.isVerified = function () {
+  return this.internal_use.verification.date !== undefined;
 };
 
 /**
@@ -109,17 +155,29 @@ schema.methods.isActivated = function () {
  *
  * @returns {boolean}
  */
-schema.methods.activationTokenExpired = function () {
+schema.methods.isVerificationTokenExpired = function () {
   var currTime = Date.now ();
-  return this.activation.token.expires_at.getTime () < currTime;
+  var expiration = this.internal_use.verification.token.expires_at;
+
+  return expiration.getTime () < currTime;
 };
 
 /**
- * Activate the account.
+ * Verify the account. It is assume the account has not been verify when this
+ * method is invoked.
  */
-schema.methods.activate = function (callback) {
-  this.activation.when = Date.now ();
+schema.methods.verify = function (callback) {
+  this.internal_use.verification.date = Date.now ();
   this.save (callback);
+};
+
+/**
+ * Test if the account is enabled.
+ *
+ * @returns {Boolean}
+ */
+schema.methods.isEnabled = function () {
+  return this.internal_use.enabled === true;
 };
 
 schema.statics.authenticate = function (username, password, done) {

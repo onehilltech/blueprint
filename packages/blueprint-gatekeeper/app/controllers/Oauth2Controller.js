@@ -315,7 +315,7 @@ Oauth2Controller.prototype.getToken = function (callback) {
       // are to return the token/refresh_token combo.
       winston.log ('info', 'client %s: exchanging username/password for access token [user=%s]', client.id, username);
 
-      Account.findOne ({username: username}, function (err, account) {
+      Account.findOne ({'access_credentials.username': username}, function (err, account) {
         // Check the result of the operation. If the account does not exist or the
         // account is disabled, then return the appropriate error message.
         if (err)
@@ -324,7 +324,7 @@ Oauth2Controller.prototype.getToken = function (callback) {
         if (!account)
           return self.handleError (err, res, 400, 'Account does not exist', callback);
 
-        if (!account.enabled)
+        if (!account.isEnabled ())
           return self.handleError (err, res, 401, 'Account is disabled', callback);
 
         account.verifyPassword (password, function (err, match) {
@@ -385,7 +385,7 @@ Oauth2Controller.prototype.getToken = function (callback) {
         if (clientSecret && at.client.secret !== clientSecret)
           return self.handleError (err, res, 400, 'Client secret is incorrect', callback);
 
-        if (!at.account.enabled)
+        if (!at.account.isEnabled ())
           return self.handleError (err, res, 400, 'User account is disabled', callback);
 
         // Generate a new access and refresh token.

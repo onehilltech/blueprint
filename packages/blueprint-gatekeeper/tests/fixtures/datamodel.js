@@ -1,4 +1,5 @@
-var async = require ('async')
+var async   = require ('async')
+  , winston = require ('winston')
   ;
 
 var blueprint = require ('./blueprint')
@@ -18,11 +19,31 @@ var rawClients = [
 ];
 
 var rawAccounts = [
-  {username: 'account1', email: 'account1@gatekeeper.com', password: 'account1'},
-  {username: 'account2', email: 'account2@gatekeeper.com', password: 'account2'},
-  {username: 'account3', email: 'account3@gatekeeper.com', password: 'account3'},
-  {username: 'account4', email: 'account4@gatekeeper.com', password: 'account4'},
-  {username: 'account5', email: 'account5@gatekeeper.com', password: 'account5', enabled: false},
+  {
+    access_credentials: {username: 'account1', password: 'account1'},
+    profile: {email: 'account1@gatekeeper.com'},
+    internal_use : {}
+  },
+  {
+    access_credentials: {username: 'account2', password: 'account2'},
+    profile: {email: 'account2@gatekeeper.com'},
+    internal_use : {}
+  },
+  {
+    access_credentials: {username: 'account3', password: 'account3'},
+    profile: {email: 'account3@gatekeeper.com'},
+    internal_use : {}
+  },
+  {
+    access_credentials: {username: 'account4', password: 'account4'},
+    profile: {email: 'account4@gatekeeper.com'},
+    internal_use : {}
+  },
+  {
+    access_credentials: {username: 'account5', password: 'account5'},
+    profile: {email: 'account5@gatekeeper.com'},
+    internal_use: {enabled: false}
+  }
 ];
 
 exports.rawModels = {
@@ -42,6 +63,8 @@ exports.apply = function (done) {
   cleanup (function () {
     async.waterfall ([
         function (callback) {
+          winston.log ('info', 'adding clients to the database');
+
           Client.create (rawClients, function (err, clients) {
             if (err)
               return callback (err);
@@ -53,12 +76,13 @@ exports.apply = function (done) {
         function (client, callback) {
           // Update the created_by path on the accounts to the first client.
           for (var i = 0; i < rawAccounts.length; ++ i)
-            rawAccounts[i].created_by = client.id;
+            rawAccounts[i].internal_use.created_by = client.id;
 
           // Insert the participants into the database.
+          winston.log ('info', 'adding accounts to the database');
+
           Account.create (rawAccounts, function (err, accounts) {
-            if (err)
-              return callback (err);
+            if (err) return callback (err);
 
             exports.models.accounts = accounts;
             callback (null);

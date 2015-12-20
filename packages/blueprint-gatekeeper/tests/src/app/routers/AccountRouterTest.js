@@ -18,9 +18,7 @@ describe ('AccountRouter', function () {
       .post('/oauth2/token').send (data)
       .expect (200)
       .end (function (err, res) {
-        if (err)
-          return callback (err);
-
+        if (err) return callback (err);
         return callback (null, res.body.access_token);
     });
   }
@@ -37,8 +35,8 @@ describe ('AccountRouter', function () {
       function (callback) {
         var data = {
           grant_type: 'password',
-          username: datamodel.rawModels.accounts[0].username,
-          password: datamodel.rawModels.accounts[0].password,
+          username: datamodel.rawModels.accounts[0].access_credentials.username,
+          password: datamodel.rawModels.accounts[0].access_credentials.password,
           client_id: datamodel.models.clients[0].id
         };
 
@@ -97,12 +95,13 @@ describe ('AccountRouter', function () {
         .expect (200, 'true')
         .end (function (err, res) {
           // Make sure the newly created account is in the database.
-          Account.findOne ({username: accountData.username, email: accountData.email}, function (err, account) {
+          Account.findOne ({'access_credentials.username': accountData.username}, function (err, account) {
             if (err) return done (err);
 
             expect (err).to.be.null;
             expect (account).to.not.be.undefined;
-            expect (account.created_by).to.eql (datamodel.models.clients[0]._id);
+            expect (account.profile.email).to.equal (accountData.email);
+            expect (account.internal_use.created_by).to.eql (datamodel.models.clients[0]._id);
 
             return done ();
           });

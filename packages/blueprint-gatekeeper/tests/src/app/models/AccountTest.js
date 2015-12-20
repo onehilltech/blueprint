@@ -8,8 +8,8 @@ describe ('Account', function () {
   describe ('new Account', function () {
     var account = new Account ();
 
-    it ('should create a new Account', function () {
-      expect (account.roles).to.have.members (['user']);
+    it ('should have no roles', function () {
+      expect (account.access_credentials.roles).to.have.length (0);
     });
   });
 });

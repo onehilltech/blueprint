@@ -36,8 +36,8 @@ module.exports = function sendActivationEmail (account) {
     // 5 minutes, the token is expired.
     var expires_at = new Date (Date.now () + DEFAULT_TOKEN_TTL);
 
-    account.activation.token.value = token;
-    account.activation.token.expires_at = expires_at;
+    account.internal_use.verification.token.value = token;
+    account.internal_use.verification.token.expires_at = expires_at;
 
     // Save the verification token to the database.
     account.save (function (err, account) {
@@ -48,7 +48,7 @@ module.exports = function sendActivationEmail (account) {
         gatekeeper : emailConfig.gatekeeper,
         account : {
           id : account.id,
-          token : account.activation.token.value
+          token : account.internal_use.verification.token
         }
       };
 

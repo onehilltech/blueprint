@@ -40,13 +40,13 @@ ActivationController.prototype.activateAccount = function () {
       if (account.activation.token.value !== token)
         return self.handleError (err, res, 404, 'Failed to activate account');
 
-      if (account.isActivated ())
+      if (account.isVerified ())
         return res.render ('gatekeeper-account-activation', { status: 'error', message : 'Account already activated'} );
 
-      if (account.activationTokenExpired ())
+      if (account.isVerificationTokenExpired ())
         return res.render ('gatekeeper-account-activation', { status: 'error', message : 'Activation token has expired' } );
 
-      account.activate (function (err, account) {
+      account.verify (function (err, account) {
         if (err)
           return self.handleError (err, res, 500, 'Failed to activate account');
 

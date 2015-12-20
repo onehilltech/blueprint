@@ -26,8 +26,8 @@ describe ('Oauth2Router', function () {
     it('password: should get a token for the username/password', function (done) {
       var data = {
         grant_type: 'password',
-        username: datamodel.rawModels.accounts[0].username,
-        password: datamodel.rawModels.accounts[0].password,
+        username: datamodel.rawModels.accounts[0].access_credentials.username,
+        password: datamodel.rawModels.accounts[0].access_credentials.password,
         client_id: datamodel.models.clients[0].id
       };
 
@@ -65,8 +65,8 @@ describe ('Oauth2Router', function () {
     it('password: should not grant token because client is disabled', function (done) {
       var data = {
         grant_type: 'password',
-        username: datamodel.rawModels.accounts[0].username,
-        password: datamodel.rawModels.accounts[0].password,
+        username: datamodel.rawModels.accounts[0].access_credentials.username,
+        password: datamodel.rawModels.accounts[0].access_credentials.password,
         client_id: datamodel.models.clients[2].id
       };
 
@@ -79,8 +79,8 @@ describe ('Oauth2Router', function () {
     it('password: should not grant token because account is disabled', function (done) {
       var data = {
         grant_type: 'password',
-        username: datamodel.rawModels.accounts[4].username,
-        password: datamodel.rawModels.accounts[4].password,
+        username: datamodel.rawModels.accounts[4].access_credentials.username,
+        password: datamodel.rawModels.accounts[4].access_credentials.password,
         client_id: datamodel.models.clients[0].id
       };
 
@@ -93,7 +93,7 @@ describe ('Oauth2Router', function () {
     it('password: should not grant token because password is incorrect', function (done) {
       var data = {
         grant_type: 'password',
-        username: datamodel.rawModels.accounts[0].username,
+        username: datamodel.rawModels.accounts[0].access_credentials.username,
         password: 'incorrect_password',
         client_id: datamodel.models.clients[0].id
       };
@@ -153,8 +153,8 @@ describe ('Oauth2Router', function () {
       // Get an access and refresh token using username/password.
       var data = {
         grant_type: 'password',
-        username: datamodel.rawModels.accounts[0].username,
-        password: datamodel.rawModels.accounts[0].password,
+        username: datamodel.rawModels.accounts[0].access_credentials.username,
+        password: datamodel.rawModels.accounts[0].access_credentials.password,
         client_id: datamodel.models.clients[0].id
       };
 
@@ -201,8 +201,8 @@ describe ('Oauth2Router', function () {
     it('should logout the current user', function (done) {
       var data = {
         grant_type: 'password',
-        username: datamodel.rawModels.accounts[0].username,
-        password: datamodel.rawModels.accounts[0].password,
+        username: datamodel.rawModels.accounts[0].access_credentials.username,
+        password: datamodel.rawModels.accounts[0].access_credentials.password,
         client_id: datamodel.models.clients[0].id
       };
 
