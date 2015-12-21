@@ -166,8 +166,13 @@ schema.methods.isVerificationTokenExpired = function () {
  * Verify the account. It is assume the account has not been verify when this
  * method is invoked.
  */
-schema.methods.verify = function (callback) {
-  this.internal_use.verification.date = Date.now ();
+schema.methods.verify = function (token, callback) {
+  var verification = this.internal_use.verification;
+
+  if (verification.token.value !== token)
+    return callback (new Error ('Token is does match'));
+
+  verification.date = Date.now ();
   this.save (callback);
 };
 
