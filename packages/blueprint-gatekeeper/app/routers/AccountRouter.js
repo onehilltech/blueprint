@@ -25,6 +25,11 @@ module.exports = exports = {
     delete: {action: 'AccountController@deleteAccount'}
   },
 
+  '/accounts/:accountId': {
+    get   : {action: 'AccountController@getAccount'},
+    delete: {action: 'AccountController@deleteAccount'}
+  },
+
   '/accounts/:accountId/enable' : {
     post : { action: 'AccountController@enableAccount'}
   },
