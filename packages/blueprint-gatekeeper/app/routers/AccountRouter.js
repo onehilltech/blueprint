@@ -26,8 +26,12 @@ module.exports = exports = {
   },
 
   '/accounts/:accountId': {
-    get   : {action: 'AccountController@getAccount'},
-    delete: {action: 'AccountController@deleteAccount'}
+    get   : {action: 'AccountController@getAccount' },
+    delete: {action: 'AccountController@deleteAccount' }
+  },
+
+  '/accounts/:accountId/profile' : {
+    get : { action : 'AccountController@getProfile' }
   },
 
   '/accounts/:accountId/enable' : {

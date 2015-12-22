@@ -10,7 +10,7 @@ var datamodel = require ('../../../fixtures/datamodel')
 
 describe ('AccountRouter', function () {
   var server;
-  var accessToken;
+  var userToken;
   var clientToken;
 
   function getToken (data, callback) {
@@ -43,7 +43,7 @@ describe ('AccountRouter', function () {
         getToken (data, function (err, token) {
           if (err) return callback(err);
 
-          accessToken = token;
+          userToken = token;
           return callback ();
         });
       },
@@ -68,7 +68,7 @@ describe ('AccountRouter', function () {
     it ('should return all the accounts', function (done) {
       request(server.app)
         .get ('/accounts')
-        .set ('Authorization', 'Bearer ' + accessToken)
+        .set ('Authorization', 'Bearer ' + userToken)
         .expect (200)
         .end (function (err, res) {
           if (err) return done (err);
@@ -123,6 +123,25 @@ describe ('AccountRouter', function () {
           .set ('Authorization', 'Bearer ' + token)
           .expect (403, done);
       });
+    });
+  });
+
+  describe ('GET /accounts/:accountId/profile', function () {
+    it ('should get the account profile', function (done) {
+      var account = datamodel.models.accounts[0];
+
+      request (server.app)
+        .get ('/accounts/' + account.id + "/profile")
+        .set ('Authorization', 'Bearer ' + userToken)
+        .expect (200)
+        .end (function (err, res) {
+          if (err) return done (err);
+
+          expect (res.body.email).to.equal (account.profile.email);
+          expect (res.body._id).to.equal (account.id);
+          
+          return done ();
+        });
     });
   });
 });

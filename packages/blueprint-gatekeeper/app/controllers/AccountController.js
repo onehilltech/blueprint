@@ -94,7 +94,7 @@ AccountController.prototype.createAccount = function (callback) {
  * @param callback
  * @returns {Function}
  */
-AccountController.prototype.getAccount = function (callback) {
+AccountController.prototype.getAccount = function () {
   var self = this;
 
   return function (req, res) {
@@ -103,6 +103,30 @@ AccountController.prototype.getAccount = function (callback) {
         return self.handleError (null, res, 404, 'account does not exist', callback);
 
       res.status (200).json (account.toObject ())
+    });
+  };
+};
+
+/**
+ * Get the account profile.
+ *
+ * @param callback
+ * @returns {Function}
+ */
+AccountController.prototype.getProfile = function () {
+  var self = this;
+
+  return function (req, res) {
+    var accountId = req.accountId;
+
+    Account.findById (accountId, '_id profile', function (err, account) {
+      if (err)
+        return self.handleError (null, res, 404, 'Account does not exist');
+
+      var profile = account.profile.toObject ();
+      profile['_id'] = accountId;
+
+      res.status (200).json (profile);
     });
   };
 };
