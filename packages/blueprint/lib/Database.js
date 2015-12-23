@@ -1,10 +1,15 @@
 var mongoose  = require ('mongoose')
-  , mongo     = require ('mongodb')
   , winston   = require ('winston')
   , util      = require ('util')
   , fs        = require ('fs')
-  , GridFS    = require ('./GridFS')
+  , async     = require ('async')
   ;
+
+var GridFS = require ('./GridFS')
+  , Path   = require ('./Path')
+  ;
+
+var SEED_SUFFIX = '.seed.js';
 
 function Database (opts) {
   this._opts = opts;
@@ -24,7 +29,7 @@ Database.prototype.connect = function (callback) {
     if (!err && self._messenger)
       self._messenger.emit ('database.connect', self);
 
-    callback ();
+    callback (err);
   });
 
   // Initialize GridFS support for the database.
@@ -35,7 +40,7 @@ Database.prototype.disconnect = function (callback) {
   var self = this;
   winston.log ('debug', 'disconnecting from database');
 
-  mongoose.connection.disconnect (function (err) {
+  mongoose.connection.close (function (err) {
     // Delete our instance of GridFS.
     delete self._gridFS;
 
@@ -53,9 +58,72 @@ Database.prototype.registerModel = function (name, schema) {
   winston.log ('debug', 'model registration: %s', name);
 
   var model = mongoose.model (name, schema);
-  this._messenger.emit ('database.model', this, model);
+
+  if (this._messenger)
+    this._messenger.emit ('database.model', this, model);
 
   return model;
+};
+
+/**
+ * Seed the database. Each separate file in the \a path contains the data for
+ * each model (or collection) in the database. The name of the file is the
+ * name of the target collection.
+ *
+ * @param path
+ * @param env
+ */
+Database.prototype.seed = function (path, done) {
+  done = done || function (err) {};
+
+  try {
+    var files = fs.readdirSync (path);
+
+    async.each (
+      files,
+      function (filename, cb) {
+        var filePath = Path.resolve (path, filename);
+
+        // The filePath must be a .seed.json or .seed.js file, and not be a directory.
+        if (!filePath.path.endsWith (SEED_SUFFIX))
+          return cb ();
+
+        try {
+          var stat = fs.lstatSync (filePath.path);
+
+          if (stat.isDirectory ())
+            return cb ();
+
+          // Get the model name from the file name.
+          var collectionName = filename.substring (0, SEED_SUFFIX.length - 1);
+          var seed = require (filePath.path);
+
+          // Locate the collection model in the database, then use the data in the
+          // seed to add the documents to the collection.
+          var Model = mongoose.models[collectionName];
+
+          if (!Model)
+            return cb (new Error (util.format ('collection does not exist [%s]', collectionName)));
+
+          Model.create (seed.data, function (err, docs) {
+            if (err) return cb (err);
+
+            // Save the created documents.
+            seed.documents = docs;
+
+            return cb ();
+          });
+        }
+        catch (ex) {
+          // Do nothing. The directory does not exist.
+        }
+      }, done);
+  }
+  catch (ex) {
+    process.nextTick (function () {
+      done ();
+    });
+  }
 };
 
 Database.prototype.__defineGetter__ ('Schema', function () {
@@ -64,6 +132,10 @@ Database.prototype.__defineGetter__ ('Schema', function () {
 
 Database.prototype.__defineGetter__ ('gridfs', function () {
   return this._gridFS;
+});
+
+Database.prototype.__defineGetter__ ('models', function () {
+  return mongoose.models;
 });
 
 /**

@@ -1,4 +1,5 @@
-var semver = require ('semver')
+var semver  = require ('semver')
+  , winston = require ('winston')
   ;
 
 var Messaging = require ('./Messaging')
@@ -38,7 +39,7 @@ function Framework () {
 
   this.releaseApplication = function () {
     app = undefined;
-  }
+  };
 
   this.messaging = new Messaging ();
 }
@@ -59,6 +60,7 @@ module.exports = exports = function () {
  * Destroy the framework.
  */
 exports.destroy = function () {
+  winston.log ('info', 'destroying the framework');
   delete process.mainModule.blueprint;
 };
 

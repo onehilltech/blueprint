@@ -13,7 +13,8 @@ describe ('index', function () {
         'emit',
         'model',
         'on',
-        'destroy'
+        'destroy',
+        'include'
       ];
 
       expect (blueprint).to.have.keys (keys);

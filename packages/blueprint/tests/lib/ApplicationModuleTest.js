@@ -13,11 +13,8 @@ describe ('ApplicationModule', function () {
   var appModule;
 
   before (function () {
-    blueprint.Application (appPath);
-  });
-
-  after (function () {
     blueprint.destroy ();
+    blueprint.Application (appPath);
   });
 
   describe ('new ApplicationModule', function () {
@@ -38,10 +35,10 @@ describe ('ApplicationModule', function () {
   });
 
   describe ('#load', function () {
-    var modulePath = path.resolve (__dirname, '../fixtures/app-module');
-
     it ('should load an application module into the main application', function (done) {
-      var module = ApplicationModule.load (modulePath);
+      var modulePath = path.resolve (__dirname, '../fixtures/app-module');
+      blueprint.include (modulePath);
+
       expect (blueprint.app._modules).to.have.keys (['test-app-module']);
 
       var files = [
