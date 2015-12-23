@@ -38,6 +38,7 @@ function Framework () {
   };
 
   this.releaseApplication = function () {
+    winston.log ('debug', 'releasing the application');
     app = undefined;
   };
 
@@ -52,6 +53,7 @@ module.exports = exports = function () {
   if (process.mainModule.blueprint !== undefined)
     return process.mainModule.blueprint;
 
+  winston.log ('debug', 'creating a new framework instance');
   process.mainModule.blueprint = new Framework ();
   return process.mainModule.blueprint;
 };
@@ -60,7 +62,7 @@ module.exports = exports = function () {
  * Destroy the framework.
  */
 exports.destroy = function () {
-  winston.log ('info', 'destroying the framework');
+  winston.log ('debug', 'destroying the framework');
   delete process.mainModule.blueprint;
 };
 
