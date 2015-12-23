@@ -1,0 +1,53 @@
+doctype html
+html(lang="en")
+    head
+        title Blueprint.js - Hello, World!
+
+        link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css")
+        link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css")
+        script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js")
+
+        style.
+            .btn-file {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .btn-file input[type=file] {
+                position: absolute;
+                top: 0;
+                right: 0;
+                min-width: 100%;
+                min-height: 100%;
+                font-size: 100px;
+                text-align: right;
+                filter: alpha(opacity=0);
+                opacity: 0;
+                outline: none;
+                background: white;
+                cursor: inherit;
+                display: block;
+            }
+    body
+        div.container
+            h1 Blueprint.js
+
+            p
+                | This example illustrates how a simple web application in Blueprint.js that
+                | use both <strong>GET</strong> and <strong>PUT</strong> verbs with either a
+                | controller or view.
+
+            form.form-horizontal(method='post', action='/helloworld', enctype="multipart/form-data")
+                div.form-group
+                    label.col-sm-2.control-label(for="image") Image File
+                    div.col-sm-10
+                        input#name.form-control(type="file", name="image", placeholder="Type name here")
+
+                div.form-group
+                    div.col-sm-offset-2.col-sm-10
+                        button.btn.btn-default(type="submit") Upload
+
+            - if (file)
+                p The POST method uses a controller to handle the action.
+
+                blockquote Upload of #{file.filename} is complete
