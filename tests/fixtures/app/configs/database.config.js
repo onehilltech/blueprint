@@ -1,4 +1,6 @@
 module.exports = exports = {
+  connstr: 'mongodb://localhost/blueprint-unit-tests',
+
   options : {
     db: {
       native_parser: true,
