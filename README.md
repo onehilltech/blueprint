@@ -7,8 +7,11 @@ Blueprint
 A lightweight, simple, elegant framework for building mean applications
 
 * Bootstrap web applications from configurations
+* Separation of concerns to maximize reuse of functionality
 * Quickly bind routes to controller functionality
 * Define behavior and configurations based on execution environment
+* Encapsulate web application logic into reusable components
+* Compose web applications from other Blueprint.js web applications
 
 Installation
 ----------------
