@@ -29,4 +29,5 @@ Then, just start the web application:
 
     node ./app
     
-See our Wiki for more details on using Blueprint.
+See our [Wiki](https://github.com/onehilltech/blueprint/wiki) for more details 
+on using Blueprint.
