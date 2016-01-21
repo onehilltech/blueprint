@@ -29,6 +29,9 @@ and install the blueprint binaries into the workspace.
     npm install
     npm bin
 
+If you install Blueprint in the global space, then you do not need to manually
+install the Blueprint binaries.
+
 Then, just start the web application:
 
     node ./app
