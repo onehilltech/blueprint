@@ -11,7 +11,7 @@ A lightweight, simple, elegant framework for building mean applications
 * Quickly bind routes to controller functionality
 * Define web application behavior and configurations based on execution environment
 * Encapsulate web application logic into reusable components
-* Compose web applications from other Blueprint.js web applications
+* Compose Blueprint web applications from other Blueprint web applications
 
 Installation
 ----------------
