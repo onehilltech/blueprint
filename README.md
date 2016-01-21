@@ -24,7 +24,8 @@ Getting Started
 First, generate the template for your mean web application, install the dependencies, 
 and install the blueprint binaries into the workspace.
 
-    blueprint init
+    blueprint init [--path=PATH]
+    cd [PATH]
     npm install
     npm bin
 
