@@ -1,11 +1,14 @@
 Blueprint
 ================
 
-lightweight, simple, elegant framework for building mean applications
-
 [![Build Status](https://travis-ci.org/onehilltech/blueprint.svg?branch=master)](https://travis-ci.org/onehilltech/blueprint)
 [![npm version](https://img.shields.io/npm/v/blueprint.svg)](https://npmjs.org/package/blueprint)
 
+A lightweight, simple, elegant framework for building mean applications
+
+* Bootstrap web applications from configurations
+* Quickly bind routes to controller functionality
+* Define behavior and configurations based on execution environment
 
 Installation
 ----------------
