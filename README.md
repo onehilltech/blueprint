@@ -17,6 +17,7 @@ Installation
 ----------------
 
     npm install @onehilltech/blueprint --save
+    npm bin
     
 Getting Started
 ----------------
