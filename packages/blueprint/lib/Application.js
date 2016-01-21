@@ -13,6 +13,8 @@ var Server            = require ('./Server')
   , Path              = require ('./Path')
   ;
 
+var SEED_FILE_SUFFIX = '.seed.js';
+
 /**
  * @class Application
  *
@@ -55,14 +57,6 @@ Application.prototype.init = function () {
     // was not database in the application, then we would not load any
     // of the models.
     this.models;
-
-    // Load the general purpose seeds and environment specific seeds into
-    // the database. Each seed is stored by its respective model name.
-    var seedsPath = Path.resolve (this.appPath, 'seeds');
-    this._db.seed (seedsPath.path);
-
-    var seedsEnvPath = Path.resolve (seedsPath.path, this.env);
-    this._db.seed (seedsEnvPath.path);
   }
 
   // Make the server object.
@@ -106,22 +100,63 @@ Application.prototype.init = function () {
 Application.prototype.start = function (callback) {
   var self = this;
 
-  function onConnected (err) {
-    if (err)
-      return callback (err);
+  function startListening (err) {
+    if (err) return callback (err);
 
     self._server.listen (function () {
-      self._messaging.emit ('app.start', self);
+      Framework().messaging.emit ('app.start', self);
       process.nextTick (callback);
     });
   }
 
-  // If there is a database, connect to the database. Otherwise, proceed
-  // with acting as if we are connected to an imaginary database.
-  if (this._db)
-    this._db.connect (onConnected);
-  else
-    onConnected (null);
+  // If there is a database, connect to the database. Otherwise, instruct
+  // the server to start listening.
+  if (this._db === undefined)
+    return startListening (null);
+
+  /**
+   * Read all the files in the directory, and seed the database. To be a seed,
+   * the file must end with .seed.js.
+   *
+   * @param db
+   * @param dir
+   */
+  function seedDatabaseFromPath (db, dir) {
+    var files = fs.readdirSync (dir);
+
+    files.forEach (function (file) {
+      if (!file.endsWith (SEED_FILE_SUFFIX))
+        return;
+
+      var collectionName = file.substring (0, SEED_FILE_SUFFIX.length - 1);
+      var fullname = path.join (dir, file);
+      var seed = require (fullname);
+
+      db.seed (collectionName, seed, function (err, seed) {
+        if (err) throw err;
+      });
+    });
+  }
+
+  this._db.connect (function (err) {
+    if (err)
+      return callback (err);
+
+    // Load the general purpose seeds and environment specific seeds into
+    // the database. Each seed is stored by its respective model name.
+    var seedsPath = Path.resolve (self.appPath, 'seeds');
+
+    if (seedsPath.exists ())
+      seedDatabaseFromPath (self._db, seedsPath.path);
+
+    var seedsEnvPath = Path.resolve (seedsPath.path, self.env);
+
+    if (seedsEnvPath.exists ())
+      seedDatabaseFromPath (self._db, seedsEnvPath.path);
+
+    // Start listening for events from the outside.
+    startListening (null);
+  });
 };
 
 /**
