@@ -59,4 +59,21 @@ describe ('Application', function () {
       }, done);
     });
   });
+
+  describe ('#start', function () {
+    it ('should start the application', function (done) {
+      app.start (done);
+    });
+
+    it ('should seed the database', function (done) {
+      var TestModel1 = app.models.TestModel1;
+
+      TestModel1.find ({}, function (err, models) {
+        if (err) return done (err);
+
+        expect (models).to.have.length (4);
+        return done ();
+      });
+    });
+  });
 });
