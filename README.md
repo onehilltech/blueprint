@@ -17,7 +17,6 @@ Installation
 ----------------
 
     npm install @onehilltech/blueprint --save
-    npm bin
     
 Getting Started
 ----------------
@@ -25,6 +24,8 @@ Getting Started
 First, generate the template for your mean web application:
 
     blueprint init
+    npm install
+    npm bin
 
 Then, just start the web application:
 
