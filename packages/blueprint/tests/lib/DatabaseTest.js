@@ -78,7 +78,7 @@ describe ('Database', function () {
       };
 
       db.seed (COLLECTION_NAME, seed, function (err, seed) {
-        expect (err).to.be.undefined;
+        expect (err).to.be.null;
         expect (seed).to.not.be.undefined;
 
         expect (seed.documents).to.have.length (4);

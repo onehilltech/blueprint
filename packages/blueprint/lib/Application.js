@@ -4,6 +4,8 @@ var winston = require ('winston')
   , fs      = require ('fs')
   ;
 
+winston.level = 'debug';
+
 var Server            = require ('./Server')
   , RouterBuilder     = require ('./RouterBuilder')
   , Configuration     = require ('./Configuration')

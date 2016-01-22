@@ -42,6 +42,8 @@ Database.prototype.connect = function (callback) {
   var self = this;
 
   // Connect to the database.
+  winston.log ('debug', 'connecting to database');
+
   this._conn.open (this._opts.connstr, this._opts.options, function (err) {
     if (!err && self._messenger)
       self._messenger.emit ('database.connect', self);
@@ -57,6 +59,7 @@ Database.prototype.connect = function (callback) {
  */
 Database.prototype.disconnect = function (callback) {
   var self = this;
+
   winston.log ('debug', 'disconnecting from database');
 
   this._conn.close (function (err) {
@@ -111,7 +114,7 @@ Database.prototype.seed = function (collectionName, seed, done) {
 
     // Save the created documents, and return the seed to the caller.
     seed.documents = docs;
-    return done (undefined, seed);
+    return done (null, seed);
   });
 };
 

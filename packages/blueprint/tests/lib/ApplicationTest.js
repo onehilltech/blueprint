@@ -60,20 +60,20 @@ describe ('Application', function () {
     });
   });
 
+  /*
   describe ('#start', function () {
-    it ('should start the application', function (done) {
-      app.start (done);
-    });
+    it ('should start the application, with seeds', function (done) {
+      app.start (function (err) {
+        if (err) return err;
+        var TestModel1 = app.models.TestModel1;
 
-    it ('should seed the database', function (done) {
-      var TestModel1 = app.models.TestModel1;
+        TestModel1.find ({}, function (err, models) {
+          if (err) return done (err);
 
-      TestModel1.find ({}, function (err, models) {
-        if (err) return done (err);
-
-        expect (models).to.have.length (4);
-        return done ();
+          expect (models).to.have.length (4);
+          return done ();
+        });
       });
     });
-  });
+  });*/
 });
