@@ -9,7 +9,7 @@ A lightweight, simple, elegant framework for building mean applications
 * Bootstrap common functionality from configurations
 * Separation of concerns to maximize reuse of core business logic
 * Quickly bind routes to controller functionality
-* Define web application behavior and configurations based on execution environment
+* Customize  behavior and configuration based on execution environment
 * Encapsulate web application logic into reusable components
 * Compose Blueprint web applications from other Blueprint web applications
 
