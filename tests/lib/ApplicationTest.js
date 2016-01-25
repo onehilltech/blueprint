@@ -60,13 +60,12 @@ describe ('Application', function () {
     });
   });
 
-  /*
   describe ('#start', function () {
     it ('should start the application, with seeds', function (done) {
       app.start (function (err) {
         if (err) return err;
-        var TestModel1 = app.models.TestModel1;
 
+        var TestModel1 = app.models.TestModel1;
         TestModel1.find ({}, function (err, models) {
           if (err) return done (err);
 
@@ -75,5 +74,5 @@ describe ('Application', function () {
         });
       });
     });
-  });*/
+  });
 });
