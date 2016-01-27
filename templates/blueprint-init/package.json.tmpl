@@ -1,13 +1,13 @@
 {
-  "name": "{{name}}",
-  "author": "{{author}}",
-  "version": "{{version}}",
-  "description": "{{description}}",
+  "name"        : "{{project.name}}",
+  "author"      : "{{project.author}}",
+  "version"     : "{{project.version}}",
+  "description" : "{{project.description}}",
 
-  "main": "./app",
+  "main" : "./app",
 
   "dependencies": {
-    "blueprint": "git@github.com:onehilltech/blueprint.git",
+    "@onehilltech/blueprint": "^{{blueprint.version}}",
     "winston": "^1.0.1"
   }
 }
