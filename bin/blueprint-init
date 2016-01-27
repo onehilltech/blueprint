@@ -17,13 +17,22 @@ program
   .option ('-o, --path [path]', 'output directory [./]', './')
   .parse (process.argv);
 
-winston.info ('target output: ' + program.path);
+winston.log ('info', 'target output: %s', program.path);
 
 var templatePath = path.resolve (__dirname, '../templates/blueprint-init');
+var packageInfo = require (path.resolve (__dirname, '../package.json'));
+
+var view = {
+  blueprint : packageInfo,
+  project : {
+    name   : program.name,
+    author : program.author,
+    description : program.description,
+    version : program.version
+  }
+};
 
 function generate (dir, outdir, done) {
-  var results = [];
-
   fs.readdir (dir, function (err, files) {
     if (err)
       return done (err);
@@ -74,7 +83,7 @@ function generate (dir, outdir, done) {
             if (err)
               return done (err);
 
-            var output = mustache.render (data.toString (), program);
+            var output = mustache.render (data.toString (), view);
             var targetFile = path.resolve (outdir, file.substring (0, file.length - TEMPLATE_SUFFIX.length));
 
             fs.writeFile (targetFile, output, function (err) {
