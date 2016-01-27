@@ -2,9 +2,9 @@ var winston = require ('winston')
   , path    = require ('path')
   , util    = require ('util')
   , fs      = require ('fs')
+  , all     = require ('require-all')
+  , async   = require ('async')
   ;
-
-winston.level = 'debug';
 
 var Server            = require ('./Server')
   , RouterBuilder     = require ('./RouterBuilder')
@@ -14,8 +14,6 @@ var Server            = require ('./Server')
   , Framework         = require ('./Framework')
   , Path              = require ('./Path')
   ;
-
-var SEED_FILE_SUFFIX = '.seed.js';
 
 /**
  * @class Application
@@ -28,6 +26,7 @@ var SEED_FILE_SUFFIX = '.seed.js';
 function Application (appPath) {
   ApplicationModule.call (this, appPath);
 
+  this._init = false;
   this._modules = {};
 }
 
@@ -37,6 +36,9 @@ util.inherits (Application, ApplicationModule);
  * Initialize the application.
  */
 Application.prototype.init = function () {
+  if (this._init === true)
+    throw new Error ('Application already initialized');
+
   winston.log ('info', 'application path: %s', this.appPath);
 
   // First, make sure there is a data directory. This is where the application stores
@@ -52,12 +54,15 @@ Application.prototype.init = function () {
   // Initialize the database object, if a configuration exists. If we
   // have a database configuration, then we can have models.
   if (this._config['database']) {
+    winston.log ('info', 'application has database support');
+
     this._db = new Database (this._config['database']);
-    this._db.setMessenger (Framework().messaging);
+    this._db.setMessenger (Framework ().messaging);
 
     // Force loading of the models since we have a database. If there
     // was not database in the application, then we would not load any
     // of the models.
+    winston.log ('info', 'loading models into memory')
     this.models;
   }
 
@@ -91,30 +96,34 @@ Application.prototype.init = function () {
 
   // Notify all listeners the application is initialized.
   Framework().messaging.emit ('app.init', this);
+  this._init = true;
 };
 
 /**
  * Start the application. This method connects to the database, creates a
  * new server, and starts listening for incoming messages.
  *
- * @param callback
+ * @param done
  */
-Application.prototype.start = function (callback) {
+Application.prototype.start = function (done) {
   var self = this;
 
-  function startListening (err) {
-    if (err) return callback (err);
+  function finishStart (err) {
+    if (err) return done (err);
 
     self._server.listen (function () {
+      // Emit that the application has started.
       Framework().messaging.emit ('app.start', self);
-      process.nextTick (callback);
+
+      // Process the done() method on the next tick.
+      process.nextTick (done);
     });
   }
 
   // If there is a database, connect to the database. Otherwise, instruct
   // the server to start listening.
-  if (this._db === undefined)
-    return startListening (null);
+  if (!this._db)
+    return finishStart (null);
 
   /**
    * Read all the files in the directory, and seed the database. To be a seed,
@@ -123,41 +132,46 @@ Application.prototype.start = function (callback) {
    * @param db
    * @param dir
    */
-  function seedDatabaseFromPath (db, dir) {
-    var files = fs.readdirSync (dir);
+  function seedDatabaseFromPath (path, done) {
+    winston.log ('debug', 'seed path: ' + path);
 
-    files.forEach (function (file) {
-      if (!file.endsWith (SEED_FILE_SUFFIX))
-        return;
+    // Load the seeds in the current directory.
+    var filter = /(.+)\.seed\.(js|json)$/;
+    var seeds = all ({dirname: path, filter:  filter, excludeDirs :  /.*/});
 
-      var collectionName = file.substring (0, SEED_FILE_SUFFIX.length - 1);
-      var fullname = path.join (dir, file);
-      var seed = require (fullname);
-
-      db.seed (collectionName, seed, function (err, seed) {
-        if (err) throw err;
+    async.forEachOf (seeds,
+      function (seed, collection, callback) {
+        self._db.seed (collection, seed, function (err, seed) {
+          return callback (err);
+        });
+      },
+      function (err) {
+        return done (err);
       });
-    });
   }
 
   this._db.connect (function (err) {
-    if (err)
-      return callback (err);
+    if (err) return done (err);
+
+    winston.log ('info', 'connected to the database');
 
     // Load the general purpose seeds and environment specific seeds into
     // the database. Each seed is stored by its respective model name.
     var seedsPath = Path.resolve (self.appPath, 'seeds');
+    var seedsEnvPath = Path.resolve (seedsPath.path, self.env);
+    var paths = [];
 
     if (seedsPath.exists ())
-      seedDatabaseFromPath (self._db, seedsPath.path);
-
-    var seedsEnvPath = Path.resolve (seedsPath.path, self.env);
+      paths.push (seedsPath.path);
 
     if (seedsEnvPath.exists ())
-      seedDatabaseFromPath (self._db, seedsEnvPath.path);
+      paths.push (seedsEnvPath.path);
 
-    // Start listening for events from the outside.
-    startListening (null);
+    async.each (paths,
+      function (path, callback) {
+        seedDatabaseFromPath (path, callback);
+      },
+      finishStart);
   });
 };
 
