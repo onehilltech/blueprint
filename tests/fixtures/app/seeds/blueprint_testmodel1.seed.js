@@ -1,4 +1,7 @@
-module.export = exports = {
+module.exports = exports = {
+  pre : function (Model, done) {
+    Model.remove ({}, done);
+  },
   data : [
     { first_name: 'John',  last_name: 'Doe'},
     { first_name: 'Jane',  last_name: 'Doe'},
