@@ -13,21 +13,14 @@ describe ('Application', function () {
 
   before (function () {
     blueprint.destroy ();
-    app = blueprint.Application (appPath);
   });
 
   describe ('new Application ()', function () {
-    it ('should create a new application', function () {
-      expect (app).to.be.instanceof (blueprint.ApplicationModule);
-    });
-  });
-
-  describe ('#init', function () {
+    app  = blueprint.Application (appPath);
     var dataPath = path.resolve (__dirname, '../fixtures/app/data');
 
-    it ('should initialize the application', function () {
-      app.init ();
-
+    it ('should create and initialize a new application', function () {
+      expect (app).to.be.instanceof (blueprint.ApplicationModule);
       expect (app.server).to.not.be.undefined;
       expect (app.database).to.not.be.undefined;
     });
@@ -63,9 +56,10 @@ describe ('Application', function () {
   describe ('#start', function () {
     it ('should start the application, with seeds', function (done) {
       app.start (function (err) {
-        if (err) return err;
+        if (err) return done (err);
 
         var TestModel1 = app.models.TestModel1;
+
         TestModel1.find ({}, function (err, models) {
           if (err) return done (err);
 
