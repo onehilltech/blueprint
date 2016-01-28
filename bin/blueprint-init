@@ -5,6 +5,8 @@ var program  = require ('commander')
   , fs       = require ('fs')
   , path     = require ('path')
   , winston  = require ('winston')
+  , exec     = require ('child_process').exec
+  , async    = require ('async')
   ;
 
 const TEMPLATE_SUFFIX = '.tmpl';
@@ -107,5 +109,28 @@ generate (templatePath, program.path, function (err) {
   if (err)
     throw err;
 
-  winston.info ('Blueprint.js web application initialization complete!')
+  var options = {
+    cwd : program.path
+  };
+
+  // Run the final tasks to complete the initialization.
+  async.series ([
+    function (callback) {
+      winston.log ('info', 'installing application dependencies...');
+      exec ('npm install', options, function (err, stdout, stderr) {
+        if (err) throw err;
+        return callback ();
+      });
+    },
+    function (callback) {
+      winston.log ('info', 'installing application binaries locally...');
+      exec ('npm bin', options, function (err, stdout, stderr) {
+        if (err) throw err;
+        return callback ();
+      });
+    }
+  ], function (err) {
+    if (err) throw err;
+    winston.log ('info', 'Blueprint.js web application initialization complete!');
+  });
 });
