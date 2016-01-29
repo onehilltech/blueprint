@@ -14,11 +14,15 @@ module.exports = exports = {
     ],
   },
 
+  '/me/profile' : {
+    get : {action: 'MeController@getProfile'}
+  },
+
   '/me/whoami' : {
-    get  : {action: 'MeController@whoami'}
+    get : {action: 'MeController@whoami'}
   },
 
   '/me/notifications': {
-    post : {action: 'MeController@setPushNotificationToken'},
-  },
+    post : {action: 'MeController@setPushNotificationToken'}
+  }
 };

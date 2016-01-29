@@ -2,6 +2,9 @@ var winston   = require ('winston')
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
+var Account = require ('../models/Account')
+  ;
+
 function MeController () {
 
 }
@@ -16,6 +19,20 @@ blueprint.controller (MeController);
 MeController.prototype.whoami = function () {
   return function whoami (req, res) {
     res.status (200).json ({_id : req.user.id});
+  };
+};
+
+/**
+ * Get my profile.
+ */
+MeController.prototype.getProfile = function () {
+  return function getProfile (req, res) {
+    var account = req.user;
+
+    var profile = account.profile.toObject ();
+    profile._id = account.id;
+
+    res.status (200).json (profile);
   };
 };
 

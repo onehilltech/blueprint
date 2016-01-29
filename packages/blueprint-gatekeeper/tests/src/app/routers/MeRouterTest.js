@@ -60,6 +60,25 @@ describe ('MeRouter', function () {
     });
   });
 
+  describe ('GET /me/profile', function () {
+    it ('should return my profile', function (done) {
+      request(server.app)
+        .get ('/me/profile')
+        .set ('Authorization', 'Bearer ' + accessToken)
+        .expect (200)
+        .end (function (err, res) {
+          if (err) return done (err);
+
+          var account = datamodel.models.accounts[0];
+
+          expect (res.body._id).to.equal (account.id);
+          expect (res.body.email).to.equal (account.profile.email);
+
+          return done ();
+        });
+    });
+  });
+
   describe ('POST /me/notifications', function () {
     it ('should update my notification token', function (done) {
       var token = '1234567890';
