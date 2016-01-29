@@ -40,7 +40,7 @@ GatekeeperClient.prototype.createAccount = function (opts, callback) {
 
 /**
  * Get the complete Url for a relative path.
- * 
+ *
  * @param relativePath
  * @returns {*}
  */

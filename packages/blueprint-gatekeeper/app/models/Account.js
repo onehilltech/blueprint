@@ -6,7 +6,6 @@ var Client = require ('./Client')
   ;
 
 const SALT_WORK_FACTOR = 10;
-const DEFAULT_ROLES    = ['user'];
 
 var Schema = blueprint.Schema;
 
