@@ -11,7 +11,9 @@ describe ('Oauth2Router', function () {
 
   before(function (done) {
     server = blueprint.app.server;
-    blueprint.app.database.connect(done);
+    done ();
+
+    //blueprint.app.database.connect(done);
   });
 
   beforeEach(function (done) {

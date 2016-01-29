@@ -139,7 +139,7 @@ describe ('AccountRouter', function () {
 
           expect (res.body.email).to.equal (account.profile.email);
           expect (res.body._id).to.equal (account.id);
-          
+
           return done ();
         });
     });

@@ -8,6 +8,12 @@ function GatekeeperClient (opts, token) {
   this.clientToken = token;
 }
 
+/**
+ * Create an account.
+ *
+ * @param opts
+ * @param callback
+ */
 GatekeeperClient.prototype.createAccount = function (opts, callback) {
   var url = this.getCompleteUrl ('/accounts');
 
@@ -32,10 +38,22 @@ GatekeeperClient.prototype.createAccount = function (opts, callback) {
   });
 };
 
+/**
+ * Get the complete Url for a relative path.
+ * 
+ * @param relativePath
+ * @returns {*}
+ */
 GatekeeperClient.prototype.getCompleteUrl = function (relativePath) {
   return this.baseUri + relativePath;
 };
 
+/**
+ * Make a request object based on the authorization of this client.
+ *
+ * @param opts
+ * @returns {*}
+ */
 GatekeeperClient.prototype.makeRequest = function (opts) {
   if (!opts.headers)
     opts.headers = {};

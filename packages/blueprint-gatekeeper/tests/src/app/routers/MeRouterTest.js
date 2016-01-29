@@ -1,11 +1,11 @@
-var blueprint = require ('@onehilltech/blueprint')
-  , request   = require ('supertest')
+var request   = require ('supertest')
   , expect    = require ('chai').expect
   , async     = require ('async')
   ;
 
-var datamodel = require ('../../../fixtures/datamodel')
-  , Account    = blueprint.app.models.Account;
+var blueprint = require ('../../../fixtures/blueprint')
+  , datamodel = require ('../../../fixtures/datamodel')
+  , Account   = blueprint.app.models.Account
   ;
 
 describe ('MeRouter', function () {
@@ -16,7 +16,8 @@ describe ('MeRouter', function () {
     async.series ([
       function (callback) {
         server = blueprint.app.server;
-        blueprint.app.database.connect(callback);
+        callback ();
+        //blueprint.app.database.connect(callback);
       },
       function (callback) {
         datamodel.apply (callback);
