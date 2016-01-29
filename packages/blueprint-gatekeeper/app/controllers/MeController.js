@@ -2,9 +2,6 @@ var winston   = require ('winston')
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
-var Account = require ('../models/Account')
-  ;
-
 function MeController () {
 
 }
@@ -36,13 +33,32 @@ MeController.prototype.getProfile = function () {
   };
 };
 
+MeController.prototype.uploadProfileImage = function () {
+  return blueprint.app.server.upload.singleFile ('image', function uploadProfileImage (req, res) {
+    blueprint.app.database.gridfs.writeFileToDatabase (req.file, function (file) {
+      // Update the account profile image with the url to access
+      var account = req.user;
+      var host = blueprint.app.config.app.host;
+      var imageUrl = 'https://' + host + '/images/' + file._id;
+
+      account.profile.image = imageUrl;
+      account.save (function (err) {
+        if (err)
+          return self.handleError (err, res, 500, 'Failed to update profile image');
+
+        res.status (200).json ({_id : file._id})
+      });
+    });
+  });
+};
+
 /**
  * Set the token for push notifications on the specified network.
  *
  * @param callback
  * @returns {Function}
  */
-MeController.prototype.setPushNotificationToken = function (callback) {
+MeController.prototype.setPushNotificationToken = function () {
   var self = this;
 
   return function (req, res) {
@@ -55,7 +71,7 @@ MeController.prototype.setPushNotificationToken = function (callback) {
 
     account.save (function (err) {
       if (err)
-        return self.handleError (err, res, 500, 'Failed to save push notification token', callback);
+        return self.handleError (err, res, 500, 'Failed to save push notification token');
 
       return res.status (200).json (true);
     });

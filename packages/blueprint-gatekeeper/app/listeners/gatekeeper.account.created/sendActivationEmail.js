@@ -58,7 +58,7 @@ module.exports = function sendActivationEmail (account) {
 
         var mailOptions = {
           from: emailConfig.from,
-          to: account.email,
+          to: account.profile.email,
           subject: 'Account activation',
           text: results.text,
           html: results.html
@@ -69,7 +69,7 @@ module.exports = function sendActivationEmail (account) {
 
         transporter.sendMail (mailOptions, function (err, info){
           if (err)
-            return winston.log ('error', util.inspect (err));
+            return winston.log ('error', 'failed to send email: ' + err.message);
 
           winston.log ('info', info.response);
           winston.log ('info', 'account activation email sent to %s', account.email);

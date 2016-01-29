@@ -11,16 +11,21 @@ var blueprint = require ('../../../fixtures/blueprint')
 describe ('MeRouter', function () {
   var server;
   var accessToken;
+  var account;
 
   before(function (done) {
     async.series ([
       function (callback) {
         server = blueprint.app.server;
         callback ();
-        //blueprint.app.database.connect(callback);
       },
       function (callback) {
-        datamodel.apply (callback);
+        datamodel.apply (function (err) {
+          if (err) return callback (err);
+
+          account = datamodel.models.accounts[0];
+          return callback ();
+        });
       },
       function (callback) {
         var data = {
@@ -36,6 +41,7 @@ describe ('MeRouter', function () {
           .expect (200)
           .end (function (err, res) {
             if (err) return callback(err);
+
             accessToken = res.body.access_token;
 
             return callback ();
@@ -69,12 +75,54 @@ describe ('MeRouter', function () {
         .end (function (err, res) {
           if (err) return done (err);
 
-          var account = datamodel.models.accounts[0];
-
           expect (res.body._id).to.equal (account.id);
           expect (res.body.email).to.equal (account.profile.email);
 
           return done ();
+        });
+    });
+  });
+
+  describe ('POST /me/profile/image', function () {
+    it ('should upload my profile', function (done) {
+      request(server.app)
+        .post ('/me/profile/image')
+        .set ('Authorization', 'Bearer ' + accessToken)
+        .attach ('image', 'tests/data/avatar.png')
+        .expect (200, function (err, res) {
+          if (err) return done (err);
+
+          expect (res.body).to.have.keys (['_id']);
+
+          async.series ([
+            function (callback) {
+              // We should verify the account profile image field is updated.
+              Account.findById (account.id, function (err, account) {
+                if (err) return callback (err);
+
+                var imageUrl = 'https://localhost/images/' + res.body._id;
+                expect (account.profile.image).to.equal (imageUrl);
+                
+                return callback ();
+              });
+            },
+            function (callback) {
+              // We should verify the image is in the database. Since it is an
+              // upload, the image is stored in GridFS portion of the database.
+              var fileId = res.body._id;
+              var gridfs = blueprint.app.database.gridfs;
+
+              gridfs.findOne ({_id: fileId}, function (err, file) {
+                if (err) return callback (err);
+
+                expect (file.filename).to.equal ('avatar.png');
+                expect (file.contentType).to.equal ('image/png');
+                expect (file.length).to.be.above (0);
+
+                return callback ();
+              });
+            }
+          ], done);
         });
     });
   });

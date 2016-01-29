@@ -18,6 +18,10 @@ module.exports = exports = {
     get : {action: 'MeController@getProfile'}
   },
 
+  '/me/profile/image' : {
+    post : {action: 'MeController@uploadProfileImage' }
+  },
+
   '/me/whoami' : {
     get : {action: 'MeController@whoami'}
   },
