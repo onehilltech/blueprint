@@ -61,8 +61,8 @@ GridFS.prototype.createReadStream = function (opts) {
  * @param filter
  * @param options
  */
-GridFS.prototype.find = function (filter, options) {
-  this._gridFS.files.find (filter, options);
+GridFS.prototype.find = function (options) {
+  return this._gridFS.files.find (options);
 };
 
 /**
