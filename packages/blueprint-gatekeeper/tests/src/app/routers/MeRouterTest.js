@@ -102,7 +102,7 @@ describe ('MeRouter', function () {
 
                 var imageUrl = 'https://localhost/images/' + res.body._id;
                 expect (account.profile.image).to.equal (imageUrl);
-                
+
                 return callback ();
               });
             },
