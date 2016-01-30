@@ -69,12 +69,8 @@ describe ('ImagesRouter', function () {
       request(server.app)
         .get ('/images/' + imageId)
         .set ('Authorization', 'Bearer ' + accessToken)
-        .expect (200, function (err, res) {
-          if (err) return done (err);
-
-          console.log (res);
-          return done ();
-        });
+        .expect ('Content-Type', 'image/png')
+        .expect (200, done);
     });
   });
 });
