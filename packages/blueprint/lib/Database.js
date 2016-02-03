@@ -84,8 +84,6 @@ Database.prototype.disconnect = function (callback) {
  * @returns {*}
  */
 Database.prototype.registerModel = function (name, schema) {
-  winston.log ('info', 'model registration: %s', name);
-
   if (this._conn.models[name])
     return this._conn.models[name];
 
