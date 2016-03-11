@@ -130,8 +130,8 @@ RouterBuilder.prototype.addRoutes = function (routes) {
       }
       else {
         // Make sure there is either an action or view defined.
-        if (!opts.action || !opts.view)
-          throw new Error (util.format ('[%s]: %s %s must define an action or view property', name, verb, path));
+        if (opts.action === undefined && opts.view === undefined)
+          throw new Error (util.format ('%s %s must define an action or view property', verb, path));
 
         var middleware = opts.before || [];
 
