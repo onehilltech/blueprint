@@ -146,8 +146,9 @@ RouterBuilder.prototype.addRoutes = function (routes) {
           // iteration.
           var view = opts.view;
 
-          middleware.push (function renderView (req, res) {
-            return res.render (view);
+          middleware.push (function renderView (req, res, next) {
+            res.render (view);
+            if (next) return next ();
           });
         }
 
