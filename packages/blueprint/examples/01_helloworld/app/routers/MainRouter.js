@@ -35,7 +35,8 @@ module.exports = exports = {
        */
       after : [
         function (req, res, next) {
-          console.log ('after getting helloworld view')
+          console.log ('after getting helloworld view');
+          return next ();
         }
       ]
     },
@@ -47,6 +48,14 @@ module.exports = exports = {
 
       action : 'HelloWorldController@echoName',
 
+      /**
+       * The after property for an action is the same as for a view. The only difference
+       * is the action on the controller must take the next callback as its final parameter
+       * and invoke it when ready to move forward. Otherwise, middleware included after
+       * the action middleware will not execute.
+       *
+       * See Express.js router documentation for more detail.
+       */
       after : [
         printMessage ('after echoing name to view')
       ]
