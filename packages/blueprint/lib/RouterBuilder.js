@@ -129,11 +129,16 @@ RouterBuilder.prototype.addRoutes = function (routes) {
         processUse (path, opts);
       }
       else {
+        // Make sure there is either an action or view defined.
+        if (!opts.action || !opts.view)
+          throw new Error (util.format ('[%s]: %s %s must define an action or view property', name, verb, path));
+
+        var middleware = opts.before || [];
+
         if (opts.action) {
-          // Resolve the controller and its method. The format of the action is
-          // 'controller@method'.
+          // Resolve controller and its method. The expected format is controller@method.
           var controller = resolveController (opts.action);
-          verbFunc.call (self._router, path, controller.invoke ());
+          middleware.push (controller.invoke ());
         }
         else if (opts.view) {
           // Use a generic callback to render the view. Make sure we save a reference
@@ -141,13 +146,19 @@ RouterBuilder.prototype.addRoutes = function (routes) {
           // iteration.
           var view = opts.view;
 
-          verbFunc.call (self._router, path, function (req, res) {
+          middleware.push (function renderView (req, res) {
             return res.render (view);
           });
         }
-        else {
-          winston.log ('error', '[%s]: %s %s must define an action or view property', name, verb, path);
-        }
+
+        // Add all middlewaer that should happen after processing.
+        if (opts.after)
+          middleware.concat (opts.after);
+
+        // Define the route path. Let's be safe and make sure there is no
+        // empty middleware being added to the route.
+        if (middleware.length !== 0)
+          verbFunc.call (self._router, path, middleware);
       }
     }
   }
