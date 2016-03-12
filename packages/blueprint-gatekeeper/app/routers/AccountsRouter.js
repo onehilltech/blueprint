@@ -1,9 +1,9 @@
-var blueprint = require ('@onehilltech/blueprint')
-  , auth      = require ('../../lib').auth
+var blueprint  = require ('@onehilltech/blueprint')
+  , gatekeeper = require ('../../lib')
   ;
 
 var passport  = blueprint.app.server.middleware.passport;
-passport.use (auth.bearer ());
+passport.use (gatekeeper.auth.bearer ());
 
 module.exports = exports = {
   // Define the router properties.
@@ -16,18 +16,27 @@ module.exports = exports = {
       passport.authenticate ('bearer', {session: false})
     ],
 
-    get : {action: 'AccountController@getAccounts'},
-    post: {action: 'AccountController@createAccount'}
+    get : { action : 'AccountController@getAccounts' },
+
+    post: {
+      before : [
+        gatekeeper.authorization.isClient (),
+        gatekeeper.authorization.roles.client ([gatekeeper.roles.client.account.create])
+      ],
+      action : 'AccountController@createAccount'
+    }
   },
 
   '/accounts/:accountId': {
-    get   : {action: 'AccountController@getAccount'},
-    delete: {action: 'AccountController@deleteAccount'}
-  },
+    get   : { action : 'AccountController@getAccount'},
 
-  '/accounts/:accountId': {
-    get   : {action: 'AccountController@getAccount' },
-    delete: {action: 'AccountController@deleteAccount' }
+    delete: {
+      before : [
+        gatekeeper.authorization.isClient (),
+        gatekeeper.authorization.roles.client ([gatekeeper.roles.client.account.delete])
+      ],
+      action : 'AccountController@deleteAccount'
+    }
   },
 
   '/accounts/:accountId/profile' : {
@@ -35,10 +44,10 @@ module.exports = exports = {
   },
 
   '/accounts/:accountId/enable' : {
-    post : { action: 'AccountController@enableAccount'}
+    post : { action : 'AccountController@enableAccount' }
   },
 
   '/accounts/:accountId/roles' : {
-    post : { action: 'AccountController@updateRoles'}
+    post : { action : 'AccountController@updateRoles' }
   },
 };

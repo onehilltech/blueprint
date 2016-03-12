@@ -94,6 +94,8 @@ describe ('AccountRouter', function () {
         .set ('Authorization', 'Bearer ' + clientToken)
         .expect (200, 'true')
         .end (function (err, res) {
+          if (err) return done (err);
+
           // Make sure the newly created account is in the database.
           Account.findOne ({'access_credentials.username': accountData.username}, function (err, account) {
             if (err) return done (err);

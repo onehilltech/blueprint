@@ -66,9 +66,6 @@ AccountController.prototype.createAccount = function (callback) {
     // does not have the correct privileges.
     var client = req.user;
 
-    if (-1 === client.roles.indexOf ('account.create'))
-      return self.handleError (null, res, 403, 'Client cannot create accounts', callback);
-
     // Create the new account, and include the client that created the account.
     var account = new Account ({
       access_credentials : {username : req.body.username, password : req.body.password},
