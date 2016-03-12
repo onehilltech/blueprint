@@ -129,6 +129,15 @@ schema.pre ('save', function (next) {
 });
 
 /**
+ * Get the roles for the account.
+ *
+ * @returns {schema.access_credentials.roles|{type}|Array}
+ */
+schema.methods.getRoles = function () {
+  return this.access_credentials.roles || [];
+};
+
+/**
  * Verify the password provided by the user. The \@ password should
  * not be encrpyted. This method will perform the hash of the password
  * to verify its correctness.

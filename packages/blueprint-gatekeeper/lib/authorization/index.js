@@ -1,3 +1,20 @@
+var Account = require ('../../app/models/Account')
+  , Client  = require ('../../app/models/Client')
+  ;
+
+/**
+ * Middleware to test if the current user is an account.
+ */
+function isAccount () {
+  return function (req, res, next) {
+    if (req.user.collection.collectionName === Account.collection.collectionName)
+      return next ();
+
+    res.status (403);
+    return next (new Error ('Account access only'))
+  };
+}
+
 /**
  * Middleware to test if the current user is a client.
  *
@@ -5,7 +22,7 @@
  */
 function isClient () {
   return function (req, res, next) {
-    if (req.user.secret !== undefined)
+    if (req.user.collection.collectionName === Client.collection.collectionName)
       return next ();
 
     res.status (403);
@@ -15,3 +32,4 @@ function isClient () {
 
 exports.roles = require ('./roles');
 exports.isClient = isClient;
+exports.isAccount = isAccount;

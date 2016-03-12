@@ -20,7 +20,7 @@ var rawClients = [
 
 var rawAccounts = [
   {
-    access_credentials: {username: 'account1', password: 'account1'},
+    access_credentials: {username: 'account1', password: 'account1', roles: ['admin']},
     profile: {email: 'account1@gatekeeper.com'},
     internal_use : {}
   },

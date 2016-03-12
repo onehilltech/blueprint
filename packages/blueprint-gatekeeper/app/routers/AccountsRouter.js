@@ -16,24 +16,37 @@ module.exports = exports = {
       passport.authenticate ('bearer', {session: false})
     ],
 
-    get : { action : 'AccountController@getAccounts' },
+    get : {
+      // Only an administrator can access all the accounts on the system.
+      before : [
+        gatekeeper.authorization.roles.any ([gatekeeper.roles.user.administrator])
+      ],
+      action : 'AccountController@getAccounts'
+    },
 
     post: {
       before : [
         gatekeeper.authorization.isClient (),
-        gatekeeper.authorization.roles.client ([gatekeeper.roles.client.account.create])
+        gatekeeper.authorization.roles.any ([gatekeeper.roles.client.account.create])
       ],
       action : 'AccountController@createAccount'
     }
   },
 
   '/accounts/:accountId': {
-    get   : { action : 'AccountController@getAccount'},
+    // Only an administrator can access the account information. The check
+    // below applies to all paths that begin with this prefix.
+
+    use : [
+      gatekeeper.authorization.roles.any ([gatekeeper.roles.user.administrator])
+    ],
+
+    get : { action : 'AccountController@getAccount'},
 
     delete: {
       before : [
         gatekeeper.authorization.isClient (),
-        gatekeeper.authorization.roles.client ([gatekeeper.roles.client.account.delete])
+        gatekeeper.authorization.roles.any ([gatekeeper.roles.client.account.delete])
       ],
       action : 'AccountController@deleteAccount'
     }
