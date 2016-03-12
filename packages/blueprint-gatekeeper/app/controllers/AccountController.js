@@ -13,27 +13,6 @@ function AccountController () {
 blueprint.controller (AccountController);
 
 /**
- * Test if the current user is an administrator.
- *
- * @param res
- * @param res
- */
-AccountController.prototype.isAdmin = function (user) {
-  return user.roles.indexOf ('admin') !== -1;
-};
-
-/**
- * Test if the current request has access to the account, or the user that
- * made the request is an admin.
- *
- * @param req
- * @param res
- */
-AccountController.prototype.hasAccessToAccount = function (user, account) {
-  return user._id.equals (account._id) || this.isAdmin (user);
-};
-
-/**
  * Get a list of the accounts in the database.
  *
  * @param callback
