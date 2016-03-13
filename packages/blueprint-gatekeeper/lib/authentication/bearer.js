@@ -5,7 +5,7 @@ var BearerStrategy = require ('passport-http-bearer').Strategy
 
 module.exports = function () {
   return new BearerStrategy (function (accessToken, done) {
-    winston.info ('[bearer]: validating access token', accessToken);
+    winston.log ('info', '[bearer]: validating access token');
 
     // Locate the access token in our database. If we cannot locate the
     // access token, then we need to fail access to the resource. We also
