@@ -322,7 +322,7 @@ Oauth2Controller.prototype.getToken = function (callback) {
           return self.handleError (err, res, 500, 'Failed to retrieve account', callback);
 
         if (!account)
-          return self.handleError (err, res, 400, 'Account does not exist', callback);
+          return self.handleError (err, res, 400, 'Invalid username', callback);
 
         if (!account.isEnabled ())
           return self.handleError (err, res, 401, 'Account is disabled', callback);
@@ -334,12 +334,12 @@ Oauth2Controller.prototype.getToken = function (callback) {
             return self.handleError (err, res, 500, 'Failed to verify password', callback);
 
           if (!match)
-            return self.handleError (err, res, 401, 'Password does not match', callback);
+            return self.handleError (err, res, 401, 'Invalid password', callback);
 
           // Create a new user token and refresh token.
           AccessToken.newUserToken (client.id, account.id, function (err, accessToken) {
             if (err)
-              return self.handleError (err, res, 500, 'Failed to generate token', callback);
+              return self.handleError (err, res, 500, 'Failed to generate access token', callback);
 
             return grantToken (res, accessToken);
           });
