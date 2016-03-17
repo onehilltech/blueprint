@@ -241,7 +241,7 @@ Oauth2Controller.prototype.getToken = function (callback) {
   function lookupClient (res, clientId, clientSecret, done) {
     Client.findById (clientId, function (err, client) {
       if (err)
-        return self.handleError (err, res, 400, 'Cannot find client', callback);
+        return self.handleError (err, res, 400, 'Failed to lookup client', callback);
 
       if (!client)
         return self.handleError (null, res, 400, 'Invalid client id', callback);
