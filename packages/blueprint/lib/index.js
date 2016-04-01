@@ -83,7 +83,7 @@ exports.Application = function (appPath) {
 };
 
 /**
- * Register for an event from the Framework (). The callback is registered with
+ * Register an event listener with the Framework (). The callback is registered with
  * the event on the default messenger.
  *
  * @param ev
@@ -91,6 +91,17 @@ exports.Application = function (appPath) {
  */
 exports.on = function (ev, cb) {
   Framework ().messaging.on (ev, cb);
+};
+
+/**
+ * Register an event listener with the framework that is only called once. Once
+ * the listener is called, it is removed from the framework.
+ *
+ * @param ev
+ * @param cb
+ */
+exports.once = function (ev, cb) {
+  Framework ().messaging.once (ev, cb);
 };
 
 /**
