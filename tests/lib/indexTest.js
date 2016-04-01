@@ -13,6 +13,7 @@ describe ('index', function () {
         'emit',
         'model',
         'on',
+        'once',
         'destroy',
         'include'
       ];
