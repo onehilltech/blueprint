@@ -1,5 +1,6 @@
 var winston   = require ('winston')
   , blueprint = require ('@onehilltech/blueprint')
+  , bm        = blueprint.messaging
   ;
 
 var Account = require ('../models/Account')
@@ -57,7 +58,7 @@ AccountController.prototype.createAccount = function (callback) {
         return self.handleError (err, res, 500, 'Failed to create account', callback);
 
       // Notify listeners that an account has been created.
-      blueprint.emit ('gatekeeper.account.created', account);
+      bm.emit ('gatekeeper.account.created', account);
 
       return res.status (200).json (true);
     });
@@ -76,7 +77,7 @@ AccountController.prototype.getAccount = function () {
   return function (req, res) {
     Account.findById (req.accountId, function (err, account) {
       if (err)
-        return self.handleError (null, res, 404, 'account does not exist', callback);
+        return self.handleError (null, res, 404, 'Account does not exist', callback);
 
       res.status (200).json (account.toObject ())
     });
@@ -124,7 +125,7 @@ AccountController.prototype.deleteAccount = function (callback) {
         return self.handleError (err, res, 404, 'Failed to delete account', callback);
 
       // Notify listeners that an account has been deleted.
-      blueprint.emit ('gatekeeper.account.deleted', accountId);
+      bm.emit ('gatekeeper.account.deleted', accountId);
 
       return res.status (200).json (true);
     });
@@ -165,7 +166,7 @@ AccountController.prototype.enableAccount = function (callback) {
         return self.handleError (err, res, 500, 'Failed to enable/disable account', callback);
 
       // Notify listeners that an account has been disabled.
-      blueprint.emit ('gatekeeper.account.enabled', accountId, enabled);
+      bm.emit ('gatekeeper.account.enabled', accountId, enabled);
 
       res.status (200).json (true);
     });

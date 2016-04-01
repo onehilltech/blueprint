@@ -1,6 +1,7 @@
 var uid           = require ('uid-safe')
   , winston       = require ('winston')
   , blueprint     = require ('@onehilltech/blueprint')
+  , bm            = blueprint.messaging
   , nodemailer    = require ('nodemailer')
   , EmailTemplate = require ('email-templates').EmailTemplate
   , path          = require ('path')
@@ -17,7 +18,7 @@ const DEFAULT_TOKEN_TTL = 300000;
 var emailConfig;
 var transporter;
 
-blueprint.on ('app.init', function (app) {
+bm.on ('app.init', function (app) {
   if (!app.config.email)
     throw new Error ('email.config not defined');
 
@@ -26,11 +27,11 @@ blueprint.on ('app.init', function (app) {
 });
 
 module.exports = function sendActivationEmail (account) {
-  winston.log ('info', 'sending account activation email to %s', account.email);
+  var email = account.profile.email;
 
   uid (DEFAULT_TOKEN_LENGTH, function (err, token) {
     if (err)
-      return winston.log ('error', err);
+      return winston.log ('error', util.inspect (err));
 
     // Calculate when the token expires. It has a time-to-live of 5 minutes. After
     // 5 minutes, the token is expired.
@@ -58,7 +59,7 @@ module.exports = function sendActivationEmail (account) {
 
         var mailOptions = {
           from: emailConfig.from,
-          to: account.profile.email,
+          to: email,
           subject: 'Account activation',
           text: results.text,
           html: results.html
@@ -66,13 +67,14 @@ module.exports = function sendActivationEmail (account) {
 
         // Send an email to the user with the a link to verify the account. The link will
         // contain both the email address and the token for verifying the account.
+        winston.log ('info', 'sending account activation email to %s', email);
 
         transporter.sendMail (mailOptions, function (err, info){
           if (err)
             return winston.log ('error', 'failed to send email: ' + err.message);
 
           winston.log ('info', info.response);
-          winston.log ('info', 'account activation email sent to %s', account.email);
+          bm.emit ('gatekeeper.email.account_activation.sent', account);
         });
       });
     });

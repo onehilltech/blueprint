@@ -1,4 +1,5 @@
 var blueprint = require ('@onehilltech/blueprint')
+  , bm        = blueprint.messaging
   , request   = require ('supertest')
   , expect    = require ('chai').expect
   , async     = require ('async')
@@ -15,15 +16,15 @@ describe ('AccountRouter', function () {
 
   function getToken (data, callback) {
     request (server.app)
-      .post('/oauth2/token').send (data)
+      .post ('/oauth2/token').send (data)
       .expect (200)
       .end (function (err, res) {
         if (err) return callback (err);
         return callback (null, res.body.access_token);
-    });
+      });
   }
 
-  before(function (done) {
+  before (function (done) {
     async.series ([
       function (callback) {
         server = blueprint.app.server;
@@ -38,7 +39,7 @@ describe ('AccountRouter', function () {
         };
 
         getToken (data, function (err, token) {
-          if (err) return callback(err);
+          if (err) return callback (err);
 
           userToken = token;
           return callback ();
@@ -63,7 +64,7 @@ describe ('AccountRouter', function () {
 
   describe ('GET /accounts', function () {
     it ('should return all the accounts', function (done) {
-      request(server.app)
+      request (server.app)
         .get ('/accounts')
         .set ('Authorization', 'Bearer ' + userToken)
         .expect (200)
@@ -74,37 +75,36 @@ describe ('AccountRouter', function () {
           expect (accounts).to.have.length (5);
 
           return done ();
-      });
+        });
     });
   });
 
   describe ('POST /accounts', function () {
-    var accountData = {
-      username: 'tester',
-      password: 'tester',
+    var data = {
+      username: 'tester1',
+      password: 'tester1',
       email: 'james@onehilltech.com'
     };
 
     it ('should create a new account', function (done) {
+      // We know the account was created when we get an event for
+      // sending an account activation email.
+      bm.once ('gatekeeper.email.account_activation.sent', function (account) {
+        expect (account.profile.email).to.equal (data.email);
+        expect (account.internal_use.created_by.id).to.equal (datamodel.models.clients[0].id);
+
+        done ();
+      });
+
       request (server.app)
-        .post ('/accounts').send (accountData)
+        .post ('/accounts').send (data)
         .set ('Authorization', 'Bearer ' + clientToken)
         .expect (200, 'true')
         .end (function (err, res) {
           if (err) return done (err);
 
-          // Make sure the newly created account is in the database.
-          Account.findOne ({'access_credentials.username': accountData.username}, function (err, account) {
-            if (err) return done (err);
-
-            expect (err).to.be.null;
-            expect (account).to.not.be.undefined;
-            expect (account.profile.email).to.equal (accountData.email);
-            expect (account.internal_use.created_by).to.eql (datamodel.models.clients[0]._id);
-
-            return done ();
-          });
-      });
+          expect (err).to.be.null;
+        });
     });
 
     it ('should not create a new account', function (done) {
@@ -118,12 +118,13 @@ describe ('AccountRouter', function () {
         if (err) return done (err);
 
         request (server.app)
-          .post ('/accounts').send (accountData)
+          .post ('/accounts').send (data)
           .set ('Authorization', 'Bearer ' + token)
           .expect (403, done);
       });
-    });
+    })
   });
+
 
   describe ('GET /accounts/:accountId/profile', function () {
     it ('should get the account profile', function (done) {
