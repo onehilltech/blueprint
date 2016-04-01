@@ -86,6 +86,10 @@ var schema = new Schema ({
     }
   },
 
+  /// Metadata for the account. This allows third-party services to
+  /// associate custom data with the account.
+  metadata : { type: Schema.Types.Mixed, default: {} },
+
   /**
    * Push notifications for the account. Push notifications allow a service to
    * send real-time updates to the client.

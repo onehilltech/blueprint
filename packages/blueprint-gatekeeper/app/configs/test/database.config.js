@@ -1,3 +1,3 @@
 module.exports = exports = {
-  connstr: "mongodb://localhost/gatekeeper-test",
+  connstr: "mongodb://localhost/gatekeeper_test",
 };

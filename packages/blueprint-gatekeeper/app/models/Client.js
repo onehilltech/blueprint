@@ -4,7 +4,9 @@ var uid       = require ('uid-safe')
 
 const DEFAULT_SECRET_LENGTH = 128;
 
-var schema = new blueprint.Schema({
+var Schema = blueprint.Schema;
+
+var schema = new Schema ({
   /// Name of the client.
   name: {type: String, required: true, trim: true, unique: true},
 
@@ -21,7 +23,11 @@ var schema = new blueprint.Schema({
   enabled: {type: Boolean, default: true, required: true},
 
   /// The different roles of the client.
-  roles: {type: [String], default: []}
+  roles: {type: [String], default: []},
+
+  /// Metadata for the client. This allows third-party services to
+  /// associate custom data with the client.
+  metadata : { type: Schema.Types.Mixed, default: {} }
 });
 
 schema.pre ('validate', function (next) {

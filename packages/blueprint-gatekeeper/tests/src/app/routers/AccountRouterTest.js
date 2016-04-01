@@ -27,9 +27,6 @@ describe ('AccountRouter', function () {
     async.series ([
       function (callback) {
         server = blueprint.app.server;
-        blueprint.app.database.connect(callback);
-      },
-      function (callback) {
         datamodel.apply (callback);
       },
       function (callback) {
