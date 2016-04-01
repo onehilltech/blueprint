@@ -83,36 +83,6 @@ exports.Application = function (appPath) {
 };
 
 /**
- * Register an event listener with the Framework (). The callback is registered with
- * the event on the default messenger.
- *
- * @param ev
- * @param cb
- */
-exports.on = function (ev, cb) {
-  Framework ().messaging.on (ev, cb);
-};
-
-/**
- * Register an event listener with the framework that is only called once. Once
- * the listener is called, it is removed from the framework.
- *
- * @param ev
- * @param cb
- */
-exports.once = function (ev, cb) {
-  Framework ().messaging.once (ev, cb);
-};
-
-/**
- * Emit an event over the Framework ().
- */
-exports.emit = function () {
-  var emit = Framework ().messaging.emit;
-  emit.apply (Framework ().messaging, arguments);
-};
-
-/**
  * Destroy the Framework ().
  */
 exports.destroy = function () {

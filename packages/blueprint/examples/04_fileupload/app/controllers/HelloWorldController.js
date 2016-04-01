@@ -4,14 +4,6 @@ var blueprint = require ('@onehilltech/blueprint')
   , winston   = require ('winston')
   ;
 
-var app;
-var Image;
-
-blueprint.on ('app.init', function (a) {
-  app = a;
-  Images = app.models.Image;
-});
-
 function HelloWorldController () {
   blueprint.BaseController.call (this);
 }
@@ -27,8 +19,6 @@ HelloWorldController.prototype.uploadImage = function () {
 };
 
 HelloWorldController.prototype.getImage = function () {
-  var self = this;
-
   return function (req, res) {
     var imageId = req.imageId;
     blueprint.app.database.gridfs.createReadStream ({_id : imageId}).pipe (res);

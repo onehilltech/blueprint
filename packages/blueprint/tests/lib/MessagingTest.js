@@ -43,7 +43,13 @@ describe ('Messaging', function () {
       handle = messaging.on ('testing', function () { });
       expect (handle.messenger.emitter.listeners ('testing')).to.have.length (1);
     });
+  });
 
+  describe ('#emit', function () {
+    it ('should emit an event to the default messenger', function (done) {
+      messaging.on ('testing', function () { done ();} );
+      messaging.emit ('testing');
+    });
   });
 
   describe ('#handle.close', function () {
@@ -54,4 +60,5 @@ describe ('Messaging', function () {
       expect (messaging.getMessenger ().emitter.listeners ('testing')).to.have.length (0);
     });
   });
+
 });
