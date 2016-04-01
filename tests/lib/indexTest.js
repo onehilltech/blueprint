@@ -10,10 +10,7 @@ describe ('index', function () {
         'ApplicationModule',
         'BaseController',
         'controller',
-        'emit',
         'model',
-        'on',
-        'once',
         'destroy',
         'include'
       ];
