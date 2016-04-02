@@ -73,7 +73,6 @@ module.exports = function sendActivationEmail (account) {
           if (err)
             return winston.log ('error', 'failed to send email: ' + err.message);
 
-          winston.log ('info', info.response);
           bm.emit ('gatekeeper.email.account_activation.sent', account);
         });
       });
