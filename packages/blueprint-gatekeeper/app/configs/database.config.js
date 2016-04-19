@@ -1,4 +1,9 @@
+var blueprint = require ('@onehilltech/blueprint')
+  ;
+
 module.exports = exports = {
+  connstr: 'mongodb://localhost/gatekeeper_' + blueprint.env,
+
   options : {
     db: {
       native_parser: true,

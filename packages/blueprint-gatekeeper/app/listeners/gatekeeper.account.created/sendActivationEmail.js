@@ -14,21 +14,35 @@ var activationEmail = new EmailTemplate (templateDir);
 
 const DEFAULT_TOKEN_LENGTH = 40;
 const DEFAULT_TOKEN_TTL = 300000;
+const DEFAULT_PRIMARY_COLOR = '#2196F3';
 
-var config;
+var appConfig;
+var gatekeeperConfig;
 var transporter;
 
+/**
+ * app.init
+ */
 bm.on ('app.init', function (app) {
+  if (!app.config.app)
+    throw new Error ('app.config not defined');
+
   if (!app.config.gatekeeper)
     throw new Error ('gatekeeper.config not defined');
 
   // Save the Gatekeeper configuration.
-  config = app.config.gatekeeper;
+  appConfig = app.config.app;
+  gatekeeperConfig = app.config.gatekeeper;
 
-  transporter = nodemailer.createTransport (config.email.nodemailer);
+  transporter = nodemailer.createTransport (gatekeeperConfig.email.nodemailer);
 });
 
-module.exports = function sendActivationEmail (account) {
+/**
+ * Send the activation email to the account.
+ *
+ * @param account
+ */
+function sendActivationEmail (account) {
   var email = account.profile.email;
 
   uid (DEFAULT_TOKEN_LENGTH, function (err, token) {
@@ -48,10 +62,15 @@ module.exports = function sendActivationEmail (account) {
         return winston.log ('error', util.inspect (err));
 
       var data = {
-        gatekeeperBaseUri : config.baseuri,
-        account : {
-          id : account.id,
-          token : account.internal_use.verification.token
+        appName: appConfig.name,
+        gatekeeperBaseUri: gatekeeperConfig.baseuri,
+        twitterHandle: gatekeeperConfig.email.twitterHandle,
+        style: {
+          primaryColor: gatekeeperConfig.primaryColor || DEFAULT_PRIMARY_COLOR
+        },
+        account: {
+          id: account.id,
+          token: account.internal_use.verification.token
         }
       };
 
@@ -59,10 +78,12 @@ module.exports = function sendActivationEmail (account) {
         if (err)
           return winston.log ('error', util.inspect (err));
 
+        var subject = appConfig.name + ' - Account confirmation';
+
         var mailOptions = {
-          from: config.email.from,
+          from: gatekeeperConfig.email.from,
           to: email,
-          subject: 'FundAll - Account confirmation',
+          subject: subject,
           text: results.text,
           html: results.html
         };
@@ -80,4 +101,6 @@ module.exports = function sendActivationEmail (account) {
       });
     });
   });
-};
+}
+
+exports = module.exports = sendActivationEmail;

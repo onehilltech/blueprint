@@ -1,5 +1,4 @@
 module.exports = exports = {
-  name : 'gatekeeper',
-
+  name : 'Gatekeeper',
   host : 'localhost'
 };

@@ -3,6 +3,7 @@ module.exports = {
 
   email : {
     from : 'noreply@onehilltech.com',
+    twitterHandle: 'onehilltech',
 
     nodemailer : {
       service: 'mailgun',

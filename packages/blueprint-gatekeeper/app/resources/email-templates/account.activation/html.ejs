@@ -5,7 +5,7 @@
 <head>
   <meta name="viewport" content="width=device-width"/>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <title>Gatekeeper - Account confirmation</title>
+  <title><%= appName %> - Account confirmation</title>
 
   <style type="text/css">
     img {
@@ -112,7 +112,7 @@
                   <td class="content-block"
                       style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"
                       valign="top">
-                    Thank your for signing up for FundAll. Please confirm your email address by clicking
+                    Thank your for signing up for <%= appName %>. Please confirm your email address by clicking
                     the link below.
                   </td>
                 </tr>
@@ -122,7 +122,7 @@
                       valign="top">
                     <a href="<%= gatekeeperBaseUri %>/activate?account=<%= account.id %>&token=<%= account.token.value %>"
                        class="btn-primary" itemprop="url"
-                       style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #2196F3; margin: 0; border-color: #2196F3; border-style: solid; border-width: 10px 20px;">Confirm
+                       style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: <%= style.primaryColor %>; margin: 0; border-color: <%= style.primaryColor %>; border-style: solid; border-width: 10px 20px;">Confirm
                       email address</a>
                   </td>
                 </tr>
@@ -130,7 +130,7 @@
                   <td class="content-block"
                       style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"
                       valign="top">
-                    &mdash; FundAll Team
+                    &mdash; <%= appName %> Team
                   </td>
                 </tr>
               </table>
@@ -144,8 +144,8 @@
             <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
               <td class="aligncenter content-block"
                   style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; vertical-align: top; color: #999; text-align: center; margin: 0; padding: 0 0 20px;"
-                  align="center" valign="top">Follow <a href="http://twitter.com/fundall"
-                                                        style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; color: #999; text-decoration: underline; margin: 0;">@OneHillTech</a>
+                  align="center" valign="top">Follow <a href="http://twitter.com/<%= twitterHandle %>"
+                                                        style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; color: #999; text-decoration: underline; margin: 0;">@<%= twitterHandle %></a>
                 on Twitter.
               </td>
             </tr>
