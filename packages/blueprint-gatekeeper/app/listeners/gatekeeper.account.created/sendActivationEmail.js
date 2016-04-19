@@ -15,15 +15,17 @@ var activationEmail = new EmailTemplate (templateDir);
 const DEFAULT_TOKEN_LENGTH = 40;
 const DEFAULT_TOKEN_TTL = 300000;
 
-var emailConfig;
+var config;
 var transporter;
 
 bm.on ('app.init', function (app) {
-  if (!app.config.email)
-    throw new Error ('email.config not defined');
+  if (!app.config.gatekeeper)
+    throw new Error ('gatekeeper.config not defined');
 
-  transporter = nodemailer.createTransport (app.config.email.nodemailer);
-  emailConfig = app.config.email;
+  // Save the Gatekeeper configuration.
+  config = app.config.gatekeeper;
+
+  transporter = nodemailer.createTransport (config.email.nodemailer);
 });
 
 module.exports = function sendActivationEmail (account) {
@@ -46,7 +48,7 @@ module.exports = function sendActivationEmail (account) {
         return winston.log ('error', util.inspect (err));
 
       var data = {
-        gatekeeper : emailConfig.gatekeeper,
+        gatekeeperBaseUri : config.baseuri,
         account : {
           id : account.id,
           token : account.internal_use.verification.token
@@ -58,7 +60,7 @@ module.exports = function sendActivationEmail (account) {
           return winston.log ('error', util.inspect (err));
 
         var mailOptions = {
-          from: emailConfig.from,
+          from: config.email.from,
           to: email,
           subject: 'FundAll - Account confirmation',
           text: results.text,
