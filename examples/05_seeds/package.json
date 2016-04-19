@@ -7,7 +7,7 @@
   "main": "./app",
 
   "dependencies": {
-    "blueprint": "git@github.com:onehilltech/blueprint.git",
+    "@onehilltech/blueprint": "file:../..",
     "winston": "^1.0.1"
   }
 }
