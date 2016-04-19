@@ -14,7 +14,9 @@ var activationEmail = new EmailTemplate (templateDir);
 
 const DEFAULT_TOKEN_LENGTH = 40;
 const DEFAULT_TOKEN_TTL = 300000;
-const DEFAULT_PRIMARY_COLOR = '#2196F3';
+const DEFAULT_STYLE = {
+  primaryColor: '#2196F3'
+};
 
 var appConfig;
 var gatekeeperConfig;
@@ -65,9 +67,7 @@ function sendActivationEmail (account) {
         appName: appConfig.name,
         gatekeeperBaseUri: gatekeeperConfig.baseuri,
         twitterHandle: gatekeeperConfig.email.twitterHandle,
-        style: {
-          primaryColor: gatekeeperConfig.primaryColor || DEFAULT_PRIMARY_COLOR
-        },
+        style: gatekeeperConfig.email.style || DEFAULT_STYLE,
         account: {
           id: account.id,
           token: account.internal_use.verification.token
