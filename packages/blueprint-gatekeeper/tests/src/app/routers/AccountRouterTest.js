@@ -6,7 +6,6 @@ var blueprint = require ('@onehilltech/blueprint')
   ;
 
 var datamodel = require ('../../../fixtures/datamodel')
-  , Account   = blueprint.app.models.Account;
   ;
 
 describe ('AccountRouter', function () {
