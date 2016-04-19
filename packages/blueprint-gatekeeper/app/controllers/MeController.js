@@ -38,8 +38,8 @@ MeController.prototype.uploadProfileImage = function () {
     blueprint.app.database.gridfs.writeFileToDatabase (req.file, function (file) {
       // Update the account profile image with the url to access
       var account = req.user;
-      var host = blueprint.app.config.app.host;
-      var imageUrl = 'https://' + host + '/images/' + file._id;
+      var hostname = blueprint.app.config.app.hostname;
+      var imageUrl = hostname + '/images/' + file._id;
 
       account.profile.image = imageUrl;
       account.save (function (err) {

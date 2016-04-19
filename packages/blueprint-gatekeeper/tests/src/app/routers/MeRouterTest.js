@@ -100,7 +100,8 @@ describe ('MeRouter', function () {
               Account.findById (account.id, function (err, account) {
                 if (err) return callback (err);
 
-                var imageUrl = 'https://localhost/images/' + res.body._id;
+                var hostname = blueprint.app.config.app.hostname;
+                var imageUrl = hostname + '/images/' + res.body._id;
                 expect (account.profile.image).to.equal (imageUrl);
 
                 return callback ();
