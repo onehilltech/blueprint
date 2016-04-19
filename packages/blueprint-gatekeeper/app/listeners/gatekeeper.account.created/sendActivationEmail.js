@@ -10,7 +10,7 @@ var uid           = require ('uid-safe')
 
 // TODO Construct the real location of the template directory.
 var templateDir = path.resolve (__dirname, '../../resources/email-templates/account.activation');
-var verifyEmail = new EmailTemplate (templateDir);
+var activationEmail = new EmailTemplate (templateDir);
 
 const DEFAULT_TOKEN_LENGTH = 40;
 const DEFAULT_TOKEN_TTL = 300000;
@@ -53,14 +53,14 @@ module.exports = function sendActivationEmail (account) {
         }
       };
 
-      verifyEmail.render (data, function (err, results) {
+      activationEmail.render (data, function (err, results) {
         if (err)
           return winston.log ('error', util.inspect (err));
 
         var mailOptions = {
           from: emailConfig.from,
           to: email,
-          subject: 'Account activation',
+          subject: 'FundAll - Account confirmation',
           text: results.text,
           html: results.html
         };

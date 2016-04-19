@@ -102,8 +102,6 @@ describe ('AccountRouter', function () {
         .expect (200, 'true')
         .end (function (err, res) {
           if (err) return done (err);
-
-          expect (err).to.be.null;
         });
     });
 
