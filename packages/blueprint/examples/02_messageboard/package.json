@@ -5,7 +5,7 @@
   "description": "a Blueprint.js web application",
   "main": "./app",
   "dependencies": {
-    "blueprint": "file:../..",
+    "@onehilltech/blueprint": "file:../..",
     "winston": "^1.0.1"
   }
 }
