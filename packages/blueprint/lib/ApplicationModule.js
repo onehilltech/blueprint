@@ -111,7 +111,7 @@ ApplicationModule.prototype.__defineGetter__ ('listeners', function () {
  * Get the current Node.js environment. The default Node.js environment is development.
  */
 ApplicationModule.prototype.__defineGetter__ ('env', function () {
-  return process.env.NODE_ENV || 'dev';
+  return process.env.NODE_ENV || 'development';
 });
 
 ApplicationModule.prototype.__defineGetter__ ('Schema', function () {
