@@ -1,4 +1,4 @@
 module.exports = exports = {
   name : 'Gatekeeper',
-  host : 'localhost'
+  hostname : 'http://localhost:5000'
 };
