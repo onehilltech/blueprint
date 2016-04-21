@@ -8,8 +8,8 @@ module.exports = {
     nodemailer : {
       service: 'mailgun',
       auth: {
-        user: 'postmaster@sandbox65709925e109491b9913db8656b6184c.mailgun.org',
-        pass: '4fe2b7b252ea56722bacf1c2fd1880dc'
+        api_key: 'key-af8e0d976bc823c09b77d5f6892ae14b',
+        domain: 'sandbox65709925e109491b9913db8656b6184c.mailgun.org'
       }
     }
   }
