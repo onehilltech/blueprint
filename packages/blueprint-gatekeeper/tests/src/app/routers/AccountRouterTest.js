@@ -88,9 +88,11 @@ describe ('AccountRouter', function () {
     it ('should create a new account', function (done) {
       // We know the account was created when we get an event for
       // sending an account activation email.
-      bm.once ('gatekeeper.email.account_activation.sent', function (account) {
+      bm.once ('gatekeeper.email.account_activation.sent', function (account, info) {
+        
         expect (account.profile.email).to.equal (data.email);
         expect (account.internal_use.created_by.id).to.equal (datamodel.models.clients[0].id);
+        expect (info).to.be.have.keys (['id', 'message']);
 
         done ();
       });
