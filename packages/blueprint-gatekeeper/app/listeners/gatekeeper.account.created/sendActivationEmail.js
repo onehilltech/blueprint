@@ -6,6 +6,7 @@ var uid           = require ('uid-safe')
   , EmailTemplate = require ('email-templates').EmailTemplate
   , path          = require ('path')
   , util          = require ('util')
+  , mailgun       = require('nodemailer-mailgun-transport')
   ;
 
 // TODO Construct the real location of the template directory.
@@ -36,7 +37,7 @@ bm.on ('app.init', function (app) {
   appConfig = app.config.app;
   gatekeeperConfig = app.config.gatekeeper;
 
-  transporter = nodemailer.createTransport (gatekeeperConfig.email.nodemailer);
+  transporter = nodemailer.createTransport (mailgun (gatekeeperConfig.email.nodemailer));
 });
 
 /**
@@ -96,7 +97,7 @@ function sendActivationEmail (account) {
           if (err)
             return winston.log ('error', 'failed to send email: ' + err.message);
 
-          bm.emit ('gatekeeper.email.account_activation.sent', account);
+          bm.emit ('gatekeeper.email.account_activation.sent', account, info);
         });
       });
     });
