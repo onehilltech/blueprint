@@ -19,7 +19,7 @@ describe ('ApplicationModule', function () {
 
   describe ('new ApplicationModule', function () {
     it ('should create a new application module', function () {
-      appModule = new ApplicationModule (appPath);
+      appModule = new ApplicationModule ('test-module', appPath);
 
       expect (appModule.appPath).to.equal (appPath);
 
@@ -30,16 +30,16 @@ describe ('ApplicationModule', function () {
     });
 
     it ('should have the name test-app', function () {
-      expect (appModule.name).to.equal ('test-app');
+      expect (appModule.moduleName).to.equal ('test-module');
     });
   });
 
   describe ('#load', function () {
     it ('should load an application module into the main application', function (done) {
       var modulePath = path.resolve (__dirname, '../fixtures/app-module');
-      blueprint.include (modulePath);
+      blueprint.include ('test-module', modulePath);
 
-      expect (blueprint.app._modules).to.have.keys (['test-app-module']);
+      expect (blueprint.app._modules).to.have.keys (['test-module']);
 
       var files = [
         path.join (appPath, 'data', 'views', 'module-first-level.jade'),

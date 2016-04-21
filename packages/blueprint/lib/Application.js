@@ -25,7 +25,13 @@ var Server            = require ('./Server')
  * @constructor
  */
 function Application (appPath) {
-  ApplicationModule.call (this, appPath);
+  // Load the application configuration.
+  var appConfigPath = path.join (appPath, 'configs', 'app.config.js');
+  var appConfig = require (appConfigPath);
+  this.name = appConfig.name;
+
+  // Initialize the base class.
+  ApplicationModule.call (this, this.name, appPath);
 
   this._init = false;
   this._modules = {};
@@ -211,13 +217,12 @@ Application.prototype.__defineGetter__ ('server', function () {
  *
  * @param module
  */
-Application.prototype.addModule = function (modulePath) {
-  var appModule = new ApplicationModule (modulePath);
+Application.prototype.addModule = function (name, path) {
+  if (this._modules.hasOwnProperty (name))
+    throw new Error (util.format ('duplicate module: %s', name));
 
-  if (this._modules.hasOwnProperty (appModule.name))
-    throw new Error (util.format ('duplicate module: %s', appModule.name));
-
-  this._modules[appModule.name] = appModule;
+  var appModule = new ApplicationModule (name, path);
+  this._modules[name] = appModule;
 
   if (this._server && appModule.getSupportsViews ())
     this._server.importViews (appModule.getViewsPath ());
