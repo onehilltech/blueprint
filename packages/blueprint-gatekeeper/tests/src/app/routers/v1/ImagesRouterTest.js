@@ -3,8 +3,8 @@ var request   = require ('supertest')
   , async     = require ('async')
   ;
 
-var blueprint = require ('../../../fixtures/blueprint')
-  , datamodel = require ('../../../fixtures/datamodel')
+var blueprint = require ('../../../../fixtures/blueprint')
+  , datamodel = require ('../../../../fixtures/datamodel')
   ;
 
 describe ('ImagesRouter', function () {
@@ -37,7 +37,7 @@ describe ('ImagesRouter', function () {
 
         // Get an access token for all requests.
         request(server.app)
-          .post('/oauth2/token').send (data)
+          .post('/v1/oauth2/token').send (data)
           .expect (200)
           .end (function (err, res) {
             if (err) return callback(err);
@@ -67,7 +67,7 @@ describe ('ImagesRouter', function () {
   describe ('GET /images/:imageId', function () {
     it ('should return an image from the database', function (done) {
       request(server.app)
-        .get ('/images/' + imageId)
+        .get ('/v1/images/' + imageId)
         .set ('Authorization', 'Bearer ' + accessToken)
         .expect ('Content-Type', 'image/png')
         .expect (200, done);

@@ -3,8 +3,8 @@ var request   = require ('supertest')
   , async     = require ('async')
   ;
 
-var blueprint = require ('../../../fixtures/blueprint')
-  , datamodel = require ('../../../fixtures/datamodel')
+var blueprint = require ('../../../../fixtures/blueprint')
+  , datamodel = require ('../../../../fixtures/datamodel')
   , Account   = blueprint.app.models.Account
   ;
 
@@ -37,7 +37,7 @@ describe ('MeRouter', function () {
 
         // Get an access token for all requests.
         request(server.app)
-          .post('/oauth2/token').send (data)
+          .post('/v1/oauth2/token').send (data)
           .expect (200)
           .end (function (err, res) {
             if (err) return callback(err);
@@ -50,10 +50,10 @@ describe ('MeRouter', function () {
     ], done);
   });
 
-  describe ('GET /me/whoami', function () {
+  describe ('GET /v1/me/whoami', function () {
     it ('should return my user id', function (done) {
       request(server.app)
-        .get ('/me/whoami')
+        .get ('/v1/me/whoami')
         .set ('Authorization', 'Bearer ' + accessToken)
         .expect (200)
         .end (function (err, res) {
@@ -66,10 +66,10 @@ describe ('MeRouter', function () {
     });
   });
 
-  describe ('GET /me/profile', function () {
+  describe ('GET /v1/me/profile', function () {
     it ('should return my profile', function (done) {
       request(server.app)
-        .get ('/me/profile')
+        .get ('/v1/me/profile')
         .set ('Authorization', 'Bearer ' + accessToken)
         .expect (200)
         .end (function (err, res) {
@@ -83,10 +83,10 @@ describe ('MeRouter', function () {
     });
   });
 
-  describe ('POST /me/profile/image', function () {
+  describe ('POST /v1/me/profile/image', function () {
     it ('should upload my profile', function (done) {
       request(server.app)
-        .post ('/me/profile/image')
+        .post ('/v1/me/profile/image')
         .set ('Authorization', 'Bearer ' + accessToken)
         .attach ('image', 'tests/data/avatar.png')
         .expect (200, function (err, res) {
@@ -128,7 +128,7 @@ describe ('MeRouter', function () {
     });
   });
 
-  describe ('POST /me/notifications', function () {
+  describe ('POST /v1/me/notifications', function () {
     it ('should update my notification token', function (done) {
       var token = '1234567890';
       var network = 'gcm';
@@ -139,7 +139,7 @@ describe ('MeRouter', function () {
       };
 
       request(server.app)
-        .post ('/me/notifications')
+        .post ('/v1/me/notifications')
         .send (data)
         .set ('Authorization', 'Bearer ' + accessToken)
         .expect (200).expect ('true')

@@ -3,7 +3,7 @@ var blueprint = require ('@onehilltech/blueprint')
   , request   = require ('supertest')
   ;
 
-var datamodel = require ('../../../fixtures/datamodel')
+var datamodel = require ('../../../../fixtures/datamodel')
   ;
 
 describe ('Oauth2Router', function () {
@@ -21,7 +21,7 @@ describe ('Oauth2Router', function () {
   });
 
   describe('#getToken (callback)', function () {
-    var TARGET_URL = '/oauth2/token';
+    var TARGET_URL = '/v1/oauth2/token';
     var accessToken;
     var refreshToken;
 
@@ -196,7 +196,7 @@ describe ('Oauth2Router', function () {
   });
 
   describe('#logoutUser (callback)', function () {
-    const TARGET_URL = '/oauth2/logout';
+    const TARGET_URL = '/v1/oauth2/logout';
 
     var accessToken;
 
@@ -210,7 +210,7 @@ describe ('Oauth2Router', function () {
 
       // First, get an access token for the user.
       request(server.app)
-        .post('/oauth2/token').send(data)
+        .post('/v1/oauth2/token').send(data)
         .expect(200)
         .end(function (err, res) {
           if (err)
@@ -219,7 +219,7 @@ describe ('Oauth2Router', function () {
           accessToken = res.body.access_token;
 
           request (server.app)
-            .get ('/oauth2/logout')
+            .get ('/v1/oauth2/logout')
             .set ('Authorization', 'Bearer ' + accessToken)
             .expect (200, done);
       });

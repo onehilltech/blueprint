@@ -1,5 +1,5 @@
 var blueprint  = require ('@onehilltech/blueprint')
-  , gatekeeper = require ('../../lib')
+  , gatekeeper = require ('../../../lib/index')
   ;
 
 var passport  = blueprint.app.server.middleware.passport;
@@ -30,37 +30,37 @@ module.exports = exports = {
         gatekeeper.authorization.roles.any ([gatekeeper.roles.client.account.create])
       ],
       action : 'AccountController@createAccount'
-    }
-  },
+    },
 
-  '/accounts/:accountId': {
-    // Only an administrator can access the account information. The check
-    // below applies to all paths that begin with this prefix.
+    '/:accountId' : {
+      // Only an administrator can access the account information. The check
+      // below applies to all paths that begin with this prefix.
 
-    use : [
-      gatekeeper.authorization.roles.any ([gatekeeper.roles.user.administrator])
-    ],
-
-    get : { action : 'AccountController@getAccount'},
-
-    delete: {
-      before : [
-        gatekeeper.authorization.isClient (),
-        gatekeeper.authorization.roles.any ([gatekeeper.roles.client.account.delete])
+      use : [
+        gatekeeper.authorization.roles.any ([gatekeeper.roles.user.administrator])
       ],
-      action : 'AccountController@deleteAccount'
+
+      get : { action : 'AccountController@getAccount'},
+      
+      delete: {
+        before : [
+          gatekeeper.authorization.isClient (),
+          gatekeeper.authorization.roles.any ([gatekeeper.roles.client.account.delete])
+        ],
+        action : 'AccountController@deleteAccount'
+      },
+
+      '/profile' : {
+        get : { action : 'AccountController@getProfile' }
+      },
+
+      '/enable' : {
+        post : { action : 'AccountController@enableAccount' }
+      },
+
+      '/roles' : {
+        post : { action : 'AccountController@updateRoles' }
+      }
     }
-  },
-
-  '/accounts/:accountId/profile' : {
-    get : { action : 'AccountController@getProfile' }
-  },
-
-  '/accounts/:accountId/enable' : {
-    post : { action : 'AccountController@enableAccount' }
-  },
-
-  '/accounts/:accountId/roles' : {
-    post : { action : 'AccountController@updateRoles' }
-  },
+  }
 };

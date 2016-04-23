@@ -5,7 +5,7 @@ var blueprint = require ('@onehilltech/blueprint')
   , async     = require ('async')
   ;
 
-var datamodel = require ('../../../fixtures/datamodel')
+var datamodel = require ('../../../../fixtures/datamodel')
   ;
 
 describe ('AccountRouter', function () {
@@ -15,7 +15,7 @@ describe ('AccountRouter', function () {
 
   function getToken (data, callback) {
     request (server.app)
-      .post ('/oauth2/token').send (data)
+      .post ('/v1/oauth2/token').send (data)
       .expect (200)
       .end (function (err, res) {
         if (err) return callback (err);
@@ -61,10 +61,10 @@ describe ('AccountRouter', function () {
     ], done);
   });
 
-  describe ('GET /accounts', function () {
+  describe ('GET /v1/accounts', function () {
     it ('should return all the accounts', function (done) {
       request (server.app)
-        .get ('/accounts')
+        .get ('/v1/accounts')
         .set ('Authorization', 'Bearer ' + userToken)
         .expect (200)
         .end (function (err, res) {
@@ -78,7 +78,7 @@ describe ('AccountRouter', function () {
     });
   });
 
-  describe ('POST /accounts', function () {
+  describe ('POST /v1/accounts', function () {
     var data = {
       username: 'tester1',
       password: 'tester1',
@@ -98,7 +98,7 @@ describe ('AccountRouter', function () {
       });
 
       request (server.app)
-        .post ('/accounts').send (data)
+        .post ('/v1/accounts').send (data)
         .set ('Authorization', 'Bearer ' + clientToken)
         .expect (200, 'true')
         .end (function (err, res) {
@@ -117,7 +117,7 @@ describe ('AccountRouter', function () {
         if (err) return done (err);
 
         request (server.app)
-          .post ('/accounts').send (data)
+          .post ('/v1/accounts').send (data)
           .set ('Authorization', 'Bearer ' + token)
           .expect (403, done);
       });
@@ -125,12 +125,12 @@ describe ('AccountRouter', function () {
   });
 
 
-  describe ('GET /accounts/:accountId/profile', function () {
+  describe ('GET /v1/accounts/:accountId/profile', function () {
     it ('should get the account profile', function (done) {
       var account = datamodel.models.accounts[0];
 
       request (server.app)
-        .get ('/accounts/' + account.id + "/profile")
+        .get ('/v1/accounts/' + account.id + "/profile")
         .set ('Authorization', 'Bearer ' + userToken)
         .expect (200)
         .end (function (err, res) {

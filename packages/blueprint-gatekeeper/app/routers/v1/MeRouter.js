@@ -1,5 +1,5 @@
 var blueprint = require ('@onehilltech/blueprint')
-  , auth      = require ('../../lib').auth
+  , auth      = require ('../../../lib/index').auth
   ;
 
 var passport  = blueprint.app.server.middleware.passport;
