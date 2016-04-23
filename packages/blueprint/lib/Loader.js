@@ -11,8 +11,8 @@ var RouterBuilder = require ('./RouterBuilder')
   , Messaging     = require ('./Messaging')
   ;
 
-const SCM_DIRECTORIES = /^\.(git|svn)$/;
-const ROUTER_SUFFIX = 'Router.js';
+var SCM_DIRECTORIES = /^\.(git|svn)$/;
+var ROUTER_SUFFIX = 'Router.js';
 
 // The solution for endWith() is adopted from the following solution on
 // StackOverflow:
