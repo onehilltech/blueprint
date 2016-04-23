@@ -184,31 +184,46 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
   if (!currPath)
     currPath = this._basePath;
 
-  for (var key in spec) {
-    if (!spec.hasOwnProperty (key))
-      continue;
+  var specType = typeof spec;
 
-    if (key === 'use') {
-      // This is a use specification, but without a path because it is associated
-      // with the router. So, process the use specification without specifying a path.
-      processUse (currPath, spec[key]);
-    }
-    else {
-      // The first letter of the key is a hint at how to process this key's value.
-      switch (key[0]) {
-        case '/':
-          var innerPath = currPath + (currPath.endsWith ('/') ? key.slice (1) : key);
-          this.addSpecification (spec[key], innerPath);
-          break;
+  if (Array.isArray (spec) || specType === 'function') {
+    // The specification is either an array of middleware, or a previously defined
+    // router imported into this specification. An example of the latter case is
+    // someone importing a router from an existing blueprint module.
+    this._router.use (currPath, spec);
+  }
+  else if (specType === 'object') {
+    // The specification is a text-based key-value pair. We need to read each key
+    // in the specification and build the described router.
+    for (var key in spec) {
+      if (!spec.hasOwnProperty (key))
+        continue;
 
-        case ':':
-          processParam (key, spec[key]);
-          break;
+      if (key === 'use') {
+        // This is a use specification, but without a path because it is associated
+        // with the router. So, process the use specification without specifying a path.
+        processUse (currPath, spec[key]);
+      }
+      else {
+        // The first letter of the key is a hint at how to process this key's value.
+        switch (key[0]) {
+          case '/':
+            var innerPath = currPath + (currPath.endsWith ('/') ? key.slice (1) : key);
+            this.addSpecification (spec[key], innerPath);
+            break;
 
-        default:
-          processHttpVerb (key, currPath, spec[key]);
+          case ':':
+            processParam (key, spec[key]);
+            break;
+
+          default:
+            processHttpVerb (key, currPath, spec[key]);
+        }
       }
     }
+  }
+  else {
+    throw Error ('Specification must be a object, router function, or an array of router functions');
   }
 
   return this;

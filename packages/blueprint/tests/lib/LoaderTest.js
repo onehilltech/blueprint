@@ -46,7 +46,7 @@ describe ('Loader', function () {
       var routers = Loader.loadRouters (routersPath, controllers);
 
       expect (routers).to.have.deep.property ('Test').that.is.a.function;
-      expect (routers.Test.stack).to.have.length (5);
+      expect (routers.Test.stack).to.have.length (6);
 
       expect (routers).to.have.deep.property ('inner').that.is.a.object;
       expect (routers).to.have.deep.property ('inner.InnerTest').that.is.a.function;
