@@ -7,8 +7,14 @@ function TestController () {
 
 blueprint.controller (TestController);
 
-TestController.prototype.helloWorld = function (callback) {
-  return function echoName (req, res) {
+TestController.prototype.helloWorld = function () {
+  return function helloWorld (req, res) {
+    return res.status (200).send ('Hello, World!');
+  };
+};
+
+TestController.prototype.innerHelloWorld = function () {
+  return function innerHelloWorld (req, res) {
     return res.status (200).send ('Hello, World!');
   };
 };

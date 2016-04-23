@@ -7,6 +7,9 @@ var blueprint = require ('../fixtures/blueprint')
   ;
 
 describe ('Loader', function () {
+  var models;
+  var controllers;
+
   describe ('#loadModels', function () {
     // The model loader only works if we have an application in place that has
     // a database. Otherwise, the blueprint.model () method will not function
@@ -19,7 +22,8 @@ describe ('Loader', function () {
     });
 
     it ('should load the models', function () {
-      var models = Loader.loadModels (path.resolve (__dirname, '../fixtures/app/models'));
+      var modelPath = path.resolve (__dirname, '../fixtures/app/models');
+      models = Loader.loadModels (modelPath);
 
       expect (models).to.have.deep.property ('TestModel1');
       expect (models).to.have.deep.property ('inner.TestModel2');
@@ -29,10 +33,26 @@ describe ('Loader', function () {
   describe ('#loadControllers', function () {
     it ('should load the controllers', function () {
       var TestController = require ('../fixtures/app/controllers/TestController');
-      var controllers = Loader.loadControllers(path.resolve (__dirname, '../fixtures/app/controllers'));
+      controllers = Loader.loadControllers(path.resolve (__dirname, '../fixtures/app/controllers'));
 
       expect (controllers).to.have.property ('TestController');
       expect (controllers['TestController']).to.be.instanceof (TestController);
+    });
+  });
+
+  describe ('#loadRouters', function () {
+    it ('should load the routers', function () {
+      var routersPath = path.resolve (__dirname, '../fixtures/app/routers');
+      var routers = Loader.loadRouters (routersPath, controllers);
+
+      expect (routers).to.have.deep.property ('Test').that.is.a.function;
+      expect (routers.Test.stack).to.have.length (5);
+
+      expect (routers).to.have.deep.property ('inner').that.is.a.object;
+      expect (routers).to.have.deep.property ('inner.InnerTest').that.is.a.function;
+
+      expect (routers.inner.InnerTest.stack).to.have.length (5);
+      expect (routers).to.have.deep.property ('inner.InnerTest.stack[4].route.path', '/inner/helloworld2/inner2');
     });
   });
 
