@@ -13,5 +13,7 @@ module.exports = exports = {
       use: [ function innerUse (req, res, next) { }],
       get: { action: 'TestController@innerHelloWorld' }
     }
-  }
+  },
+
+  '/module' : [ function (req, res) {} ]
 };
