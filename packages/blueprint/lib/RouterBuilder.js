@@ -239,6 +239,13 @@ RouterBuilder.prototype.getRouter = function () {
 };
 
 RouterBuilder.prototype.addRouters = function (routers) {
+  for (var value in Object.values (routers)) {
+    if (typeof value === 'function')
+      this._router.use (value);
+    else
+      this.addRouters (value);
+  }
+
   return this;
 };
 
