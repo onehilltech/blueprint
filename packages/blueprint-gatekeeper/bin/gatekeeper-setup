@@ -46,7 +46,7 @@ fs.stat (dataPath, function (err, stats) {
           client_secret: client.secret
         };
 
-        var dataFile = path.resolve (process.cwd (), 'data', client.name);
+        var dataFile = path.resolve (process.cwd (), 'data', client.name + ".data");
         jsonfile.writeFile (dataFile, data, {spaces: 2}, callback);
       }, callback);
     }
