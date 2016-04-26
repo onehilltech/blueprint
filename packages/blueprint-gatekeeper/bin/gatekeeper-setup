@@ -11,67 +11,49 @@ var winston   = require ('winston')
   ;
 
 blueprint.Application (path.resolve (process.cwd (), 'app'))
-  ;
+;
 
-var Client = require ('../app/models/Client')
-  ;
+// Make sure the ./data path exist for the output.
+var dataPath = path.resolve (process.cwd (), 'data');
 
-prompt.start ();
+fs.stat (dataPath, function (err, stats) {
+  if (err && err.code === 'ENOENT')
+    fs.mkdirSync (dataPath);
 
-prompt.get (['email'], function (err, result) {
-  // Create the command-line client, and the web portal client.
-  var clientData = [
-    {name: 'gatekeeper-cli', email: result.email, roles: ['account.create']},
-    {name: 'gatekeeper-webportal', email: result.email, roles: ['account.create']}
-  ];
+  // Start getting input from the user.
+  prompt.start ();
 
-  blueprint.app.database.connect (function (err) {
-    if (err)
-      throw err;
+  async.waterfall ([
+    function (callback) { blueprint.app.database.connect (callback); },
+    function (callback) { prompt.get (['email'], callback) },
 
-    function writeDataFiles (err, clients) {
-      if (err)
-        throw err;
+    // Create each of the clients in the database.
+    function (result, callback) {
+      var Client = blueprint.app.models.Client;
 
-      var dataFiles = [
-        'data/gatekeeper-cli.data',
-        'data/gatekeeper-webportal.data'
+      var data = [
+        {name: 'gatekeeper-cli', email: result.email, roles: ['account.create']},
+        {name: 'gatekeeper-webportal', email: result.email, roles: ['account.create']}
       ];
 
-      async.forEachOf (dataFiles, function (filename, key, callback) {
-        var index = parseInt (key);
+      Client.create (data, callback);
+    },
 
+    function (clients, callback) {
+      async.each (clients, function (client, callback) {
         var data = {
-          client_id: clients[index].id,
-          client_secret: clients[index].secret
+          client_id: client.id,
+          client_secret: client.secret
         };
 
-        var dataFile = path.resolve(process.cwd (), filename);
+        var dataFile = path.resolve (process.cwd (), 'data', client.name);
         jsonfile.writeFile (dataFile, data, {spaces: 2}, callback);
-      }, function (err) {
-        if (err) throw err;
-        process.exit (0);
-      });
+      }, callback);
     }
+  ], function (err) {
+    if (err)
+      winston.log ('error', err);
 
-    Client.create (clientData, function (err, clients) {
-      if (err) throw err;
-
-      // Write the client_id and client_secret to the data directory.
-      var dataPath = path.resolve (process.cwd (), 'data');
-
-      fs.stat (dataPath, function (err, stats) {
-        if (err && err.code === 'ENOENT')
-          return fs.mkdir (dataPath, function (err) {
-            return writeDataFiles (err, clients);
-          });
-
-        if (err) throw err;
-
-        if (stats.isDirectory ())
-          writeDataFiles (null, clients);
-      });
-    });
+    process.exit (!err ? 0 : 1);
   });
 });
-
