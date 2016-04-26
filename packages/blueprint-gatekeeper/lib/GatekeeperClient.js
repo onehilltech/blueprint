@@ -92,7 +92,7 @@ function newInstance (opts, callback) {
       return callback (err);
 
     if (res.statusCode !== 200)
-      return callback (null, new Error (body));
+      return callback (new Error (body));
 
     var token = body.access_token;
     var client = new GatekeeperClient (opts, token);
