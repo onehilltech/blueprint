@@ -10,8 +10,10 @@ var winston   = require ('winston')
   , fs        = require ('fs')
   ;
 
-blueprint.Application (path.resolve (process.cwd (), 'app'))
-;
+blueprint.Application (path.resolve (process.cwd (), 'app'));
+
+var Client = require ('../app/models/Client')
+  ;
 
 // Make sure the ./data path exist for the output.
 var dataPath = path.resolve (process.cwd (), 'data');
@@ -29,8 +31,6 @@ fs.stat (dataPath, function (err, stats) {
 
     // Create each of the clients in the database.
     function (result, callback) {
-      var Client = blueprint.app.models.Client;
-
       var data = [
         {name: 'gatekeeper-cli', email: result.email, roles: ['account.create']},
         {name: 'gatekeeper-webportal', email: result.email, roles: ['account.create']}
