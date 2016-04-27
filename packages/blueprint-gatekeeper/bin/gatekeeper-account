@@ -22,7 +22,7 @@ var gatekeeper = require ('../lib')
  */
 function getGatekeeperClient (callback) {
   // Load the client information.
-  var dataFile = path.resolve (process.cwd (), 'data/gatekeeper-cli.data');
+  var dataFile = path.resolve (process.cwd (), 'data/gatekeeper-cli');
 
   jsonfile.readFile (dataFile, function (err, obj) {
     if (err) throw err;
