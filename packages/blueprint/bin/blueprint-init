@@ -13,10 +13,6 @@ const TEMPLATE_SUFFIX = '.tmpl';
 
 program
   .option ('-n, --name <name>', '[name] of the web application')
-  .option ('--author [author]', '[author] of the web application [Blueprint.js]', 'Blueprint.js')
-  .option ('--description [desc]', '[description] of the web application [a Blueprint.js web application]', 'a Blueprint.js web application')
-  .option ('--version [x.y.z]', 'initial version number [0.0.0]', '0.0.0')
-  .option ('-o, --path [path]', 'output directory [./]', './')
   .parse (process.argv);
 
 winston.log ('info', 'target output: %s', program.path);
