@@ -29,5 +29,10 @@ Then, start the web application:
 
     node ./app
     
+Open your browser, and go to http://localhost:5000/helloworld
+
+Next Steps
+-----------------
+    
 See our [Wiki](https://github.com/onehilltech/blueprint/wiki) for more details 
 on using Blueprint.
