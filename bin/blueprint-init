@@ -13,6 +13,7 @@ const TEMPLATE_SUFFIX = '.tmpl';
 
 program
   .option ('-n, --name <name>', '[name] of the web application')
+  .option ('-o, --path [path]', 'output directory [./]', './')
   .parse (process.argv);
 
 winston.log ('info', 'target output: %s', program.path);
