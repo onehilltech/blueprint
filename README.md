@@ -29,7 +29,7 @@ Then, start the web application:
 
     node ./app
     
-Open your browser, and go to http://localhost:5000/helloworld
+Open your browser, and go to [http://localhost:5000/helloworld](http://localhost:5000/helloworld).
 
 Next Steps
 -----------------
