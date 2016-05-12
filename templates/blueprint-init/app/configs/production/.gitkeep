@@ -2,7 +2,7 @@ module.exports = exports = {
   middleware : {
     session: {
       cookie: {
-        secure: false
+        secure: true
       },
       secret: '123abc',
       resave: true,

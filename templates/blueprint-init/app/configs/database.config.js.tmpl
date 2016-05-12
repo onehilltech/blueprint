@@ -1,4 +1,9 @@
+var blueprint = require ('@onehilltech/blueprint')
+  ;
+
 module.exports = exports = {
+  connstr: 'mongodb://localhost/{{project.name}}_' + blueprint.env,
+
   options : {
     db: {
       native_parser: true,
