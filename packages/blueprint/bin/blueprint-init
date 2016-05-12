@@ -24,10 +24,7 @@ var packageInfo = require (path.resolve (__dirname, '../package.json'));
 var view = {
   blueprint : packageInfo,
   project : {
-    name   : program.name,
-    author : program.author,
-    description : program.description,
-    version : program.version
+    name   : program.name
   }
 };
 
