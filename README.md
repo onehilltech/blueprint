@@ -13,21 +13,19 @@ A lightweight, simple, elegant framework for building mean applications
 * Encapsulate application logic into reusable components
 * Compose Blueprint applications from other Blueprint applications
 
-Installation
-----------------
-
-    npm install @onehilltech/blueprint --save
-    
 Getting Started
 ----------------
 
-First, generate the template for your mean web application, install the dependencies, 
-and install the blueprint binaries into the workspace. If you install Blueprint in 
-the global space, then you do not need to manually install the Blueprint binaries.
+Install Blueprint package into your application:
 
-    blueprint init [--path=PATH]
+    npm install @onehilltech/blueprint --save
+    npm bin
+    
+Add `./node_modules/.bin` to your `PATH`, and install Blueprint application:
 
-Then, just start the web application:
+    blueprint init --name=[name_of_application]
+
+Then, start the web application:
 
     node ./app
     
