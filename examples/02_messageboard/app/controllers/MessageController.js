@@ -66,7 +66,7 @@ MessageController.prototype.postMessage = function (callback) {
 
       return callback (util.inspect (req.validationErrors (true)));
     },
-    execute: function (req, res, next) {
+    execute: function (req, res) {
       var msg = new Message ({
         title: req.body.title,
         content: req.body.content
