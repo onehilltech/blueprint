@@ -13,8 +13,8 @@ Features
 
 * Bootstrap common functionality from configurations
 * Separation of concerns to maximize reuse of core business logic
-* Quickly bind routes to controller functionality
-* Customize  behavior and configuration based on execution environment
+* Declarative approach to binding routes to controllers
+* Customize behavior and configuration based on execution environment
 * Encapsulate application logic into reusable components
 * Compose Blueprint applications from other Blueprint applications
 
