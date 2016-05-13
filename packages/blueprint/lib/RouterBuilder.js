@@ -135,12 +135,24 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
           // need. If either fails, then execution stops here.
           if (result.validate) {
             var validate = result.validate;
-            middleware.push (function __validate (req, res, next) { return validate (req, next); });
+
+            middleware.push (function __validate (req, res, next) {
+              return validate (req, function (err) {
+                if (!err) return next ();
+                return next (util.inspect (err));
+              });
+            });
           }
 
           if (result.sanitize) {
             var sanitize = result.sanitize;
-            middleware.push (function __sanitize (req, res, next) { return sanitize (req, next); });
+            
+            middleware.push (function __sanitize (req, res, next) {
+              return sanitize (req, function (err) {
+                if (!err) return next ();
+                return next (util.inspect (err));
+              });
+            });
           }
         }
 
