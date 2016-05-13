@@ -1,6 +1,7 @@
 var express = require ('express')
   , winston = require ('winston')
   , util    = require ('util')
+  , async   = require ('async')
   ;
 
 /**
@@ -128,11 +129,28 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
         if (!result.execute)
           throw new Error ('Controller method must define an \'execute\' property');
 
-        if (result.validate)
-          middleware.push (result.validate);
+        if (result.validate || result.sanitize) {
+          // This controller method needs to validate and/or sanitize the input. We
+          // are going to add a new function to the middleware stack to handle this
+          // need. If either fails, then execution stops here.
+          var tasks = [];
 
-        if (result.sanitize)
-          middleware.push (result.sanitize);
+          if (result.validate) {
+            var validate = result.validate;
+            tasks.push (function (callback) { validate (res, callback); });
+          }
+
+          if (result.sanitize) {
+            var sanitize = result.sanitize;
+            tasks.push (function (callback) { sanitize (res, callback); });
+          }
+
+          middleware.push (function (req, res, next) {
+            async.waterfall (tasks, function (err) {
+              return next (err);
+            });
+          });
+        }
 
         // Lastly, push the execution function onto the middleware stack.
         middleware.push (result.execute);
