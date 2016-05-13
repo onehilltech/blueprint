@@ -133,16 +133,14 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
           // This controller method needs to validate and/or sanitize the input. We
           // are going to add a new function to the middleware stack to handle this
           // need. If either fails, then execution stops here.
-          var tasks = [];
-
           if (result.validate) {
             var validate = result.validate;
-            tasks.push (function (callback) { validate (res, callback); });
+            middleware.push (function __validate (req, res, next) { return validate (req, next); });
           }
 
           if (result.sanitize) {
             var sanitize = result.sanitize;
-            tasks.push (function (callback) { sanitize (res, callback); });
+            middleware.push (function __sanitize (req, res, next) { return sanitize (req, next); });
           }
 
           middleware.push (function (req, res, next) {
