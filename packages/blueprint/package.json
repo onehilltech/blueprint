@@ -37,10 +37,15 @@
     "blueprint": "./bin/blueprint"
   },
   "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive tests/lib --reporter spec"
+    "test": "env NODE_ENV=test mocha --recursive tests/lib --reporter spec",
+    "cover": "istanbul cover _mocha --recursive tests/lib",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "devDependencies": {
     "chai": "^3.2.0",
-    "mocha": "^2.4.5"
+    "coveralls": "^2.11.9",
+    "istanbul": "^0.4.3",
+    "mocha": "^2.4.5",
+    "mocha-lcov-reporter": "^1.2.0"
   }
 }
