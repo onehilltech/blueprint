@@ -1,4 +1,5 @@
 var blueprint = require ('@onehilltech/blueprint')
+  , util      = require ('util')
   ;
 
 var Message = require ('../models/Message')
@@ -57,15 +58,15 @@ MessageController.prototype.postMessage = function (callback) {
       req.checkBody ('title', 'required').notEmpty ();
       req.checkBody ('content', 'required').notEmpty ();
 
-      return callback (req.validationErrors (true));
+      return callback (util.inspect (req.validationErrors (true)));
     },
     sanitize: function (req, callback) {
       req.sanitizeBody ('title').escape ().trim ();
       req.sanitizeBody ('content').escape ().trim ();
 
-      return callback ();
+      return callback (util.inspect (req.validationErrors (true)));
     },
-    execute: function (req, res) {
+    execute: function (req, res, next) {
       var msg = new Message ({
         title: req.body.title,
         content: req.body.content
