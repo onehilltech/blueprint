@@ -142,12 +142,6 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
             var sanitize = result.sanitize;
             middleware.push (function __sanitize (req, res, next) { return sanitize (req, next); });
           }
-
-          middleware.push (function (req, res, next) {
-            async.waterfall (tasks, function (err) {
-              return next (err);
-            });
-          });
         }
 
         // Lastly, push the execution function onto the middleware stack.
