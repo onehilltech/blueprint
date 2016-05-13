@@ -6,6 +6,9 @@ Blueprint
 [![Dependencies](https://david-dm.org/onehilltech/blueprint.svg)](https://david-dm.org/onehilltech/blueprint)
 [![Coverage Status](https://coveralls.io/repos/github/onehilltech/blueprint/badge.svg?branch=master)](https://coveralls.io/github/onehilltech/blueprint?branch=master)
 
+Features
+--------
+
 A lightweight, simple, elegant framework for building mean applications
 
 * Bootstrap common functionality from configurations
