@@ -52,18 +52,32 @@ MessageController.prototype.getMessage = function (callback) {
 MessageController.prototype.postMessage = function (callback) {
   var self = this;
 
-  return function (req, res) {
-    var msg = new Message ({
-      title : req.body.title,
-      content : req.body.content
-    });
+  return {
+    validate: function (req, callback) {
+      req.checkBody ('title', 'required').notEmpty ();
+      req.checkBody ('content', 'required').notEmpty ();
 
-    msg.save (function (err, msg) {
-      if (err)
-        return self.handleError (err, res, 500, 'Failed to save message', callback);
+      return callback (req.validationErrors (true));
+    },
+    sanitize: function (req, callback) {
+      req.sanitizeBody ('title').escape ().trim ();
+      req.sanitizeBody ('content').escape ().trim ();
 
-      return res.status (200).json (msg.id);
-    });
+      return callback ();
+    },
+    execute: function (req, res) {
+      var msg = new Message ({
+        title: req.body.title,
+        content: req.body.content
+      });
+
+      msg.save (function (err, msg) {
+        if (err)
+          return self.handleError (err, res, 500, 'Failed to save message', callback);
+
+        return res.status (200).json (msg.id);
+      });
+    }
   };
 };
 

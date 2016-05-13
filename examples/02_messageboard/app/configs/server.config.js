@@ -10,8 +10,10 @@ module.exports = exports = {
       json :  {}
     },
 
+    validator: {},
+
     statics : [
       '../public_html'
     ]
-  },
+  }
 };
