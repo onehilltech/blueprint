@@ -4,6 +4,9 @@ var express = require ('express')
   , async   = require ('async')
   ;
 
+var HttpError = require ('./errors/HttpError')
+  ;
+
 /**
  * @class MethodCall
  *
@@ -130,27 +133,45 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
           throw new Error ('Controller method must define an \'execute\' property');
 
         if (result.validate || result.sanitize) {
+          function handleError (err, res, next) {
+            var errType = typeof err;
+
+            if (errType === 'string') {
+              res.status (400).send (err);
+            }
+            else if (errType === 'object') {
+              if (err instanceof HttpError) {
+                res.status (err.statusCode).send (err.message);
+              }
+              else {
+                res.status (400).send (util.inspect (err));
+              }
+            }
+
+            return next ('route');
+          }
+
           // This controller method needs to validate and/or sanitize the input. We
           // are going to add a new function to the middleware stack to handle this
           // need. If either fails, then execution stops here.
           if (result.validate) {
             var validate = result.validate;
 
-            middleware.push (function __validate (req, res, next) {
+            middleware.push (function __blueprint_validate (req, res, next) {
               return validate (req, function (err) {
                 if (!err) return next ();
-                return next (util.inspect (err));
+                return handleError (err, res, next);
               });
             });
           }
 
           if (result.sanitize) {
             var sanitize = result.sanitize;
-            
-            middleware.push (function __sanitize (req, res, next) {
+
+            middleware.push (function __blueprint_sanitize (req, res, next) {
               return sanitize (req, function (err) {
                 if (!err) return next ();
-                return next (util.inspect (err));
+                return handleError (err, res, next);
               });
             });
           }

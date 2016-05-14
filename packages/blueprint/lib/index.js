@@ -112,19 +112,4 @@ exports.include = function (moduleName, appModulePath) {
   Framework().app.addModule (moduleName, appModulePath);
 };
 
-var testing;
-
-/**
- * Get the testing module. This module is loaded on demand since it is only valid
- * when we are running tests.
- */
-Object.defineProperty (exports, 'testing', {
-  get : function () {
-    if (testing)
-      return testing;
-
-    testing = require ('./testing');
-    return testing;
-  }
-});
-
+exports.errors = require ('./errors');
