@@ -1,6 +1,8 @@
 Blueprint
 ================
 
+A lightweight, simple, elegant framework for building mean applications
+
 [![npm version](https://img.shields.io/npm/v/@onehilltech/blueprint.svg?maxAge=2592000)](https://www.npmjs.com/package/@onehilltech/blueprint)
 [![Build Status](https://travis-ci.org/onehilltech/blueprint.svg?branch=master)](https://travis-ci.org/onehilltech/blueprint)
 [![Dependencies](https://david-dm.org/onehilltech/blueprint.svg)](https://david-dm.org/onehilltech/blueprint)
@@ -9,12 +11,10 @@ Blueprint
 Features
 --------
 
-A lightweight, simple, elegant framework for building mean applications
-
 * Bootstrap common functionality from configurations
 * Separation of concerns to maximize reuse of core business logic
-* Quickly bind routes to controller functionality
-* Customize  behavior and configuration based on execution environment
+* Declarative approach to binding routes to controllers
+* Customize behavior and configuration based on execution environment
 * Encapsulate application logic into reusable components
 * Compose Blueprint applications from other Blueprint applications
 
