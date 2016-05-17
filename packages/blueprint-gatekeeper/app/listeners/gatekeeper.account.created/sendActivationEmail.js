@@ -46,6 +46,10 @@ bm.on ('app.init', function (app) {
  * @param account
  */
 function sendActivationEmail (account) {
+  // Do not continue if we have no email configuration.
+  if (!gatekeeperConfig.email)
+    return;
+
   var email = account.profile.email;
 
   uid (DEFAULT_TOKEN_LENGTH, function (err, token) {
