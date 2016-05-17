@@ -130,7 +130,7 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
         // The user elects to have separate validation, sanitize, and execution
         // section for the controller method. There must be a execution function.
         if (!result.execute)
-          throw new Error (util.format ('Controller method must define an \'execute\' property [%s %s]', verbFunc, currPath));
+          throw new Error (util.format ('Controller method must define an \'execute\' property [%s %s]', verb, currPath));
 
         if (result.validate || result.sanitize) {
           function handleError (err, res, next) {
