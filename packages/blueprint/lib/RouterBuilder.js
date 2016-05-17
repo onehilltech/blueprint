@@ -122,7 +122,7 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
       var result = controller.invoke ();
       var resultType = typeof result;
 
-      if (resultType === 'function') {
+      if (resultType === 'function' || Array.isArray (result)) {
         // Push the function onto the middleware stack.
         middleware.push (result);
       }
