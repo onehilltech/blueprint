@@ -1,5 +1,8 @@
+var blueprint = require ('@onehilltech/blueprint')
+  ;
+
 module.exports = exports = {
-  connstr: 'mongodb://localhost/blueprint_unit_tests',
+  connstr: 'mongodb://localhost/blueprint_examples_resources_' + blueprint.env,
 
   options : {
     db: {

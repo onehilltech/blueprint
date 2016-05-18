@@ -9,6 +9,7 @@ describe ('index', function () {
         'Application',
         'ApplicationModule',
         'BaseController',
+        'ResourceController',
         'controller',
         'model',
         'destroy',

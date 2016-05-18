@@ -1,6 +1,7 @@
 module.exports = exports = {
   ':param1' : { property: 'param1' },
   ':param2' : { property: 'param2' },
+  ':personId': { property: 'personId' },
 
   use: [ function routerUse (req, res, next) { }],
 

@@ -1,0 +1,12 @@
+module.exports = exports = {
+  middleware : {
+    session: {
+      cookie: {
+        secure: true
+      },
+      secret: '123abc',
+      resave: true,
+      saveUninitialized: true
+    }
+  }
+};
