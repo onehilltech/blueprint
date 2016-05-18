@@ -8,6 +8,10 @@ module.exports = exports = {
   middleware : {
     validator  : { },
     bodyParser : { json : { } },
-    passport   : {  }
+    passport   : {  },
+    morgan: {
+      format: 'dev',
+      immediate: true
+    }
   }
 };
