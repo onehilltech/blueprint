@@ -10,6 +10,7 @@ module.exports = exports = new blueprint.ApplicationModule ('com.onehilltech.gat
 // Export the authentication package.
 exports.auth = require ('./authentication');
 exports.authentication = exports.auth;
-exports.newClient = require ('./GatekeeperClient');
 exports.authorization = require ('./authorization');
+exports.blueprint = require ('./blueprint');
+exports.newClient = require ('./GatekeeperClient');
 exports.roles = require ('./roles');
