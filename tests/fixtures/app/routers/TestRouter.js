@@ -8,7 +8,7 @@ module.exports = exports = {
   '/helloworld' : {
     use: [ function outerUse (req, res, next) { }],
 
-    get: { action: 'TestController@helloWorld' },
+    get: { action: 'TestController@helloWorld', options: {debug: true} },
 
     '/inner' : {
       use: [ function innerUse (req, res, next) { }],
