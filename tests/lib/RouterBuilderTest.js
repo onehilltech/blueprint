@@ -195,12 +195,11 @@ describe ('RouterBuilder', function () {
 
       it ('should not retrieve all the resources', function (done) {
         request (server.app)
-          .get ('/allow')
+          .delete ('/allow')
           .expect (404, done);
       });
     });
 
-    // allowed routing...
     describe ('property: deny', function () {
 
       // deny: delete
