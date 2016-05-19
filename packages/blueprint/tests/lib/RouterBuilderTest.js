@@ -167,5 +167,69 @@ describe ('RouterBuilder', function () {
         .delete ('/persons/' + id)
         .expect (404, done);
     });
+
+    // allowed routing...
+    describe ('property: allow', function () {
+
+      // allow: create, getOne
+
+      it ('should create a new resource', function (done) {
+        request (server.app)
+          .post ('/allow')
+          .send ({first_name: 'James', last_name: 'Hill'})
+          .expect (200)
+          .end (function (err, res) {
+            if (err) return done (err);
+
+            id = res.body._id;
+
+            return done ();
+          });
+      });
+
+      it ('should get a single resource', function (done) {
+        request (server.app)
+          .get ('/allow/' + id)
+          .expect (200, done);
+      });
+
+      it ('should not retrieve all the resources', function (done) {
+        request (server.app)
+          .get ('/allow')
+          .expect (404, done);
+      });
+    });
+
+    // allowed routing...
+    describe ('property: deny', function () {
+
+      // deny: delete
+
+      it ('should create a new resource', function (done) {
+        request (server.app)
+          .post ('/deny')
+          .send ({first_name: 'James', last_name: 'Hill'})
+          .expect (200)
+          .end (function (err, res) {
+            if (err) return done (err);
+
+            id = res.body._id;
+
+            return done ();
+          });
+      });
+
+      it ('should get a single resource', function (done) {
+        request (server.app)
+          .get ('/deny/' + id)
+          .expect (200, done);
+      });
+
+      it ('should not delete the resource', function (done) {
+        request (server.app)
+          .delete ('/deny')
+          .expect (404, done);
+      });
+    });
   });
 });
