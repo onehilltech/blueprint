@@ -9,7 +9,7 @@
     "url": "https://github.com/onehilltech/gatekeeper.git"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^0.29.3",
+    "@onehilltech/blueprint": "onehilltech/blueprint",
     "bcrypt": "^0.8.5",
     "commander": "^2.9.0",
     "cors": "^2.7.1",
@@ -27,7 +27,6 @@
     "pug": "^2.0.0-alpha6",
     "request": "^2.65.0",
     "uid-safe": "^2.0.0",
-    "underscore": "^1.8.3",
     "winston": "^0.7.3",
     "yargs": "^3.29.0"
   },

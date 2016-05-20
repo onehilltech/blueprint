@@ -3,80 +3,32 @@ var winston     = require ('winston')
   , blueprint   = require ('@onehilltech/blueprint')
   ;
 
-var Client      = require ('../models/Client')
-  , Account     = require ('../models/Account')
-  , AccessToken = require ('../models/oauth2/AccessToken')
+var Client      = require ('../../models/Client')
+  , Account     = require ('../../models/Account')
+  , AccessToken = require ('../../models/oauth2/AccessToken')
   ;
 
 /**
- * @class Oauth2Controller
+ * @class WorkflowController
  *
- * The Oauth2Controller provides methods for binding OAuth 2.0 routes to its implementation of
- * the OAuth 2.0 protocol.
+ * The WorkflowController provides methods for binding OAuth 2.0 routes to its
+ * implementation of the OAuth 2.0 protocol.
  *
  * @param models
  * @constructor
  */
-function Oauth2Controller () {
+function WorkflowController () {
   blueprint.BaseController.call (this);
 }
 
-blueprint.controller (Oauth2Controller);
-
-/**
- * Lookup a client by param.
- *
- * @returns {Function}
- */
-Oauth2Controller.prototype.lookupClientByParam = function () {
-  var self = this;
-
-  return function (req, res, next, clientId) {
-    winston.info ('searching for client ' + clientId);
-
-    self._clientModel.findById (clientId, function (err, client) {
-      if (err)
-        return next (err);
-
-      if (!client)
-        return next (new Error ('Client does not exist'));
-
-      req.client = client;
-      return next ();
-    });
-  };
-};
-
-/**
- * Lookup a token by id.
- *
- * @returns {Function}
- */
-Oauth2Controller.prototype.lookupTokenByParam = function () {
-  var self = this;
-
-  return function (req, res, next, tokenId) {
-    winston.info ('searching for token ' + tokenId);
-
-    self._accessTokenModel.findById (tokenId, function (err, token) {
-      if (err)
-        return next (err);
-
-      if (!token)
-        return next (new Error ('token does not exist'))
-
-      req.clientToken = token;
-      next ();
-    });
-  };
-};
+blueprint.controller (WorkflowController);
 
 /**
  * Logout a user. After this method returns, the token is no longer valid.
  *
  * @returns {*[]}
  */
-Oauth2Controller.prototype.logoutUser = function (callback) {
+WorkflowController.prototype.logoutUser = function (callback) {
   var self = this;
 
   return function (req, res) {
@@ -92,141 +44,13 @@ Oauth2Controller.prototype.logoutUser = function (callback) {
 };
 
 /**
- * Delete a client from the database.
- *
- * @returns {Function}
- */
-Oauth2Controller.prototype.deleteClient = function () {
-  return function (req, res) {
-    if (!req.client)
-      return res.status (404).send ();
-
-    var client = req.client;
-    client.remove (function (err) {
-      return res.send (200, err ? false : true);
-    });
-  };
-};
-
-Oauth2Controller.prototype.refreshSecret = function () {
-  return function (req, res) {
-    if (!req.client)
-      return res.status (404).send ();
-
-    var newSecret = uid.sync (SECRET_LENGTH);
-    var client = req.client;
-
-    // Update the secret, save it, and return it to the client.
-    client.secret = newSecret;
-    client.save (function (err) {
-      return res.status (200).send (newSecret);
-    });
-  };
-}
-
-Oauth2Controller.prototype.updateClient = function () {
-  return function (req, res) {
-    if (!req.client)
-      return res.status (404).send ();
-
-    var client = req.client;
-    client.name = req.body.name;
-    client.redirect_uri = req.body.redirect_uri;
-    client.email = req.body.email;
-
-    client.save (function (err) {
-      res.status (200).send (err ? false : true);
-    });
-  }
-};
-
-Oauth2Controller.prototype.enableClient = function () {
-  return function (req, res) {
-    if (!req.client)
-      return res.status (404).send ();
-
-    req.checkBody ('enabled', 'Enabled is a required Boolean').notEmpty ().isBoolean ();
-
-    var errors = req.validationErrors ();
-
-    if (errors)
-      return res.status (400).send (errors);
-
-    // Sanitize the parameters.
-    req.sanitizeBody ('enabled').toBoolean ();
-
-    // Update the client, and save it.
-    var client = req.client;
-    client.enabled = req.body.enabled;
-
-    client.save (function (err) {
-      res.status (200).send (err ? false : true);
-    });
-  };
-};
-
-Oauth2Controller.prototype.enableToken = function () {
-  return function (req, res) {
-    if (!req.clientToken)
-      return res.status (404).send ();
-
-    req.checkBody ('enabled', 'Enabled is a required Boolean').notEmpty ().isBoolean ();
-
-    var errors = req.validationErrors ();
-
-    if (errors)
-      return res.status (400).send (errors);
-
-    // Sanitize the parameters.
-    req.sanitizeBody ('enabled').toBoolean ();
-
-    // Update the client, and save it.
-    var token = req.clientToken;
-    winston.info ('enabling access token %s [state=%s]', token.id, req.body.enabled);
-
-    token.enabled = req.body.enabled;
-    token.save (function (err) {
-      if (err)
-        winston.error (err);
-
-      res.status (200).send (err ? false : true);
-    });
-  };
-};
-
-/**
- * Delete an access token.
- *
- * @param callback
- * @returns {Function}
- */
-Oauth2Controller.prototype.deleteToken = function (callback) {
-  var self = this;
-
-  return function (req, res) {
-    if (!req.clientToken)
-      return self.handleError (null, res, 404, 'Token does not exist', callback);
-
-    var token = req.clientToken;
-    winston.info ('deleting access token %s', token.id);
-
-    token.remove (function (err) {
-      if (err)
-        return self.handleError (err, res, 500, 'Failed to delete token', callback);
-
-      return res.status (200).send (true);
-    });
-  };
-};
-
-/**
  * Get the access token. The exchange workflow depends on the grant_type
  * body parameter.
  *
  * @param callback
  * @returns {Function}
  */
-Oauth2Controller.prototype.getToken = function (callback) {
+WorkflowController.prototype.issueToken = function (callback) {
   var self = this;
 
   function grantToken (res, accessToken) {
@@ -254,7 +78,7 @@ Oauth2Controller.prototype.getToken = function (callback) {
 
       done (client);
     });
-  };
+  }
 
   /**
    * Implementation of the client_credentials grant type.
@@ -355,8 +179,8 @@ Oauth2Controller.prototype.getToken = function (callback) {
    * @param res
    */
   function refresh_token (req, res) {
-    req.checkBody ('client_id', 'required').notEmpty();
-    req.checkBody ('refresh_token', 'required').notEmpty();
+    req.checkBody ('client_id', 'required').notEmpty ();
+    req.checkBody ('refresh_token', 'required').notEmpty ();
 
     var errs = req.validationErrors (true);
 
@@ -368,7 +192,7 @@ Oauth2Controller.prototype.getToken = function (callback) {
     var refreshToken = req.body.refresh_token;
 
     AccessToken
-      .findOne ({refresh_token: refreshToken, client : clientId})
+      .findOne ({refresh_token: refreshToken, client: clientId})
       .populate ('account client')
       .exec (function (err, at) {
         if (err)
@@ -398,32 +222,31 @@ Oauth2Controller.prototype.getToken = function (callback) {
 
           grantToken (res, at);
         });
-    });
+      });
   }
 
-  return function (req, res) {
-    req.checkBody ('grant_type', 'required').notEmpty ();
-    var errs = req.validationErrors (true);
+  var grantTypes = {
+    'password': password,
+    'client_credentials': client_credentials,
+    'refresh_token': refresh_token
+  };
 
-    if (errs)
-      return self.handleError (null, res, 400, errs, callback);
+  return {
+    validate: function (req, callback) {
+      req.checkBody ('grant_type', 'required').notEmpty ().isIn (Object.keys (grantTypes));
+      return callback (req.validationErrors (true));
+    },
 
-    var grantTypes = {
-      'password' : password,
-      'client_credentials' : client_credentials,
-      'refresh_token' : refresh_token
-    };
+    execute: function (req, res) {
 
-    // Locate the handler for the grant type.
-    var grantType = req.body.grant_type;
-    var granter = grantTypes[grantType];
+      // Locate the handler for the grant type.
+      var grantType = req.body.grant_type;
+      var grantFunc = grantTypes[grantType];
 
-    if (!granter)
-      return self.handleError (null, res, 400, 'Unsupported grant type', callback);
-
-    // Handle the token request.
-    granter (req, res);
-  }
+      // Handle the token request.
+      return grantFunc (req, res);
+    }
+  };
 };
 
-exports = module.exports = Oauth2Controller;
+exports = module.exports = WorkflowController;

@@ -1,8 +1,8 @@
 var blueprint = require ('@onehilltech/blueprint')
-  , auth      = require ('../../../lib/index').auth
+  , passport  = require ('passport')
+  , auth      = require ('../../../lib/authentication')
   ;
 
-var passport  = blueprint.app.server.middleware.passport;
 passport.use (auth.bearer ());
 
 module.exports = exports = {

@@ -1,8 +1,8 @@
 var blueprint  = require ('@onehilltech/blueprint')
-  , gatekeeper = require ('../../../lib/index')
+  , passport = require ('passport')
+  , gatekeeper = require ('../../../lib')
   ;
 
-var passport  = blueprint.app.server.middleware.passport;
 passport.use (gatekeeper.auth.bearer ());
 
 module.exports = exports = {
