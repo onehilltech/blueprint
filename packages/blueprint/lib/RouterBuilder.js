@@ -1,7 +1,8 @@
 var express = require ('express')
   , winston = require ('winston')
-  , util    = require ('util')
-  , async   = require ('async')
+  , util = require ('util')
+  , async = require ('async')
+  , objectPath = require ('object-path')
   ;
 
 var HttpError = require ('./errors/HttpError')
@@ -103,7 +104,7 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
 
     // Locate the controller object in our loaded controllers. If the controller
     // does not exist, then throw an exception.
-    var controller = self._controllers[controllerName];
+    var controller = objectPath.get (self._controllers, controllerName);
 
     if (!controller)
       throw new Error (util.format ('controller %s not found', controllerName));
@@ -141,7 +142,9 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
       if (!controllerName)
         throw new Error (util.format ('Resource path %s is missing \'controller\' property', path));
 
-      if (!(self._controllers[controllerName] instanceof ResourceController))
+      var controller = objectPath.get (self._controllers, controllerName);
+
+      if (!(controller instanceof ResourceController))
         throw new Error (util.format ('%s is not an instance of ResourceController', controllerName));
 
       if (opts.allow && opts.deny)

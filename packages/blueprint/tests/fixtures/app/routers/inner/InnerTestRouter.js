@@ -3,10 +3,10 @@ module.exports = exports = {
   ':param2' : { property: 'param2' },
 
   '/helloworld2' : {
-    get: { action: 'TestController@helloWorld' },
+    get: { action: 'inner.InnerTestController@helloWorld' },
 
     '/inner2' : {
-      get: { action: 'TestController@innerHelloWorld' }
+      get: { action: 'inner.InnerTestController@innerHelloWorld' }
     }
   }
 };
