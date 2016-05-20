@@ -46,13 +46,12 @@ describe ('Loader', function () {
       var routers = Loader.loadRouters (routersPath, controllers);
 
       expect (routers).to.have.deep.property ('Test').that.is.a.function;
-      expect (routers.Test.stack).to.have.length (6);
+      expect (routers.Test.stack).to.have.length (3);
 
       expect (routers).to.have.deep.property ('inner').that.is.a.object;
       expect (routers).to.have.deep.property ('inner.InnerTest').that.is.a.function;
 
-      expect (routers.inner.InnerTest.stack).to.have.length (5);
-      expect (routers).to.have.deep.property ('inner.InnerTest.stack[4].route.path', '/inner/helloworld2/inner2');
+      expect (routers.inner.InnerTest.stack).to.have.length (2);
     });
   });
 
