@@ -2,8 +2,8 @@ var blueprint = require ('@onehilltech/blueprint')
   ;
 
 var schema = new blueprint.Schema({
-  firstname: {type: String, required: true, trim: true},
-  lastname: {type: String, required: true, trim: true},
+  first_name: {type: String, required: true, trim: true},
+  last_name: {type: String, required: true, trim: true},
 });
 
 const COLLECTION_NAME = 'person';

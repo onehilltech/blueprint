@@ -102,31 +102,13 @@ describe ('RouterBuilder', function () {
       it ('should retrieve a single resource', function (done) {
         request (server.app)
           .get ('/persons/' + id)
-          .expect (200)
-          .end (function (err, res) {
-            if (err) return done (err);
-
-            expect (res.body).to.have.keys (['_id', 'first_name', 'last_name']);
-            expect (res.body).to.have.property ('_id', id);
-            expect (res.body).to.have.property ('first_name', 'James');
-            expect (res.body).to.have.property ('last_name', 'Hill');
-
-            return done ();
-          });
+          .expect (200, {_id: id, first_name: 'James', last_name: 'Hill'}, done);
       });
 
       it ('should retrieve a list of all resources', function (done) {
         request (server.app)
           .get ('/persons')
-          .expect (200)
-          .end (function (err, res) {
-            if (err) return done (err);
-
-            expect (res.body).to.have.length (1);
-            expect (res.body[0]._id).to.equal (id);
-
-            return done ();
-          });
+          .expect (200, [{_id: id, first_name: 'James', last_name: 'Hill'}], done);
       });
 
       it ('should update a single resource', function (done) {
@@ -135,22 +117,13 @@ describe ('RouterBuilder', function () {
             request (server.app)
               .put ('/persons/' + id)
               .send ({first_name: 'Lanita', last_name: 'Hill'})
-              .expect (200, 'true', callback);
+              .expect (200, {_id: id, first_name: 'Lanita', last_name: 'Hill'}, callback);
           },
 
           function (callback) {
             request (server.app)
               .get ('/persons/' + id)
-              .expect (200)
-              .end (function (err, res) {
-                if (err) return callback (err);
-
-                expect (res.body).to.have.keys (['_id', 'first_name', 'last_name']);
-                expect (res.body).to.have.property ('first_name', 'Lanita');
-                expect (res.body).to.have.property ('last_name', 'Hill');
-
-                return callback ();
-              });
+              .expect (200, {_id: id, first_name: 'Lanita', last_name: 'Hill'}, callback);
           }
 
         ], done);
