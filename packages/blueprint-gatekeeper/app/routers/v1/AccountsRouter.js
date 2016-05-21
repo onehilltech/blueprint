@@ -7,7 +7,14 @@ passport.use (gatekeeper.auth.bearer ());
 
 module.exports = exports = {
   // Define the router properties.
-  ':accountId'    : { property : 'accountId' },
+  ':accountId' : { property : 'accountId' },
+
+  '/accounts:' : {
+    resource: {
+      id: ':accountId',
+      controller: 'AccountController'
+    }
+  },
 
   // Define the different account routes. We are going to protect all routes
   // under the /accounts base uri.

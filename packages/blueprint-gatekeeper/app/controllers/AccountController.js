@@ -1,6 +1,9 @@
-var winston   = require ('winston')
+var winston = require ('winston')
   , blueprint = require ('@onehilltech/blueprint')
-  , bm        = blueprint.messaging
+  ;
+
+var bm = blueprint.messaging
+  , ResourceController = blueprint.ResourceController
   ;
 
 var Account = require ('../models/Account')
@@ -8,18 +11,20 @@ var Account = require ('../models/Account')
   ;
 
 function AccountController () {
-
+  ResourceController.call (this);
 }
 
-blueprint.controller (AccountController);
+blueprint.controller (AccountController, ResourceController);
 
-/**
- * Get a list of the accounts in the database.
- *
- * @param callback
- * @returns {Function}
- */
-AccountController.prototype.getAccounts = function (callback) {
+AccountController.prototype.getAll = function () {
+  var options = {
+    on: {
+
+    }
+  };
+
+  return ResourceController.prototype.getAll (this, options);
+
   var self = this;
 
   return function (req, res) {
