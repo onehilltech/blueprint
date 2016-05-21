@@ -6,7 +6,26 @@ var BaseController = require ('./BaseController')
   , HttpError      = require ('./errors/HttpError')
   ;
 
+/**
+ * Test if the projection is exclusive. An exclusive projection only has to
+ * have one key that is false (or 0). Any empty projection is exclusive as well,
+ * meaning that all fields will be included.
+ *
+ * @param projection
+ * @returns {*}
+ */
+function isProjectionExclusive (projection) {
+  var keys = Object.keys (projection);
+
+  if (keys.length === 0)
+    return true;
+
+  var value = projection[keys[0]];
+  return value === false || value === 0;
+}
+
 function __onValidate (req, callback) { return callback (null); }
+function __onPrepareProjection (req, callback) { return callback (null, {}); }
 function __onUpdateFilter (filter, callback) { return callback (null, filter); }
 function __onPostExecute (result, callback) { return callback (null, result); }
 
@@ -50,7 +69,7 @@ function makeTaskCompletionHandler (res) {
 /**
  * @class ResourceController
  *
- * Base class for all resource controllers.
+ * Base class f or all resource controllers.
  *
  * @param opts
  * @constructor
@@ -85,6 +104,8 @@ ResourceController.prototype.getAll = function (opts) {
   var onUpdateFilter = on.updateFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onValidate = on.validate || __onValidate;
+  var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
+
   var self = this;
 
   return {
@@ -100,7 +121,15 @@ ResourceController.prototype.getAll = function (opts) {
         onUpdateFilter,
 
         // Now, let's search our database for the resource in question.
-        function (filter, callback) { self._model.find (filter, '-__v', makeDbCompletionHandler (callback)); },
+        function (filter, callback) {
+          onPrepareProjection (req, function (err, projection) {
+            // Do not include the version field in the projection.
+            if (isProjectionExclusive (projection))
+              projection.__v = 0;
+
+            self._model.find (filter, projection, makeDbCompletionHandler (callback));
+          });
+        },
 
         // Allow the subclass to do any post-execution analysis of the result.
         onPostExecute
@@ -122,6 +151,7 @@ ResourceController.prototype.create = function (opts) {
   var onPrepareDocument = on.prepareDocument || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onValidate = on.validate || __onValidate;
+
   var self = this;
 
   return {
@@ -166,6 +196,8 @@ ResourceController.prototype.get = function (opts) {
   var onUpdateFilter = on.updateFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onValidate = on.validate || __onValidate;
+  var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
+
   var self = this;
 
   return {
@@ -180,8 +212,20 @@ ResourceController.prototype.get = function (opts) {
         async.constant (filter),
         onUpdateFilter,
 
+        function (filter, callback) {
+          onPrepareProjection (req, function (err, projection) {
+            // Do not include the version field in the projection.
+            if (isProjectionExclusive (projection))
+              projection.__v = 0;
+
+            self._model.findOne (filter, projection, makeDbCompletionHandler (callback));
+          });
+        },
+
         // Now, let's search our database for the resource in question.
-        function (filter, callback) { self._model.findOne (filter, '-__v', makeDbCompletionHandler (callback)); },
+        function (filter, callback) {
+          self._model.findOne (filter, '-__v', makeDbCompletionHandler (callback));
+        },
 
         // Allow the subclass to do any post-execution analysis of the result.
         onPostExecute
@@ -203,6 +247,8 @@ ResourceController.prototype.update = function (opts) {
   var onUpdateFilter = on.updateFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onValidate = on.validate || __onValidate;
+  var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
+
   var self = this;
 
   return {
@@ -220,9 +266,17 @@ ResourceController.prototype.update = function (opts) {
         // Now, let's search our database for the resource in question.
         function (filter, callback) {
           var update = { $set: req.body };
-          var option = { fields: '-__v', upsert: false, new: true };
+          var option = { upsert: false, new: true };
 
-          self._model.findOneAndUpdate (filter, update, option, makeDbCompletionHandler (callback));
+          onPrepareProjection (req, function (err, projection) {
+            // Do not include the version field in the projection.
+            option.fields = projection;
+
+            if (isProjectionExclusive (projection))
+              option.fields.__v = 0;
+
+            self._model.findOneAndUpdate (filter, update, option, makeDbCompletionHandler (callback));
+          });
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
@@ -260,7 +314,9 @@ ResourceController.prototype.delete = function (opts) {
         onUpdateFilter,
 
         // Now, let's search our database for the resource in question.
-        function (filter, callback) { self._model.findOneAndRemove (filter, makeDbCompletionHandler (callback)); },
+        function (filter, callback) {
+          self._model.findOneAndRemove (filter, makeDbCompletionHandler (callback));
+        },
 
         // Allow the subclass to do any post-execution analysis of the result.
         onPostExecute,
