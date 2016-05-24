@@ -3,6 +3,7 @@ var expect = require ('chai').expect
   ;
 
 var blueprint = require ('../../../fixtures/blueprint')
+  , connect   = require ('../../../fixtures/connect')
   , Account   = require ('../../../../app/models/Account')
   , Client    = require ('../../../../app/models/Client')
   ;
@@ -32,7 +33,7 @@ describe ('Account', function () {
     async.series ([
       function (callback) {
         server = blueprint.app.server;
-        blueprint.app.database.connect (callback);
+        connect (callback);
       },
       function (cb) { Account.remove ({}, cb); },
       function (cb) { Client.remove ({}, cb); },

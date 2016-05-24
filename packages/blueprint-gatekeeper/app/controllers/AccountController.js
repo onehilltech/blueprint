@@ -1,73 +1,94 @@
-var winston = require ('winston')
-  , blueprint = require ('@onehilltech/blueprint')
-  ;
-
-var bm = blueprint.messaging
-  , ResourceController = blueprint.ResourceController
+var blueprint = require ('@onehilltech/blueprint')
+  , gatekeeper = require ('../../lib')
+  , async = require ('async')
   ;
 
 var Account = require ('../models/Account')
   , Client  = require ('../models/Client')
   ;
 
+
+var bm = blueprint.messaging
+  , ResourceController = blueprint.ResourceController
+  , HttpError = blueprint.errors.HttpError
+  ;
+
+function isClient (req, callback) {
+  return callback (null, req.user.collection.collectionName === Client.collection.collectionName);
+}
+
+function hasRole (expected, req, callback) {
+  var current = req.user.getRoles ();
+
+  async.some (expected, function (expectedRole, callback) {
+    async.some (current, function (currentRole, callback) {
+      return callback (currentRole === expectedRole);
+    }, callback);
+  }, function (result) {
+    return callback (null, result);
+  });
+}
+
 function AccountController () {
-  ResourceController.call (this);
+  ResourceController.call (this, {model: Account, id: 'accountId'});
 }
 
 blueprint.controller (AccountController, ResourceController);
 
+/**
+ * Get all the accounts in the database. Only administrators can access all the accounts
+ * in the database.
+ */
 AccountController.prototype.getAll = function () {
   var options = {
     on: {
-
+      authorize: function (req, callback) {
+        ResourceController.runChecks ([
+          ResourceController.check (hasRole, [gatekeeper.roles.user.administrator])
+        ], req, callback);
+      }
     }
   };
 
-  return ResourceController.prototype.getAll (this, options);
-
-  var self = this;
-
-  return function (req, res) {
-    Account.find ({}, '-__v -apn', function (err, accounts) {
-      if (err)
-        return self.handleError (err, res, 500, 'Cannot get requested account', callback);
-
-      return res.status (200).json (accounts);
-    });
-  };
+  return ResourceController.prototype.getAll.call (this, options);
 };
 
 /**
- * Create a new account, and store the new account in the database.
+ * Create a new account in the database.
  *
- * @param callback
- * @returns {Function}
+ * @returns {*|Object}
  */
-AccountController.prototype.createAccount = function (callback) {
-  var self = this;
+AccountController.prototype.create = function () {
+  var options = {
+    on: {
+      authorize: function (req, callback) {
+        ResourceController.runChecks ([
+          ResourceController.check (isClient),
+          ResourceController.check (hasRole, [gatekeeper.roles.client.account.create])
+        ], req, callback);
+      },
 
-  return function (req, res) {
-    // Make sure the client has the account.create role. Otherwise, the client
-    // does not have the correct privileges.
-    var client = req.user;
+      preCreate: function (req, doc, callback) {
+        // Overwrite the current document with one that matches the
+        // data model for an account.
 
-    // Create the new account, and include the client that created the account.
-    var account = new Account ({
-      access_credentials : {username : req.body.username, password : req.body.password},
-      profile: {email : req.body.email},
-      internal_use: { created_by : client }
-    });
+        doc = {
+          access_credentials : {username : req.body.username, password : req.body.password},
+          profile: {email : req.body.email},
+          internal_use: { created_by : req.user }
+        };
 
-    account.save (function (err, account) {
-      if (err)
-        return self.handleError (err, res, 500, 'Failed to create account', callback);
+        return callback (null, doc);
+      },
 
-      // Notify listeners that an account has been created.
-      bm.emit ('gatekeeper.account.created', account);
-
-      return res.status (200).json (true);
-    });
+      postExecute: function (account, callback) {
+        bm.emit ('gatekeeper.account.created', account);
+        return callback (null, account);
+      }
+    }
   };
+
+  return ResourceController.prototype.create.call (this, options);
 };
 
 /**

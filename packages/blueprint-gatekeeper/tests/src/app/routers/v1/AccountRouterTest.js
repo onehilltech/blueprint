@@ -1,11 +1,14 @@
-var blueprint = require ('@onehilltech/blueprint')
-  , bm        = blueprint.messaging
-  , request   = require ('supertest')
+var request   = require ('supertest')
   , expect    = require ('chai').expect
   , async     = require ('async')
   ;
 
 var datamodel = require ('../../../../fixtures/datamodel')
+  , blueprint = require ('../../../../fixtures/blueprint')
+  , bm = blueprint.messaging
+  ;
+
+var Account = blueprint.app.models.Account
   ;
 
 describe ('AccountRouter', function () {
@@ -24,16 +27,19 @@ describe ('AccountRouter', function () {
   }
 
   before (function (done) {
+    server = blueprint.app.server;
     async.series ([
+      // 1. apply the datamodel
       function (callback) {
-        server = blueprint.app.server;
         datamodel.apply (callback);
       },
+
+      // 2. get the user token for the tests.
       function (callback) {
         var data = {
           grant_type: 'password',
-          username: datamodel.rawModels.accounts[0].access_credentials.username,
-          password: datamodel.rawModels.accounts[0].access_credentials.password,
+          username: datamodel.data.accounts[0].access_credentials.username,
+          password: datamodel.data.accounts[0].access_credentials.password,
           client_id: datamodel.models.clients[0].id
         };
 
@@ -44,6 +50,8 @@ describe ('AccountRouter', function () {
           return callback ();
         });
       },
+
+      // 3. get a client token for the tests.
       function (callback) {
         var data = {
           grant_type: 'client_credentials',
@@ -63,18 +71,14 @@ describe ('AccountRouter', function () {
 
   describe ('GET /v1/accounts', function () {
     it ('should return all the accounts', function (done) {
-      request (server.app)
-        .get ('/v1/accounts')
-        .set ('Authorization', 'Bearer ' + userToken)
-        .expect (200)
-        .end (function (err, res) {
-          if (err) return done (err);
+      Account.find ({}, '-__v', function (err, accounts) {
+        if (err) return done (err);
 
-          var accounts = res.body;
-          expect (accounts).to.have.length (5);
-
-          return done ();
-        });
+        request (server.app)
+          .get ('/v1/accounts')
+          .set ('Authorization', 'Bearer ' + userToken)
+          .expect (200, JSON.stringify (accounts), done);
+      });
     });
   });
 
@@ -89,10 +93,12 @@ describe ('AccountRouter', function () {
       // We know the account was created when we get an event for
       // sending an account activation email.
       bm.once ('gatekeeper.email.account_activation.sent', function (account, info) {
-        
         expect (account.profile.email).to.equal (data.email);
         expect (account.internal_use.created_by.id).to.equal (datamodel.models.clients[0].id);
-        expect (info).to.be.have.keys (['id', 'message']);
+
+        expect (info).to.have.deep.property ('envelope.from', 'noreply@onehilltech.com');
+        expect (info).to.have.deep.property ('envelope.to[0]', data.email);
+        expect (info).to.have.property ('messageId');
 
         done ();
       });
@@ -100,13 +106,16 @@ describe ('AccountRouter', function () {
       request (server.app)
         .post ('/v1/accounts').send (data)
         .set ('Authorization', 'Bearer ' + clientToken)
-        .expect (200, 'true')
+        .expect (200)
         .end (function (err, res) {
           if (err) return done (err);
+          expect (res.body).to.have.keys (['_id']);
+
+          // NOTE Test is done when we receive the message that email was sent.
         });
     });
 
-    it ('should not create a new account', function (done) {
+    it ('should not create a new account [invalid role]', function (done) {
       var clientData = {
         grant_type: 'client_credentials',
         client_id: datamodel.models.clients[1].id,
@@ -121,26 +130,6 @@ describe ('AccountRouter', function () {
           .set ('Authorization', 'Bearer ' + token)
           .expect (403, done);
       });
-    })
-  });
-
-
-  describe ('GET /v1/accounts/:accountId/profile', function () {
-    it ('should get the account profile', function (done) {
-      var account = datamodel.models.accounts[0];
-
-      request (server.app)
-        .get ('/v1/accounts/' + account.id + "/profile")
-        .set ('Authorization', 'Bearer ' + userToken)
-        .expect (200)
-        .end (function (err, res) {
-          if (err) return done (err);
-
-          expect (res.body.email).to.equal (account.profile.email);
-          expect (res.body._id).to.equal (account.id);
-
-          return done ();
-        });
     });
   });
 });

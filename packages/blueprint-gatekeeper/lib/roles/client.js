@@ -1,7 +1,6 @@
 var roles = {
   account : {
-    create : 'account.create',
-    delete : 'account.delete'
+    create : 'gatekeeper.account.create'
   }
 };
 

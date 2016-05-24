@@ -14,15 +14,12 @@ describe ('ImagesRouter', function () {
   var imageId;
 
   before(function (done) {
+    server = blueprint.app.server;
+
     async.series ([
-      function (callback) {
-        server = blueprint.app.server;
-        callback ();
-      },
       function (callback) {
         datamodel.apply (function (err) {
           if (err) return callback (err);
-
           account = datamodel.models.accounts[0];
           return callback ();
         });
@@ -30,8 +27,8 @@ describe ('ImagesRouter', function () {
       function (callback) {
         var data = {
           grant_type: 'password',
-          username: datamodel.rawModels.accounts[0].access_credentials.username,
-          password: datamodel.rawModels.accounts[0].access_credentials.password,
+          username: datamodel.data.accounts[0].access_credentials.username,
+          password: datamodel.data.accounts[0].access_credentials.password,
           client_id: datamodel.models.clients[0].id
         };
 
@@ -41,7 +38,6 @@ describe ('ImagesRouter', function () {
           .expect (200)
           .end (function (err, res) {
             if (err) return callback(err);
-
             accessToken = res.body.access_token;
 
             return callback ();

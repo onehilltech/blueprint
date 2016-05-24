@@ -9,27 +9,15 @@ module.exports = exports = {
   // Define the router properties.
   ':accountId' : { property : 'accountId' },
 
-  '/accounts:' : {
-    resource: {
-      id: ':accountId',
-      controller: 'AccountController'
-    }
-  },
+  '/accounts' : {
+    use: passport.authenticate ('bearer', {session: false}),
+    resource: { id: ':accountId', controller: 'AccountController' }
+  }
 
+  /*
   // Define the different account routes. We are going to protect all routes
   // under the /accounts base uri.
   '/accounts' : {
-    use  : [
-      passport.authenticate ('bearer', {session: false})
-    ],
-
-    get : {
-      // Only an administrator can access all the accounts on the system.
-      before : [
-        gatekeeper.authorization.roles.any ([gatekeeper.roles.user.administrator])
-      ],
-      action : 'AccountController@getAccounts'
-    },
 
     post: {
       before : [
@@ -69,5 +57,5 @@ module.exports = exports = {
         post : { action : 'AccountController@updateRoles' }
       }
     }
-  }
+  }*/
 };

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "onehilltech/blueprint",
+    "async": "^1.5.2",
     "bcrypt": "^0.8.5",
     "commander": "^2.9.0",
     "cors": "^2.7.1",
@@ -17,7 +18,6 @@
     "email-templates": "^2.0.1",
     "jsonfile": "^2.2.3",
     "nodemailer": "^2.3.2",
-    "nodemailer-mailgun-transport": "^1.0.1",
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.x.x",
     "passport-oauth2-client-password": "^0.1.2",
@@ -31,9 +31,9 @@
     "yargs": "^3.29.0"
   },
   "devDependencies": {
-    "async": "^1.4.2",
     "chai": "^3.4.0",
     "mocha": "^2.2.5",
+    "nodemailer-stub-transport": "^1.0.0",
     "superagent": "^0.18.x",
     "supertest": "^1.1.0"
   },

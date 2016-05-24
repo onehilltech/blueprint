@@ -6,7 +6,6 @@ var uid           = require ('uid-safe')
   , EmailTemplate = require ('email-templates').EmailTemplate
   , path          = require ('path')
   , util          = require ('util')
-  , mailgun       = require('nodemailer-mailgun-transport')
   ;
 
 // TODO Construct the real location of the template directory.
@@ -21,7 +20,7 @@ const DEFAULT_STYLE = {
 
 var appConfig;
 var gatekeeperConfig;
-var transporter;
+var transport;
 
 /**
  * app.init
@@ -38,7 +37,7 @@ bm.on ('app.init', function (app) {
   gatekeeperConfig = app.config.gatekeeper;
 
   if (gatekeeperConfig.email)
-    transporter = nodemailer.createTransport (mailgun (gatekeeperConfig.email.nodemailer));
+    transport = nodemailer.createTransport (gatekeeperConfig.email.nodemailer);
 });
 
 /**
@@ -47,8 +46,8 @@ bm.on ('app.init', function (app) {
  * @param account
  */
 function sendActivationEmail (account) {
-  // Do not continue if we have no email transporter.
-  if (!transporter)
+  // Do not continue if we have no email transport.
+  if (!transport)
     return;
 
   var email = account.profile.email;
@@ -98,7 +97,7 @@ function sendActivationEmail (account) {
         // contain both the email address and the token for verifying the account.
         winston.log ('info', 'sending account activation email to %s', email);
 
-        transporter.sendMail (mailOptions, function (err, info){
+        transport.sendMail (mailOptions, function (err, info){
           if (err)
             return winston.log ('error', 'failed to send email: ' + err.message);
 
