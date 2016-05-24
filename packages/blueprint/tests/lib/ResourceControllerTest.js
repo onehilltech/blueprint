@@ -45,7 +45,68 @@ describe ('ResourceController', function () {
         ResourceController.check (passthrough, true),
         ResourceController.check (passthrough, false)
       ], null, function (result) {
-        expect (result).to.be.instanceof (HttpError);
+        expect (result).to.deep.equal ({ message: 'Unauthorized access', name: 'HttpError', statusCode: 403 });
+      });
+    });
+  });
+
+  describe ('#orCheck', function () {
+    it ('should pass all checks', function () {
+      ResourceController.runChecks ([
+        ResourceController.orCheck ([
+          ResourceController.check (passthrough, true),
+          ResourceController.check (passthrough, true)]
+        )
+      ], null, function (result) {
+        expect (result).to.be.undefined;
+      });
+    });
+
+    it ('should not pass all checks', function () {
+      ResourceController.runChecks ([
+        ResourceController.orCheck ([
+          ResourceController.check (passthrough, false),
+          ResourceController.check (passthrough, false)]
+        )
+      ], null, function (result) {
+        expect (result).to.deep.equal ({ message: 'Unauthorized access', name: 'HttpError', statusCode: 403 });
+      });
+    });
+  });
+
+  describe ('#andCheck', function () {
+    it ('should pass all checks', function () {
+      ResourceController.runChecks ([
+        ResourceController.andCheck ([
+          ResourceController.check (passthrough, true),
+          ResourceController.check (passthrough, true)]
+        )
+      ], null, function (result) {
+        expect (result).to.be.undefined;
+      });
+    });
+
+    it ('should pass all checks, includes nested', function () {
+      ResourceController.runChecks ([
+        ResourceController.check (passthrough, true),
+        ResourceController.check (passthrough, true),
+        ResourceController.andCheck ([
+          ResourceController.check (passthrough, true),
+          ResourceController.check (passthrough, true),
+        ])
+      ], null, function (result) {
+        expect (result).to.be.undefined;
+      });
+    });
+
+    it ('should not pass all checks', function () {
+      ResourceController.runChecks ([
+        ResourceController.andCheck ([
+          ResourceController.check (passthrough, true),
+          ResourceController.check (passthrough, false)]
+        )
+      ], null, function (result) {
+        expect (result).to.deep.equal ({ message: 'Unauthorized access', name: 'HttpError', statusCode: 403 });
       });
     });
   });

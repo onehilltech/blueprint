@@ -120,6 +120,54 @@ ResourceController.check = function () {
 };
 
 /**
+ * A set of OR checks...
+ *
+ * @param checks
+ * @returns {Function}
+ */
+ResourceController.orCheck = function (checks) {
+  return function __run_orCheck (req, callback) {
+    async.some (checks,
+      function __orCheck_iterator (check, callback) {
+        return check (req, function __orCheck_result (err, result) {
+          // Since we are using async 1.5, we need to ignore the err parameter.
+          callback (result);
+        });
+      },
+      function __orCheck_complete (result) {
+        // This is a callback from our framework. We need to pass in null as
+        // the error so we have proper behavior.
+        return callback (null, result);
+      }
+    );
+  };
+};
+
+/**
+ * A set of AND checks...
+ *
+ * @param checks
+ * @returns {Function}
+ */
+ResourceController.andCheck = function (checks) {
+  return function __run_orCheck (req, callback) {
+    async.every (checks,
+      function __orCheck_iterator (check, callback) {
+        return check (req, function __orCheck_result (err, result) {
+          // Since we are using async 1.5, we need to ignore the err parameter.
+          callback (result);
+        });
+      },
+      function __orCheck_complete (result) {
+        // This is a callback from our framework. We need to pass in null as
+        // the error so we have proper behavior.
+        return callback (null, result);
+      }
+    );
+  };
+};
+
+/**
  * Implementation of the authorize handler design to run a unique set of
  * checks to determine if the current request is authorized to access the
  * targeted resource.
