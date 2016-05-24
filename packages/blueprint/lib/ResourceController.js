@@ -30,9 +30,11 @@ function __onUpdateFilter (filter, callback) { return callback (null, filter); }
 function __onPreCreate (req, doc, callback) { return callback (null, doc); }
 function __onPostExecute (result, callback) { return callback (null, result); }
 
-function makeAuthorize (id, next) {
-  return function __blueprint_validate (req, callback) {
-    if (!req[id]) return callback (new HttpError (400, 'Missing resource id'));
+function checkIdThenAuthorize (id, next) {
+  return function __blueprint_checkIdThenAuthorize (req, callback) {
+    if (!req[id])
+      return callback (new HttpError (400, 'Missing resource id'));
+
     return next (req, callback);
   }
 }
@@ -97,6 +99,58 @@ function ResourceController (opts) {
 }
 
 util.inherits (ResourceController, BaseController);
+
+/**
+ * Factory method for creating a check function \a runChecks ().
+ *
+ * @returns {Function}
+ */
+ResourceController.check = function () {
+  var args = [].slice.call (arguments);
+  var check = args.shift ();
+
+  return function __run_check (req, callback) {
+    // Push the callback as the last argument.
+    args.push (req);
+    args.push (callback);
+
+    // Call the check.
+    return check.apply (this, args);
+  };
+};
+
+/**
+ * Implementation of the authorize handler design to run a unique set of
+ * checks to determine if the current request is authorized to access the
+ * targeted resource.
+ *
+ * @param checks
+ * @returns {Function}
+ */
+ResourceController.runChecks = function (checks, req, callback) {
+  async.every (checks, __check_iterator (req), __check_complete (callback));
+
+  function __check_result (callback) {
+    return function __check_result_impl (err, result) {
+      // Since we using async 1.5, we need to ignore the err. When we upgrade to
+      // async 2.x, we will take into account the err parameter.)
+      return callback (result);
+    }
+  }
+
+  function __check_iterator (req) {
+    return function __check_iterator_impl (check, callback) {
+      return check (req, __check_result (callback));
+    }
+  }
+
+  function __check_complete (callback) {
+    return function __check_complete_impl (result) {
+      if (!result) return callback (new HttpError (403, 'Unauthorized access'));
+      return callback ();
+    }
+  }
+};
 
 /**
  * Get a list of the resources, if not all.
@@ -208,7 +262,7 @@ ResourceController.prototype.get = function (opts) {
   var self = this;
 
   return {
-    validate: makeAuthorize (self._id, onAuthorize),
+    validate: checkIdThenAuthorize (self._id, onAuthorize),
 
     execute: function __blueprint_get_execute (req, res) {
       var rcId = req[self._id];
@@ -259,7 +313,7 @@ ResourceController.prototype.update = function (opts) {
   var self = this;
 
   return {
-    validate: makeAuthorize (self._id, onAuthorize),
+    validate: checkIdThenAuthorize (self._id, onAuthorize),
 
     execute: function __blueprint_update_execute (req, res) {
       var rcId = req[self._id];
@@ -309,7 +363,7 @@ ResourceController.prototype.delete = function (opts) {
   var self = this;
 
   return {
-    validate: makeAuthorize (self._id, onAuthorize),
+    validate: checkIdThenAuthorize (self._id, onAuthorize),
 
     execute: function __blueprint_delete (req, res) {
       var rcId = req[self._id];
