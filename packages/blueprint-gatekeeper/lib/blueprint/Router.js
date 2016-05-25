@@ -1,7 +1,6 @@
 var blueprint  = require ('@onehilltech/blueprint')
   , cors       = require ('cors')
   , winston    = require ('winston')
-  , _          = require ('underscore')
   ;
 
 var gatekeeper = require ('./../index')
@@ -37,13 +36,14 @@ module.exports = exports = function (opts) {
   // Select the router version.
   var version = 'v' + (opts.version || DEFAULT_VERSION);
 
-  var router = [cors (options)].concat (_.values (gatekeeper.routers[version]));
 
   // Get the path for the router.
-  var gatekeeperPath = opts.path || '/gatekeeper';
+  var targetPath = opts.path || '/gatekeeper';
+  var versionedRouter = gatekeeper.routers[version];
 
-  var routerBuilder = blueprint.RouterBuilder (gatekeeperPath);
-  routerBuilder.addRouters (router);
+  var routerBuilder = new blueprint.RouterBuilder (targetPath);
+  routerBuilder.addRouters (versionedRouter);
 
-  return routerBuilder.getRouter ();
+  return [cors (options)].concat (routerBuilder.getRouter ());
 };
+
