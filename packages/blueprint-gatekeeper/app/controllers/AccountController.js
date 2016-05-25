@@ -159,6 +159,11 @@ AccountController.prototype.delete = function () {
             ResourceController.check (hasRole, [gatekeeper.roles.user.administrator])
           ])
         ], req, callback);
+      },
+
+      postExecute: function (account, callback) {
+        bm.emit ('gatekeeper.account.deleted', account);
+        return callback (null, account);
       }
     }
   };
