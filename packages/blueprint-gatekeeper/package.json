@@ -32,14 +32,19 @@
   },
   "devDependencies": {
     "chai": "^3.4.0",
+    "coveralls": "^2.11.9",
+    "istanbul": "^0.4.3",
     "mocha": "^2.2.5",
+    "mocha-lcov-reporter": "^1.2.0",
     "nodemailer-stub-transport": "^1.0.0",
     "superagent": "^0.18.x",
     "supertest": "^1.1.0"
   },
   "scripts": {
     "start": "node ./app.js",
-    "test": "env NODE_ENV=test mocha --recursive tests/ --reporter spec"
+    "test": "env NODE_ENV=test mocha --recursive tests/src --reporter spec",
+    "cover": "env NODE_ENV=test istanbul cover _mocha --recursive tests/src",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "bin": {
     "gatekeeper": "./bin/gatekeeper"
