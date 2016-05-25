@@ -14,6 +14,7 @@ var Account = blueprint.app.models.Account
 describe ('AccountRouter', function () {
   var server;
   var userToken;
+  var adminUserToken;
   var clientToken;
 
   function getToken (data, callback) {
@@ -51,6 +52,23 @@ describe ('AccountRouter', function () {
         });
       },
 
+      // 2a. get the user token for an admin.
+      function (callback) {
+        var data = {
+          grant_type: 'password',
+          username: datamodel.data.accounts[1].access_credentials.username,
+          password: datamodel.data.accounts[1].access_credentials.password,
+          client_id: datamodel.models.clients[0].id
+        };
+
+        getToken (data, function (err, token) {
+          if (err) return callback (err);
+
+          adminUserToken = token;
+          return callback ();
+        });
+      },
+
       // 3. get a client token for the tests.
       function (callback) {
         var data = {
@@ -70,15 +88,69 @@ describe ('AccountRouter', function () {
   });
 
   describe ('GET /v1/accounts', function () {
-    it ('should return all the accounts', function (done) {
-      Account.find ({}, '-__v', function (err, accounts) {
+    it ('should return all the accounts for an admin', function (done) {
+      var projection = {
+        '__v': 0,
+        'access_credentials.password': 0
+      };
+
+      Account.find ({}, projection, function (err, accounts) {
         if (err) return done (err);
 
         request (server.app)
           .get ('/v1/accounts')
-          .set ('Authorization', 'Bearer ' + userToken)
+          .set ('Authorization', 'Bearer ' + adminUserToken)
           .expect (200, JSON.stringify (accounts), done);
       });
+    });
+
+    it ('should not allow non-admin access to all accounts', function (done) {
+      request (server.app)
+        .get ('/v1/accounts')
+        .set ('Authorization', 'Bearer ' + userToken)
+        .expect (403, done);
+    });
+  });
+
+  describe ('GET /v1/accounts/:accountId', function () {
+    var projection = {
+      '__v': 0,
+      'access_credentials.password': 0
+    };
+
+    it ('should return the account owner\'s account', function (done) {
+      var accountId = datamodel.models.accounts[0]._id;
+
+      Account.findById (accountId, projection, function (err, account) {
+        if (err) return done (err);
+
+        request (server.app)
+          .get ('/v1/accounts/' + accountId)
+          .set ('Authorization', 'Bearer ' + userToken)
+          .expect (200, JSON.stringify (account), done);
+      });
+    });
+
+    it ('should retrieve a user account for an admin', function (done) {
+      var accountId = datamodel.models.accounts[0]._id;
+
+      Account.findById (accountId, projection, function (err, account) {
+        if (err) return done (err);
+
+        request (server.app)
+          .get ('/v1/accounts/' + accountId)
+          .set ('Authorization', 'Bearer ' + adminUserToken)
+          .expect (200, JSON.stringify (account), done);
+      });
+    });
+
+    it ('should not allow non-admin access to another account', function (done) {
+      var accountId = datamodel.models.accounts[1]._id;
+
+      request (server.app)
+        .get ('/v1/accounts/' + accountId)
+        .set ('Authorization', 'Bearer ' + userToken)
+        .expect (403, done);
     });
   });
 

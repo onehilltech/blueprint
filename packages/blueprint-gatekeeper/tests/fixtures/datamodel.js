@@ -38,12 +38,12 @@ var data = {
 
   accounts: [
     {
-      access_credentials: {username: 'account1', password: 'account1', roles: [gatekeeper.roles.user.administrator]},
+      access_credentials: {username: 'account1', password: 'account1'},
       profile: {email: 'account1@gatekeeper.com'},
       internal_use : {}
     },
     {
-      access_credentials: {username: 'account2', password: 'account2'},
+      access_credentials: {username: 'account2', password: 'account2', roles: [gatekeeper.roles.user.administrator]},
       profile: {email: 'account2@gatekeeper.com'},
       internal_use : {}
     },
@@ -62,6 +62,10 @@ var data = {
       profile: {email: 'account5@gatekeeper.com'},
       internal_use: {enabled: false}
     }
+  ],
+
+  access_tokens: [
+
   ]
 };
 

@@ -10,13 +10,35 @@ var Account = require ('../models/Account')
 
 var bm = blueprint.messaging
   , ResourceController = blueprint.ResourceController
-  , HttpError = blueprint.errors.HttpError
   ;
 
+var DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE = {
+  'access_credentials.password': 0,
+  '__v': 0
+};
+
+/**
+ * Check that the request is from a client.
+ *
+ * @param req
+ * @param callback
+ * @returns {*}
+ */
 function isClient (req, callback) {
   return callback (null, req.user.collection.collectionName === Client.collection.collectionName);
 }
 
+function isOwner (req, callback) {
+  return callback (null, req.accountId === req.user.id);
+}
+
+/**
+ * Check that user has the correct roles.
+ *
+ * @param expected
+ * @param req
+ * @param callback
+ */
 function hasRole (expected, req, callback) {
   var current = req.user.getRoles ();
 
@@ -46,11 +68,42 @@ AccountController.prototype.getAll = function () {
         ResourceController.runChecks ([
           ResourceController.check (hasRole, [gatekeeper.roles.user.administrator])
         ], req, callback);
+      },
+
+      prepareProjection: function (req, callback) {
+        callback (null, DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE);
       }
     }
   };
 
   return ResourceController.prototype.getAll.call (this, options);
+};
+
+/**
+ * Get the account
+ *
+ * @param callback
+ * @returns {Function}
+ */
+AccountController.prototype.get = function () {
+  var options = {
+    on: {
+      authorize: function (req, callback) {
+        ResourceController.runChecks ([
+          ResourceController.orCheck ([
+            ResourceController.check (isOwner),
+            ResourceController.check (hasRole, [gatekeeper.roles.user.administrator])
+          ])
+        ], req, callback);
+      },
+
+      prepareProjection: function (req, callback) {
+        callback (null, DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE);
+      }
+    }
+  };
+
+  return ResourceController.prototype.get.call (this, options);
 };
 
 /**
@@ -89,25 +142,6 @@ AccountController.prototype.create = function () {
   };
 
   return ResourceController.prototype.create.call (this, options);
-};
-
-/**
- * Get the account
- *
- * @param callback
- * @returns {Function}
- */
-AccountController.prototype.getAccount = function () {
-  var self = this;
-
-  return function (req, res) {
-    Account.findById (req.accountId, function (err, account) {
-      if (err)
-        return self.handleError (null, res, 404, 'Account does not exist', callback);
-
-      res.status (200).json (account.toObject ())
-    });
-  };
 };
 
 /**
