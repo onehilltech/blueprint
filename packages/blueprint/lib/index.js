@@ -1,19 +1,21 @@
 'use strict';
 
-var util   = require ('util')
+var util = require ('util')
   ;
 
-var BaseController              = require ('./BaseController')
-  , ResourceController          = require ('./ResourceController')
-  , Application                 = require ('./Application')
-  , ApplicationModule           = require ('./ApplicationModule')
-  , Framework                   = require ('./Framework')
-  , Env                         = require ('./Environment')
+var BaseController     = require ('./BaseController')
+  , ResourceController = require ('./ResourceController')
+  , Application        = require ('./Application')
+  , ApplicationModule  = require ('./ApplicationModule')
+  , Framework          = require ('./Framework')
+  , Env                = require ('./Environment')
+  , RouterBuilder      = require ('./RouterBuilder')
   ;
 
 exports.BaseController = BaseController;
 exports.ResourceController = ResourceController;
 exports.ApplicationModule = ApplicationModule;
+exports.RouterBuilder = RouterBuilder;
 
 // Make sure Blueprint has been instantiated in the main process. This instance
 // is used by the current application, and its dependencies to ensure operate in

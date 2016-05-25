@@ -10,6 +10,7 @@ describe ('index', function () {
         'ApplicationModule',
         'BaseController',
         'ResourceController',
+        'RouterBuilder',
         'controller',
         'model',
         'destroy',
