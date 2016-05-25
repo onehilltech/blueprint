@@ -1,1 +1,1 @@
-exports.RouterSpecification = require ('./RouterSpecification');
+exports.Router = require ('./Router');

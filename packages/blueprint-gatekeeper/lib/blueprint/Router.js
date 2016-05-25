@@ -36,14 +36,14 @@ module.exports = exports = function (opts) {
 
   // Select the router version.
   var version = 'v' + (opts.version || DEFAULT_VERSION);
+
   var router = [cors (options)].concat (_.values (gatekeeper.routers[version]));
 
   // Get the path for the router.
   var gatekeeperPath = opts.path || '/gatekeeper';
 
-  // Build the router Blueprint router specification.
-  var spec = {};
-  spec[gatekeeperPath] = router;
+  var routerBuilder = blueprint.RouterBuilder (gatekeeperPath);
+  routerBuilder.addRouters (router);
 
-  return spec;
+  return routerBuilder.getRouter ();
 };
