@@ -145,6 +145,28 @@ AccountController.prototype.create = function () {
 };
 
 /**
+ * Delete an account in the database
+ *
+ * @returns {*|Object}
+ */
+AccountController.prototype.delete = function () {
+  var options = {
+    on: {
+      authorize: function (req, callback) {
+        ResourceController.runChecks ([
+          ResourceController.orCheck ([
+            ResourceController.check (isOwner),
+            ResourceController.check (hasRole, [gatekeeper.roles.user.administrator])
+          ])
+        ], req, callback);
+      }
+    }
+  };
+
+  return ResourceController.prototype.delete.call (this, options);
+};
+
+/**
  * Get the account profile.
  *
  * @param callback

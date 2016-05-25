@@ -204,4 +204,33 @@ describe ('AccountRouter', function () {
       });
     });
   });
+
+  describe ('DELETE /v1/accounts/:accountId', function () {
+    it ('should not allow non-admin to delete another user account', function (done) {
+      var accountId = datamodel.models.accounts[2]._id;
+
+      request (server.app)
+        .delete ('/v1/accounts/' + accountId)
+        .set ('Authorization', 'Bearer ' + userToken)
+        .expect (403, done);
+    });
+
+    it ('should allow account owner to delete account', function (done) {
+      var accountId = datamodel.models.accounts[0]._id;
+
+      request (server.app)
+        .delete ('/v1/accounts/' + accountId)
+        .set ('Authorization', 'Bearer ' + userToken)
+        .expect (200, done);
+    });
+
+    it ('should allow admin to delete user account', function (done) {
+      var accountId = datamodel.models.accounts[2]._id;
+
+      request (server.app)
+        .delete ('/v1/accounts/' + accountId)
+        .set ('Authorization', 'Bearer ' + adminUserToken)
+        .expect (200, done);
+    });
+  });
 });
