@@ -31,5 +31,7 @@ function isClient () {
 }
 
 exports.roles = require ('./roles');
+exports.checks = require ('./checks');
+
 exports.isClient = isClient;
 exports.isAccount = isAccount;

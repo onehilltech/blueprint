@@ -40,4 +40,4 @@ var middleware = {
   }
 };
 
-exports.middleware = middleware;
+exports.middleware = middleware
