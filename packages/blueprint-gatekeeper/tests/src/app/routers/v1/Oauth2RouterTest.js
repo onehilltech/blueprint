@@ -184,8 +184,8 @@ describe ('Oauth2Router', function () {
           expect(res.body).to.have.all.keys(['token_type', 'access_token', 'refresh_token', 'expires_in']);
           expect(res.body).to.have.property('token_type', 'Bearer');
 
-          expect(res.body.access_token).to.not.equal(accessToken);
-          expect(res.body.refresh_token).to.not.equal(refreshToken);
+          expect(res.body.access_token).to.not.equal (accessToken);
+          expect(res.body.refresh_token).to.not.equal (refreshToken);
 
           return done();
         });

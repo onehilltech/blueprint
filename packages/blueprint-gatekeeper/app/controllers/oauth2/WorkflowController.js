@@ -1,6 +1,7 @@
-var winston     = require ('winston')
-  , uid         = require ('uid-safe')
-  , blueprint   = require ('@onehilltech/blueprint')
+var winston   = require ('winston')
+  , uid       = require ('uid-safe')
+  , async     = require ('async')
+  , blueprint = require ('@onehilltech/blueprint')
   ;
 
 var Client      = require ('../../models/Client')
@@ -104,7 +105,7 @@ WorkflowController.prototype.issueToken = function (callback) {
       winston.log ('info', 'client %s: exchanging secret for access token', client.id);
 
       // Create a new user token and refresh token.
-      AccessToken.newClientToken (client.id, '*', function (err, accessToken) {
+      AccessToken.createClientToken (client.id, '*', function (err, accessToken) {
         if (err)
           return self.handleError (err, res, 500, 'Failed to generate token', callback);
 
@@ -161,7 +162,7 @@ WorkflowController.prototype.issueToken = function (callback) {
             return self.handleError (err, res, 401, 'Invalid password', callback);
 
           // Create a new user token and refresh token.
-          AccessToken.newUserToken (client.id, account.id, function (err, accessToken) {
+          AccessToken.createUserToken (client.id, account.id, function (err, accessToken) {
             if (err)
               return self.handleError (err, res, 500, 'Failed to generate access token', callback);
 
@@ -213,10 +214,19 @@ WorkflowController.prototype.issueToken = function (callback) {
           return self.handleError (err, res, 400, 'User account is disabled', callback);
 
         // Generate a new access and refresh token.
-        at.token = AccessToken.generateToken ();
-        at.refresh_token = AccessToken.generateToken ();
-
-        at.save (function (err, at) {
+        async.waterfall ([
+          function (callback) {
+            AccessToken.generateTokenString (callback);
+          },
+          function (token, callback) {
+            at.token = token;
+            AccessToken.generateTokenString (callback);
+          },
+          function (token, callback) {
+            at.refresh_token = token;
+            at.save (callback);
+          }
+        ], function (err, at) {
           if (err)
             return self.handleError (err, res, 500, 'Failed to save new token', callback);
 

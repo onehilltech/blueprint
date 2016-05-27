@@ -1,5 +1,6 @@
 var uid       = require ('uid-safe')
   , blueprint = require ('@onehilltech/blueprint')
+  , async     = require ('async')
   ;
 
 // We have to manually load the references models since the models
@@ -29,19 +30,34 @@ var schema = new Schema ({
  * @param user
  * @param done
  */
-schema.statics.newUserToken = function (client, user, done) {
-  var token = uid.sync (DEFAULT_TOKEN_LENGTH);
-  var refreshToken = uid.sync (DEFAULT_TOKEN_LENGTH);
+schema.statics.createUserToken = function (client, user, done) {
+  var self = this;
+  var opts = { account: user, client: client, enabled: true };
 
-  var query   = {account : user, client : client};
-  var data    = {token : token, refresh_token : refreshToken, enabled : true};
-  var options = {upsert : true, new : true};
-
-  this.findOneAndUpdate (query, data, options, done);
+  async.waterfall ([
+    function (callback) {
+      uid (DEFAULT_TOKEN_LENGTH, callback);
+    },
+    function (token, callback) {
+      opts.token = token;
+      uid (DEFAULT_TOKEN_LENGTH, callback);
+    },
+    function (token, callback) {
+      opts.refresh_token = token;
+      callback ();
+    },
+    function (callback) { self.create (opts, callback); }
+  ], done);
 };
 
-schema.statics.generateToken = function () {
-  return uid.sync (DEFAULT_TOKEN_LENGTH);
+/**
+ * Generate a token string.
+ *
+ * @param callback
+ * @returns {Promise}
+ */
+schema.statics.generateTokenString = function (callback) {
+  return uid (DEFAULT_TOKEN_LENGTH, callback);
 };
 
 /**
@@ -52,13 +68,17 @@ schema.statics.generateToken = function () {
  * @param scope
  * @param done
  */
-schema.statics.newClientToken = function (client, scope, done) {
-  var token   = uid.sync (DEFAULT_TOKEN_LENGTH);
-  var query   = {client : client, account: { $exists: false }};
-  var data    = {token: token, client: client, enabled : true};
-  var options = {upsert : true, new : true};
+schema.statics.createClientToken = function (client, scope, done) {
+  var self = this;
+  var opts = { client: client, enabled : true };
 
-  this.findOneAndUpdate (query, data, options, done);
+  async.waterfall ([
+    function (callback) { uid (DEFAULT_TOKEN_LENGTH, callback); },
+    function (token, callback) {
+      opts.token = token;
+      self.create (opts, callback);
+    }
+  ], done);
 };
 
 /**
