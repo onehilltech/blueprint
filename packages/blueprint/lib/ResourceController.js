@@ -6,9 +6,14 @@ var BaseController = require ('./BaseController')
   , HttpError      = require ('./errors/HttpError')
   ;
 
-function computeResourceName (req) {
-  var lastIndex = req.originalUrl.lastIndexOf ('/');
-  return lastIndex === 0 ? req.originalUrl.slice (1) : req.originalUrl.slice (1, lastIndex);
+function computeGroupResourceName (req) {
+  var parts = req.originalUrl.split ('/');
+  return parts[parts.length - 1];
+}
+
+function computeSingleResourceName (req) {
+  var parts = req.originalUrl.split ('/');
+  return parts[parts.length - 2];
 }
 
 /**
@@ -229,7 +234,7 @@ ResourceController.prototype.getAll = function (opts) {
 
     execute: function __blueprint_getall_execute (req, res) {
       var filter = {};
-      var resourceName = computeResourceName (req);
+      var resourceName = computeGroupResourceName (req);
 
       async.waterfall ([
         async.constant (filter),
@@ -329,7 +334,7 @@ ResourceController.prototype.get = function (opts) {
     execute: function __blueprint_get_execute (req, res) {
       var rcId = req[self._id];
       var filter = {_id: rcId};
-      var resourceName = computeResourceName (req);
+      var resourceName = computeSingleResourceName (req);
 
       async.waterfall ([
         // First, allow the subclass to update the filter.
@@ -385,7 +390,7 @@ ResourceController.prototype.update = function (opts) {
     execute: function __blueprint_update_execute (req, res) {
       var rcId = req[self._id];
       var filter = {_id: rcId};
-      var resourceName = computeResourceName (req);
+      var resourceName = computeSingleResourceName (req);
 
       async.waterfall ([
         // First, allow the subclass to update the filter.
