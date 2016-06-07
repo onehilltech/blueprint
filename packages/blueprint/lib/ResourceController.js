@@ -6,6 +6,11 @@ var BaseController = require ('./BaseController')
   , HttpError      = require ('./errors/HttpError')
   ;
 
+function computeResourceName (req) {
+  var lastIndex = req.originalUrl.lastIndexOf ('/');
+  return lastIndex === 0 ? req.originalUrl.slice (1) : req.originalUrl.slice (1, lastIndex);
+}
+
 /**
  * Test if the projection is exclusive. An exclusive projection only has to
  * have one key that is false (or 0). Any empty projection is exclusive as well,
@@ -224,7 +229,7 @@ ResourceController.prototype.getAll = function (opts) {
 
     execute: function __blueprint_getall_execute (req, res) {
       var filter = {};
-      var resourceName = req.originalUrl.slice (1);
+      var resourceName = computeResourceName (req);
 
       async.waterfall ([
         async.constant (filter),
@@ -324,9 +329,7 @@ ResourceController.prototype.get = function (opts) {
     execute: function __blueprint_get_execute (req, res) {
       var rcId = req[self._id];
       var filter = {_id: rcId};
-
-      var lastIndex = req.originalUrl.lastIndexOf ('/');
-      var resourceName = req.originalUrl.slice (1, lastIndex);
+      var resourceName = computeResourceName (req);
 
       async.waterfall ([
         // First, allow the subclass to update the filter.
@@ -382,8 +385,7 @@ ResourceController.prototype.update = function (opts) {
     execute: function __blueprint_update_execute (req, res) {
       var rcId = req[self._id];
       var filter = {_id: rcId};
-      var lastIndex = req.originalUrl.lastIndexOf ('/');
-      var resourceName = req.originalUrl.slice (1, lastIndex);
+      var resourceName = computeResourceName (req);
 
       async.waterfall ([
         // First, allow the subclass to update the filter.
