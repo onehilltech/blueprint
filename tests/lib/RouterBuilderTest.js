@@ -102,13 +102,13 @@ describe ('RouterBuilder', function () {
       it ('should retrieve a single resource', function (done) {
         request (server.app)
           .get ('/persons/' + id)
-          .expect (200, {_id: id, first_name: 'James', last_name: 'Hill'}, done);
+          .expect (200, { persons: {_id: id, first_name: 'James', last_name: 'Hill'}}, done);
       });
 
       it ('should retrieve a list of all resources', function (done) {
         request (server.app)
           .get ('/persons')
-          .expect (200, [{_id: id, first_name: 'James', last_name: 'Hill'}], done);
+          .expect (200, { persons: [{ _id: id, first_name: 'James', last_name: 'Hill'}]}, done);
       });
 
       it ('should update a single resource', function (done) {
@@ -117,13 +117,13 @@ describe ('RouterBuilder', function () {
             request (server.app)
               .put ('/persons/' + id)
               .send ({first_name: 'Lanita', last_name: 'Hill'})
-              .expect (200, {_id: id, first_name: 'Lanita', last_name: 'Hill'}, callback);
+              .expect (200, {persons: {_id: id, first_name: 'Lanita', last_name: 'Hill'}}, callback);
           },
 
           function (callback) {
             request (server.app)
               .get ('/persons/' + id)
-              .expect (200, {_id: id, first_name: 'Lanita', last_name: 'Hill'}, callback);
+              .expect (200, {persons: {_id: id, first_name: 'Lanita', last_name: 'Hill'}}, callback);
           }
 
         ], done);
