@@ -70,17 +70,20 @@ describe ('RouterBuilder', function () {
     });
 
     describe ('all', function () {
+      var data = {person: {first_name: 'James', last_name: 'Hill'}};
+
       it ('should create a new resource', function (done) {
         request (server.app)
           .post ('/persons')
-          .send ({first_name: 'James', last_name: 'Hill'})
+          .send (data)
           .expect (200)
           .end (function (err, res) {
             if (err) return done (err);
 
-            expect (res.body).to.have.keys (['_id', 'first_name', 'last_name', '__v']);
+            data.person._id = res.body.person._id;
+            expect (res.body).to.deep.equal (data);
 
-            id = res.body._id;
+            id = res.body.person._id;
 
             return done ();
           });
@@ -102,7 +105,7 @@ describe ('RouterBuilder', function () {
       it ('should retrieve a single resource', function (done) {
         request (server.app)
           .get ('/persons/' + id)
-          .expect (200, { persons: {_id: id, first_name: 'James', last_name: 'Hill'}}, done);
+          .expect (200, { person: {_id: id, first_name: 'James', last_name: 'Hill'}}, done);
       });
 
       it ('should retrieve a list of all resources', function (done) {
@@ -116,14 +119,14 @@ describe ('RouterBuilder', function () {
           function (callback) {
             request (server.app)
               .put ('/persons/' + id)
-              .send ({first_name: 'Lanita', last_name: 'Hill'})
-              .expect (200, {persons: {_id: id, first_name: 'Lanita', last_name: 'Hill'}}, callback);
+              .send ({person: {first_name: 'Lanita', last_name: 'Hill'}})
+              .expect (200, {person: {_id: id, first_name: 'Lanita', last_name: 'Hill'}}, callback);
           },
 
           function (callback) {
             request (server.app)
               .get ('/persons/' + id)
-              .expect (200, {persons: {_id: id, first_name: 'Lanita', last_name: 'Hill'}}, callback);
+              .expect (200, {person: {_id: id, first_name: 'Lanita', last_name: 'Hill'}}, callback);
           }
 
         ], done);
@@ -150,12 +153,12 @@ describe ('RouterBuilder', function () {
       it ('should create a new resource', function (done) {
         request (server.app)
           .post ('/allow')
-          .send ({first_name: 'James', last_name: 'Hill'})
+          .send ({person: {first_name: 'James', last_name: 'Hill'}})
           .expect (200)
           .end (function (err, res) {
             if (err) return done (err);
 
-            id = res.body._id;
+            id = res.body.person._id;
 
             return done ();
           });
@@ -181,12 +184,12 @@ describe ('RouterBuilder', function () {
       it ('should create a new resource', function (done) {
         request (server.app)
           .post ('/deny')
-          .send ({first_name: 'James', last_name: 'Hill'})
+          .send ({person: {first_name: 'James', last_name: 'Hill'}})
           .expect (200)
           .end (function (err, res) {
             if (err) return done (err);
 
-            id = res.body._id;
+            id = res.body.person._id;
 
             return done ();
           });

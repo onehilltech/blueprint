@@ -6,16 +6,6 @@ var BaseController = require ('./BaseController')
   , HttpError      = require ('./errors/HttpError')
   ;
 
-function computeGroupResourceName (req) {
-  var parts = req.originalUrl.split ('/');
-  return parts[parts.length - 1];
-}
-
-function computeSingleResourceName (req) {
-  var parts = req.originalUrl.split ('/');
-  return parts[parts.length - 2];
-}
-
 /**
  * Test if the projection is exclusive. An exclusive projection only has to
  * have one key that is false (or 0). Any empty projection is exclusive as well,
@@ -104,8 +94,12 @@ function ResourceController (opts) {
   if (!opts.id)
     throw new Error ('Options must define id property');
 
+  if (!opts.name)
+    throw new Error ('Options must define name property');
+
   this._id = opts.id;
   this._model = opts.model;
+  this._name = opts.name;
 }
 
 util.inherits (ResourceController, BaseController);
@@ -234,7 +228,6 @@ ResourceController.prototype.getAll = function (opts) {
 
     execute: function __blueprint_getall_execute (req, res) {
       var filter = {};
-      var resourceName = computeGroupResourceName (req);
 
       async.waterfall ([
         async.constant (filter),
@@ -256,8 +249,10 @@ ResourceController.prototype.getAll = function (opts) {
 
         // Rewrite the result in JSON API format.
         function (data, callback) {
+          var pluralName = self._name + 's';
+
           var result = { };
-          result[resourceName] = data;
+          result[pluralName] = data;
 
           return callback (null, result);
         }
@@ -288,7 +283,7 @@ ResourceController.prototype.create = function (opts) {
     validate: onAuthorize,
 
     execute: function __blueprint_create (req, res) {
-      var doc = req.body;
+      var doc = req.body[self._name];
 
       async.waterfall ([
         async.constant (doc),
@@ -301,6 +296,15 @@ ResourceController.prototype.create = function (opts) {
 
         // Allow the subclass to do any post-execution analysis of the result.
         onPostExecute,
+
+        // Serialize the data in REST format.
+        function (data, callback) {
+          var result = {};
+          result[self._name] = data.toJSON ();
+          delete result[self._name].__v;
+
+          return callback (null, result);
+        }
       ], makeTaskCompletionHandler (res));
     }
   }
@@ -329,7 +333,6 @@ ResourceController.prototype.get = function (opts) {
     execute: function __blueprint_get_execute (req, res) {
       var rcId = req[self._id];
       var filter = {_id: rcId};
-      var resourceName = computeSingleResourceName (req);
 
       async.waterfall ([
         // First, allow the subclass to update the filter.
@@ -353,7 +356,7 @@ ResourceController.prototype.get = function (opts) {
         // Rewrite the result in JSON API format.
         function (data, callback) {
           var result = { };
-          result[resourceName] = data;
+          result[self._name] = data;
 
           return callback (null, result);
         }
@@ -385,7 +388,6 @@ ResourceController.prototype.update = function (opts) {
     execute: function __blueprint_update_execute (req, res) {
       var rcId = req[self._id];
       var filter = {_id: rcId};
-      var resourceName = computeSingleResourceName (req);
 
       async.waterfall ([
         // First, allow the subclass to update the filter.
@@ -394,7 +396,7 @@ ResourceController.prototype.update = function (opts) {
 
         // Now, let's search our database for the resource in question.
         function (filter, callback) {
-          var update = { $set: req.body };
+          var update = { $set: req.body[self._name] };
           var option = { upsert: false, new: true };
 
           onPrepareProjection (req, function (err, projection) {
@@ -414,7 +416,7 @@ ResourceController.prototype.update = function (opts) {
         // Rewrite the result in JSON API format.
         function (data, callback) {
           var result = { };
-          result[resourceName] = data;
+          result[self._name] = data;
 
           return callback (null, result);
         }
