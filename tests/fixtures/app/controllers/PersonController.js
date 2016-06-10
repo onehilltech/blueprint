@@ -5,7 +5,7 @@ var Person = require ('../models/Person')
   ;
 
 function PersonController () {
-  blueprint.ResourceController.call (this, {model: Person, id: 'personId', name: 'person'});
+  blueprint.ResourceController.call (this, {name: 'person', model: Person, id: 'personId', name: 'person'});
 }
 
 blueprint.controller (PersonController, blueprint.ResourceController);
