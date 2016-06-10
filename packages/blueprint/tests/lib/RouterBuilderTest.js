@@ -78,7 +78,7 @@ describe ('RouterBuilder', function () {
           .end (function (err, res) {
             if (err) return done (err);
 
-            expect (res.body).to.have.keys (['_id']);
+            expect (res.body).to.have.keys (['_id', 'first_name', 'last_name', '__v']);
 
             id = res.body._id;
 

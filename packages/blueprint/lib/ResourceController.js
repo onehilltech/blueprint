@@ -301,11 +301,6 @@ ResourceController.prototype.create = function (opts) {
 
         // Allow the subclass to do any post-execution analysis of the result.
         onPostExecute,
-
-        // We only want to return the id.
-        function (result, callback) {
-          return callback (null, {_id: result.id})
-        }
       ], makeTaskCompletionHandler (res));
     }
   }
