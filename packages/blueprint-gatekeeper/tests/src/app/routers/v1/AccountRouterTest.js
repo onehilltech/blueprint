@@ -100,7 +100,7 @@ describe ('AccountRouter', function () {
         request (server.app)
           .get ('/v1/accounts')
           .set ('Authorization', 'Bearer ' + adminUserToken)
-          .expect (200, JSON.stringify (accounts), done);
+          .expect (200, {'accounts': JSON.parse (JSON.stringify (accounts))}, done);
       });
     });
 
@@ -127,7 +127,7 @@ describe ('AccountRouter', function () {
         request (server.app)
           .get ('/v1/accounts/' + accountId)
           .set ('Authorization', 'Bearer ' + userToken)
-          .expect (200, JSON.stringify (account), done);
+          .expect (200, {account: JSON.parse (JSON.stringify (account))}, done);
       });
     });
 
@@ -140,7 +140,7 @@ describe ('AccountRouter', function () {
         request (server.app)
           .get ('/v1/accounts/' + accountId)
           .set ('Authorization', 'Bearer ' + adminUserToken)
-          .expect (200, JSON.stringify (account), done);
+          .expect (200, {account: JSON.parse (JSON.stringify (account))}, done);
       });
     });
 
@@ -181,7 +181,7 @@ describe ('AccountRouter', function () {
         .expect (200)
         .end (function (err, res) {
           if (err) return done (err);
-          expect (res.body).to.have.keys (['_id']);
+          expect (res.body.account).to.have.keys (['_id']);
 
           // NOTE Test is done when we receive the message that email was sent.
         });
@@ -221,7 +221,7 @@ describe ('AccountRouter', function () {
       request (server.app)
         .delete ('/v1/accounts/' + accountId)
         .set ('Authorization', 'Bearer ' + userToken)
-        .expect (200, done);
+        .expect (200, 'true', done);
     });
 
     it ('should allow admin to delete user account', function (done) {
@@ -230,7 +230,7 @@ describe ('AccountRouter', function () {
       request (server.app)
         .delete ('/v1/accounts/' + accountId)
         .set ('Authorization', 'Bearer ' + adminUserToken)
-        .expect (200, done);
+        .expect (200, 'true', done);
     });
   });
 });

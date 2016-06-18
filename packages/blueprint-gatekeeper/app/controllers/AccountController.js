@@ -1,6 +1,7 @@
-var blueprint = require ('@onehilltech/blueprint')
+var blueprint  = require ('@onehilltech/blueprint')
   , gatekeeper = require ('../../lib')
-  , async = require ('async')
+  , async      = require ('async')
+  , _          = require ('underscore')
   ;
 
 var Account = require ('../models/Account')
@@ -52,7 +53,7 @@ function hasRole (expected, req, callback) {
 }
 
 function AccountController () {
-  ResourceController.call (this, {model: Account, id: 'accountId'});
+  ResourceController.call (this, {name: 'account', model: Account, id: 'accountId'});
 }
 
 blueprint.controller (AccountController, ResourceController);
@@ -134,9 +135,9 @@ AccountController.prototype.create = function () {
         return callback (null, doc);
       },
 
-      postExecute: function (account, callback) {
+      postExecute: function (req, account, callback) {
         bm.emit ('gatekeeper.account.created', account);
-        return callback (null, account);
+        return callback (null, {_id: account._id});
       }
     }
   };
@@ -156,14 +157,14 @@ AccountController.prototype.delete = function () {
         ResourceController.runChecks ([
           ResourceController.orCheck ([
             ResourceController.check (isOwner),
-            ResourceController.check (hasRole, [gatekeeper.roles.user.administrator])
+            ResourceController.check (gatekeeper.authorization.checks.isAdministrator)
           ])
         ], req, callback);
       },
 
-      postExecute: function (account, callback) {
+      postExecute: function (req, account, callback) {
         bm.emit ('gatekeeper.account.deleted', account);
-        return callback (null, account);
+        return callback (null, true);
       }
     }
   };
