@@ -27,6 +27,7 @@ function isProjectionExclusive (projection) {
 
 function __onAuthorize (req, callback) { return callback (null); }
 function __onPrepareProjection (req, callback) { return callback (null, {}); }
+function __onPrepareOptions (req, callback) { return callback (null, {}); }
 function __onUpdateFilter (req, filter, callback) { return callback (null, filter); }
 function __onPreCreate (req, doc, callback) { return callback (null, doc); }
 function __onPostExecute (req, result, callback) { return callback (null, result); }
@@ -219,6 +220,7 @@ ResourceController.prototype.getAll = function (opts) {
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
+  var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
 
   var self = this;
 
@@ -239,12 +241,20 @@ ResourceController.prototype.getAll = function (opts) {
 
         // Now, let's search our database for the resource in question.
         function (filter, callback) {
-          onPrepareProjection (req, function (err, projection) {
-            // Do not include the version field in the projection.
-            if (isProjectionExclusive (projection))
-              projection.__v = 0;
+          onPrepareOptions (req, function (err, options) {
+            if (err) return callback (err);
 
-            self._model.find (filter, projection, makeDbCompletionHandler (callback));
+            options = options || {};
+
+            onPrepareProjection (req, function (err, projection) {
+              if (err) return callback (err);
+
+              // Do not include the version field in the projection.
+              if (isProjectionExclusive (projection))
+                projection.__v = 0;
+
+              self._model.find (filter, projection, options, makeDbCompletionHandler (callback));
+            });
           });
         },
 
@@ -304,7 +314,7 @@ ResourceController.prototype.create = function (opts) {
         // Serialize the data in REST format.
         function (data, callback) {
           var result = {};
-          
+
           data = data.toJSON ? data.toJSON () : (data.toObject ? data.toObject () : data);
           result[self._name] = _.omit (data, '__v');
 
