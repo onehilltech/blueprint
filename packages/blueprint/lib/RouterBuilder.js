@@ -21,7 +21,7 @@ function handleError (err, res, next) {
   }
   else if (errType === 'object') {
     if (err instanceof HttpError) {
-      res.status (err.statusCode).send (err.message);
+      res.status (err.statusCode).send ({errors: err.message});
     }
     else {
       res.status (400).send (util.inspect (err));
