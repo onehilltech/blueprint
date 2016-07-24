@@ -2,7 +2,7 @@ var expect    = require ('chai').expect
   , path      = require ('path')
   , async     = require ('async')
   , fs        = require ('fs')
-  , blueprint = require ('../fixtures/blueprint')
+  , blueprint = require ('../fixtures/lib')
   ;
 
 var ApplicationModule = blueprint.ApplicationModule

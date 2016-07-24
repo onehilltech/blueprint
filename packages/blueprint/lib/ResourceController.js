@@ -76,7 +76,7 @@ function makeTaskCompletionHandler (res, callback) {
 function makeOnPreCreateHandler (req, onPreCreate) {
   return function __blueprint_on_prepare_document (doc, callback) {
     return onPreCreate (req, doc, callback);
-  }
+  };
 }
 
 /**
@@ -107,73 +107,6 @@ function ResourceController (opts) {
 }
 
 util.inherits (ResourceController, BaseController);
-
-/**
- * Factory method for creating a check function \a runChecks ().
- *
- * @returns {Function}
- */
-ResourceController.check = function () {
-  var args = [].slice.call (arguments);
-  var check = args.shift ();
-
-  return function __run_check (req, callback) {
-    // Push the callback as the last argument.
-    args.push (req);
-    args.push (callback);
-
-    // Call the check.
-    return check.apply (this, args);
-  };
-};
-
-/**
- * A set of OR checks...
- *
- * @param checks
- * @returns {Function}
- */
-ResourceController.orCheck = function (checks) {
-  return function __run_orCheck (req, callback) {
-    async.some (checks,
-      function __orCheck_iterator (check, callback) {
-        return check (req, function __orCheck_result (err, result) {
-          // Since we are using async 1.5, we need to ignore the err parameter.
-          callback (result);
-        });
-      },
-      function __orCheck_complete (result) {
-        // This is a callback from our framework. We need to pass in null as
-        // the error so we have proper behavior.
-        return callback (null, result);
-      }
-    );
-  };
-};
-
-/**
- * A set of AND checks...
- *
- * @param checks
- * @returns {Function}
- */
-ResourceController.andCheck = function (checks) {
-  return function __run_orCheck (req, callback) {
-    async.every (checks,
-      function __orCheck_iterator (check, callback) {
-        return check (req, function __orCheck_result (err, result) {
-          // Since we are using async 1.5, we need to ignore the err parameter.
-          callback (result);
-        });
-      },
-      function __orCheck_complete (result) {
-        // This is a callback from our framework. We need to pass in null as
-        // the error so we have proper behavior.
-        return callback (null, result);
-      }
-    );
-  };
-};
 
 /**
  * Implementation of the authorize handler design to run a unique set of
@@ -229,13 +162,31 @@ ResourceController.prototype.getAll = function (opts) {
   return {
     // There is no resource id that needs to be validated. So, we can
     // just pass control to the onAuthorize method.
-    validate: onAuthorize,
+    validate: function (req, callback) {
+      async.series ([
+        // First, validate the query string.
+        function (callback) {
+          req.checkQuery ('options', 'Invalid options').optional ().isJSON ();
+
+          return callback (req.validationErrors (true));
+        },
+
+        function (callback) {
+          onAuthorize (req, callback);
+        }
+      ], callback);
+    },
+
+    sanitize: function (req, callback) {
+      if (req.query.options)
+        req.query.options = JSON.parse (req.query.options);
+
+      return callback (null);
+    },
 
     execute: function __blueprint_getall_execute (req, res, callback) {
-      var filter = req.query || {};
-
       async.waterfall ([
-        async.constant (filter),
+        async.constant ({}),
 
         function (filter, callback) {
           return onUpdateFilter (req, filter, callback)
@@ -245,15 +196,26 @@ ResourceController.prototype.getAll = function (opts) {
         function (filter, callback) {
           onPrepareOptions (req, function (err, options) {
             if (err) return callback (err);
-
             options = options || {};
+
+            // Update the options with those from the query string.
+            var opts = req.query.options || {};
+
+            if (opts.skip)
+              options['skip'] = opts.skip;
+
+            if (opts.limit)
+              options['limit'] = opts.limit;
+
+            if (opts.sort)
+              options['sort'] = opts.sort;
 
             onPrepareProjection (req, function (err, projection) {
               if (err) return callback (err);
 
               // Do not include the version field in the projection.
               if (isProjectionExclusive (projection))
-                projection.__v = 0;
+                projection['__v'] = 0;
 
               self._model.find (filter, projection, options, makeDbCompletionHandler (callback));
             });

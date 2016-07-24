@@ -2,7 +2,7 @@ var expect = require ('chai').expect
   , path   = require ('path')
   ;
 
-var blueprint = require ('../fixtures/blueprint')
+var blueprint = require ('../fixtures/lib')
   , Loader    = require ('../../lib/Loader')
   ;
 
@@ -17,7 +17,7 @@ describe ('Loader', function () {
     before (function () {
       blueprint.destroy ();
 
-      var appPath = path.resolve (__dirname, '../fixtures/app-empty');
+      var appPath = path.resolve (__dirname, '../fixtures/app');
       blueprint.Application (appPath);
     });
 

@@ -1,4 +1,4 @@
-var blueprint = require ('../../../blueprint')
+var blueprint = require ('../../../lib')
   ;
 
 var schema = new blueprint.Schema ({

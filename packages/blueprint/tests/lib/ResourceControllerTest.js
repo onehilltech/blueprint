@@ -1,5 +1,10 @@
 var expect  = require ('chai').expect
   , async   = require ('async')
+  , request = require ('supertest')
+  ;
+
+var blueprint = require ('../fixtures/blueprint')
+  , datamodel = require ('../fixtures/datamodel')
   ;
 
 var ResourceController = require ('../../lib/ResourceController')
@@ -7,9 +12,19 @@ var ResourceController = require ('../../lib/ResourceController')
   ;
 
 describe ('ResourceController', function () {
+  var server;
+
   function passthrough (result, req, callback) {
     return callback (null, result);
   }
+
+  before (function (done) {
+    server = blueprint.app.server;
+
+    async.series ([
+      function (callback) { datamodel.apply (callback); }
+    ], done);
+  });
 
   describe ('#check', function () {
     it ('should create a new check function', function () {
@@ -110,4 +125,31 @@ describe ('ResourceController', function () {
       });
     });
   });
+
+  describe ('GET /persons', function () {
+    it ('should get all persons in the database', function (done) {
+      request (server.app)
+        .get ('/persons')
+        .expect (200).end (function (err, res) {
+          if (err) return done (err);
+
+          expect (res.body.persons).to.have.length (4);
+          return done ();
+      });
+    });
+
+    it ('should get middle 2 person from database, ordered by name', function (done) {
+      request (server.app)
+        .get ('/persons?options={"sort":{"last_name":1},"skip":1,"limit":2}')
+        .expect (200).end (function (err, res) {
+        if (err) return done (err);
+
+        expect (res.body).to.deep.equal ({persons: [
+          datamodel.data.persons[0],
+          datamodel.data.persons[2]
+        ]});
+        return done ();
+      });
+    });
+  })
 });
