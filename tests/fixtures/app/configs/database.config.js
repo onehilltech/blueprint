@@ -1,5 +1,5 @@
 module.exports = exports = {
-  connstr: 'mongodb://localhost/blueprint_unit_tests',
+  connstr: 'mongodb://localhost/blueprint_tests',
 
   options : {
     db: {
