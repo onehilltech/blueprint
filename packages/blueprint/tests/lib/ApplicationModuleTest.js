@@ -33,7 +33,7 @@ describe ('ApplicationModule', function () {
       var modulePath = path.resolve (__dirname, '../fixtures/app-module');
       blueprint.include ('test-module', modulePath);
 
-      expect (blueprint.app._modules).to.have.keys (['test-module']);
+      expect (blueprint.app.modules).to.have.keys (['test-module']);
 
       var files = [
         path.join (appPath, 'data', 'views', 'module-first-level.jade'),
