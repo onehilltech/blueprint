@@ -9,27 +9,7 @@ var blueprint = require ('../fixtures/lib')
 describe ('Loader', function () {
   var models;
   var controllers;
-
-  describe ('#loadModels', function () {
-    // The model loader only works if we have an application in place that has
-    // a database. Otherwise, the blueprint.model () method will not function
-    // properly.
-    before (function () {
-      blueprint.destroy ();
-
-      var appPath = path.resolve (__dirname, '../fixtures/app');
-      blueprint.Application (appPath);
-    });
-
-    it ('should load the models', function () {
-      var modelPath = path.resolve (__dirname, '../fixtures/app/models');
-      models = Loader.loadModels (modelPath);
-
-      expect (models).to.have.deep.property ('TestModel1');
-      expect (models).to.have.deep.property ('inner.TestModel2');
-    });
-  });
-
+  
   describe ('#loadControllers', function () {
     it ('should load the controllers', function () {
       var TestController = require ('../fixtures/app/controllers/TestController');

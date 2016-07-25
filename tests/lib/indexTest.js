@@ -11,6 +11,7 @@ describe ('index', function () {
         'BaseController',
         'ResourceController',
         'RouterBuilder',
+        'Policy',
         'controller',
         'model',
         'destroy',
