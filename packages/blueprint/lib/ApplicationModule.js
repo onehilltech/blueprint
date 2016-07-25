@@ -12,6 +12,7 @@ var RouterBuilder = require ('./RouterBuilder')
   , Framework     = require ('./Framework')
   , PolicyManager = require ('./PolicyManager')
   , ModelManager  = require ('./ModelManager')
+  , ControllerManager = require ('./ControllerManager')
   ;
 
 /**
@@ -29,7 +30,7 @@ function ApplicationModule (name, modulePath) {
     throw Error ('Must provide a name for the module');
 
   this._listeners = undefined;
-  this._controllers = undefined;
+  this._controllerManager = undefined;
   this._modelManager = undefined;
   this._routers = undefined;
   this._policyManager = undefined;
@@ -63,16 +64,17 @@ ApplicationModule.prototype.__defineGetter__ ('models', function () {
  * Get the controllers defined by the application.
  */
 ApplicationModule.prototype.__defineGetter__ ('controllers', function () {
-  if (this._controllers)
-    return this._controllers;
+  if (this._controllerManager)
+    return this._controllerManager.controllers;
 
   winston.log ('debug', 'loading controllers into memory');
+  this._controllerManager = new ControllerManager ();
 
   Framework().messaging.emit ('app.controllers.loading', this);
-  this._controllers = Loader.loadControllers (path.join (this.appPath, 'controllers'));
+  this._controllerManager.load (path.join (this.appPath, 'controllers'));
   Framework().messaging.emit ('app.controllers.loaded', this);
 
-  return this._controllers;
+  return this._controllerManager.controllers;
 });
 
 /**

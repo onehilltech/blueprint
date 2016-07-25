@@ -8,17 +8,6 @@ var blueprint = require ('../fixtures/lib')
 
 describe ('Loader', function () {
   var models;
-  var controllers;
-  
-  describe ('#loadControllers', function () {
-    it ('should load the controllers', function () {
-      var TestController = require ('../fixtures/app/controllers/TestController');
-      controllers = Loader.loadControllers(path.resolve (__dirname, '../fixtures/app/controllers'));
-
-      expect (controllers).to.have.property ('TestController');
-      expect (controllers['TestController']).to.be.instanceof (TestController);
-    });
-  });
 
   describe ('#loadRouters', function () {
     it ('should load the routers', function () {
