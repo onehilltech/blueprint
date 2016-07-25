@@ -13,6 +13,7 @@ var RouterBuilder = require ('./RouterBuilder')
   , PolicyManager = require ('./PolicyManager')
   , ModelManager  = require ('./ModelManager')
   , ControllerManager = require ('./ControllerManager')
+  , ListenerManager = require ('./ListenerManager')
   ;
 
 /**
@@ -29,7 +30,7 @@ function ApplicationModule (name, modulePath) {
   if (!name)
     throw Error ('Must provide a name for the module');
 
-  this._listeners = undefined;
+  this._listenerManager = undefined;
   this._controllerManager = undefined;
   this._modelManager = undefined;
   this._routers = undefined;
@@ -99,17 +100,17 @@ ApplicationModule.prototype.__defineGetter__ ('routers', function () {
  * the listeners in the application directory.
  */
 ApplicationModule.prototype.__defineGetter__ ('listeners', function () {
-  if (this._listeners)
-    return this._listeners;
+  if (this._listenerManager)
+    return this._listenerManager.listeners;
 
-  var listenersPath = path.join (this.appPath, 'listeners');
   winston.log ('debug', 'loading listeners into memory');
 
   Framework().messaging.emit ('app.listeners.loading', this);
-  this._listeners = Loader.loadListeners (listenersPath, Framework().messaging);
+  this._listenerManager = new ListenerManager (Framework().messaging);
+  this._listenerManager.load (path.join (this.appPath, 'listeners'));
   Framework().messaging.emit ('app.listeners.loaded', this);
 
-  return this._listeners;
+  return this._listenerManager.listeners;
 });
 
 /**
