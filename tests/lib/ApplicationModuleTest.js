@@ -76,4 +76,10 @@ describe ('ApplicationModule', function () {
       expect (appModule.controllers).to.have.property ('TestController');
     });
   });
+
+  describe ('#policies', function () {
+    it ('should return the loaded policies', function () {
+      expect (appModule.policies).to.have.keys (['always_true']);
+    });
+  });
 });
