@@ -1,5 +1,6 @@
 var expect = require ('chai').expect
   , async  = require ('async')
+  , path   = require ('path')
   ;
 
 var blueprint = require ('../fixtures/blueprint')
@@ -14,7 +15,14 @@ function passthrough (result, req, callback) {
 }
 
 describe ('Policy', function () {
-  describe ('#assert', function () {
+  var appPath = path.resolve (__dirname, '../fixtures/app');
+
+  before (function () {
+    blueprint.destroy ();
+    blueprint.Application (appPath);
+  });
+
+  describe ('#', function () {
     it ('should export several functions', function () {
       expect (Policy).to.be.a.function;
       expect (Policy.assert).to.be.a.function;
@@ -22,9 +30,22 @@ describe ('Policy', function () {
       expect (Policy.or).to.be.a.function;
       expect (Policy.not).to.be.a.function;
     });
+  });
 
+  describe ('#assert', function () {
     it ('should create an assertion that evaluates to true', function (done) {
       var f = Policy.assert (passthrough, true);
+
+      f (null, function (err, result) {
+        expect (err).to.be.null;
+        expect (result).to.be.true;
+
+        return done ();
+      });
+    });
+
+    it ('should create an assertion from existing application policy', function (done) {
+      var f = Policy.assert ('always_true');
 
       f (null, function (err, result) {
         expect (err).to.be.null;
