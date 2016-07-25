@@ -1,26 +1,25 @@
-var all = require ('require-all')
-  , objectPath = require ('object-path')
+var util = require ('util')
+  , _ = require ('underscore')
+  , ResourceManager = require ('./ResourceManager')
   ;
 
-function PolicyManager () {
-  this._policies = {};
+function PolicyManager (opts) {
+  ResourceManager.call (this, 'policies', opts);
 }
+
+util.inherits (PolicyManager, ResourceManager);
 
 /**
  * Load policies from the specified path.
  *
  * @param path
- * @param callback
+ * @param opts
  */
-PolicyManager.prototype.load = function (path) {
-  this._policies = all ({
-    dirname: path,
-    filter:  /(.+)\.js$/,
-    excludeDirs: /.*/,
-    recursive: false
-  });
+PolicyManager.prototype.load = function (path, opts) {
+  opts = _.extend ({recursive: true}, opts);
+  ResourceManager.prototype.load.call (this, path, opts);
 };
 
-PolicyManager.prototype.find = function (name) {
-  return objectPath.get (this._policies, name);
-};
+PolicyManager.prototype.__defineGetter__ ('policies', function () {
+  return this._resources;
+});

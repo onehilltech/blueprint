@@ -11,6 +11,7 @@ var RouterBuilder = require ('./RouterBuilder')
   , Loader        = require ('./Loader')
   , Framework     = require ('./Framework')
   , PolicyManager = require ('./PolicyManager')
+  , ModelManager  = require ('./ModelManager')
   ;
 
 /**
@@ -19,7 +20,8 @@ var RouterBuilder = require ('./RouterBuilder')
  * Application that is loaded via the node_modules. This class only works if
  * blueprint.Application() has been called for the top-level project.
  *
- * @param appPath
+ * @param name
+ * @param modulePath
  * @constructor
  */
 function ApplicationModule (name, modulePath) {
@@ -28,9 +30,9 @@ function ApplicationModule (name, modulePath) {
 
   this._listeners = undefined;
   this._controllers = undefined;
-  this._models = undefined;
+  this._modelManager = undefined;
   this._routers = undefined;
-  this._policies = null
+  this._policyManager = undefined;
 
   // Resolve the complete application path.
   this.appPath = path.resolve (modulePath);
@@ -44,17 +46,17 @@ function ApplicationModule (name, modulePath) {
  * Get the models defined by the application.
  */
 ApplicationModule.prototype.__defineGetter__ ('models', function () {
-  if (this._models)
-    return this._models;
+  if (this._modelManager)
+    return this._modelManager.models;
 
-  // Load all the models into memory.
-  winston.log ('info', 'loading application models into memory');
+  this._modelManager = new ModelManager ();
+  winston.log ('info', 'loading application models');
 
-  Framework().messaging.emit ('app.models.loading', this);
-  this._models = Loader.loadModels (path.join (this.appPath, 'models'));
-  Framework().messaging.emit ('app.models.loaded', this);
+  Framework ().messaging.emit ('app.models.loading', this);
+  this._modelManager.load (path.join (this.appPath, 'models'));
+  Framework ().messaging.emit ('app.models.loaded', this);
 
-  return this._models;
+  return this._modelManager.models;
 });
 
 /**
@@ -112,11 +114,13 @@ ApplicationModule.prototype.__defineGetter__ ('listeners', function () {
  * Get the policies for the application model.
  */
 ApplicationModule.prototype.__defineGetter__ ('policies', function () {
-  if (this._policies)
-    return this._policies;
+  if (this._policyManager)
+    return this._policyManager.policies;
 
-  this._policies = new PolicyManager ();
-  this._policies.load (path.join (this._appPath, 'policies'));
+  this._policyManager = new PolicyManager ();
+  this._policyManager.load (path.join (this._appPath, 'policies'));
+
+  return this._policyManager.policies;
 });
 
 ApplicationModule.prototype.__defineGetter__ ('Schema', function () {
