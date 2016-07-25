@@ -20,13 +20,7 @@ describe ('ApplicationModule', function () {
   describe ('new ApplicationModule', function () {
     it ('should create a new application module', function () {
       appModule = new ApplicationModule ('test-module', appPath);
-
       expect (appModule.appPath).to.equal (appPath);
-
-      expect (appModule._listeners).to.have.keys (['app.init', 'custom.event'])
-      expect (appModule._controllers).to.be.undefined;
-      expect (appModule._modelManager).to.be.undefined;
-      expect (appModule._routers).to.be.undefined;
     });
 
     it ('should have the name test-app', function () {
@@ -60,6 +54,13 @@ describe ('ApplicationModule', function () {
   describe ('#listeners', function () {
     it ('should return the loaded listeners', function () {
       expect (appModule.listeners).to.have.keys (['app.init', 'custom.event']);
+      expect (appModule.listeners['app.init']).to.have.keys (['TestListener', 'TargetListener']);
+      expect (appModule.listeners['app.init']['TargetListener']).to.have.property ('targetMessenger');
+      expect (appModule.listeners['custom.event']).to.have.keys (['CustomListener1', 'CustomListener2']);
+
+      expect (blueprint.messaging.messengers).to.have.keys (['_', 'testTarget']);
+      expect (blueprint.messaging.getMessenger ('_').emitter.listeners).to.have.length (1);
+      expect (blueprint.messaging.getMessenger ('testTarget').emitter.listeners).to.have.length (1);
     });
   });
 
