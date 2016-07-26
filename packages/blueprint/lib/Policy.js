@@ -6,24 +6,35 @@ var Framework = require ('./Framework')
   , HttpError = require ('./errors/HttpError')
   ;
 
-var app = require ('./index').app;
-
 /**
- * Create a policy evaluator that can be used to validate a request.
+ * Definition of a policy.
  *
- * @param policy  Policy function with signature (req, callback).
- * @returns {__blueprint_policy}
+ * @param def
+ * @constructor
  */
-function PolicyEvaluator (policy) {
-  return function __blueprint_policy_evaluator (req, callback) {
-    return policy (req, function (err, result) {
-      if (!result) return callback (new HttpError (403, 'Unauthorized access'));
-      return callback ();
-    })
-  }
+function PolicyDefinition (def) {
+  this._def = def;
 }
 
-exports = module.exports = PolicyEvaluator;
+/**
+ * Evaluate the policy definition.
+ *
+ * @param req
+ * @param callback
+ * @returns {*}
+ */
+PolicyDefinition.prototype.evaluate = function (req, callback) {
+  return this._def (req, function (err, result) {
+    if (!result) return callback (new HttpError (403, 'Unauthorized access'));
+    return callback ();
+  });
+};
+
+function PolicyDefinitionFactory (def) {
+  return new PolicyDefinition (def);
+}
+
+module.exports = exports = PolicyDefinitionFactory;
 
 /**
  * Factory method for creating a policy that can be evaluated. This factory
@@ -67,7 +78,7 @@ function orPolicy (policies) {
       function __blueprint_or_iterator (policy, callback) {
         return policy (req, function __blueprint_or_result (err, result) {
           // Since we are using async 1.5, we need to ignore the err parameter.
-          callback (result);
+          return callback (result);
         });
       },
       function __blueprint_or_complete (result) {
@@ -91,7 +102,7 @@ function andPolicy (policies) {
       function __blueprint_and_iterator (policy, callback) {
         return policy (req, function __blueprint_and_result (err, result) {
           // Since we are using async 1.5, we need to ignore the err parameter.
-          callback (result);
+          return callback (result);
         });
       },
       function __blueprint_and_complete (result) {
