@@ -5,6 +5,7 @@ var expect = require ('chai').expect
 
 var blueprint = require ('../fixtures/blueprint')
   , datamodel = require ('../fixtures/datamodel')
+  , HttpError = blueprint.errors.HttpError
   ;
 
 var Policy = require ('../../lib/Policy')
@@ -22,16 +23,6 @@ describe ('Policy', function () {
     blueprint.Application (appPath);
   });
 
-  describe ('#', function () {
-    it ('should export several functions', function () {
-      expect (Policy).to.be.a.function;
-      expect (Policy.assert).to.be.a.function;
-      expect (Policy.and).to.be.a.function;
-      expect (Policy.or).to.be.a.function;
-      expect (Policy.not).to.be.a.function;
-    });
-  });
-
   describe ('#assert', function () {
     it ('should create an assertion that evaluates to true', function (done) {
       var f = Policy.assert (passthrough, true);
@@ -41,6 +32,31 @@ describe ('Policy', function () {
         expect (result).to.be.true;
 
         return done ();
+      });
+    });
+
+    describe ('#', function () {
+      it ('should export several functions', function () {
+        expect (Policy).to.be.a.function;
+        expect (Policy.assert).to.be.a.function;
+        expect (Policy.and).to.be.a.function;
+        expect (Policy.or).to.be.a.function;
+        expect (Policy.not).to.be.a.function;
+      });
+
+      it ('should return a successful evaluation', function (done) {
+        Policy (
+          Policy.assert (passthrough, true)
+        ).evaluate (null, done);
+      });
+
+      it ('should return an error for the evaluation', function (done) {
+        Policy (
+          Policy.assert (passthrough, false)
+        ).evaluate (null, function (err) {
+          expect (err).to.be.instanceof (HttpError);
+          return done ();
+        });
       });
     });
 
