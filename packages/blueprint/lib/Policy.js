@@ -36,6 +36,8 @@ function PolicyDefinitionFactory (def) {
 
 module.exports = exports = PolicyDefinitionFactory;
 
+exports.Definition = PolicyDefinition;
+
 /**
  * Factory method for creating a policy that can be evaluated. This factory
  * return a function that has the signature function (req, callback). The
