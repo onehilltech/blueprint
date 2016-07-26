@@ -162,6 +162,9 @@ describe ('AccountRouter', function () {
     };
 
     it ('should create a new account', function (done) {
+      var callbackCalled = false;
+      var count = 5;
+
       // We know the account was created when we get an event for
       // sending an account activation email.
       bm.once ('gatekeeper.email.account_activation.sent', function (account, info) {
@@ -172,7 +175,7 @@ describe ('AccountRouter', function () {
         expect (info).to.have.deep.property ('envelope.to[0]', data.email);
         expect (info).to.have.property ('messageId');
 
-        done ();
+        callbackCalled = true;
       });
 
       request (server.app)
@@ -183,7 +186,23 @@ describe ('AccountRouter', function () {
           if (err) return done (err);
           expect (res.body.account).to.have.keys (['_id']);
 
-          // NOTE Test is done when we receive the message that email was sent.
+          var count = 0;
+          async.whilst (
+            function () { return count < 5; },
+            function (callback) {
+              ++ count;
+
+              setTimeout(function() {
+                callback(null, count);
+              }, 1000);
+            },
+            function (err, n) {
+              if (err) return done (err);
+
+              expect (callbackCalled).to.be.true;
+              return done ();
+            }
+          );
         });
     });
 

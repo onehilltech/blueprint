@@ -29,21 +29,17 @@ blueprint.controller (WorkflowController);
 
 /**
  * Logout a user. After this method returns, the token is no longer valid.
- *
- * @returns {*[]}
  */
-WorkflowController.prototype.logoutUser = function (callback) {
-  var self = this;
+WorkflowController.prototype.logoutUser = function () {
+  return {
+    execute: function (req, res, callback) {
+      var token = req.authInfo.token;
 
-  return function (req, res) {
-    var token = req.authInfo.token;
-
-    token.remove (function (err) {
-      if (err)
-        return self.handleError (res, err, 500, 'Failed to logout user', callback);
-
-      return res.status (200).send (true);
-    });
+      token.remove (function (err) {
+        if (err) return callback (new HttpError (500, 'Failed to logout user'));
+        return res.status (200).send (true);
+      });
+    }
   };
 };
 
@@ -54,9 +50,7 @@ WorkflowController.prototype.logoutUser = function (callback) {
  * @param callback
  * @returns {Function}
  */
-WorkflowController.prototype.issueToken = function (callback) {
-  var self = this;
-
+WorkflowController.prototype.issueToken = function () {
   function grantToken (res, accessToken) {
     return res.status (200).json ({
       token_type    : 'Bearer',
@@ -253,7 +247,6 @@ WorkflowController.prototype.issueToken = function (callback) {
     },
 
     execute: function (req, res, callback) {
-
       // Locate the handler for the grant type.
       var grantType = req.body.grant_type;
       var grantFunc = grantTypes[grantType];

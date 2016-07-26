@@ -1,6 +1,5 @@
 var blueprint  = require ('@onehilltech/blueprint')
   , gatekeeper = require ('../../lib')
-  , async      = require ('async')
   ;
 
 var Account = require ('../models/Account')
@@ -10,46 +9,13 @@ var Account = require ('../models/Account')
 
 var bm = blueprint.messaging
   , ResourceController = blueprint.ResourceController
+  , Policy = blueprint.Policy
   ;
 
 var DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE = {
   'access_credentials.password': 0,
   '__v': 0
 };
-
-/**
- * Check that the request is from a client.
- *
- * @param req
- * @param callback
- * @returns {*}
- */
-function isClient (req, callback) {
-  return callback (null, req.user.collection.collectionName === Client.collection.collectionName);
-}
-
-function isOwner (req, callback) {
-  return callback (null, req.accountId === req.user.id);
-}
-
-/**
- * Check that user has the correct roles.
- *
- * @param expected
- * @param req
- * @param callback
- */
-function hasRole (expected, req, callback) {
-  var current = req.user.getRoles ();
-
-  async.some (expected, function (expectedRole, callback) {
-    async.some (current, function (currentRole, callback) {
-      return callback (currentRole === expectedRole);
-    }, callback);
-  }, function (result) {
-    return callback (null, result);
-  });
-}
 
 function AccountController () {
   ResourceController.call (this, {name: 'account', model: Account, id: 'accountId'});
@@ -65,9 +31,9 @@ AccountController.prototype.getAll = function () {
   var options = {
     on: {
       authorize: function (req, callback) {
-        ResourceController.runChecks ([
-          ResourceController.check (hasRole, [gatekeeper.roles.user.administrator])
-        ], req, callback);
+        Policy (
+          Policy.assert ('is_administrator')
+        ).evaluate (req, callback);
       },
 
       prepareProjection: function (req, callback) {
@@ -80,21 +46,20 @@ AccountController.prototype.getAll = function () {
 };
 
 /**
- * Get the account
+ * Get a single account from the database.
  *
- * @param callback
  * @returns {Function}
  */
 AccountController.prototype.get = function () {
   var options = {
     on: {
       authorize: function (req, callback) {
-        ResourceController.runChecks ([
-          ResourceController.orCheck ([
-            ResourceController.check (isOwner),
-            ResourceController.check (hasRole, [gatekeeper.roles.user.administrator])
+        Policy (
+          Policy.or ([
+            Policy.assert ('is_account_owner'),
+            Policy.assert ('is_administrator')
           ])
-        ], req, callback);
+        ).evaluate (req, callback);
       },
 
       prepareProjection: function (req, callback) {
@@ -115,10 +80,12 @@ AccountController.prototype.create = function () {
   var options = {
     on: {
       authorize: function (req, callback) {
-        ResourceController.runChecks ([
-          ResourceController.check (isClient),
-          ResourceController.check (hasRole, [gatekeeper.roles.client.account.create])
-        ], req, callback);
+        Policy (
+          Policy.and ([
+            Policy.assert ('is_client_request'),
+            Policy.assert ('has_role', gatekeeper.roles.client.account.create)
+          ])
+        ).evaluate (req, callback);
       },
 
       preCreate: function (req, doc, callback) {
@@ -153,12 +120,12 @@ AccountController.prototype.delete = function () {
   var options = {
     on: {
       authorize: function (req, callback) {
-        ResourceController.runChecks ([
-          ResourceController.orCheck ([
-            ResourceController.check (isOwner),
-            ResourceController.check (gatekeeper.authorization.checks.isAdministrator)
+        Policy (
+          Policy.or ([
+            Policy.assert ('is_account_owner'),
+            Policy.assert ('is_administrator')
           ])
-        ], req, callback);
+        ).evaluate (req, callback);
       },
 
       postExecute: function (req, account, callback) {
