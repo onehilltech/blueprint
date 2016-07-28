@@ -3,9 +3,9 @@ var expect = require ('chai').expect
   , path   = require ('path')
   ;
 
-var blueprint = require ('../fixtures/blueprint')
-  , datamodel = require ('../fixtures/datamodel')
-  , HttpError = blueprint.errors.HttpError
+var blueprint  = require ('../../lib/')
+  , appFixture = require ('../fixtures/app')
+  , HttpError  = blueprint.errors.HttpError
   ;
 
 var Policy = require ('../../lib/Policy')
@@ -16,11 +16,8 @@ function passthrough (result, req, callback) {
 }
 
 describe ('Policy', function () {
-  var appPath = path.resolve (__dirname, '../fixtures/app');
-
-  before (function () {
-    blueprint.destroy ();
-    blueprint.Application (appPath);
+  before (function (done) {
+    appFixture (done);
   });
 
   describe ('#assert', function () {

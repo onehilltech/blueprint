@@ -1,12 +1,11 @@
-var blueprint = require ('./lib')
+var app = require ('./app')
   ;
 
-var connected = false;
+var db = app.database;
 
 module.exports = exports = function (callback) {
-  if (connected)
+  if (db.state === 1 || db.state === 2)
     return callback ();
 
-  connected = true;
   blueprint.app.database.connect (callback);
 };

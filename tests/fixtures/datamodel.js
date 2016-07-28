@@ -7,8 +7,11 @@ var blueprint = require ('./blueprint')
   , connect   = require ('./connect')
   ;
 
-var Person = blueprint.app.models.Person
-  ;
+var Person;
+
+blueprint.messaging.on ('app.init', function (app) {
+  Person = app.models.Person;
+});
 
 var data = {
   persons : [

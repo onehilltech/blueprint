@@ -1,8 +1,9 @@
-var expect    = require ('chai').expect
-  , path      = require ('path')
-  , async     = require ('async')
-  , fs        = require ('fs')
-  , blueprint = require ('../fixtures/lib')
+var expect     = require ('chai').expect
+  , path       = require ('path')
+  , async      = require ('async')
+  , fs         = require ('fs')
+  , blueprint  = require ('../fixtures/lib')
+  , appFixture = require ('../fixtures/app')
   ;
 
 var ApplicationModule = blueprint.ApplicationModule
@@ -12,9 +13,8 @@ describe ('ApplicationModule', function () {
   var appPath = path.resolve (__dirname, '../fixtures/app');
   var appModule;
 
-  before (function () {
-    blueprint.destroy ();
-    blueprint.Application (appPath);
+  before (function (done) {
+    appFixture (done);
   });
 
   describe ('new ApplicationModule', function () {
@@ -28,7 +28,7 @@ describe ('ApplicationModule', function () {
     });
   });
 
-  describe ('#load', function () {
+  describe ('#include', function () {
     it ('should load an application module into the main application', function (done) {
       var modulePath = path.resolve (__dirname, '../fixtures/app-module');
       blueprint.include ('test-module', modulePath);
@@ -43,8 +43,8 @@ describe ('ApplicationModule', function () {
       async.each (files, function (file, callback) {
         fs.stat (file, function (err, stat) {
           if (err) return callback (err);
-          expect (stat.isFile()).to.be.true;
 
+          expect (stat.isFile()).to.be.true;
           return callback ();
         });
       }, done);
@@ -66,7 +66,7 @@ describe ('ApplicationModule', function () {
 
   describe ('#models', function () {
     it ('should return the loaded models', function () {
-      expect (appModule.models).to.have.deep.property ('TestModel1')
+      expect (appModule.models).to.have.deep.property ('TestModel1');
       expect (appModule.models).to.have.deep.property ('inner.TestModel2');
     });
   });
