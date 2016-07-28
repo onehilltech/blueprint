@@ -1,7 +1,7 @@
 var express     = require ('express')
   , winston     = require ('winston')
   , path        = require ('path')
-  , extend      = require ('extend')
+  , _           = require ('underscore')
   , async       = require ('async')
   , consolidate = require ('consolidate')
   , fs          = require ('fs')
@@ -214,68 +214,119 @@ function configureProtocols (configs, app) {
  * @param config      Server configuration
  * @constructor
  */
-function Server (appPath, config) {
-  config = config || {};
-
+function Server (appPath) {
   this._appPath = appPath;
-  this._config = config;
   this._app = express ();
   this._mainRouter = express.Router ();
   this._protocols = [];
+}
 
-  // Configure the middleware for the Express.js application.
-  configureMiddleware (this._app, config.middleware);
+/**
+ * Configure the server.
+ *
+ * @param config
+ * @param callback
+ */
+Server.prototype.configure = function (config, callback) {
+  if (this._config)
+    return callback (new Error ('Server already configured'));
 
-  this._app.use (this._mainRouter);
-  this._protocols = configureProtocols (config.protocols, this._app);
+  config = config || {};
 
-  if (config.statics) {
+  this._config = config;
+
+  async.waterfall ([
+    async.constant (this),
+
+    // Configure the middleware.
+    function (server, callback) {
+      configureMiddleware (server._app, config.middleware);
+      return callback (null, server);
+    },
+
+    // Configure the protocols.
+    function (server, callback) {
+      server._protocols = configureProtocols (config.protocols, server._app);
+      return callback (null, server);
+    },
+
     // Static middleware is the last middleware before any error handling middleware. This
     // ensures that dynamic routes take precedence over any static routes. The static routes
     // are in relation to the application path.
-    var self = this;
 
-    async.each(config.statics, function (iter, callback) {
-      var staticPath = path.resolve (self._appPath, iter);
-      winston.log ('debug', 'static path: ', staticPath);
+    function (server, callback) {
+      if (!config.statics)
+        return callback (null, server);
 
-      self._app.use (express.static (staticPath));
-      return callback ();
-    });
-  }
+      async.each (config.statics, function (iter, callback) {
+        var staticPath = path.resolve (self._appPath, iter);
+        winston.log ('debug', 'static path: ', staticPath);
 
-  // Initialize the uploader for the server.
-  var uploadPath = Path.resolve (appPath, UPLOAD_PATH);
-  uploadPath.createIfNotExists ();
-  this._uploader = new Uploader ({dest : uploadPath.path});
+        server._app.use (express.static (staticPath));
 
-  // Setup the views for the server, and the view engine. There can be a
-  // single view engine, or there can be multiple view engines. The view
-  // engine must be supported by consolidate.js.
-  this._viewCachePath = Path.resolve (this._appPath, VIEW_CACHE_PATH);
-  this._viewCachePath.createIfNotExists ();
+        return callback ();
+      }, function (err) {
+        return callback (err, server);
+      });
+    },
 
-  this._app.set ('views', this._viewCachePath.path);
+    // Setup the views for the server, and the view engine. There can be a
+    // single view engine, or there can be multiple view engines. The view
+    // engine must be supported by consolidate.js.
+    function (server, callback) {
+      var viewCachePath = Path.resolve (server._appPath, VIEW_CACHE_PATH);
 
-  var viewEngine = config['view_engine'] || DEFAULT_VIEW_ENGINE;
-  this._app.set ('view engine', viewEngine);
+      viewCachePath.createIfNotExists (function (err) {
+        if (err) return callback (err);
 
-  if (config['view_engines']) {
-    // We are going to load multiple view engines in addition to the default
-    // view engine for the server.
-    var viewEngines = config['view_engines'];
-    var length = viewEngines.length;
+        server._viewCachePath = viewCachePath.path;
+        server._app.set ('views', viewCachePath.path);
 
-    for (var i = 0; i < length; ++ i) {
-      var engine = viewEngines[i];
-      this._app.engine (engine, consolidate[engine]);
+        var viewEngine = config.view_engine || DEFAULT_VIEW_ENGINE;
+        server._app.set ('view engine', viewEngine);
+
+        if (config.view_engines) {
+          // We are going to load multiple view engines in addition to the default
+          // view engine for the server.
+          var viewEngines = config.view_engines;
+          var length = viewEngines.length;
+
+          for (var i = 0; i < length; ++ i) {
+            var engine = viewEngines[i];
+            server._app.engine (engine, consolidate[engine]);
+          }
+        }
+
+        return callback (null, server);
+      });
+    },
+
+    // Set the locals for the server application.
+    function (server, callback) {
+      if (config.locals)
+        server._app.locals = _.extend (server._app.locals, config.locals);
+
+      return callback (null, server)
+    },
+
+    // Setup the upload path for the server.
+    function (server, callback) {
+      var uploadPath = Path.resolve (server._appPath, UPLOAD_PATH);
+
+      uploadPath.createIfNotExists (function (err) {
+        if (err) return callback (err);
+
+        server._uploader = new Uploader ({dest: uploadPath.path});
+        return callback (null, server);
+      });
     }
-  }
+  ], function (err, server) {
+    if (server)
+      server._app.use (server._mainRouter);
 
-  // Set the locals for the server application.
-  if (config.locals)
-    extend (true, this._app.locals, config.locals);
-}
+    return callback (err, server);
+  });
+};
 
 /**
  * Start listening for requests.
@@ -298,7 +349,7 @@ Server.prototype.listen = function (done) {
  *
  * @param path
  */
-Server.prototype.importViews = function (srcPath) {
+Server.prototype.importViews = function (srcPath, callback) {
   winston.log ('debug', 'importing views from %s', srcPath);
 
   var options = {
@@ -306,7 +357,7 @@ Server.prototype.importViews = function (srcPath) {
     preserveTimestamps: true,
   };
 
-  fse.copySync (srcPath, this._viewCachePath.path, options);
+  fse.copy (srcPath, this._viewCachePath, options, callback);
 };
 
 /**

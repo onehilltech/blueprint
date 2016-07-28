@@ -1,10 +1,19 @@
 var async = require ('async')
   , util = require ('util')
+  , Framework = require ('./Framework')
   ;
 
-var Framework = require ('./Framework')
-  , HttpError = require ('./errors/HttpError')
+var HttpError = require ('./errors/HttpError')
   ;
+
+// The module needs to store the initialize application. We are not going
+// to rely on the getting the app directly from the framework since there
+// is good chance it may not be initialized.
+var app;
+
+Framework ().messaging.on ('app.init', function (a) {
+  app = a;
+});
 
 /**
  * Definition of a policy.
@@ -51,7 +60,7 @@ function PolicyRule () {
   var func = args.shift ();
 
   if (typeof func === 'string') {
-    func = Framework ().app._policyManager.find (func);
+    func = app._policyManager.find (func);
 
     if (!func)
       throw new Error (util.format ('Policy %s does not exist', func));

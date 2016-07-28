@@ -3,16 +3,31 @@ var path    = require ('path')
   , async   = require ('async')
   , request = require ('supertest')
   , util    = require ('util')
+  , winston = require ('winston')
   ;
 
 var ApplicationModule = require ('../../lib/ApplicationModule')
   , RouterBuilder     = require ('../../lib/RouterBuilder')
-  , blueprint         = require ('../../lib')
+  , appFixture        = require ('../fixtures/app')
   ;
 
 describe ('RouterBuilder', function () {
   var routerBuilder;
   var routersPath;
+  var app;
+
+  before (function (done) {
+    appFixture (function (err, a) {
+      if (err) return done (err);
+
+      app = a;
+      app.models.Person.remove ({}, done);
+    });
+  });
+
+  after (function (done) {
+    app.database.disconnect (done);
+  });
 
   describe ('new RouterBuilder ()', function () {
     it ('should create a new RouterBuilder', function () {
@@ -44,36 +59,13 @@ describe ('RouterBuilder', function () {
   });
 
   describe ('resources', function () {
-    var app;
-    var server;
-    var Person;
     var id;
-
-    before (function (done) {
-      var appPath = path.resolve (__dirname, '../fixtures/app');
-
-      // Destroy the current application, and create a new one.
-      blueprint.destroy ();
-      app = blueprint.Application (appPath);
-      server = app.server;
-      Person = app.models.Person;
-
-      // connect to the database, delete all resources.
-      async.series ([
-        function (callback) { app.database.connect (callback); },
-        function (callback) { Person.remove ({}, callback); }
-      ], done);
-    });
-
-    after (function (done) {
-      app.database.disconnect (done);
-    });
 
     describe ('all', function () {
       var data = {person: {first_name: 'James', last_name: 'Hill'}};
 
       it ('should create a new resource', function (done) {
-        request (server.app)
+        request (app.server.app)
           .post ('/persons')
           .send (data)
           .expect (200)
@@ -90,26 +82,26 @@ describe ('RouterBuilder', function () {
       });
 
       it ('should not create the resource [missing body]', function (done) {
-        request (server.app)
+        request (app.server.app)
           .post ('/persons')
           .expect (400, done);
       });
 
       it ('should not create the resource [invalid parameters]', function (done) {
-        request (server.app)
+        request (app.server.app)
           .post ('/persons')
           .send ({first: 'James', last: 'Hill'})
           .expect (400, done);
       });
 
       it ('should retrieve a single resource', function (done) {
-        request (server.app)
+        request (app.server.app)
           .get ('/persons/' + id)
           .expect (200, { person: {_id: id, first_name: 'James', last_name: 'Hill'}}, done);
       });
 
       it ('should retrieve a list of all resources', function (done) {
-        request (server.app)
+        request (app.server.app)
           .get ('/persons')
           .expect (200, { persons: [{ _id: id, first_name: 'James', last_name: 'Hill'}]}, done);
       });
@@ -117,14 +109,14 @@ describe ('RouterBuilder', function () {
       it ('should update a single resource', function (done) {
         async.series ([
           function (callback) {
-            request (server.app)
+            request (app.server.app)
               .put ('/persons/' + id)
               .send ({person: {first_name: 'Lanita', last_name: 'Hill'}})
               .expect (200, {person: {_id: id, first_name: 'Lanita', last_name: 'Hill'}}, callback);
           },
 
           function (callback) {
-            request (server.app)
+            request (app.server.app)
               .get ('/persons/' + id)
               .expect (200, {person: {_id: id, first_name: 'Lanita', last_name: 'Hill'}}, callback);
           }
@@ -133,13 +125,13 @@ describe ('RouterBuilder', function () {
       });
 
       it ('should delete an existing resource', function (done) {
-        request (server.app)
+        request (app.server.app)
           .delete ('/persons/' + id)
           .expect (200, 'true', done);
       });
 
       it ('should not delete an existing resource', function (done) {
-        request (server.app)
+        request (app.server.app)
           .delete ('/persons/' + id)
           .expect (404, done);
       });
@@ -151,7 +143,7 @@ describe ('RouterBuilder', function () {
       // allow: create, getOne
 
       it ('should create a new resource', function (done) {
-        request (server.app)
+        request (app.server.app)
           .post ('/allow')
           .send ({person: {first_name: 'James', last_name: 'Hill'}})
           .expect (200)
@@ -165,13 +157,13 @@ describe ('RouterBuilder', function () {
       });
 
       it ('should get a single resource', function (done) {
-        request (server.app)
+        request (app.server.app)
           .get ('/allow/' + id)
           .expect (200, done);
       });
 
       it ('should not retrieve all the resources', function (done) {
-        request (server.app)
+        request (app.server.app)
           .get ('/allow')
           .expect (404, done);
       });
@@ -182,7 +174,7 @@ describe ('RouterBuilder', function () {
       // deny: delete
 
       it ('should create a new resource', function (done) {
-        request (server.app)
+        request (app.server.app)
           .post ('/deny')
           .send ({person: {first_name: 'James', last_name: 'Hill'}})
           .expect (200)
@@ -196,13 +188,13 @@ describe ('RouterBuilder', function () {
       });
 
       it ('should get a single resource', function (done) {
-        request (server.app)
+        request (app.server.app)
           .get ('/deny/' + id)
           .expect (200, done);
       });
 
       it ('should not delete the resource', function (done) {
-        request (server.app)
+        request (app.server.app)
           .delete ('/deny')
           .expect (404, done);
       });

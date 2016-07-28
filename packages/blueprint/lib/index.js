@@ -76,22 +76,22 @@ exports.model = function (name, schema) {
  * in the main module.
  *
  * @param appPath
+ * @param callback
+ *
  * @constructor
  */
-exports.Application = function (appPath) {
+exports.Application = function (appPath, callback) {
   if (Framework ().hasApplication ()) {
-    if (appPath === Framework ().app.appPath)
-      return Framework ().app;
+    if (appPath !== Framework ().app.appPath)
+      return callback (new Error (util.format ('Application is already initialized [path=%s]', appPath)));
 
-    throw new Error (util.format ('Application is already initialized [path=%s]', appPath));
+    return callback (null, Framework().app)
   }
 
-  // Create a new application and install it.
   var app = new Application (appPath);
   Framework ().app = app;
 
-  // Initialize the application.
-  app.init ();
+  app.init (callback);
 
   return app;
 };
@@ -99,14 +99,16 @@ exports.Application = function (appPath) {
 /**
  * Destroy the Framework ().
  */
-exports.destroy = function () {
+exports.destroy = function (callback) {
   var framework = Framework ();
 
-  if (framework === undefined)
-    return;
+  if (framework !== undefined) {
+    framework.releaseApplication ();
+    Framework.destroy ();
+  }
 
-  framework.releaseApplication ();
-  Framework.destroy ();
+  if (callback)
+    return callback (null);
 };
 
 /**

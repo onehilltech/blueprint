@@ -1,7 +1,4 @@
-var semver  = require ('semver')
-  , winston = require ('winston')
-  ;
-
+var winston   = require ('winston')
 var Messaging = require ('./Messaging')
   , version   = require ('../package.json').version
   ;

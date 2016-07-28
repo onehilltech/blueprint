@@ -4,56 +4,67 @@ var expect = require ('chai').expect
   , fs     = require ('fs')
   ;
 
-var blueprint = require ('../../lib')
+var Application = require ('../../lib/Application')
+  , ApplicationModule = require ('../../lib/ApplicationModule')
   ;
 
 describe ('Application', function () {
   var appPath = path.resolve (__dirname, '../fixtures/app');
   var app;
 
-  before (function () {
-    blueprint.destroy ();
+  describe ('new Application ()', function () {
+    it ('should create and initialize a new application', function () {
+      app = new Application (appPath);
+      expect (app).to.be.instanceof (ApplicationModule);
+    });
   });
 
-  describe ('new Application ()', function () {
-    app  = blueprint.Application (appPath);
-    var dataPath = path.resolve (__dirname, '../fixtures/app/data');
-
-    it ('should create and initialize a new application', function () {
-      expect (app).to.be.instanceof (blueprint.ApplicationModule);
-      expect (app.server).to.not.be.undefined;
-      expect (app.database).to.not.be.undefined;
-    });
-
-    it ('should create the /data directory', function (done) {
-      fs.stat (dataPath, function (err, stats) {
+  describe ('#init', function () {
+    it ('should initialize the application', function (done) {
+      app.init (function (err, app) {
         if (err) return done (err);
 
-        expect (stats.isDirectory ()).to.be.true;
-        return done ();
+        async.parallel ([
+          function (callback) {
+            expect (app.server).to.not.be.undefined;
+            expect (app.database).to.not.be.undefined;
+            return callback ();
+          },
+          function (callback) {
+            // Make sure the data directory has been created.
+            var dataPath = path.resolve (app.appPath, '/data');
+
+            fs.stat (dataPath, function (err, stats) {
+              if (err) return callback (err);
+              expect (stats.isDirectory ()).to.be.true;
+              return callback ();
+            });
+          },
+
+          function (callback) {
+            // Make sure the views have been copied.
+            var viewsPath = path.join (app.appPath, 'data/views');
+
+            var files = [
+              path.join (viewsPath, 'first-level.jade'),
+              path.join (viewsPath, 'inner', 'second-level.jade')
+            ];
+
+            async.each (files, function (item, callback) {
+              fs.stat (item, function (err, stats) {
+                if (err) return callback (err);
+
+                expect (stats.isFile ()).to.be.true;
+                return callback ();
+              });
+            }, callback);
+          }
+        ], done);
       });
-    });
-
-    it ('should copy the views into the /data/views directory', function (done) {
-      var viewsPath = path.join (dataPath, 'views');
-
-      var files = [
-        path.join (viewsPath, 'first-level.jade'),
-        path.join (viewsPath, 'inner', 'second-level.jade')
-      ];
-
-      async.each (files, function (item, callback) {
-        fs.stat (item, function (err, stats) {
-          if (err) return callback (err);
-
-          expect (stats.isFile ()).to.be.true;
-          return callback ();
-        });
-      }, done);
     });
   });
 
-  describe ('#start', function () {
+  describe.skip ('#start', function () {
     it ('should start the application', function (done) {
       app.start (done);
     });
