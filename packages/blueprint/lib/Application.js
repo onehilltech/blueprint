@@ -241,6 +241,44 @@ Application.prototype.start = function (done) {
 };
 
 /**
+ * Add an application module to the application. An application module can only
+ * be added once. Two application modules are different if they have the same
+ * name, not module path. This will ensure we do not have the same module in
+ * different location added to the application more than once.
+ *
+ * @param module
+ */
+Application.prototype.addModule = function (name, path, callback) {
+  if (this._modules.hasOwnProperty (name))
+    throw new Error (util.format ('duplicate module: %s', name));
+
+  var appModule = new ApplicationModule (name, path);
+  this._modules[name] = appModule;
+
+  async.waterfall ([
+    async.constant (this),
+
+    // Import the views from the module into the application.
+    function (app, callback) {
+      if (!app._server && appModule.getSupportsViews ())
+        return callback (null, app);
+
+      app._server.importViews (appModule.getViewsPath (), function (err) {
+        return callback (err, app);
+      });
+    },
+
+    // Import the policies from the module into the application.
+    function (app, callback) {
+      if (app._policyManager && appModule._policyManager)
+        app._policyManager.merge (appModule._policyManager)
+
+      return callback (null);
+    }
+  ], callback);
+};
+
+/**
  * Get the application database.
  */
 Application.prototype.__defineGetter__ ('database', function () {
@@ -277,27 +315,5 @@ Application.prototype.__defineGetter__ ('modules', function () {
 Application.prototype.__defineGetter__ ('is_init', function () {
   return this._is_init;
 });
-
-/**
- * Add an application module to the application. An application module can only
- * be added once. Two application modules are different if they have the same
- * name, not module path. This will ensure we do not have the same module in
- * different location added to the application more than once.
- *
- * @param module
- */
-Application.prototype.addModule = function (name, path) {
-  if (this._modules.hasOwnProperty (name))
-    throw new Error (util.format ('duplicate module: %s', name));
-
-  var appModule = new ApplicationModule (name, path);
-  this._modules[name] = appModule;
-
-  if (this._server && appModule.getSupportsViews ())
-    this._server.importViews (appModule.getViewsPath ());
-
-  if (this._policyManager && appModule._policyManager)
-    this._policyManager.merge (appModule._policyManager)
-};
 
 module.exports = exports = Application;

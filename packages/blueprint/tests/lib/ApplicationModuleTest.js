@@ -31,23 +31,26 @@ describe ('ApplicationModule', function () {
   describe ('#include', function () {
     it ('should load an application module into the main application', function (done) {
       var modulePath = path.resolve (__dirname, '../fixtures/app-module');
-      blueprint.include ('test-module', modulePath);
 
-      expect (blueprint.app.modules).to.have.keys (['test-module']);
+      blueprint.include ('test-module', modulePath, function (err) {
+        if (err) return done (err);
 
-      var files = [
-        path.join (appPath, 'data', 'views', 'module-first-level.jade'),
-        path.join (appPath, 'data', 'views', 'inner', 'module-second-level.jade')
-      ];
+        expect (blueprint.app.modules).to.have.keys (['test-module']);
 
-      async.each (files, function (file, callback) {
-        fs.stat (file, function (err, stat) {
-          if (err) return callback (err);
+        var files = [
+          path.join (appPath, 'data', 'views', 'module.jade'),
+          path.join (appPath, 'data', 'views', 'second-level', 'module.jade')
+        ];
 
-          expect (stat.isFile()).to.be.true;
-          return callback ();
-        });
-      }, done);
+        async.each (files, function (file, callback) {
+          fs.stat (file, function (err, stat) {
+            if (err) return callback (err);
+
+            expect (stat.isFile()).to.be.true;
+            return callback ();
+          });
+        }, done);
+      });
     });
   });
 
