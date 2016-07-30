@@ -98,9 +98,21 @@ Application.prototype.init = function (callback) {
       if (!app._configs.app.modules)
         return callback (null, app);
 
-      async.eachOf (app._configs.app.modules, function (module, name, callback) {
-        var modulePath = path.resolve (app.appPath, '../node_modules', module, 'app');
-        app.addModule (name, modulePath, callback);
+      var resolver = {
+        path: function (location) {
+          return path.resolve (app.appPath, location, 'app');
+        },
+        module: function (location) {
+          return path.resolve (app.appPath, '../node_modules', location, 'app')
+        }
+      };
+
+      async.eachOf (app._configs.app.modules, function (value, name, callback) {
+        var parts = value.split ('://');
+        var protocol = parts[0];
+        var location = resolver[protocol](parts[1]);
+
+        app.addModule (name, location, callback);
       }, function (err) {
         return callback (err, app);
       })
