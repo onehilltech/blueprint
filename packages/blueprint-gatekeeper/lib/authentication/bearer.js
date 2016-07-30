@@ -1,9 +1,18 @@
-var BearerStrategy = require ('passport-http-bearer').Strategy
-  , AccessToken    = require ('../../app/models/oauth2/AccessToken')
+var blueprint = require ('@onehilltech/blueprint')
+  , BearerStrategy = require ('passport-http-bearer').Strategy
   , winston        = require ('winston')
   ;
 
-module.exports = function () {
+var AccessToken;
+
+blueprint.messaging.on ('app.init', function (app) {
+  AccessToken = app.models.oauth2.AccessToken;
+
+  if (!AccessToken)
+    throw new Error ('AccessToken model not defined');
+});
+
+module.exports = exports = function () {
   return new BearerStrategy (function (accessToken, done) {
     winston.log ('info', '[bearer]: validating access token');
 

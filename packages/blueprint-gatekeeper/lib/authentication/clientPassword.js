@@ -1,6 +1,15 @@
-var ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy
-  , Client                 = require ('../../app/models/Client')
+var blueprint = require ('@onehilltech/blueprint')
+  , ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy
   ;
+
+var Client;
+
+blueprint.messaging.on ('app.init', function (app) {
+  Client = app.models.Client;
+
+  if (!Client)
+    throw new Error ('AccessToken model not defined');
+});
 
 module.exports = exports = function () {
   return new ClientPasswordStrategy (function (id, secret, done) {

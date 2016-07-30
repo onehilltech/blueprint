@@ -1,8 +1,18 @@
 var winston       = require ('winston')
   , LocalStrategy = require ('passport-local').Strategy
-  , Account       = require ('../../app/models/Account');
+  , blueprint     = require ('@onehilltech/blueprint')
+  ;
 
-module.exports = function (opts) {
+var Account;
+
+blueprint.messaging.on ('app.init', function (app) {
+  Account = app.models.Account;
+
+  if (!Account)
+    throw new Error ('AccessToken model not defined');
+});
+
+module.exports = exports = function (opts) {
   opts = opts || {};
 
   return new LocalStrategy (opts, function (username, password, done) {
