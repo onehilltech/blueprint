@@ -81,11 +81,6 @@ Application.prototype.init = function (callback) {
       return callback (null, app);
     },
 
-    // Let's configure the application module portion of the application.
-    function (app, callback) {
-      ApplicationModule.prototype.init.call (app, callback);
-    },
-
     // Load the modules for the application.
     function (app, callback) {
       if (!app._configs.app.modules)
@@ -97,6 +92,11 @@ Application.prototype.init = function (callback) {
       }, function (err) {
         return callback (err, app);
       })
+    },
+
+    // Let's configure the application module portion of the application.
+    function (app, callback) {
+      ApplicationModule.prototype.init.call (app, callback);
     },
 
     // Make the server object for the application.
