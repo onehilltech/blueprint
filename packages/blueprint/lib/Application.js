@@ -81,9 +81,22 @@ Application.prototype.init = function (callback) {
       return callback (null, app);
     },
 
-    // Now, let's configure the application module portion of the application.
+    // Let's configure the application module portion of the application.
     function (app, callback) {
       ApplicationModule.prototype.init.call (app, callback);
+    },
+
+    // Load the modules for the application.
+    function (app, callback) {
+      if (!app._configs.app.modules)
+        return callback (null, app);
+
+      async.eachOf (app._configs.app.modules, function (module, name, callback) {
+        var modulePath = path.resolve (app.appPath, '../node_modules', module);
+        app.addModule (name, modulePath, callback);
+      }, function (err) {
+        return callback (err, app);
+      })
     },
 
     // Make the server object for the application.
