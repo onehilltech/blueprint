@@ -1,4 +1,4 @@
-module.exports = {
+module.exports = exports = {
   baseuri : 'http://localhost:5000/gatekeeper',
 
   email : {
