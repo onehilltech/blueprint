@@ -9,7 +9,7 @@
     "url": "https://github.com/onehilltech/gatekeeper.git"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^0.32.6",
+    "@onehilltech/blueprint": "^0.32.7",
     "async": "^1.5.2",
     "bcrypt": "^0.8.5",
     "commander": "^2.9.0",
