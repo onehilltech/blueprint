@@ -1,14 +1,12 @@
 var request   = require ('supertest')
   , expect    = require ('chai').expect
   , async     = require ('async')
+  , blueprint = require ('@onehilltech/blueprint')
   ;
 
-var datamodel = require ('../../../../fixtures/datamodel')
-  , blueprint = require ('../../../../fixtures/blueprint')
+var datamodel  = require ('../../../../fixtures/datamodel')
+  , appFixture = require ('../../../../fixtures/app')
   , bm = blueprint.messaging
-  ;
-
-var Account = blueprint.app.models.Account
   ;
 
 describe ('AccountRouter', function () {
@@ -16,6 +14,8 @@ describe ('AccountRouter', function () {
   var userToken;
   var adminUserToken;
   var clientToken;
+
+  var Account;
 
   function getToken (data, callback) {
     request (server.app)
@@ -28,8 +28,18 @@ describe ('AccountRouter', function () {
   }
 
   before (function (done) {
-    server = blueprint.app.server;
     async.series ([
+      function (callback) {
+        appFixture (function (err, app) {
+          if (err) return callback (err);
+
+          server  = app.server;
+          Account = app.models.Account;
+
+          return callback (null);
+        });
+      },
+
       // 1. apply the datamodel
       function (callback) {
         datamodel.apply (callback);
@@ -162,9 +172,6 @@ describe ('AccountRouter', function () {
     };
 
     it ('should create a new account', function (done) {
-      var callbackCalled = false;
-      var count = 5;
-
       // We know the account was created when we get an event for
       // sending an account activation email.
       bm.once ('gatekeeper.email.account_activation.sent', function (account, info) {
@@ -175,7 +182,7 @@ describe ('AccountRouter', function () {
         expect (info).to.have.deep.property ('envelope.to[0]', data.email);
         expect (info).to.have.property ('messageId');
 
-        callbackCalled = true;
+        return done ();
       });
 
       request (server.app)
@@ -185,24 +192,6 @@ describe ('AccountRouter', function () {
         .end (function (err, res) {
           if (err) return done (err);
           expect (res.body.account).to.have.keys (['_id']);
-
-          var count = 0;
-          async.whilst (
-            function () { return count < 5; },
-            function (callback) {
-              ++ count;
-
-              setTimeout(function() {
-                callback(null, count);
-              }, 1000);
-            },
-            function (err, n) {
-              if (err) return done (err);
-
-              expect (callbackCalled).to.be.true;
-              return done ();
-            }
-          );
         });
     });
 

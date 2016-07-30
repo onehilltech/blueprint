@@ -3,15 +3,20 @@ var blueprint = require ('@onehilltech/blueprint')
   , request   = require ('supertest')
   ;
 
-var datamodel = require ('../../../../fixtures/datamodel')
+var datamodel  = require ('../../../../fixtures/datamodel')
+  , appFixture = require ('../../../../fixtures/app')
   ;
 
 describe ('Oauth2Router', function () {
   var server;
 
-  before(function (done) {
-    server = blueprint.app.server;
-    done ();
+  before (function (done) {
+    appFixture (function (err, app) {
+      if (err) return done (err);
+
+      server = app.server;
+      return done (null);
+    });
   });
 
   beforeEach(function (done) {

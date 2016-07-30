@@ -3,4 +3,5 @@ var blueprint = require ('@onehilltech/blueprint')
   ;
 
 blueprint.Application (path.resolve (__dirname, '../../app'));
+
 module.exports = exports = blueprint;

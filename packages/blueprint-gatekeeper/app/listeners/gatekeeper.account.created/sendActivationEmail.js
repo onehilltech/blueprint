@@ -26,15 +26,15 @@ var transport;
  * app.init
  */
 bm.on ('app.init', function (app) {
-  if (!app.config.app)
+  if (!app.configs.app)
     throw new Error ('app.config not defined');
 
-  if (!app.config.gatekeeper)
+  if (!app.configs.gatekeeper)
     throw new Error ('gatekeeper.config not defined');
 
   // Save the Gatekeeper configuration.
-  appConfig = app.config.app;
-  gatekeeperConfig = app.config.gatekeeper;
+  appConfig = app.configs.app;
+  gatekeeperConfig = app.configs.gatekeeper;
 
   if (gatekeeperConfig.email)
     transport = nodemailer.createTransport (gatekeeperConfig.email.nodemailer);

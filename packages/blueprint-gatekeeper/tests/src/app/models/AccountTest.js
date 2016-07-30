@@ -2,10 +2,7 @@ var expect = require ('chai').expect
   , async  = require ('async')
   ;
 
-var blueprint = require ('../../../fixtures/blueprint')
-  , connect   = require ('../../../fixtures/connect')
-  , Account   = require ('../../../../app/models/Account')
-  , Client    = require ('../../../../app/models/Client')
+var appFixture = require ('../../../fixtures/app')
   ;
 
 var data = {
@@ -28,15 +25,31 @@ var data = {
 describe ('Account', function () {
   var account;
   var client;
+  var app;
+
+  var Account;
+  var Client;
 
   before (function (done) {
     async.series ([
       function (callback) {
-        server = blueprint.app.server;
-        connect (callback);
+        appFixture (function (err, result) {
+          if (err) return callback (err);
+
+          app = result;
+
+          Account = result.models.Account;
+          Client  = result.models.Client;
+
+          return callback ();
+        });
       },
-      function (cb) { Account.remove ({}, cb); },
-      function (cb) { Client.remove ({}, cb); },
+      function (callback) {
+        Account.remove ({}, callback);
+      },
+      function (callback) {
+        Client.remove ({}, callback);
+      },
       function (callback) {
         client = new Client (data.client);
 

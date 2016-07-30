@@ -24,7 +24,7 @@ function origin (origin, callback) {
 }
 
 // First, configure cors support.
-var corsConfig = blueprint.app.config.cors || {};
+var corsConfig = blueprint.app.configs.cors || {};
 var options = corsConfig.options || {};
 
 if (!options.origin)

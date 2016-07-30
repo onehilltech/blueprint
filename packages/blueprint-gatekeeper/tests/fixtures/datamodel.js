@@ -2,14 +2,13 @@ var async   = require ('async')
   , winston = require ('winston')
   ;
 
-var blueprint  = require ('./blueprint')
-  , connect    = require ('./connect')
-  , gatekeeper = require ('../../lib')
+var appFixture = require ('./app')
+  , roles      = require ('../../lib/roles')
   ;
 
-var Account     = blueprint.app.models.Account
-  , Client      = blueprint.app.models.Client
-  , AccessToken = blueprint.app.models.oauth2.AccessToken
+var Account = undefined
+  , Client = undefined
+  , AccessToken = undefined
   ;
 
 var data = {
@@ -19,7 +18,7 @@ var data = {
       email: 'contact@client1.com',
       secret: 'client1',
       redirect_uri: 'https://client1.com/gatekeeper',
-      roles: [gatekeeper.roles.client.account.create]
+      roles: [roles.client.account.create]
     },
     {
       name: 'client2',
@@ -43,7 +42,7 @@ var data = {
       internal_use : {}
     },
     {
-      access_credentials: {username: 'account2', password: 'account2', roles: [gatekeeper.roles.user.administrator]},
+      access_credentials: {username: 'account2', password: 'account2', roles: [roles.user.administrator]},
       profile: {email: 'account2@gatekeeper.com'},
       internal_use : {}
     },
@@ -121,7 +120,17 @@ exports.apply = function (done) {
   winston.log ('info', 'applying datamodel to test cases');
 
   async.series ([
-    function (callback) { connect (callback); },
+    function (callback) {
+      appFixture (function (err, app) {
+        if (err) return callback (err);
+
+        Client = app.models.Client;
+        Account = app.models.Account;
+        AccessToken = app.models.oauth2.AccessToken;
+
+        return callback ();
+      });
+    },
     function (callback) { cleanup (callback); },
     function (callback) { seed (callback); }
   ], done);
