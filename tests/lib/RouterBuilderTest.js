@@ -31,11 +31,10 @@ describe ('RouterBuilder', function () {
 
   describe ('new RouterBuilder ()', function () {
     it ('should create a new RouterBuilder', function () {
-      var appModule = new ApplicationModule ('test-module', path.resolve (__dirname, '../fixtures/app'));
       routersPath = path.resolve (__dirname, '../fixtures/app/routers');
-      routerBuilder = new RouterBuilder (appModule.controllers);
+      routerBuilder = new RouterBuilder (app.controllers);
 
-      expect (routerBuilder._controllers).to.equal (appModule.controllers);
+      expect (routerBuilder._controllers).to.equal (app.controllers);
     });
   });
   

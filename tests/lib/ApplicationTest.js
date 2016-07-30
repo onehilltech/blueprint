@@ -64,6 +64,34 @@ describe ('Application', function () {
     });
   });
 
+  describe ('#addModule', function () {
+    it ('should load an application module into the main application', function (done) {
+      var modulePath = path.resolve (__dirname, '../fixtures/app-module');
+
+      app.addModule ('test-module', modulePath, function (err) {
+        if (err) return done (err);
+
+        expect (app.modules).to.have.keys (['test-module']);
+
+        var files = [
+          path.join (appPath, 'data', 'views', 'module.jade'),
+          path.join (appPath, 'data', 'views', 'second-level', 'module.jade')
+        ];
+
+        expect (app.policies).to.have.keys (['module-policy', 'always_true']);
+
+        async.each (files, function (file, callback) {
+          fs.stat (file, function (err, stat) {
+            if (err) return callback (err);
+
+            expect (stat.isFile()).to.be.true;
+            return callback ();
+          });
+        }, done);
+      });
+    });
+  });
+
   describe.skip ('#start', function () {
     it ('should start the application', function (done) {
       app.start (done);
