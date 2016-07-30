@@ -11,7 +11,12 @@ function ControllerManager (opts) {
 
 util.inherits (ControllerManager, ResourceManager);
 
-ControllerManager.prototype.load = function (path, opts) {
+ControllerManager.prototype.load = function (path, opts, callback) {
+  if (!callback) {
+    callback = opts;
+    opts = {};
+  }
+
   function resolve (Controller) {
     return new Controller ();
   }
@@ -21,7 +26,7 @@ ControllerManager.prototype.load = function (path, opts) {
     filter : /(.+Controller)\.js$/
   }, opts);
 
-  ResourceManager.prototype.load.call (this, path, opts);
+  ResourceManager.prototype.load.call (this, path, opts, callback);
 };
 
 ControllerManager.prototype.__defineGetter__ ('controllers', function () {

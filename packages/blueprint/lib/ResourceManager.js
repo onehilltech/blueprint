@@ -19,22 +19,30 @@ ResourceManager.SCM_DIRECTORIES = /^\.(git|svn)$/;
  * @param path        Path to resources
  * @param opts        Options for loading
  */
-ResourceManager.prototype.load = function (path, opts) {
+ResourceManager.prototype.load = function (path, opts, callback) {
+  if (!callback) {
+    callback = opts;
+    opts = {};
+  }
+
   opts = opts || {};
   var recursive = opts.recursive || true;
   var filter = opts.filter || /(.+)\.js$/;
   var excludeDirs = opts.excludeDirs || ResourceManager.SCM_DIRECTORIES;
   var resolve = opts.resolve;
 
-  winston.info ('info', 'loading resources in', path);
-
-  this._resources = all ({
-    dirname: path,
-    filter:  filter,
-    excludeDirs: excludeDirs,
-    recursive: recursive,
-    resolve: resolve
-  });
+  try {
+    this._resources = all ({
+      dirname: path,
+      filter: filter,
+      excludeDirs: excludeDirs,
+      recursive: recursive,
+      resolve: resolve
+    });
+    return callback (null, this);
+  } catch (e) {
+    return callback (e, this);
+  }
 };
 
 /**

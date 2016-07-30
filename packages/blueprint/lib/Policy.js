@@ -60,7 +60,7 @@ function PolicyRule () {
   var func = args.shift ();
 
   if (typeof func === 'string') {
-    func = app._policyManager.find (func);
+    func = app.policyManager.find (func);
 
     if (!func)
       throw new Error (util.format ('Policy %s does not exist', func));

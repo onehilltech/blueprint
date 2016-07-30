@@ -10,7 +10,6 @@ var ApplicationModule = blueprint.ApplicationModule
   ;
 
 describe ('ApplicationModule', function () {
-  var appPath = path.resolve (__dirname, '../fixtures/app');
   var appModule;
 
   before (function (done) {
@@ -19,37 +18,25 @@ describe ('ApplicationModule', function () {
 
   describe ('new ApplicationModule', function () {
     it ('should create a new application module', function () {
-      appModule = new ApplicationModule ('test-module', appPath);
-      expect (appModule.appPath).to.equal (appPath);
-    });
+      var appPath = path.resolve (__dirname, '../fixtures/app');
+      appModule = new ApplicationModule (appPath);
 
-    it ('should have the name test-app', function () {
-      expect (appModule.moduleName).to.equal ('test-module');
+      expect (appModule.appPath).to.equal (appPath);
     });
   });
 
-  describe ('#include', function () {
-    it ('should load an application module into the main application', function (done) {
-      var modulePath = path.resolve (__dirname, '../fixtures/app-module');
-
-      blueprint.include ('test-module', modulePath, function (err) {
+  describe ('#init', function () {
+    it ('should initialize the application module', function (done) {
+      appModule.init (function (err, module) {
         if (err) return done (err);
 
-        expect (blueprint.app.modules).to.have.keys (['test-module']);
+        expect (module.controllerManager).to.be.defined;
+        expect (module.modelManager).to.be.defined;
+        expect (module.routerManager).to.be.defined;
+        expect (module.listenerManager).to.be.defined;
+        expect (module.policyManager).to.be.defined;
 
-        var files = [
-          path.join (appPath, 'data', 'views', 'module.jade'),
-          path.join (appPath, 'data', 'views', 'second-level', 'module.jade')
-        ];
-
-        async.each (files, function (file, callback) {
-          fs.stat (file, function (err, stat) {
-            if (err) return callback (err);
-
-            expect (stat.isFile()).to.be.true;
-            return callback ();
-          });
-        }, done);
+        return done ();
       });
     });
   });
