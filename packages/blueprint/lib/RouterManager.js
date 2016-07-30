@@ -20,14 +20,13 @@ if (typeof String.prototype.endsWith !== 'function') {
   };
 }
 
-function RouterManager (controllers, opts) {
+function RouterManager (opts) {
   ResourceManager.call (this, 'routers', opts);
-  this._controllers = controllers;
 }
 
 util.inherits (RouterManager, ResourceManager);
 
-RouterManager.prototype.load = function (loadPath, opts, callback) {
+RouterManager.prototype.load = function (loadPath, controllers, opts, callback) {
   if (!callback) {
     callback = opts;
     opts = undefined;
@@ -36,9 +35,6 @@ RouterManager.prototype.load = function (loadPath, opts, callback) {
   opts = opts || {};
 
   function processDirectory (currPath, basePath, controllers, callback) {
-    if (!_.isFunction (callback))
-      console.log ('WAIT A MINUTE!!!');
-
     // Read the names of the files in the current path.
     var routers = {};
 
@@ -89,7 +85,7 @@ RouterManager.prototype.load = function (loadPath, opts, callback) {
 
   var self = this;
 
-  processDirectory (loadPath, '', this._controllers, function (err, result) {
+  processDirectory (loadPath, '', controllers, function (err, result) {
     if (err) return callback (err);
 
     self._resources = result;
