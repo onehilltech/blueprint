@@ -62,7 +62,8 @@ ListenerManager.prototype.load = function (rcPath, opts, callback) {
             tmpManager.load (eventPath, opts, function (err) {
               if (err) return callback (err);
 
-              manager._resources[eventName] = _.extend (manager._resources[eventName], tmpManager._resources);
+              var listeners = manager._resources[eventName] || {};
+              manager._resources[eventName] = _.extend (listeners, tmpManager._resources);
 
               return callback (null);
             });
