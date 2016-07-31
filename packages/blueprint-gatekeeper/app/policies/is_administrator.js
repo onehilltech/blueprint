@@ -1,5 +1,4 @@
-var async = require ('async')
-  , roles = require ('../../lib/roles').user
+var roles = require ('../../lib/roles').user
   ;
 
 var has_role = require ('./has_role')

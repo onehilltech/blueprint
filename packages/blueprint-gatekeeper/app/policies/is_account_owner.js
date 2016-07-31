@@ -1,7 +1,3 @@
-var Client = require ('../models/Client')
-  ;
-
-
 /**
  * Policy Description:
  *

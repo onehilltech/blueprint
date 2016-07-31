@@ -1,4 +1,5 @@
 var blueprint  = require ('@onehilltech/blueprint')
+  , messaging  = blueprint.messaging
   , gatekeeper = require ('../../lib')
   ;
 
@@ -7,8 +8,7 @@ var Account = require ('../models/Account')
   ;
 
 
-var bm = blueprint.messaging
-  , ResourceController = blueprint.ResourceController
+var ResourceController = blueprint.ResourceController
   , Policy = blueprint.Policy
   ;
 
@@ -102,7 +102,7 @@ AccountController.prototype.create = function () {
       },
 
       postExecute: function (req, account, callback) {
-        bm.emit ('gatekeeper.account.created', account);
+        messaging.emit ('gatekeeper.account.created', account);
         return callback (null, {_id: account._id});
       }
     }
@@ -129,7 +129,7 @@ AccountController.prototype.delete = function () {
       },
 
       postExecute: function (req, account, callback) {
-        bm.emit ('gatekeeper.account.deleted', account);
+        messaging.emit ('gatekeeper.account.deleted', account);
         return callback (null, true);
       }
     }

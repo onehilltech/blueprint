@@ -1,6 +1,15 @@
-var Client = require ('../models/Client')
+var blueprint = require ('@onehilltech/blueprint')
+  , messaging = blueprint.messaging
   ;
 
+var Client;
+
+messaging.on ('app.init', function (app) {
+  Client = app.models.Client;
+
+  if (!Client)
+    throw new Error ('Client model not initialized');
+});
 
 /**
  * Policy Description:
