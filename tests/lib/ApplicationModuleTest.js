@@ -30,6 +30,7 @@ describe ('ApplicationModule', function () {
       appModule.init (function (err, module) {
         if (err) return done (err);
 
+        expect (module._is_init).to.be.true;
         expect (module.controllerManager).to.be.defined;
         expect (module.modelManager).to.be.defined;
         expect (module.routerManager).to.be.defined;
