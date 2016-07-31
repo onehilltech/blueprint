@@ -1,8 +1,8 @@
 var expect = require ('chai').expect
+  , blueprint = require ('@onehilltech/blueprint')
   ;
 
 var appFixture = require ('../../../fixtures/app')
-  , Router = require ('../../../../lib/blueprint/Router')
   ;
 
 describe ('RouterTest', function () {
@@ -12,11 +12,10 @@ describe ('RouterTest', function () {
 
   describe ('()', function () {
     it ('should return a router for the specified version', function () {
-      var router = Router ();
-
-      expect (router).to.have.length (2);
-      expect (router[0]).to.be.a.function;
-      expect (router[1]).to.be.a.function;
+      var router = require ('../../../../lib/blueprint/Router');
+      
+      expect (router).to.be.a.function;
+      expect (router.stack).to.have.length (2);
     });
   });
 });

@@ -1,5 +1,4 @@
-var blueprint  = require ('@onehilltech/blueprint')
-  , passport = require ('passport')
+var passport   = require ('passport')
   , gatekeeper = require ('../../../lib')
   ;
 

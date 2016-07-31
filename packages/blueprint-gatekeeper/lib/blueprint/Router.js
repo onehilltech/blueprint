@@ -2,16 +2,14 @@ var blueprint = require ('@onehilltech/blueprint')
   , cors      = require ('cors')
   , winston   = require ('winston')
   , path      = require ('path')
+  , express   = require ('express')
   ;
 
 const DEFAULT_VERSION = 1;
 
-var appPath = path.resolve (__dirname, '../../app');
-var appModule = new blueprint.ApplicationModule (appPath);
+var router = express.Router ();
 
-appModule.init (function (err, appModule) {
-  // Do nothing...
-});
+module.exports = exports = router;
 
 /**
  * Check if the origin is whitelisted. By default, all origins are whitelisted
@@ -21,29 +19,34 @@ appModule.init (function (err, appModule) {
  * @param callback
  */
 function origin (origin, callback) {
-  if (!origin) return callback (null, true);
+  if (!origin)
+    return callback (null, true);
+
   callback (null, true);
 }
 
-module.exports = exports = function (opts) {
+var modulePath = path.resolve (__dirname, '../../app');
+var appModule = new blueprint.ApplicationModule (modulePath);
+
+// Initialize the application module.
+
+appModule.init (function (err, appModule) {
+  if (err) throw err;
+
+  var gatekeeperConfig = blueprint.app.configs.gatekeeper || {};
   var corsConfig = blueprint.app.configs.cors || {};
   var options = corsConfig.options || {};
 
   if (!options.origin)
     options.origin = origin;
 
-  opts = opts || {};
-
   // Select the router version.
-  var version = 'v' + (opts.version || DEFAULT_VERSION);
+  var version = 'v' + (gatekeeperConfig.version || DEFAULT_VERSION);
+  var routerSpec = appModule.routers[version];
 
-  // Get the path for the router.
-  var targetPath = opts.path || '/gatekeeper';
-  var versionedRouter = appModule.routers[version];
+  var routerBuilder = new blueprint.RouterBuilder ('/');
+  routerBuilder.addRouters (routerSpec);
 
-  var routerBuilder = new blueprint.RouterBuilder (targetPath);
-  routerBuilder.addRouters (versionedRouter);
-
-  return [cors (options)].concat (routerBuilder.getRouter ());
-};
-
+  var handlers = [cors (options)].concat (routerBuilder.getRouter ());
+  router.use (handlers);
+});

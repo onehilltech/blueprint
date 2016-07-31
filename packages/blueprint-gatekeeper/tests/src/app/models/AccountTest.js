@@ -37,9 +37,8 @@ describe ('Account', function () {
           if (err) return callback (err);
 
           app = result;
-
-          Account = result.models.Account;
-          Client  = result.models.Client;
+          Account = app.models.Account;
+          Client  = app.models.Client;
 
           return callback ();
         });
