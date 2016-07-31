@@ -11,6 +11,7 @@ var ApplicationModule = blueprint.ApplicationModule
 
 describe ('ApplicationModule', function () {
   var appModule;
+  var appPath = path.resolve (__dirname, '../fixtures/app');
 
   before (function (done) {
     appFixture (done);
@@ -18,7 +19,6 @@ describe ('ApplicationModule', function () {
 
   describe ('new ApplicationModule', function () {
     it ('should create a new application module', function () {
-      var appPath = path.resolve (__dirname, '../fixtures/app');
       appModule = new ApplicationModule (appPath);
 
       expect (appModule.appPath).to.equal (appPath);
@@ -27,6 +27,13 @@ describe ('ApplicationModule', function () {
 
   describe ('#init', function () {
     it ('should initialize the application module', function (done) {
+      blueprint.messaging.once ('module.init', function (module) {
+        expect (module._is_init).to.be.true;
+        expect (module.appPath).to.equal (appPath);
+
+        return done ();
+      });
+
       appModule.init (function (err, module) {
         if (err) return done (err);
 
@@ -36,8 +43,6 @@ describe ('ApplicationModule', function () {
         expect (module.routerManager).to.be.defined;
         expect (module.listenerManager).to.be.defined;
         expect (module.policyManager).to.be.defined;
-
-        return done ();
       });
     });
   });
