@@ -155,7 +155,7 @@ ResourceController.prototype.getAll = function (opts) {
 
     execute: function __blueprint_getall_execute (req, res, callback) {
       async.waterfall ([
-        async.constant ({}),
+        async.constant (_.omit (req.query, ['options'])),
 
         function (filter, callback) {
           return onUpdateFilter (req, filter, callback)
