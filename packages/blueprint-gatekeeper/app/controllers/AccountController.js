@@ -31,7 +31,7 @@ AccountController.prototype.getAll = function () {
   var options = {
     on: {
       authorize: function (req, callback) {
-        Policy (
+        Policy.Definition (
           Policy.assert ('is_administrator')
         ).evaluate (req, callback);
       },
@@ -54,7 +54,7 @@ AccountController.prototype.get = function () {
   var options = {
     on: {
       authorize: function (req, callback) {
-        Policy (
+        Policy.Definition (
           Policy.or ([
             Policy.assert ('is_account_owner'),
             Policy.assert ('is_administrator')
@@ -80,7 +80,7 @@ AccountController.prototype.create = function () {
   var options = {
     on: {
       authorize: function (req, callback) {
-        Policy (
+        Policy.Definition (
           Policy.and ([
             Policy.assert ('is_client_request'),
             Policy.assert ('has_role', gatekeeper.roles.client.account.create)
@@ -120,7 +120,7 @@ AccountController.prototype.delete = function () {
   var options = {
     on: {
       authorize: function (req, callback) {
-        Policy (
+        Policy.Definition (
           Policy.or ([
             Policy.assert ('is_account_owner'),
             Policy.assert ('is_administrator')
