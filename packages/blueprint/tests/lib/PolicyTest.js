@@ -20,6 +20,26 @@ describe ('Policy', function () {
     appFixture (done);
   });
 
+  describe ('#evaluate', function () {
+    it ('should evaluate the policy function', function (done) {
+      Policy.evaluate (passthrough, true, null, function (err, result) {
+        expect (err).to.be.null;
+        expect (result).to.be.true;
+
+        return done ();
+      });
+    });
+
+    it ('should evaluate policy function by name', function (done) {
+      Policy.evaluate ('always_true', null, function (err, result) {
+        expect (err).to.be.null;
+        expect (result).to.be.true;
+
+        return done ();
+      });
+    });
+  });
+
   describe ('#assert', function () {
     it ('should create an assertion that evaluates to true', function (done) {
       var f = Policy.assert (passthrough, true);
