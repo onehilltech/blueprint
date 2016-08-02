@@ -42,7 +42,7 @@ util.inherits (Application, ApplicationModule);
  */
 Application.prototype.init = function (callback) {
   if (this._is_init)
-    return callback (new Error ('Application already initialized'), this);
+    return callback (null, this);
 
   callback = callback || function (err, app) {};
 
@@ -52,8 +52,8 @@ Application.prototype.init = function (callback) {
     // First, make sure there is a data directory. This is where the application stores
     // all its internal information.
     function (app, callback) {
-      var dataPath = Path.resolve (app.appPath, 'data');
-      dataPath.createIfNotExists (function (err) { return callback (err, app); });
+      var tempPath = Path.resolve (app.appPath, 'temp');
+      tempPath.createIfNotExists (function (err) { return callback (err, app); });
     },
 
     // Load all configurations first. This is because other entities in the

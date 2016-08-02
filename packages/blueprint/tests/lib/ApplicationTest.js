@@ -2,6 +2,7 @@ var expect = require ('chai').expect
   , path   = require ('path')
   , async  = require ('async')
   , fs     = require ('fs')
+  , winston = require ('winston')
   ;
 
 var Application = require ('../../lib/Application')
@@ -32,10 +33,11 @@ describe ('Application', function () {
           },
           function (callback) {
             // Make sure the data directory has been created.
-            var dataPath = path.resolve (app.appPath, '/data');
+            var tempPath = path.resolve (app.appPath, 'temp');
 
-            fs.stat (dataPath, function (err, stats) {
+            fs.stat (tempPath, function (err, stats) {
               if (err) return callback (err);
+
               expect (stats.isDirectory ()).to.be.true;
               return callback ();
             });
@@ -43,7 +45,7 @@ describe ('Application', function () {
 
           function (callback) {
             // Make sure the views have been copied.
-            var viewsPath = path.join (app.appPath, 'data/views');
+            var viewsPath = path.join (app.appPath, 'temp/views');
 
             var files = [
               path.join (viewsPath, 'first-level.jade'),
@@ -52,9 +54,10 @@ describe ('Application', function () {
 
             async.each (files, function (item, callback) {
               fs.stat (item, function (err, stats) {
-                if (err) return callback (err);
 
+                if (err) return callback (err);
                 expect (stats.isFile ()).to.be.true;
+
                 return callback ();
               });
             }, callback);
@@ -74,8 +77,8 @@ describe ('Application', function () {
         expect (app.modules).to.have.keys (['test-module']);
 
         var files = [
-          path.join (appPath, 'data', 'views', 'module.jade'),
-          path.join (appPath, 'data', 'views', 'second-level', 'module.jade')
+          path.join (appPath, 'temp', 'views', 'module.jade'),
+          path.join (appPath, 'temp', 'views', 'second-level', 'module.jade')
         ];
 
         expect (app.policies).to.have.keys (['module-policy', 'always_true']);
