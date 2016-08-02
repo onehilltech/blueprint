@@ -19,7 +19,10 @@ describe ('GridFSController', function () {
 
         var collections = ['image.files', 'image.chunks'];
         async.each (collections, function (coll, callback) {
-          app.database.conn.db.collection (coll).drop (callback);
+          app.database.conn.db.collection (coll).drop (function (err) {
+            if (err && err.code === 26) err = null;
+            return callback (err);
+          });
         }, callback);
       }
     ], done);
