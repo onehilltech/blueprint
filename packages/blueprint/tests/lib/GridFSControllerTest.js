@@ -22,8 +22,7 @@ describe ('GridFSController', function () {
           app.database.conn.db.collection (coll).drop (function (err) {
             if (err && err.code === 26) return callback (null);
             if (err) return callback (err);
-
-            result.drop (callback);
+            return callback ();
           });
         }, callback);
       }
