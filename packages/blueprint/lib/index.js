@@ -5,6 +5,7 @@ var util = require ('util')
 
 var BaseController     = require ('./BaseController')
   , ResourceController = require ('./ResourceController')
+  , GridFSController   = require ('./GridFSController')
   , Application        = require ('./Application')
   , ApplicationModule  = require ('./ApplicationModule')
   , Framework          = require ('./Framework')
@@ -15,6 +16,7 @@ var BaseController     = require ('./BaseController')
 
 exports.BaseController = BaseController;
 exports.ResourceController = ResourceController;
+exports.GridFSController = GridFSController;
 exports.ApplicationModule = ApplicationModule;
 exports.RouterBuilder = RouterBuilder;
 exports.Policy = Policy;

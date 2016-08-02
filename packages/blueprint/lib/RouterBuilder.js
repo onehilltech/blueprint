@@ -159,8 +159,8 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
       }
 
       // Build the specification for managing the resource.
-
-      var individualPath = '/' + opts.id;
+      var resourceId = controller['resourceId'];
+      var individualPath = '/:' + resourceId;
 
       var spec = { };
       spec[individualPath] = { };
