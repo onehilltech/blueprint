@@ -25,8 +25,6 @@ describe ('GridFSController', function () {
 
             result.drop (callback);
           });
-
-          });
         }, callback);
       }
     ], done);
