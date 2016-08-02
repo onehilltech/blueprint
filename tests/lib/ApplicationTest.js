@@ -91,10 +91,4 @@ describe ('Application', function () {
       });
     });
   });
-
-  describe.skip ('#start', function () {
-    it ('should start the application', function (done) {
-      app.start (done);
-    });
-  });
 });

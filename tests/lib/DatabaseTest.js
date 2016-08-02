@@ -49,7 +49,7 @@ describe ('Database', function () {
       db.connect (function (err) {
         if (err) return done (err);
 
-        expect (db._conn.readyState).to.equal (1);
+        expect (db.conn.readyState).to.equal (1);
         return done ();
       });
     });
@@ -62,33 +62,6 @@ describe ('Database', function () {
 
       Model.remove ({}, function (err) {
         return done (err);
-      });
-    });
-  });
-
-  describe ('#seed', function () {
-    it ('should seed the database', function (done) {
-      var seed = {
-        data : [
-          { first_name: 'John',  last_name: 'Doe'},
-          { first_name: 'Jane',  last_name: 'Doe'},
-          { first_name: 'Luke',  last_name: 'Skywalker'},
-          { first_name: 'Darth', last_name: 'Vader'}
-        ]
-      };
-
-      db.seed (COLLECTION_NAME, seed, function (err, seed) {
-        if (err) return done (err);
-
-        expect (seed.documents).to.have.length (4);
-
-        Model.find ({}, function (err, docs) {
-          if (err) return done (err);
-
-          expect (docs).to.have.length (4);
-
-          return done ();
-        });
       });
     });
   });
