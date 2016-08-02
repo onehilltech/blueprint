@@ -49,8 +49,8 @@ describe ('AccountRouter', function () {
       function (callback) {
         var data = {
           grant_type: 'password',
-          username: datamodel.data.accounts[0].access_credentials.username,
-          password: datamodel.data.accounts[0].access_credentials.password,
+          username: datamodel.data.accounts[0].username,
+          password: datamodel.data.accounts[0].password,
           client_id: datamodel.models.clients[0].id
         };
 
@@ -66,8 +66,8 @@ describe ('AccountRouter', function () {
       function (callback) {
         var data = {
           grant_type: 'password',
-          username: datamodel.data.accounts[1].access_credentials.username,
-          password: datamodel.data.accounts[1].access_credentials.password,
+          username: datamodel.data.accounts[1].username,
+          password: datamodel.data.accounts[1].password,
           client_id: datamodel.models.clients[0].id
         };
 
@@ -101,7 +101,7 @@ describe ('AccountRouter', function () {
     it ('should return all the accounts for an admin', function (done) {
       var projection = {
         '__v': 0,
-        'access_credentials.password': 0
+        'password': 0
       };
 
       Account.find ({}, projection, function (err, accounts) {
@@ -125,7 +125,7 @@ describe ('AccountRouter', function () {
   describe ('GET /v1/accounts/:accountId', function () {
     var projection = {
       '__v': 0,
-      'access_credentials.password': 0
+      'password': 0
     };
 
     it ('should return the account owner\'s account', function (done) {
@@ -175,8 +175,8 @@ describe ('AccountRouter', function () {
       // We know the account was created when we get an event for
       // sending an account activation email.
       bm.once ('gatekeeper.email.account_activation.sent', function (account, info) {
-        expect (account.profile.email).to.equal (data.email);
-        expect (account.internal_use.created_by.id).to.equal (datamodel.models.clients[0].id);
+        expect (account.email).to.equal (data.email);
+        expect (account.created_by.id).to.equal (datamodel.models.clients[0].id);
 
         expect (info).to.have.deep.property ('envelope.from', 'noreply@onehilltech.com');
         expect (info).to.have.deep.property ('envelope.to[0]', data.email);
@@ -195,7 +195,19 @@ describe ('AccountRouter', function () {
         });
     });
 
-    it ('should not create a new account [invalid role]', function (done) {
+    it ('should not create an account [missing parameter]', function (done) {
+      var data = {
+        password: 'tester1',
+        email: 'james@onehilltech.com'
+      };
+
+      request (server.app)
+        .post ('/v1/accounts').send (data)
+        .set ('Authorization', 'Bearer ' + clientToken)
+        .expect (400, done);
+    });
+
+    it ('should not create an account [invalid role]', function (done) {
       var clientData = {
         grant_type: 'client_credentials',
         client_id: datamodel.models.clients[1].id,

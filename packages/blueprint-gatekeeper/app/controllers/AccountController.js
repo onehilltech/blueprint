@@ -13,7 +13,7 @@ var ResourceController = blueprint.ResourceController
   ;
 
 var DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE = {
-  'access_credentials.password': 0,
+  'password': 0,
   '__v': 0
 };
 
@@ -83,7 +83,14 @@ AccountController.prototype.create = function () {
         Policy.Definition (
           Policy.and ([
             Policy.assert ('is_client_request'),
-            Policy.assert ('has_role', gatekeeper.roles.client.account.create)
+            Policy.assert ('has_role', gatekeeper.roles.client.account.create),
+            Policy.assert (function (req, callback) {
+              req.checkBody ('email', 'Missing/invalid email').notEmpty ().isEmail ();
+              req.checkBody ('username', 'Missing/invalid username').notEmpty ();
+              req.checkBody ('password', 'Missing/invalid password').notEmpty ();
+
+              return callback (req.validationErrors (true), true);
+            })
           ])
         ).evaluate (req, callback);
       },
@@ -93,9 +100,10 @@ AccountController.prototype.create = function () {
         // data model for an account.
 
         doc = {
-          access_credentials : {username : req.body.username, password : req.body.password},
-          profile: {email : req.body.email},
-          internal_use: { created_by : req.user }
+          email : req.body.email,
+          username : req.body.username,
+          password : req.body.password,
+          created_by : req.user
         };
 
         return callback (null, doc);
@@ -103,6 +111,7 @@ AccountController.prototype.create = function () {
 
       postExecute: function (req, account, callback) {
         messaging.emit ('gatekeeper.account.created', account);
+
         return callback (null, {_id: account._id});
       }
     }

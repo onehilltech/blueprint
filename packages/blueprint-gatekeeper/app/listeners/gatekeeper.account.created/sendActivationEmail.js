@@ -50,7 +50,7 @@ function sendActivationEmail (account) {
   if (!transport)
     return;
 
-  var email = account.profile.email;
+  var email = account.email;
 
   uid (DEFAULT_TOKEN_LENGTH, function (err, token) {
     if (err)
@@ -59,9 +59,7 @@ function sendActivationEmail (account) {
     // Calculate when the token expires. It has a time-to-live of 5 minutes. After
     // 5 minutes, the token is expired.
     var expires_at = new Date (Date.now () + DEFAULT_TOKEN_TTL);
-
-    account.internal_use.verification.token.value = token;
-    account.internal_use.verification.token.expires_at = expires_at;
+    account.activation.token = token;
 
     // Save the verification token to the database.
     account.save (function (err, account) {
@@ -75,7 +73,7 @@ function sendActivationEmail (account) {
         style: gatekeeperConfig.email.style || DEFAULT_STYLE,
         account: {
           id: account.id,
-          token: account.internal_use.verification.token
+          token: account.activation.token
         }
       };
 

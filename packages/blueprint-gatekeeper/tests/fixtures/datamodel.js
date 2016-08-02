@@ -36,31 +36,11 @@ var data = {
   ],
 
   accounts: [
-    {
-      access_credentials: {username: 'account1', password: 'account1'},
-      profile: {email: 'account1@gatekeeper.com'},
-      internal_use : {}
-    },
-    {
-      access_credentials: {username: 'account2', password: 'account2', roles: [roles.user.administrator]},
-      profile: {email: 'account2@gatekeeper.com'},
-      internal_use : {}
-    },
-    {
-      access_credentials: {username: 'account3', password: 'account3'},
-      profile: {email: 'account3@gatekeeper.com'},
-      internal_use : {}
-    },
-    {
-      access_credentials: {username: 'account4', password: 'account4'},
-      profile: {email: 'account4@gatekeeper.com'},
-      internal_use : {}
-    },
-    {
-      access_credentials: {username: 'account5', password: 'account5'},
-      profile: {email: 'account5@gatekeeper.com'},
-      internal_use: {enabled: false}
-    }
+    { email: 'account1@gatekeeper.com', username: 'account1', password: 'account1' },
+    { email: 'account2@gatekeeper.com', username: 'account2', password: 'account2', roles: [roles.user.administrator]},
+    { email: 'account3@gatekeeper.com', username: 'account3', password: 'account3' },
+    { email: 'account4@gatekeeper.com', username: 'account4', password: 'account4' },
+    { email: 'account5@gatekeeper.com', username: 'account5', password: 'account5', enabled: false }
   ],
 
   access_tokens: [
@@ -96,10 +76,7 @@ function seed (done) {
     function (client, callback) {
       // Update the created_by path on the accounts to the first client.
       for (var i = 0; i < data.accounts.length; ++i)
-        data.accounts[i].internal_use.created_by = client.id;
-
-      // Insert the participants into the database.
-      winston.log ('info', 'adding accounts to the database');
+        data.accounts[i].created_by = client.id;
 
       Account.create (data.accounts, function (err, accounts) {
         if (err) return callback (err);

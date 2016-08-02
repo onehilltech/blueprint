@@ -7,7 +7,7 @@ var async = require ('async')
  * Determine if the user supports all roles specified.
  */
 module.exports = exports = function (roles, req, callback) {
-  var userRoles = req.user.getRoles ();
+  var userRoles = req.user.roles;
 
   async.every (roles, function (role, callback) {
     async.some (userRoles, function (aRole, callback) {

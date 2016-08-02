@@ -137,7 +137,7 @@ WorkflowController.prototype.issueToken = function () {
       // are to return the token/refresh_token combo.
       winston.log ('info', 'client %s: exchanging username/password for access token [user=%s]', client.id, username);
 
-      Account.findOne ({'access_credentials.username': username}, function (err, account) {
+      Account.findOne ({'username': username}, function (err, account) {
         // Check the result of the operation. If the account does not exist or the
         // account is disabled, then return the appropriate error message.
         if (err)
@@ -146,7 +146,7 @@ WorkflowController.prototype.issueToken = function () {
         if (!account)
           return callback (new HttpError (400, 'Invalid username'));
 
-        if (!account.isEnabled ())
+        if (!account.enabled)
           return callback (new HttpError (401, 'Account is disabled'));
 
         account.verifyPassword (password, function (err, match) {
@@ -205,7 +205,7 @@ WorkflowController.prototype.issueToken = function () {
         if (clientSecret && at.client.secret !== clientSecret)
           return callback (new HttpError (400, 'Client secret is incorrect'));
 
-        if (!at.account.isEnabled ())
+        if (!at.account.enabled)
           return callback (new HttpError (400, 'User account is disabled'));
 
         // Generate a new access and refresh token.

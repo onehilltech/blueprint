@@ -15,9 +15,9 @@ var data = {
   },
 
   account: {
-    access_credentials: {username: 'account1', password: 'account1'},
-    profile: {email: 'account1@gatekeeper.com'},
-    internal_use: {}
+    email: 'account1@gatekeeper.com',
+    username: 'account1',
+    password: 'account1'
   }
 };
 
@@ -43,12 +43,8 @@ describe ('Account', function () {
           return callback ();
         });
       },
-      function (callback) {
-        Account.remove ({}, callback);
-      },
-      function (callback) {
-        Client.remove ({}, callback);
-      },
+      function (callback) { Account.remove ({}, callback); },
+      function (callback) { Client.remove ({}, callback); },
       function (callback) {
         client = new Client (data.client);
 
@@ -65,7 +61,7 @@ describe ('Account', function () {
   describe ('create and save', function () {
     it ('should save a new account to the database', function (done) {
       account = new Account (data.account);
-      account.internal_use.created_by = client._id;
+      account.created_by = client._id;
 
       account.save (function (err, model) {
         if (err) return done (err);

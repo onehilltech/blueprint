@@ -7,7 +7,7 @@ var async = require ('async')
  * Determine if the user has a least 1 role.
  */
 module.exports = exports = function (role, req, callback) {
-  var userRoles = req.user.getRoles ();
+  var userRoles = req.user.roles;
 
   async.some (userRoles,
     function (userRole, callback) {

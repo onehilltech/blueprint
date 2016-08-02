@@ -37,14 +37,5 @@ schema.pre ('validate', function (next) {
   return next ();
 });
 
-/**
- * Get the roles for the account.
- *
- * @returns {schema.access_credentials.roles|{type}|Array}
- */
-schema.methods.getRoles = function () {
-  return this.roles || [];
-};
-
 const COLLECTION_NAME = 'gatekeeper_client';
 module.exports = exports = blueprint.model (COLLECTION_NAME, schema);

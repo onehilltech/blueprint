@@ -10,6 +10,6 @@ module.exports = exports = {
 
   '/accounts' : {
     use: passport.authenticate ('bearer', {session: false}),
-    resource: { id: ':accountId', controller: 'AccountController' }
+    resource: { controller: 'AccountController' }
   }
 };
