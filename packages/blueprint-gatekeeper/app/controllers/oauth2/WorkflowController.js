@@ -122,13 +122,17 @@ WorkflowController.prototype.issueToken = function () {
               if (!account) return callback (new HttpError (400, 'Invalid username'));
               if (!account.enabled) return callback (new HttpError (401, 'Account is disabled'));
 
-              account.verifyPassword (password, function (err, match) {
-                // Check the result of the operation. If there is an error, or the password
-                // does not match, then return an error.
-                if (err) return callback (new HttpError (500, 'Failed to verify password'));
-                if (!match) return callback (new HttpError (401, 'Invalid password'));
-                return callback (err, client, account);
-              });
+              return callback (null, client, account);
+            })
+          },
+
+          function (client, account, callback) {
+            account.verifyPassword (password, function (err, match) {
+              // Check the result of the operation. If there is an error, or the password
+              // does not match, then return an error.
+              if (err) return callback (new HttpError (500, 'Failed to verify password'));
+              if (!match) return callback (new HttpError (401, 'Invalid password'));
+              return callback (err, client, account);
             });
           },
 
