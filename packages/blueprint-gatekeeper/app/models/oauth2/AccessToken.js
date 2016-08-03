@@ -61,27 +61,6 @@ schema.statics.generateTokenString = function (callback) {
 };
 
 /**
- * Create a new client token and add it to the database.
- *
- * @param length
- * @param client
- * @param scope
- * @param done
- */
-schema.statics.createClientToken = function (client, scope, done) {
-  var self = this;
-  var opts = { client: client, enabled : true };
-
-  async.waterfall ([
-    function (callback) { uid (DEFAULT_TOKEN_LENGTH, callback); },
-    function (token, callback) {
-      opts.token = token;
-      self.create (opts, callback);
-    }
-  ], done);
-};
-
-/**
  * Refresh an access token.
  *
  * @param length

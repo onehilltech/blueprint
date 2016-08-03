@@ -18,9 +18,15 @@ var HttpError = blueprint.errors.HttpError
 
 var gatekeeperConfig;
 var tokenStrategy;
+var accessConfig;
+
+const DEFAULT_ACCESS_EXPIRES_IN = 3600;
+const DEFAULT_REFRESH_EXPIRES_IN = 5400;
 
 messaging.on ('app.init', function (app) {
   gatekeeperConfig = app.configs.gatekeeper;
+  accessConfig = gatekeeperConfig.access || {};
+
   tokenStrategy = gatekeeper.tokens (gatekeeperConfig.token);
 });
 
@@ -40,6 +46,17 @@ function lookupClient (clientId, clientSecret, callback) {
 
     callback (null, client);
   });
+}
+
+function grantToken (res, accessToken, callback) {
+  res.status (200).json ({
+    token_type    : 'Bearer',
+    access_token  : accessToken.token,
+    refresh_token : accessToken.refresh_token,
+    expires_in    : accessToken.expires_in
+  });
+
+  callback (null);
 }
 
 /**
@@ -81,17 +98,6 @@ WorkflowController.prototype.logoutUser = function () {
  * @returns
  */
 WorkflowController.prototype.issueToken = function () {
-  function grantToken (res, accessToken, callback) {
-    res.status (200).json ({
-      token_type    : 'Bearer',
-      access_token  : accessToken.token,
-      refresh_token : accessToken.refresh_token,
-      expires_in    : accessToken.expires_in
-    });
-
-    callback (null);
-  }
-
   var grantTypes = {
     password: {
       validate: function (req, callback) {
@@ -137,14 +143,45 @@ WorkflowController.prototype.issueToken = function () {
           },
 
           function (client, account, callback) {
-            // Create a new user token and refresh token.
-            AccessToken.createUserToken (client.id, account.id, function (err, accessToken) {
-              if (err) return callback (new HttpError (500, 'Failed to generate access token'));
-              return callback (null, accessToken);
-            });
-          },
+            async.series ([
+              function (callback) {
+                var opts = {
+                  payload: {kind: 'user', id: account.id, roles: account.roles},
+                  options: {
+                    expiresIn: accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN
+                  }
+                };
 
-          function (token, callback) { grantToken (res, token, callback); }
+                tokenStrategy.generateToken (opts, callback);
+              },
+              function (callback) {
+                var opts = {
+                  payload: {kind: 'refresh', id: account.id},
+                  options: {
+                    expiresIn: accessConfig.refreshExpiresIn || DEFAULT_REFRESH_EXPIRES_IN
+                  }
+                };
+
+                tokenStrategy.generateToken (opts, callback);
+              }
+            ], function (err, results) {
+              if (err)
+                return callback (new HttpError (500, 'Failed to generate access token'));
+
+              var accessToken = new AccessToken ({
+                account: account._id,
+                client: client._id,
+                enabled: true,
+                token: results[0],
+                refresh_token: results[1]
+              });
+
+              accessToken.save (function (err, accessToken) {
+                if (err) return callback (new HttpError (500, 'Failed to generate access token'));
+                return grantToken (res, accessToken, callback);
+              })
+            }, callback);
+          }
         ], callback);
       }
     },
@@ -168,9 +205,28 @@ WorkflowController.prototype.issueToken = function () {
             // are to return the token/refresh_token combo.
             winston.log ('info', 'client %s: exchanging secret for access token', client.id);
 
-            // Create a new user token and refresh token.
-            AccessToken.createClientToken (client.id, '*', function (err, accessToken) {
+            var opts = {
+              payload: {kind: 'client', id: client.id, roles: client.roles},
+              options: {
+                expiresIn: accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN
+              }
+            };
+
+            tokenStrategy.generateToken (opts, function (err, token) {
               if (err) return callback (new HttpError (500, 'Failed to generate token'));
+              return callback (null, client, token);
+            });
+          },
+
+          function (client, token, callback) {
+            var accessToken = new AccessToken ({
+              client: client,
+              enabled : true,
+              token: token
+            });
+
+            accessToken.save (function (err, accessToken) {
+              if (err) return callback (new HttpError (500, 'Failed to generate access token'));
               return callback (null, accessToken);
             });
           },
