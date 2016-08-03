@@ -4,7 +4,6 @@ var winston   = require ('winston')
   , async     = require ('async')
   , HttpError = blueprint.errors.HttpError
   , gatekeeper = require ('../../lib')
-  , JwtToken   = gatekeeper.tokens.JwtToken
   ;
 
 var Account = require ('../models/Account')
@@ -20,11 +19,7 @@ var tokenStrategy;
 
 messaging.on ('app.init', function (app) {
   var gatekeeperConfig = app.configs.gatekeeper;
-
-  if (gatekeeperConfig.token.kind === 'jwt')
-    tokenStrategy = new JwtToken (gatekeeperConfig.token.options);
-  else
-    throw new Error ('Unsupported token strategy');
+  tokenStrategy = gatekeeper.tokens (gatekeeperConfig.token);
 });
 
 /**

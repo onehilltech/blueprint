@@ -3,8 +3,6 @@ var blueprint  = require ('@onehilltech/blueprint')
   , uid        = require ('uid-safe')
   , async      = require ('async')
   , gatekeeper = require ('../../lib')
-  , JwtToken   = gatekeeper.tokens.JwtToken
-  , HttpError  = blueprint.errors.HttpError
   ;
 
 var Account = require ('../models/Account')
@@ -22,11 +20,7 @@ const DEFAULT_ACTIVATION_REQUIRED = false;
 
 messaging.on ('app.init', function (app) {
   gatekeeperConfig = app.configs.gatekeeper;
-
-  if (gatekeeperConfig.token.kind === 'jwt')
-    tokenStrategy = new JwtToken (gatekeeperConfig.token.options);
-  else
-    throw new Error ('Unsupported token strategy');
+  tokenStrategy = gatekeeper.tokens (gatekeeperConfig.token);
 });
 
 var DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE = {
@@ -121,7 +115,7 @@ AccountController.prototype.create = function () {
         var required = gatekeeperConfig.activation.required;
 
         if (required === undefined)
-          required = false;
+          required = DEFAULT_ACTIVATION_REQUIRED;
 
         doc = {
           email : req.body.email,
