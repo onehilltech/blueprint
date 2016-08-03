@@ -93,20 +93,24 @@ AccountController.prototype.create = function () {
   var options = {
     on: {
       authorize: function (req, callback) {
-        Policy.Definition (
-          Policy.and ([
-            Policy.assert ('is_client_request'),
-            Policy.assert ('has_role', gatekeeper.roles.client.account.create),
-            Policy.assert (function (req, callback) {
-              // Validate the input parameters.
-              req.checkBody ('email', 'Missing/invalid email').notEmpty ().isEmail ();
-              req.checkBody ('username', 'Missing/invalid username').notEmpty ();
-              req.checkBody ('password', 'Missing/invalid password').notEmpty ();
+        async.series ([
+          function (callback) {
+            Policy.Definition (
+              Policy.and ([
+                Policy.assert ('is_client_request'),
+                Policy.assert ('has_role', gatekeeper.roles.client.account.create)
+              ])
+            ).evaluate (req, callback);
+          },
+          function (callback) {
+            // Validate the input parameters.
+            req.checkBody ('email', 'Missing/invalid email').notEmpty ().isEmail ();
+            req.checkBody ('username', 'Missing/invalid username').notEmpty ();
+            req.checkBody ('password', 'Missing/invalid password').notEmpty ();
 
-              return callback (req.validationErrors (true), true);
-            })
-          ])
-        ).evaluate (req, callback);
+            return callback (req.validationErrors (true));
+          }
+        ], callback);
       },
 
       preCreate: function (req, doc, callback) {

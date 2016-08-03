@@ -1,7 +1,11 @@
-var winston   = require ('winston')
-  , uid       = require ('uid-safe')
-  , async     = require ('async')
-  , blueprint = require ('@onehilltech/blueprint')
+var winston    = require ('winston')
+  , uid        = require ('uid-safe')
+  , async      = require ('async')
+  , blueprint  = require ('@onehilltech/blueprint')
+  , messaging  = blueprint.messaging
+  , Policy     = blueprint.Policy
+  , gatekeeper = require ('../../../lib')
+
   ;
 
 var Client      = require ('../../models/Client')
@@ -11,6 +15,32 @@ var Client      = require ('../../models/Client')
 
 var HttpError = blueprint.errors.HttpError
   ;
+
+var gatekeeperConfig;
+var tokenStrategy;
+
+messaging.on ('app.init', function (app) {
+  gatekeeperConfig = app.configs.gatekeeper;
+  tokenStrategy = gatekeeper.tokens (gatekeeperConfig.token);
+});
+
+function lookupClient (clientId, clientSecret, callback) {
+  Client.findById (clientId, function (err, client) {
+    if (err)
+      return callback (new HttpError (400, 'Failed to lookup client'));
+
+    if (!client)
+      return callback (new HttpError (400, 'Invalid client id'));
+
+    if (!client.enabled)
+      return callback (new HttpError (401, 'Client is not enabled'));
+
+    if (clientSecret && client.secret !== clientSecret)
+      return callback (new HttpError (400, 'Client secret is incorrect'));
+
+    callback (null, client);
+  });
+}
 
 /**
  * @class WorkflowController
@@ -48,7 +78,7 @@ WorkflowController.prototype.logoutUser = function () {
  * body parameter.
  *
  * @param callback
- * @returns {Function}
+ * @returns
  */
 WorkflowController.prototype.issueToken = function () {
   function grantToken (res, accessToken) {
@@ -60,199 +90,164 @@ WorkflowController.prototype.issueToken = function () {
     });
   }
 
-  function lookupClient (clientId, clientSecret, callback) {
-    Client.findById (clientId, function (err, client) {
-      if (err)
-        return callback (new HttpError (400, 'Failed to lookup client'));
+  var grantTypes = {
+    password: {
+      validate: function (req, callback) {
+        req.checkBody ('client_id', 'required').isMongoId ();
+        req.checkBody ('username', 'required').notEmpty();
+        req.checkBody ('password', 'required').notEmpty();
+        return callback (req.validationErrors (true));
+      },
 
-      if (!client)
-        return callback (new HttpError (400, 'Invalid client id'));
+      execute: function (req, res, callback) {
+        var clientId = req.body.client_id;
+        var username = req.body.username;
+        var password = req.body.password;
 
-      if (!client.enabled)
-        return callback (new HttpError (401, 'Client is not enabled'));
-      
-      if (clientSecret && client.secret !== clientSecret)
-        return callback (new HttpError (400, 'Client secret is incorrect'));
-
-      callback (null, client);
-    });
-  }
-
-  /**
-   * Implementation of the client_credentials grant type.
-   *
-   * @param req
-   * @param res
-   * @param callback
-   */
-  function client_credentials (req, res, callback) {
-    req.checkBody ('client_id', 'required').notEmpty();
-    req.checkBody ('client_secret', 'required').notEmpty();
-
-    var errs = req.validationErrors (true);
-    if (errs) return callback (new HttpError (400, errs));
-
-    var clientId = req.body.client_id;
-    var clientSecret = req.body.client_secret;
-
-    lookupClient (clientId, clientSecret, function (err, client) {
-      if (err) return callback (err);
-
-      // Authenticate the username/password combo. Upon authentication, we
-      // are to return the token/refresh_token combo.
-      winston.log ('info', 'client %s: exchanging secret for access token', client.id);
-
-      // Create a new user token and refresh token.
-      AccessToken.createClientToken (client.id, '*', function (err, accessToken) {
-        if (err) return callback (new HttpError (500, 'Failed to generate token'));
-
-        return grantToken (res, accessToken);
-      });
-    });
-  }
-
-  /**
-   * Implementation of the password grant type.
-   *
-   * @param req
-   * @param res
-   */
-  function password (req, res, callback) {
-    req.checkBody ('client_id', 'required').notEmpty();
-    req.checkBody ('username', 'required').notEmpty();
-    req.checkBody ('password', 'required').notEmpty();
-
-    var errs = req.validationErrors (true);
-    if (errs) return callback (new HttpError (400, errs));
-
-    var clientId = req.body.client_id;
-    var username = req.body.username;
-    var password = req.body.password;
-
-    // Locate the client and make sure the client is enabled.
-    lookupClient (clientId, null, function (err, client) {
-      if (err) return callback (err);
-
-      // Authenticate the username/password combo. Upon authentication, we
-      // are to return the token/refresh_token combo.
-      winston.log ('info', 'client %s: exchanging username/password for access token [user=%s]', client.id, username);
-
-      Account.findOne ({'username': username}, function (err, account) {
-        // Check the result of the operation. If the account does not exist or the
-        // account is disabled, then return the appropriate error message.
-        if (err)
-          return callback (new HttpError (500, 'Failed to retrieve account'));
-
-        if (!account)
-          return callback (new HttpError (400, 'Invalid username'));
-
-        if (!account.enabled)
-          return callback (new HttpError (401, 'Account is disabled'));
-
-        account.verifyPassword (password, function (err, match) {
-          // Check the result of the operation. If there is an error, or the password
-          // does not match, then return an error.
-          if (err)
-            return callback (new HttpError (500, 'Failed to verify password'));
-
-          if (!match)
-            return callback (new HttpError (401, 'Invalid password'));
-
-          // Create a new user token and refresh token.
-          AccessToken.createUserToken (client.id, account.id, function (err, accessToken) {
-            if (err)
-              return callback (new HttpError (500, 'Failed to generate access token'));
-
-            return grantToken (res, accessToken);
-          });
-        });
-      });
-    });
-  }
-
-  /**
-   * Implementation of the refresh_token grant type.
-   *
-   * @param req
-   * @param res
-   */
-  function refresh_token (req, res, callback) {
-    req.checkBody ('client_id', 'required').notEmpty ();
-    req.checkBody ('refresh_token', 'required').notEmpty ();
-
-    var errs = req.validationErrors (true);
-    if (errs) return callback (new HttpError (400, errs));
-
-    var clientId = req.body.client_id;
-    var clientSecret = req.body.client_secret;
-    var refreshToken = req.body.refresh_token;
-
-    AccessToken
-      .findOne ({refresh_token: refreshToken, client: clientId})
-      .populate ('account client')
-      .exec (function (err, at) {
-        if (err)
-          return callback (new HttpError (500, 'Failed to locate refresh token'));
-
-        if (!at)
-          return callback (new HttpError (400, 'Refresh token is invalid'));
-
-        // Check the client and account. The client and the account must be enabled. The
-        // client secret must also match, if provided.
-        if (!at.client.enabled)
-          return callback (new HttpError (401, 'Client access is disabled'));
-
-        if (clientSecret && at.client.secret !== clientSecret)
-          return callback (new HttpError (400, 'Client secret is incorrect'));
-
-        if (!at.account.enabled)
-          return callback (new HttpError (400, 'User account is disabled'));
-
-        // Generate a new access and refresh token.
+        // Locate the client and make sure the client is enabled.
         async.waterfall ([
-          function (callback) {
-            AccessToken.generateTokenString (callback);
-          },
+          function (callback) { lookupClient (clientId, null, callback); },
 
-          function (token, callback) {
-            AccessToken.generateTokenString (function (err, token) {
-              return callback (null, token, refreshToken);
+          function (client, callback) {
+            // Authenticate the username/password combo. Upon authentication, we
+            // are to return the token/refresh_token combo.
+            winston.log ('info', 'client %s: exchanging username/password for access token [user=%s]', client.id, username);
+
+            Account.findOne ({username: username}, function (err, account) {
+              // Check the result of the operation. If the account does not exist or the
+              // account is disabled, then return the appropriate error message.
+              if (err) return callback (new HttpError (500, 'Failed to retrieve account'));
+              if (!account) return callback (new HttpError (400, 'Invalid username'));
+              if (!account.enabled) return callback (new HttpError (401, 'Account is disabled'));
+
+              account.verifyPassword (password, function (err, match) {
+                // Check the result of the operation. If there is an error, or the password
+                // does not match, then return an error.
+                if (err) return callback (new HttpError (500, 'Failed to verify password'));
+                if (!match) return callback (new HttpError (401, 'Invalid password'));
+                return callback (err, client, account);
+              });
             });
           },
 
-          function (token, refreshToken, callback) {
-            at.token = token;
-            at.refresh_token = token;
+          function (client, account, callback) {
+            // Create a new user token and refresh token.
+            AccessToken.createUserToken (client.id, account.id, function (err, accessToken) {
+              if (err) return callback (new HttpError (500, 'Failed to generate access token'));
+              return callback (null, accessToken);
+            });
+          },
 
-            at.save (callback);
+          function (token, callback) {
+            grantToken (res, token);
+            return callback (null);
           }
-        ], function (err, at) {
-          if (err) return callback (new HttpError (500, 'Failed to save new token'));
+        ], callback);
+      }
+    },
 
-          grantToken (res, at);
-        });
-      });
-  }
+    client_credentials: {
+      validate: function (req, callback) {
+        req.checkBody ('client_id', 'required').isMongoId ();
+        req.checkBody ('client_secret', 'required').notEmpty ();
+        return callback (req.validationErrors (true));
+      },
 
-  var grantTypes = {
-    password: password,
-    client_credentials: client_credentials,
-    refresh_token: refresh_token
+      execute: function (req, res, callback) {
+        var clientId = req.body.client_id;
+        var clientSecret = req.body.client_secret;
+
+        async.waterfall ([
+          function (callback) { lookupClient (clientId, clientSecret, callback); },
+
+          function (client, callback) {
+            // Authenticate the username/password combo. Upon authentication, we
+            // are to return the token/refresh_token combo.
+            winston.log ('info', 'client %s: exchanging secret for access token', client.id);
+
+            // Create a new user token and refresh token.
+            AccessToken.createClientToken (client.id, '*', function (err, accessToken) {
+              if (err) return callback (new HttpError (500, 'Failed to generate token'));
+              return callback (null, accessToken);
+            });
+          },
+
+          function (accessToken, callback) {
+            grantToken (res, accessToken);
+            return callback (null);
+          }
+        ], callback);
+      }
+    },
+
+    refresh_token: {
+      validate: function (req, callback) {
+        req.checkBody ('client_id', 'required').notEmpty ();
+        req.checkBody ('refresh_token', 'required').notEmpty ();
+        return callback (req.validationErrors (true));
+      },
+
+      execute: function (req, res, callback) {
+        var clientId = req.body.client_id;
+        var clientSecret = req.body.client_secret;
+        var refreshToken = req.body.refresh_token;
+
+        async.waterfall ([
+          function (callback) {
+            AccessToken
+              .findOne ({refresh_token: refreshToken, client: clientId})
+              .populate ('account client').exec (function (err, at) {
+                if (err) return callback (new HttpError (500, 'Failed to locate refresh token'));
+                if (!at) return callback (new HttpError (400, 'Refresh token is invalid'));
+                return callback (null, at);
+            });
+          },
+
+          function (at, callback) {
+            // Check the client and account. The client and the account must be enabled. The
+            // client secret must also match, if provided.
+            if (!at.client.enabled) return callback (new HttpError (401, 'Client access is disabled'));
+            if (clientSecret && at.client.secret !== clientSecret) return callback (new HttpError (400, 'Client secret is incorrect'));
+            if (!at.account.enabled) return callback (new HttpError (400, 'User account is disabled'));
+
+            // Generate a new access and refresh token.
+            async.waterfall ([
+              function (callback) { AccessToken.generateTokenString (callback); },
+              function (token, callback) {
+                AccessToken.generateTokenString (function (err, token) {
+                  return callback (null, token, refreshToken);
+                });
+              },
+              function (token, refreshToken, callback) {
+                at.token = token;
+                at.refresh_token = token;
+
+                at.save (callback);
+              }
+            ], function (err, at) {
+              if (err) return callback (new HttpError (500, 'Failed to save new token'));
+              grantToken (res, at);
+
+              return callback (null);
+            });
+          }
+        ], callback);
+      }
+    }
   };
 
   return {
     validate: function (req, callback) {
       req.checkBody ('grant_type', 'required').notEmpty ().isIn (Object.keys (grantTypes));
+
+      if (req.body.grant_type)
+        return grantTypes[req.body.grant_type].validate (req, callback);
+
       return callback (req.validationErrors (true));
     },
 
     execute: function (req, res, callback) {
-      // Locate the handler for the grant type.
-      var grantType = req.body.grant_type;
-      var grantFunc = grantTypes[grantType];
-
-      // Handle the token request.
-      return grantFunc (req, res, callback);
+      grantTypes[req.body.grant_type].execute (req, res, callback);
     }
   };
 };

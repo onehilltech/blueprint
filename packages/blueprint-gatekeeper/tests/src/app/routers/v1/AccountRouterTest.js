@@ -213,12 +213,6 @@ describe ('AccountRouter', function () {
     });
 
     it ('should not create an account [duplicate]', function (done) {
-      var data = {
-        username: 'tester1',
-        password: 'tester1',
-        email: 'james@onehilltech.com'
-      };
-
       request (server.app)
         .post ('/v1/accounts').send (data)
         .set ('Authorization', 'Bearer ' + clientToken)
@@ -226,29 +220,29 @@ describe ('AccountRouter', function () {
     })
 
     it ('should not create an account [missing parameter]', function (done) {
-      var data = {
+      var invalid = {
         password: 'tester1',
         email: 'james@onehilltech.com'
       };
 
       request (server.app)
-        .post ('/v1/accounts').send (data)
+        .post ('/v1/accounts').send (invalid)
         .set ('Authorization', 'Bearer ' + clientToken)
         .expect (400, done);
     });
 
     it ('should not create an account [invalid role]', function (done) {
-      var clientData = {
+      var invalid = {
         grant_type: 'client_credentials',
         client_id: datamodel.models.clients[1].id,
         client_secret: datamodel.models.clients[1].secret
       };
 
-      getToken (clientData, function (err, token) {
+      getToken (invalid, function (err, token) {
         if (err) return done (err);
 
         request (server.app)
-          .post ('/v1/accounts').send (data)
+          .post ('/v1/accounts').send (invalid)
           .set ('Authorization', 'Bearer ' + token)
           .expect (403, done);
       });

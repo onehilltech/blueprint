@@ -154,7 +154,7 @@ describe ('Oauth2Router', function () {
         .expect(400, done);
     });
 
-    it('refresh_token: should refresh the access and refresh token', function (done) {
+    it ('refresh_token: should refresh the access and refresh token', function (done) {
       // Get an access and refresh token using username/password.
       var data = {
         grant_type: 'password',
