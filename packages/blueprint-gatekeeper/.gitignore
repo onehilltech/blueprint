@@ -76,6 +76,7 @@ crashlytics.properties
 crashlytics-build.properties
 
 temp
+data
 
 ### OSX template
 .DS_Store
