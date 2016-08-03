@@ -1,3 +1,8 @@
+[![npm version](https://img.shields.io/npm/v/@onehilltech/gatekeeper.svg?maxAge=2592000)](https://www.npmjs.com/package/@onehilltech/gatekeeper)
+[![Build Status](https://travis-ci.org/onehilltech/gatekeeper.svg?branch=master)](https://travis-ci.org/onehilltech/gatekeeper)
+[![Dependencies](https://david-dm.org/onehilltech/gatekeeper.svg)](https://david-dm.org/onehilltech/gatekeeper)
+[![Coverage Status](https://coveralls.io/repos/github/onehilltech/gatekeeper/badge.svg?branch=master)](https://coveralls.io/github/onehilltech/gatekeeper?branch=master)
+
 An authentication server and client module for [Passport](http://passportjs.org/).
 Gatekeeper implements the [OAuth 2.0](http://oauth.net/2/) protocol atop of 
 [MongoDB](https://www.mongodb.org/), and is designed to be deployed with any service 
