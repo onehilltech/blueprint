@@ -81,13 +81,15 @@ WorkflowController.prototype.logoutUser = function () {
  * @returns
  */
 WorkflowController.prototype.issueToken = function () {
-  function grantToken (res, accessToken) {
-    return res.status (200).json ({
+  function grantToken (res, accessToken, callback) {
+    res.status (200).json ({
       token_type    : 'Bearer',
       access_token  : accessToken.token,
       refresh_token : accessToken.refresh_token,
       expires_in    : accessToken.expires_in
     });
+
+    callback (null);
   }
 
   var grantTypes = {
@@ -138,10 +140,7 @@ WorkflowController.prototype.issueToken = function () {
             });
           },
 
-          function (token, callback) {
-            grantToken (res, token);
-            return callback (null);
-          }
+          function (token, callback) { grantToken (res, token, callback); }
         ], callback);
       }
     },
@@ -172,10 +171,7 @@ WorkflowController.prototype.issueToken = function () {
             });
           },
 
-          function (accessToken, callback) {
-            grantToken (res, accessToken);
-            return callback (null);
-          }
+          function (accessToken, callback) { grantToken (res, accessToken, callback); }
         ], callback);
       }
     },
@@ -226,9 +222,7 @@ WorkflowController.prototype.issueToken = function () {
               }
             ], function (err, at) {
               if (err) return callback (new HttpError (500, 'Failed to save new token'));
-              grantToken (res, at);
-
-              return callback (null);
+              grantToken (res, at, callback);
             });
           }
         ], callback);
