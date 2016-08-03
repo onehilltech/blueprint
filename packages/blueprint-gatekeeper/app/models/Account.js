@@ -17,10 +17,10 @@ var schema = new Schema ({
    */
 
   /// Contact email address for the account.
-  email : { type: String, required: true, trim: true },
+  email : { type: String, required: true, unique: true, trim: true },
 
   /// Username for the account.
-  username : { type: String, required: true, index: true, unique: true},
+  username : { type: String, required: true, unique: true, index: true },
 
   /// Encrypted password
   password : { type: String, required: true},
@@ -48,7 +48,7 @@ var schema = new Schema ({
    */
   activation : {
     /// The account requires activation.
-    required: {type: Boolean, required: true, default: true},
+    required: { type: Boolean, required: true, default: false },
 
     /// Verification token for the account.
     token : { type : String },

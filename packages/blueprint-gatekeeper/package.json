@@ -17,6 +17,7 @@
     "ejs": "^2.4.1",
     "email-templates": "^2.0.1",
     "jsonfile": "^2.2.3",
+    "jsonwebtoken": "^7.1.7",
     "nodemailer": "^2.3.2",
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.x.x",

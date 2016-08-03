@@ -172,17 +172,12 @@ describe ('AccountRouter', function () {
     };
 
     it ('should create a new account', function (done) {
+      var accountId;
+
       // We know the account was created when we get an event for
       // sending an account activation email.
-      bm.once ('gatekeeper.email.account_activation.sent', function (account, info) {
-        expect (account.email).to.equal (data.email);
-        expect (account.created_by.id).to.equal (datamodel.models.clients[0].id);
-
-        expect (info).to.have.deep.property ('envelope.from', 'noreply@onehilltech.com');
-        expect (info).to.have.deep.property ('envelope.to[0]', data.email);
-        expect (info).to.have.property ('messageId');
-
-        return done ();
+      bm.once ('gatekeeper.account.created', function (account) {
+        accountId = account.id;
       });
 
       request (server.app)
@@ -191,9 +186,44 @@ describe ('AccountRouter', function () {
         .expect (200)
         .end (function (err, res) {
           if (err) return done (err);
-          expect (res.body.account).to.have.keys (['_id']);
+
+          // Wait until the gatekeeper.account.created message is handled.
+          async.waterfall ([
+            function (callback) {
+              async.whilst (
+                function () {
+                  return accountId === undefined;
+                },
+                function (callback) {
+                  setTimeout (function () {
+                    callback (null);
+                  }, 1000);
+                }, callback);
+            },
+            function (callback) {
+              expect (res.body).to.deep.equal ({account: {_id: accountId}});
+              Account.findById (accountId, callback);
+            },
+            function (account, callback) {
+              expect (account.activation.token).to.not.be.undefined;
+              return callback ();
+            }
+          ], done);
         });
     });
+
+    it ('should not create an account [duplicate]', function (done) {
+      var data = {
+        username: 'tester1',
+        password: 'tester1',
+        email: 'james@onehilltech.com'
+      };
+
+      request (server.app)
+        .post ('/v1/accounts').send (data)
+        .set ('Authorization', 'Bearer ' + clientToken)
+        .expect (400, done);
+    })
 
     it ('should not create an account [missing parameter]', function (done) {
       var data = {

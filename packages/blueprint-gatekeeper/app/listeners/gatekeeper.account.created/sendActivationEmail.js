@@ -1,5 +1,4 @@
-var uid           = require ('uid-safe')
-  , winston       = require ('winston')
+var winston       = require ('winston')
   , blueprint     = require ('@onehilltech/blueprint')
   , bm            = blueprint.messaging
   , nodemailer    = require ('nodemailer')
@@ -12,14 +11,13 @@ var uid           = require ('uid-safe')
 var templateDir = path.resolve (__dirname, '../../resources/email-templates/account.activation');
 var activationEmail = new EmailTemplate (templateDir);
 
-const DEFAULT_TOKEN_LENGTH = 40;
-const DEFAULT_TOKEN_TTL = 300000;
 const DEFAULT_STYLE = {
   primaryColor: '#2196F3'
 };
 
 var appConfig;
 var gatekeeperConfig;
+var activationConfig;
 var transport;
 
 /**
@@ -35,6 +33,7 @@ bm.on ('app.init', function (app) {
   // Save the Gatekeeper configuration.
   appConfig = app.configs.app;
   gatekeeperConfig = app.configs.gatekeeper;
+  activationConfig = gatekeeperConfig || {};
 
   if (gatekeeperConfig.email)
     transport = nodemailer.createTransport (gatekeeperConfig.email.nodemailer);
@@ -47,61 +46,43 @@ bm.on ('app.init', function (app) {
  */
 function sendActivationEmail (account) {
   // Do not continue if we have no email transport.
-  if (!transport)
+  if (!transport || !activationConfig.required)
     return;
 
   var email = account.email;
 
-  uid (DEFAULT_TOKEN_LENGTH, function (err, token) {
+  var data = {
+    appName: appConfig.name,
+    gatekeeperBaseUri: gatekeeperConfig.baseuri,
+    twitterHandle: gatekeeperConfig.email.twitterHandle,
+    style: gatekeeperConfig.email.style || DEFAULT_STYLE,
+    account: {
+      id: account.id,
+      token: account.activation.token
+    }
+  };
+
+  activationEmail.render (data, function (err, results) {
     if (err)
       return winston.log ('error', util.inspect (err));
 
-    // Calculate when the token expires. It has a time-to-live of 5 minutes. After
-    // 5 minutes, the token is expired.
-    var expires_at = new Date (Date.now () + DEFAULT_TOKEN_TTL);
-    account.activation.token = token;
+    var subject = appConfig.name + ' - Account confirmation';
 
-    // Save the verification token to the database.
-    account.save (function (err, account) {
-      if (err)
-        return winston.log ('error', util.inspect (err));
+    var mailOptions = {
+      from: gatekeeperConfig.email.from,
+      to: email,
+      subject: subject,
+      text: results.text,
+      html: results.html
+    };
 
-      var data = {
-        appName: appConfig.name,
-        gatekeeperBaseUri: gatekeeperConfig.baseuri,
-        twitterHandle: gatekeeperConfig.email.twitterHandle,
-        style: gatekeeperConfig.email.style || DEFAULT_STYLE,
-        account: {
-          id: account.id,
-          token: account.activation.token
-        }
-      };
+    // Send an email to the user with the a link to verify the account. The link will
+    // contain both the email address and the token for verifying the account.
+    winston.log ('info', 'sending account activation email to %s', email);
 
-      activationEmail.render (data, function (err, results) {
-        if (err)
-          return winston.log ('error', util.inspect (err));
-
-        var subject = appConfig.name + ' - Account confirmation';
-
-        var mailOptions = {
-          from: gatekeeperConfig.email.from,
-          to: email,
-          subject: subject,
-          text: results.text,
-          html: results.html
-        };
-
-        // Send an email to the user with the a link to verify the account. The link will
-        // contain both the email address and the token for verifying the account.
-        winston.log ('info', 'sending account activation email to %s', email);
-
-        transport.sendMail (mailOptions, function (err, info){
-          if (err)
-            return winston.log ('error', 'failed to send email: ' + err.message);
-
-          bm.emit ('gatekeeper.email.account_activation.sent', account, info);
-        });
-      });
+    transport.sendMail (mailOptions, function (err, info){
+      if (err) return winston.log ('error', 'failed to send email: ' + err.message);
+      bm.emit ('gatekeeper.email.account_activation.sent', account, info);
     });
   });
 }

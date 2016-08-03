@@ -235,9 +235,9 @@ WorkflowController.prototype.issueToken = function () {
   }
 
   var grantTypes = {
-    'password': password,
-    'client_credentials': client_credentials,
-    'refresh_token': refresh_token
+    password: password,
+    client_credentials: client_credentials,
+    refresh_token: refresh_token
   };
 
   return {

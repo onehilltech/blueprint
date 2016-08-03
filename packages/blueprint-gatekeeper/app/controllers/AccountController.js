@@ -1,16 +1,33 @@
 var blueprint  = require ('@onehilltech/blueprint')
   , messaging  = blueprint.messaging
+  , uid        = require ('uid-safe')
+  , async      = require ('async')
   , gatekeeper = require ('../../lib')
+  , JwtToken   = gatekeeper.tokens.JwtToken
+  , HttpError  = blueprint.errors.HttpError
   ;
 
 var Account = require ('../models/Account')
   , Client  = require ('../models/Client')
   ;
 
-
 var ResourceController = blueprint.ResourceController
   , Policy = blueprint.Policy
   ;
+
+var gatekeeperConfig;
+var tokenStrategy;
+
+const DEFAULT_ACTIVATION_REQUIRED = false;
+
+messaging.on ('app.init', function (app) {
+  gatekeeperConfig = app.configs.gatekeeper;
+
+  if (gatekeeperConfig.token.kind === 'jwt')
+    tokenStrategy = new JwtToken (gatekeeperConfig.token.options);
+  else
+    throw new Error ('Unsupported token strategy');
+});
 
 var DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE = {
   'password': 0,
@@ -77,6 +94,8 @@ AccountController.prototype.get = function () {
  * @returns {*|Object}
  */
 AccountController.prototype.create = function () {
+  var self = this;
+
   var options = {
     on: {
       authorize: function (req, callback) {
@@ -85,6 +104,7 @@ AccountController.prototype.create = function () {
             Policy.assert ('is_client_request'),
             Policy.assert ('has_role', gatekeeper.roles.client.account.create),
             Policy.assert (function (req, callback) {
+              // Validate the input parameters.
               req.checkBody ('email', 'Missing/invalid email').notEmpty ().isEmail ();
               req.checkBody ('username', 'Missing/invalid username').notEmpty ();
               req.checkBody ('password', 'Missing/invalid password').notEmpty ();
@@ -98,15 +118,41 @@ AccountController.prototype.create = function () {
       preCreate: function (req, doc, callback) {
         // Overwrite the current document with one that matches the
         // data model for an account.
+        var required = gatekeeperConfig.activation.required;
+
+        if (required === undefined)
+          required = false;
 
         doc = {
           email : req.body.email,
           username : req.body.username,
           password : req.body.password,
-          created_by : req.user
+          created_by : req.user._id,
+          activation: {
+            required: required
+          }
         };
 
-        return callback (null, doc);
+        async.waterfall ([
+          function (callback) {
+            if (!doc.activation.required)
+              return callback (null);
+
+            var opts = {
+              payload: {email: doc.email, username: doc.username},
+              options: {
+                expiresIn: gatekeeperConfig.activation.expiresIn
+              }
+            };
+
+            tokenStrategy.generateToken (opts, callback);
+          }
+        ], function (err, token) {
+          if (err) return callback (err);
+          if (token) doc.activation.token = token;
+
+          return callback (null, doc);
+        });
       },
 
       postExecute: function (req, account, callback) {
