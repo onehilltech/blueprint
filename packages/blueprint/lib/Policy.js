@@ -114,6 +114,7 @@ function orPolicy (policies) {
       function __blueprint_or_iterator (policy, callback) {
         return policy (req, function __blueprint_or_result (err, result) {
           // Since we are using async 1.5, we need to ignore the err parameter.
+          if (err) result = false;
           return callback (result);
         });
       },
@@ -138,6 +139,7 @@ function andPolicy (policies) {
       function __blueprint_and_iterator (policy, callback) {
         return policy (req, function __blueprint_and_result (err, result) {
           // Since we are using async 1.5, we need to ignore the err parameter.
+          if (err) result = false;
           return callback (result);
         });
       },
