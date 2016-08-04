@@ -1,6 +1,7 @@
 var blueprint = require ('@onehilltech/blueprint')
   , expect    = require ('chai').expect
   , request   = require ('supertest')
+  , async     = require ('async')
   ;
 
 var datamodel  = require ('../../../../fixtures/datamodel')
@@ -24,11 +25,11 @@ describe ('Oauth2Router', function () {
   });
 
   describe('#getToken (callback)', function () {
-    var TARGET_URL = '/v1/oauth2/token';
+    var TOKEN_URL = '/v1/oauth2/token';
     var accessToken;
     var refreshToken;
 
-    it('password: should get a token for the username/password', function (done) {
+    it ('password: should get a token for the username/password', function (done) {
       var data = {
         grant_type: 'password',
         username: datamodel.data.accounts[0].username,
@@ -36,21 +37,20 @@ describe ('Oauth2Router', function () {
         client_id: datamodel.models.clients[0].id
       };
 
-      request(server.app)
-        .post (TARGET_URL)
+      request (server.app)
+        .post (TOKEN_URL)
         .send (data)
-        .expect(200).expect('Content-Type', /json/)
-        .end(function (err, res) {
-        if (err)
-          return done(err);
+        .expect (200).expect('Content-Type', /json/)
+        .end (function (err, res) {
+          if (err) return done(err);
 
-        expect(res.body).to.have.all.keys(['token_type', 'access_token', 'refresh_token', 'expires_in']);
-        expect(res.body).to.have.property('token_type', 'Bearer');
+          expect (res.body).to.have.all.keys (['token_type', 'access_token', 'refresh_token']);
+          expect (res.body).to.have.property ('token_type', 'Bearer');
 
-        accessToken = res.body.access_token;
-        refreshToken = res.body.refresh_token;
+          accessToken = res.body.access_token;
+          refreshToken = res.body.refresh_token;
 
-        return done();
+          return done();
       });
     });
 
@@ -62,7 +62,7 @@ describe ('Oauth2Router', function () {
       };
 
       request(server.app)
-        .post(TARGET_URL)
+        .post(TOKEN_URL)
         .send(data)
         .expect(400, done);
     });
@@ -76,7 +76,7 @@ describe ('Oauth2Router', function () {
       };
 
       request(server.app)
-        .post(TARGET_URL)
+        .post(TOKEN_URL)
         .send(data)
         .expect(401, done);
     });
@@ -90,7 +90,7 @@ describe ('Oauth2Router', function () {
       };
 
       request(server.app)
-        .post(TARGET_URL)
+        .post(TOKEN_URL)
         .send(data)
         .expect(401, done);
     });
@@ -103,10 +103,10 @@ describe ('Oauth2Router', function () {
         client_id: datamodel.models.clients[0].id
       };
 
-      request(server.app)
-        .post(TARGET_URL)
-        .send(data)
-        .expect(401, done);
+      request (server.app)
+        .post (TOKEN_URL)
+        .send (data)
+        .expect (401, done);
     });
 
     it('client_credentials: should get a token for client credentials', function (done) {
@@ -117,13 +117,13 @@ describe ('Oauth2Router', function () {
       };
 
       request(server.app)
-        .post(TARGET_URL).send(data)
+        .post(TOKEN_URL).send(data)
         .expect(200).expect('Content-Type', /json/)
         .end(function (err, res) {
         if (err)
           return done(err);
 
-        expect(res.body).to.have.all.keys(['token_type', 'access_token', 'expires_in']);
+        expect(res.body).to.have.all.keys(['token_type', 'access_token']);
         expect(res.body).to.have.property('token_type', 'Bearer');
 
         return done();
@@ -138,7 +138,7 @@ describe ('Oauth2Router', function () {
       };
 
       request(server.app)
-        .post(TARGET_URL).send(data)
+        .post(TOKEN_URL).send(data)
         .expect(401, done);
     });
 
@@ -150,7 +150,7 @@ describe ('Oauth2Router', function () {
       };
 
       request(server.app)
-        .post(TARGET_URL).send(data)
+        .post(TOKEN_URL).send(data)
         .expect(400, done);
     });
 
@@ -163,8 +163,8 @@ describe ('Oauth2Router', function () {
         client_id: datamodel.models.clients[0].id
       };
 
-      request(server.app)
-        .post(TARGET_URL).send(data)
+      request (server.app)
+        .post(TOKEN_URL).send(data)
         .expect(200).expect('Content-Type', /json/)
         .end(function (err, res) {
         if (err)
@@ -180,17 +180,17 @@ describe ('Oauth2Router', function () {
         };
 
         request(server.app)
-          .post(TARGET_URL).send(data)
+          .post(TOKEN_URL).send(data)
           .expect(200).expect('Content-Type', /json/)
           .end(function (err, res) {
           if (err)
             return done(err);
 
-          expect(res.body).to.have.all.keys(['token_type', 'access_token', 'refresh_token', 'expires_in']);
-          expect(res.body).to.have.property('token_type', 'Bearer');
+          expect (res.body).to.have.all.keys(['token_type', 'access_token', 'refresh_token']);
+          expect (res.body).to.have.property('token_type', 'Bearer');
 
-          expect(res.body.access_token).to.not.equal (accessToken);
-          expect(res.body.refresh_token).to.not.equal (refreshToken);
+          expect (res.body.access_token).to.not.equal (accessToken);
+          expect (res.body.refresh_token).to.not.equal (refreshToken);
 
           return done();
         });
@@ -199,33 +199,32 @@ describe ('Oauth2Router', function () {
   });
 
   describe('#logoutUser (callback)', function () {
-    const TARGET_URL = '/v1/oauth2/logout';
-
     var accessToken;
 
-    it('should logout the current user', function (done) {
-      var data = {
-        grant_type: 'password',
-        username: datamodel.data.accounts[0].username,
-        password: datamodel.data.accounts[0].password,
-        client_id: datamodel.models.clients[0].id
-      };
+    it ('should logout the current user', function (done) {
+      async.waterfall ([
+        function (callback) {
+          var data = {
+            grant_type: 'password',
+            username: datamodel.data.accounts[0].username,
+            password: datamodel.data.accounts[0].password,
+            client_id: datamodel.models.clients[0].id
+          };
 
-      // First, get an access token for the user.
-      request(server.app)
-        .post('/v1/oauth2/token').send(data)
-        .expect(200)
-        .end(function (err, res) {
-          if (err)
-            return done(err);
+          request (server.app)
+            .post ('/v1/oauth2/token').send (data)
+            .expect (200, callback);
+        },
 
+        function (res, callback) {
           accessToken = res.body.access_token;
 
           request (server.app)
             .get ('/v1/oauth2/logout')
             .set ('Authorization', 'Bearer ' + accessToken)
-            .expect (200, done);
-      });
+            .expect (200, callback);
+        }
+      ], done);
     });
   });
 });

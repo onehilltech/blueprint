@@ -1,4 +1,4 @@
-var roles = require ('../../lib/roles').user
+var gatekeeeper = require ('../../lib')
   ;
 
 var has_role = require ('./has_role')
@@ -10,5 +10,5 @@ var has_role = require ('./has_role')
  * Determine if the user that created the request is an administrator.
  */
 module.exports = exports = function (req, callback) {
-  return has_role (roles.administrator, req, callback);
+  return has_role (gatekeeeper.roles.user.administrator, req, callback);
 };

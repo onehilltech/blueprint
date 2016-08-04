@@ -2,10 +2,9 @@ var winston    = require ('winston')
   , uid        = require ('uid-safe')
   , async      = require ('async')
   , blueprint  = require ('@onehilltech/blueprint')
+  , mongoose   = require ('mongoose')
   , messaging  = blueprint.messaging
-  , Policy     = blueprint.Policy
   , gatekeeper = require ('../../../lib')
-
   ;
 
 var Client      = require ('../../models/Client')
@@ -22,6 +21,10 @@ var accessConfig;
 
 const DEFAULT_ACCESS_EXPIRES_IN = 3600;
 const DEFAULT_REFRESH_EXPIRES_IN = 5400;
+
+const KIND_USER_TOKEN = 'user';
+const KIND_CLIENT_TOKEN = 'client';
+const KIND_REFRESH_TOKEN = 'refresh';
 
 messaging.on ('app.init', function (app) {
   gatekeeperConfig = app.configs.gatekeeper;
@@ -48,15 +51,55 @@ function lookupClient (clientId, clientSecret, callback) {
   });
 }
 
-function grantToken (res, accessToken, callback) {
-  res.status (200).json ({
-    token_type    : 'Bearer',
-    access_token  : accessToken.token,
-    refresh_token : accessToken.refresh_token,
-    expires_in    : accessToken.expires_in
-  });
+function grantToken (res, accessToken, refreshToken, callback) {
+  var response = { token_type: 'Bearer', access_token: accessToken };
+
+  if (refreshToken)
+    response.refresh_token = refreshToken;
+
+  res.status (200).json (response);
 
   callback (null);
+}
+
+function createAndSaveUserAccessToken (client, account, callback) {
+  async.waterfall ([
+    // Create a new AccessToken model. The model is used to determine
+    function (callback) {
+      var doc = { client: client._id, account: account._id, refresh_token: new mongoose.Types.ObjectId () };
+      var accessToken = new AccessToken (doc);
+
+      accessToken.save (callback);
+    },
+
+    function (accessToken, affected, callback) {
+      async.series ([
+        // Generate the access token.
+        function (callback) {
+          var expiresIn = accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN;
+          var opts = {
+            payload: { kind: KIND_USER_TOKEN, roles: account.roles },
+            options: { jwtid: accessToken.id, expiresIn: expiresIn }
+          };
+
+          tokenStrategy.generateToken (opts, callback);
+        },
+
+        // Generate the refresh token.
+        function (callback) {
+          var refreshExpiresIn = accessConfig.refreshExpiresIn || DEFAULT_REFRESH_EXPIRES_IN;
+          var jti = accessToken.refresh_token.toString ();
+
+          var opts = {
+            payload: { kind: KIND_REFRESH_TOKEN },
+            options: { jwtid: jti, expiresIn: refreshExpiresIn }
+          };
+
+          tokenStrategy.generateToken (opts, callback);
+        }
+      ], callback);
+    }
+  ], callback);
 }
 
 /**
@@ -119,8 +162,6 @@ WorkflowController.prototype.issueToken = function () {
           function (client, callback) {
             // Authenticate the username/password combo. Upon authentication, we
             // are to return the token/refresh_token combo.
-            winston.log ('info', 'client %s: exchanging username/password for access token [user=%s]', client.id, username);
-
             Account.findOne ({username: username}, function (err, account) {
               // Check the result of the operation. If the account does not exist or the
               // account is disabled, then return the appropriate error message.
@@ -143,44 +184,11 @@ WorkflowController.prototype.issueToken = function () {
           },
 
           function (client, account, callback) {
-            async.series ([
-              function (callback) {
-                var opts = {
-                  payload: {kind: 'user', id: account.id, roles: account.roles},
-                  options: {
-                    expiresIn: accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN
-                  }
-                };
+            return createAndSaveUserAccessToken (client, account, callback);
+          },
 
-                tokenStrategy.generateToken (opts, callback);
-              },
-              function (callback) {
-                var opts = {
-                  payload: {kind: 'refresh', id: account.id},
-                  options: {
-                    expiresIn: accessConfig.refreshExpiresIn || DEFAULT_REFRESH_EXPIRES_IN
-                  }
-                };
-
-                tokenStrategy.generateToken (opts, callback);
-              }
-            ], function (err, results) {
-              if (err)
-                return callback (new HttpError (500, 'Failed to generate access token'));
-
-              var accessToken = new AccessToken ({
-                account: account._id,
-                client: client._id,
-                enabled: true,
-                token: results[0],
-                refresh_token: results[1]
-              });
-
-              accessToken.save (function (err, accessToken) {
-                if (err) return callback (new HttpError (500, 'Failed to generate access token'));
-                return grantToken (res, accessToken, callback);
-              })
-            }, callback);
+          function (result, callback) {
+            return grantToken (res, result[0], result[1], callback);
           }
         ], callback);
       }
@@ -201,37 +209,30 @@ WorkflowController.prototype.issueToken = function () {
           function (callback) { lookupClient (clientId, clientSecret, callback); },
 
           function (client, callback) {
-            // Authenticate the username/password combo. Upon authentication, we
-            // are to return the token/refresh_token combo.
-            winston.log ('info', 'client %s: exchanging secret for access token', client.id);
-
-            var opts = {
-              payload: {kind: 'client', id: client.id, roles: client.roles},
-              options: {
-                expiresIn: accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN
-              }
-            };
-
-            tokenStrategy.generateToken (opts, function (err, token) {
-              if (err) return callback (new HttpError (500, 'Failed to generate token'));
-              return callback (null, client, token);
-            });
-          },
-
-          function (client, token, callback) {
-            var accessToken = new AccessToken ({
-              client: client,
-              enabled : true,
-              token: token
-            });
+            var doc = {client: client._id};
+            var accessToken = new AccessToken (doc);
 
             accessToken.save (function (err, accessToken) {
-              if (err) return callback (new HttpError (500, 'Failed to generate access token'));
-              return callback (null, accessToken);
+              return callback (err, client, accessToken);
             });
           },
 
-          function (accessToken, callback) { grantToken (res, accessToken, callback); }
+          function (client, accessToken, callback) {
+            // Authenticate the username/password combo. Upon authentication, we
+            // are to return the token/refresh_token combo.
+            var expiresIn = accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN;
+
+            var opts = {
+              payload: { kind: KIND_CLIENT_TOKEN, roles: client.roles },
+              options: { jwtid: accessToken.id, expiresIn: expiresIn }
+            };
+
+            tokenStrategy.generateToken (opts, callback);
+          },
+
+          function (token, callback) {
+            grantToken (res, token, null, callback);
+          }
         ], callback);
       }
     },
@@ -249,41 +250,44 @@ WorkflowController.prototype.issueToken = function () {
         var refreshToken = req.body.refresh_token;
 
         async.waterfall ([
+          // Verify the token is valid.
           function (callback) {
-            AccessToken
-              .findOne ({refresh_token: refreshToken, client: clientId})
-              .populate ('account client').exec (function (err, at) {
-                if (err) return callback (new HttpError (500, 'Failed to locate refresh token'));
-                if (!at) return callback (new HttpError (400, 'Refresh token is invalid'));
-                return callback (null, at);
+            tokenStrategy.verifyToken (refreshToken, {}, callback);
+          },
+
+          // Decode the token because we need the header.
+          function (payload, callback) {
+            if (payload.kind !== KIND_REFRESH_TOKEN)
+              return callback (new HttpError ('Token is not a refresh token'));
+
+            var refresh_token = payload.jti;
+            var filter = {refresh_token: refresh_token, client: clientId};
+            var fields = 'account client';
+
+            AccessToken.findOne (filter).populate (fields).exec (function (err, at) {
+              if (err) return callback (new HttpError (500, 'Failed to refresh token'));
+              if (!at) return callback (new HttpError (400, 'Invalid/unknown refresh token'));
+
+              if (!at.client.enabled)
+                return callback (new HttpError (401, 'Client access is disabled'));
+
+              if (clientSecret && at.client.secret !== clientSecret)
+                return callback (new HttpError (400, 'Client secret is incorrect'));
+
+              // Check the state of the account.
+              if (at.account && !at.account.enabled)
+                return callback (new HttpError (400, 'User account is disabled'));
+
+              return callback (null, at);
             });
           },
 
           function (at, callback) {
-            // Check the client and account. The client and the account must be enabled. The
-            // client secret must also match, if provided.
-            if (!at.client.enabled) return callback (new HttpError (401, 'Client access is disabled'));
-            if (clientSecret && at.client.secret !== clientSecret) return callback (new HttpError (400, 'Client secret is incorrect'));
-            if (!at.account.enabled) return callback (new HttpError (400, 'User account is disabled'));
+            createAndSaveUserAccessToken (at.client, at.account, callback);
+          },
 
-            // Generate a new access and refresh token.
-            async.waterfall ([
-              function (callback) { AccessToken.generateTokenString (callback); },
-              function (token, callback) {
-                AccessToken.generateTokenString (function (err, token) {
-                  return callback (null, token, refreshToken);
-                });
-              },
-              function (token, refreshToken, callback) {
-                at.token = token;
-                at.refresh_token = token;
-
-                at.save (callback);
-              }
-            ], function (err, at) {
-              if (err) return callback (new HttpError (500, 'Failed to save new token'));
-              grantToken (res, at, callback);
-            });
+          function (result, callback) {
+            grantToken (res, result[0], result[1], callback);
           }
         ], callback);
       }

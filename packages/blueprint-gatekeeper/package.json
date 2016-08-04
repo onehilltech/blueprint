@@ -19,6 +19,7 @@
     "jsonfile": "^2.2.3",
     "jsonwebtoken": "^7.1.7",
     "nodemailer": "^2.3.2",
+    "nonce": "^1.0.4",
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.x.x",
     "passport-oauth2-client-password": "^0.1.2",

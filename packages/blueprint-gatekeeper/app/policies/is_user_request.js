@@ -17,5 +17,5 @@ messaging.on ('app.init', function (app) {
  * This policy determine if the request is from a client.
  */
 module.exports = exports = function (req, callback) {
-  return callback (null, req.authInfo.kind === 'client');
+  return callback (null, req.authInfo.kind === 'user');
 };

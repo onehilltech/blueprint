@@ -88,8 +88,6 @@ AccountController.prototype.get = function () {
  * @returns {*|Object}
  */
 AccountController.prototype.create = function () {
-  var self = this;
-
   var options = {
     on: {
       authorize: function (req, callback) {
@@ -125,7 +123,7 @@ AccountController.prototype.create = function () {
           email : req.body.email,
           username : req.body.username,
           password : req.body.password,
-          created_by : req.user._id,
+          created_by : req.user ,
           activation: {
             required: required
           }

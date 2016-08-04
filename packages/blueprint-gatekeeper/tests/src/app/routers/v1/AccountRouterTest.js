@@ -128,7 +128,7 @@ describe ('AccountRouter', function () {
       'password': 0
     };
 
-    it ('should return the account owner\'s account', function (done) {
+    it ('should return the owner account', function (done) {
       var accountId = datamodel.models.accounts[0]._id;
 
       Account.findById (accountId, projection, function (err, account) {

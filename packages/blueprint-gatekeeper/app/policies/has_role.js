@@ -7,13 +7,13 @@ var async = require ('async')
  * Determine if the user has a least 1 role.
  */
 module.exports = exports = function (role, req, callback) {
-  var userRoles = req.user.roles;
+  var scopes = req.authInfo.scope;
 
-  async.some (userRoles,
-    function (userRole, callback) {
+  async.some (scopes,
+    function (scope, callback) {
       // We are using async 1.5. This must change for async 2.0 to
-      // callback (null, userRole === role).
-      return callback (userRole === role);
+      // callback (null, scope === role).
+      return callback (scope === role);
     },
     function (result) {
       return callback (null, result);
