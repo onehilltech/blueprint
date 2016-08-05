@@ -1,17 +1,5 @@
-var blueprint  = require ('@onehilltech/blueprint')
-  , messaging  = blueprint.messaging
-  , passport   = require ('passport')
-  , gatekeeper = require ('../../../../lib')
+var passport   = require ('passport')
   ;
-
-var tokenStrategy;
-
-messaging.on ('app.init', function (app) {
-  var config = app.configs.gatekeeper;
-  tokenStrategy = gatekeeper.tokens (config.token);
-
-  passport.use (gatekeeper.auth.bearer ({ tokenStrategy: tokenStrategy }));
-});
 
 module.exports = exports = {
   '/token': {
