@@ -1,10 +1,10 @@
-var util            = require ('util')
-  , _               = require ('underscore')
-  , path            = require ('path')
-  , fs              = require ('fs')
-  , async           = require ('async')
+var util = require ('util')
+  , extend = require ('extend')
+  , path = require ('path')
+  , fs = require ('fs')
+  , async = require ('async')
   , ResourceManager = require ('./ResourceManager')
-  , RouterBuilder   = require ('./RouterBuilder')
+  , RouterBuilder = require ('./RouterBuilder')
   ;
 
 const ROUTER_SUFFIX = 'Router.js';
@@ -88,7 +88,7 @@ RouterManager.prototype.load = function (loadPath, controllers, opts, callback) 
   processDirectory (loadPath, '', controllers, function (err, result) {
     if (err) return callback (err);
 
-    self._resources = _.extend (self._resources, result);
+    self._resources = extend (true, self._resources, result);
 
     return callback (null, self);
   });

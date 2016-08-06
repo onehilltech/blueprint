@@ -2,7 +2,7 @@ var path    = require ('path')
   , all     = require ('require-all')
   , winston = require ('winston')
   , fs      = require ('fs')
-  , _       = require ('underscore')
+  , extend  = require ('extend')
   ;
 
 function getConfigs (configPath, env, callback) {
@@ -36,7 +36,7 @@ function getConfigs (configPath, env, callback) {
     // Extend the default configurations with the ones loaded from the environment
     // configurations. The environment configurations will overwrite the configuration
     // values in the default configurations.
-    configs = _.extend (configs, envConfigs);
+    configs = extend (true, configs, envConfigs);
     return callback (null, configs);
   });
 }
