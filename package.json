@@ -19,6 +19,7 @@
     "express": "^4.13.4",
     "express-session": "^1.11.3",
     "express-validator": "^2.13.0",
+    "extend": "^3.0.0",
     "fs-extra": "^0.30.0",
     "mongoose": "^4.5.7",
     "morgan": "^1.6.1",
