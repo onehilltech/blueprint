@@ -17,16 +17,16 @@ var schema = new Schema ({
    */
 
   /// Contact email address for the account.
-  email : { type: String, required: true, unique: true, trim: true },
+  email: { type: String, required: true, unique: true, trim: true },
 
   /// Username for the account.
-  username : { type: String, required: true, unique: true, index: true },
+  username: { type: String, required: true, unique: true, index: true },
 
   /// Encrypted password
-  password : { type: String, required: true},
+  password: { type: String, required: true},
 
   /// Access roles for the account.
-  roles : { type: [String], default: [] },
+  roles: { type: [String], default: [] },
 
   /**
    * Internal housekeeping information. This is only use by the service
@@ -36,10 +36,10 @@ var schema = new Schema ({
    */
 
   /// The client that created the account.
-  created_by : {type: Schema.Types.ObjectId, required: true, ref: Client.modelName},
+  created_by: {type: Schema.Types.ObjectId, required: true, ref: Client.modelName},
 
   /// Enabled state for the account.
-  enabled : { type: Boolean, required: true, default: true },
+  enabled: { type: Boolean, required: true, default: true },
 
   /**
    * Activation information for the account. An account can be created, but it
