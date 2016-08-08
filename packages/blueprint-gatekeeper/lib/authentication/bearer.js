@@ -2,6 +2,7 @@ var blueprint      = require ('@onehilltech/blueprint')
   , BearerStrategy = require ('passport-http-bearer').Strategy
   , winston        = require ('winston')
   , async          = require ('async')
+  , _              = require ('underscore')
   ;
 
 var AccessToken;
@@ -15,6 +16,25 @@ blueprint.messaging.on ('app.init', function (app) {
 module.exports = exports = function (opts) {
   var tokenStrategy = opts.tokenStrategy;
 
+  var accountPopulation =  {
+    '_id': 1,
+    'username': 1,
+    'email': 1,
+    'enabled': 1,
+    'roles': 1,
+    'activation.required': 1,
+    'activation.date': 1
+  };
+
+  var clientPopulation = {
+    _id: 1,
+    name: 1,
+    email: 1,
+    enabled: 1,
+    roles: 1,
+    metadata: 1
+  };
+
   return new BearerStrategy (function (token, done) {
     async.waterfall ([
       function (callback) {
@@ -27,7 +47,11 @@ module.exports = exports = function (opts) {
         async.waterfall ([
           // Locate the access token in the database.
           function (callback) {
-            AccessToken.findById (payload.jti).populate ('client account').exec (callback);
+            AccessToken
+              .findById (payload.jti)
+              .populate ('client', clientPopulation)
+              .populate ('account', accountPopulation)
+              .exec (callback);
           },
 
           // Validate if the token can access the resources.
@@ -45,7 +69,7 @@ module.exports = exports = function (opts) {
               return callback (new Error ('Token is from an unknown client'));
 
             // Set the user to the client id.
-            var user = accessToken.client._id;
+            var user = accessToken.client;
 
             if (payload.kind === 'user') {
               if (!accessToken.account)
@@ -55,7 +79,7 @@ module.exports = exports = function (opts) {
                 return callback (new Error ('Account is disabled'));
 
               // Update the user to the account id.
-              user = accessToken.account._id;
+              user = accessToken.account;
             }
 
             return callback (null, user, payload, accessToken);
@@ -66,7 +90,7 @@ module.exports = exports = function (opts) {
     ], function (err, user, payload, accessToken) {
       if (err) return done (err);
 
-      var authInfo = {kind: payload.kind, scope: payload.roles, token: accessToken};
+      var authInfo = {scope: payload.kind, token: accessToken};
       return done (null, user, authInfo);
     });
   });
