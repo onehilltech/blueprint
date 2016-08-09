@@ -172,70 +172,28 @@ Application.prototype.init = function (callback) {
 Application.prototype.start = function (done) {
   var self = this;
 
-  function finishStart (err) {
-    if (err) return done (err);
+  async.waterfall ([
+    async.constant (this),
 
-    self._server.listen (function (err) {
-      if (err) return done (err);
-
-      // Emit that the application has started.
-      Framework().messaging.emit ('app.start', self);
-      return done (null, self);
-    });
-  }
-
-  // If there is a database, connect to the database. Otherwise, instruct
-  // the server to start listening.
-  if (!this._db)
-    return finishStart (null);
-
-  /**
-   * Read all the files in the directory, and seed the database. To be a seed,
-   * the file must end with .seed.js.
-   *
-   * @param db
-   * @param dir
-   */
-  function seedDatabaseFromPath (path, done) {
-    winston.log ('debug', 'seed path: ' + path);
-
-    // Load the seeds in the current directory.
-    var filter = /(.+)\.seed\.(js|json)$/;
-    var seeds = all ({dirname: path, filter:  filter, excludeDirs :  /.*/});
-
-    async.forEachOf (seeds,
-      function (seed, collection, callback) {
-        self._db.seed (collection, seed, function (err, seed) {
-          return callback (err);
-        });
-      },
-      function (err) {
-        return done (err);
+    // Connect to the database.
+    function (app, callback) {
+      app._db.connect (function (err) {
+        return callback (err, app);
       });
-  }
+    },
 
-  this._db.connect (function (err) {
+    // Listen for events.
+    function (app, callback) {
+      app._server.listen (function (err) {
+        return callback (err, app);
+      });
+    }
+  ], function (err, app) {
     if (err) return done (err);
 
-    winston.log ('info', 'connected to the database');
+    Framework ().messaging.emit ('app.start', app);
 
-    // Load the general purpose seeds and environment specific seeds into
-    // the database. Each seed is stored by its respective model name.
-    var seedsPath = Path.resolve (self.appPath, 'seeds');
-    var seedsEnvPath = Path.resolve (seedsPath.path, Env.name);
-    var paths = [];
-
-    if (seedsPath.exists ())
-      paths.push (seedsPath.path);
-
-    if (seedsEnvPath.exists ())
-      paths.push (seedsEnvPath.path);
-
-    async.each (paths,
-      function (path, callback) {
-        seedDatabaseFromPath (path, callback);
-      },
-      finishStart);
+    return done (null, app);
   });
 };
 
