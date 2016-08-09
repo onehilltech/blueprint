@@ -9,7 +9,7 @@ module.exports = exports = {
     https : {
       port : 5001,
       options : {
-        key  : blueprint.app.resource ('ssl/helloworld.ket'),
+        key  : blueprint.app.resource ('ssl/helloworld.key'),
         cert : blueprint.app.resource ('ssl/helloworld.crt')
       }
     }
