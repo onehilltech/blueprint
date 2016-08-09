@@ -1,10 +1,11 @@
 var blueprint = require ('@onehilltech/blueprint')
+  , messaging = blueprint.messaging
   , ClientPasswordStrategy = require ('passport-oauth2-client-password').Strategy
   ;
 
 var Client;
 
-blueprint.messaging.on ('app.init', function (app) {
+messaging.once ('app.init', function (app) {
   Client = app.models.Client;
 
   if (!Client)

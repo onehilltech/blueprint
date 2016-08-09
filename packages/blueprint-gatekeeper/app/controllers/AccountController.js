@@ -18,7 +18,7 @@ var tokenStrategy;
 
 const DEFAULT_ACTIVATION_REQUIRED = false;
 
-messaging.on ('app.init', function (app) {
+messaging.once ('app.init', function (app) {
   gatekeeperConfig = app.configs.gatekeeper;
   tokenStrategy = gatekeeper.tokens (gatekeeperConfig.token);
 });

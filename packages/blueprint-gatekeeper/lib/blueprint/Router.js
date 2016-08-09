@@ -45,7 +45,9 @@ function makeRouter (moduleName, version) {
     })
   }
   else {
-    messaging.once ('app.init', function (app) { initRouter (app); });
+    messaging.once ('app.init', function (app) {
+      initRouter (app);
+    });
   }
 
   return router;

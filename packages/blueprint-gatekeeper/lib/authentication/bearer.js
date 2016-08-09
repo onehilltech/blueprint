@@ -1,4 +1,5 @@
 var blueprint      = require ('@onehilltech/blueprint')
+  , messaging      = blueprint.messaging
   , BearerStrategy = require ('passport-http-bearer').Strategy
   , winston        = require ('winston')
   , async          = require ('async')
@@ -7,7 +8,7 @@ var blueprint      = require ('@onehilltech/blueprint')
 
 var AccessToken;
 
-blueprint.messaging.on ('app.init', function (app) {
+messaging.once ('app.init', function (app) {
   AccessToken = app.models.oauth2.AccessToken;
 });
 

@@ -1,6 +1,6 @@
 var winston       = require ('winston')
   , blueprint     = require ('@onehilltech/blueprint')
-  , bm            = blueprint.messaging
+  , messaging     = blueprint.messaging
   , nodemailer    = require ('nodemailer')
   , EmailTemplate = require ('email-templates').EmailTemplate
   , path          = require ('path')
@@ -23,7 +23,7 @@ var transport;
 /**
  * app.init
  */
-bm.on ('app.init', function (app) {
+messaging.once ('app.init', function (app) {
   if (!app.configs.app)
     throw new Error ('app.config not defined');
 
@@ -82,7 +82,7 @@ function sendActivationEmail (account) {
 
     transport.sendMail (mailOptions, function (err, info){
       if (err) return winston.log ('error', 'failed to send email: ' + err.message);
-      bm.emit ('gatekeeper.email.account_activation.sent', account, info);
+      messaging.emit ('gatekeeper.email.account_activation.sent', account, info);
     });
   });
 }

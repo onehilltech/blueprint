@@ -17,7 +17,7 @@ blueprint.controller (ActivationController);
 
 var tokenStrategy;
 
-messaging.on ('app.init', function (app) {
+messaging.once ('app.init', function (app) {
   var gatekeeperConfig = app.configs.gatekeeper;
   tokenStrategy = gatekeeper.tokens (gatekeeperConfig.token);
 });

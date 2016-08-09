@@ -1,11 +1,12 @@
 var winston       = require ('winston')
   , LocalStrategy = require ('passport-local').Strategy
   , blueprint     = require ('@onehilltech/blueprint')
+  , messaging     = blueprint.messaging
   ;
 
 var Account;
 
-blueprint.messaging.on ('app.init', function (app) {
+messaging.once ('app.init', function (app) {
   Account = app.models.Account;
 
   if (!Account)

@@ -4,7 +4,7 @@ var blueprint = require ('@onehilltech/blueprint')
 
 var Client;
 
-messaging.on ('app.init', function (app) {
+messaging.once ('app.init', function (app) {
   Client = app.models.Client;
 
   if (!Client)
