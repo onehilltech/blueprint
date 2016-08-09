@@ -67,6 +67,12 @@ describe ('Application', function () {
     });
   });
 
+  describe ('#start', function () {
+    it ('should start the application', function (done) {
+      app.start (done);
+    });
+  });
+
   describe ('#addModule', function () {
     it ('should load an application module into the main application', function (done) {
       var modulePath = path.resolve (__dirname, '../fixtures/app-module');
