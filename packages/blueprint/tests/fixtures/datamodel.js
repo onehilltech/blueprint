@@ -9,7 +9,7 @@ var blueprint = require ('./blueprint')
 
 var Person;
 
-blueprint.messaging.on ('app.init', function (app) {
+blueprint.messaging.once ('app.init', function (app) {
   Person = app.models.Person;
 });
 
