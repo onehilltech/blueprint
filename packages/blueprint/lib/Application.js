@@ -169,9 +169,7 @@ Application.prototype.init = function (callback) {
  *
  * @param done
  */
-Application.prototype.start = function (done) {
-  var self = this;
-
+Application.prototype.start = function (callback) {
   async.waterfall ([
     async.constant (this),
 
@@ -189,11 +187,11 @@ Application.prototype.start = function (done) {
       });
     }
   ], function (err, app) {
-    if (err) return done (err);
+    if (err) return callback (err);
 
     Framework ().messaging.emit ('app.start', app);
 
-    return done (null, app);
+    return callback (null, app);
   });
 };
 
