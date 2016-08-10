@@ -1,3 +1,6 @@
+var blueprint = require ('@onehilltech/blueprint')
+  ;
+
 module.exports = exports = {
   baseuri : 'http://localhost:5000/gatekeeper',
 
@@ -7,6 +10,16 @@ module.exports = exports = {
 
     nodemailer : {
       transport: 'stub'
+    }
+  },
+
+  token: {
+    kind: 'jwt',
+    options: {
+      algorithm: 'RS256',
+      publicKey:  blueprint.app.resource ('ssl/server.crt'),
+      privateKey: blueprint.app.resource ('ssl/server.key'),
+      issuer: 'engage'
     }
   }
 };
