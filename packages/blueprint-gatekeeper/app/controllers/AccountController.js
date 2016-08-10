@@ -18,8 +18,12 @@ var tokenStrategy;
 
 const DEFAULT_ACTIVATION_REQUIRED = false;
 
+var activationConfig;
+
 messaging.once ('app.init', function (app) {
   gatekeeperConfig = app.configs.gatekeeper;
+  activationConfig = gatekeeperConfig.activation || {};
+
   tokenStrategy = gatekeeper.tokens (gatekeeperConfig.token);
 });
 
@@ -114,7 +118,7 @@ AccountController.prototype.create = function () {
       preCreate: function (req, doc, callback) {
         // Overwrite the current document with one that matches the
         // data model for an account.
-        var required = gatekeeperConfig.activation.required;
+        var required = activationConfig.required;
 
         if (required === undefined)
           required = DEFAULT_ACTIVATION_REQUIRED;
