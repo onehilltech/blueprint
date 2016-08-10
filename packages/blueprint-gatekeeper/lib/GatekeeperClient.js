@@ -25,16 +25,9 @@ GatekeeperClient.prototype.createAccount = function (opts, callback) {
 
   var req = this.makeRequest ({url: url, method: 'POST', json: data});
   request (req, function (err, res, body) {
-    if (err)
-      throw err;
-
-    if (res.statusCode !== 200)
-      throw new Error (body);
-
-    if (body === true)
-      winston.log ('info', 'Successfully created account', opts.username);
-    else
-      winston.log ('error', 'Failed to create account');
+    if (err) return callback (err);
+    if (res.statusCode !== 200) return callback (new Error (body));
+    return callback (null, body);
   });
 };
 
