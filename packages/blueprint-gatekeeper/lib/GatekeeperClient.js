@@ -45,7 +45,7 @@ GatekeeperClient.prototype.createAccount = function (opts, callback) {
  * @returns {*}
  */
 GatekeeperClient.prototype.getCompleteUrl = function (relativePath) {
-  return this.baseUri + relativePath;
+  return this.baseUri + '/v1' + relativePath;
 };
 
 /**
@@ -72,13 +72,13 @@ function newInstance (opts, callback) {
   opts = opts || {};
 
   if (opts.baseUri === undefined)
-    throw new Error ('baseUri is not defined');
+    return callback (new Error ('baseUri is not defined'));
 
   if (opts.clientId === undefined)
-    throw new Error ('clientId is not defined');
+    return callback (new Error ('clientId is not defined'));
 
   if (opts.clientSecret === undefined)
-    throw new Error ('clientSecret is not defined');
+    return callback (new Error ('clientSecret is not defined'));
 
   var data = {
     grant_type : 'client_credentials',
@@ -86,13 +86,10 @@ function newInstance (opts, callback) {
     client_secret : opts.clientSecret
   };
 
-  var url = opts.baseUri + '/oauth2/token';
+  var url = opts.baseUri + '/v1/oauth2/token';
   request ({url: url, method: 'POST', json: data}, function (err, res, body) {
-    if (err)
-      return callback (err);
-
-    if (res.statusCode !== 200)
-      return callback (new Error (body));
+    if (err) return callback (err);
+    if (res.statusCode !== 200) return callback (new Error (body));
 
     var token = body.access_token;
     var client = new GatekeeperClient (opts, token);
