@@ -6,79 +6,69 @@ var program   = require ('commander')
   , prompt    = require ('prompt')
   , blueprint = require ('@onehilltech/blueprint')
   , path      = require ('path')
+  , async     = require ('async')
   ;
 
-blueprint.Application (path.resolve (process.cwd (), 'app'))
-  ;
+var appPath = path.resolve (process.cwd (), 'app');
 
-var Client = require ('../app/models/Client')
-  ;
+async.waterfall ([
+  function (callback) { blueprint.Application (appPath, callback); },
+  function (app, callback) {
+    app.database.connect (function (err) {
+      return callback (err, app);
+    });
+  },
+  function (app, callback) {
+    var Client = app.models.Client;
 
-// command: create
-program
-  .command ('add')
-  .description ('add a new client')
-  .action (function () {
-    prompt.start ();
-    prompt.get (['name', 'email', 'redirect', 'roles'], function (err, result) {
-      winston.log ('debug', 'adding a new client to the database');
+    // command: create
+    program
+      .command ('add')
+      .description ('add a new client')
+      .action (function () {
+        prompt.start ();
+        prompt.get (['name', 'email', 'redirect', 'roles'], function (err, result) {
+          winston.log ('debug', 'adding a new client to the database');
 
-      var client = new Client ({
-        name : result.name,
-        email : result.email,
-        redirect_uri : result.redirect,
-        roles : result.roles.split (',')
+          var client = new Client ({
+            name : result.name,
+            email : result.email,
+            redirect_uri : result.redirect,
+            roles : result.roles.split (',')
+          });
+
+          client.save (function (err, client) {
+            if (err) return callback (err);
+
+            console.log('client_id: ' + client.id);
+            console.log('client_secret: ' + client.secret);
+
+            callback (null);
+          });
+        });
       });
 
-      client.save (function (err, client) {
-        if (err) {
-          winston.log ('error', err.message);
-          process.exit (1);
-        }
-
-        console.log('client_id: ' + client.id);
-        console.log('client_secret: ' + client.secret);
-
-        process.exit();
+    // command: remove
+    program
+      .command ('remove <clientId>')
+      .description ('remove client from the database')
+      .action (function (clientId) {
+        Client.findByIdAndRemove (clientId, callback);
       });
-    });
-  });
 
-// command: remove
-program
-  .command ('remove <clientId>')
-  .description ('remove client from the database')
-  .action (function (clientId) {
+    // command: enable
+    program
+      .command ('enable <clientId> <state>')
+      .description ('enable/disable client access')
+      .action (function (clientId, state) {
+        state = JSON.parse (state.toLowerCase());
 
-    Client.remove ({_id : clientId}, function (err) {
-      if (!err)
-        return process.exit ();
+        Client.findByIdAndUpdate (clientId, {enabled: state}, callback);
+      });
 
-      winston.log ('error', err);
-      process.exit (1);
-    });
-  });
-
-// command: enable
-program
-  .command ('enable <clientId> <state>')
-  .description ('enable/disable client access')
-  .action (function (clientId, state) {
-    state = JSON.parse (state.toLowerCase());
-
-    Client.findByIdAndUpdate (clientId, {enabled: state}, function (err) {
-      if (!err)
-        return process.exit ();
-
-      winston.log ('error', err);
-      process.exit (1);
-    });
-  });
-
-
-blueprint.app.database.connect (function (err) {
-  if (err)
-    return winston.log ('error', err);
-
-  program.parse(process.argv);
+    program.parse (process.argv);
+  }
+], function (err) {
+  if (err) throw err;
+  process.exit (0);
 });
