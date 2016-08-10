@@ -11,15 +11,28 @@ var winston   = require ('winston')
   , roles     = require ('../lib').roles
   ;
 
-async.waterfall ([
+var appPath = path.resolve (process.cwd (), 'app');
+var rcPath  = path.resolve (appPath, 'resources/gatekeeper');
+
+  async.waterfall ([
   function (callback) {
-    var appPath = path.resolve (process.cwd (), 'app');
     blueprint.Application (appPath, callback);
   },
 
   function (app, callback) {
     app.database.connect (function (err) {
       return callback (err, app);
+    });
+  },
+
+  function (app, callback) {
+    fs.stat (rcPath, function (err) {
+      if (err)
+        return fs.mkdir (rcPath, function (err) {
+          return callback (err, app);
+        });
+
+      return callback (null, app);
     });
   },
 
@@ -39,15 +52,13 @@ async.waterfall ([
     async.waterfall ([
       function (callback) { app.models.Client.create (data, callback); },
       function (clients, callback) {
-        var dataPath = path.resolve (app.appPath, 'data');
-
         async.each (clients, function (client, callback) {
           var data = {
             client_id: client.id,
             client_secret: client.secret
           };
 
-          var dataFile = path.resolve (dataPath, client.name);
+          var dataFile = path.resolve (rcPath, client.name);
           jsonfile.writeFile (dataFile, data, {spaces: 2}, callback);
         }, callback);
       }
