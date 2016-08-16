@@ -87,12 +87,11 @@ function createAndSaveUserAccessToken (client, account, callback) {
 
         // Generate the refresh token.
         function (callback) {
-          var refreshExpiresIn = accessConfig.refreshExpiresIn || DEFAULT_REFRESH_EXPIRES_IN;
           var jti = accessToken.refresh_token.toString ();
 
           var opts = {
             payload: { kind: KIND_REFRESH_TOKEN },
-            options: { jwtid: jti, expiresIn: refreshExpiresIn }
+            options: { jwtid: jti }
           };
 
           tokenStrategy.generateToken (opts, callback);
