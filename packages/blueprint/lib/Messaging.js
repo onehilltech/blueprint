@@ -154,4 +154,18 @@ Messaging.prototype.emit = function () {
   emit.apply (messenger, arguments);
 };
 
+/**
+ * Relay the results of a callback as an event.
+ *
+ * @param ev Target event to relay callback
+ * @returns {Function}
+ */
+Messaging.prototype.relay = function (ev) {
+  var self = this;
+
+  return function () {
+    self.emit (ev, arguments);
+  };
+};
+
 module.exports = exports = Messaging;
