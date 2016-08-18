@@ -196,7 +196,7 @@ WorkflowController.prototype.issueToken = function () {
     client_credentials: {
       validate: function (req, callback) {
         req.checkBody ('client_id', 'required').isMongoId ();
-        req.checkBody ('client_secret', 'required').notEmpty ();
+        req.checkBody ('client_secret', 'required').optional ().notEmpty ();
         return callback (req.validationErrors (true));
       },
 
