@@ -82,15 +82,21 @@ describe ('Application', function () {
 
         expect (app.modules).to.have.keys (['test-module']);
 
-        var files = [
+        // Check the policies are added to the application.
+        expect (app.policies).to.have.keys (['module-policy', 'always_true']);
+
+        // Check auto-setting of engines on application based on view extensions.
+        expect (app._server._engines).to.have.length (3);
+        expect (app._server._engines).to.deep.equal (['jade', 'mustache', 'pug']);
+
+        // Check the views are copy to the view cache.
+        var views = [
           path.join (appPath, 'temp', 'views', 'module.jade'),
           path.join (appPath, 'temp', 'views', 'second-level', 'module.jade')
         ];
 
-        expect (app.policies).to.have.keys (['module-policy', 'always_true']);
-
-        async.each (files, function (file, callback) {
-          fs.stat (file, function (err, stat) {
+        async.each (views, function (view, callback) {
+          fs.stat (view, function (err, stat) {
             if (err) return callback (err);
 
             expect (stat.isFile()).to.be.true;

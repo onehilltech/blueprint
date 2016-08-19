@@ -95,7 +95,7 @@ Application.prototype.init = function (callback) {
 
     // Load the modules for the application.
     function (app, callback) {
-      if (!app._configs.app.modules)
+      if (!app._configs.app['modules'])
         return callback (null, app);
 
       var resolver = {
@@ -107,7 +107,7 @@ Application.prototype.init = function (callback) {
         }
       };
 
-      async.eachOf (app._configs.app.modules, function (value, name, callback) {
+      async.eachOf (app._configs.app['modules'], function (value, name, callback) {
         var parts = value.split ('://');
         var protocol = parts[0];
         var location = resolver[protocol](parts[1]);
@@ -115,7 +115,7 @@ Application.prototype.init = function (callback) {
         app.addModule (name, location, callback);
       }, function (err) {
         return callback (err, app);
-      })
+      });
     },
 
     // Let's configure the application module portion of the application.
@@ -228,6 +228,7 @@ Application.prototype.addModule = function (name, path, callback) {
     },
 
     // Import the views from the module into the application.
+
     function (app, callback) {
       if (!app._server && appModule.getSupportsViews ())
         return callback (null, app);
