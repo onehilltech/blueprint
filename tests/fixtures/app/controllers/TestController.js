@@ -19,4 +19,10 @@ TestController.prototype.innerHelloWorld = function () {
   };
 };
 
+TestController.prototype.getWithId = function () {
+  return function getWithId (req, res) {
+    return res.status (200).send ('Hello, World!');
+  };
+};
+
 module.exports = exports = TestController;

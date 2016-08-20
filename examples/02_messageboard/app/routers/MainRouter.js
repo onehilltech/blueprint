@@ -7,7 +7,7 @@ module.exports = exports = {
 
   '/messages' : {
     get  : { action : 'MessageController@getMessages' },
-    post : { action : 'MessageController@postMessage' },
+    post : { action : 'MessageController@postMessage' }
   },
 
   '/messages/:messageId' : {
