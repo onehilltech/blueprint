@@ -10,7 +10,7 @@ blueprint.controller (HelloWorldController);
 
 HelloWorldController.prototype.echoName = function () {
   return function echoName (req, res) {
-    return res.render ('helloworld', {name: req.body.whoami});
+    return res.render ('helloworld.pug', {name: req.body.whoami});
   };
 };
 
