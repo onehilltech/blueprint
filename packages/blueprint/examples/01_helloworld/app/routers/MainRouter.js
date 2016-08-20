@@ -23,7 +23,7 @@ module.exports = exports = {
         }
       ],
 
-      view : 'helloworld',
+      view : 'helloworld.pug',
 
       /**
        * The after attribute allows you to define middleware that executes
