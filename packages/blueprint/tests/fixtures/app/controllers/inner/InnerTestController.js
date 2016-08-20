@@ -19,4 +19,11 @@ TestController.prototype.innerHelloWorld = function () {
   };
 };
 
+TestController.prototype.lookupById = function () {
+  return function (req, res, next, id) {
+    console.log (id);
+    return next ();
+  };
+};
+
 module.exports = exports = TestController;

@@ -45,13 +45,10 @@ describe ('RouterBuilder', function () {
       routerBuilder.addSpecification (spec);
       var router = routerBuilder.getRouter ();
 
-      expect (router.params).to.have.keys (['param1', 'param2']);
+      expect (router.params).to.have.keys (['param1']);
       expect (router.params.param1).to.have.length (1);
-      expect (router.params.param2).to.have.length (1);
-
       expect (router.params.param1[0]).to.be.a.function;
-      expect (router.params.param2[0]).to.be.a.function;
-      
+
       expect (router.stack[0].route.path).to.equal ('/helloworld');
       expect (router.stack[1].route.path).to.equal ('/helloworld/inner');
     });

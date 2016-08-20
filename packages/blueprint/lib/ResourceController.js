@@ -36,7 +36,7 @@ function __onPostExecute (req, result, callback) { return callback (null, result
 
 function checkIdThenAuthorize (id, next) {
   return function __blueprint_checkIdThenAuthorize (req, callback) {
-    if (!req[id])
+    if (!req.params[id])
       return callback (new HttpError (400, 'Missing resource id'));
 
     return next (req, callback);
@@ -286,7 +286,7 @@ ResourceController.prototype.get = function (opts) {
     validate: checkIdThenAuthorize (self._id, onAuthorize),
 
     execute: function __blueprint_get_execute (req, res, callback) {
-      var rcId = req[self._id];
+      var rcId = req.params[self._id];
       var filter = {_id: rcId};
 
       async.waterfall ([
@@ -343,7 +343,7 @@ ResourceController.prototype.update = function (opts) {
     validate: checkIdThenAuthorize (self._id, onAuthorize),
 
     execute: function __blueprint_update_execute (req, res, callback) {
-      var rcId = req[self._id];
+      var rcId = req.params[self._id];
       var filter = {_id: rcId};
 
       async.waterfall ([
@@ -404,7 +404,7 @@ ResourceController.prototype.delete = function (opts) {
     validate: checkIdThenAuthorize (self._id, onAuthorize),
 
     execute: function __blueprint_delete (req, res, callback) {
-      var rcId = req[self._id];
+      var rcId = req.params[self._id];
       var filter = {_id: rcId};
 
       async.waterfall ([

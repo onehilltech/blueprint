@@ -19,9 +19,10 @@ TestController.prototype.innerHelloWorld = function () {
   };
 };
 
-TestController.prototype.getWithId = function () {
-  return function getWithId (req, res) {
-    return res.status (200).send ('Hello, World!');
+TestController.prototype.lookupById = function () {
+  return function (req, res, next, id) {
+    console.log (id);
+    return next ();
   };
 };
 

@@ -114,8 +114,8 @@ GridFSController.prototype.get = function () {
   return {
     sanitize: function (req, callback) {
       try {
-        var rcid = req[self._id];
-        req[self._id] = new mongodb.ObjectId (rcid);
+        var rcid = req.params[self._id];
+        req.params[self._id] = new mongodb.ObjectId (rcid);
 
         return callback (null);
       }
@@ -125,7 +125,7 @@ GridFSController.prototype.get = function () {
     },
 
     execute: function (req, res, callback) {
-      var id = req[self._id];
+      var id = req.params[self._id];
 
       async.waterfall ([
         function (callback) {
@@ -190,8 +190,8 @@ GridFSController.prototype.delete = function () {
   return {
     sanitize: function (req, callback) {
       try {
-        var rcid = req[self._id];
-        req[self._id] = new mongodb.ObjectId (rcid);
+        var rcid = req.params[self._id];
+        req.params[self._id] = new mongodb.ObjectId (rcid);
 
         return callback (null);
       }
@@ -201,7 +201,7 @@ GridFSController.prototype.delete = function () {
     },
 
     execute: function (req, res, callback) {
-      var id = req[self._id];
+      var id = req.params[self._id];
 
       self._bucket.delete (id, function (err) {
         if (err) return res.status (500).json ({errors: 'Delete operation failed'});
