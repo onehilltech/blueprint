@@ -384,15 +384,7 @@ Server.prototype.importViews = function (srcPath, callback) {
             if (self._engines.indexOf (ext) !== -1)
               return callback (null);
 
-            var lookupName = ext;
-
-            // Right now, Jade is the only view engine that must be mapped to another
-            // hook method in consolidate since it has not been updated to reflect the
-            // change.
-            if (ext === 'pug')
-              lookupName = 'jade';
-
-            var render = consolidate[lookupName];
+            var render = consolidate[ext];
 
             if (render) {
               self._app.engine (ext, render);
