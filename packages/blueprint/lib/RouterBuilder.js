@@ -1,18 +1,53 @@
-var express = require ('express')
-  , winston = require ('winston')
-  , util = require ('util')
-  , async = require ('async')
+var express    = require ('express')
+  , winston    = require ('winston')
+  , util       = require ('util')
+  , async      = require ('async')
   , objectPath = require ('object-path')
+  , _          = require ('underscore')
   ;
 
 var HttpError = require ('./errors/HttpError')
   , ResourceController = require ('./ResourceController')
   ;
 
-function makeAction (controller, method, options) {
-  return {action: controller + '@' + method, options: options};
+/**
+ * Factory method that generates the default handler for a parameter. The parameter
+ * value is stored as a property on the request object.
+ *
+ * @param param
+ */
+function makeDefaultParameterHandler (param) {
+  return function __blueprint_param_callback (req, res, next, value) {
+    req[param] = value;
+    return next ();
+  }
 }
 
+/**
+ * Factory method that generates an action object.
+ *
+ * @param controller
+ * @param method
+ * @param options
+ * @returns {{action: string, options: *}}
+ */
+function makeAction (controller, method, options) {
+  var action = {action: controller + '@' + method};
+
+  if (options)
+    action.options = options;
+
+  return action;
+}
+
+/**
+ * Default function for handling an error returned via a VaSE callback.
+ *
+ * @param err
+ * @param res
+ * @param next
+ * @returns {*}
+ */
 function handleError (err, res, next) {
   var errType = typeof err;
 
@@ -54,9 +89,9 @@ function MethodCall (obj, method) {
 //
 //  http://stackoverflow.com/a/2548133/2245732
 
-if (typeof String.prototype.endsWith !== 'function') {
-  String.prototype.endsWith = function(suffix) {
-    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+if (!_.isFunction (String.prototype.endsWith)) {
+  String.prototype.endsWith = function (suffix) {
+    return this.indexOf (suffix, this.length - suffix.length) !== -1;
   };
 }
 
@@ -65,15 +100,15 @@ if (typeof String.prototype.endsWith !== 'function') {
  *
  * Builder class for building an express.Router object.
  *
- * @param routerPath
- * @param controllers
- * @param currPath
+ * @param controllers       Collection of controllers for binding
+ * @param basePath          Base path of the router
  * @constructor
  */
 function RouterBuilder (controllers, basePath) {
   this._controllers = controllers;
   this._basePath = basePath || '/';
   this._router = express.Router ();
+  this._params = [];
 }
 
 /**
@@ -304,35 +339,6 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
     self._router.use (path, handlers);
   }
 
-  /**
-   * Registers a parameters with the router. The parameter starts with a colon (:).
-   *
-   * @param param
-   * @param opts
-   */
-  function processParam (param, opts) {
-    winston.log ('debug', 'processing parameter %s', param);
-    var rawParam = param.substring (1);
-
-    if (opts.action) {
-      // The parameter invokes an operation on the controller.
-      var controller = resolveController (opts.action);
-      self._router.param (rawParam, controller.invoke ());
-    }
-    else if (opts.property) {
-      // The parameter is just stored as a property on the request. We can just provide our
-      // own function to handle this operation. There is no need to invoke a method on a
-      // controller.
-      self._router.param (rawParam, function (req, res, next, value) {
-        req[opts.property] = value;
-        next ();
-      });
-    }
-    else {
-      throw new Error ('Invalid parameter specification (' + param + ')');
-    }
-  }
-
   if (!currPath)
     currPath = this._basePath;
 
@@ -365,7 +371,7 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
             break;
 
           case ':':
-            processParam (key, spec[key]);
+            this.addParameter (key, spec[key]);
             break;
 
           default:
@@ -379,6 +385,48 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
   }
 
   return this;
+};
+
+RouterBuilder.prototype.addParameter = function (param, opts, override) {
+  winston.log ('debug', 'processing parameter %s', param);
+
+  // We only add a parameter once unless we are overriding the existing
+  // parameter definition.
+  if (this._params.indexOf (param) !== -1 && !override)
+    return;
+
+  var rawParam = param.slice (1);
+  var handler;
+
+  if (_.isFunction (opts)) {
+    handler = opts;
+  }
+  else if (_.isObject (opts)) {
+    if (opts.action) {
+      // The parameter invokes an operation on the controller.
+      var controller = resolveController (opts.action);
+      handler = controller.invoke ();
+    }
+    else if (opts.property) {
+      // The parameter is just stored as a property on the request. We can just provide our
+      // own function to handle this operation. There is no need to invoke a method on a
+      // controller.
+      handler = makeDefaultParameterHandler (opts.property);
+    }
+    else {
+      throw new Error ('Invalid parameter specification (' + param + ')');
+    }
+  }
+  else {
+    throw new Error (util.format ('opts must be a Function or Object [param=%s]', param));
+  }
+
+  if (handler != null)
+    this._router.param (rawParam, handler);
+
+  // Cache the parameter so we do not add it more than once.
+  if (this._params.indexOf (param) === -1)
+    this._params.push (param);
 };
 
 /**
