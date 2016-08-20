@@ -1,6 +1,5 @@
 module.exports = exports = {
-  ':param1' : { property: 'param1' },
-  ':param2' : { property: 'param2' },
+  ':param1': { action: 'inner.InnerTestController@lookupById' },
 
   '/helloworld2' : {
     get: { action: 'inner.InnerTestController@helloWorld' },
