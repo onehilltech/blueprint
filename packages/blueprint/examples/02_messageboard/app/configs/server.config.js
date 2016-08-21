@@ -24,6 +24,6 @@ module.exports = exports = {
           return new mongoose.Types.ObjectId (value);
         }
       }
-    },
+    }
   }
 };
