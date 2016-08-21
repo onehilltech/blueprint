@@ -1,5 +1,4 @@
 var passport   = require ('passport')
-  , blueprint  = require ('@onehilltech/blueprint')
   ;
 
 module.exports = exports = {
