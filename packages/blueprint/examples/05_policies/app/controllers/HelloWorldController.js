@@ -11,18 +11,16 @@ blueprint.controller (HelloWorldController);
 
 HelloWorldController.prototype.echoName = function () {
   return {
-    validate: Policy (
-      Policy.and ([
-        Policy.assert (function (req, callback) {
-          // Validate the request parameters.
-        }),
-        Policy.assert ('gatekeeper::is_admin'),
-        Policy.assert (function (req, callback) { return callback (null, true); })
-      ])
-    ),
+    validate: function (req, callback) {
+      Policy.Definition (
+        Policy.and ([
+          Policy.assert ('passthrough', true),
+          Policy.assert (function (req, callback) { return callback (null, true); })
+        ])).evaluate (req, callback);
+    },
 
     execute: function (req, res, callback) {
-      res.render ('helloworld', {name: req.body.name});
+      res.render ('helloworld.pug', {name: req.body.name});
       return callback (null);
     }
   };
