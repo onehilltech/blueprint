@@ -1,3 +1,6 @@
+var mongoose = require ('mongoose')
+  ;
+
 module.exports = exports = {
   protocols : {
     http : {
@@ -6,7 +9,14 @@ module.exports = exports = {
   },
 
   middleware : {
-    validator  : { },
+    validator: {
+      customSanitizers: {
+        toMongoId: function (value) {
+          return new mongoose.Types.ObjectId (value);
+        }
+      }
+    },
+
     bodyParser : {
       urlencoded : { extended: false },
       json : { }

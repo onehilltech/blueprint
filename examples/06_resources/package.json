@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@onehilltech/blueprint": "^0.29.3"
+    "@onehilltech/blueprint": "file:../..",
+    "winston": "^1.0.1"
   }
 }
