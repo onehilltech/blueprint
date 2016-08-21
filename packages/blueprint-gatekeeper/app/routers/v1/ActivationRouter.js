@@ -3,6 +3,6 @@ module.exports = exports = {
   // under the /accounts base uri.
 
   '/activate' : {
-    get  : {action: 'ActivationController@activate'}
+    get: {action: 'ActivationController@activate'}
   }
 };

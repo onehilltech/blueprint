@@ -33,7 +33,7 @@ var DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE = {
 };
 
 function AccountController () {
-  ResourceController.call (this, {name: 'account', model: Account, id: 'accountId'});
+  ResourceController.call (this, {name: 'account', model: Account});
 }
 
 blueprint.controller (AccountController, ResourceController);
