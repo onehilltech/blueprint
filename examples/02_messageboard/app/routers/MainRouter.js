@@ -1,17 +1,15 @@
 module.exports = exports = {
-  ':messageId' : { property : 'messageId'},
-
   '/messageboard' : {
-    get  : { view : 'messageboard' }
+    get  : { view : 'messageboard.pug' }
   },
 
-  '/messages' : {
+  '/messages': {
     get  : { action : 'MessageController@getMessages' },
-    post : { action : 'MessageController@postMessage' }
-  },
+    post : { action : 'MessageController@postMessage' },
 
-  '/messages/:messageId' : {
-    get    : { action : 'MessageController@getMessage'},
-    delete : { action : 'MessageController@deleteMessage' }
+    '/:messageId': {
+      get    : { action : 'MessageController@getMessage'},
+      delete : { action : 'MessageController@deleteMessage' }
+    }
   }
 };

@@ -1,4 +1,5 @@
 var blueprint = require ('@onehilltech/blueprint')
+  , HttpError = blueprint.errors.HttpError
   ;
 
 var Message = require ('../models/Message')
@@ -10,46 +11,46 @@ function MessageController () {
 
 blueprint.controller (MessageController);
 
-MessageController.prototype.setMessageId = function (callback) {
-  return function (req, res, next, param) {
-    req.messageId = param;
-    return next ();
+MessageController.prototype.getMessages = function () {
+  return {
+    execute: function (req, res, callback) {
+      Message.find ({}, '-__v', function (err, msgs) {
+        if (err) return callback (new HttpError (500, 'Cannot retrieve messages'));
+
+        res.status (200).json (msgs);
+        return callback (null);
+      });
+    }
   };
 };
 
-MessageController.prototype.getMessages = function (callback) {
-  var self = this;
+MessageController.prototype.getMessage = function () {
+  return {
+    validate: function (req, callback) {
+      req.checkParams ('messageId', 'Missing/invalid message id').notEmpty ().isMongoId ();
+      return callback (req.validationErrors (true));
+    },
 
-  return function (req, res) {
-    Message.find ({}, '-__v', function (err, msgs) {
-      if (err)
-        return self.handleError (err, res, 500, 'Cannot retrieve messages', callback);
+    sanitize: function (req, callback) {
+      req.sanitizeParams ('messageId').toMongoId ();
+      return callback (req.validationErrors (true));
+    },
 
-      if (!msgs || msgs.length === 0)
-        return res.status (200).json ([]);
+    execute: function (req, res, callback) {
+      var messageId = req.params.messageId;
 
-      return res.status (200).json (msgs);
-    });
-  };
-}
+      Message.findById (messageId, '-__v', function (err, msg) {
+        if (err) return callback (new HttpError (500, 'Failed to retrieve message'));
+        if (!msg) return callback (new HttpError (404, 'Message not found'));
 
-MessageController.prototype.getMessage = function (callback) {
-  var self = this;
-
-  return function (req, res) {
-    Message.findById (req.messageId, '-__v', function (err, msg) {
-      if (err)
-        return self.handleError (err, res, 500, 'Failed to retreive message', callback);
-
-      if (!msg)
-        return self.handleError (err, res, 404, 'Message not found', callback);
-
-      return res.status (200).json (msg);
-    });
+        res.status (200).json (msg);
+        return callback (null);
+      });
+    }
   };
 };
 
-MessageController.prototype.postMessage = function (callback) {
+MessageController.prototype.postMessage = function () {
   var self = this;
 
   return {
@@ -59,38 +60,52 @@ MessageController.prototype.postMessage = function (callback) {
 
       return callback (req.validationErrors (true));
     },
+
     sanitize: function (req, callback) {
       req.sanitizeBody ('title').escape ().trim ();
       req.sanitizeBody ('content').escape ().trim ();
 
       return callback (req.validationErrors (true));
     },
-    execute: function (req, res) {
+
+    execute: function (req, res, callback) {
       var msg = new Message ({
         title: req.body.title,
         content: req.body.content
       });
 
       msg.save (function (err, msg) {
-        if (err)
-          return self.handleError (err, res, 500, 'Failed to save message', callback);
+        if (err) return callback (new HttpError (500, 'Failed to save message'));
 
-        return res.status (200).json (msg.id);
+        res.status (200).json (msg.id);
+        return callback (null);
       });
     }
   };
 };
 
-MessageController.prototype.deleteMessage = function (callback) {
-  var self = this;
+MessageController.prototype.deleteMessage = function () {
+  return {
+    validate: function (req, callback) {
+      req.checkParams ('messageId', 'Missing/invalid message id').notEmpty ().isMongoId ();
+      return callback (req.validationErrors (true));
+    },
 
-  return function (req, res) {
-    Message.remove ({_id : req.messageId}, function (err) {
-      if (err)
-        return self.handleError (err, res, 500, 'Failed to delete message', callback);
+    sanitize: function (req, callback) {
+      req.sanitizeParams ('messageId').toMongoId ();
+      return callback (req.validationErrors (true));
+    },
 
-      return res.status (200).json (true);
-    });
+    execute: function (req, res, callback) {
+      var messageId = req.params.messageId;
+
+      Message.remove ({_id : messageId}, function (err) {
+        if (err) return callback (new HttpError (500, 'Failed to delete message'));
+
+        res.status (200).json (true);
+        return callback (null);
+      });
+    }
   };
 };
 
