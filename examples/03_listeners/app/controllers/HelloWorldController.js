@@ -8,11 +8,9 @@ function HelloWorldController () {
 
 blueprint.controller (HelloWorldController);
 
-HelloWorldController.prototype.echoName = function (callback) {
-  var self = this;
-
+HelloWorldController.prototype.echoName = function () {
   return function (req, res) {
-    return res.render ('helloworld', {name: req.body.name});
+    return res.render ('helloworld.pug', {name: req.body.name});
   };
 };
 

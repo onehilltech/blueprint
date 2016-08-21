@@ -8,7 +8,7 @@ module.exports = exports = {
       port : 5000
     }
   },
-  
+
   statics : [
     path.resolve (__dirname, '../../public_html')
   ],
