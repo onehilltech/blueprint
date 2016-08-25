@@ -12,6 +12,7 @@ describe ('index', function () {
         'ResourceController',
         'GridFSController',
         'RouterBuilder',
+        'ModuleRouter',
         'Policy',
         'controller',
         'model',
