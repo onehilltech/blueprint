@@ -12,6 +12,7 @@ var BaseController     = require ('./BaseController')
   , Env                = require ('./Environment')
   , RouterBuilder      = require ('./RouterBuilder')
   , Policy             = require ('./Policy')
+  , ModuleRouter       = require ('./ModuleRouter')
   ;
 
 exports.BaseController = BaseController;
@@ -20,6 +21,7 @@ exports.GridFSController = GridFSController;
 exports.ApplicationModule = ApplicationModule;
 exports.RouterBuilder = RouterBuilder;
 exports.Policy = Policy;
+exports.ModuleRouter = ModuleRouter;
 
 // Make sure Blueprint has been instantiated in the main process. This instance
 // is used by the current application, and its dependencies to ensure operate in
