@@ -28,7 +28,7 @@ Install Blueprint package into your application:
     
 Add `./node_modules/.bin` to your `PATH`, and install Blueprint application:
 
-    blueprint init --name=[name_of_application]
+    blueprint init
 
 Then, start the web application:
 
