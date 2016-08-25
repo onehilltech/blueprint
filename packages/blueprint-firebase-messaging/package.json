@@ -1,0 +1,33 @@
+{
+  "name": "@onehilltech/blueprint-cloud-messaging",
+  "version": "0.1.0",
+  "description": "Blueprint.js module for cloud messaging frameworks/protocols",
+  "main": "app/index.js",
+  "scripts": {
+    "test": "env NODE_ENV=test mocha --recursive tests/src --reporter spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onehilltech/blueprint-cloud-messaging.git"
+  },
+  "keywords": [
+    "blueprint-module",
+    "cloud",
+    "messaging"
+  ],
+  "author": "James H. Hill",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/onehilltech/blueprint-cloud-messaging/issues"
+  },
+  "homepage": "https://github.com/onehilltech/blueprint-cloud-messaging#readme",
+  "dependencies": {
+    "@onehilltech/blueprint": "^0.38.1",
+    "@onehilltech/gatekeeper": "^0.29.2"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2",
+    "supertest": "^2.0.0"
+  }
+}
