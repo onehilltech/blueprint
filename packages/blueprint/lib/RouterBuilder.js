@@ -329,15 +329,13 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
   if (!currPath)
     currPath = this._basePath;
 
-  var specType = typeof spec;
-
-  if (Array.isArray (spec) || specType === 'function') {
+  if (_.isArray (spec) || _.isFunction (spec)) {
     // The specification is either an array of middleware, or a previously defined
     // router imported into this specification. An example of the latter case is
     // someone importing a router from an existing blueprint module.
     this._router.use (currPath, spec);
   }
-  else if (specType === 'object') {
+  else if (_.isObject (spec)) {
     // The specification is a text-based key-value pair. We need to read each key
     // in the specification and build the described router.
     for (var key in spec) {
@@ -424,7 +422,7 @@ RouterBuilder.prototype.addRouters = function (routers) {
     if (routers.hasOwnProperty (key)) {
       var value = routers[key];
       
-      if (typeof value === 'function')
+      if (_.isFunction (value) || _.isArray (value))
         this._router.use (value);
       else
         this.addRouters (value);

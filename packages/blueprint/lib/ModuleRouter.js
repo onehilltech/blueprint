@@ -1,6 +1,8 @@
 var Framework = require ('./Framework')
+  , RouterBuilder = require ('./RouterBuilder')
   , objectPath = require ('object-path')
   , util = require ('util')
+  , _ = require ('underscore')
   ;
 
 module.exports = exports = function (location) {
@@ -18,5 +20,16 @@ module.exports = exports = function (location) {
   if (!mod)
     throw new Error (util.format ('%s module does not exist', moduleName));
 
-  return objectPath.get (mod.routers, pathName);
+  var router = objectPath.get (mod.routers, pathName);
+
+  if (!_.isFunction (router)) {
+    // The pathname is a directory. This means we are loading many routers into
+    // the mix. So, we need to actually build the router by adding routers to a
+    // central router.
+    router = new RouterBuilder (null, '/')
+        .addRouters (router)
+        .getRouter ();
+  }
+
+  return router;
 };
