@@ -98,7 +98,7 @@ Application.prototype.init = function (callback) {
       if (!app._configs.app['modules'])
         return callback (null, app);
 
-      async.each (app._configs.app['modules'], function (name, callback) {
+      async.eachSeries (app._configs.app['modules'], function (name, callback) {
         var location = path.resolve (app.appPath, '../node_modules', name, 'app');
         app.addModule (name, location, callback);
       }, function (err) {
