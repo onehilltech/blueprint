@@ -1,3 +1,5 @@
+temp/
+
 ### OSX template
 *.DS_Store
 .AppleDouble
