@@ -1,6 +1,6 @@
-var gatekeeper = require ('@onehilltech/gatekeeper')
+var blueprint = require ('@onehilltech/blueprint')
   ;
 
 module.exports = exports = {
-  '/gatekeeper': gatekeeper.blueprint.Router ('gatekeeper', 1)
+  '/gatekeeper': blueprint.ModuleRouter ('@onehilltech/gatekeeper:v1')
 };
