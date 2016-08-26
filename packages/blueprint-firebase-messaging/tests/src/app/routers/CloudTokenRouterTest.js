@@ -62,7 +62,7 @@ describe ('CloudTokenRouter', function () {
   });
 
   describe ('POST /v1/cloudtoken', function () {
-    var data = {network: 'gcm', token: '1234567890'};
+    var data = {device: '1234567890', token: 'aabbccdd'};
 
     it ('should post a new cloud token for user', function (done) {
       request (server.app)
@@ -72,10 +72,18 @@ describe ('CloudTokenRouter', function () {
         .expect (200, 'true', function (err) {
           if (err) return done (err);
 
-          CloudToken.findById (datamodel.models.accounts[0]._id, function (err, cloudToken) {
+          CloudToken.findById (data.device, '-__v', function (err, cloudToken) {
             if (err) return done (err);
+            if (!cloudToken) return done (new HttpError ('Token cannot be found'));
 
-            expect (cloudToken.gcm).to.equal (data.token);
+            cloudToken = cloudToken.toJSON ();
+            cloudToken.owner = cloudToken.owner.toString ();
+
+            expect (cloudToken).to.deep.equal ({
+              _id: data.device,
+              owner: datamodel.models.accounts[0].id,
+              token: data.token
+            });
 
             return done ();
           });

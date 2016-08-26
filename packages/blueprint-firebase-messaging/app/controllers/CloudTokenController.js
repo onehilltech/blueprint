@@ -1,4 +1,5 @@
 var blueprint = require ('@onehilltech/blueprint')
+  , ResourceController = blueprint.ResourceController
   , HttpError = blueprint.errors.HttpError
   ;
 
@@ -6,7 +7,7 @@ var CloudToken = require ('../models/CloudToken')
   ;
 
 function CloudTokenController () {
-  blueprint.BaseController.call (this);
+  ResourceController.call (this, {name: 'token', model: CloudToken});
 }
 
 blueprint.controller (CloudTokenController);
@@ -16,26 +17,36 @@ blueprint.controller (CloudTokenController);
  *
  * @returns {{validate: validate, execute: execute}}
  */
-CloudTokenController.prototype.registerToken = function () {
-  const networks = ['gcm'];
-
+CloudTokenController.prototype.create = function () {
   return {
     validate: function (req, callback) {
-      req.checkBody ('network', 'Invalid network value').isIn (networks);
+      req.checkBody ('device', 'Missing device id').notEmpty ();
       req.checkBody ('token', 'Missing token parameter').notEmpty ();
 
       return callback (req.validationErrors (true));
     },
 
     execute: function (req, res, callback) {
-      var query   = {_id: req.user._id};
-      var update  = {gcm: req.body.token};
-      var options = {upsert: true};
+      var query = {
+        '_id': req.body.device
+      };
 
-      CloudToken.findOneAndUpdate (query, update, options, function (err) {
-        if (err) return callback (new HttpError ('Failed to save token'));
+      var update = {
+        _id: req.body.device,
+        owner: req.user._id,
+        token: req.body.token
+      };
+
+      var options = {
+        upsert: true
+      };
+
+      CloudToken.findOneAndUpdate (query, update, options, function (err, token) {
+        if (err) return callback (new HttpError (500, 'Failed to save token'));
+        if (!token) return callback (new HttpError (400, 'Bad request'));
 
         res.status (200).json (true);
+
         return callback ();
       });
     }

@@ -2,7 +2,7 @@ var blueprint = require ('@onehilltech/blueprint')
   ;
 
 module.exports = exports = {
-  connstr: 'mongodb://localhost/_' + blueprint.env,
+  connstr: 'mongodb://localhost/blueprint_cloud_messaging_' + blueprint.env,
 
   options : {
     db: {
