@@ -1,1 +1,1 @@
-module.Sender = require ('./Sender');
+exports.Sender = require ('./Sender');
