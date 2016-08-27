@@ -28,17 +28,18 @@ CloudTokenController.prototype.create = function () {
 
     execute: function (req, res, callback) {
       var query = {
-        '_id': req.body.device
+        'device': req.body.device
       };
 
       var update = {
-        _id: req.body.device,
+        device: req.body.device,
         owner: req.user._id,
         token: req.body.token
       };
 
       var options = {
-        upsert: true
+        upsert: true,
+        new: true
       };
 
       CloudToken.findOneAndUpdate (query, update, options, function (err, token) {

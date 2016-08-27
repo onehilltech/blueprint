@@ -3,6 +3,7 @@ var async      = require ('async')
   , winston    = require ('winston')
   , blueprint  = require ('@onehilltech/blueprint')
   , gatekeeper = require ('@onehilltech/gatekeeper')
+  , mongoose   = require ('mongoose')
   ;
 
 var appFixture = require ('./app')
@@ -40,9 +41,19 @@ var data = {
     { username: 'account4', password: 'account4', email: 'contact@account4.com'},
     { username: 'account5', password: 'account5', email: 'contact@account5.com'}
   ],
+
+  cloudTokens: [
+    { device: new mongoose.Types.ObjectId (), token: '123' },
+    { device: new mongoose.Types.ObjectId (), token: '456' },
+    { device: new mongoose.Types.ObjectId (), token: '789' },
+    { device: new mongoose.Types.ObjectId (), token: 'abc' },
+    { device: new mongoose.Types.ObjectId (), token: 'def' }
+  ]
 };
 
-exports.models = {};
+var models = {};
+
+exports.models = models;
 
 exports.data = data;
 
@@ -53,7 +64,7 @@ function cleanup (done) {
     // We need a method for removing all the files in GridFS.
     function (cb) { app.models.Account.remove ({}, cb); },
     function (cb) { app.models.Client.remove ({}, cb); },
-    function (cb) { app.models.oauth2.AccessToken.remove ({}, cb); }
+    function (cb) { app.models.CloudToken.remove ({}, cb); }
   ], done);
 }
 
@@ -66,7 +77,7 @@ function seed (callback) {
       app.models.Client.create (data.clients, function (err, clients) {
         if (err) return callback (err);
 
-        exports.models.clients = clients;
+        models.clients = clients;
         callback (null, clients[0]);
       });
     },
@@ -82,9 +93,26 @@ function seed (callback) {
       app.models.Account.create (data.accounts, function (err, accounts) {
         if (err) return callback (err);
 
-        exports.models.accounts = accounts;
-        callback (null, accounts[0]);
+        models.accounts = accounts;
+        callback (null);
       });
+    },
+
+    function (callback) {
+      // Associate an owner account with each token.
+      async.eachOf (data.cloudTokens, function (item, index, callback) {
+        item.owner = models.accounts[index]._id;
+        return callback ()
+      }, callback);
+    },
+
+    function (callback) {
+      app.models.CloudToken.create (data.cloudTokens, function (err, tokens) {
+        if (err) return callback (err);
+        models.cloudTokens = tokens;
+
+        return callback (null, tokens);
+      })
     }
   ], callback);
 }

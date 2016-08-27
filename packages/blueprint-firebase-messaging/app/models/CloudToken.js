@@ -5,7 +5,7 @@ var blueprint = require ('@onehilltech/blueprint')
 
 var schema = new Schema({
   /// Instance id for the token.
-  _id: {type: String, required: true, unique: true, index: true},
+  device: {type: String, required: true, unique: true, index: true},
 
   /// User account that owns the token.
   owner: {type: Schema.Types.ObjectId, required: true, ref: Account.modelName},

@@ -2,7 +2,7 @@
   "name": "@onehilltech/blueprint-cloud-messaging",
   "version": "0.3.0",
   "description": "Blueprint.js module for cloud messaging frameworks/protocols",
-  "main": "app/index.js",
+  "main": "index.js",
   "scripts": {
     "test": "env NODE_ENV=test mocha --recursive tests/src --reporter spec"
   },
@@ -23,7 +23,8 @@
   "homepage": "https://github.com/onehilltech/blueprint-cloud-messaging#readme",
   "dependencies": {
     "@onehilltech/blueprint": "^0.39.1",
-    "@onehilltech/gatekeeper": "^0.30.3"
+    "@onehilltech/gatekeeper": "^0.30.3",
+    "node-gcm": "^0.14.4"
   },
   "devDependencies": {
     "chai": "^3.5.0",

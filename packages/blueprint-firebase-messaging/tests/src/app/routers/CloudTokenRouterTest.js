@@ -6,7 +6,6 @@ var request   = require ('supertest')
 
 var datamodel  = require ('../../../fixtures/datamodel')
   , appFixture = require ('../../../fixtures/app')
-  , bm = blueprint.messaging
   ;
 
 describe ('CloudTokenRouter', function () {
@@ -72,7 +71,7 @@ describe ('CloudTokenRouter', function () {
         .expect (200, 'true', function (err) {
           if (err) return done (err);
 
-          CloudToken.findById (data.device, '-__v', function (err, cloudToken) {
+          CloudToken.findOne ({device: data.device}, '-__v', function (err, cloudToken) {
             if (err) return done (err);
             if (!cloudToken) return done (new HttpError ('Token cannot be found'));
 
@@ -80,7 +79,8 @@ describe ('CloudTokenRouter', function () {
             cloudToken.owner = cloudToken.owner.toString ();
 
             expect (cloudToken).to.deep.equal ({
-              _id: data.device,
+              _id: cloudToken._id,
+              device: data.device,
               owner: datamodel.models.accounts[0].id,
               token: data.token
             });
