@@ -52,13 +52,12 @@ Sender.prototype.send = function (recipients, data, callback) {
             registrationTokens: tokens.slice (i, i + MAX_RECIPIENTS)
           };
 
-          self._sender.send (message, recipient, function (err, res) {
+          self.sendMessage (recipient, message, function (err, res) {
             if (err) return callback (err);
-
-            // TODO Check res.failure and res.result for failures to resolve bad registrations.
 
             // Move the next set of recipients
             i += MAX_RECIPIENTS;
+
             return callback (null, res);
           })
         },
@@ -87,7 +86,24 @@ Sender.prototype.publish = function (topic, data, callback) {
   else
     recipient.condition = topic;
 
-  this._sender.send (message, recipient, callback);
+  this.sendMessage (recipient, message, callback);
+};
+
+/**
+ * Wrapper method for node-gcm Sender.send ().
+ *
+ * @param recipient
+ * @param message
+ * @param callback
+ */
+Sender.prototype.sendMessage = function (recipient, message, callback) {
+  this._sender.send (message, recipient, function (err, res) {
+    if (err) return callback (err);
+
+    // TODO Check res.failure and res.result for failures to resolve bad registrations.
+
+    return callback (err, res);
+  });
 };
 
 module.exports = exports = Sender;
