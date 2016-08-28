@@ -25,14 +25,7 @@ var Server            = require ('./Server')
  * @constructor
  */
 function Application (appPath) {
-  // Initialize the base class.
   ApplicationModule.call (this, appPath);
-
-  // Load the application configuration.
-  var appConfigPath = path.join (appPath, 'configs', 'app.config.js');
-  var appConfig = require (appConfigPath);
-  this.name = appConfig.name;
-  this._modules = {};
 }
 
 util.inherits (Application, ApplicationModule);
@@ -52,14 +45,14 @@ Application.prototype.init = function (callback) {
     // First, make sure there is a data directory. This is where the application stores
     // all its internal information.
     function (app, callback) {
-      var tempPath = Path.resolve (app.appPath, 'temp');
+      var tempPath = Path.resolve (app._appPath, 'temp');
       tempPath.createIfNotExists (function (err) { return callback (err, app); });
     },
 
     // Load all configurations first. This is because other entities in the
     // application may need the configuration object for initialization.
     function (app, callback) {
-      var configPath = path.join (app.appPath, 'configs');
+      var configPath = path.join (app._appPath, 'configs');
 
       Configuration (configPath, Env.name, function (err, configs) {
         if (err) return callback (err);
@@ -83,26 +76,13 @@ Application.prototype.init = function (callback) {
 
     // Make the server object for the application.
     function (app, callback) {
-      var server = new Server (app.appPath);
+      var server = new Server (app._appPath);
 
       server.configure (app._configs.server, function (err, server) {
         if (err) return callback (err);
         app._server = server;
 
         return callback (null, app);
-      });
-    },
-
-    // Load the modules for the application.
-    function (app, callback) {
-      if (!app._configs.app['modules'])
-        return callback (null, app);
-
-      async.eachSeries (app._configs.app['modules'], function (name, callback) {
-        var location = path.resolve (app.appPath, '../node_modules', name, 'app');
-        app.addModule (name, location, callback);
-      }, function (err) {
-        return callback (err, app);
       });
     },
 
@@ -127,7 +107,7 @@ Application.prototype.init = function (callback) {
     // the controllers. Otherwise, the router builder will not be able to
     // resolve any of the defined actions.
     function (app, callback) {
-      var routersPath = path.resolve (app.appPath, 'routers');
+      var routersPath = path.resolve (app._appPath, 'routers');
       var builder = new RouterBuilder (app.controllers, routersPath);
       var routers = app.routers;
 
@@ -186,70 +166,6 @@ Application.prototype.start = function (callback) {
 };
 
 /**
- * Add an application module to the application. An application module can only
- * be added once. Two application modules are different if they have the same
- * name, not module path. This will ensure we do not have the same module in
- * different location added to the application more than once.
- *
- * @param name
- * @param path
- * @param callback
- */
-Application.prototype.addModule = function (name, path, callback) {
-  if (this._modules.hasOwnProperty (name))
-    throw new Error (util.format ('duplicate module: %s', name));
-
-  var appModule = new ApplicationModule (path);
-
-  async.waterfall ([
-    async.constant (this),
-
-    function (app, callback) {
-      appModule.init (function (err, module) {
-        if (err) return callback (err);
-
-        // Store the module
-        app._modules[name] = module;
-
-        return callback (null, app);
-      });
-    },
-
-    // Import the views from the module into the application.
-
-    function (app, callback) {
-      if (!app._server && appModule.getSupportsViews ())
-        return callback (null, app);
-
-      app._server.importViews (appModule.getViewsPath (), function (err) {
-        return callback (err, app);
-      });
-    },
-
-    // Merge the listeners
-
-    function (app, callback) {
-      app.listenerManager.merge (appModule.listenerManager);
-      return callback (null, app);
-    },
-
-    // Merge the models
-
-    function (app, callback) {
-      app.modelManager.merge (appModule.modelManager);
-      return callback (null, app);
-    },
-
-    // Merge the policies
-
-    function (app, callback) {
-      app.policyManager.merge (appModule.policyManager);
-      return callback (null, app);
-    }
-  ], callback);
-};
-
-/**
  * Get the application database.
  */
 Application.prototype.__defineGetter__ ('database', function () {
@@ -277,13 +193,6 @@ Application.prototype.__defineGetter__ ('server', function () {
 });
 
 /**
- * Get the Blueprint modules loaded by the application.
- */
-Application.prototype.__defineGetter__ ('modules', function () {
-  return this._modules;
-});
-
-/**
  * Test if the application is initialized.
  */
 Application.prototype.__defineGetter__ ('is_init', function () {
@@ -300,7 +209,7 @@ Application.prototype.__defineGetter__ ('is_init', function () {
  * @param callback      Optional callback
  */
 Application.prototype.resource = function (location, opts, callback) {
-  var fullPath = path.resolve (this.appPath, 'resources', location);
+  var fullPath = path.resolve (this._appPath, 'resources', location);
 
   if (callback)
     return fs.readfile (fullPath, opts, callback);
