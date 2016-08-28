@@ -149,7 +149,7 @@ ApplicationModule.prototype.addModule = function (name, path, callback) {
   if (this._modules.hasOwnProperty (name))
     throw new Error (util.format ('duplicate module: %s', name));
 
-  var appModule = new ApplicationModule (path);
+  var appModule = new ApplicationModule (path, this._modulesPath);
 
   async.waterfall ([
     async.constant (this),
