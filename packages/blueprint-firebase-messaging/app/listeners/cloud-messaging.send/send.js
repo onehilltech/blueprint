@@ -1,10 +1,11 @@
 var blueprint = require ('@onehilltech/blueprint')
   , messaging = blueprint.messaging
   , Sender    = require ('../../../lib/Sender')
-  , Constants = require ('../../../lib/Constants')
   ;
 
 var sender;
+
+const DEFAULT_RELAY_CALLBACK = 'cloud-messaging.send.callback';
 
 messaging.once ('app.init', function (app) {
   var config = app.configs['cloud-messaging'];
@@ -12,7 +13,7 @@ messaging.once ('app.init', function (app) {
 });
 
 function send (recipients, message, relayTopic) {
-  relayTopic = relayTopic || Constants.DEFAULT_RELAY_CALLBACK;
+  relayTopic = relayTopic || DEFAULT_RELAY_CALLBACK;
   sender.send (recipients, message, messaging.relay (relayTopic));
 }
 
