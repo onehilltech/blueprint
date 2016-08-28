@@ -61,4 +61,19 @@ describe ('Messaging', function () {
     });
   });
 
+  describe ('#relay', function () {
+    it ('should relay a callback as an event', function (done) {
+      messaging.once ('foo.bar', function (err, a, b, c) {
+        expect (err).to.be.null;
+        expect (a).to.equal (1);
+        expect (b).to.equal (2);
+        expect (c).to.equal (3);
+
+        return done ();
+      });
+
+      var callback = messaging.relay ('foo.bar');
+      callback.call (null, null, 1, 2, 3);
+    });
+  });
 });
