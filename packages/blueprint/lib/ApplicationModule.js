@@ -26,11 +26,9 @@ var RouterBuilder = require ('./RouterBuilder')
  * @param modulesPath     Optional location of ./node_modules
  * @constructor
  */
-function ApplicationModule (appPath, modulesPath) {
+function ApplicationModule (appPath) {
   this._is_init = false;
   this._appPath = appPath;
-  this._modulesPath = modulesPath || path.resolve (appPath, '../node_modules');
-  this._modules = {};
 
   this.listenerManager = new ListenerManager (Framework ().messaging);
   this.policyManager = new PolicyManager ();
@@ -53,26 +51,6 @@ ApplicationModule.prototype.init = function (callback) {
 
   async.waterfall ([
     async.constant (this),
-
-    // Load the sub-modules for the module.
-    function (module, callback) {
-      var moduleFileName = path.resolve (module._appPath, 'modules.js');
-
-      fs.stat (moduleFileName, function (err, stat) {
-        if (err || !stat.isFile ()) return callback (null, module);
-
-        // Read the module names so we can load the modules into memory.
-        var names = require (moduleFileName);
-
-        async.eachSeries (names, function (name, callback) {
-          var location = path.resolve (module._modulesPath, name, 'app');
-
-          module.addModule (name, location, callback);
-        }, function (err) {
-          return callback (err, module);
-        });
-      });
-    },
 
     // Load the listeners so all parties listening will receive updates
     // about what is going on.
@@ -135,76 +113,24 @@ ApplicationModule.prototype.init = function (callback) {
   });
 };
 
-/**
- * Add an application module to the application. An application module can only
- * be added once. Two application modules are different if they have the same
- * name, not module path. This will ensure we do not have the same module in
- * different location added to the application more than once.
- *
- * @param name
- * @param path
- * @param callback
- */
-ApplicationModule.prototype.addModule = function (name, path, callback) {
-  if (this._modules.hasOwnProperty (name))
-    throw new Error (util.format ('duplicate module: %s', name));
+ApplicationModule.prototype.__defineGetter__ ('modules', function () {
+  try {
+    var modulesFile = path.resolve (this._appPath, 'modules.js');
+    var stat = fs.statSync (modulesFile);
 
-  var appModule = new ApplicationModule (path, this._modulesPath);
+    if (!stat.isFile ()) return [];
 
-  async.waterfall ([
-    async.constant (this),
+    var modules = require (modulesFile);
 
-    function (app, callback) {
-      appModule.init (function (err, module) {
-        if (err) return callback (err);
-
-        // Store the module
-        app._modules[name] = module;
-
-        return callback (null, app);
-      });
-    },
-
-    // Import the views from the module into the application.
-
-    function (app, callback) {
-      if (!app._server && appModule.getSupportsViews ())
-        return callback (null, app);
-
-      app._server.importViews (appModule.getViewsPath (), function (err) {
-        return callback (err, app);
-      });
-    },
-
-    // Merge the listeners
-
-    function (app, callback) {
-      app.listenerManager.merge (appModule.listenerManager);
-      return callback (null, app);
-    },
-
-    // Merge the models
-
-    function (app, callback) {
-      app.modelManager.merge (appModule.modelManager);
-      return callback (null, app);
-    },
-
-    // Merge the policies
-
-    function (app, callback) {
-      app.policyManager.merge (appModule.policyManager);
-      return callback (null, app);
-    }
-  ], callback);
-};
+    return modules;
+  }
+  catch (err) {
+    return [];
+  }
+});
 
 ApplicationModule.prototype.__defineGetter__ ('appPath', function () {
   return this._appPath;
-});
-
-ApplicationModule.prototype.__defineGetter__ ('modules', function () {
-  return this._modules;
 });
 
 ApplicationModule.prototype.__defineGetter__ ('listeners', function () {
@@ -273,4 +199,3 @@ ApplicationModule.prototype.getViewsPath = function () {
 };
 
 module.exports = ApplicationModule;
-
