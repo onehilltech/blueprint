@@ -5,6 +5,8 @@ var util  = require ('util')
 
 var BaseController = require ('./BaseController')
   , HttpError      = require ('./errors/HttpError')
+  , Framework      = require ('./Framework')
+  , messaging      = Framework ().messaging
   ;
 
 /**
@@ -46,12 +48,12 @@ function checkIdThenAuthorize (id, next) {
  * Make the database completion handler. We have to create a new handler
  * for each execution because we need to bind to a different callback.
  *
- * @param res
+ * @param callback
  * @returns {Function}
  */
-function makeDbCompletionHandler (callback) {
+function makeDbCompletionHandler (errMsg, callback) {
   return function __blueprint_db_execution_complete (err, result) {
-    if (err) return callback (new HttpError (400, 'Failed to get resource'));
+    if (err) return callback (new HttpError (400, errMsg));
     if (!result) return callback (new HttpError (404, 'Not Found'));
 
     return callback (null, result);
@@ -103,6 +105,7 @@ function ResourceController (opts) {
   this._id = opts.id;
   this._model = opts.model;
   this._name = opts.name;
+  this._eventPrefix = opts.eventPrefix;
 
   if (!this._id)
     this._id = this._name + 'Id';
@@ -193,7 +196,7 @@ ResourceController.prototype.getAll = function (opts) {
               if (isProjectionExclusive (projection))
                 projection['__v'] = 0;
 
-              self._model.find (filter, projection, options, makeDbCompletionHandler (callback));
+              self._model.find (filter, projection, options, makeDbCompletionHandler ('Failed to retrieve resource', callback));
             });
           });
         },
@@ -228,6 +231,7 @@ ResourceController.prototype.create = function (opts) {
   var onPreCreate = on.preCreate || __onPreCreate;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
+  var eventName = this.computeEventName ('created');
 
   var self = this;
 
@@ -241,15 +245,21 @@ ResourceController.prototype.create = function (opts) {
 
       async.waterfall ([
         async.constant (doc),
+
         makeOnPreCreateHandler (req, onPreCreate),
 
         // Now, let's search our database for the resource in question.
         function (doc, callback) {
-          self._model.create (doc, makeDbCompletionHandler (callback));
+          self._model.create (doc, makeDbCompletionHandler ('Failed to create resource', callback));
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
-        function (result, callback) { onPostExecute (req, result, callback); },
+        function (result, callback) {
+          // Emit that a resource was created.
+          messaging.emit (eventName, result);
+
+          onPostExecute (req, result, callback);
+        },
 
         // Serialize the data in REST format.
         function (data, callback) {
@@ -292,6 +302,7 @@ ResourceController.prototype.get = function (opts) {
       async.waterfall ([
         // First, allow the subclass to update the filter.
         async.constant (filter),
+
         function (filter, callback) {
           return onUpdateFilter (req, filter, callback)
         },
@@ -303,12 +314,14 @@ ResourceController.prototype.get = function (opts) {
             if (isProjectionExclusive (projection) && projection['__v'] === undefined)
               projection['__v'] = 0;
 
-            self._model.findOne (filter, projection, makeDbCompletionHandler (callback));
+            self._model.findOne (filter, projection, makeDbCompletionHandler ('Failed to retrieve resource', callback));
           });
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
-        function (result, callback) { onPostExecute (req, result, callback); },
+        function (result, callback) {
+          onPostExecute (req, result, callback);
+        },
 
         // Rewrite the result in JSON API format.
         function (data, callback) {
@@ -336,6 +349,8 @@ ResourceController.prototype.update = function (opts) {
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
+
+  var eventName = this.computeEventName("updated");
 
   var self = this;
 
@@ -366,12 +381,15 @@ ResourceController.prototype.update = function (opts) {
             if (isProjectionExclusive (projection) && projection['__v'] === undefined)
               option.fields.__v = 0;
 
-            self._model.findOneAndUpdate (filter, update, option, makeDbCompletionHandler (callback));
+            self._model.findOneAndUpdate (filter, update, option, makeDbCompletionHandler ('Failed to update resource', callback));
           });
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
-        function (result, callback) { onPostExecute (req, result, callback); },
+        function (result, callback) {
+          messaging.emit (eventName, result);
+          onPostExecute (req, result, callback);
+        },
 
         // Rewrite the result in JSON API format.
         function (data, callback) {
@@ -398,6 +416,7 @@ ResourceController.prototype.delete = function (opts) {
   var onUpdateFilter = on.updateFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
+  var eventName = this.computeEventName ('deleted');
   var self = this;
 
   return {
@@ -417,17 +436,31 @@ ResourceController.prototype.delete = function (opts) {
 
         // Now, let's search our database for the resource in question.
         function (filter, callback) {
-          self._model.findOneAndRemove (filter, makeDbCompletionHandler (callback));
+          self._model.findOneAndRemove (filter, makeDbCompletionHandler ('Failed to delete resource', callback));
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
-        function (result, callback) { onPostExecute (req, result, callback); },
+        function (result, callback) {
+          // Emit that a resource was created.
+          messaging.emit (eventName, result);
+
+          onPostExecute (req, result, callback);
+        },
 
         // Make sure we return 'true'.
         function (result, callback) { return callback (null, true); }
       ], makeTaskCompletionHandler (res, callback));
     }
   };
+};
+
+ResourceController.prototype.computeEventName = function (action) {
+  var prefix = this._eventPrefix || '';
+
+  if (prefix.length !== 0)
+    prefix += '.';
+
+  return prefix + this._name + '.' + action;
 };
 
 module.exports = exports = ResourceController;
