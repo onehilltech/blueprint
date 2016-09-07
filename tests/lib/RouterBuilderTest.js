@@ -9,6 +9,7 @@ var path    = require ('path')
 var ApplicationModule = require ('../../lib/ApplicationModule')
   , RouterBuilder     = require ('../../lib/RouterBuilder')
   , appFixture        = require ('../fixtures/app')
+  , blueprint         = require ('../fixtures/lib')
   ;
 
 describe ('RouterBuilder', function () {
@@ -61,18 +62,22 @@ describe ('RouterBuilder', function () {
       var data = {person: {first_name: 'James', last_name: 'Hill'}};
 
       it ('should create a new resource', function (done) {
+        // The callback is not triggering.
+        blueprint.messaging.on ('person.created', function (person) {
+          expect (person).to.have.property ('first', 'James');
+          expect (person).to.have.property ('last', 'Hill');
+        });
+
         request (app.server.app)
           .post ('/persons')
           .send (data)
-          .expect (200)
-          .end (function (err, res) {
+          .expect (200, function (err, res) {
             if (err) return done (err);
 
             data.person._id = res.body.person._id;
             expect (res.body).to.deep.equal (data);
 
             id = res.body.person._id;
-
             return done ();
           });
       });
