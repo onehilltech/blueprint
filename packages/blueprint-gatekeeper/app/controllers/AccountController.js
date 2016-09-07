@@ -33,7 +33,7 @@ var DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE = {
 };
 
 function AccountController () {
-  ResourceController.call (this, {name: 'account', model: Account});
+  ResourceController.call (this, {name: 'account', model: Account, eventPrefix: 'gatekeeper'});
 }
 
 blueprint.controller (AccountController, ResourceController);
@@ -156,8 +156,6 @@ AccountController.prototype.create = function () {
       },
 
       postExecute: function (req, account, callback) {
-        messaging.emit ('gatekeeper.account.created', account);
-
         return callback (null, {_id: account._id});
       }
     }
@@ -181,11 +179,6 @@ AccountController.prototype.delete = function () {
             Policy.assert ('is_administrator')
           ])
         ).evaluate (req, callback);
-      },
-
-      postExecute: function (req, account, callback) {
-        messaging.emit ('gatekeeper.account.deleted', account);
-        return callback (null, true);
       }
     }
   };
