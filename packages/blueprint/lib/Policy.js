@@ -12,7 +12,7 @@ var HttpError = require ('./errors/HttpError')
 // is good chance it may not be initialized.
 var app;
 
-Framework ().messaging.once ('app.init', function (result) {
+Framework ().messaging.on ('app.init', function (result) {
   app = result;
 });
 

@@ -27,13 +27,6 @@ describe ('ApplicationModule', function () {
 
   describe ('#init', function () {
     it ('should initialize the application module', function (done) {
-      blueprint.messaging.once ('module.init', function (module) {
-        expect (module._is_init).to.be.true;
-        expect (module.appPath).to.equal (appPath);
-
-        return done ();
-      });
-
       appModule.init (function (err, module) {
         if (err) return done (err);
 
@@ -43,6 +36,8 @@ describe ('ApplicationModule', function () {
         expect (module.routerManager).to.be.defined;
         expect (module.listenerManager).to.be.defined;
         expect (module.policyManager).to.be.defined;
+
+        return done ();
       });
     });
   });
@@ -55,8 +50,7 @@ describe ('ApplicationModule', function () {
       expect (appModule.listeners['custom.event']).to.have.keys (['CustomListener1', 'CustomListener2']);
 
       expect (blueprint.messaging.messengers).to.have.keys (['_', 'testTarget']);
-      expect (blueprint.messaging.getMessenger ('_').emitter.listeners).to.have.length (1);
-      expect (blueprint.messaging.getMessenger ('testTarget').emitter.listeners).to.have.length (1);
+      expect (blueprint.messaging.getMessenger ('_').listeners).to.have.keys (['app.init', 'custom.event']);
     });
   });
 
