@@ -19,7 +19,7 @@ describe ('listener:cloud-messaging.publish', function () {
     var data = {device: '1234567890', token: 'aabbccdd'};
     var topic = '/topics/foo-bar';
 
-    messaging.once ('cloud-messaging.publish.callback', done);
+    messaging.on ('cloud-messaging.publish.callback', done);
     messaging.emit ('cloud-messaging.publish', topic, data);
   });
 });

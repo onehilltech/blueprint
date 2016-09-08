@@ -19,7 +19,7 @@ describe ('listener:cloud-messaging.send', function () {
     var data = {device: '1234567890', token: 'aabbccdd'};
     var recipient = datamodel.models.accounts[0]._id;
 
-    messaging.once ('cloud-messaging.send.callback', done);
+    messaging.on ('cloud-messaging.send.callback', done);
     messaging.emit ('cloud-messaging.send', recipient, data);
   });
 });

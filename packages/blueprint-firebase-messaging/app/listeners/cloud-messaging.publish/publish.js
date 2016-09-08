@@ -7,7 +7,7 @@ var sender;
 
 const DEFAULT_RELAY_CALLBACK = 'cloud-messaging.publish.callback';
 
-messaging.once ('app.init', function (app) {
+messaging.on ('app.init', function (app) {
   var config = app.configs['cloud-messaging'];
   sender = new Sender (config);
 });
