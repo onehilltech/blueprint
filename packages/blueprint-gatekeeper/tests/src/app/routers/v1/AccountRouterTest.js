@@ -176,7 +176,7 @@ describe ('AccountRouter', function () {
 
       // We know the account was created when we get an event for
       // sending an account activation email.
-      bm.once ('gatekeeper.account.created', function (account) {
+      bm.on ('gatekeeper.account.created', function (account) {
         accountId = account.id;
       });
 
@@ -217,7 +217,7 @@ describe ('AccountRouter', function () {
         .post ('/v1/accounts').send (data)
         .set ('Authorization', 'Bearer ' + clientToken)
         .expect (400, done);
-    })
+    });
 
     it ('should not create an account [missing parameter]', function (done) {
       var invalid = {

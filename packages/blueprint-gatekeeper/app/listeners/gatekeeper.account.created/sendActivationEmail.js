@@ -23,7 +23,7 @@ var transport;
 /**
  * app.init
  */
-messaging.once ('app.init', function (app) {
+messaging.on ('app.init', function (app) {
   if (!app.configs.app)
     throw new Error ('app.config not defined');
 

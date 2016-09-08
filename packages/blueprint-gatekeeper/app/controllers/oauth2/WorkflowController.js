@@ -26,7 +26,7 @@ const KIND_USER_TOKEN = 'user';
 const KIND_CLIENT_TOKEN = 'client';
 const KIND_REFRESH_TOKEN = 'refresh';
 
-messaging.once ('app.init', function (app) {
+messaging.on ('app.init', function (app) {
   gatekeeperConfig = app.configs.gatekeeper;
   accessConfig = gatekeeperConfig.access || {};
 

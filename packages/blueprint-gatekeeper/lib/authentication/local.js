@@ -6,7 +6,7 @@ var winston       = require ('winston')
 
 var Account;
 
-messaging.once ('app.init', function (app) {
+messaging.on ('app.init', function (app) {
   Account = app.models.Account;
 
   if (!Account)

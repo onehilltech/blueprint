@@ -20,7 +20,7 @@ const DEFAULT_ACTIVATION_REQUIRED = false;
 
 var activationConfig;
 
-messaging.once ('app.init', function (app) {
+messaging.on ('app.init', function (app) {
   gatekeeperConfig = app.configs.gatekeeper;
   activationConfig = gatekeeperConfig.activation || {};
 

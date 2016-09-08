@@ -8,7 +8,7 @@ var blueprint      = require ('@onehilltech/blueprint')
 
 var AccessToken;
 
-messaging.once ('app.init', function (app) {
+messaging.on ('app.init', function (app) {
   AccessToken = app.models.oauth2.AccessToken;
 });
 
