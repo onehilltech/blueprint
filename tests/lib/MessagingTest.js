@@ -40,30 +40,21 @@ describe ('Messaging', function () {
 
   describe ('#on', function () {
     it ('should add a listener to the default messenger', function () {
-      handle = messaging.on ('testing', function () { });
-      expect (handle.messenger.emitter.listeners ('testing')).to.have.length (1);
+      messaging.on ('testing', function () { });
+      expect (messaging.getMessenger ('_').listeners).to.have.keys (['testing']);
     });
   });
 
   describe ('#emit', function () {
     it ('should emit an event to the default messenger', function (done) {
-      messaging.on ('testing', function () { done ();} );
+      messaging.on ('testing', function () { done (); });
       messaging.emit ('testing');
-    });
-  });
-
-  describe ('#handle.close', function () {
-    it ('should close the handle, removing the listener', function () {
-      handle = messaging.on ('testing', function () { });
-      handle.close ();
-
-      expect (messaging.getMessenger ().emitter.listeners ('testing')).to.have.length (0);
     });
   });
 
   describe ('#relay', function () {
     it ('should relay a callback as an event', function (done) {
-      messaging.once ('foo.bar', function (err, a, b, c) {
+      messaging.on ('foo.bar', function (err, a, b, c) {
         expect (err).to.be.null;
         expect (a).to.equal (1);
         expect (b).to.equal (2);
