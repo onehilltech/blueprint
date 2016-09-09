@@ -12,7 +12,7 @@ HelloWorldController.prototype.echoName = function () {
   var self = this;
 
   return function (req, res) {
-    return res.render ('helloworld', {name: req.body.name});
+    return res.render ('helloworld.pug', {name: req.body.name});
   };
 };
 
