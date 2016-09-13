@@ -8,6 +8,6 @@ module.exports = exports = {
 
   '/logout' : {
     use: passport.authenticate ('bearer', {session: false}),
-    get: { action : 'oauth2.WorkflowController@logoutUser' }
+    post: { action : 'oauth2.WorkflowController@logoutUser' }
   }
 };

@@ -220,7 +220,7 @@ describe ('Oauth2Router', function () {
           accessToken = res.body.access_token;
 
           request (server.app)
-            .get ('/v1/oauth2/logout')
+            .post ('/v1/oauth2/logout')
             .set ('Authorization', 'Bearer ' + accessToken)
             .expect (200, callback);
         }
