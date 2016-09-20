@@ -1,5 +1,5 @@
 {
-  "name": "blueprint-cli",
+  "name": "@onehilltech/blueprint-cli",
   "description": "command-line interface for Blueprint.js",
   "version": "0.1.0",
   "private": false,
