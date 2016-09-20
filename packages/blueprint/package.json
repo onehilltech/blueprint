@@ -34,9 +34,6 @@
     "underscore": "^1.8.3",
     "winston": "^2.2.0"
   },
-  "bin": {
-    "blueprint": "./bin/blueprint"
-  },
   "scripts": {
     "test": "env NODE_ENV=test mocha --recursive tests/lib --reporter spec",
     "cover": "istanbul cover _mocha --recursive tests/lib",
