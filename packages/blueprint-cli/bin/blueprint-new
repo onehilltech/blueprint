@@ -7,7 +7,12 @@ var program = require ('commander')
   , winston = require ('winston')
   , async = require ('async')
   , npm = require ('npm')
-  , TemplateDir = require ('../lib').TemplateDir
+  , fse = require ('fs-extra')
+  , lib = require ('../lib')
+  ;
+
+var TemplateDir = lib.TemplateDir
+  , Installer = lib.Installer
   ;
 
 program
@@ -21,12 +26,17 @@ program
 if (program.debug)
   winston.level = 'debug';
 
-winston.log ('info', 'target output: %s', program.outputPath);
-
 var templatePath = path.resolve (__dirname, '../templates/blueprint-new');
+var dstPath = path.resolve (program.outputPath, program.name);
+
+winston.log ('info', 'target output: %s', dstPath);
 
 async.waterfall ([
   function (callback) {
+    fse.ensureDir (dstPath, callback);
+  },
+
+  function (made, callback) {
     winston.log ('info', 'generating new application...');
 
     // Define the view used to render the templates, then render the templates with
@@ -40,68 +50,40 @@ async.waterfall ([
     };
 
     var templates = new TemplateDir (templatePath);
-    templates.render (program.outputPath, view, callback);
+    templates.render (dstPath, view, callback);
   },
 
-  function (callback) { installDependencies (program.outputPath, callback); },
-  function (result, node, callback) { installDevDependencies (program.outputPath, callback); },
-  function (result, node, callback) { installBinaries (program.outputPath, callback); }
+  function (callback) {
+    Installer (dstPath, callback);
+  },
+
+  function (installer, callback) {
+    async.series ([
+      function (callback) {
+        const dependencies = [
+          '@onehilltech/blueprint'
+        ];
+
+        installer.install (dependencies, callback);
+      },
+
+      function (callback) {
+        const devDependencies = [
+          'chai',
+          'mocha',
+          'superagent',
+          'supertest'
+        ];
+
+        installer.install (devDependencies, callback);
+      },
+
+      function (callback) {
+        installer.bin (callback);
+      }
+    ], callback);
+  }
 ], onComplete);
-
-function installDependencies (targetPath, callback) {
-  winston.log ('info', 'installing dependencies...');
-
-  async.waterfall ([
-    function (callback) {
-      npm.load ({loaded: false, save: true}, callback);
-    },
-
-    function (npm, callback) {
-      const dependencies = [
-        '@onehilltech/blueprint'
-      ];
-
-      npm.commands.install (targetPath, dependencies, callback);
-    }
-  ], callback);
-
-
-}
-
-function installDevDependencies (targetPath, callback) {
-  winston.log ('info', 'installing development dependencies...');
-
-  async.waterfall ([
-    function (callback) {
-      npm.load ({'loaded': false, 'save-dev': true}, callback);
-    },
-
-    function (npm, callback) {
-      const devDependencies = [
-        'chai',
-        'mocha',
-        'superagent',
-        'supertest'
-      ];
-
-      npm.commands.install (targetPath, devDependencies, callback);
-    }
-  ], callback);
-}
-
-function installBinaries (targetPath, callback) {
-  winston.log ('info', 'installing binaries...');
-
-  async.waterfall ([
-    function (callback) {
-      npm.load ({'loaded': false}, callback);
-    },
-
-    function (npm, callback) {
-      npm.commands.bin (targetPath, callback);
-    }
-  ], callback);
-}
 
 function onComplete (err) {
   if (err)
