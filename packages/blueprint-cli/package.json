@@ -18,5 +18,9 @@
   "engines": {
     "node": ">=4.0.0",
     "npm": ">=3.0.0"
+  },
+
+  "bin": {
+    "blueprint": "./bin/blueprint"
   }
 }
