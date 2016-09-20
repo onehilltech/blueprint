@@ -21,20 +21,8 @@ Features
 Getting Started
 ----------------
 
-Install Blueprint package into your application:
-
-    npm install @onehilltech/blueprint --save
-    npm bin
-    
-Add `./node_modules/.bin` to your `PATH`, and install Blueprint application:
-
-    blueprint init
-
-Then, start the web application:
-
-    node ./app
-    
-Open your browser, and go to [http://localhost:5000/helloworld](http://localhost:5000/helloworld).
+See [blueprint-cli](https://github.com/onehilltech/blueprint-cli) for using
+the command-line interface to start a new project.
 
 Next Steps
 -----------------
