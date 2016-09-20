@@ -1,0 +1,22 @@
+{
+  "name": "blueprint-cli",
+  "description": "command-line interface for Blueprint.js",
+  "version": "0.1.0",
+  "private": false,
+  "author": "One Hill Technologies, LLC",
+  "scripts": {
+    "test": "env NODE_ENV=test mocha --recursive tests/tests"
+  },
+  "dependencies": {
+    "async": "^2.0.1",
+    "commander": "^2.9.0",
+    "npm": "^3.10.7",
+    "winston": "^2.2.0"
+  },
+  "devDependencies": {},
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=4.0.0",
+    "npm": ">=3.0.0"
+  }
+}

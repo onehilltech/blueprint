@@ -1,0 +1,112 @@
+#!/usr/bin/env node
+
+'use strict';
+
+var program = require ('commander')
+  , path = require ('path')
+  , winston = require ('winston')
+  , async = require ('async')
+  , npm = require ('npm')
+  , TemplateDir = require ('../lib').TemplateDir
+  ;
+
+program
+  .option ('-n, --name <name>', 'name of the application')
+  .option ('-o, --output-path [path]', 'output path [./]', './')
+  .option ('--version [version]', 'version number [0.0.1]', '0.0.1')
+  .option ('--license [license]', 'distribution license [Apache-2.0]', 'Apache-2.0')
+  .option ('--debug', 'enable debug messages')
+  .parse (process.argv);
+
+if (program.debug)
+  winston.level = 'debug';
+
+winston.log ('info', 'target output: %s', program.outputPath);
+
+var templatePath = path.resolve (__dirname, '../templates/blueprint-new');
+
+async.waterfall ([
+  function (callback) {
+    winston.log ('info', 'generating new application...');
+
+    // Define the view used to render the templates, then render the templates with
+    // this view of the system.
+    var view = {
+      project : {
+        name: program.name,
+        version: program.version,
+        license: program.license
+      }
+    };
+
+    var templates = new TemplateDir (templatePath);
+    templates.render (program.outputPath, view, callback);
+  },
+
+  function (callback) { installDependencies (program.outputPath, callback); },
+  function (result, node, callback) { installDevDependencies (program.outputPath, callback); },
+  function (result, node, callback) { installBinaries (program.outputPath, callback); }
+], onComplete);
+
+function installDependencies (targetPath, callback) {
+  winston.log ('info', 'installing dependencies...');
+
+  async.waterfall ([
+    function (callback) {
+      npm.load ({loaded: false, save: true}, callback);
+    },
+
+    function (npm, callback) {
+      const dependencies = [
+        '@onehilltech/blueprint'
+      ];
+
+      npm.commands.install (targetPath, dependencies, callback);
+    }
+  ], callback);
+
+
+}
+
+function installDevDependencies (targetPath, callback) {
+  winston.log ('info', 'installing development dependencies...');
+
+  async.waterfall ([
+    function (callback) {
+      npm.load ({'loaded': false, 'save-dev': true}, callback);
+    },
+
+    function (npm, callback) {
+      const devDependencies = [
+        'chai',
+        'mocha',
+        'superagent',
+        'supertest'
+      ];
+
+      npm.commands.install (targetPath, devDependencies, callback);
+    }
+  ], callback);
+}
+
+function installBinaries (targetPath, callback) {
+  winston.log ('info', 'installing binaries...');
+
+  async.waterfall ([
+    function (callback) {
+      npm.load ({'loaded': false}, callback);
+    },
+
+    function (npm, callback) {
+      npm.commands.bin (targetPath, callback);
+    }
+  ], callback);
+}
+
+function onComplete (err) {
+  if (err)
+    winston.log ('error', err);
+  else
+    winston.log ('info', 'Blueprint.js application project is ready!')
+}
+
