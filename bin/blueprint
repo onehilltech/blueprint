@@ -1,8 +1,0 @@
-#!/usr/bin/env node
-'use strict';
-
-var program = require ('commander');
-
-program
-  .command ('init', 'initialize a new Blueprint.js web application')
-  .parse (process.argv);
