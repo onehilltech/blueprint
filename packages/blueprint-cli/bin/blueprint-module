@@ -1,0 +1,19 @@
+#!/usr/bin/env node
+'use strict';
+
+var program = require ('commander')
+  , path = require ('path')
+  , winston = require ('winston')
+  , async = require ('async')
+  , npm = require ('npm')
+  , fse = require ('fs-extra')
+  , lib = require ('../lib')
+  ;
+
+var Installer = lib.Installer
+  ;
+
+program
+  .command ('install <module-name>', 'install module in application')
+  .command ('uninstall <module-name>', 'uninstall module from application')
+  .parse (process.argv);

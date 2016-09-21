@@ -1,8 +1,21 @@
 #!/usr/bin/env node
 'use strict';
 
-var program = require ('commander');
+var program = require ('commander')
+  , util = require ('util')
+  , async = require ('async')
+  ;
 
-program
-  .command ('new', 'create a new Blueprint.js application')
-  .parse (process.argv);
+var commands = {
+  new: 'create a new Blueprint.js application',
+  module: 'update modules used by the application'
+};
+
+
+async.eachOf (commands, function (value, key, callback) {
+  program.command (key, value);
+  return callback (null);
+}, function (err) {
+  if (err) return winston.log ('error', util.inspect (err));
+  program.parse (process.argv);
+});

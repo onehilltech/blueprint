@@ -20,15 +20,16 @@ Installer.prototype.bin = function (callback) {
   this._npm.commands.bin (callback);
 };
 
-function InstallerFactory (targetPath, callback) {
-  var config = {
-    prefix: targetPath,
-    save: true
-  };
+function InstallerFactory (targetPath, config, callback) {
+  config.prefix = targetPath;
 
   async.waterfall ([
-    function (callback) { return npm.load (config, callback); },
-    function (npm, callback) { return callback (null, new Installer (targetPath, npm)); }
+    function (callback) {
+      return npm.load (config, callback);
+    },
+    function (npm, callback) {
+      return callback (null, new Installer (targetPath, npm));
+    }
   ], callback);
 }
 

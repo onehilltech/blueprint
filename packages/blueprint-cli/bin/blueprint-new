@@ -54,11 +54,13 @@ async.waterfall ([
   },
 
   function (callback) {
-    Installer (dstPath, callback);
+    Installer (dstPath, {'save': true}, callback);
   },
 
   function (installer, callback) {
     async.series ([
+      // The dependencies
+
       function (callback) {
         const dependencies = [
           '@onehilltech/blueprint'
@@ -67,6 +69,7 @@ async.waterfall ([
         installer.install (dependencies, callback);
       },
 
+      // The devDependencies
       function (callback) {
         const devDependencies = [
           'chai',
@@ -75,7 +78,9 @@ async.waterfall ([
           'supertest'
         ];
 
-        installer.install (devDependencies, callback);
+        Installer (dstPath, {'save-dev': true}, function (err, devInstaller) {
+          devInstaller.install (devDependencies, callback);
+        });
       },
 
       function (callback) {
