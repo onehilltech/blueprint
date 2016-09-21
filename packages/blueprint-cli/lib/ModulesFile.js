@@ -76,8 +76,13 @@ ModulesFile.prototype.remove = function (name, callback) {
       return callback (null, item.value !== name);
     },
     function (err, result) {
-      if (result) self._tree.body[0].expression.right.right.elements = result;
-      return callback (err);
+      var oldLength = self._tree.body[0].expression.right.right.elements.length;
+      var newLength = result.length;
+
+      if (oldLength !== newLength)
+        self._tree.body[0].expression.right.right.elements = result;
+
+      return callback (err, oldLength !== newLength);
     });
 };
 
