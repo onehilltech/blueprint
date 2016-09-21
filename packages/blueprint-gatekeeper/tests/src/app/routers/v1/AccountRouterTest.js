@@ -66,8 +66,8 @@ describe ('AccountRouter', function () {
       function (callback) {
         var data = {
           grant_type: 'password',
-          username: datamodel.data.accounts[1].username,
-          password: datamodel.data.accounts[1].password,
+          username: datamodel.data.accounts[3].username,
+          password: datamodel.data.accounts[3].password,
           client_id: datamodel.models.clients[0].id
         };
 
@@ -84,7 +84,7 @@ describe ('AccountRouter', function () {
         var data = {
           grant_type: 'client_credentials',
           client_id: datamodel.models.clients[0].id,
-          client_secret: datamodel.models.clients[0].secret,
+          client_secret: datamodel.models.clients[0].secret
         };
 
         getToken (data, function (err, token) {

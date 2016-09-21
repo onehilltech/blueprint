@@ -12,34 +12,11 @@ var Account = undefined
   ;
 
 var data = {
-  clients: [
-    {
-      name: 'client1',
-      email: 'contact@client1.com',
-      secret: 'client1',
-      redirect_uri: 'https://client1.com/gatekeeper',
-      roles: [roles.client.account.create]
-    },
-    {
-      name: 'client2',
-      email: 'contact@client2.com',
-      secret: 'client2',
-      redirect_uri: 'https://client2.com/gatekeeper'
-    },
-    {
-      name: 'client3',
-      email: 'contact@client3.com',
-      secret: 'client3',
-      redirect_uri: 'https://client3.com/gatekeeper',
-      enabled: false
-    }
-  ],
-
   accounts: [
     { email: 'account1@gatekeeper.com', username: 'account1', password: 'account1' },
-    { email: 'account2@gatekeeper.com', username: 'account2', password: 'account2', roles: [roles.user.administrator]},
+    { email: 'account2@gatekeeper.com', username: 'account2', password: 'account2' },
     { email: 'account3@gatekeeper.com', username: 'account3', password: 'account3' },
-    { email: 'account4@gatekeeper.com', username: 'account4', password: 'account4' },
+    { email: 'account4@gatekeeper.com', username: 'account4', password: 'account4', roles: [roles.user.administrator]},
     { email: 'account5@gatekeeper.com', username: 'account5', password: 'account5', enabled: false }
   ],
 
@@ -60,20 +37,34 @@ function cleanup (done) {
 }
 
 function seed (done) {
-  async.waterfall ([
-    function (callback) {
-      winston.log ('info', 'adding clients to the database');
+  var testing = require ('../../lib/testing');
 
-      Client.create (data.clients, function (err, clients) {
-        if (err)
-          return callback (err);
+  async.waterfall ([
+    // Create the clients used for testing.
+    function (callback) {
+      var clients =
+        [
+          { firstId: 1, roles: [roles.client.account.create] },
+          { firstId: 2 },
+          { firstId: 3, enabled: false }
+        ];
+
+      async.concat (clients, testing.clients.createTimes (1), function (err, clients) {
+        if (err) return callback (err);
 
         exports.models.clients = clients;
+
         callback (null, clients[0]);
       });
     },
 
     function (client, callback) {
+      var accounts = [
+        { firstId: 1 },
+        { firstId: 4, roles: [roles.user.administrator] },
+        { firstId: 5, enabled: false }
+      ];
+
       // Update the created_by path on the accounts to the first client.
       for (var i = 0; i < data.accounts.length; ++i)
         data.accounts[i].created_by = client.id;
