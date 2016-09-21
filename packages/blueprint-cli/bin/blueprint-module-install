@@ -3,11 +3,8 @@
 
 var program = require ('commander')
   , path = require ('path')
-  , fse = require ('fs-extra')
   , winston = require ('winston')
   , async = require ('async')
-  , esprima = require ('esprima')
-  , escodegen = require ('escodegen')
   , lib = require ('../lib')
   ;
 
