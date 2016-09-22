@@ -1,0 +1,12 @@
+'use strict';
+
+var blueprint = require ('blueprint')
+  , Schema = blueprint.Schema
+  ;
+
+var schema = new Schema ({
+  // add fields here
+});
+
+const COLLECTION_NAME = '{{collectionName}}';
+module.exports = blueprint.model (COLLECTION_NAME, schema);

@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+'use strict';
+
+var program = require ('commander')
+  ;
+
+program
+  .command ('create <model-name>', 'create a new application model')
+  .parse (process.argv);

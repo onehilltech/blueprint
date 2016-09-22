@@ -2,15 +2,6 @@
 'use strict';
 
 var program = require ('commander')
-  , path = require ('path')
-  , winston = require ('winston')
-  , async = require ('async')
-  , npm = require ('npm')
-  , fse = require ('fs-extra')
-  , lib = require ('../lib')
-  ;
-
-var Installer = lib.Installer
   ;
 
 program

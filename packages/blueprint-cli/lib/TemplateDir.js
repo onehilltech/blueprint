@@ -74,8 +74,13 @@ TemplateDir.prototype.render = function (outPath, view, callback) {
               function (callback) { fs.readFile (abspath, callback); },
               function (data, callback) {
                 var output = mustache.render (data.toString (), view);
-                var targetFile = path.resolve (outPath, file.substring (0, file.length - TEMPLATE_SUFFIX.length));
 
+                // We also need to render the filename just in case it has some
+                // markup values as well.
+                var filename = file.substring (0, file.length - TEMPLATE_SUFFIX.length);
+                filename = mustache.render (filename, view);
+
+                var targetFile = path.resolve (outPath, filename);
                 winston.log ('debug', 'writing file: %s', targetFile);
 
                 fs.writeFile (targetFile, output, callback);
