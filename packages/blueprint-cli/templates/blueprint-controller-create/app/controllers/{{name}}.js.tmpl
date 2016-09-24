@@ -1,0 +1,13 @@
+'use strict';
+
+module.exports = {{name}};
+
+var blueprint = require ('@onehilltech/blueprint')
+  , HttpError = blueprint.errors.HttpError
+  ;
+
+function {{name}} () {
+  {{baseController}}.call (this);
+}
+
+blueprint.controller ({{name}}, {{baseController}});

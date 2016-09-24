@@ -8,6 +8,7 @@ var program = require ('commander')
 
 var commands = {
   new: 'create a new Blueprint.js application',
+  controller: 'manage application controllers',
   model: 'manage application models',
   module: 'update modules used by the application'
 };
