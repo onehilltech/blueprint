@@ -15,7 +15,10 @@ exports.modelOn = modelOn;
 var config = blueprint.app.configs['mongodb'];
 
 if (!config) throw new Error ('Must define mongodb.config.js configuration');
-if (!config.connections.default) throw new Error ('Must define a default connection');
+if (!config['defaultConnection']) throw new Error ('Must define the \'defaultConnection\' property');
+
+var connsConfig = config['connections'];
+if (!connsConfig || connsConfig.length == 0) throw new Error ('Must define at least one connection');
 
 var conns = { };
 
@@ -34,7 +37,7 @@ messaging.on ('app.start', function (app) {
 // Create the connections defined in the configuration. The key is the name
 // of the connection, and the value is the connection details.
 
-for (var key in config.connections) {
+for (var key in connsConfig) {
   if (config.connections.hasOwnProperty (key))
     conns[key] = mongoose.createConnection ();
 }
