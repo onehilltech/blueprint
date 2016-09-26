@@ -12,7 +12,7 @@ module.exports = openConnections;
  */
 function openConnections (app) {
   winston.log ('info', 'opening all connections to the database');
-  
+
   var config = app.configs.mongodb;
 
   for (var key in config.connections) {
