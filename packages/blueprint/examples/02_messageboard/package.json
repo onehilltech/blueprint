@@ -6,6 +6,7 @@
   "main": "./app",
   "dependencies": {
     "@onehilltech/blueprint": "file:../..",
+    "@onehilltech/blueprint-mongodb": "^0.2.0",
     "winston": "^1.0.1"
   }
 }

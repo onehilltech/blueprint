@@ -49,7 +49,7 @@ function handleError (err, res, next) {
     }
     else {
       var errMsg = util.inspect (err);
-      
+
       winston.log ('error', errMsg);
       res.status (400).send (errMsg);
     }
