@@ -5,9 +5,7 @@
   "private": false,
   "main": "./lib",
   "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive tests/tests",
-    "start-server": "env NODE_ENV=production forever -o ./app/temp/logs/output.log -e ./app/temp/logs/error.log start ./app/index.js",
-    "stop-server": "env NODE_ENV=production forever stop app/index.js"
+    "test": "env NODE_ENV=test mocha --recursive tests/tests"
   },
   "dependencies": {
     "@onehilltech/blueprint": "^0.43.2",
