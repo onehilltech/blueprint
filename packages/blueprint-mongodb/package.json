@@ -1,5 +1,5 @@
 {
-  "name": "blueprint-mongodb",
+  "name": "@onehilltech/blueprint-mongodb",
   "description": "",
   "version": "0.1.2",
   "private": false,
