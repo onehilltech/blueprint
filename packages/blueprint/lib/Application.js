@@ -1,19 +1,19 @@
 var winston = require ('winston')
-  , path    = require ('path')
-  , util    = require ('util')
-  , fs      = require ('fs')
-  , all     = require ('require-all')
-  , async   = require ('async')
+  , path = require ('path')
+  , util = require ('util')
+  , fs = require ('fs-extra')
+  , all = require ('require-all')
+  , async = require ('async')
   ;
 
-var Server            = require ('./Server')
-  , RouterBuilder     = require ('./RouterBuilder')
-  , Configuration     = require ('./Configuration')
-  , Database          = require ('./Database')
+var Server = require ('./Server')
+  , RouterBuilder = require ('./RouterBuilder')
+  , Configuration = require ('./Configuration')
+  , Database = require ('./Database')
   , ApplicationModule = require ('./ApplicationModule')
-  , Framework         = require ('./Framework')
-  , Path              = require ('./Path')
-  , Env               = require ('./Environment')
+  , Framework = require ('./Framework')
+  , Path = require ('./Path')
+  , Env = require ('./Environment')
   ;
 
 /**
@@ -26,9 +26,7 @@ var Server            = require ('./Server')
  */
 function Application (appPath) {
   ApplicationModule.call (this, appPath);
-
   this._modules = {};
-
 }
 
 util.inherits (Application, ApplicationModule);
@@ -48,8 +46,8 @@ Application.prototype.init = function (callback) {
     // First, make sure there is a data directory. This is where the application stores
     // all its internal information.
     function (app, callback) {
-      var tempPath = Path.resolve (app._appPath, 'temp');
-      tempPath.createIfNotExists (function (err) { return callback (err, app); });
+      var tempPath = path.resolve (app._appPath, 'temp');
+      fs.ensureDir (tempPath, function (err) { return callback (err, app); });
     },
 
     // Load all configurations first. This is because other entities in the
