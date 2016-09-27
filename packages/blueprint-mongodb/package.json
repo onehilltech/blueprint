@@ -2,7 +2,7 @@
   "name": "blueprint-mongodb",
   "description": "",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "main": "./lib",
   "scripts": {
     "test": "env NODE_ENV=test mocha --recursive tests/tests",
