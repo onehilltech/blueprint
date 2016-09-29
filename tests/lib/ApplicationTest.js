@@ -28,7 +28,6 @@ describe ('Application', function () {
         async.parallel ([
           function (callback) {
             expect (app.server).to.not.be.undefined;
-            expect (app.database).to.not.be.undefined;
             return callback ();
           },
           function (callback) {

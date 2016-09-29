@@ -9,13 +9,10 @@ describe ('index', function () {
         'Application',
         'ApplicationModule',
         'BaseController',
-        'ResourceController',
-        'GridFSController',
         'RouterBuilder',
         'ModuleRouter',
         'Policy',
         'controller',
-        'model',
         'destroy',
         'include',
         'errors'
