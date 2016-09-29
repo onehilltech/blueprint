@@ -32,7 +32,9 @@ module.exports = {
   connections: {     // Define one or more connections by name.    
     $default: {
       connstr:       // MongoDB connection string
-      options:       // mongoose connection options
+      options:  {    // mongoose connection options
+            
+      }      
     }
   }
 };
