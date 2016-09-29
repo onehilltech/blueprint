@@ -107,12 +107,13 @@ The `GridFSController` is a [Blueprint.js](https://github.com/onehilltech/bluepr
 resource controller designed for [GridFS](https://docs.mongodb.com/manual/core/gridfs/) 
 iin [MongoDB](https://www.mongodb.com). The `GridFSController` support the following
 operations out-of-the-box: create, get, and delete. Currently, it does not
-support getting multiple resources and updating an existing resource. Because `GridFS`
-is designed to store large files, the `GridFSController` assumes the client is uploading
-a file, which can be a multi-part file. The controller handles this concern automatically.
-It's just your responsibility to inform the controller of the parameter used for the 
-upload, and what connection on the database to use for GridFS. Below is an example 
-`GridFSController` for storing images that use the default connection.
+support getting multiple resources and updating an existing resource. 
+
+Because `GridFS` is designed to store large files, the `GridFSController` assumes the 
+client is uploading a file, which can be a multi-part file. The controller handles this 
+concern automatically. It's just your responsibility to inform the controller of the 
+parameter used for the upload, and what connection on the database to use for GridFS. 
+Below is an example `GridFSController` for storing images that use the default connection.
 
 ```javascript
 'use strict';
