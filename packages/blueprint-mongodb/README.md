@@ -85,9 +85,11 @@ blueprint.controller (PersonController, ResourceController)
 `ResourceController` will generate the following events on Blueprint.js messaging 
 framework.
 
-| Action | Event |
-|--------|-------|
-| create | [prefix.][name].created|
+| Action | Event | Example |
+|--------|-------|---------|
+| create | [prefix.][name].created | [prefix.]person.created |
+| update | [prefix.][name].updated | [prefix.]person.updated |
+| delete | [prefix.][name].deleted | [prefix.]person.deleted |
  
 ### GridFSController
 
