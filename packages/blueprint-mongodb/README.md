@@ -61,8 +61,9 @@ module.exports = mongodb.model ('person', schema);
 ```
 
 All models are defined on the default connection unless stated otherwise. To define
-a model on a different connection, use the `modelOn` function where the first parameter
-is the name of the connection as defined in `mongodb.config.js`.
+a model on a different connection, use the `modelOn()` function where the first parameter
+is the name of the connection as defined in `mongodb.config.js`, followed by the 
+same parameters for the `model()` function.
 
 ### ResourceController
 
