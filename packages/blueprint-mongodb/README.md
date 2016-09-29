@@ -74,7 +74,7 @@ var blueprint = require ('@onehilltech/blueprint')
   ;
     
 function PersonController () {
-  ResourceController.call (this, {name: person, model: Person});
+  ResourceController.call (this, {name: 'person', model: Person});
 }
 
 blueprint.controller (PersonController, ResourceController)
