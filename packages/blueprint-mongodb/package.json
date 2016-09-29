@@ -11,6 +11,7 @@
     "@onehilltech/blueprint": "^0.43.2",
     "chai": "^3.5.0",
     "mocha": "^3.0.2",
+    "multer": "^1.2.0",
     "superagent": "^2.3.0",
     "supertest": "^2.0.0"
   },

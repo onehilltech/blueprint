@@ -3,7 +3,7 @@
 var mongoose = require ('mongoose')
   ;
 
-module.exports = ConnectionManager;
+var exports = module.exports = ConnectionManager;
 
 function ConnectionManager (opts) {
   this._defaultName = opts.defaultConnection;
@@ -36,4 +36,13 @@ ConnectionManager.prototype.openConnection = function (name, opts, callback) {
 
 ConnectionManager.prototype.getConnection = function (name) {
   return name === this._defaultName ? mongoose.connections[0] : this._connections[name];  
+};
+
+var singleton = null;
+
+exports.getConnectionManager = function (opts) {
+  if (singleton) return singleton;
+
+  singleton = new ConnectionManager (opts);
+  return singleton;
 };

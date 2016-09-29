@@ -2,7 +2,9 @@
 
 var mongoose = require ('mongoose')
   , blueprint = require ('@onehilltech/blueprint')
-  , ConnectionManager = require ('./ConnectionManager')
+  , ConnectionManager  = require ('./ConnectionManager')
+  , ResourceController = require ('./ResourceController')
+  , GridFSController = require ('./GridFSController')
   ;
 
 const DEFAULT_CONNECTION_NAME = '$default';
@@ -27,7 +29,7 @@ var opts = {
   defaultConnection: defaultConnection
 };
 
-var connMgr = new ConnectionManager (opts);
+var connMgr = ConnectionManager.getConnectionManager (opts);
 
 for (var key in connsConfig) {
   if (connsConfig.hasOwnProperty (key))
@@ -40,6 +42,8 @@ exports.Types = mongoose.Types;
 exports.Schema = mongoose.Schema;
 exports.model = model;
 exports.modelOn = modelOn;
+exports.ResourceController = ResourceController;
+exports.GridFSController = GridFSController;
 
 /**
  * Create a model on the default connection.
