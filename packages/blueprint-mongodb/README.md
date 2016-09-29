@@ -96,5 +96,4 @@ passed to the `ResourceController` constructor.
  
 ### GridFSController
 
-### Messaging Framework
 
