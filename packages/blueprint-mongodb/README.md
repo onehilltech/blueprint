@@ -90,6 +90,9 @@ framework.
 | create | [prefix.][name].created | [prefix.]person.created |
 | update | [prefix.][name].updated | [prefix.]person.updated |
 | delete | [prefix.][name].deleted | [prefix.]person.deleted |
+
+The prefix in the event name is optional. It is defined by the `eventPrefix` property
+passed to the `ResourceController` constructor.
  
 ### GridFSController
 
