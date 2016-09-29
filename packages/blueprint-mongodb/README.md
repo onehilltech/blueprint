@@ -47,6 +47,8 @@ Models represent the different collections stored in the
 using [Mongoose schemas](http://mongoosejs.com/docs/guide.html).
 
 ```javascript
+// app/models/Person.js
+
 var mongodb = require ('@onehilltech/blueprint-mongodb')
   ;
 
