@@ -8,7 +8,7 @@
     "test": "env NODE_ENV=test mocha --recursive tests/tests"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^0.43.2",
+    "@onehilltech/blueprint": "^0.44.0",
     "chai": "^3.5.0",
     "mocha": "^3.0.2",
     "multer": "^1.2.0",
