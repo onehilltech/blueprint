@@ -42,11 +42,15 @@ module.exports = {
 
 ### Models
 
-Models represent the different collections stored in the MongoDB database.
+Models represent the different collections stored in the 
+[MongoDB](https://www.mongodb.com) database. The models are defined 
+using [Mongoose schemas](http://mongoosejs.com/docs/guide.html).
 
 ```javascript
 var mongodb = require ('@onehilltech/blueprint-mongodb')
   ;
+
+// use mongodb.Types to access mongoose.Types
 
 var schema = mongodb.Schema ({
   first_name: {type: String, required: true, trim: true},
