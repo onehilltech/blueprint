@@ -27,14 +27,12 @@ Define the `mongodb.config.js` configuration file in your Blueprint.js applicati
 // mongodb.config.js
 
 module.exports = {
-  // defaultConnection: name of default connection [default is $default]
+  defaultConnection: // Optional name of default connection [default is $default]
   
-  connections: {
-    // Define one or more connections by name.
-    
+  connections: {     // Define one or more connections by name.    
     $default: {
-      connstr: // MongoDB connection string
-      options: // mongoose connection options
+      connstr:       // MongoDB connection string
+      options:       // mongoose connection options
     }
   }
 };
