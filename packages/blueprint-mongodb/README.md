@@ -42,4 +42,7 @@ module.exports = {
 
 ### ResourceController
 
+The `ResourceController` is a default implementation of a resource controller
+designed to integrate with the Blueprint.js architecture.
+
 ### GridFSController
