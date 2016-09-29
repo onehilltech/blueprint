@@ -42,6 +42,23 @@ module.exports = {
 
 ### Models
 
+Models represent the different collections stored in the MongoDB database.
+
+```javascript
+var mongodb = require ('@onehilltech/blueprint-mongodb')
+  ;
+
+var schema = mongodb.Schema ({
+  first_name: {type: String, required: true, trim: true},
+  last_name: {type: String, required: true, trim: true}
+});
+
+module.exports = mongodb.model ('person', schema);
+```
+
+All models are defined on the default connection unless stated otherwise. To define
+a model on a different connection, use the `modelOn` function where the first parameter
+is the name of the connection as defined in `mongodb.config.js`.
 
 ### ResourceController
 
