@@ -12,6 +12,8 @@ A Blueprint.js module for MongoDB
 Installation
 ------------
 
+Run the `blueprint` program for your Blueprint.js application root directory.
+
     blueprint module install @onehilltech/blueprint-mongodb
 
 Usage
