@@ -46,7 +46,7 @@ module.exports = {
 ### ResourceController
 
 The `ResourceController` is a default implementation of a resource controller
-designed to integrate with the Blueprint.js architecture. The `ResourceController`
+that integrates with the Blueprint.js architecture. The `ResourceController`
 can be used as-is, or extended to add domain-specific customizations.
 
 ```javascript
