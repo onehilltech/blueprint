@@ -20,14 +20,10 @@ describe ('RouterBuilder', function () {
   before (function (done) {
     appFixture (function (err, a) {
       if (err) return done (err);
-
       app = a;
-      app.models.Person.remove ({}, done);
-    });
-  });
 
-  after (function (done) {
-    app.database.disconnect (done);
+      return done (null);
+    });
   });
 
   describe ('new RouterBuilder ()', function () {
@@ -82,19 +78,6 @@ describe ('RouterBuilder', function () {
           });
       });
 
-      it ('should not create the resource [missing body]', function (done) {
-        request (app.server.app)
-          .post ('/persons')
-          .expect (400, done);
-      });
-
-      it ('should not create the resource [invalid parameters]', function (done) {
-        request (app.server.app)
-          .post ('/persons')
-          .send ({first: 'James', last: 'Hill'})
-          .expect (400, done);
-      });
-
       it ('should retrieve a single resource', function (done) {
         request (app.server.app)
           .get ('/persons/' + id)
@@ -129,12 +112,6 @@ describe ('RouterBuilder', function () {
         request (app.server.app)
           .delete ('/persons/' + id)
           .expect (200, 'true', done);
-      });
-
-      it ('should not delete an existing resource', function (done) {
-        request (app.server.app)
-          .delete ('/persons/' + id)
-          .expect (404, done);
       });
     });
 

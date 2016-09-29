@@ -1,7 +1,9 @@
-var blueprint = require ('@onehilltech/blueprint')
+'use strict';
+
+var mongodb = require ('@onehilltech/blueprint-mongodb')
   ;
 
-var schema = new blueprint.Schema({
+var schema = new mongodb.Schema({
   /// Timestamp of the message.
   timestamp: {type: Date, required: true, default: Date.now},
 
@@ -13,4 +15,4 @@ var schema = new blueprint.Schema({
 });
 
 const COLLECTION_NAME = 'message';
-module.exports = exports = blueprint.model (COLLECTION_NAME, schema);
+module.exports = blueprint.model (COLLECTION_NAME, schema);

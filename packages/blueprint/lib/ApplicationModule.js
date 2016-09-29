@@ -7,7 +7,6 @@ var winston = require ('winston')
   ;
 
 var RouterBuilder = require ('./RouterBuilder')
-  , Database      = require ('./Database')
   , Framework     = require ('./Framework')
   , PolicyManager = require ('./PolicyManager')
   , ModelManager  = require ('./ModelManager')
@@ -151,10 +150,6 @@ ApplicationModule.prototype.__defineGetter__ ('controllers', function () {
 
 ApplicationModule.prototype.__defineGetter__ ('routers', function () {
   return this.routerManager.routers;
-});
-
-ApplicationModule.prototype.__defineGetter__ ('Schema', function () {
-  return Database.Schema;
 });
 
 /**

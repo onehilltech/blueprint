@@ -1,13 +1,16 @@
+'use strict';
+
 var blueprint = require ('@onehilltech/blueprint')
+  , mongodb   = require ('@onehilltech/blueprint-mongodb')
   ;
 
 var Message = require ('../models/Message')
   ;
 
 function MessageController () {
-  blueprint.ResourceController.call (this, {name: 'message', model: Message});
+  mongodb.ResourceController.call (this, {name: 'message', model: Message});
 }
 
-blueprint.controller (MessageController, blueprint.ResourceController);
+blueprint.controller (MessageController, mongodb.ResourceController);
 
-module.exports = exports = MessageController;
+module.exports = MessageController;
