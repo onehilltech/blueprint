@@ -81,4 +81,15 @@ blueprint.controller (PersonController, ResourceController)
 
 ```
 
+**Messaging Framework.** All actions on the default implementation of the
+`ResourceController` will generate the following events on Blueprint.js messaging 
+framework.
+
+| Action | Event |
+|--------|-------|
+| create | [prefix.][name].created|
+ 
 ### GridFSController
+
+### Messaging Framework
+
