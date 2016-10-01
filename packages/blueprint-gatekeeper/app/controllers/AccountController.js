@@ -1,4 +1,5 @@
 var blueprint  = require ('@onehilltech/blueprint')
+  , mongodb    = require ('@onehilltech/blueprint-mongodb')
   , messaging  = blueprint.messaging
   , uid        = require ('uid-safe')
   , async      = require ('async')
@@ -9,7 +10,7 @@ var Account = require ('../models/Account')
   , Client  = require ('../models/Client')
   ;
 
-var ResourceController = blueprint.ResourceController
+var ResourceController = mongodb.ResourceController
   , Policy = blueprint.Policy
   ;
 

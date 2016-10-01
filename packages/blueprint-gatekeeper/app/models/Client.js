@@ -1,12 +1,12 @@
-var uid       = require ('uid-safe')
-  , blueprint = require ('@onehilltech/blueprint')
+'use strict';
+
+var uid     = require ('uid-safe')
+  , mongodb = require ('@onehilltech/blueprint-mongodb')
   ;
 
 const DEFAULT_SECRET_LENGTH = 128;
 
-var Schema = blueprint.Schema;
-
-var schema = new Schema ({
+var schema = new mongodb.Schema ({
   /// Name of the client.
   name: {type: String, required: true, trim: true, unique: true},
 
@@ -27,7 +27,7 @@ var schema = new Schema ({
 
   /// Metadata for the client. This allows third-party services to
   /// associate custom data with the client.
-  metadata : { type: Schema.Types.Mixed, default: {} }
+  metadata : { type: mongodb.Schema.Types.Mixed, default: {} }
 });
 
 schema.pre ('validate', function (next) {
@@ -38,4 +38,4 @@ schema.pre ('validate', function (next) {
 });
 
 const COLLECTION_NAME = 'gatekeeper_client';
-module.exports = exports = blueprint.model (COLLECTION_NAME, schema);
+module.exports = mongodb.model (COLLECTION_NAME, schema);

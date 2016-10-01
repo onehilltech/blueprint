@@ -1,5 +1,7 @@
-var bcrypt    = require ('bcrypt')
-  , blueprint = require ('@onehilltech/blueprint')
+'use strict';
+
+var bcrypt  = require ('bcrypt')
+  , mongodb = require ('@onehilltech/blueprint-mongodb')
   ;
 
 var Client = require ('./Client')
@@ -7,7 +9,7 @@ var Client = require ('./Client')
 
 const SALT_WORK_FACTOR = 10;
 
-var Schema = blueprint.Schema;
+var Schema = mongodb.Schema;
 
 var schema = new Schema ({
   /**
@@ -36,7 +38,7 @@ var schema = new Schema ({
    */
 
   /// The client that created the account.
-  created_by: {type: Schema.Types.ObjectId, required: true, ref: Client.modelName},
+  created_by: {type: mongodb.Schema.Types.ObjectId, required: true, ref: Client.modelName, index: true},
 
   /// Enabled state for the account.
   enabled: { type: Boolean, required: true, default: true },
@@ -157,4 +159,4 @@ schema.statics.authenticate = function (username, password, done) {
 };
 
 const COLLECTION_NAME  = 'gatekeeper_account';
-module.exports = exports = blueprint.model (COLLECTION_NAME, schema);
+module.exports = mongodb.model (COLLECTION_NAME, schema);

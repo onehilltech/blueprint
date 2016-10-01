@@ -1,5 +1,7 @@
-var uid       = require ('uid-safe')
-  , blueprint = require ('@onehilltech/blueprint')
+'use strict';
+
+var uid     = require ('uid-safe')
+  , mongodb = require ('@onehilltech/blueprint-mongodb')
   ;
 
 // We have to manually load the references models since the models
@@ -8,14 +10,16 @@ var Client  = require ('../Client')
   , Account = require ('../Account')
   ;
 
-var Schema = blueprint.Schema;
+var Schema = mongodb.Schema;
 
 var schema = new Schema ({
-  client: {type: Schema.Types.ObjectId, required: true, ref: Client.modelName},
-  account: {type: Schema.Types.ObjectId, ref: Account.modelName},
+  client: {type: mongodb.Schema.Types.ObjectId, required: true, ref: Client.modelName, index: true},
+
+  account: {type: mongodb.Schema.Types.ObjectId, ref: Account.modelName, index: true},
+
   enabled: {type: Boolean, required: true, default : true},
-  refresh_token: {type: Schema.Types.ObjectId, index: true},
-  expires_at: {type: Date}
+
+  refresh_token: {type: Schema.Types.ObjectId, index: true}
 });
 
 /**
@@ -37,4 +41,4 @@ schema.methods.isClientToken = function () {
 };
 
 const COLLECTION_NAME = 'gatekeeper_oauth2_accesstoken';
-module.exports = exports = blueprint.model (COLLECTION_NAME, schema);
+module.exports = mongodb.model (COLLECTION_NAME, schema);
