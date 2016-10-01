@@ -12,10 +12,7 @@ A Blueprint.js module for MongoDB
 Installation
 ------------
 
-Run the [blueprint-cli](https://github.com/onehilltech/blueprint-cli) 
-program for your Blueprint.js application root directory.
-
-    blueprint module install @onehilltech/blueprint-mongodb
+    npm install @onehilltech/blueprint-mongodb --save
 
 Usage
 -----
