@@ -1,5 +1,6 @@
 var blueprint = require ('@onehilltech/blueprint')
-  , Schema    = blueprint.Schema
+  , mongodb   = require ('@onehilltech/blueprint-mongodb')
+  , Schema    = mongodb.Schema
   , Account   = blueprint.app.modules['@onehilltech/gatekeeper'].models.Account
   ;
 
@@ -15,5 +16,4 @@ var schema = new Schema({
 });
 
 const COLLECTION_NAME = 'blueprint_cloud_token';
-
-module.exports = exports = blueprint.model (COLLECTION_NAME, schema);
+module.exports = mongodb.model (COLLECTION_NAME, schema);

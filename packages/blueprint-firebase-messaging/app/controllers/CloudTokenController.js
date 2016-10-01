@@ -1,5 +1,8 @@
+'use strict';
+
 var blueprint = require ('@onehilltech/blueprint')
-  , ResourceController = blueprint.ResourceController
+  , mongodb   = require ('@onehilltech/blueprint-mongodb')
+  , ResourceController = mongodb.ResourceController
   , HttpError = blueprint.errors.HttpError
   ;
 
@@ -10,7 +13,9 @@ function CloudTokenController () {
   ResourceController.call (this, {name: 'token', model: CloudToken});
 }
 
-blueprint.controller (CloudTokenController);
+blueprint.controller (CloudTokenController, ResourceController);
+
+module.exports = CloudTokenController;
 
 /**
  * Register a token.
@@ -53,5 +58,3 @@ CloudTokenController.prototype.create = function () {
     }
   }
 };
-
-module.exports = exports = CloudTokenController;

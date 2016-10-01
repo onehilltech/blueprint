@@ -56,7 +56,7 @@ Sender.prototype.send = function (recipients, data, callback) {
             if (err) return callback (err);
 
             // Move the next set of recipients
-            i += MAX_RECIPIENTS;
+            i += recipient.registrationTokens.length;
 
             return callback (null, res);
           })

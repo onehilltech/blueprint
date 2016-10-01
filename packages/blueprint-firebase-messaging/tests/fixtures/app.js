@@ -1,21 +1,20 @@
 var path = require ('path')
-  , async = require ('async')
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
-module.exports = exports = function (callback) {
+var started = false;
+
+module.exports = function (callback) {
   var appPath = path.resolve (__dirname, '../../app');
+  blueprint.Application (appPath, function (err, app) {
+    if (err)
+      return callback (err);
 
-  var app = blueprint.Application (appPath, function (err, app) {
-    if (err) return callback (err);
+    if (!started) {
+      blueprint.messaging.emit ('app.start', app);
+      started = true;
+    }
 
-    var db = app.database;
-
-    if (db.state === 1 || db.state === 2)
-      return callback (null, app);
-
-    db.connect (function (err) {
-      return callback (err, app);
-    });
+    return callback (null, app);
   });
 };
