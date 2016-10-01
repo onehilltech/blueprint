@@ -5,17 +5,19 @@
   "private": false,
   "main": "./lib",
   "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive tests/tests"
+    "test": "env NODE_ENV=test mocha --recursive tests/unit-tests"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^0.44.0",
+    "@onehilltech/blueprint": "^0.45.0",
+    "mongoose": "^4.6.2"
+  },
+  "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^3.0.2",
     "multer": "^1.2.0",
     "superagent": "^2.3.0",
     "supertest": "^2.0.0"
   },
-  "devDependencies": {},
   "license": "Apache-2.0",
   "engines": {
     "node": ">=4.0.0",
