@@ -1,6 +1,5 @@
 var expect = require ('chai').expect
   , async  = require ('async')
-  , path   = require ('path')
   ;
 
 var blueprint  = require ('../../lib/')
