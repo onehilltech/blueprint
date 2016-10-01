@@ -22,6 +22,9 @@ var connsConfig = config['connections'];
 if (!connsConfig || connsConfig.length == 0) throw new Error ('Must define at least one connection');
 if (!connsConfig[defaultConnection]) throw new Error ('Default connection configuration not defined');
 
+// Fix deprecation warnings.
+mongoose.Promise = config.promiseLibrary || global.Promise;
+
 // Create the connections defined in the configuration. The key is the name
 // of the connection, and the value is the connection details.
 
