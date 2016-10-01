@@ -21,7 +21,6 @@
     "express-validator": "^2.20.8",
     "extend": "^3.0.0",
     "fs-extra": "^0.30.0",
-    "mongoose": "^4.5.7",
     "morgan": "^1.6.1",
     "multer": "^1.1.0",
     "mustache": "^2.2.1",
@@ -40,6 +39,7 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "devDependencies": {
+    "@onehilltech/blueprint-dummy-module1": "^0.1.1",
     "chai": "^3.2.0",
     "coveralls": "^2.11.9",
     "istanbul": "^0.4.3",
