@@ -46,87 +46,42 @@ ApplicationModule.prototype.init = function (callback) {
   if (this._is_init)
     return callback (null, this);
 
-  winston.log ('debug', 'module: %s', this._appPath);
+  winston.log ('debug', 'initializing module: %s', this._appPath);
 
   async.waterfall ([
     async.constant (this),
+    loadInto (this.listenerManager, 'listeners'),
+    loadInto (this.policyManager, 'policies'),
+    loadInto (this.modelManager, 'models'),
+    loadInto (this.controllerManager, 'controllers'),
 
-    // Load the listeners so all parties listening will receive updates
-    // about what is going on.
     function (module, callback) {
-      var rcPath = path.join (module._appPath, 'listeners');
-
-      module.listenerManager.load (rcPath, function (err) {
-        if (err && err.code === 'ENOENT') err = null;
-        return callback (err, module);
-      });
+      module.routerManager.setControllers (module.controllers);
+      return callback (null, module);
     },
 
-    // Load the policies from the application module.
+    loadInto (this.routerManager, 'routers'),
+
     function (module, callback) {
-      var rcPath = path.join (module._appPath, 'policies');
+      // Mark the module as initialized, and notify all listeners.
+      module._is_init = true;
+      Framework ().messaging.emit ('module.init', module);
 
-      module.policyManager.load (rcPath, function (err) {
-        if (err && err.code === 'ENOENT') err = null;
-        return callback (err, module);
-      });
-    },
+      return callback (null, module);
+    }
+  ], callback);
 
-    // Load the models from the application module.
-    function (module, callback) {
-      var rcPath = path.join (module._appPath, 'models');
+  function loadInto (manager, location) {
+    return function (module, callback) {
+      var rcPath = path.join (module._appPath, location);
 
-      module.modelManager.load (rcPath, function (err) {
-        if (err && err.code === 'ENOENT') err = null;
-        return callback (err, module);
-      });
-    },
-
-    // Load the controllers for the application module.
-    function (module, callback) {
-      var rcPath = path.join (module._appPath, 'controllers');
-
-      module.controllerManager.load (rcPath, function (err) {
-        if (err && err.code === 'ENOENT') err = null;
-        return callback (err, module);
-      });
-    },
-
-    // Load the routers for the application module.
-    function (module, callback) {
-      var rcPath = path.join (module._appPath, 'routers');
-
-      module.routerManager.load (rcPath, module.controllers, function (err) {
+      manager.load (rcPath, function (err) {
         if (err && err.code === 'ENOENT') err = null;
         return callback (err, module);
       });
     }
-  ], function (err, module) {
-    if (err) return callback (err);
-
-    // Mark the module as initialized, and notify all listeners.
-    module._is_init = true;
-    Framework().messaging.emit ('module.init', module);
-
-    return callback (null, module);
-  });
+  }
 };
-
-ApplicationModule.prototype.__defineGetter__ ('modules', function () {
-  try {
-    var modulesFile = path.resolve (this._appPath, 'modules.js');
-    var stat = fs.statSync (modulesFile);
-
-    if (!stat.isFile ()) return [];
-
-    var modules = require (modulesFile);
-
-    return modules;
-  }
-  catch (err) {
-    return [];
-  }
-});
 
 ApplicationModule.prototype.__defineGetter__ ('appPath', function () {
   return this._appPath;

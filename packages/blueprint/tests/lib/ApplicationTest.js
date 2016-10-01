@@ -72,37 +72,46 @@ describe ('Application', function () {
     });
   });
 
-  describe ('#addModule', function () {
+  describe ('#addModule', function (done) {
     it ('should load an application module into the main application', function (done) {
       var modulePath = path.resolve (__dirname, '../fixtures/app-module');
+      var appModule  = new ApplicationModule (modulePath);
 
-      app.addModule ('test-module', modulePath, function (err) {
-        if (err) return done (err);
+      async.waterfall ([
+        async.constant (appModule),
 
-        expect (app.modules).to.have.keys (['test-module']);
+        function (module, callback) {
+          module.init (callback);
+        },
+        function (module, callback) {
+          app.addModule ('test-module', module, callback);
+        },
+        function (callback) {
+          expect (app.modules).to.have.keys (['test-module']);
 
-        // Check the policies are added to the application.
-        expect (app.policies).to.have.keys (['module-policy', 'always_true']);
+          // Check the policies are added to the application.
+          expect (app.policies).to.have.keys (['module-policy', 'always_true']);
 
-        // Check auto-setting of engines on application based on view extensions.
-        expect (app._server._engines).to.have.length (3);
-        expect (app._server._engines).to.deep.equal (['jade', 'mustache', 'pug']);
+          // Check auto-setting of engines on application based on view extensions.
+          expect (app._server._engines).to.have.length (3);
+          expect (app._server._engines).to.deep.equal (['jade', 'mustache', 'pug']);
 
-        // Check the views are copy to the view cache.
-        var views = [
-          path.join (appPath, 'temp', 'views', 'module.jade'),
-          path.join (appPath, 'temp', 'views', 'second-level', 'module.jade')
-        ];
+          // Check the views are copy to the view cache.
+          var views = [
+            path.join (appPath, 'temp', 'views', 'module.jade'),
+            path.join (appPath, 'temp', 'views', 'second-level', 'module.jade')
+          ];
 
-        async.each (views, function (view, callback) {
-          fs.stat (view, function (err, stat) {
-            if (err) return callback (err);
+          async.each (views, function (view, callback) {
+            fs.stat (view, function (err, stat) {
+              if (err) return callback (err);
 
-            expect (stat.isFile()).to.be.true;
-            return callback ();
-          });
-        }, done);
-      });
+              expect (stat.isFile()).to.be.true;
+              return callback ();
+            });
+          }, done);
+        }
+      ], done);
     });
   });
 });
