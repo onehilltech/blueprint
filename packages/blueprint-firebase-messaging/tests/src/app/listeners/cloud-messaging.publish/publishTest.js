@@ -1,18 +1,13 @@
-var async     = require ('async')
-  , blueprint = require ('@onehilltech/blueprint')
+var blueprint = require ('@onehilltech/blueprint')
   , messaging = blueprint.messaging
   ;
 
 var datamodel  = require ('../../../../fixtures/datamodel')
-  , appFixture = require ('../../../../fixtures/app')
   ;
 
 describe ('listener:cloud-messaging.publish', function () {
   before (function (done) {
-    async.series ([
-      function (callback) { appFixture (callback); },
-      function (callback) { datamodel.apply (callback); }
-    ], done);
+    datamodel.apply (done);
   });
 
   it ('should publish data on the topic', function (done) {

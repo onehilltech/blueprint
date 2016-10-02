@@ -6,7 +6,7 @@ var async      = require ('async')
   , mongoose   = require ('mongoose')
   ;
 
-var appFixture = require ('./app')
+const appPath = require ('./appPath')
   ;
 
 var app;
@@ -120,10 +120,12 @@ function seed (callback) {
 exports.apply = function (done) {
   async.series ([
     function (callback) {
-      appFixture (function (err, result) {
+      blueprint.testing.createApplicationAndStart (appPath, function (err, result) {
         if (err) return callback (err);
+
         app = result;
-        return callback ();
+
+        return callback (null, result);
       });
     },
     function (callback) { cleanup (callback); },

@@ -1,11 +1,8 @@
-var request   = require ('supertest')
-  , expect    = require ('chai').expect
-  , async     = require ('async')
+var async     = require ('async')
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
-var appFixture = require ('../../fixtures/app')
-  , datamodel  = require ('../../fixtures/datamodel')
+var datamodel  = require ('../../fixtures/datamodel')
   ;
 
 describe ('Sender', function () {
@@ -13,7 +10,6 @@ describe ('Sender', function () {
 
   before (function (done) {
     async.series ([
-      function (callback) { appFixture (callback); },
       function (callback) { datamodel.apply (callback); },
       function (callback) {
         Sender = require ('../../../lib/Sender');

@@ -5,7 +5,6 @@ var request   = require ('supertest')
   ;
 
 var datamodel  = require ('../../../fixtures/datamodel')
-  , appFixture = require ('../../../fixtures/app')
   ;
 
 describe ('CloudTokenRouter', function () {
@@ -25,17 +24,6 @@ describe ('CloudTokenRouter', function () {
 
   before (function (done) {
     async.series ([
-      function (callback) {
-        appFixture (function (err, app) {
-          if (err) return callback (err);
-
-          server  = app.server;
-          CloudToken = app.models.CloudToken;
-
-          return callback (null);
-        });
-      },
-
       // 1. apply the datamodel
       function (callback) {
         datamodel.apply (callback);
@@ -43,6 +31,9 @@ describe ('CloudTokenRouter', function () {
 
       // 2. get the user token for the tests.
       function (callback) {
+        server  = blueprint.app.server;
+        CloudToken = blueprint.app.models.CloudToken;
+
         var data = {
           grant_type: 'password',
           username: datamodel.data.accounts[0].username,
