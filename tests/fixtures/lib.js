@@ -1,4 +1,3 @@
 var blueprint = require ('../../lib');
-
-module.exports = exports = blueprint;
+module.exports = blueprint;
 
