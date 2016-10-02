@@ -1,14 +1,17 @@
-var app = require ('../../app')
+var blueprint = require ('@onehilltech/blueprint')
+  , path = require ('path')
   , expect = require ('chai').expect
   , async = require ('async')
   ;
+
+var appPath = path.resolve (__dirname, '../../fixtures/app');
 
 describe ('index', function () {
   var mongodb = null;
 
   before (function (done) {
     async.series ([
-      function (callback) { app (callback); },
+      function (callback) { blueprint.testing.createApplicationAndStart (appPath, callback); },
       function (callback) { mongodb = require ('../../../lib'); return callback (null); }
     ], done);
   });

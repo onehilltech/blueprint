@@ -6,6 +6,8 @@ var request = require ('supertest')
   , ConnectionManager = require ('../../../lib/ConnectionManager')
   ;
 
+var appPath = path.resolve (__dirname, '../../fixtures/app');
+
 describe ('GridFSController', function () {
   var server;
   var imageId;
@@ -14,9 +16,7 @@ describe ('GridFSController', function () {
   before (function (done) {
     async.waterfall ([
       function (callback) {
-        // Instantiate the application.
-        var appPath = path.resolve (__dirname, '../../fixtures/app');
-        blueprint.Application (appPath, callback);
+        blueprint.testing.createApplicationAndStart (appPath, callback);
       },
 
       function (app, callback) {
@@ -27,18 +27,6 @@ describe ('GridFSController', function () {
 
         defaultConnection.open (connstr, callback);
       }
-
-      /*
-      function (app, callback) {
-        return callback ();
-
-        var collections = ['image.files', 'image.chunks'];
-        async.each (collections, function (coll, callback) {
-          app.database.conn.db.collection (coll).drop (function () {
-            return callback ();
-          });
-        }, callback);
-      } */
     ], done);
   });
 

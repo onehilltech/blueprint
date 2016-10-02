@@ -1,6 +1,5 @@
 var ConnectionManager = require ('../../../lib/ConnectionManager')
   , expect = require ('chai').expect
-  , async = require ('async')
   ;
 
 describe ('ConnectionManager', function () {

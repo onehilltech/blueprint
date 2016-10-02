@@ -11,7 +11,7 @@
     "test": "env NODE_ENV=test mocha --recursive tests/unit-tests"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^0.45.1",
+    "@onehilltech/blueprint": "^0.47.0",
     "mongoose": "^4.6.2"
   },
   "devDependencies": {
