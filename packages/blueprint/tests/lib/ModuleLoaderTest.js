@@ -8,20 +8,23 @@ describe ('ModuleLoader', function () {
     it ('should load module in the application path', function (done) {
       var modulesPath = path.resolve (__dirname, '../../node_modules');
       var appPath = path.resolve (__dirname, '../fixtures/app');
-      var loader = new ModuleLoader (modulesPath);
       var modules = {};
 
-      loader.on ('module', function (name, module) {
-        modules[name] = module;
-      });
+      var mockapp =  {
+        addModule: function (name, module, callback) {
+          modules[name] = module;
+          return callback (null);
+        }
+      };
 
-      loader.on ('error', done);
-      loader.on ('done', function () {
+      var loader = new ModuleLoader (mockapp, modulesPath);
+
+      loader.load (appPath, function (err) {
+        if (err) return done (err);
+
         expect (modules).to.have.keys (['@onehilltech/blueprint-dummy-module1', '@onehilltech/blueprint-dummy-module2']);
         return done ();
       });
-
-      loader.load (appPath);
     });
   });
 });

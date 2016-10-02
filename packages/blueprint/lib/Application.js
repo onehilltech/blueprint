@@ -79,24 +79,10 @@ Application.prototype.init = function (callback) {
     // Load all the modules for the application.
     function (app, callback) {
       var modulesPath = path.resolve (app._appPath, '../node_modules');
-      var moduleLoader = new ModuleLoader (modulesPath);
-      var modules = {};
-
-      moduleLoader.on ('module', function (name, module) {
-        app.addModule (name, module, function (err) {
-          winston.log ('error', 'failed to load module %s [%s]', name, util.inspect (err));
-        });
+      var moduleLoader = new ModuleLoader (app, modulesPath);
+      moduleLoader.load (app._appPath, function (err) {
+        return callback (err, app);
       });
-
-      moduleLoader.on ('error', function (err) {
-        return callback (err);
-      });
-
-      moduleLoader.on ('done', function () {
-        return callback (null, app);
-      });
-
-      moduleLoader.load (app._appPath);
     },
 
     // Let's configure the application module portion of the application.
