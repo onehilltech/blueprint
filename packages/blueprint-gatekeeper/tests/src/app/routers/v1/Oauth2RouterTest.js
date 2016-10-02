@@ -5,23 +5,19 @@ var blueprint = require ('@onehilltech/blueprint')
   ;
 
 var datamodel  = require ('../../../../fixtures/datamodel')
-  , appFixture = require ('../../../../fixtures/app')
+  , appPath = require ('../../../../fixtures/appPath')
   ;
 
 describe ('Oauth2Router', function () {
   var server;
 
   before (function (done) {
-    appFixture (function (err, app) {
+    datamodel.apply (function (err) {
       if (err) return done (err);
 
-      server = app.server;
+      server = blueprint.app.server;
       return done (null);
     });
-  });
-
-  beforeEach(function (done) {
-    datamodel.apply(done);
   });
 
   describe('#getToken (callback)', function () {

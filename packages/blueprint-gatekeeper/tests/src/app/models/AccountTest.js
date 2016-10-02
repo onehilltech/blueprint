@@ -1,8 +1,9 @@
 var expect = require ('chai').expect
   , async  = require ('async')
+  , blueprint = require ('@onehilltech/blueprint')
   ;
 
-var appFixture = require ('../../../fixtures/app')
+const appPath = require ('../../../fixtures/appPath')
   ;
 
 var data = {
@@ -33,14 +34,14 @@ describe ('Account', function () {
   before (function (done) {
     async.series ([
       function (callback) {
-        appFixture (function (err, result) {
+        blueprint.testing.createApplicationAndStart (appPath, function (err, result) {
           if (err) return callback (err);
 
           app = result;
           Account = app.models.Account;
           Client  = app.models.Client;
 
-          return callback ();
+          return callback (null, app);
         });
       },
       function (callback) { Account.remove ({}, callback); },

@@ -4,8 +4,8 @@ var request   = require ('supertest')
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
-var datamodel  = require ('../../../../fixtures/datamodel')
-  , appFixture = require ('../../../../fixtures/app')
+const datamodel  = require ('../../../../fixtures/datamodel')
+  , appPath = require ('../../../../fixtures/appPath')
   , bm = blueprint.messaging
   ;
 
@@ -30,19 +30,13 @@ describe ('AccountRouter', function () {
   before (function (done) {
     async.series ([
       function (callback) {
-        appFixture (function (err, app) {
-          if (err) return callback (err);
-
-          server  = app.server;
-          Account = app.models.Account;
-
-          return callback (null);
-        });
+        datamodel.apply (callback);
       },
 
-      // 1. apply the datamodel
       function (callback) {
-        datamodel.apply (callback);
+        server  = blueprint.app.server;
+        Account = blueprint.app.models.Account;
+        return callback ();
       },
 
       // 2. get the user token for the tests.

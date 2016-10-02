@@ -5,7 +5,7 @@ var request   = require ('supertest')
   ;
 
 var datamodel  = require ('../../../../fixtures/datamodel')
-  , appFixture = require ('../../../../fixtures/app')
+  , appPath = require ('../../../../fixtures/appPath')
   ;
 
 describe ('ActivationRouter', function () {
@@ -45,7 +45,7 @@ describe ('ActivationRouter', function () {
 
   before (function (done) {
     async.waterfall ([
-      function (callback) { appFixture (callback); },
+      function (callback) { blueprint.testing.createApplicationAndStart (appPath, callback); },
 
       // apply the datamodel
       function (app, callback) {

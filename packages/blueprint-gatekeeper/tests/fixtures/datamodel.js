@@ -1,9 +1,10 @@
 var async   = require ('async')
   , winston = require ('winston')
+  , blueprint = require ('@onehilltech/blueprint')
   ;
 
-var appFixture = require ('./app')
-  , roles      = require ('../../lib/roles')
+const appPath = require ('./appPath')
+  , roles = require ('../../lib/roles')
   ;
 
 var Account = undefined
@@ -89,14 +90,14 @@ exports.apply = function (done) {
 
   async.series ([
     function (callback) {
-      appFixture (function (err, app) {
+      blueprint.testing.createApplicationAndStart (appPath, function (err, app) {
         if (err) return callback (err);
 
-        Client = app.models.Client;
-        Account = app.models.Account;
-        AccessToken = app.models.oauth2.AccessToken;
+        if (!Client) Client = app.models.Client;
+        if (!Account) Account = app.models.Account;
+        if (!AccessToken) AccessToken = app.models.oauth2.AccessToken;
 
-        return callback ();
+        return callback (null, app);
       });
     },
     function (callback) { cleanup (callback); },
