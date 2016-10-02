@@ -83,7 +83,9 @@ Application.prototype.init = function (callback) {
       var modules = {};
 
       moduleLoader.on ('module', function (name, module) {
-        modules[name] = module;
+        app.addModule (name, module, function (err) {
+          winston.log ('error', 'failed to load module %s [%s]', name, util.inspect (err));
+        });
       });
 
       moduleLoader.on ('error', function (err) {
@@ -91,13 +93,7 @@ Application.prototype.init = function (callback) {
       });
 
       moduleLoader.on ('done', function () {
-        function onComplete (err) {
-          return callback (err, app);
-        }
-
-        async.eachOf (modules, function (module, name, callback) {
-          app.addModule (name, module, callback);
-        }, onComplete);
+        return callback (null, app);
       });
 
       moduleLoader.load (app._appPath);
