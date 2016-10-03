@@ -9,7 +9,9 @@ const DEFAULT_RELAY_CALLBACK = 'cloud-messaging.publish.callback';
 
 messaging.on ('app.init', function (app) {
   var config = app.configs['cloud-messaging'];
-  sender = new Sender (config);
+  var CloudToken = app.models.CloudToken;
+
+  sender = new Sender (CloudToken, config);
 });
 
 function publish (topic, message, relayTopic) {

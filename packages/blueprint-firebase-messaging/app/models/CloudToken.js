@@ -1,7 +1,9 @@
 var blueprint = require ('@onehilltech/blueprint')
   , mongodb   = require ('@onehilltech/blueprint-mongodb')
-  , Schema    = mongodb.Schema
-  , Account   = blueprint.app.modules['@onehilltech/gatekeeper'].models.Account
+  ;
+
+var Schema  = mongodb.Schema
+  , Account = blueprint.app.modules ['@onehilltech/gatekeeper'].models.Account
   ;
 
 var schema = new Schema({

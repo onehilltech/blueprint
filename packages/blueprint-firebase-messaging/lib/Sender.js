@@ -1,12 +1,11 @@
-var async      = require ('async')
-  , gcm        = require ('node-gcm')
-  , CloudToken = require ('../app/models/CloudToken')
-  , _          = require ('underscore')
+var async = require ('async')
+  , gcm   = require ('node-gcm')
+  , _     = require ('underscore')
   ;
 
 const MAX_RECIPIENTS = 1000;
 
-function Sender (opts) {
+function Sender (model, opts) {
   opts = opts || {};
 
   if (!opts.apiKey)
@@ -14,6 +13,7 @@ function Sender (opts) {
 
   this._dryRun = opts.dryRun || false;
   this._sender = gcm.Sender (opts.apiKey);
+  this._model = model;
 }
 
 /**
@@ -33,7 +33,7 @@ Sender.prototype.send = function (recipients, data, callback) {
     // Get the tokens for all recipients.
     function (callback) {
       var filter = { owner: {$in: recipients} };
-      CloudToken.distinct ('token', filter, callback);
+      self._model.distinct ('token', filter, callback);
     },
 
     function (tokens, callback) {
