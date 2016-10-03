@@ -1,45 +1,12 @@
 'use strict';
 
-var mongoose = require ('mongoose')
-  , blueprint = require ('@onehilltech/blueprint')
+var mongoose           = require ('mongoose')
   , ConnectionManager  = require ('./ConnectionManager')
   , ResourceController = require ('./ResourceController')
-  , GridFSController = require ('./GridFSController')
+  , GridFSController   = require ('./GridFSController')
   ;
 
-const DEFAULT_CONNECTION_NAME = '$default';
-
-// Locate the module configuration in the application. If there is no
-// configuration, then we need to stop processing. This brings attention
-// to the developer to resolve the problem.
-
-var config = blueprint.app.configs['mongodb'];
-if (!config) throw new Error ('Must define mongodb.config.js configuration');
-
-var defaultConnection = config.defaultConnection || DEFAULT_CONNECTION_NAME;
-var connsConfig = config['connections'];
-
-if (!connsConfig || connsConfig.length == 0) throw new Error ('Must define at least one connection');
-if (!connsConfig[defaultConnection]) throw new Error ('Default connection configuration not defined');
-
-// Fix deprecation warnings.
-mongoose.Promise = config.promiseLibrary || global.Promise;
-
-// Create the connections defined in the configuration. The key is the name
-// of the connection, and the value is the connection details.
-
-var opts = {
-  defaultConnection: defaultConnection
-};
-
-var connMgr = ConnectionManager.getConnectionManager (opts);
-
-for (var key in connsConfig) {
-  if (connsConfig.hasOwnProperty (key))
-    connMgr.createConnection (key);
-}
-
-var exports = module.exports = connMgr;
+var exports = module.exports = ConnectionManager;
 
 exports.Types = mongoose.Types;
 exports.Schema = mongoose.Schema;
@@ -57,7 +24,7 @@ exports.GridFSController = GridFSController;
  * @returns {*}
  */
 function model (name, schema, collection) {
-  return connMgr.defaultConnection.model (name, schema, collection);
+  return ConnectionManager.getConnectionManager ().defaultConnection.model (name, schema, collection);
 }
 
 /**
@@ -72,7 +39,7 @@ function model (name, schema, collection) {
  * @param collection    Name of the model collection
  */
 function modelOn (connName, name, schema, collection) {
-  var conn = connMgr.getConnection (connName);
+  var conn = ConnectionManager.getConnectionManager ().getConnection (connName);
 
   if (conn)
     return conn.model (name, schema, collection);

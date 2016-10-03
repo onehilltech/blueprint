@@ -1,12 +1,12 @@
 'use strict';
 
-var blueprint = require ('@onehilltech/blueprint')
-  , mongodb = require ('../../../../lib')
+var blueprint        = require ('@onehilltech/blueprint')
+  , mongodb          = require ('../../../../lib')
   , GridFSController = mongodb.GridFSController
   ;
 
 function ImageController () {
-  GridFSController.call (this, mongodb.defaultConnection, {name: 'image'});
+  GridFSController.call (this, mongodb.getConnectionManager ().defaultConnection, {name: 'image'});
 }
 
 blueprint.controller (ImageController, GridFSController);

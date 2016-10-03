@@ -1,8 +1,8 @@
-var request = require ('supertest')
-  , blueprint = require ('@onehilltech/blueprint')
-  , path = require ('path')
-  , async = require ('async')
-  , expect = require ('chai').expect
+var request           = require ('supertest')
+  , blueprint         = require ('@onehilltech/blueprint')
+  , path              = require ('path')
+  , async             = require ('async')
+  , expect            = require ('chai').expect
   , ConnectionManager = require ('../../../lib/ConnectionManager')
   ;
 

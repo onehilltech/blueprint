@@ -6,7 +6,9 @@ var mongoose = require ('mongoose')
 var exports = module.exports = ConnectionManager;
 
 function ConnectionManager (opts) {
-  this._defaultName = opts.defaultConnection;
+  opts = opts || {};
+
+  this._defaultName = opts.defaultConnection || '$default';
   this._connections = {};
 
   this._connections[this._defaultName] = mongoose.connections[0];
