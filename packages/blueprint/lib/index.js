@@ -30,7 +30,7 @@ exports.ModuleRouter = ModuleRouter;
  * initialized, then an exception is thrown.
  */
 Object.defineProperty (exports, 'app', {
-  get : function () { return Framework ().app; }
+  get: function () { return Framework ().app; }
 });
 
 /**
@@ -54,7 +54,7 @@ Object.defineProperty (exports, 'testing', {
  * Get the current Node.js environment. The default Node.js environment is development.
  */
 Object.defineProperty (exports, 'env', {
-  get : function () { return Env.name }
+  get: function () { return Env.name }
 });
 
 /**
@@ -104,17 +104,6 @@ exports.destroy = function (callback) {
 
   if (callback)
     return callback (null);
-};
-
-/**
- * Include an application model in the main application.
- *
- * @param moduleName
- * @param appModulePath
- * @param callback
- */
-exports.include = function (moduleName, appModulePath, callback) {
-  Framework().app.addModule (moduleName, appModulePath, callback);
 };
 
 exports.errors = require ('./errors');
