@@ -2,7 +2,7 @@
 
 var blueprint         = require ('@onehilltech/blueprint')
   , mongoose          = require ('mongoose')
-  , ConnectionManager = require ('./ConnectionManager')
+  , ConnectionManager = require ('../../lib/ConnectionManager')
   ;
 
 const DEFAULT_CONNECTION_NAME = '$default';
