@@ -122,7 +122,7 @@ var blueprint        = require ('@onehilltech/blueprint')
   ;
 
 function ImageController () {
-  GridFSController.call (this, mongodb.defaultConnection, {name: 'image'});
+  GridFSController.call (this, mongodb.getConnectionManager ().defaultConnection, {name: 'image'});
 }
 
 blueprint.controller (ImageController, GridFSController);
@@ -133,4 +133,4 @@ module.exports = ImageController;
 This controller will extract the uploaded file from the `image` parameter.
 In addition, it will create collections named `image.files` and `image.chunks`
 in the database associated with the connection. If you want to use a different 
-connection, then use the `getConnection(name)` method.
+connection, then use the `getConnection(name)` method on the `ConnectionManager`.
