@@ -2,7 +2,7 @@
 
 var mongodb = require ('../../../lib')
   , winston = require ('winston')
-  , util = require ('util')
+  , util    = require ('util')
   ;
 
 module.exports = openConnections;
@@ -14,11 +14,12 @@ function openConnections (app) {
   winston.log ('info', 'opening all connections to the database');
 
   var config = app.configs.mongodb;
+  var connMgr = mongodb.getConnectionManager ();
 
   for (var key in config.connections) {
     if (config.connections.hasOwnProperty (key)) {
       var opts = config.connections[key];
-      mongodb.openConnection (key, opts, errorHandler (key));
+      connMgr.openConnection (key, opts, errorHandler (key));
     }
   }
 }
