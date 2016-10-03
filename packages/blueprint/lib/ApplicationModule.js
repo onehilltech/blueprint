@@ -50,18 +50,7 @@ ApplicationModule.prototype.init = function (callback) {
 
   async.waterfall ([
     async.constant (this),
-    loadInto (this.listenerManager, 'listeners'),
-    loadInto (this.policyManager, 'policies'),
-    loadInto (this.modelManager, 'models'),
-    loadInto (this.controllerManager, 'controllers'),
-
-    function (module, callback) {
-      module.routerManager.setControllers (module.controllers);
-      return callback (null, module);
-    },
-
-    loadInto (this.routerManager, 'routers'),
-
+    
     function (module, callback) {
       var initHookFile = path.resolve (module._appPath, 'hooks/module.init.js');
 
@@ -76,6 +65,18 @@ ApplicationModule.prototype.init = function (callback) {
         return callback (null, module);
       });
     },
+
+    loadInto (this.listenerManager, 'listeners'),
+    loadInto (this.policyManager, 'policies'),
+    loadInto (this.modelManager, 'models'),
+    loadInto (this.controllerManager, 'controllers'),
+
+    function (module, callback) {
+      module.routerManager.setControllers (module.controllers);
+      return callback (null, module);
+    },
+
+    loadInto (this.routerManager, 'routers'),
 
     function (module, callback) {
       // Mark the module as initialized, and notify all listeners.
