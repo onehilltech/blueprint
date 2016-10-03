@@ -63,6 +63,21 @@ ApplicationModule.prototype.init = function (callback) {
     loadInto (this.routerManager, 'routers'),
 
     function (module, callback) {
+      var initHookFile = path.resolve (module._appPath, 'hooks/module.init.js');
+
+      fs.stat (initHookFile, function (err, stat) {
+        if (err && err.code === 'ENOENT') return callback (null, module);
+        if (err) return callback (err);
+        if (!stat.isFile ()) return callback (null, module);
+
+        // Load the initialization hook, forcing the file to execute.
+        module.initState = require (initHookFile);
+
+        return callback (null, module);
+      });
+    },
+
+    function (module, callback) {
       // Mark the module as initialized, and notify all listeners.
       module._is_init = true;
       Framework ().messaging.emit ('module.init', module);

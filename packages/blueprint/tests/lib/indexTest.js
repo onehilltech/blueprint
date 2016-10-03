@@ -14,7 +14,6 @@ describe ('index', function () {
         'Policy',
         'controller',
         'destroy',
-        'include',
         'errors'
       ];
 

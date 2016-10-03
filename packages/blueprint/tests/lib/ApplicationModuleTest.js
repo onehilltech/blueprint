@@ -36,6 +36,7 @@ describe ('ApplicationModule', function () {
         expect (module.routerManager).to.be.defined;
         expect (module.listenerManager).to.be.defined;
         expect (module.policyManager).to.be.defined;
+        expect (module.initState).to.equal ('Hello, World!');
 
         return done ();
       });
