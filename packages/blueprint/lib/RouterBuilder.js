@@ -38,19 +38,16 @@ function handleError (err, res, next) {
   var errType = typeof err;
 
   if (errType === 'string') {
-    winston.log ('error', err);
-    res.status (400).send (err);
+    res.status (400).type ('text/plain').send (err);
   }
   else if (errType === 'object') {
+    res.type ('application/json');
+
     if (err instanceof HttpError) {
-      winston.log ('error', err.message);
       res.status (err.statusCode).send ({errors: err.message});
     }
     else {
-      var errMsg = util.inspect (err);
-
-      winston.log ('error', errMsg);
-      res.status (400).send (errMsg);
+      res.status (400).send (err);
     }
   }
 
