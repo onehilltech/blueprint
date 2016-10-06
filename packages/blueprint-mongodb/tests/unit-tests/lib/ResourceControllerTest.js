@@ -29,7 +29,18 @@ describe ('ResourceController', function () {
   describe ('create', function () {
     it ('should create a resource', function (done) {
       var dob  = new Date ().toISOString();
-      var data = {person: {first_name: 'James', last_name: 'Hill', age: 34, sex: 'Male', dob: dob}};
+      var data = {
+        person: {
+          first_name: 'John', last_name: 'Doe', age: 21, sex: 'Male', dob: dob,
+          address: {
+            street: 'Make Believe Lane',
+            city: 'Magic',
+            state: 'TN',
+            zipcode: 12345
+          }
+        }
+      };
+
       request (server.app)
         .post ('/person')
         .send (data)
@@ -38,6 +49,8 @@ describe ('ResourceController', function () {
           if (err) return done (err);
 
           data.person._id = req.body.person._id;
+          data.person.books = [];
+
           expect (req.body).to.deep.equal (data);
 
           return done (null);
@@ -49,12 +62,14 @@ describe ('ResourceController', function () {
         .post ('/person')
         .send ({person: {sex: 'Ok'}})
         .expect (400, [
-          {param: "person.first_name", msg: "Invalid param"},
-          {param: "person.last_name", msg: "Invalid param"},
-          {param: "person.age", msg: "Invalid/missing Int"},
-          {param: "person.sex", msg: "Expected [ 'Female', 'Male' ]", value: 'Ok'},
-          {param: "person.dob", msg: "Invalid date format"}
-
+          { param: "person.first_name", msg: "Invalid param"},
+          { param: "person.last_name", msg: "Invalid param"},
+          { param: "person.age", msg: "Invalid/missing Int"},
+          { param: "person.sex", msg: "Expected [ 'Female', 'Male' ]", value: 'Ok'},
+          { param: "person.dob", msg: "Invalid date format"},
+          { param: 'person.address.street', msg: 'Invalid param' },
+          { param: 'person.address.city', msg: 'Invalid param' },
+          { param: 'person.address.state', msg: 'Invalid param' }
         ], done);
     });
   });

@@ -7,7 +7,16 @@ var schema = new mongodb.Schema ({
   last_name: {type: String, required: true, default: 'User'},
   age: {type: Number, required: true, validation: {kind: 'Int'}},
   sex: {type: String, required: true, enum: ['Female', 'Male']},
-  dob: {type: Date, required: true}
+  dob: {type: Date, required: true},
+
+  address: {
+    street: {type: String, required: true},
+    city: {type: String, required: true},
+    state: {type: String, required: true},
+    zipcode: {type: Number, required: true}
+  },
+
+  books: [{type: String, ref: 'person', index: true, required: true}]
 });
 
 module.exports = mongodb.model ('person', schema);
