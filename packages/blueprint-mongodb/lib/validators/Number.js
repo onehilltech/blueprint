@@ -21,9 +21,13 @@ module.exports = function (path) {
       if (kinds.indexOf (kind) === -1)
         throw new Error (util.format ('Invalid number kind: %s', kind));
 
-      schema['is' + kind] = {
+      const isKind = 'is' + kind;
+      schema[isKind] = {
         errorMessage: util.format ('Invalid/missing %s', kind)
       };
+
+      if (validation.options)
+        schema[isKind].options = validation.options;
     }
   }
 

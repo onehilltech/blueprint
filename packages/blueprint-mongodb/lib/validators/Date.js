@@ -8,9 +8,9 @@ module.exports = function (path) {
   const validation = path.options.validation;
 
   if (validation) {
-    if (validation.kind && validation.kind === 'Int') {
-      schema.isInt = {
-        errorMessage: 'Invalid integer date format'
+    if (validation.kind && validation.kind === 'Numeric') {
+      schema.isNumeric = {
+        errorMessage: 'Invalid numeric date'
       }
     }
     else {
