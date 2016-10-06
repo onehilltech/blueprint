@@ -1,8 +1,10 @@
-var util = require ('util')
-  , async = require ('async')
-  , _ = require ('underscore')
+var util      = require ('util')
+  , async     = require ('async')
+  , _         = require ('underscore')
   , blueprint = require ('@onehilltech/blueprint')
   ;
+
+var ValidationSchema = require ('./ValidationSchema');
 
 var BaseController = blueprint.BaseController
   , HttpError = blueprint.errors.HttpError
@@ -31,7 +33,7 @@ function __onAuthorize (req, callback) { return callback (null); }
 function __onPrepareProjection (req, callback) { return callback (null, {}); }
 function __onPrepareOptions (req, callback) { return callback (null, {}); }
 function __onUpdateFilter (req, filter, callback) { return callback (null, filter); }
-function __onPreCreate (req, doc, callback) {
+function __onPrepareDocument (req, doc, callback) {
   return callback (null, doc);
 }
 function __onPostExecute (req, result, callback) { return callback (null, result); }
@@ -109,6 +111,12 @@ function ResourceController (opts) {
 
   if (!this._id)
     this._id = this._name + 'Id';
+
+  // Build the validation schema for create and update.
+  var validationOpts = {pathPrefix: this._name};
+  this._createValidation = ValidationSchema (opts.model, validationOpts);
+
+  // this._updateValidation = this._createValidation;
 }
 
 util.inherits (ResourceController, BaseController);
@@ -228,7 +236,7 @@ ResourceController.prototype.create = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onPreCreate = on.preCreate || __onPreCreate;
+  var onPrepareDocument = on.preCreate || on.prepareDocument || __onPrepareDocument;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
   var eventName = this.computeEventName ('created');
@@ -236,9 +244,23 @@ ResourceController.prototype.create = function (opts) {
   var self = this;
 
   return {
-    // There is no resource id that needs to be validated. So, we can
-    // just pass control to the onAuthorize method.
-    validate: onAuthorize,
+    validate: function (req, callback) {
+      async.series ([
+        // First, validate the input based on the target model. If any part of the
+        // schema validation fails, we return as
+        function (callback) {
+          req.checkBody (self._createValidation);
+          var errors = req.validationErrors ();
+
+          return callback (errors);
+        },
+
+        // Next, allow the subclass to perform its own validation.
+        function (callback) {
+          onAuthorize (req, callback);
+        }
+      ], callback);
+    },
 
     execute: function __blueprint_create (req, res, callback) {
       var doc = req.body[self._name];
@@ -246,7 +268,19 @@ ResourceController.prototype.create = function (opts) {
       async.waterfall ([
         async.constant (doc),
 
-        makeOnPreCreateHandler (req, onPreCreate),
+        function (doc, callback) {
+          async.waterfall ([
+            // First, remove all elements from the body that are not part of
+            // the target model.
+            function (callback) {
+              return callback (null, doc);
+            },
+
+            function (doc, callback) {
+              return onPrepareDocument (req, doc, callback);
+            }
+          ], callback);
+        },
 
         // Now, let's search our database for the resource in question.
         function (doc, callback) {

@@ -8,14 +8,17 @@
     "blueprint-module"
   ],
   "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive tests/unit-tests"
+    "test": "env NODE_ENV=test mocha --recursive tests/unit-tests",
+    "cover": "env NODE_ENV=test istanbul cover _mocha --recursive tests/unit-tests",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^0.47.0",
+    "@onehilltech/blueprint": "^0.47.8",
     "mongoose": "^4.6.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "istanbul": "^0.4.5",
     "mocha": "^3.0.2",
     "multer": "^1.2.0",
     "superagent": "^2.3.0",
