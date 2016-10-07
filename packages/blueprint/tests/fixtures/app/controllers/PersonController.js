@@ -18,14 +18,31 @@ PersonController.prototype.__defineGetter__ ('resourceId', function () {
 });
 
 PersonController.prototype.create = function () {
-  return function (req, res) {
-    var person = req.body.person;
-    person._id = persons.length;
+  return {
+    validate: {
+      'person.first_name': {
+        notEmpty: {
+          errorMessage: 'first_name is required'
+        }
+      },
 
-    persons.push (person);
+      'person.last_name': {
+        notEmpty: {
+          errorMessage: 'last_name is required'
+        }
+      }
+    },
 
-    res.status (200).json ({person: person});
-  };
+    execute: function (req, res, callback) {
+      var person = req.body.person;
+      person._id = persons.length;
+
+      persons.push (person);
+
+      res.status (200).json ({person: person});
+      return callback (null);
+    }
+  }
 };
 
 PersonController.prototype.getAll = function () {
@@ -42,19 +59,28 @@ PersonController.prototype.get = function () {
 };
 
 PersonController.prototype.update = function () {
-  return function (req, res) {
-    var personId = req.params.personId;
-    var person = persons[req.params.personId];
+  return {
+    validate: function (req, callback) {
+      req.checkBody ('person.first_name').optional ().notEmpty ();
+      req.checkBody ('person.last_name').optional ().notEmpty ();
 
-    if (req.body.person.first_name)
-      person.first_name = req.body.person.first_name;
+      return callback (req.validationErrors ());
+    },
 
-    if (req.body.person.last_name)
-      person.last_name = req.body.person.last_name;
+    execute: function (req, res) {
+      var personId = req.params.personId;
+      var person = persons[req.params.personId];
 
-    persons[personId] = person;
+      if (req.body.person.first_name)
+        person.first_name = req.body.person.first_name;
 
-    res.status (200).json ({person: person});
+      if (req.body.person.last_name)
+        person.last_name = req.body.person.last_name;
+
+      persons[personId] = person;
+
+      res.status (200).json ({person: person});
+    }
   };
 };
 
