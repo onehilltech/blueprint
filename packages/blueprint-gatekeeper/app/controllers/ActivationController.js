@@ -28,23 +28,24 @@ messaging.on ('app.init', function (app) {
  * Activate an account.
  */
 ActivationController.prototype.activate = function () {
-  return {
-    validate: {
-      token: {
-        in: 'query',
-        notEmpty: {
-          errorMessage: 'Missing account activation token'
-        }
-      },
-      redirect_uri: {
-        in: 'query',
-        optional: true,
-        isURL: {
-          errorMessage: 'Invalid URL'
-        }
+  var schema = {
+    token: {
+      in: 'query',
+      notEmpty: {
+        errorMessage: 'Missing account activation token'
       }
     },
+    redirect_uri: {
+      in: 'query',
+      optional: true,
+      isURL: {
+        errorMessage: 'Invalid URL'
+      }
+    }
+  };
 
+  return {
+    validate: schema,
     execute: function (req, res, callback) {
       async.waterfall ([
         async.constant (req.query.token),
