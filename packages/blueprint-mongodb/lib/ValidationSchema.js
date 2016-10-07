@@ -1,8 +1,9 @@
 'use strict';
 
-const _       = require ('underscore')
-  , util      = require ('util')
-  , instances = require ('./validators')
+const _        = require ('underscore')
+  , util       = require ('util')
+  , objectPath = require ('object-path')
+  , instances  = require ('./validators')
   ;
 
 module.exports = makeValidationSchema;
@@ -11,7 +12,7 @@ function makeValidationSchemaForPath (path) {
   // Build the general-purpose schema for the path.
   var schema = {};
 
-  if (!path.isRequired)
+  if (!path.isRequired || objectPath.get (path.options, 'validation.optional', false))
     schema.optional = true;
 
   // Build the instance schema for the path.
