@@ -11,7 +11,7 @@ var schema = new Schema({
   device: {type: String, required: true, unique: true, index: true},
 
   /// User account that owns the token.
-  owner: {type: Schema.Types.ObjectId, required: true, ref: Account.modelName},
+  owner: {type: Schema.Types.ObjectId, required: true, ref: Account.modelName, validation: {optional: true}},
 
   /// Access token for the device.
   token: {type: String, required: true}

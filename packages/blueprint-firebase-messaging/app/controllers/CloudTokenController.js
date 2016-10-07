@@ -24,13 +24,20 @@ module.exports = CloudTokenController;
  */
 CloudTokenController.prototype.create = function () {
   return {
-    validate: function (req, callback) {
-      req.checkBody ('device', 'Missing device id').notEmpty ();
-      req.checkBody ('token', 'Missing token parameter').notEmpty ();
+    validate: {
+      device: {
+        notEmpty: {
+          errorMessage: 'Missing device id parameter'
+        }
+      },
 
-      return callback (req.validationErrors (true));
+      token: {
+        notEmpty: {
+          errorMessage: 'Missing token parameter'
+        }
+      }
     },
-
+    
     execute: function (req, res, callback) {
       var query = {
         'device': req.body.device
