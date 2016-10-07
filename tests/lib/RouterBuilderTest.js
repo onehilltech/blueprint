@@ -78,6 +78,15 @@ describe ('RouterBuilder', function () {
           });
       });
 
+      it ('should not create a single resource [validation failure]', function (done) {
+        request (app.server.app)
+          .post ('/persons')
+          .expect (400, [
+            { msg: "first_name is required", param: "person.first_name" },
+            { msg: "last_name is required", param: "person.last_name" }
+          ], done);
+      });
+
       it ('should retrieve a single resource', function (done) {
         request (app.server.app)
           .get ('/persons/' + id)
