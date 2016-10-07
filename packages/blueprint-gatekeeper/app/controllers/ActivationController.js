@@ -9,8 +9,10 @@ var winston   = require ('winston')
 var Account = require ('../models/Account')
   ;
 
-function ActivationController () {
+module.exports = ActivationController;
 
+function ActivationController () {
+  blueprint.BaseController.call (this);
 }
 
 blueprint.controller (ActivationController);
@@ -24,16 +26,23 @@ messaging.on ('app.init', function (app) {
 
 /**
  * Activate an account.
- *
- * @returns {Function}
  */
 ActivationController.prototype.activate = function () {
   return {
-    validate: function (req, callback) {
-      req.checkQuery ('token').notEmpty ();
-      req.checkQuery ('redirect_uri').optional ().isURL ();
-
-      return callback (req.validationErrors (true));
+    validate: {
+      token: {
+        in: 'query',
+        notEmpty: {
+          errorMessage: 'Missing account activation token'
+        }
+      },
+      redirect_uri: {
+        in: 'query',
+        optional: true,
+        isURL: {
+          errorMessage: 'Invalid URL'
+        }
+      }
     },
 
     execute: function (req, res, callback) {
@@ -83,5 +92,3 @@ ActivationController.prototype.activate = function () {
     }
   };
 };
-
-module.exports = exports = ActivationController;

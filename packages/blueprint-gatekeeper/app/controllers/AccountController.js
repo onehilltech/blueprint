@@ -96,24 +96,12 @@ AccountController.prototype.create = function () {
   var options = {
     on: {
       authorize: function (req, callback) {
-        async.series ([
-          function (callback) {
-            Policy.Definition (
-              Policy.and ([
-                Policy.assert ('is_client_request'),
-                Policy.assert ('has_role', gatekeeper.roles.client.account.create)
-              ])
-            ).evaluate (req, callback);
-          },
-          function (callback) {
-            // Validate the input parameters.
-            req.checkBody ('email', 'Missing/invalid email').notEmpty ().isEmail ();
-            req.checkBody ('username', 'Missing/invalid username').notEmpty ();
-            req.checkBody ('password', 'Missing/invalid password').notEmpty ();
-
-            return callback (req.validationErrors (true));
-          }
-        ], callback);
+        Policy.Definition (
+          Policy.and ([
+            Policy.assert ('is_client_request'),
+            Policy.assert ('has_role', gatekeeper.roles.client.account.create)
+          ])
+        ).evaluate (req, callback);
       },
 
       preCreate: function (req, doc, callback) {
@@ -125,10 +113,10 @@ AccountController.prototype.create = function () {
           required = DEFAULT_ACTIVATION_REQUIRED;
 
         doc = {
-          email : req.body.email,
-          username : req.body.username,
-          password : req.body.password,
-          created_by : req.user ,
+          email : req.body.account.email,
+          username : req.body.account.username,
+          password : req.body.account.password,
+          created_by : req.user,
           activation: {
             required: required
           }

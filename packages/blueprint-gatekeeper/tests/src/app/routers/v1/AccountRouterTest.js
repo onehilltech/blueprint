@@ -175,7 +175,8 @@ describe ('AccountRouter', function () {
       });
 
       request (server.app)
-        .post ('/v1/accounts').send (data)
+        .post ('/v1/accounts')
+        .send ({account: data})
         .set ('Authorization', 'Bearer ' + clientToken)
         .expect (200)
         .end (function (err, res) {
@@ -235,8 +236,14 @@ describe ('AccountRouter', function () {
       getToken (invalid, function (err, token) {
         if (err) return done (err);
 
+        var account = {
+          username: 'tester1',
+          password: 'tester1',
+          email: 'james@onehilltech.com'
+        };
+
         request (server.app)
-          .post ('/v1/accounts').send (invalid)
+          .post ('/v1/accounts').send ({account: account})
           .set ('Authorization', 'Bearer ' + token)
           .expect (403, done);
       });

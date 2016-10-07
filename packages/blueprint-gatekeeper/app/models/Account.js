@@ -38,7 +38,7 @@ var schema = new Schema ({
    */
 
   /// The client that created the account.
-  created_by: {type: mongodb.Schema.Types.ObjectId, required: true, ref: Client.modelName, index: true},
+  created_by: {type: mongodb.Schema.Types.ObjectId, required: true, ref: Client.modelName, index: true, validation: {optional: true}},
 
   /// Enabled state for the account.
   enabled: { type: Boolean, required: true, default: true },

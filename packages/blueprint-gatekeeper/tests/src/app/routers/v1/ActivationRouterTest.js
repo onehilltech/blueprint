@@ -27,7 +27,7 @@ describe ('ActivationRouter', function () {
     async.waterfall ([
       function (callback) {
         request (server.app)
-          .post ('/v1/accounts').send (data)
+          .post ('/v1/accounts').send ({account: data})
           .set ('Authorization', 'Bearer ' + clientToken)
           .expect (200, callback);
       },
@@ -95,6 +95,12 @@ describe ('ActivationRouter', function () {
       request (server.app)
         .get ('/v1/activate?token=' + activationToken1)
         .expect (400, done);
+    });
+
+    it ('should not activate the account [missing query params]', function (done) {
+      request (server.app)
+        .get ('/v1/activate')
+        .expect (400, [{param: 'token', msg: 'Missing account activation token'}], done);
     });
 
     it ('should activate the token, with redirect', function (done) {
