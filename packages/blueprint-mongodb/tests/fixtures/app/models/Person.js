@@ -1,6 +1,12 @@
 var mongodb = require ('../../../../lib')
   ;
 
+var education = new mongodb.Schema ({
+  degree: {type: String},
+  school: {type: String},
+  graduation: {type: Number}
+});
+
 var schema = new mongodb.Schema ({
   first_name: {type: String, required: true, default: 'New'},
   middle_name: {type: String},
@@ -16,7 +22,7 @@ var schema = new mongodb.Schema ({
     zipcode: {type: Number, required: true}
   },
 
-  books: [{type: String, ref: 'person', index: true, required: true}]
+  books: [{type: String, ref: 'person', index: true, required: true}],
 });
 
 module.exports = mongodb.model ('person', schema);
