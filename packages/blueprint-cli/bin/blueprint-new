@@ -16,7 +16,6 @@ var TemplateDir = lib.TemplateDir
   ;
 
 program
-  .option ('-n, --name <name>', 'name of the application')
   .option ('-o, --output-path [path]', 'output path [./]', './')
   .option ('--version [version]', 'version number [0.0.1]', '0.0.1')
   .option ('--license [license]', 'distribution license [Apache-2.0]', 'Apache-2.0')
@@ -26,8 +25,20 @@ program
 if (program.debug)
   winston.level = 'debug';
 
+if (program.args.length > 1) {
+  winston.log('error', 'cannot accept multiple arguments');
+  process.exit(1);
+}
+
+var name = program.args[0];
+
+if (!(name)) {
+  winston.log('error', 'must specify the name of the new application.');
+  process.exit(1);
+}
+
 var templatePath = path.resolve (__dirname, '../templates/blueprint-new');
-var dstPath = path.resolve (program.outputPath, program.name);
+var dstPath = path.resolve (program.outputPath, name);
 
 winston.log ('info', 'target output: %s', dstPath);
 
@@ -43,7 +54,7 @@ async.waterfall ([
     // this view of the system.
     var view = {
       project : {
-        name: program.name,
+        name: name,
         version: program.version,
         license: program.license
       }
