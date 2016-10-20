@@ -2,11 +2,14 @@
 
 'use strict';
 
-var fse   = require ('fs-extra')
-  , async = require ('async')
-  , util  = require ('util')
+var fse     = require ('fs-extra')
+  , async   = require ('async')
+  , util    = require ('util')
+  , winston = require ('winston')
   ;
 
+const PACKAGE_JSON = './package.json';
+const DEFAULT_ENCODING = 'utf-8';
 const KEYWORD_BLUEPRINT_MODULE = 'blueprint-module';
 
 function done (err) {
@@ -20,7 +23,7 @@ function done (err) {
 
 async.waterfall ([
   function (callback) {
-    fse.readJson ('./package.json', 'utf-8', callback);
+    fse.readJson (PACKAGE_JSON, DEFAULT_ENCODING, callback);
   },
 
   function (packageObj, callback) {
@@ -29,6 +32,6 @@ async.waterfall ([
     if (packageObj.keywords.indexOf (KEYWORD_BLUEPRINT_MODULE) == -1)
       packageObj.keywords.push (KEYWORD_BLUEPRINT_MODULE);
 
-    return fse.outputJson (packageObj, 'utf-8', callback);
+    return fse.outputJson (PACKAGE_JSON, packageObj, DEFAULT_ENCODING, callback);
   }
 ], done);
