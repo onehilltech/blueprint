@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+
+'use strict';
+
+var fse   = require ('fs-extra')
+  , async = require ('async')
+  , util  = require ('util')
+  ;
+
+const KEYWORD_BLUEPRINT_MODULE = 'blueprint-module';
+
+function done (err) {
+  if (err)
+    winston.log ('error', util.inspect (err));
+  else
+    winston.log ('info', 'Initialized module support');
+}
+
+// Open package.json, and add blueprint-module to keywords.
+
+async.waterfall ([
+  function (callback) {
+    fse.readJson ('./package.json', 'utf-8', callback);
+  },
+
+  function (packageObj, callback) {
+    packageObj.keywords = packageObj.keywords || [];
+
+    if (packageObj.keywords.indexOf (KEYWORD_BLUEPRINT_MODULE) == -1)
+      packageObj.keywords.push (KEYWORD_BLUEPRINT_MODULE);
+
+    return fse.outputJson (packageObj, 'utf-8', callback);
+  }
+], done);

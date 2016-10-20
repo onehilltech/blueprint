@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+'use strict';
+
+var program = require ('commander')
+  ;
+
+program
+  .command ('init', 'initialize the Blueprint application as a module')
+  .parse (process.argv);

@@ -7,16 +7,20 @@ var program = require ('commander')
   ;
 
 var commands = {
-  new: 'create a new Blueprint.js application',
+  new: 'create a new application',
   controller: 'manage application controllers',
-  model: 'manage application models'
+  model: 'manage application models',
+  module: 'module support'
 };
 
+function execute (err) {
+  if (err)
+    return winston.log ('error', util.inspect (err));
+
+  program.parse (process.argv);
+}
 
 async.eachOf (commands, function (value, key, callback) {
   program.command (key, value);
   return callback (null);
-}, function (err) {
-  if (err) return winston.log ('error', util.inspect (err));
-  program.parse (process.argv);
-});
+}, execute);
