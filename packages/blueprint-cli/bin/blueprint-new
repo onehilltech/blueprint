@@ -26,8 +26,6 @@ program
 program.parse (process.argv);
 
 function generateApplication (name) {
-  winston.log ('info', 'great!');
-
   if (program.debug)
     winston.level = 'debug';
 
