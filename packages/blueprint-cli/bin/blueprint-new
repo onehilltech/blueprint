@@ -16,90 +16,85 @@ var TemplateDir = lib.TemplateDir
   ;
 
 program
+  .arguments('<name>')
   .option ('-o, --output-path [path]', 'output path [./]', './')
   .option ('--version [version]', 'version number [0.0.1]', '0.0.1')
   .option ('--license [license]', 'distribution license [Apache-2.0]', 'Apache-2.0')
   .option ('--debug', 'enable debug messages')
-  .parse (process.argv);
+  .action (generateApplication);
 
-if (program.debug)
-  winston.level = 'debug';
+program.parse (process.argv);
 
-if (program.args.length > 1) {
-  winston.log('error', 'cannot accept multiple arguments');
-  process.exit(1);
+function generateApplication (name) {
+  winston.log ('info', 'great!');
+
+  if (program.debug)
+    winston.level = 'debug';
+
+  var templatePath = path.resolve (__dirname, '../templates/blueprint-new');
+  var dstPath = path.resolve (program.outputPath, name);
+
+  winston.log ('info', 'target output: %s', dstPath);
+
+  async.waterfall ([
+    function (callback) {
+      fse.ensureDir (dstPath, callback);
+    },
+
+    function (made, callback) {
+      winston.log ('info', 'generating new application...');
+
+      // Define the view used to render the templates, then render the templates with
+      // this view of the system.
+      var view = {
+        project : {
+          name: name,
+          version: program.version,
+          license: program.license
+        }
+      };
+
+      var templates = new TemplateDir (templatePath);
+      templates.render (dstPath, view, callback);
+    },
+
+    function (callback) {
+      Installer (dstPath, {'save': true}, callback);
+    },
+
+    function (installer, callback) {
+      async.series ([
+        // The dependencies
+
+        function (callback) {
+          const dependencies = [
+            '@onehilltech/blueprint'
+          ];
+
+          installer.install (dependencies, callback);
+        },
+
+        // The devDependencies
+        function (callback) {
+          const devDependencies = [
+            'chai',
+            'mocha',
+            'superagent',
+            'supertest'
+          ];
+
+          Installer (dstPath, {'save-dev': true}, function (err, devInstaller) {
+            devInstaller.install (devDependencies, callback);
+          });
+        },
+
+        function (callback) {
+          installer.bin (callback);
+        }
+      ], callback);
+    }
+  ], onComplete);
 }
-
-var name = program.args[0];
-
-if (!(name)) {
-  winston.log('error', 'must specify the name of the new application.');
-  process.exit(1);
-}
-
-var templatePath = path.resolve (__dirname, '../templates/blueprint-new');
-var dstPath = path.resolve (program.outputPath, name);
-
-winston.log ('info', 'target output: %s', dstPath);
-
-async.waterfall ([
-  function (callback) {
-    fse.ensureDir (dstPath, callback);
-  },
-
-  function (made, callback) {
-    winston.log ('info', 'generating new application...');
-
-    // Define the view used to render the templates, then render the templates with
-    // this view of the system.
-    var view = {
-      project : {
-        name: name,
-        version: program.version,
-        license: program.license
-      }
-    };
-
-    var templates = new TemplateDir (templatePath);
-    templates.render (dstPath, view, callback);
-  },
-
-  function (callback) {
-    Installer (dstPath, {'save': true}, callback);
-  },
-
-  function (installer, callback) {
-    async.series ([
-      // The dependencies
-
-      function (callback) {
-        const dependencies = [
-          '@onehilltech/blueprint'
-        ];
-
-        installer.install (dependencies, callback);
-      },
-
-      // The devDependencies
-      function (callback) {
-        const devDependencies = [
-          'chai',
-          'mocha',
-          'superagent',
-          'supertest'
-        ];
-
-        Installer (dstPath, {'save-dev': true}, function (err, devInstaller) {
-          devInstaller.install (devDependencies, callback);
-        });
-      },
-
-      function (callback) {
-        installer.bin (callback);
-      }
-    ], callback);
-  }
-], onComplete);
 
 function onComplete (err) {
   if (err)
