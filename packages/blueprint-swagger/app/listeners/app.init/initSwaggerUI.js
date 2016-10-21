@@ -4,6 +4,7 @@ var fse     = require ('fs-extra')
   , path    = require ('path')
   , winston = require ('winston')
   , async   = require ('async')
+  , express = require ('express')
   ;
 
 module.exports = initSwaggerUI;
@@ -11,10 +12,10 @@ module.exports = initSwaggerUI;
 // Support version of Swagger
 const SWAGGER_VERSION = '2.0';
 const DEFAULT_VERSION = '0.1.0';
-const DEFAULT_ENDPOINT = '/swagger';
+const DEFAULT_ENDPOINT = '/api-doc';
 
 // Swagger definition for the application.
-var swagger = {
+var spec = {
   swagger: SWAGGER_VERSION,
 
   info: {
@@ -22,8 +23,8 @@ var swagger = {
   }
 };
 
-function getSwaggerDefinition (req, res) {
-  res.status (200).json (swagger);
+function getSwaggerUI (req, res) {
+  res.render ('swagger', {spec: spec});
 }
 
 /**
@@ -38,18 +39,18 @@ function defineInfoObject (packageObj, app) {
   var swaggerInfoConfig = swaggerConfig.info || {};
 
   // Define the info object in the Swagger specification.
-  swagger.info.title = appConfig.name || packageObj.name;
+  spec.info.title = appConfig.name || packageObj.name;
 
-  swagger.info.version = packageObj.version || DEFAULT_VERSION;
-  swagger.info.description = packageObj.description;
+  spec.info.version = packageObj.version || DEFAULT_VERSION;
+  spec.info.description = packageObj.description;
 
   if (packageObj.license)
-    swagger.info.license = {name: packageObj.license};
+    spec.info.license = {name: packageObj.license};
 
   if (packageObj.author)
-    swagger.info.contact = packageObj.author;
+    spec.info.contact = packageObj.author;
 
-  swagger.info.termsOfService = swaggerInfoConfig.termsOfService;
+  spec.info.termsOfService = swaggerInfoConfig.termsOfService;
 }
 
 /**
@@ -67,11 +68,11 @@ function defineSchemes (app) {
   if (protocols.https)
     schemes.push ('https');
 
-  swagger.schemes = schemes;
+  spec.schemes = schemes;
 }
 
 function definePaths (app) {
-  swagger.paths = {};
+  spec.paths = {};
 }
 
 /**
@@ -105,16 +106,16 @@ function initSwaggerUI (app) {
       defineInfoObject (packageObj, app);
 
       if (appConfig.host)
-        swagger.host = appConfig.host;
+        spec.host = appConfig.host;
 
       if (serverConfig.basePath)
-        swagger.basePath = serverConfig.basePath;
+        spec.basePath = serverConfig.basePath;
 
       if (swaggerConfig.consumes)
-        swagger.consumes = swaggerConfig.consumes;
+        spec.consumes = swaggerConfig.consumes;
 
       if (swaggerConfig.produces)
-        swagger.produces = swaggerConfig.produces;
+        spec.produces = swaggerConfig.produces;
 
       defineSchemes (app);
       definePaths (app);
@@ -124,11 +125,17 @@ function initSwaggerUI (app) {
 
     // Add a route the application server that returns the Swagger UI specification.
     function (callback) {
-      var endpoint = swaggerConfig.endpoint || DEFAULT_ENDPOINT;
       var server = app.server;
 
-      if (server)
-        server.app.get (endpoint, getSwaggerDefinition);
+      if (server) {
+        // Set the endpoint for viewing the Swagger UI.
+        var endpoint = swaggerConfig.endpoint || DEFAULT_ENDPOINT;
+        server.app.get (endpoint, getSwaggerUI);
+
+        // Set the location of the static files rendered by the Swagger UI.
+        var staticPath = path.resolve (app.appPath, '../public_html');
+        server.app.use (express.static (staticPath))
+      }
 
       return callback (null);
     }
