@@ -2,7 +2,7 @@ var winston    = require ('winston')
   , uid        = require ('uid-safe')
   , async      = require ('async')
   , blueprint  = require ('@onehilltech/blueprint')
-  , mongoose   = require ('mongoose')
+  , mongodb    = require ('@onehilltech/blueprint-mongodb')
   , messaging  = blueprint.messaging
   , gatekeeper = require ('../../../lib')
   ;
@@ -62,19 +62,29 @@ function grantToken (res, accessToken, refreshToken, callback) {
   callback (null);
 }
 
+/**
+ * Create a save the user access token. The user access token has an accessToken
+ * and a refreshToken.
+ *
+ * @param client
+ * @param account
+ * @param callback
+ */
 function createAndSaveUserAccessToken (client, account, callback) {
   async.waterfall ([
     // Create a new AccessToken model. The model is used to determine
     function (callback) {
-      var doc = { client: client._id, account: account._id, refresh_token: new mongoose.Types.ObjectId () };
+      var doc = { client: client._id, account: account._id, refresh_token: new mongodb.Types.ObjectId () };
       var accessToken = new AccessToken (doc);
 
       accessToken.save (callback);
     },
 
     function (accessToken, affected, callback) {
+      // Use the information in the accessToken to generate a jwt for both the accessToken
+      // and the refreshToken.
+
       async.series ([
-        // Generate the access token.
         function (callback) {
           var expiresIn = accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN;
           var opts = {
@@ -85,7 +95,6 @@ function createAndSaveUserAccessToken (client, account, callback) {
           tokenStrategy.generateToken (opts, callback);
         },
 
-        // Generate the refresh token.
         function (callback) {
           var jti = accessToken.refresh_token.toString ();
 

@@ -104,7 +104,7 @@ AccountController.prototype.create = function () {
         ).evaluate (req, callback);
       },
 
-      preCreate: function (req, doc, callback) {
+      prepareDocument: function (req, doc, callback) {
         // Overwrite the current document with one that matches the
         // data model for an account.
         var required = activationConfig.required;
