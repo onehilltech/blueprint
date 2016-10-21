@@ -3522,7 +3522,7 @@ SwaggerClient.prototype.initialize = function (url, options) {
   this.supportedSubmitMethods = options.supportedSubmitMethods || [];
   this.failure = options.failure || function (err) { throw err; };
   this.progress = options.progress || function () {};
-  this.spec = _.cloneDeep(options.spec); // Clone so we do not alter the provided document
+  this.swaggerSpec = _.cloneDeep(options.spec); // Clone so we do not alter the provided document
 
   if (options.scheme) {
     this.scheme = options.scheme;
@@ -4540,7 +4540,7 @@ Resolver.prototype.processAllOf = function(root, name, definition, resolutionTab
 };
 
 Resolver.prototype.resolve = function (spec, arg1, arg2, arg3) {
-  this.spec = spec;
+  this.swaggerSpec = spec;
   var root = arg1, callback = arg2, scope = arg3, opts = {}, location, i;
   if(typeof arg1 === 'function') {
     root = null;
