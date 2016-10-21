@@ -24,7 +24,7 @@ var spec = {
 };
 
 function getSwaggerUI (req, res) {
-  res.render ('swagger', {spec: spec});
+  res.render ('swagger.handlebars', {spec: spec});
 }
 
 /**
