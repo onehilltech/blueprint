@@ -23,7 +23,7 @@ var swagger = {
 };
 
 function getSwaggerDefinition (req, res) {
-
+  res.status (200).json (swagger);
 }
 
 /**
@@ -80,9 +80,13 @@ function definePaths (app) {
  * @param app
  */
 function initSwaggerUI (app) {
+  winston.log ('info', 'building Swagger UI specification');
+
   function done (err) {
     if (err)
-      winston.log ('error', 'Failed to initialize Swagger UI')
+      winston.log ('error', 'Failed to initialize Swagger UI');
+    else
+      winston.log ('info', 'finished building Swagger UI specification');
   }
 
   var appConfig = app.configs.app || {};
