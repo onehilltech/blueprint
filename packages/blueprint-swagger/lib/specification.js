@@ -19,16 +19,7 @@ const SUPPORTED_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'p
  * @param callback
  */
 function buildSwaggerSpecification (app, callback) {
-  var spec = {
-    swagger: SWAGGER_VERSION,
-    info : {
-
-    },
-    paths: {
-
-    }
-  };
-
+  var spec;
   var appConfig = app.configs.app || {};
   var serverConfig = app.configs.server || {};
   var swaggerConfig = app.configs.swagger || {};
@@ -55,7 +46,7 @@ function buildSwaggerSpecification (app, callback) {
    * Initialize the specification.
    */
   function newSpec () {
-    var spec = {};
+    var spec = { swagger: SWAGGER_VERSION };
 
     if (appConfig.host)
       spec.host = appConfig.host;
