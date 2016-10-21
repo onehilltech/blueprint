@@ -2,6 +2,7 @@ var blueprint = require ('@onehilltech/blueprint')
   , path      = require ('path')
   , async     = require ('async')
   , swagger   = require ('../../../lib/specification')
+  , expect    = require ('chai').expect
   ;
 
 describe ('specification', function () {
@@ -11,13 +12,13 @@ describe ('specification', function () {
   });
 
   it ('should create a Swagger specification', function (done) {
-    async.waterfall ([
-      function (callback) { swagger (blueprint.app, callback); },
+    swagger (blueprint.app, function (err, spec) {
+      if (err) return done (err);
 
-      function (spec, callback) {
+      expect (spec).to.have.property ('swagger', '2.0');
+      //expect (spec).to.have.property ('schemes', ['http']);
 
-        return callback (null);
-      }
-    ], done);
+      return done (null);
+    });
   });
 });

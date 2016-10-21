@@ -4,6 +4,7 @@ var path    = require ('path')
   , winston = require ('winston')
   , async   = require ('async')
   , fse     = require ('fs-extra')
+  , _       = require ('underscore')
   ;
 
 module.exports = buildSwaggerSpecification;
@@ -122,7 +123,15 @@ function buildSwaggerSpecification (app, callback) {
         if (!routers.hasOwnProperty (key))
           continue;
 
-        buildPathFromRouter (basePath, routers[key]);
+        var router = routers[key];
+
+        if (_.isFunction (router)) {
+          buildPathFromRouter (basePath, router);
+        }
+        else {
+          var nextPath = path.join (basePath, key);
+          buildPathsFromRouters (nextPath, router);
+        }
       }
     }
 
