@@ -63,7 +63,12 @@ RouterManager.prototype.load = function (loadPath, callback) {
               var builder = new RouterBuilder (controllers, basePath);
               builder.addSpecification (routerSpec);
 
-              routers[routerName] = builder.getRouter ();
+              // Insert the specification into the router.
+              var router = builder.getRouter ();
+              router.spec = routerSpec;
+
+              // Add the router to our list of routers.
+              routers[routerName] = router;
 
               return callback (null);
             }
