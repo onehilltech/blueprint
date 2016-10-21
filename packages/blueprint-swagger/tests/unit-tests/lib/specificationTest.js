@@ -1,6 +1,5 @@
 var blueprint = require ('@onehilltech/blueprint')
   , path      = require ('path')
-  , async     = require ('async')
   , swagger   = require ('../../../lib/specification')
   , expect    = require ('chai').expect
   ;
