@@ -1,18 +1,18 @@
 {
   "name": "@onehilltech/blueprint-swagger",
-  "description": "Swagger UI integration into Blueprint.js",
-  "version": "0.0.1",
+  "description": "Blueprint.js module for Swagger UI",
+  "version": "0.0.0",
   "private": false,
   "author": "One Hill Technologies, LLC",
   "scripts": {
     "test": "env NODE_ENV=test mocha --recursive tests/tests"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^1.0.1"
+    "@onehilltech/blueprint": "^1.0.1",
+    "handlebars": "^4.0.5"
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "handlebars": "^4.0.5",
     "mocha": "^3.1.2",
     "superagent": "^2.3.0",
     "supertest": "^2.0.1"
@@ -23,6 +23,9 @@
     "npm": ">=3.0.0"
   },
   "keywords": [
-    "blueprint-module"
+    "blueprint-module",
+    "blueprint",
+    "swagger",
+    "swagger-ui"
   ]
 }
