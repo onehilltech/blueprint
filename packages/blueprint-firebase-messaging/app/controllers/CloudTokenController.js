@@ -37,7 +37,7 @@ CloudTokenController.prototype.create = function () {
         }
       }
     },
-    
+
     execute: function (req, res, callback) {
       var query = {
         'device': req.body.device
