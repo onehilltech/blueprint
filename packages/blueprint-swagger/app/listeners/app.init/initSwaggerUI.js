@@ -84,14 +84,21 @@ function defineSchemes (app) {
   swaggerSpec.schemes = schemes;
 }
 
-function getMethods (methods) {
+function getMethods (basePath, methods) {
   var methodsSpec = {};
 
   for (var key in methods) {
     if (!methods.hasOwnProperty (key))
       continue;
 
-    if (SUPPORTED_METHODS.indexOf (key) !== -1) {
+    if (key[0] === '/') {
+      pushRouterSpec (path.join (basePath, key), methods[key]);
+    }
+    else if (key === 'resource') {
+      // Process a resource
+    }
+    else if (SUPPORTED_METHODS.indexOf (key) !== -1) {
+      // Process a single method.
       var spec = {};
       var method = methods[key];
 
@@ -146,7 +153,7 @@ function pushRouterSpec (basePath, routerSpec) {
       continue;
 
     var p = path.join (basePath, key);
-    swaggerSpec.paths[p] = getMethods (routerSpec[key]);
+    swaggerSpec.paths[p] = getMethods (basePath, routerSpec[key]);
   }
 }
 
