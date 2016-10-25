@@ -1,9 +1,15 @@
+'use strict';
+
 var async = require ('async')
   , gcm   = require ('node-gcm')
   , _     = require ('underscore')
   ;
 
 const MAX_RECIPIENTS = 1000;
+
+const ERROR_NOT_REGISTERED = 'NotRegistered';
+
+module.exports = Sender;
 
 function Sender (model, opts) {
   opts = opts || {};
@@ -48,15 +54,15 @@ Sender.prototype.send = function (recipients, data, callback) {
         function () { return i < tokens.length; },
         function (callback) {
           // Get the next N recipients, and send them the message.
-          var recipient = {
-            registrationTokens: tokens.slice (i, i + MAX_RECIPIENTS)
-          };
+          var currTokens = tokens.slice (i, i + MAX_RECIPIENTS);
+          var recipient = { registrationTokens: currTokens };
 
           self.sendMessage (recipient, message, function (err, res) {
-            if (err) return callback (err);
+            if (err)
+              return callback (err);
 
             // Move the next set of recipients
-            i += recipient.registrationTokens.length;
+            i += currTokens.length;
 
             return callback (null, res);
           })
@@ -97,13 +103,36 @@ Sender.prototype.publish = function (topic, data, callback) {
  * @param callback
  */
 Sender.prototype.sendMessage = function (recipient, message, callback) {
+  var self = this;
+
   this._sender.send (message, recipient, function (err, res) {
     if (err) return callback (err);
 
-    // TODO Check res.failure and res.result for failures to resolve bad registrations.
+    var finishTasks = [];
 
-    return callback (err, res);
+    if (res.failure > 0 && recipient.registrationTokens) {
+      // There were some failures. We need to check what the failure is, and
+      // remove registration information if the id is not registered.
+
+      var tokens = recipient.registrationTokens;
+      var badTokens = [];
+
+      res.results.forEach (function (result, index) {
+        if (result.error === ERROR_NOT_REGISTERED) {
+          badTokens.push (tokens[index]);
+        }
+      });
+
+      if (badTokens.length > 0) {
+        // Remove all tokens from the database with the bad ids.
+        finishTasks.push (function (callback) {
+          self._model.remove ({token: {$in: badTokens}}, callback);
+        });
+      }
+    }
+
+    async.series (finishTasks, function (err) {
+      return callback (err, res);
+    });
   });
 };
-
-module.exports = exports = Sender;
