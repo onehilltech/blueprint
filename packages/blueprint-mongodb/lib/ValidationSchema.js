@@ -12,8 +12,12 @@ function makeValidationSchemaForPath (path) {
   // Build the general-purpose schema for the path.
   var schema = {};
 
-  if (!path.isRequired || objectPath.get (path.options, 'validation.optional', false))
+  if (!path.isRequired ||
+      objectPath.has (path.options, 'default') ||
+      objectPath.get (path.options, 'validation.optional', false))
+  {
     schema.optional = true;
+  }
 
   // Build the instance schema for the path.
   var instanceValidator = instances[path.instance];

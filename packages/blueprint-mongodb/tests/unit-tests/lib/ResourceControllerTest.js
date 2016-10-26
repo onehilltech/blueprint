@@ -62,8 +62,6 @@ describe ('ResourceController', function () {
         .post ('/person')
         .send ({person: {sex: 'Ok'}})
         .expect (400, [
-          { param: "person.first_name", msg: "Invalid param"},
-          { param: "person.last_name", msg: "Invalid param"},
           { param: "person.age", msg: "Invalid/missing Int"},
           { param: "person.sex", msg: "Expected [ 'Female', 'Male' ]", value: 'Ok'},
           { param: "person.dob", msg: "Invalid date format"},
