@@ -105,25 +105,16 @@ function PolicyRule () {
  * Collection of policies where at least one must pass.
  *
  * @param policies
- * @returns {__blueprint_or_policy}
+ * @returns {function(req, callback)}
  * @constructor
  */
 function orPolicy (policies) {
   return function __blueprint_or_policy (req, callback) {
     async.some (policies,
       function __blueprint_or_iterator (policy, callback) {
-        return policy (req, function __blueprint_or_result (err, result) {
-          // Since we are using async 1.5, we need to ignore the err parameter.
-          if (err) result = false;
-          return callback (result);
-        });
+        return policy (req, callback);
       },
-      function __blueprint_or_complete (result) {
-        // This is a callback from our framework. We need to pass in null as
-        // the error so we have proper behavior.
-        return callback (null, result);
-      }
-    );
+      callback);
   };
 }
 
@@ -131,24 +122,15 @@ function orPolicy (policies) {
  * Collection of policies where all must pass.
  *
  * @param policies
- * @returns {__blueprint_and_policy}
+ * @returns {function(req, callback)}
  */
 function andPolicy (policies) {
   return function __blueprint_and_policy (req, callback) {
     async.every (policies,
       function __blueprint_and_iterator (policy, callback) {
-        return policy (req, function __blueprint_and_result (err, result) {
-          // Since we are using async 1.5, we need to ignore the err parameter.
-          if (err) result = false;
-          return callback (result);
-        });
+        return policy (req, callback);
       },
-      function __blueprint_and_complete (result) {
-        // This is a callback from our framework. We need to pass in null as
-        // the error so we have proper behavior.
-        return callback (null, result);
-      }
-    );
+      callback);
   };
 }
 
@@ -156,7 +138,7 @@ function andPolicy (policies) {
  * Negate a policy.
  *
  * @param policy
- * @returns {__blueprint_not_policy}
+ * @returns {function(req, callback)}
  */
 function notPolicy (policy) {
   return function __blueprint_not_policy (req, callback) {
