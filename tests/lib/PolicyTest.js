@@ -150,4 +150,15 @@ describe ('Policy', function () {
       });
     });
   });
+
+  describe ('#Definition', function () {
+    it ('should create a policy definition', function () {
+      var definition = Policy.Definition ([
+        Policy.assert (passthrough, true),
+        Policy.assert (passthrough, true)
+      ]);
+
+      expect (definition).to.be.a.function;
+    })
+  });
 });
