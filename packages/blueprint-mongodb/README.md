@@ -99,10 +99,10 @@ For example, the `PersonController` exposes the following actions:
 
 | Action       | HTTP method | Body                       | Response
 |--------------|-------------|----------------------------|-----------------------------------|
-| create | POST | {person: { first_name: 'James', last_name: 'Hill }} | {person: {_id: 'id', first_name: 'James', last_name: 'Hill }} |
-| retrieve one | GET | N/A                        | {\<resource\>: { values }}        |
-| retrieve all | GET | N/A                        | {\<plural-resource\>: { values }} |   
-| update  | UPDATE | {\<resource\>: { values }} | {\<resource\>: { values }}        |
+| create | POST | `{person: { first_name: 'James', last_name: 'Hill }}` | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}` |
+| retrieve one | GET | N/A  | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}`  |
+| retrieve all | GET | N/A  | {\<plural-resource\>: { values }} |   
+| update  | UPDATE | {person: { first_name: 'John' }} | {person: {_id: 'id', first_name: 'James', last_name: 'Hill }}        |
 | delete       | DELETE      | N/A                        | `true` or `false`                 |
 
 
