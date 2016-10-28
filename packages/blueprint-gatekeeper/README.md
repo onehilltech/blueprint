@@ -17,10 +17,8 @@ OAuth 2.0 token server and module for Blueprint.js
 Installation
 --------------
 
-Install the [Blueprint.js](https://github.com/onehilltech/blueprint) module
-
-    blueprint module install @onehilltech/gatekeeper
- 
+    npm install @onehilltech/gatekeeper --save
+    
 Getting Started
 ----------------
 
