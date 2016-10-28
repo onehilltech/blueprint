@@ -87,13 +87,13 @@ blueprint.controller (PersonController, ResourceController)
 
 The resource controller exposes the following endpoints:
 
-| Action       | HTTP method | Body                     | Response
-|--------------|-------------|--------------------------|---------------------------------|
-| create       | POST        | {<resource>: { values }} | {<resource>: { values }}        |
-| retrieve one | GET         | N/A                      | {<resource>: { values }}        |
-| retrieve all | GET         | N/A                      | {<plural-resource>: { values }} |   
-| update       | UPDATE      | {<resource>: { values }} | {<resource>: { values }}        |
-| delete       | DELETE      | N/A                      | `true` or `false`               |
+| Action       | HTTP method | Body                       | Response
+|--------------|-------------|----------------------------|---------------------------------|
+| create       | POST        | {\<resource\>: { values }} | {\<resource\>: { values }}        |
+| retrieve one | GET         | N/A                        | {\<resource\>: { values }}        |
+| retrieve all | GET         | N/A                        | {\<plural-resource\>: { values }} |   
+| update       | UPDATE      | {\<resource\>: { values }} | {\<resource\>: { values }}        |
+| delete       | DELETE      | N/A                        | `true` or `false`               |
 
 **Messaging Framework.** All actions on the default implementation of the
 `ResourceController` will generate the following events on Blueprint.js messaging 
