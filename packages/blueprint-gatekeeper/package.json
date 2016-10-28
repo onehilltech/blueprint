@@ -53,6 +53,6 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "bin": {
-    "gatekeeper": "./bin/gatekeeper"
+    "gatekeeper-setup": "./bin/gatekeeper-setup"
   }
 }

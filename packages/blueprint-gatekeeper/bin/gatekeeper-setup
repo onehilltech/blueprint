@@ -6,67 +6,54 @@ var winston   = require ('winston')
   , blueprint = require ('@onehilltech/blueprint')
   , path      = require ('path')
   , async     = require ('async')
-  , jsonfile  = require ('jsonfile')
-  , fs        = require ('fs')
+  , fse       = require ('fs-extra')
   , roles     = require ('../lib').roles
   ;
 
-var appPath = path.resolve (process.cwd (), 'app');
-var rcPath  = path.resolve (appPath, 'resources/gatekeeper');
+var appPath = path.resolve (__dirname, '../app');
+var rcPath  = path.resolve (getUserHome (), '/.gatekeeper');
 
-  async.waterfall ([
-  function (callback) {
-    blueprint.Application (appPath, callback);
-  },
+async.waterfall ([
+  function (callback) { blueprint.Application (appPath, callback); },
+
+  function (app, callback) { app.start (callback); },
 
   function (app, callback) {
-    app.database.connect (function (err) {
+    fse.ensureDir (rcPath, function (err) {
       return callback (err, app);
     });
   },
 
   function (app, callback) {
-    fs.stat (rcPath, function (err) {
-      if (err)
-        return fs.mkdir (rcPath, function (err) {
-          return callback (err, app);
-        });
-
-      return callback (null, app);
-    });
+    prompt.get (['email'], callback);
   },
 
-  function (app, callback) {
-    prompt.start ();
-    prompt.get (['email'], function (err, result) {
-      return callback (err, app, result);
-    });
-  },
-
-  function (app, result, callback) {
+  function (result, callback) {
     var data = [
       {name: 'gatekeeper-cli', email: result.email, roles: [roles.client.account.create]},
       {name: 'gatekeeper-webportal', email: result.email, roles: [roles.client.account.create]}
     ];
 
-    async.waterfall ([
-      function (callback) { app.models.Client.create (data, callback); },
-      function (clients, callback) {
-        async.each (clients, function (client, callback) {
-          var data = {
-            client_id: client.id,
-            client_secret: client.secret
-          };
+    blueprint.app.models.Client.create (data, callback);
+  },
 
-          var dataFile = path.resolve (rcPath, client.name);
-          jsonfile.writeFile (dataFile, data, {spaces: 2}, callback);
-        }, callback);
-      }
-    ], function (err) {
-      return callback (err, app);
-    });
-  }
-], function (err) {
+  function (clients, callback) {
+    async.each (clients, function (client, callback) {
+      var data = {
+        client_id: client.id,
+        client_secret: client.secret
+      };
+
+      var filename = path.resolve (rcPath, client.name);
+      fse.writeJSON (filename, data, {spaces: 2}, callback);
+    }, callback);
+  }], setupComplete);
+
+function getUserHome () {
+  return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+}
+
+function setupComplete (err) {
   if (err) throw err;
-  process.exit (0);
-});
+  winston.log ('setup complete!');
+}
