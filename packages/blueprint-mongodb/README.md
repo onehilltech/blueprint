@@ -102,7 +102,7 @@ For example, the `PersonController` exposes the following actions:
 | create | POST | `{person: { first_name: 'James', last_name: 'Hill }}` | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}` |
 | retrieve one | GET | N/A  | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}`  |
 | retrieve all | GET | N/A  | {\<plural-resource\>: { values }} |   
-| update  | UPDATE | {person: { first_name: 'John' }} | {person: {_id: 'id', first_name: 'James', last_name: 'Hill }}        |
+| update  | UPDATE | `{person: { first_name: 'John' }}` | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill }}`        |
 | delete       | DELETE      | N/A                        | `true` or `false`                 |
 
 
