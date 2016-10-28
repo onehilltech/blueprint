@@ -13,7 +13,7 @@ Install the command-line interface globally on your machine:
 
 Create a new application:
 
-    blueprint new <name-of-app> [other options]
+    blueprint new [other options] <name-of-app> 
 
 Start the application:
 
