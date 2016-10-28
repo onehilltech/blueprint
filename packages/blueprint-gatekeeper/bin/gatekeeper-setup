@@ -11,43 +11,50 @@ var winston   = require ('winston')
   ;
 
 var appPath = path.resolve (__dirname, '../app');
-var rcPath  = path.resolve (getUserHome (), '/.gatekeeper');
+var rcPath  = path.resolve (__dirname, '../.gatekeeper');
 
 async.waterfall ([
-  function (callback) { blueprint.Application (appPath, callback); },
+  function (callback) { prompt.get (['email'], callback); },
+  execute
+], setupComplete);
 
-  function (app, callback) { app.start (callback); },
+function execute (args, callback) {
+  async.waterfall ([
+    function (callback) {
+      blueprint.Application (appPath, callback);
+    },
 
-  function (app, callback) {
-    fse.ensureDir (rcPath, function (err) {
-      return callback (err, app);
-    });
-  },
+    function (app, callback) {
+      app.start (callback);
+    },
 
-  function (app, callback) {
-    prompt.get (['email'], callback);
-  },
+    function (app, callback) {
+      fse.ensureDir (rcPath, function (err) {
+        return callback (err, app);
+      });
+    },
 
-  function (result, callback) {
-    var data = [
-      {name: 'gatekeeper-cli', email: result.email, roles: [roles.client.account.create]},
-      {name: 'gatekeeper-webportal', email: result.email, roles: [roles.client.account.create]}
-    ];
+    function (exists, callback) {
+      var data = [
+        {name: 'gatekeeper-cli', email: args.email, roles: [roles.client.account.create]},
+        {name: 'gatekeeper-webportal', email: args.email, roles: [roles.client.account.create]}
+      ];
 
-    blueprint.app.models.Client.create (data, callback);
-  },
+      blueprint.app.models.Client.create (data, callback);
+    },
 
-  function (clients, callback) {
-    async.each (clients, function (client, callback) {
-      var data = {
-        client_id: client.id,
-        client_secret: client.secret
-      };
+    function (clients, callback) {
+      async.each (clients, function (client, callback) {
+        var data = {
+          client_id: client.id,
+          client_secret: client.secret
+        };
 
-      var filename = path.resolve (rcPath, client.name);
-      fse.writeJSON (filename, data, {spaces: 2}, callback);
-    }, callback);
-  }], setupComplete);
+        var filename = path.resolve (rcPath, client.name);
+        fse.writeJSON (filename, data, {spaces: 2}, callback);
+      }, callback);
+    }], callback);
+}
 
 function getUserHome () {
   return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
@@ -55,5 +62,7 @@ function getUserHome () {
 
 function setupComplete (err) {
   if (err) throw err;
-  winston.log ('setup complete!');
+
+  winston.log ('info', 'setup complete!');
+  process.exit (0);
 }
