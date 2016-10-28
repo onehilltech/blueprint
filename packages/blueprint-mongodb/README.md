@@ -72,10 +72,10 @@ that integrates with the Blueprint.js architecture. The `ResourceController`
 can be used as-is, or extended to add domain-specific customizations.
 
 ```javascript
-var blueprint = require ('@onehilltech/blueprint')
-  , mongodb = require ('@onehilltech/blueprint-mongodb')
+var blueprint          = require ('@onehilltech/blueprint')
+  , mongodb            = require ('@onehilltech/blueprint-mongodb')
   , ResourceController = mongodb.ResourceController
-  , Person = require ('../models/Person')
+  , Person             = require ('../models/Person')
   ;
     
 function PersonController () {
