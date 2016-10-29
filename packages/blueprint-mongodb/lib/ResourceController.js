@@ -5,6 +5,7 @@ var util      = require ('util')
   ;
 
 var ValidationSchema = require ('./ValidationSchema');
+var populate = require ('./populate');
 
 var BaseController = blueprint.BaseController
   , HttpError = blueprint.errors.HttpError
@@ -115,6 +116,7 @@ function ResourceController (opts) {
   // Build the validation schema for create and update.
   var validationOpts = {pathPrefix: this._name};
   this._createValidation = ValidationSchema (opts.model, validationOpts);
+  this._populate = populate (opts.model);
 
   // this._updateValidation = this._createValidation;
 }
@@ -138,11 +140,11 @@ ResourceController.prototype.getAll = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onUpdateFilter = on.updateFilter || __onUpdateFilter;
-  var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
+  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
+  var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
 
@@ -319,10 +321,10 @@ ResourceController.prototype.get = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onUpdateFilter = on.updateFilter || __onUpdateFilter;
-  var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
+  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
 
@@ -362,7 +364,30 @@ ResourceController.prototype.get = function (opts) {
           var result = { };
           result[self._name] = data;
 
-          return callback (null, result);
+          if (!req.query.populate)
+            return callback (null, result);
+
+          async.eachOf (self._populate, function (item, path, callback) {
+            var value = data[path];
+
+            item.populator.populate (value, function (err, model) {
+              if (err) return callback (err);
+              if (model) result[item.modelName] = model;
+
+              return callback (err);
+            });
+
+            populate.populator (Model, value, function (err, model) {
+              if (err) return callback (err);
+              if (model) result[populate.modelName] = model;
+
+              return callback (err);
+            });
+          }, complete);
+
+          function complete (err) {
+            return callback (err, result);
+          }
         }
       ], makeTaskCompletionHandler (res, callback));
     }

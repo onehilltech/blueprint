@@ -11,6 +11,7 @@ const appPath = path.resolve (__dirname, '../../fixtures/app');
 
 describe ('ResourceController', function () {
   var server = null;
+  var personId;
 
   before (function (done) {
     async.waterfall ([
@@ -31,7 +32,7 @@ describe ('ResourceController', function () {
       var dob  = new Date ().toISOString();
       var data = {
         person: {
-          first_name: 'John', last_name: 'Doe', age: 21, sex: 'Male', dob: dob,
+          first_name: 'John', last_name: 'Doe', age: 21, gender: 'Male', dob: dob,
           address: {
             street: 'Make Believe Lane',
             city: 'Magic',
@@ -48,9 +49,7 @@ describe ('ResourceController', function () {
         .end (function (err, req) {
           if (err) return done (err);
 
-          data.person._id = req.body.person._id;
-          data.person.books = [];
-
+          personId = data.person._id = req.body.person._id;
           expect (req.body).to.deep.equal (data);
 
           return done (null);
@@ -60,15 +59,28 @@ describe ('ResourceController', function () {
     it ('should not create resource; missing parameters', function (done) {
       request (server.app)
         .post ('/person')
-        .send ({person: {sex: 'Ok'}})
+        .send ({person: {gender: 'Ok'}})
         .expect (400, [
           { param: "person.age", msg: "Invalid/missing Int"},
-          { param: "person.sex", msg: "Expected [ 'Female', 'Male' ]", value: 'Ok'},
+          { param: "person.gender", msg: "Expected [ 'Female', 'Male' ]", value: 'Ok'},
           { param: "person.dob", msg: "Invalid date format"},
           { param: 'person.address.street', msg: 'Invalid param' },
           { param: 'person.address.city', msg: 'Invalid param' },
           { param: 'person.address.state', msg: 'Invalid param' }
         ], done);
+    });
+  });
+
+  describe ('get', function () {
+    it ('should return a single person', function (done) {
+      request (server.app)
+        .get ('/person/' + personId)
+        .expect (200)
+        .end (function (err, req) {
+          if (err) return done (err);
+
+          return done (null);
+        });
     });
   });
 });

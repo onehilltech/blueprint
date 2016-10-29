@@ -1,18 +1,15 @@
-var mongodb = require ('../../../../lib')
+var mongodb   = require ('../../../../lib')
+  , Degree = require ('./Degree')
   ;
 
-var education = new mongodb.Schema ({
-  degree: {type: String},
-  school: {type: String},
-  graduation: {type: Number}
-});
+const MODEL_NAME = 'person';
 
 var schema = new mongodb.Schema ({
   first_name: {type: String, required: true, default: 'New'},
   middle_name: {type: String},
   last_name: {type: String, required: true, default: 'User'},
   age: {type: Number, required: true, validation: {kind: 'Int'}},
-  sex: {type: String, required: true, enum: ['Female', 'Male']},
+  gender: {type: String, required: true, enum: ['Female', 'Male']},
   dob: {type: Date, required: true},
 
   address: {
@@ -22,7 +19,7 @@ var schema = new mongodb.Schema ({
     zipcode: {type: Number, required: true}
   },
 
-  books: [{type: String, ref: 'person', index: true, required: true}],
+  education: {type: mongodb.Schema.Types.ObjectId, ref: Degree.modelName}
 });
 
-module.exports = mongodb.model ('person', schema);
+module.exports = mongodb.model (MODEL_NAME, schema);
