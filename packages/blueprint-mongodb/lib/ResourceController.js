@@ -373,13 +373,6 @@ ResourceController.prototype.get = function (opts) {
 
               return callback (err);
             });
-
-            populate.populator (Model, value, function (err, model) {
-              if (err) return callback (err);
-              if (model) result[populate.modelName] = model;
-
-              return callback (err);
-            });
           }, complete);
 
           function complete (err) {
