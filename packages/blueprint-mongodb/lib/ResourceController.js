@@ -102,12 +102,9 @@ function ResourceController (opts) {
   if (!opts.model)
     throw new Error ('Options must define model property');
 
-  if (!opts.name)
-    throw new Error ('Options must define name property');
-
   this._id = opts.id;
   this._model = opts.model;
-  this._name = opts.name;
+  this._name = opts.name || opts.model.modelName;
   this._eventPrefix = opts.eventPrefix;
 
   if (!this._id)
