@@ -20,3 +20,11 @@ Usage
 By default, no configuration is need to use the Swagger UI module in
 Blueprint.js. The module can discover the required information by analyzing
 the application and its configuration.
+
+To view the Swagger specification via the Swagger UI:
+
+    http://host/api-doc  
+
+To view the Swagger specification in JSON format:
+
+    http://host/swagger.json
