@@ -29,3 +29,5 @@ Next Steps
     
 See our [Wiki](https://github.com/onehilltech/blueprint/wiki) for more details 
 on using Blueprint.
+
+Need help? [Contact us](mailto:contact@onehilltech.com)
