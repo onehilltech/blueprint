@@ -22,6 +22,18 @@ Installation
 Getting Started
 ----------------
 
+### Initial setup
+
+First, run the setup script from the project directory:
+
+    ./bin/gatekeeper-setup
+    
+This will register the [gatekeeper-cli]() client, and other clients, with the 
+server. The client registrations will be placed in `./gatekeeper` under the
+project directory.
+
+### Defining the configuration
+
 Define the configuration file `gatekeeper.config.js` to configure the module
 for your application:
 
@@ -38,6 +50,8 @@ module.exports = {
 };
 ```
 
+### Defining Gatekeeper router endpoint
+
 Define a route (or router) to import the Gatekeeper routes into the application:
 
 ```javascript
@@ -49,6 +63,8 @@ module.exports = exports = {
   '/gatekeeper': [ blueprint.ModuleRouter ('@onehilltech/gatekeeper:v1') ]
 };
 ```
+
+### Protecting the routes
 
 The router definition above will expose the Gatekeeper routers at `/gatekeeper`.
 Lastly, define the routes you want to protect. For example, you can protect all
