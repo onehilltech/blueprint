@@ -1,8 +1,6 @@
-var mongodb   = require ('../../../../lib')
-  , Degree = require ('./Degree')
+var mongodb = require ('../../../../lib')
+  , Degree  = require ('./Degree')
   ;
-
-const MODEL_NAME = 'person';
 
 var schema = new mongodb.Schema ({
   first_name: {type: String, required: true, default: 'New'},
@@ -16,10 +14,10 @@ var schema = new mongodb.Schema ({
     street: {type: String, required: true},
     city: {type: String, required: true},
     state: {type: String, required: true},
-    zipcode: {type: Number, required: true}
+    zipcode: {type: String, required: true}
   },
 
   education: {type: mongodb.Schema.Types.ObjectId, ref: Degree.modelName}
 });
 
-module.exports = mongodb.model (MODEL_NAME, schema);
+module.exports = mongodb.model ('person', schema, 'blueprint_persons');

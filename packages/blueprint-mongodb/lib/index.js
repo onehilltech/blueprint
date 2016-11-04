@@ -44,3 +44,10 @@ function modelOn (connName, name, schema, collection) {
   if (conn)
     return conn.model (name, schema, collection);
 }
+
+/**
+ * Load the testing module on demand.
+ */
+exports.__defineGetter__ ('testing', function () {
+  return require ('./testing');
+});

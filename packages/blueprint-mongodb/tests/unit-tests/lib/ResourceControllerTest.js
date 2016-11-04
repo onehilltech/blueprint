@@ -7,7 +7,7 @@ const request = require ('supertest')
   , ConnectionManager = require ('../../../lib/ConnectionManager')
   ;
 
-const appPath = path.resolve (__dirname, '../../fixtures/app');
+const datamodel = require (path.resolve (__dirname, '../../fixtures/datamodel'));
 
 describe ('ResourceController', function () {
   var server = null;
@@ -16,12 +16,11 @@ describe ('ResourceController', function () {
   before (function (done) {
     async.waterfall ([
       function (callback) {
-        blueprint.testing.createApplicationAndStart (appPath, callback);
+        datamodel.apply (callback);
       },
-
-      function (app, callback) {
+      function (result, callback) {
         // Make sure the default connection is open.
-        server = app.server;
+        server = result[0].server;
         return callback (null);
       }
     ], done);
@@ -37,7 +36,7 @@ describe ('ResourceController', function () {
             street: 'Make Believe Lane',
             city: 'Magic',
             state: 'TN',
-            zipcode: 12345
+            zipcode: '12345'
           }
         }
       };
@@ -66,7 +65,8 @@ describe ('ResourceController', function () {
           { param: "person.dob", msg: "Invalid date format"},
           { param: 'person.address.street', msg: 'Invalid param' },
           { param: 'person.address.city', msg: 'Invalid param' },
-          { param: 'person.address.state', msg: 'Invalid param' }
+          { param: 'person.address.state', msg: 'Invalid param' },
+          { param: 'person.address.zipcode', msg: 'Invalid param' }
         ], done);
     });
   });
@@ -75,11 +75,14 @@ describe ('ResourceController', function () {
     it ('should return a single person', function (done) {
       request (server.app)
         .get ('/person/' + personId)
-        .expect (200)
-        .end (function (err, req) {
-          if (err) return done (err);
+        .expect (200, done);
+    });
 
-          return done (null);
+    it ('should return a single person with a populated data', function (done) {
+      request (server.app)
+        .get ('/person/' + datamodel.models.persons[0].id + '?populate=true')
+        .expect (200, function (err, res) {
+          return done (err);
         });
     });
   });

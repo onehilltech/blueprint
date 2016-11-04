@@ -105,6 +105,7 @@ function ResourceController (opts) {
   this._id = opts.id;
   this._model = opts.model;
   this._name = opts.name || opts.model.modelName;
+  this._pluralize = this._name + 's';
   this._eventPrefix = opts.eventPrefix;
 
   if (!this._id)
@@ -213,10 +214,8 @@ ResourceController.prototype.getAll = function (opts) {
 
         // Rewrite the result in JSON API format.
         function (data, callback) {
-          var pluralName = self._name + 's';
-
           var result = { };
-          result[pluralName] = data;
+          result[self._pluralize] = data;
 
           return callback (null, result);
         }

@@ -3,8 +3,8 @@ var mongodb = require ('../../../../lib')
 
 var schema = new mongodb.Schema ({
   degree: {type: String},
-  school: {type: String},
-  graduation: {type: Number}
+  major : {type: String},
+  school: {type: String}
 });
 
-module.exports = mongodb.model ('degree', schema);
+module.exports = mongodb.model ('degree', schema, 'blueprint_degrees');
