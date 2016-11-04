@@ -1,5 +1,5 @@
 var roles = {
-  administrator : 'gatekeeper.administrator'
+  administrator: 'gatekeeper.administrator'
 };
 
 module.exports = exports = roles;

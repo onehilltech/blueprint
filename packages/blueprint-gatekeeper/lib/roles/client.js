@@ -1,6 +1,8 @@
 var roles = {
-  account : {
-    create : 'gatekeeper.account.create'
+  administrator: 'gatekeeper.administrator',
+
+  account: {
+    create: 'gatekeeper.account.create'
   }
 };
 

@@ -37,5 +37,7 @@ schema.pre ('validate', function (next) {
   return next ();
 });
 
-const COLLECTION_NAME = 'gatekeeper_client';
-module.exports = mongodb.model (COLLECTION_NAME, schema);
+const MODEL_NAME = 'client';
+const COLLECTION_NAME = 'gatekeeper_clients';
+
+module.exports = mongodb.model (MODEL_NAME, schema, COLLECTION_NAME);

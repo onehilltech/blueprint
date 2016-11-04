@@ -40,5 +40,7 @@ schema.methods.isClientToken = function () {
   return this.account === undefined;
 };
 
-const COLLECTION_NAME = 'gatekeeper_oauth2_accesstoken';
-module.exports = mongodb.model (COLLECTION_NAME, schema);
+const MODEL_NAME = 'access_token';
+const COLLECTION_NAME = 'gatekeeper_oauth2_access_tokens';
+
+module.exports = mongodb.model (MODEL_NAME, schema, COLLECTION_NAME);

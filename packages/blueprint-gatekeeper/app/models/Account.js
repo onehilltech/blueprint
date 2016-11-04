@@ -158,5 +158,7 @@ schema.statics.authenticate = function (username, password, done) {
   });
 };
 
-const COLLECTION_NAME  = 'gatekeeper_account';
-module.exports = mongodb.model (COLLECTION_NAME, schema);
+const MODEL_NAME = 'account';
+const COLLECTION_NAME  = 'gatekeeper_accounts';
+
+module.exports = mongodb.model (MODEL_NAME, schema, COLLECTION_NAME);
