@@ -10,8 +10,8 @@ var winston   = require ('winston')
   , roles     = require ('../lib').roles
   ;
 
-var appPath = path.resolve (__dirname, '../app');
-var rcPath  = path.resolve (__dirname, '../.gatekeeper');
+var appPath = path.resolve (process.cwd (), 'app');
+var rcPath  = path.resolve (process.cwd (), '.gatekeeper');
 
 async.waterfall ([
   function (callback) { prompt.get (['email'], callback); },
