@@ -13,6 +13,18 @@ var winston   = require ('winston')
 var appPath = path.resolve (process.cwd (), 'app');
 var rcPath  = path.resolve (process.cwd (), '.gatekeeper');
 
+const DEFAULT_CLIENT_ROLES = [
+  // account roles
+  roles.client.account.create,
+  roles.client.account.update,
+  roles.client.account.delete,
+
+  // client roles
+  roles.client.client.create,
+  roles.client.client.delete,
+  roles.client.client.update
+];
+
 async.waterfall ([
   function (callback) { prompt.get (['email'], callback); },
   execute
@@ -36,8 +48,8 @@ function execute (args, callback) {
 
     function (exists, callback) {
       var data = [
-        {name: 'gatekeeper-cli', email: args.email, roles: [roles.client.account.create]},
-        {name: 'gatekeeper-webportal', email: args.email, roles: [roles.client.account.create]}
+        {name: 'gatekeeper-cli', email: args.email, roles: DEFAULT_CLIENT_ROLES},
+        {name: 'gatekeeper-webportal', email: args.email, roles: DEFAULT_CLIENT_ROLES}
       ];
 
       blueprint.app.models.Client.create (data, callback);
