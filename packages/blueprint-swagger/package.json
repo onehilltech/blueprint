@@ -8,7 +8,7 @@
     "test": "env NODE_ENV=test mocha --recursive tests/tests"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^1.0.1",
+    "@onehilltech/blueprint": "^1.2.0",
     "handlebars": "^4.0.5"
   },
   "devDependencies": {
