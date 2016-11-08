@@ -12,7 +12,8 @@ function EventListeners (name) {
 }
 
 EventListeners.prototype.on = function (listener) {
-  this._on.push (listener);
+  var index = this._on.push (listener) - 1;
+  return new ListenerHandle (this, index);
 };
 
 EventListeners.prototype.emit = function () {
@@ -21,6 +22,25 @@ EventListeners.prototype.emit = function () {
   async.each (this._on, function (listener) {
     listener.apply (null, args);
   });
+};
+
+//////////////////////////////////
+// class ListerHandle
+
+function ListenerHandle (listeners, index) {
+  this._listeners = listeners;
+  this._index = index;
+}
+
+ListenerHandle.prototype.close = function () {
+  if (this._listeners == null || this._index == null)
+    return;
+
+  // Delete the listener from the array.
+  this._listeners._on.splice (this._index, 1);
+
+  this._listeners = null;
+  this._index = null;
 };
 
 //////////////////////////////////
@@ -57,7 +77,7 @@ Messenger.prototype.on = function (ev, listener) {
     this._listeners[ev] = listeners;
   }
 
-  listeners.on (listener);
+  return listeners.on (listener);
 };
 
 Messenger.prototype.__defineGetter__ ('listeners', function () {
