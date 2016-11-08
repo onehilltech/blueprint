@@ -393,7 +393,7 @@ ResourceController.prototype.update = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onUpdateFilter = on.updateFilter || __onUpdateFilter;
+  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
@@ -461,7 +461,7 @@ ResourceController.prototype.delete = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onUpdateFilter = on.updateFilter || __onUpdateFilter;
+  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
   var eventName = this.computeEventName ('deleted');
