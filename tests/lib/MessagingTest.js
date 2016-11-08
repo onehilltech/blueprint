@@ -6,7 +6,6 @@ var Messaging = require ('../../lib/Messaging')
 
 describe ('Messaging', function () {
   var messaging;
-  var handle;
 
   beforeEach (function () {
     messaging = new Messaging ();
@@ -40,8 +39,14 @@ describe ('Messaging', function () {
 
   describe ('#on', function () {
     it ('should add a listener to the default messenger', function () {
-      messaging.on ('testing', function () { });
-      expect (messaging.getMessenger ('_').listeners).to.have.keys (['testing']);
+      var handle = messaging.on ('testing', function () { });
+      var listeners = messaging.getMessenger ('_').listeners;
+
+      expect (listeners).to.have.keys (['testing']);
+      expect (listeners['testing']._on).to.have.lengthOf (1);
+
+      expect (handle._index).to.equal (0);
+      expect (handle._listeners).to.eql (listeners['testing']);
     });
   });
 
@@ -65,6 +70,22 @@ describe ('Messaging', function () {
 
       var callback = messaging.relay ('foo.bar');
       callback.call (null, null, 1, 2, 3);
+    });
+  });
+
+  describe ('ListenerHandle.close', function () {
+    it ('should close the listener handle', function () {
+      var handle = messaging.on ('testing', function () { });
+      var listeners = messaging.getMessenger ('_').listeners;
+
+      // Remove the listener from the messaging framework.
+      handle.close ();
+
+      expect (listeners).to.have.keys (['testing']);
+      expect (listeners['testing']._on).to.have.lengthOf (0);
+
+      expect (handle._index).to.be.null;
+      expect (handle._listeners).to.be.null;
     });
   });
 });
