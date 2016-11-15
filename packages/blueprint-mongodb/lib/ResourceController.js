@@ -407,6 +407,7 @@ ResourceController.prototype.update = function (opts) {
         function (callback) {
           req.checkBody (self._updateValidation);
           var errors = req.validationErrors ();
+
           return callback (errors);
         },
 

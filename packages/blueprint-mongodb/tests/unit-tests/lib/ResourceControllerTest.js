@@ -110,15 +110,23 @@ describe ('ResourceController', function () {
         });
     });
 
-    it ('should not update a resource because of bad param', function (done) {
+    it ('should update resource, excluding unknown param', function (done) {
       var data = {
-        person: { firstname: 'Jake' }
+        person: { firstname: 'Jake', last_name: 'Williams'}
       };
 
       request (server.app)
         .put ('/person/' + person._id)
         .send (data)
-        .expect (400, [{ param: "person.first_name", msg: "Invalid/missing Int"}], done);
+        .expect (200)
+        .end (function (err, res) {
+          if (err) return done (err);
+
+          person.last_name = 'Williams';
+
+          expect (res.body).to.deep.equal ({person: person});
+          return done (null);
+        });
     });
   });
 });
