@@ -12,6 +12,10 @@ var BaseController = blueprint.BaseController
   , messaging = blueprint.messaging
   ;
 
+function pluralize (name) {
+  return name + 's';
+}
+
 /**
  * Test if the projection is exclusive. An exclusive projection only has to
  * have one key that is false (or 0). Any empty projection is exclusive as well,
@@ -126,102 +130,6 @@ util.inherits (ResourceController, BaseController);
 ResourceController.prototype.__defineGetter__ ('resourceId', function () {
   return this._id;
 });
-
-/**
- * Get a list of the resources, if not all.
- *
- * @param opts
- * @returns
- */
-ResourceController.prototype.getAll = function (opts) {
-  opts = opts || {};
-  var on = opts.on || {};
-
-  var onAuthorize = on.authorize || __onAuthorize;
-  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
-  var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
-  var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
-  var onPostExecute = on.postExecute || __onPostExecute;
-
-  var self = this;
-
-  return {
-    // There is no resource id that needs to be validated. So, we can
-    // just pass control to the onAuthorize method.
-    validate: function (req, callback) {
-      async.series ([
-        // First, validate the query string.
-        function (callback) {
-          req.checkQuery ('options', 'Invalid options').optional ().isJSON ();
-
-          return callback (req.validationErrors (true));
-        },
-
-        function (callback) {
-          onAuthorize (req, callback);
-        }
-      ], callback);
-    },
-
-    sanitize: function (req, callback) {
-      if (req.query.options)
-        req.query.options = JSON.parse (req.query.options);
-
-      return callback (null);
-    },
-
-    execute: function __blueprint_getall_execute (req, res, callback) {
-      async.waterfall ([
-        async.constant (_.omit (req.query, ['options'])),
-
-        function (filter, callback) {
-          return onUpdateFilter (req, filter, callback)
-        },
-
-        // Now, let's search our database for the resource in question.
-        function (filter, callback) {
-          onPrepareOptions (req, function (err, options) {
-            if (err) return callback (err);
-            options = options || {};
-
-            // Update the options with those from the query string.
-            var opts = req.query.options || {};
-
-            if (opts.skip)
-              options['skip'] = opts.skip;
-
-            if (opts.limit)
-              options['limit'] = opts.limit;
-
-            if (opts.sort)
-              options['sort'] = opts.sort;
-
-            onPrepareProjection (req, function (err, projection) {
-              if (err) return callback (err);
-
-              // Do not include the version field in the projection.
-              if (isProjectionExclusive (projection))
-                projection['__v'] = 0;
-
-              self._model.find (filter, projection, options, makeDbCompletionHandler ('Failed to retrieve resource', callback));
-            });
-          });
-        },
-
-        // Allow the subclass to do any post-execution analysis of the result.
-        function (result, callback) { onPostExecute (req, result, callback); },
-
-        // Rewrite the result in JSON API format.
-        function (data, callback) {
-          var result = { };
-          result[self._pluralize] = data;
-
-          return callback (null, result);
-        }
-      ], makeTaskCompletionHandler (res, callback));
-    }
-  };
-};
 
 /**
  * Create a new resource.
@@ -362,10 +270,14 @@ ResourceController.prototype.get = function (opts) {
 
           async.eachOf (self._populate, function (item, path, callback) {
             var value = data[path];
+            var plural = pluralize (item.modelName);
+
+            if (!result[plural])
+              result[plural] = [];
 
             item.populator.populate (value, function (err, model) {
               if (err) return callback (err);
-              if (model) result[item.modelName] = model;
+              if (model) result[plural].push (model);
 
               return callback (err);
             });
@@ -374,6 +286,102 @@ ResourceController.prototype.get = function (opts) {
           function complete (err) {
             return callback (err, result);
           }
+        }
+      ], makeTaskCompletionHandler (res, callback));
+    }
+  };
+};
+
+/**
+ * Get a list of the resources, if not all.
+ *
+ * @param opts
+ * @returns
+ */
+ResourceController.prototype.getAll = function (opts) {
+  opts = opts || {};
+  var on = opts.on || {};
+
+  var onAuthorize = on.authorize || __onAuthorize;
+  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
+  var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
+  var onPostExecute = on.postExecute || __onPostExecute;
+
+  var self = this;
+
+  return {
+    // There is no resource id that needs to be validated. So, we can
+    // just pass control to the onAuthorize method.
+    validate: function (req, callback) {
+      async.series ([
+        // First, validate the query string.
+        function (callback) {
+          req.checkQuery ('options', 'Invalid options').optional ().isJSON ();
+
+          return callback (req.validationErrors (true));
+        },
+
+        function (callback) {
+          onAuthorize (req, callback);
+        }
+      ], callback);
+    },
+
+    sanitize: function (req, callback) {
+      if (req.query.options)
+        req.query.options = JSON.parse (req.query.options);
+
+      return callback (null);
+    },
+
+    execute: function __blueprint_getall_execute (req, res, callback) {
+      async.waterfall ([
+        async.constant (_.omit (req.query, ['options'])),
+
+        function (filter, callback) {
+          return onUpdateFilter (req, filter, callback)
+        },
+
+        // Now, let's search our database for the resource in question.
+        function (filter, callback) {
+          onPrepareOptions (req, function (err, options) {
+            if (err) return callback (err);
+            options = options || {};
+
+            // Update the options with those from the query string.
+            var opts = req.query.options || {};
+
+            if (opts.skip)
+              options['skip'] = opts.skip;
+
+            if (opts.limit)
+              options['limit'] = opts.limit;
+
+            if (opts.sort)
+              options['sort'] = opts.sort;
+
+            onPrepareProjection (req, function (err, projection) {
+              if (err) return callback (err);
+
+              // Do not include the version field in the projection.
+              if (isProjectionExclusive (projection))
+                projection['__v'] = 0;
+
+              self._model.find (filter, projection, options, makeDbCompletionHandler ('Failed to retrieve resource', callback));
+            });
+          });
+        },
+
+        // Allow the subclass to do any post-execution analysis of the result.
+        function (result, callback) { onPostExecute (req, result, callback); },
+
+        // Rewrite the result in JSON API format.
+        function (data, callback) {
+          var result = { };
+          result[self._pluralize] = data;
+
+          return callback (null, result);
         }
       ], makeTaskCompletionHandler (res, callback));
     }

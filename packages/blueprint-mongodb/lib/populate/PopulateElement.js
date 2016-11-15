@@ -7,9 +7,5 @@ function PopulateElement (Model) {
 }
 
 PopulateElement.prototype.populate = function (_id, callback) {
-  this._Model.findById (_id, callback);
+  this._Model.findById (_id, {__v: 0}, callback);
 };
-
-function populateElement (Model, _id, callback) {
-  Model.findById (_id, callback);
-}

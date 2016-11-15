@@ -50,6 +50,7 @@ var data = {
 };
 
 exports.models = models;
+exports.data = data;
 
 function seed (callback) {
   async.series ([

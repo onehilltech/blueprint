@@ -38,7 +38,8 @@ describe ('ResourceController', function () {
             city: 'Magic',
             state: 'TN',
             zipcode: '12345'
-          }
+          },
+          education: datamodel.models.degrees[0].id
         }
       };
 
@@ -83,9 +84,10 @@ describe ('ResourceController', function () {
     it ('should return a single person with a populated data', function (done) {
       request (server.app)
         .get ('/person/' + person._id + '?populate=true')
-        .expect (200, function (err, res) {
-          return done (err);
-        });
+        .expect (200, {
+          degrees: [_.extend (datamodel.data.degrees[0], {_id: datamodel.models.degrees[0].id})],
+          person: person
+        }, done);
     });
   });
 
