@@ -1,20 +1,25 @@
 'use strict';
 
 const _        = require ('underscore')
-  , util       = require ('util')
   , objectPath = require ('object-path')
   , instances  = require ('./validators')
   ;
 
 module.exports = makeValidationSchema;
 
-function makeValidationSchemaForPath (path) {
+function makeValidationSchemaForPath (path, opts) {
   // Build the general-purpose schema for the path.
   var schema = {};
+  var opts = opts || {};
+
+  // The 'optional' property has to be the first key in the partial schema
+  // object in order for validation by schema to work.
+  var allOptional = opts.allOptional || false;
 
   if (!path.isRequired ||
       objectPath.has (path.options, 'default') ||
-      objectPath.get (path.options, 'validation.optional', false))
+      objectPath.get (path.options, 'validation.optional', false) ||
+      allOptional)
   {
     schema.optional = true;
   }
@@ -42,7 +47,7 @@ function makeValidationSchema (model, opts) {
       continue;
 
     var fullKey = pathPrefix + key;
-    validation[fullKey] = makeValidationSchemaForPath (schema.paths[key]);
+    validation[fullKey] = makeValidationSchemaForPath (schema.paths[key], {allOptional: opts.allOptional});
   }
 
   return validation;

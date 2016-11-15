@@ -4,7 +4,7 @@ var util      = require ('util')
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
-var ValidationSchema = require ('./ValidationSchema');
+var Validation = require ('./ValidationSchema');
 var populate = require ('./populate');
 
 var BaseController = blueprint.BaseController
@@ -113,10 +113,9 @@ function ResourceController (opts) {
 
   // Build the validation schema for create and update.
   var validationOpts = {pathPrefix: this._name};
-  this._createValidation = ValidationSchema (opts.model, validationOpts);
+  this._createValidation = Validation (opts.model, validationOpts);
   this._populate = populate (opts.model);
-
-  // this._updateValidation = this._createValidation;
+  this._updateValidation = Validation (opts.model, _.extend (validationOpts, {allOptional: true}));
 }
 
 util.inherits (ResourceController, BaseController);
@@ -248,9 +247,7 @@ ResourceController.prototype.create = function (opts) {
         // schema validation fails, we return as
         function (callback) {
           req.checkBody (self._createValidation);
-          var errors = req.validationErrors ();
-
-          return callback (errors);
+          return callback (req.validationErrors ());
         },
 
         // Next, allow the subclass to perform its own validation.
@@ -403,7 +400,22 @@ ResourceController.prototype.update = function (opts) {
   var self = this;
 
   return {
-    validate: checkIdThenAuthorize (self._id, onAuthorize),
+    validate: checkIdThenAuthorize (self._id, function (req, callback) {
+      async.series ([
+        // First, validate the input based on the target model. If any part of the
+        // schema validation fails, we return as
+        function (callback) {
+          req.checkBody (self._updateValidation);
+          var errors = req.validationErrors ();
+          return callback (errors);
+        },
+
+        // Next, allow the subclass to perform its own validation.
+        function (callback) {
+          onAuthorize (req, callback);
+        }
+      ], callback);
+    }),
 
     execute: function __blueprint_update_execute (req, res, callback) {
       var rcId = req.params[self._id];
