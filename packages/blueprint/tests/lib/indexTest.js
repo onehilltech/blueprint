@@ -9,6 +9,7 @@ describe ('index', function () {
         'Application',
         'ApplicationModule',
         'BaseController',
+        'ResourceController',
         'RouterBuilder',
         'ModuleRouter',
         'Policy',
