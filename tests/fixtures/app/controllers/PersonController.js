@@ -1,6 +1,7 @@
 'use strict';
 
 var blueprint = require ('../../../../lib')
+  , ResourceController = blueprint.ResourceController;
   ;
 
 module.exports = PersonController;
@@ -8,10 +9,10 @@ module.exports = PersonController;
 var persons = [];
 
 function PersonController () {
-  blueprint.BaseController.call (this);
+  blueprint.ResourceController.call (this);
 }
 
-blueprint.controller (PersonController);
+blueprint.controller (PersonController, ResourceController);
 
 PersonController.prototype.__defineGetter__ ('resourceId', function () {
   return 'personId';
