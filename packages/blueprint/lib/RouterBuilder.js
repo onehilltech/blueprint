@@ -231,7 +231,6 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
       var individualPath = '/:' + resourceId;
 
       var spec = { };
-      spec[individualPath] = { };
 
       if (actions.indexOf ('getAll') !== -1)
         spec['get'] = makeAction (controllerName, 'getAll', opts.options);
@@ -241,6 +240,8 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
 
       if (actions.indexOf ('count') !== -1)
         spec['/count'] = {get: makeAction (controllerName, 'count', opts.options)};
+
+      spec[individualPath] = { };
 
       if (actions.indexOf ('getOne') !== -1)
         spec[individualPath]['get'] = makeAction (controllerName, 'get', opts.options);
