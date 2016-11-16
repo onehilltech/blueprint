@@ -1,6 +1,7 @@
 var util      = require ('util')
   , async     = require ('async')
   , _         = require ('underscore')
+  , pluralize = require ('pluralize')
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
@@ -11,10 +12,6 @@ var BaseController = blueprint.BaseController
   , HttpError = blueprint.errors.HttpError
   , messaging = blueprint.messaging
   ;
-
-function pluralize (name) {
-  return name + 's';
-}
 
 /**
  * Test if the projection is exclusive. An exclusive projection only has to
@@ -109,7 +106,7 @@ function ResourceController (opts) {
   this._id = opts.id;
   this._model = opts.model;
   this._name = opts.name || opts.model.modelName;
-  this._pluralize = this._name + 's';
+  this._pluralize = pluralize (this._name);
   this._eventPrefix = opts.eventPrefix;
 
   if (!this._id)

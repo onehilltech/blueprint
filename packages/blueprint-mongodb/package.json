@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^1.2.0",
-    "mongoose": "^4.6.2"
+    "mongoose": "^4.6.2",
+    "pluralize": "^3.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
