@@ -87,23 +87,25 @@ blueprint.controller (PersonController, ResourceController)
 
 The resource controller exposes the following actions:
 
-| Action       | HTTP method | Body                       | Response
-|--------------|-------------|----------------------------|-----------------------------------|
-| create       | POST        | {\<resource\>: { values }} | {\<resource\>: { values }}        |
-| retrieve one | GET         | N/A                        | {\<resource\>: { values }}        |
-| retrieve all | GET         | N/A                        | {\<plural-resource\>: { values }} |   
-| update       | UPDATE      | {\<resource\>: { values }} | {\<resource\>: { values }}        |
-| delete       | DELETE      | N/A                        | `true` or `false`                 |
+| Action       | HTTP method | Path            | Body                       | Response
+|--------------|-------------|-----------------|----------------------------|-----------------------------------|
+| create       | POST        | /resource       | {\<resource\>: { values }} | {\<resource\>: { values }}        |
+| retrieve one | GET         | /resource/:rcId | N/A                        | {\<resource\>: { values }}        |
+| retrieve all | GET         | /resource       | N/A                        | {\<plural-resource\>: { values }} |   
+| count        | GET         | /resource/count | N/A                        | {count: n}                        |   
+| update       | UPDATE      | /resource/:rcId | {\<resource\>: { values }} | {\<resource\>: { values }}        |
+| delete       | DELETE      | /resource/:rcId | N/A                        | `true` or `false`                 |
 
 For example, the `PersonController` exposes the following actions:
 
-| Action       | HTTP method | Body                       | Response
-|--------------|-------------|----------------------------|-----------------------------------|
-| create | POST | `{person: { first_name: 'James', last_name: 'Hill }}` | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}` |
-| retrieve one | GET | N/A  | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}`  |
-| retrieve all | GET | N/A  | `{persons: [{_id: 'id', first_name: 'James', last_name: 'Hill' }]}` |   
-| update  | UPDATE | `{person: { first_name: 'John' }}` | `{person: {_id: 'id', first_name: 'John', last_name: 'Hill }}`        |
-| delete       | DELETE      | N/A                        | `true` or `false`                 |
+| Action       | HTTP method | Path | Body                       | Response
+|--------------|-------------|------| ----------------------------|-----------------------------------|
+| create | POST | /person | `{person: { first_name: 'James', last_name: 'Hill }}` | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}` |
+| retrieve one | GET | /person/id | N/A  | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}`  |
+| retrieve all | GET | /person | N/A  | `{persons: [{_id: 'id', first_name: 'James', last_name: 'Hill' }]}` |   
+| count   | GET   | /person/count | N/A                        | {count: n} |   
+| update  | UPDATE | /person/id | `{person: { first_name: 'John' }}` | `{person: {_id: 'id', first_name: 'John', last_name: 'Hill }}`        |
+| delete       | DELETE    | /person/id   | N/A                        | `true` or `false`                 |
 
 
 **Messaging Framework.** All actions on the default implementation of the
