@@ -77,7 +77,6 @@ function makeTaskCompletionHandler (res, callback) {
     if (err) return callback (err);
 
     res.status (200).json (result);
-    return callback ();
   }
 }
 
@@ -515,6 +514,52 @@ ResourceController.prototype.delete = function (opts) {
 
         // Make sure we return 'true'.
         function (result, callback) { return callback (null, true); }
+      ], makeTaskCompletionHandler (res, callback));
+    }
+  };
+};
+
+/**
+ * Count the number of resources.
+ *
+ * @param opts
+ * @returns
+ */
+ResourceController.prototype.count = function (opts) {
+  opts = opts || {};
+  var on = opts.on || {};
+
+  var onAuthorize = on.authorize || __onAuthorize;
+  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPostExecute = on.postExecute || __onPostExecute;
+
+  var self = this;
+
+  return {
+    // There is no resource id that needs to be validated. So, we can
+    // just pass control to the onAuthorize method.
+    validate: onAuthorize,
+
+    execute: function __blueprint_count_execute (req, res, callback) {
+      async.waterfall ([
+        async.constant (req.query),
+
+        function (filter, callback) {
+          return onUpdateFilter (req, filter, callback)
+        },
+
+        // Now, let's search our database for the resource in question.
+        function (filter, callback) {
+          self._model.count (filter, makeDbCompletionHandler ('Failed to count resources', callback));
+        },
+
+        // Allow the subclass to do any post-execution analysis of the result.
+        function (count, callback) { onPostExecute (req, count, callback); },
+
+        // Rewrite the result in JSON API format.
+        function (count, callback) {
+          return callback (null, {count: count});
+        }
       ], makeTaskCompletionHandler (res, callback));
     }
   };

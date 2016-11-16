@@ -10,7 +10,7 @@ var util = require ('util')
   , fs = require ('fs')
   ;
 
-var BaseController = blueprint.BaseController
+var ResourceController = blueprint.ResourceController
   , HttpError = blueprint.errors.HttpError
   ;
 
@@ -22,7 +22,7 @@ var BaseController = blueprint.BaseController
  * @constructor
  */
 function GridFSController (conn, opts) {
-  BaseController.call (this);
+  ResourceController.call (this);
 
   opts = opts || {};
 
@@ -48,7 +48,7 @@ function GridFSController (conn, opts) {
   });
 }
 
-util.inherits (GridFSController, BaseController);
+blueprint.controller (GridFSController, ResourceController);
 
 /**
  * Get the resource identifier.

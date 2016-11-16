@@ -11,7 +11,6 @@ const datamodel = require (path.resolve (__dirname, '../../fixtures/datamodel'))
 
 describe ('ResourceController', function () {
   var server = null;
-  var personId;
   var person;
 
   before (function (done) {
@@ -129,6 +128,14 @@ describe ('ResourceController', function () {
           expect (res.body).to.deep.equal ({person: person});
           return done (null);
         });
+    });
+  });
+
+  describe ('count', function () {
+    it ('should count the number of resources', function (done) {
+      request (server.app)
+        .get ('/person/count')
+        .expect (200, {count: 2}, done);
     });
   });
 });
