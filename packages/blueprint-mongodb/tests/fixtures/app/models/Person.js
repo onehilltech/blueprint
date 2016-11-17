@@ -17,7 +17,8 @@ var schema = new mongodb.Schema ({
     zipcode: {type: String, required: true}
   },
 
-  education: {type: mongodb.Schema.Types.ObjectId, ref: Degree.modelName}
+  education: {type: mongodb.Schema.Types.ObjectId, ref: Degree.modelName},
+  degrees: [{type: mongodb.Schema.Types.ObjectId, ref: Degree.modelName}]
 });
 
 module.exports = mongodb.model ('person', schema, 'blueprint_persons');

@@ -38,7 +38,11 @@ describe ('ResourceController', function () {
             state: 'TN',
             zipcode: '12345'
           },
-          education: datamodel.models.degrees[0].id
+          education: datamodel.models.degrees[0].id,
+          degrees: [
+            datamodel.models.degrees[0].id,
+            datamodel.models.degrees[1].id
+          ]
         }
       };
 
@@ -84,7 +88,10 @@ describe ('ResourceController', function () {
       request (server.app)
         .get ('/person/' + person._id + '?populate=true')
         .expect (200, {
-          degrees: [_.extend (datamodel.data.degrees[0], {_id: datamodel.models.degrees[0].id})],
+          degrees: [
+            _.extend (datamodel.data.degrees[0], {_id: datamodel.models.degrees[0].id}),
+            _.extend (datamodel.data.degrees[1], {_id: datamodel.models.degrees[1].id})
+          ],
           person: person
         }, done);
     });

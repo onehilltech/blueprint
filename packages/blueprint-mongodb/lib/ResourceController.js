@@ -114,7 +114,6 @@ function ResourceController (opts) {
   // Build the validation schema for create and update.
   var validationOpts = {pathPrefix: this._name};
   this._createValidation = Validation (opts.model, validationOpts);
-  this._populate = populate (opts.model);
   this._updateValidation = Validation (opts.model, _.extend (validationOpts, {allOptional: true}));
 }
 
@@ -261,26 +260,14 @@ ResourceController.prototype.get = function (opts) {
           var result = { };
           result[self._name] = data;
 
-          if (!req.query.populate)
+          if (!req.query.populate) {
             return callback (null, result);
-
-          async.eachOf (self._populate, function (item, path, callback) {
-            var value = data[path];
-            var plural = pluralize (item.modelName);
-
-            if (!result[plural])
-              result[plural] = [];
-
-            item.populator.populate (value, function (err, model) {
-              if (err) return callback (err);
-              if (model) result[plural].push (model);
-
-              return callback (err);
+          }
+          else {
+            return populate (data, self._model, function (err, details) {
+              result = _.extend (result, details);
+              return callback (null, result);
             });
-          }, complete);
-
-          function complete (err) {
-            return callback (err, result);
           }
         }
       ], makeTaskCompletionHandler (res, callback));
