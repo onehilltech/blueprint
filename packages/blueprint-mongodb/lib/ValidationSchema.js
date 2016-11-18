@@ -10,7 +10,7 @@ module.exports = makeValidationSchema;
 function makeValidationSchemaForPath (path, opts) {
   // Build the general-purpose schema for the path.
   var schema = {};
-  var opts = opts || {};
+  opts = opts || {};
 
   // The 'optional' property has to be the first key in the partial schema
   // object in order for validation by schema to work.
@@ -35,19 +35,26 @@ function makeValidationSchemaForPath (path, opts) {
   return schema;
 }
 
-function makeValidationSchema (model, opts) {
-  var opts = opts || {};
-  var pathPrefix = (opts.pathPrefix + '.') || '';
+function makeValidationSchema (schema, opts) {
+  opts = opts || {};
 
-  var schema = model.schema;
+  var pathPrefix = '';
+
+  if (opts.pathPrefix)
+    pathPrefix = opts.pathPrefix + '.';
+
   var validation = {};
+
+  var pathOptions = {
+    allOptional: opts.allOptional
+  };
 
   for (var key in schema.paths) {
     if (!schema.paths.hasOwnProperty (key) || key === '__v')
       continue;
 
     var fullKey = pathPrefix + key;
-    validation[fullKey] = makeValidationSchemaForPath (schema.paths[key], {allOptional: opts.allOptional});
+    validation[fullKey] = makeValidationSchemaForPath (schema.paths[key], pathOptions);
   }
 
   return validation;

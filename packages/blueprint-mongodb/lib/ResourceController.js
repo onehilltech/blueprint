@@ -5,7 +5,7 @@ var util      = require ('util')
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
-var Validation = require ('./ValidationSchema');
+var validationSchema = require ('./ValidationSchema');
 var populate = require ('./populate');
 
 var BaseController = blueprint.BaseController
@@ -113,8 +113,8 @@ function ResourceController (opts) {
 
   // Build the validation schema for create and update.
   var validationOpts = {pathPrefix: this._name};
-  this._createValidation = Validation (opts.model, validationOpts);
-  this._updateValidation = Validation (opts.model, _.extend (validationOpts, {allOptional: true}));
+  this._createValidation = validationSchema (opts.model.schema, validationOpts);
+  this._updateValidation = validationSchema (opts.model.schema, _.extend (validationOpts, {allOptional: true}));
 }
 
 util.inherits (ResourceController, BaseController);
