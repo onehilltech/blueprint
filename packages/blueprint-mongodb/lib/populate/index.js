@@ -48,73 +48,88 @@ function createPopulator (Model) {
   }
 }
 
-function populate (key, data) {
+function populateImpl (populator, data, ids, result, callback) {
+  async.eachOf (populator, function (populate, path, callback) {
+    const value  = data[path];
+    const plural = pluralize (populate.Model.modelName);
+
+    // Make sure the result and ids for the current population exists. If not,
+    // then we start with the default array.
+
+    if (!result[plural])
+      result[plural] = [];
+
+    if (!ids[plural])
+      ids[plural] = [];
+
+    async.waterfall ([
+      // Determine the ids that we need to search for.
+      function (callback) {
+        populate.accept ({
+          visitPopulateElement: function () {
+            var coll = ids[plural];
+            var idStr = value.toString ();
+
+            if (coll.indexOf (idStr) !== -1)
+              return callback (null, null);
+
+            coll.push (idStr);
+            return callback (null, value);
+          },
+
+          visitPopulateArray: function () {
+            var coll = ids[plural];
+
+            async.filter (value, function (id, callback) {
+              var idStr = id.toString ();
+              var firstTime = coll.indexOf (idStr) === -1;
+
+              if (firstTime)
+                coll.push (idStr);
+
+              return callback (null, firstTime);
+            }, complete);
+
+            function complete (err, result) {
+              return callback (err, result.length > 0 ? result : null);
+            }
+          }
+        })
+      },
+
+      // Populate populate the remaining ids.
+      function (remaining, callback) {
+        if (!remaining) return callback (null);
+
+        populate.populate (remaining, function (err, model) {
+          if (err) return callback (err);
+          result[plural].push (model);
+
+          return callback (null);
+        });
+      }
+    ], callback);
+  }, complete);
+
+  function complete (err) {
+    return callback (err, result);
+  }
+}
+
+function populateArray (key, arr) {
   var ids = {};
   var result = {};
 
   return function (callback) {
     const populator = populators[key];
 
-    async.eachOf (populator, function (item, path, callback) {
-      const value = data[path];
-      const plural = pluralize (item.Model.modelName);
-
-      // Make sure the result and ids for the current population exists. If not,
-      // then we start with the default array.
-
-      if (!result[plural])
-        result[plural] = [];
-
-      if (!ids[plural])
-        ids[plural] = [];
-
-      async.waterfall ([
-        // Determine the ids that we need to search for.
-        function (callback) {
-          item.accept ({
-            visitPopulateElement: function () {
-              var coll = ids[plural];
-              var idStr = value.toString ();
-
-              if (coll.indexOf (idStr) !== -1)
-                return callback (null, null);
-
-              coll.push (idStr);
-              return callback (null, value);
-            },
-
-            visitPopulateArray: function () {
-              var coll = ids[plural];
-
-              async.filter (value, function (id, callback) {
-                var idStr = id.toString ();
-                var firstTime = coll.indexOf (idStr) === -1;
-
-                if (firstTime)
-                  coll.push (idStr);
-
-                return callback (null, firstTime);
-              }, complete);
-
-              function complete (err, result) {
-                return callback (err, result.length > 0 ? result : null);
-              }
-            }
-          })
-        },
-
-        // Populate populate the remaining ids.
-        function (remaining, callback) {
-          if (!remaining) return callback (null);
-
-          item.populate (remaining, function (err, model) {
-            if (err) return callback (err);
-            result[plural].push (model);
-
-            return callback (null);
-          });
-        }
-      ], callback);
+    // Iterate over each element in the array, and populate each one. The
+    // partial result can be ignored since we are will be adding the populated
+    // object directly to the result.
+    async.each (arr, function (model, callback) {
+      populateImpl (populator, model, ids, result, function (err, partial) {
+        return callback (err, result);
+      });
     }, complete);
 
     function complete (err) {
@@ -124,6 +139,22 @@ function populate (key, data) {
         return callback (null, _.flatten (values));
       }, callback);
     }
+  };
+}
+
+function populateOne (key, model) {
+  var ids = {};
+
+  return function (callback) {
+    const populator = populators[key];
+
+    populateImpl (populator, model, ids, {}, function (err, result) {
+      if (err) return callback (err);
+
+      async.mapValues (result, function (values, name, callback) {
+        return callback (null, _.flatten (values));
+      }, callback);
+    });
   }
 }
 
@@ -134,12 +165,17 @@ module.exports = function (data, model, callback) {
   if (!populators[key])
     tasks.push (createPopulator (model));
 
-  tasks.push (populate (key, data));
+  if (_.isArray (data))
+    tasks.push (populateArray (key, data));
+  else
+    tasks.push (populateOne (key, data));
 
   async.series (tasks, complete);
 
   function complete (err, results) {
     if (err) return callback (err);
-    return callback (null, results[1]);
+
+    var ret = results[tasks.length - 1];
+    return callback (null, ret);
   }
 };

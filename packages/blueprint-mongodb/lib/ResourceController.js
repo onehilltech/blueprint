@@ -296,29 +296,12 @@ ResourceController.prototype.getAll = function (opts) {
   return {
     // There is no resource id that needs to be validated. So, we can
     // just pass control to the onAuthorize method.
-    validate: function (req, callback) {
-      async.series ([
-        // First, validate the query string.
-        function (callback) {
-          req.checkQuery ('options', 'Invalid options').optional ().isJSON ();
-
-          return callback (req.validationErrors (true));
-        },
-
-        function (callback) {
-          onAuthorize (req, callback);
-        }
-      ], callback);
-    },
-
-    sanitize: function (req, callback) {
-      if (req.query.options)
-        req.query.options = JSON.parse (req.query.options);
-
-      return callback (null);
-    },
+    validate: onAuthorize,
 
     execute: function __blueprint_getall_execute (req, res, callback) {
+      // Update the options with those from the query string.
+      var opts = req.query.options || {};
+
       async.waterfall ([
         async.constant (_.omit (req.query, ['options'])),
 
@@ -331,9 +314,6 @@ ResourceController.prototype.getAll = function (opts) {
           onPrepareOptions (req, function (err, options) {
             if (err) return callback (err);
             options = options || {};
-
-            // Update the options with those from the query string.
-            var opts = req.query.options || {};
 
             if (opts.skip)
               options['skip'] = opts.skip;
@@ -364,7 +344,15 @@ ResourceController.prototype.getAll = function (opts) {
           var result = { };
           result[self._pluralize] = data;
 
-          return callback (null, result);
+          if (!opts.populate) {
+            return callback (null, result);
+          }
+          else {
+            return populate (data, self._model, function (err, details) {
+              result = _.extend (result, details);
+              return callback (null, result);
+            });
+          }
         }
       ], makeTaskCompletionHandler (res, callback));
     }
