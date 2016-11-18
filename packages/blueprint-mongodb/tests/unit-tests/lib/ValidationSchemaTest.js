@@ -10,7 +10,7 @@ describe ('ValidationSchema', function () {
       name: {
         first: {type: String, required: true},
         middle: {type: String},
-        last: {type: String, required: true}
+        last: {type: String, required: true, validation: {optional: true}}
       },
       sex: {type: String, required: true, enum: ['male', 'female']},
       age: {type: Number, validation: { kind: 'Int'}}
@@ -32,7 +32,8 @@ describe ('ValidationSchema', function () {
         notEmpty: true
       },
       'name.last': {
-        notEmpty: true
+        notEmpty: true,
+        optional: true
       },
 
       age: {
