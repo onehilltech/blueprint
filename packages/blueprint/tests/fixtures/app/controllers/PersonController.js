@@ -1,7 +1,7 @@
 'use strict';
 
 var blueprint = require ('../../../../lib')
-  , ResourceController = blueprint.ResourceController;
+  , ResourceController = blueprint.ResourceController
   ;
 
 module.exports = PersonController;
