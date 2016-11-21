@@ -4,7 +4,7 @@ var async   = require ('async')
   ;
 
 const appPath = require ('./appPath')
-  , roles = require ('../../lib/roles')
+  , roles = require ('../../lib/scopes')
   ;
 
 var Account = undefined

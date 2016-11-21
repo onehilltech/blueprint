@@ -4,7 +4,7 @@ var blueprint = require ('@onehilltech/blueprint')
   , mongodb   = require ('@onehilltech/blueprint-mongodb')
   , ResourceController = mongodb.ResourceController
   , Policy    = blueprint.Policy
-  , roles     = require ('../../lib/roles/client')
+  , roles     = require ('../../lib/scopes/client')
   ;
 
 var Client = require ('../models/Client')
