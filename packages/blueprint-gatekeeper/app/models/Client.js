@@ -14,7 +14,7 @@ var schema = new mongodb.Schema ({
   email: {type: String, required: true, trim: true},
 
   /// Client secret.
-  secret: {type: String, required: true},
+  secret: {type: String, required: true, validation: {optional: true}},
 
   /// Redirect URI for the client.
   redirect_uri: {type: String, trim: true},
@@ -31,7 +31,7 @@ var schema = new mongodb.Schema ({
 });
 
 schema.pre ('validate', function (next) {
-  if (!this.isInit ('secret'))
+  if (!this.secret)
     this.secret = uid.sync (DEFAULT_SECRET_LENGTH);
 
   return next ();

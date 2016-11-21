@@ -1,3 +1,5 @@
+'use strict';
+
 var roles = {
   administrator: 'gatekeeper.administrator',
 
@@ -9,9 +11,10 @@ var roles = {
 
   client: {
     create: 'gatekeeper.client.create',
+    get: 'gatekeeper.client.get',
     update: 'gatekeeper.client.update',
     delete: 'gatekeeper.client.delete'
   }
 };
 
-module.exports = exports = roles;
+module.exports = roles;

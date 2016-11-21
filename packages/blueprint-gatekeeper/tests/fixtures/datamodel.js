@@ -14,7 +14,7 @@ var Account = undefined
 
 var data = {
   accounts: [
-    { email: 'account1@gatekeeper.com', username: 'account1', password: 'account1' },
+    { email: 'account1@gatekeeper.com', username: 'account1', password: 'account1'},
     { email: 'account2@gatekeeper.com', username: 'account2', password: 'account2' },
     { email: 'account3@gatekeeper.com', username: 'account3', password: 'account3' },
     { email: 'account4@gatekeeper.com', username: 'account4', password: 'account4', roles: [roles.user.administrator]},
@@ -45,7 +45,15 @@ function seed (done) {
     function (callback) {
       var clients =
         [
-          { firstId: 1, roles: [roles.client.account.create] },
+          { firstId: 1, roles: [
+            // client scope
+            roles.client.client.create,
+            roles.client.client.delete,
+            roles.client.client.update,
+
+            // account scope
+            roles.client.account.create
+          ] },
           { firstId: 2 },
           { firstId: 3, enabled: false }
         ];

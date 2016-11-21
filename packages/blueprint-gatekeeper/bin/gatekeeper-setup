@@ -13,13 +13,13 @@ var winston   = require ('winston')
 var appPath = path.resolve (process.cwd (), 'app');
 var rcPath  = path.resolve (process.cwd (), '.gatekeeper');
 
-const DEFAULT_CLIENT_ROLES = [
-  // account roles
+const DEFAULT_CLIENT_SCOPES = [
+  // account scopes
   roles.client.account.create,
   roles.client.account.update,
   roles.client.account.delete,
 
-  // client roles
+  // client scopes
   roles.client.client.create,
   roles.client.client.delete,
   roles.client.client.update
@@ -48,8 +48,8 @@ function execute (args, callback) {
 
     function (exists, callback) {
       var data = [
-        {name: 'gatekeeper-cli', email: args.email, roles: DEFAULT_CLIENT_ROLES},
-        {name: 'gatekeeper-webportal', email: args.email, roles: DEFAULT_CLIENT_ROLES}
+        {name: 'gatekeeper-cli', email: args.email, roles: DEFAULT_CLIENT_SCOPES},
+        {name: 'gatekeeper-webportal', email: args.email, roles: DEFAULT_CLIENT_SCOPES}
       ];
 
       blueprint.app.models.Client.create (data, callback);
