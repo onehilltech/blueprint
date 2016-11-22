@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+'use strict';
+
+var program          = require ('commander')
+  , gatekeeper       = require ('@onehilltech/gatekeeper')
+  , gatekeeperClient = require ('../lib/GatekeeperClient')
+  , async            = require ('async')
+  , winston          = require ('winston')
+  ;
+
+program
+  .option ('-b, --base <base>', 'Base uri for the Gatekeeper service')
+  .arguments ('<name> <email> [scope]')
+  .action (addClient)
+  .parse (process.argv);
+
+function addClient (name, email, scope) {
+  async.waterfall ([
+    function (callback) {
+      gatekeeperClient (program.base, callback);
+    },
+    function (client, callback) {
+      winston.log ('info', 'adding client to service');
+      client.createClient ({name: name, email: email, scope: scope}, callback);
+    }], actionComplete);
+}
+
+function actionComplete (err, result) {
+  if (err) return winston.log ('error', err.message);
+
+  winston.log ('info', 'successfully added client to service');
+
+  console.log ('client_id: ' + result.client._id);
+  console.log ('client_secret: ' + result.client.secret);
+}
