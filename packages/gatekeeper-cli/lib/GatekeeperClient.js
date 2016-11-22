@@ -5,6 +5,7 @@ var request = require ('request')
   , path    = require ('path')
   , fse     = require ('fs-extra')
   , async   = require ('async')
+  , util    = require ('util')
   ;
 
 module.exports = makeClient;
@@ -176,7 +177,7 @@ GatekeeperClient.prototype.makeRequest = function (opts) {
 function handleResponse (callback) {
   return function (err, res, body) {
     if (err) return callback (err);
-    if (res.statusCode < 200 || res.statusCode >= 400) return callback (new Error (body));
+    if (res.statusCode < 200 || res.statusCode >= 400) return callback (new Error (util.inspect (body)));
     return callback (null, body);
   }
 }

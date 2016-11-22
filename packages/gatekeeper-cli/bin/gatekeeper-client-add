@@ -17,21 +17,19 @@ program
 function addClient (name, email, scope) {
   async.waterfall ([
     function (callback) {
-      winston.log ('info', 'creating Gatekeeper client');
       gatekeeperClient (program.base, callback);
     },
     function (client, callback) {
-      winston.log ('info', 'adding new client to service');
+      winston.log ('info', 'adding client to service');
       client.createClient ({name: name, email: email, scope: scope}, callback);
     }], actionComplete);
 }
 
 function actionComplete (err, result) {
-  if (err) throw err;
+  if (err) return winston.log ('error', err.message);
 
-  winston.log ('info', 'Successfully added new client!');
+  winston.log ('info', 'successfully added client to service');
 
   console.log ('client_id: ' + result.client._id);
   console.log ('client_secret: ' + result.client.secret);
-  //process.exit (0);
 }

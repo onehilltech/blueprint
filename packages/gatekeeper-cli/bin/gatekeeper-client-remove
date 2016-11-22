@@ -1,65 +1,32 @@
 #!/usr/bin/env node
 'use strict';
 
-var program    = require ('commander')
-  , winston    = require ('winston')
-  , prompt     = require ('prompt')
-  , gatekeeper = require ('@onehilltech/gatekeeper')
-  , path       = require ('path')
-  , async      = require ('async')
+var program          = require ('commander')
+  , gatekeeper       = require ('@onehilltech/gatekeeper')
+  , gatekeeperClient = require ('../lib/GatekeeperClient')
+  , async            = require ('async')
+  , winston          = require ('winston')
   ;
 
-async.waterfall ([
-  function (app, callback) {
-    // command: create
-    program
-      .command ('add', 'add a new client to the database')
-      .description ('add a new client')
-      .action (function () {
-        prompt.start ();
+program
+  .option ('-b, --base <base>', 'Base uri for the Gatekeeper service')
+  .arguments ('<client-id>')
+  .action (deleteClient)
+  .parse (process.argv);
 
-        prompt.get (['name', 'email', 'redirect', 'roles'], function (err, result) {
-          winston.log ('debug', 'adding a new client to the database');
+function deleteClient (clientId) {
+  async.waterfall ([
+    function (callback) {
+      gatekeeperClient (program.base, callback);
+    },
+    function (client, callback) {
+      winston.log ('info', 'removing client %s from service', clientId);
+      client.deleteClient (clientId, callback);
+    }], actionComplete);
+}
 
-          var client = new Client ({
-            name : result.name,
-            email : result.email,
-            redirect_uri : result.redirect,
-            roles : result.roles.split (',')
-          });
+function actionComplete (err, result) {
+  if (err) return winston.log ('error', err.message);
 
-          client.save (function (err, client) {
-            if (err) return callback (err);
-
-            console.log('client_id: ' + client.id);
-            console.log('client_secret: ' + client.secret);
-
-            callback (null);
-          });
-        });
-      });
-
-    // command: remove
-    program
-      .command ('remove <clientId>')
-      .description ('remove client from the database')
-      .action (function (clientId) {
-        Client.findByIdAndRemove (clientId, callback);
-      });
-
-    // command: enable
-    program
-      .command ('enable <clientId> <state>')
-      .description ('enable/disable client access')
-      .action (function (clientId, state) {
-        state = JSON.parse (state.toLowerCase());
-
-        Client.findByIdAndUpdate (clientId, {enabled: state}, callback);
-      });
-
-    program.parse (process.argv);
-  }
-], function (err) {
-  if (err) throw err;
-  process.exit (0);
-});
+  winston.log ('info', 'successfully removed client');
+}
