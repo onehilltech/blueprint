@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+'use strict';
+
+var program          = require ('commander')
+  , gatekeeper       = require ('@onehilltech/gatekeeper')
+  , gatekeeperClient = require ('../lib/GatekeeperClient')
+  , async            = require ('async')
+  , winston          = require ('winston')
+  ;
+
+program
+  .option ('-b, --base <base>', 'Base uri for the Gatekeeper service')
+  .arguments ('<account-id>')
+  .action (deleteClient)
+  .parse (process.argv);
+
+function deleteClient (accountId) {
+  async.waterfall ([
+    function (callback) {
+      gatekeeperClient (program.base, callback);
+    },
+    function (client, callback) {
+      winston.log ('info', 'removing account %s from service', accountId);
+      client.deleteAccount (accountId, callback);
+    }], actionComplete);
+}
+
+function actionComplete (err) {
+  if (err) return winston.log ('error', err.message);
+
+  winston.log ('info', 'successfully removed account');
+}
