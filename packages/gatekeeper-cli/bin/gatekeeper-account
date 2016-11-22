@@ -1,0 +1,85 @@
+#!/usr/bin/env node
+'use strict';
+
+var program    = require ('commander')
+  , winston    = require ('winston')
+  , prompt     = require ('prompt')
+  , blueprint  = require ('@onehilltech/blueprint')
+  , path       = require ('path')
+  , jsonfile   = require ('jsonfile')
+  , async      = require ('async')
+  , path       = require ('path')
+  , gatekeeper = require (path.resolve (__dirname, '../lib/GatekeeperClient'))
+  ;
+
+function complete (err) {
+  if (err) throw err;
+  process.exit (0);
+}
+
+var rcPath = path.resolve (process.cwd (), './gatekeeper');
+
+/**
+ * Get a new GatekeeperClient object.
+ *
+ * @param callback
+ */
+function getGatekeeperClient (callback) {
+  // Load the client information.
+  var dataFile = path.resolve (rcPath, 'gatekeeper-cli');
+
+  jsonfile.readFile (dataFile, function (err, obj) {
+    if (err) return callback (err);
+
+    var baseurl = program.baseurl || 'http://localhost:5000';
+
+    var opts = {
+      baseUri : baseurl,
+      clientId : obj.client_id,
+      clientSecret : obj.client_secret
+    };
+
+    return gatekeeper.newClient (opts, callback);
+  });
+}
+
+async.waterfall ([
+  function (callback) {
+    program.option ('--baseurl <url>', 'base url of Gatekeeper service');
+
+    // command: create
+    program
+      .command ('add')
+      .description ('add a new account')
+      .action (function () {
+        var schema = {
+          properties: {
+            username: { required: true, type: 'string' },
+            password: { required: true, type: 'string', hidden: true },
+            email: { required: true, type: 'string' },
+            roles: {}
+          }
+        };
+
+        // Prompt the user for the account information.
+
+        prompt.start ();
+
+        async.waterfall ([
+          function (callback) {
+            prompt.get (schema, callback);
+          },
+          function (result, callback) {
+            getGatekeeperClient (function (err, client) {
+              return callback (err, client, result);
+            });
+          },
+          function (client, result, callback) {
+            client.createAccount (result, callback);
+          }
+        ], callback);
+      });
+
+    program.parse (process.argv);
+  }
+], complete);

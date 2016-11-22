@@ -1,0 +1,37 @@
+{
+  "name": "@onehilltech/gatekeeper-cli",
+  "description": "command-line interface for Gatekeeper",
+  "version": "0.1.0",
+  "private": false,
+  "main": "./lib",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/onehilltech/gatekeeper-cli.git"
+  },
+  "dependencies": {
+    "@onehilltech/gatekeeper": "0.39.1",
+    "async": "^1.5.2",
+    "commander": "^2.9.0",
+    "request": "^2.65.0",
+    "underscore": "^1.8.3",
+    "winston": "^0.7.3"
+  },
+  "devDependencies": {
+    "chai": "^3.4.0",
+    "coveralls": "^2.11.9",
+    "istanbul": "^0.4.3",
+    "mocha": "^3.0.2",
+    "mocha-lcov-reporter": "^1.2.0",
+    "nodemailer-stub-transport": "^1.0.0",
+    "superagent": "^2.2.0",
+    "supertest": "^2.0.0"
+  },
+  "scripts": {
+    "test": "env NODE_ENV=test mocha --recursive tests/src --reporter spec",
+    "cover": "env NODE_ENV=test istanbul cover _mocha --recursive tests/src",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+  },
+  "bin": {
+    "gatekeeper": "./bin/gatekeeper"
+  }
+}
