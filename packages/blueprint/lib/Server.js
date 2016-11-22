@@ -124,10 +124,6 @@ function configureMiddleware (app, config) {
 
 /**
  * @class Protocol
- *
- * @param protocol
- * @param port
- * @constructor
  */
 function Protocol (name, protocol, port) {
   this._name = name;
@@ -418,6 +414,10 @@ Server.prototype.__defineGetter__ ('middleware', function () {
 
 Server.prototype.__defineGetter__ ('upload', function () {
   return this._uploader;
+});
+
+Server.prototype.__defineGetter__ ('protocols', function () {
+  return this._protocols
 });
 
 /**
