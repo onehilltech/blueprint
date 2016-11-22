@@ -73,6 +73,9 @@ AccountController.prototype.create = function () {
           }
         };
 
+        if (req.body.account.scope)
+          doc.scope = req.body.account.scope;
+
         async.waterfall ([
           function (callback) {
             if (!doc.activation.required)
