@@ -38,8 +38,7 @@ function execute (args, callback) {
 
     function (exists, callback) {
       var data = [
-        {name: 'gatekeeper-cli', email: args.email, scope: DEFAULT_SCOPE},
-        {name: 'gatekeeper-webportal', email: args.email, scope: DEFAULT_SCOPE}
+        {name: 'gatekeeper-cli', email: args.email, scope: DEFAULT_SCOPE}
       ];
 
       blueprint.app.models.Client.create (data, callback);
