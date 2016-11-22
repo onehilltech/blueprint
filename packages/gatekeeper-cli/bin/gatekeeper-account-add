@@ -6,30 +6,53 @@ var program          = require ('commander')
   , gatekeeperClient = require ('../lib/GatekeeperClient')
   , async            = require ('async')
   , winston          = require ('winston')
+  , prompt           = require ('prompt')
   ;
 
 program
   .option ('-b, --base <base>', 'Base uri for the Gatekeeper service')
-  .arguments ('<name> <email> [scope]')
-  .action (addClient)
   .parse (process.argv);
 
-function addClient (name, email, scope) {
-  async.waterfall ([
-    function (callback) {
-      gatekeeperClient (program.base, callback);
-    },
-    function (client, callback) {
-      winston.log ('info', 'adding client to service');
-      client.createClient ({name: name, email: email, scope: scope}, callback);
-    }], actionComplete);
-}
+async.waterfall ([
+  function (callback) {
+    var schema = {
+      properties: {
+        username: {
+          required: true
+        },
+        password: {
+          hidden: true,
+          replace: '*'
+        },
+        email: {
+          required: true
+        },
+        scope: {
+          required: false
+        }
+      }
+    };
 
-function actionComplete (err, result) {
+    prompt.start ();
+    prompt.get (schema, callback);
+  },
+
+  function (input, callback) {
+    async.waterfall ([
+      function (callback) {
+        gatekeeperClient (program.base, callback);
+      },
+
+      function (client, callback) {
+        winston.log ('info', 'adding account to service');
+        client.addAccount (input, callback);
+      }
+    ], callback);
+  },
+], actionComplete);
+
+function actionComplete (err) {
   if (err) return winston.log ('error', err.message);
 
-  winston.log ('info', 'successfully added client to service');
-
-  console.log ('client_id: ' + result.client._id);
-  console.log ('client_secret: ' + result.client.secret);
+  winston.log ('info', 'successfully added user account');
 }

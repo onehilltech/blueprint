@@ -7,5 +7,4 @@ var program = require ('commander')
 program
   .command ('add', 'add a new client to service')
   .command ('remove', 'remove an existing client from service')
-  .command ('enable', 'enable/disable client access')
   .parse (process.argv);

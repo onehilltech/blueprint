@@ -132,7 +132,10 @@ GatekeeperClient.prototype.addAccount = function (opts, callback) {
     email : opts.email
   };
 
-  var req = this.makeRequest ({url: url, method: 'POST', json: data});
+  if (opts.scope)
+    data.scope = opts.scope;
+
+  var req = this.makeRequest ({url: url, method: 'POST', json: {account: data}});
   request (req, handleResponse (callback));
 };
 
