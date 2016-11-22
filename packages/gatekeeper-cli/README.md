@@ -11,61 +11,44 @@ command-line interface for Gatekeeper
 Installation
 --------------
 
-    blueprint module install @onehilltech/gatekeeper-cli
+    npm install -g @onehilltech/gatekeeper-cli
  
 Getting Started
-----------------
+---------------
 
-Define the configuration file `gatekeeper.config.js` to configure the module
-for your application:
+First, we need to setup Gatekeeper from the Blueprint application directory:
 
-```javascript
-module.exports = {
-  token: {
-    kind: 'jwt',
-    options: {
-      issuer: 'name-of-the-application',
-      algorithm : 'RS256',
-      secret: 'ssshhh'   // can replace with publicKey, privateKey properties
-    }
-  }
-};
-```
+    ./bin/gatekeeper-setup
+    
+This will register the `gatekeeper-cli` with the current service, and allow you
+to run the `gatekeeper-cli` to manage what client and account has access to your
+service.
 
-Define a route (or router) to import the Gatekeeper routes into the application:
+### Adding a client
 
-```javascript
-// app/routers/GatekeeperRouter.js
-var blueprint = require ('@onehilltech/blueprint')
-  ;
+Each client (i.e., mobile app, web portal, etc.) must be register with the service
+to be allowed access. We can register a new client with the service as follows:
 
-module.exports = exports = {
-  '/gatekeeper': [ blueprint.ModuleRouter ('@onehilltech/gatekeeper:v1') ]
-};
-```
+    gatekeeper client add --base <base-uri> <name> <email> [scope]
+    
+where `scope` is an optional list of strings that define the access scope for the
+client. `*` denotes superuser. The client id and secret will be printed to the
+console. This should be used with requesting a client-level access token from the
+service.
 
-The router definition above will expose the Gatekeeper routers at `/gatekeeper`.
-Lastly, define the routes you want to protect. For example, you can protect all
-routes on a give path.
+### Adding a user account
 
-```javascript
-// app/routers/IndexRouter.js
+It is allow possible to add a user account to the service. The user account represents
+an individual who has access to the service. Similar to adding a client, you can add
+a user account:
 
-var passport = require ('passport')
-  ;
+    gatekeeper account add --base 
+    
+Follow the on-screen prompts to complete the addition process. The `username` 
+and `password` are used to create an access token for the user.
 
-exports = module.exports = {
-  '/v1': [
-    passport.authenticate ('bearer', {session: false})
-  ]
-};
-```
+### Next steps
 
-The router above will protect all routes under the `/v1` path, which
-includes all routers located in `app/routers/v1` directory. The client will
-need to define the `Authorization` header and include a generated token.
-Otherwise, the protected routes will return `401`.
-
-For more details on allowed routes, see `app/routers` for Gatekeeper.
+For more details, use the `--help` option.
 
 Happy Coding!
