@@ -7,23 +7,13 @@ var winston   = require ('winston')
   , path      = require ('path')
   , async     = require ('async')
   , fse       = require ('fs-extra')
-  , roles     = require ('../lib').roles
+  , scope     = require ('../lib').scope
   ;
 
 var appPath = path.resolve (process.cwd (), 'app');
 var rcPath  = path.resolve (process.cwd (), '.gatekeeper');
 
-const DEFAULT_CLIENT_SCOPES = [
-  // account scopes
-  roles.client.account.create,
-  roles.client.account.update,
-  roles.client.account.delete,
-
-  // client scopes
-  roles.client.client.create,
-  roles.client.client.delete,
-  roles.client.client.update
-];
+const DEFAULT_SCOPE = [scope.superuser];
 
 async.waterfall ([
   function (callback) { prompt.get (['email'], callback); },
@@ -48,8 +38,8 @@ function execute (args, callback) {
 
     function (exists, callback) {
       var data = [
-        {name: 'gatekeeper-cli', email: args.email, roles: DEFAULT_CLIENT_SCOPES},
-        {name: 'gatekeeper-webportal', email: args.email, roles: DEFAULT_CLIENT_SCOPES}
+        {name: 'gatekeeper-cli', email: args.email, scope: DEFAULT_SCOPE},
+        {name: 'gatekeeper-webportal', email: args.email, scope: DEFAULT_SCOPE}
       ];
 
       blueprint.app.models.Client.create (data, callback);
@@ -66,10 +56,6 @@ function execute (args, callback) {
         fse.writeJSON (filename, data, {spaces: 2}, callback);
       }, callback);
     }], callback);
-}
-
-function getUserHome () {
-  return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
 }
 
 function setupComplete (err) {
