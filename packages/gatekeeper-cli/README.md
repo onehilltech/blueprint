@@ -26,13 +26,13 @@ service.
 
 ### Adding a client
 
-Each client (i.e., mobile app, web portal, etc.) must be register with the service
+Each client (i.e., mobile app, web portal, etc.) must be registered with the service
 to be allowed access. We can register a new client with the service as follows:
 
     gatekeeper client add --base <base-uri> <name> <email> [scope]
     
 where `scope` is an optional list of strings that define the access scope for the
-client. `*` denotes superuser. The client id and secret will be printed to the
+client (`*` denotes superuser). The client id and secret will be printed to the
 console. This should be used with requesting a client-level access token from the
 service.
 
