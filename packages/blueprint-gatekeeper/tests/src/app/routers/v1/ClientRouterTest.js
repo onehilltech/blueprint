@@ -66,7 +66,7 @@ describe ('ClientRouter', function () {
                 name: data.name,
                 secret: data.secret,
                 email: data.email,
-                roles: [],
+                scope: [],
                 enabled: true
               }
             });
@@ -95,7 +95,7 @@ describe ('ClientRouter', function () {
               secret: client.secret,
               email: client.email,
               enabled: client.enabled,
-              roles: client.roles
+              scope: client.scope
             }
           }, done);
       });

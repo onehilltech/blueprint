@@ -73,47 +73,49 @@ describe ('ActivationRouter', function () {
     });
   });
 
-  describe ('GET /activate', function () {
-    var activationToken1;
+  describe ('/activate', function () {
+    describe ('GET', function () {
+      var activationToken1;
 
-    it ('should activate the account', function (done) {
-      var data = { email: 'me@gatekeeper.com', username: 'me', password: 'me' };
+      it ('should activate the account', function (done) {
+        var data = { email: 'me@gatekeeper.com', username: 'me', password: 'me' };
 
-      async.waterfall ([
-        function (callback) { getActivationToken (data, callback); },
-        function (token, callback) {
-          activationToken1 = token;
+        async.waterfall ([
+          function (callback) { getActivationToken (data, callback); },
+          function (token, callback) {
+            activationToken1 = token;
 
-          request (server.app)
-            .get ('/v1/activate?token=' + token)
-            .expect (200, 'true', callback);
-        }
-      ], done);
-    });
+            request (server.app)
+              .get ('/v1/activate?token=' + token)
+              .expect (200, 'true', callback);
+          }
+        ], done);
+      });
 
-    it ('should not double activate the account', function (done) {
-      request (server.app)
-        .get ('/v1/activate?token=' + activationToken1)
-        .expect (400, done);
-    });
+      it ('should not double activate the account', function (done) {
+        request (server.app)
+          .get ('/v1/activate?token=' + activationToken1)
+          .expect (400, done);
+      });
 
-    it ('should not activate the account [missing query params]', function (done) {
-      request (server.app)
-        .get ('/v1/activate')
-        .expect (400, [{param: 'token', msg: 'Missing account activation token'}], done);
-    });
+      it ('should not activate the account [missing query params]', function (done) {
+        request (server.app)
+          .get ('/v1/activate')
+          .expect (400, [{param: 'token', msg: 'Missing account activation token'}], done);
+      });
 
-    it ('should activate the token, with redirect', function (done) {
-      var data = { email: 'me2@gatekeeper.com', username: 'me2', password: 'me2' };
+      it ('should activate the token, with redirect', function (done) {
+        var data = { email: 'me2@gatekeeper.com', username: 'me2', password: 'me2' };
 
-      async.waterfall ([
-        function (callback) { getActivationToken (data, callback); },
-        function (token, callback) {
-          request (server.app)
-            .get ('/v1/activate?token=' + token + '&redirect_uri=http://localhost:8080/activate')
-            .expect (302, callback);
-        }
-      ], done);
+        async.waterfall ([
+          function (callback) { getActivationToken (data, callback); },
+          function (token, callback) {
+            request (server.app)
+              .get ('/v1/activate?token=' + token + '&redirect_uri=http://localhost:8080/activate')
+              .expect (302, callback);
+          }
+        ], done);
+      });
     });
   });
 });
