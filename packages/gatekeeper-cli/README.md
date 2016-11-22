@@ -47,7 +47,8 @@ a user account:
 Follow the on-screen prompts to complete the addition process. The `username` 
 and `password` are used to create an access token for the user.
 
-### Next steps
+Next Steps
+----------
 
 For more details, use the `--help` option.
 
