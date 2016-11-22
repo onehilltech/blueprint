@@ -22,7 +22,7 @@ module.exports = exports = function (opts) {
     'username': 1,
     'email': 1,
     'enabled': 1,
-    'roles': 1,
+    'scope': 1,
     'activation.required': 1,
     'activation.date': 1
   };
@@ -32,7 +32,7 @@ module.exports = exports = function (opts) {
     name: 1,
     email: 1,
     enabled: 1,
-    roles: 1,
+    scope: 1,
     metadata: 1
   };
 
@@ -92,7 +92,7 @@ module.exports = exports = function (opts) {
         user = accessToken.account;
       }
 
-      var authInfo = {scope: payload.kind, token: accessToken};
+      var authInfo = {scope: user.scope, token: accessToken};
       return done (null, user, authInfo);
     });
   });

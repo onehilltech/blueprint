@@ -19,7 +19,10 @@ var schema = new Schema ({
 
   enabled: {type: Boolean, required: true, default : true},
 
-  refresh_token: {type: Schema.Types.ObjectId, index: true}
+  refresh_token: {type: Schema.Types.ObjectId, index: true},
+
+  /// The access scopes for the token.
+  scopes: [{type: String}]
 });
 
 /**

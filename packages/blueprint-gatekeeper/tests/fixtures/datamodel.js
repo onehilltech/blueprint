@@ -4,7 +4,7 @@ var async   = require ('async')
   ;
 
 const appPath = require ('./appPath')
-  , roles = require ('../../lib/scopes')
+  , scope = require ('../../lib/scope')
   ;
 
 var Account = undefined
@@ -17,7 +17,7 @@ var data = {
     { email: 'account1@gatekeeper.com', username: 'account1', password: 'account1'},
     { email: 'account2@gatekeeper.com', username: 'account2', password: 'account2' },
     { email: 'account3@gatekeeper.com', username: 'account3', password: 'account3' },
-    { email: 'account4@gatekeeper.com', username: 'account4', password: 'account4', roles: [roles.user.administrator]},
+    { email: 'account4@gatekeeper.com', username: 'account4', password: 'account4', scope: [scope.superuser]},
     { email: 'account5@gatekeeper.com', username: 'account5', password: 'account5', enabled: false }
   ],
 
@@ -45,15 +45,7 @@ function seed (done) {
     function (callback) {
       var clients =
         [
-          { firstId: 1, roles: [
-            // client scope
-            roles.client.client.create,
-            roles.client.client.delete,
-            roles.client.client.update,
-
-            // account scope
-            roles.client.account.create
-          ] },
+          { firstId: 1, scope: [scope.superuser] },
           { firstId: 2 },
           { firstId: 3, enabled: false }
         ];
@@ -70,7 +62,7 @@ function seed (done) {
     function (client, callback) {
       var accounts = [
         { firstId: 1 },
-        { firstId: 4, roles: [roles.user.administrator] },
+        { firstId: 4 },
         { firstId: 5, enabled: false }
       ];
 

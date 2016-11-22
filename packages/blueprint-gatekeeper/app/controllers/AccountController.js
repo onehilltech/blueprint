@@ -7,7 +7,6 @@ var blueprint  = require ('@onehilltech/blueprint')
   ;
 
 var Account = require ('../models/Account')
-  , Client  = require ('../models/Client')
   ;
 
 var ResourceController = mongodb.ResourceController
@@ -40,66 +39,18 @@ function AccountController () {
 blueprint.controller (AccountController, ResourceController);
 
 /**
- * Get all the accounts in the database. Only administrators can access all the accounts
- * in the database.
- */
-AccountController.prototype.getAll = function () {
-  var options = {
-    on: {
-      authorize: function (req, callback) {
-        Policy.Definition (
-          Policy.assert ('is_administrator')
-        ).evaluate (req, callback);
-      },
-
-      prepareProjection: function (req, callback) {
-        callback (null, DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE);
-      }
-    }
-  };
-
-  return ResourceController.prototype.getAll.call (this, options);
-};
-
-/**
- * Get a single account from the database.
+ * Create a new account.
  *
- * @returns {Function}
- */
-AccountController.prototype.get = function () {
-  var options = {
-    on: {
-      authorize: function (req, callback) {
-        Policy.Definition (
-          Policy.or ([
-            Policy.assert ('is_account_owner'),
-            Policy.assert ('is_administrator')
-          ])
-        ).evaluate (req, callback);
-      },
-
-      prepareProjection: function (req, callback) {
-        callback (null, DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE);
-      }
-    }
-  };
-
-  return ResourceController.prototype.get.call (this, options);
-};
-
-/**
- * Create a new account in the database.
- *
- * @returns {*|Object}
+ * @returns {*}
  */
 AccountController.prototype.create = function () {
   var options = {
     on: {
       authorize: function (req, callback) {
         Policy.Definition (
-          Policy.and ([
-            Policy.assert ('is_client_request'),
-            Policy.assert ('has_role', gatekeeper.roles.client.account.create)
+          Policy.or ([
+            Policy.assert ('has_scope', gatekeeper.scope.account.create),
+            Policy.assert ('has_scope', gatekeeper.scope.superuser)
           ])
         ).evaluate (req, callback);
       },
@@ -154,9 +105,53 @@ AccountController.prototype.create = function () {
 };
 
 /**
+ * Get all the accounts in the database. Only administrators can access all the accounts
+ * in the database.
+ */
+AccountController.prototype.getAll = function () {
+  var options = {
+    on: {
+      authorize: function (req, callback) {
+        Policy.Definition (
+          Policy.assert ('has_scope', gatekeeper.scope.superuser)
+        ).evaluate (req, callback);
+      },
+
+      prepareProjection: function (req, callback) {
+        callback (null, DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE);
+      }
+    }
+  };
+
+  return ResourceController.prototype.getAll.call (this, options);
+};
+
+/**
+ * Get a single account from the database.
+ */
+AccountController.prototype.get = function () {
+  var options = {
+    on: {
+      authorize: function (req, callback) {
+        Policy.Definition (
+          Policy.or ([
+            Policy.assert ('is_account_owner'),
+            Policy.assert ('has_scope', gatekeeper.scope.superuser)
+          ])
+        ).evaluate (req, callback);
+      },
+
+      prepareProjection: function (req, callback) {
+        callback (null, DEFAULT_ACCOUNT_PROJECTION_EXCLUSIVE);
+      }
+    }
+  };
+
+  return ResourceController.prototype.get.call (this, options);
+};
+
+/**
  * Delete an account in the database
- *
- * @returns {*|Object}
  */
 AccountController.prototype.delete = function () {
   var options = {
@@ -165,7 +160,7 @@ AccountController.prototype.delete = function () {
         Policy.Definition (
           Policy.or ([
             Policy.assert ('is_account_owner'),
-            Policy.assert ('is_administrator')
+            Policy.assert ('has_scope', gatekeeper.scope.superuser)
           ])
         ).evaluate (req, callback);
       }

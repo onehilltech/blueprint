@@ -22,8 +22,9 @@ var schema = new mongodb.Schema ({
   /// Enabled state of the client.
   enabled: {type: Boolean, default: true, required: true},
 
-  /// The different roles of the client.
-  roles: {type: [String], default: []},
+  /// The default scope for the client. The scope is applied to the access
+  /// token for the client.
+  scope: {type: [String], default: []},
 
   /// Metadata for the client. This allows third-party services to
   /// associate custom data with the client.

@@ -13,7 +13,7 @@ function createClients (num, opts, callback) {
   opts = _.defaults (opts, {firstId: 1, roles:[], enabled: true});
 
   var firstId = opts.firstId;
-  var roles = opts.roles;
+  var scope = opts.scope;
   var enabled = opts.enabled;
 
   function onComplete (err, clients) {
@@ -34,7 +34,7 @@ function createClients (num, opts, callback) {
       email: email,
       secret: secret,
       redirect_uri: redirect,
-      roles: roles,
+      scope: scope,
       enabled : enabled
     };
 

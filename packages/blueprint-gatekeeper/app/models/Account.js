@@ -27,9 +27,6 @@ var schema = new Schema ({
   /// Encrypted password
   password: { type: String, required: true},
 
-  /// Access roles for the account.
-  roles: { type: [String], default: [] },
-
   /**
    * Internal housekeeping information. This is only use by the service
    * to manage the account. This includes information such as what client
@@ -42,6 +39,10 @@ var schema = new Schema ({
 
   /// Enabled state for the account.
   enabled: { type: Boolean, required: true, default: true },
+
+  /// The default scope for the account. This is applied to the access
+  /// token for the account.
+  scope: {type: [String], default: []},
 
   /**
    * Activation information for the account. An account can be created, but it

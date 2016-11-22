@@ -4,7 +4,7 @@ var blueprint = require ('@onehilltech/blueprint')
   , mongodb   = require ('@onehilltech/blueprint-mongodb')
   , ResourceController = mongodb.ResourceController
   , Policy    = blueprint.Policy
-  , roles     = require ('../../lib/scopes/client')
+  , scope     = require ('../../lib/scope')
   ;
 
 var Client = require ('../models/Client')
@@ -23,7 +23,7 @@ ClientController.prototype.create = function () {
     on: {
       authorize: function (req, callback) {
         Policy.Definition (
-          Policy.assert ('has_role', roles.client.create)
+          Policy.assert ('has_role', scope.client.create)
         ).evaluate (req, callback);
       }
     }
@@ -35,7 +35,7 @@ ClientController.prototype.update = function () {
     on: {
       authorize: function (req, callback) {
         Policy.Definition (
-          Policy.assert ('has_role', roles.client.update)
+          Policy.assert ('has_role', scope.client.update)
         ).evaluate (req, callback);
       }
     }
@@ -47,7 +47,7 @@ ClientController.prototype.delete = function () {
     on: {
       authorize: function (req, callback) {
         Policy.Definition (
-          Policy.assert ('has_role', roles.client.delete)
+          Policy.assert ('has_role', scope.client.delete)
         ).evaluate (req, callback);
       }
     }

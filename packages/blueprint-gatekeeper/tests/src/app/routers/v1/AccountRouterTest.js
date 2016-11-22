@@ -12,7 +12,7 @@ const datamodel  = require ('../../../../fixtures/datamodel')
 describe ('AccountRouter', function () {
   var server;
   var userToken;
-  var adminUserToken;
+  var superUserToken;
   var clientToken;
 
   var Account;
@@ -68,7 +68,7 @@ describe ('AccountRouter', function () {
         getToken (data, function (err, token) {
           if (err) return callback (err);
 
-          adminUserToken = token;
+          superUserToken = token;
           return callback ();
         });
       },
@@ -91,191 +91,195 @@ describe ('AccountRouter', function () {
     ], done);
   });
 
-  describe ('GET /v1/accounts', function () {
-    it ('should return all the accounts for an admin', function (done) {
-      var projection = {
-        '__v': 0,
-        'password': 0
-      };
+  describe ('/v1/accounts', function () {
+    describe ('GET', function () {
+      it ('should return all the accounts for an admin', function (done) {
+        var projection = {
+          '__v': 0,
+          'password': 0
+        };
 
-      Account.find ({}, projection, function (err, accounts) {
-        if (err) return done (err);
-
-        request (server.app)
-          .get ('/v1/accounts')
-          .set ('Authorization', 'Bearer ' + adminUserToken)
-          .expect (200, {'accounts': JSON.parse (JSON.stringify (accounts))}, done);
-      });
-    });
-
-    it ('should not allow non-admin access to all accounts', function (done) {
-      request (server.app)
-        .get ('/v1/accounts')
-        .set ('Authorization', 'Bearer ' + userToken)
-        .expect (403, done);
-    });
-  });
-
-  describe ('GET /v1/accounts/:accountId', function () {
-    var projection = {
-      '__v': 0,
-      'password': 0
-    };
-
-    it ('should return the owner account', function (done) {
-      var accountId = datamodel.models.accounts[0]._id;
-
-      Account.findById (accountId, projection, function (err, account) {
-        if (err) return done (err);
-
-        request (server.app)
-          .get ('/v1/accounts/' + accountId)
-          .set ('Authorization', 'Bearer ' + userToken)
-          .expect (200, {account: JSON.parse (JSON.stringify (account))}, done);
-      });
-    });
-
-    it ('should retrieve a user account for an admin', function (done) {
-      var accountId = datamodel.models.accounts[0]._id;
-
-      Account.findById (accountId, projection, function (err, account) {
-        if (err) return done (err);
-
-        request (server.app)
-          .get ('/v1/accounts/' + accountId)
-          .set ('Authorization', 'Bearer ' + adminUserToken)
-          .expect (200, {account: JSON.parse (JSON.stringify (account))}, done);
-      });
-    });
-
-    it ('should not allow non-admin access to another account', function (done) {
-      var accountId = datamodel.models.accounts[1]._id;
-
-      request (server.app)
-        .get ('/v1/accounts/' + accountId)
-        .set ('Authorization', 'Bearer ' + userToken)
-        .expect (403, done);
-    });
-  });
-
-  describe ('POST /v1/accounts', function () {
-    var data = {
-      username: 'tester1',
-      password: 'tester1',
-      email: 'james@onehilltech.com'
-    };
-
-    it ('should create a new account', function (done) {
-      var accountId;
-
-      // We know the account was created when we get an event for
-      // sending an account activation email.
-      bm.on ('gatekeeper.account.created', function (account) {
-        accountId = account.id;
-      });
-
-      request (server.app)
-        .post ('/v1/accounts')
-        .send ({account: data})
-        .set ('Authorization', 'Bearer ' + clientToken)
-        .expect (200)
-        .end (function (err, res) {
+        Account.find ({}, projection, function (err, accounts) {
           if (err) return done (err);
 
-          // Wait until the gatekeeper.account.created message is handled.
-          async.waterfall ([
-            function (callback) {
-              async.whilst (
-                function () {
-                  return accountId === undefined;
-                },
-                function (callback) {
-                  setTimeout (function () {
-                    callback (null);
-                  }, 1000);
-                }, callback);
-            },
-            function (callback) {
-              expect (res.body).to.deep.equal ({account: {_id: accountId}});
-              Account.findById (accountId, callback);
-            },
-            function (account, callback) {
-              expect (account.activation.token).to.not.be.undefined;
-              return callback ();
-            }
-          ], done);
+          request (server.app)
+            .get ('/v1/accounts')
+            .set ('Authorization', 'Bearer ' + superUserToken)
+            .expect (200, {'accounts': JSON.parse (JSON.stringify (accounts))}, done);
         });
+      });
+
+      it ('should not allow non-admin access to all accounts', function (done) {
+        request (server.app)
+          .get ('/v1/accounts')
+          .set ('Authorization', 'Bearer ' + userToken)
+          .expect (403, done);
+      });
     });
 
-    it ('should not create an account [duplicate]', function (done) {
-      request (server.app)
-        .post ('/v1/accounts').send (data)
-        .set ('Authorization', 'Bearer ' + clientToken)
-        .expect (400, done);
-    });
-
-    it ('should not create an account [missing parameter]', function (done) {
-      var invalid = {
+    describe ('POST', function () {
+      var data = {
+        username: 'tester1',
         password: 'tester1',
         email: 'james@onehilltech.com'
       };
 
-      request (server.app)
-        .post ('/v1/accounts').send (invalid)
-        .set ('Authorization', 'Bearer ' + clientToken)
-        .expect (400, done);
-    });
+      it ('should create a new account', function (done) {
+        var accountId;
 
-    it ('should not create an account [invalid role]', function (done) {
-      var invalid = {
-        grant_type: 'client_credentials',
-        client_id: datamodel.models.clients[1].id,
-        client_secret: datamodel.models.clients[1].secret
-      };
+        // We know the account was created when we get an event for
+        // sending an account activation email.
+        bm.on ('gatekeeper.account.created', function (account) {
+          accountId = account.id;
+        });
 
-      getToken (invalid, function (err, token) {
-        if (err) return done (err);
+        request (server.app)
+          .post ('/v1/accounts')
+          .send ({account: data})
+          .set ('Authorization', 'Bearer ' + clientToken)
+          .expect (200)
+          .end (function (err, res) {
+            if (err) return done (err);
 
-        var account = {
-          username: 'tester1',
+            // Wait until the gatekeeper.account.created message is handled.
+            async.waterfall ([
+              function (callback) {
+                async.whilst (
+                  function () {
+                    return accountId === undefined;
+                  },
+                  function (callback) {
+                    setTimeout (function () {
+                      callback (null);
+                    }, 1000);
+                  }, callback);
+              },
+              function (callback) {
+                expect (res.body).to.deep.equal ({account: {_id: accountId}});
+                Account.findById (accountId, callback);
+              },
+              function (account, callback) {
+                expect (account.activation.token).to.not.be.undefined;
+                return callback ();
+              }
+            ], done);
+          });
+      });
+
+      it ('should not create an account [duplicate]', function (done) {
+        request (server.app)
+          .post ('/v1/accounts').send (data)
+          .set ('Authorization', 'Bearer ' + clientToken)
+          .expect (400, done);
+      });
+
+      it ('should not create an account [missing parameter]', function (done) {
+        var invalid = {
           password: 'tester1',
           email: 'james@onehilltech.com'
         };
 
         request (server.app)
-          .post ('/v1/accounts').send ({account: account})
-          .set ('Authorization', 'Bearer ' + token)
-          .expect (403, done);
+          .post ('/v1/accounts').send (invalid)
+          .set ('Authorization', 'Bearer ' + clientToken)
+          .expect (400, done);
+      });
+
+      it ('should not create an account [invalid role]', function (done) {
+        var invalid = {
+          grant_type: 'client_credentials',
+          client_id: datamodel.models.clients[1].id,
+          client_secret: datamodel.models.clients[1].secret
+        };
+
+        getToken (invalid, function (err, token) {
+          if (err) return done (err);
+
+          var account = {
+            username: 'tester1',
+            password: 'tester1',
+            email: 'james@onehilltech.com'
+          };
+
+          request (server.app)
+            .post ('/v1/accounts').send ({account: account})
+            .set ('Authorization', 'Bearer ' + token)
+            .expect (403, done);
+        });
       });
     });
   });
 
-  describe ('DELETE /v1/accounts/:accountId', function () {
-    it ('should not allow non-admin to delete another user account', function (done) {
-      var accountId = datamodel.models.accounts[2]._id;
+  describe ('/v1/accounts/:accountId', function () {
+    describe ('GET', function () {
+      var projection = {
+        '__v': 0,
+        'password': 0
+      };
 
-      request (server.app)
-        .delete ('/v1/accounts/' + accountId)
-        .set ('Authorization', 'Bearer ' + userToken)
-        .expect (403, done);
+      it ('should return the owner account', function (done) {
+        var accountId = datamodel.models.accounts[0]._id;
+
+        Account.findById (accountId, projection, function (err, account) {
+          if (err) return done (err);
+
+          request (server.app)
+            .get ('/v1/accounts/' + accountId)
+            .set ('Authorization', 'Bearer ' + userToken)
+            .expect (200, {account: JSON.parse (JSON.stringify (account))}, done);
+        });
+      });
+
+      it ('should retrieve a user account for an admin', function (done) {
+        var accountId = datamodel.models.accounts[0]._id;
+
+        Account.findById (accountId, projection, function (err, account) {
+          if (err) return done (err);
+
+          request (server.app)
+            .get ('/v1/accounts/' + accountId)
+            .set ('Authorization', 'Bearer ' + superUserToken)
+            .expect (200, {account: JSON.parse (JSON.stringify (account))}, done);
+        });
+      });
+
+      it ('should not allow non-admin access to another account', function (done) {
+        var accountId = datamodel.models.accounts[1]._id;
+
+        request (server.app)
+          .get ('/v1/accounts/' + accountId)
+          .set ('Authorization', 'Bearer ' + userToken)
+          .expect (403, done);
+      });
     });
 
-    it ('should allow account owner to delete account', function (done) {
-      var accountId = datamodel.models.accounts[0]._id;
+    describe ('DELETE', function () {
+      it ('should not allow non-admin to delete another user account', function (done) {
+        var accountId = datamodel.models.accounts[2]._id;
 
-      request (server.app)
-        .delete ('/v1/accounts/' + accountId)
-        .set ('Authorization', 'Bearer ' + userToken)
-        .expect (200, 'true', done);
-    });
+        request (server.app)
+          .delete ('/v1/accounts/' + accountId)
+          .set ('Authorization', 'Bearer ' + userToken)
+          .expect (403, done);
+      });
 
-    it ('should allow admin to delete user account', function (done) {
-      var accountId = datamodel.models.accounts[2]._id;
+      it ('should allow account owner to delete account', function (done) {
+        var accountId = datamodel.models.accounts[0]._id;
 
-      request (server.app)
-        .delete ('/v1/accounts/' + accountId)
-        .set ('Authorization', 'Bearer ' + adminUserToken)
-        .expect (200, 'true', done);
+        request (server.app)
+          .delete ('/v1/accounts/' + accountId)
+          .set ('Authorization', 'Bearer ' + userToken)
+          .expect (200, 'true', done);
+      });
+
+      it ('should allow admin to delete user account', function (done) {
+        var accountId = datamodel.models.accounts[2]._id;
+
+        request (server.app)
+          .delete ('/v1/accounts/' + accountId)
+          .set ('Authorization', 'Bearer ' + superUserToken)
+          .expect (200, 'true', done);
+      });
     });
   });
 });

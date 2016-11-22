@@ -6,7 +6,7 @@ exports.auth = require ('./authentication');
 exports.authentication = exports.auth;
 
 exports.newClient = require ('./GatekeeperClient');
-exports.roles = exports.scopes = require ('./scopes');
+exports.scope = require ('./scope');
 exports.tokens = require ('./tokens');
 
 exports.__defineGetter__ ('testing', function () {
