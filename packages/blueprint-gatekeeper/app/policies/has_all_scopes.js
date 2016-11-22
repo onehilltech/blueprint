@@ -14,9 +14,6 @@ module.exports = exports = function (expected, req, callback) {
 
   var actual = req.authInfo.scope;
 
-  if (actual === '*')
-    return callback (null, true);
-
   async.every (expected, function (role, callback) {
     async.some (actual, function (scope, callback) {
       // We are using async 1.5. This must change for async 2.0 to
