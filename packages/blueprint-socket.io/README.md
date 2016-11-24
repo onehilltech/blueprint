@@ -14,7 +14,6 @@ Installation
 
     npm install @onehilltech/blueprint-socket.io --save
 
-
 Usage 
 -----
 
@@ -36,7 +35,8 @@ event will return us a socket we can use to send/receive events.
 ChatController.prototype.__invoke = function (context) {
   // We are using the http:// server. If we are using the https:// server,
   // the we use SocketIO.ios.
-  SocketIO.io.listen (function (socket) {
+  
+  SocketIO.io.listen (function (nsp, socket) {
     console.log ('a user connected');
 
     socket.on ('disconnect', function(){
@@ -70,7 +70,7 @@ in [blueprint-socket.io](https://github.com/onehilltech/blueprint-socket.io).
 NewsController.prototype.streamNews = function (context) {
   // Listen on a custom namespace based on the binding path.
 
-  SocketIO.io.listen (context.path, function (socket) {
+  SocketIO.io.listen (context.path, function (nsp, socket) {
     console.log ('a user connected');
 
     nsp.on ('disconnect', function(){
