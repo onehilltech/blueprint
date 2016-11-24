@@ -27,29 +27,25 @@ var SocketIO = require ('@onehilltech/blueprint-socket.io');
 
 In the target controller method, we need to listen for the connection. For example,
 assume we are creating a [chat](http://socket.io/get-started/chat/) client using a 
-single-action `ChatController`. In the controller method (i.e., `__invoke`), we 
+[single-action controller](https://github.com/onehilltech/blueprint/wiki/Application%3AControllers#single-action-controller). In the controller method (i.e., `__invoke`), we 
 need to listen the application initialized event. While handling the application
 initialized event, we need to listen for the Socket.IO connection event. The connection
 event will return us a socket we can use to send/receive events.
  
 ```javascript
 ChatController.prototype.__invoke = function (context) {
-  blueprint.messaging.on ('app.init', function (app) {
-    // We are using the http:// server. If we are using the https:// server,
-    // the we use SocketIO.ios.
- 
-    SocketIO.io.on ('connection', function (socket) {
-      console.log ('a user connected');
+  // We are using the http:// server. If we are using the https:// server,
+  // the we use SocketIO.ios.
+  SocketIO.io.listen (function (socket) {
+    console.log ('a user connected');
 
-      socket.on ('disconnect', function(){
-        console.log ('user disconnected');
-      });
+    socket.on ('disconnect', function(){
+      console.log ('user disconnected');
+    });
 
-      socket.on ('chat message', function(msg){
-        console.log('message: ' + msg);
-
-        SocketIO.io.emit ('chat message', msg);
-      });
+    socket.on ('chat message', function(msg){
+      console.log('message: ' + msg);
+      socket.emit ('chat message', msg);
     });  
   });
 
@@ -72,22 +68,19 @@ in [blueprint-socket.io](https://github.com/onehilltech/blueprint-socket.io).
 
 ```javascript
 NewsController.prototype.streamNews = function (context) {
-  blueprint.messaging.on ('app.init', function (app) {
-    // Create a custom namespace based on the binding path.
-    var nsp = SocketIO.io.of (context.path);
-    
-    nsp.on ('connection', function (socket) {
-      console.log ('a user connected');
+  // Listen on a custom namespace based on the binding path.
 
-      nsp.on ('disconnect', function(){
-        console.log ('user disconnected');
-      });
+  SocketIO.io.listen (context.path, function (socket) {
+    console.log ('a user connected');
+
+    nsp.on ('disconnect', function(){
+      console.log ('user disconnected');
+    });
       
-      nsp.on ('chat message', function(msg){
-        console.log('message: ' + msg);
-        nsp.emit ('chat message', msg);
-      });
-    });  
+    nsp.on ('chat message', function(msg){
+      console.log('message: ' + msg);
+      nsp.emit ('chat message', msg);
+    });
   });
 
   return function (req, res) {
