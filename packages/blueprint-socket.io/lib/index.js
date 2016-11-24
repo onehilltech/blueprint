@@ -19,8 +19,11 @@ SocketWrapper.prototype.listen = function (nsp, callback) {
     nsp = DEFAULT_NAMESPACE;
   }
 
-  blueprint.messaging.on ('app.init', function (app) {
-    self.io.of (nsp).on ('connection', callback);
+  blueprint.messaging.on ('app.init', function () {
+    var channel = self.io.of (nsp);
+    channel.on ('connection', function (socket) {
+      return callback (nsp, socket);
+    });
   });
 };
 
