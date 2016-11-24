@@ -26,3 +26,11 @@ var exports = module.exports = function (opts) {
 };
 
 exports.SocketIO = SocketIO;
+
+Object.defineProperty (exports, 'io', {
+  get: function () { return singleton.io; }
+});
+
+Object.defineProperty (exports, 'ios', {
+  get: function () { return singleton.ios; }
+});
