@@ -71,7 +71,7 @@ to the controller method. Below is an example of using custom namespaces
 in [blueprint-socket.io](https://github.com/onehilltech/blueprint-socket.io).
 
 ```javascript
-NewController.prototype.streamNews = function (context) {
+NewsController.prototype.streamNews = function (context) {
   blueprint.messaging.on ('app.init', function (app) {
     // Create a custom namespace based on the binding path.
     var nsp = SocketIO.io.of (context.path);
