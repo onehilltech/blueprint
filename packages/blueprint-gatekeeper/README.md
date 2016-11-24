@@ -64,7 +64,7 @@ module.exports = exports = {
 };
 ```
 
-### Protecting the routes
+### Protecting routes
 
 The router definition above will expose the Gatekeeper routers at `/gatekeeper`.
 Lastly, define the routes you want to protect. For example, you can protect all
@@ -73,13 +73,11 @@ routes on a give path.
 ```javascript
 // app/routers/IndexRouter.js
 
-var passport = require ('passport')
+var gatekeeper = require ('@onehilltech/gatekeeper')
   ;
 
 exports = module.exports = {
-  '/v1': [
-    passport.authenticate ('bearer', {session: false})
-  ]
+  '/v1': [gatekeeper.protect ()]
 };
 ```
 
