@@ -73,10 +73,6 @@ NewsController.prototype.streamNews = function (context) {
   SocketIO.io.listen (context.path, function (nsp, socket) {
     console.log ('a user connected');
 
-    nsp.on ('disconnect', function(){
-      console.log ('user disconnected');
-    });
-      
     nsp.on ('chat message', function(msg){
       console.log('message: ' + msg);
       nsp.emit ('chat message', msg);
