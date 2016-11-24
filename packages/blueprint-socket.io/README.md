@@ -42,14 +42,15 @@ ChatController.prototype.__invoke = function (context) {
       console.log ('a user connected');
 
       socket.on ('disconnect', function(){
-      console.log ('user disconnected');
-    });
+        console.log ('user disconnected');
+      });
 
-    socket.on ('chat message', function(msg){
-      console.log('message: ' + msg);
+      socket.on ('chat message', function(msg){
+        console.log('message: ' + msg);
 
-      SocketIO.io.emit ('chat message', msg);
-    });
+        SocketIO.io.emit ('chat message', msg);
+      });
+    });  
   });
 
   return function (req, res) {
@@ -79,14 +80,14 @@ NewController.prototype.streamNews = function (context) {
       console.log ('a user connected');
 
       socket.on ('disconnect', function(){
-      console.log ('user disconnected');
-    });
-
-    socket.on ('chat message', function(msg){
-      console.log('message: ' + msg);
-
-      SocketIO.io.emit ('chat message', msg);
-    });
+        console.log ('user disconnected');
+      });
+      
+      nsp.on ('chat message', function(msg){
+        console.log('message: ' + msg);
+        nsp.emit ('chat message', msg);
+      });
+    });  
   });
 
   return function (req, res) {
