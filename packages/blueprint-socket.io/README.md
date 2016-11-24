@@ -79,7 +79,7 @@ NewController.prototype.streamNews = function (context) {
     nsp.on ('connection', function (socket) {
       console.log ('a user connected');
 
-      socket.on ('disconnect', function(){
+      nsp.on ('disconnect', function(){
         console.log ('user disconnected');
       });
       
