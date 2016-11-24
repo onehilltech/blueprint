@@ -95,3 +95,5 @@ NewController.prototype.streamNews = function (context) {
   }
 });
 ```
+
+Happy Coding!
