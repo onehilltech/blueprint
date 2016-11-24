@@ -13,19 +13,17 @@ function ChatController () {
 blueprint.controller (ChatController);
 
 ChatController.prototype.__invoke = function (args) {
-  blueprint.messaging.on ('app.init', function (app) {
-    SocketIO.io.on ('connection', function (socket) {
-      console.log ('a user connected');
+  SocketIO.io.listen (function (socket) {
+    console.log ('a user connected');
 
-      socket.on ('disconnect', function(){
-        console.log ('user disconnected');
-      });
+    socket.on ('disconnect', function(){
+      console.log ('user disconnected');
+    });
 
-      socket.on ('chat message', function(msg){
-        console.log('message: ' + msg);
+    socket.on ('chat message', function(msg){
+      console.log('message: ' + msg);
 
-        SocketIO.io.emit ('chat message', msg);
-      });
+      socket.emit ('chat message', msg);
     });
   });
 
