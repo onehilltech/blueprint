@@ -32,7 +32,7 @@ need to listen the application initialized event. While handling the application
 initialized event, we need to listen for the Socket.IO connection event. The connection
 event will return us a socket we can use to send/receive events.
  
-```javscript
+```javascript
 ChatController.prototype.__invoke = function (args) {
   blueprint.messaging.on ('app.init', function (app) {
     // We are using the http:// server. If we are using the https:// server,
