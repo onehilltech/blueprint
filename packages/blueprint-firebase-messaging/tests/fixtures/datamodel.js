@@ -18,7 +18,7 @@ var data = {
       email: 'contact@client1.com',
       secret: 'client1',
       redirect_uri: 'https://client1.com/gatekeeper',
-      roles: [gatekeeper.roles.client.account.create]
+      roles: [gatekeeper.scope.client.create]
     },
     {
       name: 'client2',
