@@ -13,7 +13,7 @@ function ChatController () {
 blueprint.controller (ChatController);
 
 ChatController.prototype.__invoke = function (args) {
-  SocketIO.io.listen (function (socket) {
+  SocketIO.io.listen (function (nsp, socket) {
     console.log ('a user connected');
 
     socket.on ('disconnect', function(){
