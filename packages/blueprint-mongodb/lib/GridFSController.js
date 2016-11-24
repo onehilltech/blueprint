@@ -29,7 +29,7 @@ function GridFSController (conn, opts) {
   if (!opts.name)
     throw new Error ('Options must define id property');
 
-  this._name = opts.name;
+  this.name = opts.name;
 
   if (!opts.id)
     this._id = opts.name + 'Id';
@@ -43,7 +43,7 @@ function GridFSController (conn, opts) {
   var self = this;
 
   conn.on ('open', function () {
-    var opts = { bucketName: self._name };
+    var opts = { bucketName: self.name };
     self._bucket = new mongodb.GridFSBucket (conn.db, opts);
   });
 }
@@ -66,7 +66,7 @@ GridFSController.prototype.create = function () {
   var self = this;
 
   return [
-    this._upload.single (this._name),
+    this._upload.single (this.name),
     function (req, res) {
       // Store the content type.
       var opts = { contentType: req.file.mimetype};

@@ -104,15 +104,15 @@ function ResourceController (opts) {
 
   this._id = opts.id;
   this._model = opts.model;
-  this._name = opts.name || opts.model.modelName;
-  this._pluralize = pluralize (this._name);
+  this.name = opts.name || opts.model.modelName;
+  this._pluralize = pluralize (this.name);
   this._eventPrefix = opts.eventPrefix;
 
   if (!this._id)
-    this._id = this._name + 'Id';
+    this._id = this.name + 'Id';
 
   // Build the validation schema for create and update.
-  var validationOpts = {pathPrefix: this._name};
+  var validationOpts = {pathPrefix: this.name};
   this._createValidation = validationSchema (opts.model.schema, validationOpts);
   this._updateValidation = validationSchema (opts.model.schema, _.extend (validationOpts, {allOptional: true}));
 }
@@ -161,7 +161,7 @@ ResourceController.prototype.create = function (opts) {
     },
 
     execute: function __blueprint_create (req, res, callback) {
-      var doc = req.body[self._name];
+      var doc = req.body[self.name];
 
       async.waterfall ([
         async.constant (doc),
@@ -198,7 +198,7 @@ ResourceController.prototype.create = function (opts) {
           var result = {};
 
           data = data.toJSON ? data.toJSON () : (data.toObject ? data.toObject () : data);
-          result[self._name] = _.omit (data, '__v');
+          result[self.name] = _.omit (data, '__v');
 
           return callback (null, result);
         }
@@ -258,7 +258,7 @@ ResourceController.prototype.get = function (opts) {
         // Rewrite the result in JSON API format.
         function (data, callback) {
           var result = { };
-          result[self._name] = data;
+          result[self.name] = data;
 
           if (!req.query.populate) {
             return callback (null, result);
@@ -411,7 +411,7 @@ ResourceController.prototype.update = function (opts) {
 
         // Now, let's search our database for the resource in question.
         function (filter, callback) {
-          var update = { $set: req.body[self._name] };
+          var update = { $set: req.body[self.name] };
           var option = { upsert: false, new: true };
 
           onPrepareProjection (req, function (err, projection) {
@@ -434,7 +434,7 @@ ResourceController.prototype.update = function (opts) {
         // Rewrite the result in JSON API format.
         function (data, callback) {
           var result = { };
-          result[self._name] = data;
+          result[self.name] = data;
 
           return callback (null, result);
         }
@@ -546,7 +546,7 @@ ResourceController.prototype.computeEventName = function (action) {
   if (prefix.length !== 0)
     prefix += '.';
 
-  return prefix + this._name + '.' + action;
+  return prefix + this.name + '.' + action;
 };
 
 module.exports = exports = ResourceController;
