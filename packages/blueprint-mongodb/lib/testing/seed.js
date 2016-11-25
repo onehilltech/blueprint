@@ -1,7 +1,8 @@
 'use strict';
 
-const async = require ('async')
-  , util = require ('util')
+const async   = require ('async')
+  , util      = require ('util')
+  , pluralize = require ('pluralize')
   , ConnectionManager = require ('../ConnectionManager')
   ;
 
@@ -12,7 +13,7 @@ function seed (data, callback) {
   var models = {};
 
   async.eachOf (data, function (data, name, callback) {
-    var singular = name.endsWith ('s') ? name.slice (0, -1) : name.endsWith ('es') ? name.slice (0, -2) : name;
+    var singular = pluralize.singular (name);
     var Model = conn.models[singular];
 
     if (!Model)
