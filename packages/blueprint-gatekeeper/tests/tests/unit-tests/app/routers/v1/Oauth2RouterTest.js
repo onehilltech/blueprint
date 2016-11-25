@@ -4,8 +4,7 @@ var blueprint = require ('@onehilltech/blueprint')
   , async     = require ('async')
   ;
 
-var datamodel  = require ('../../../../fixtures/datamodel')
-  , appPath = require ('../../../../fixtures/appPath')
+var datamodel = require ('../../../../../fixtures/datamodel')
   ;
 
 describe ('Oauth2Router', function () {

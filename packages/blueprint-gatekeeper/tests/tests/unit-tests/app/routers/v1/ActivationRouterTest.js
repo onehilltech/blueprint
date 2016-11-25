@@ -4,8 +4,7 @@ var request   = require ('supertest')
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
-var datamodel  = require ('../../../../fixtures/datamodel')
-  , appPath = require ('../../../../fixtures/appPath')
+var datamodel = require ('../../../../../fixtures/datamodel')
   ;
 
 describe ('ActivationRouter', function () {
@@ -45,18 +44,16 @@ describe ('ActivationRouter', function () {
 
   before (function (done) {
     async.waterfall ([
-      function (callback) { blueprint.testing.createApplicationAndStart (appPath, callback); },
-
-      // apply the datamodel
-      function (app, callback) {
-        server  = app.server;
-        Account = app.models.Account;
+      function (callback) {
 
         datamodel.apply (callback);
       },
 
       // get a client token for the tests.
       function (result, callback) {
+        server  = result[0].server;
+        Account = result[0].models.Account;
+
         var data = {
           grant_type: 'client_credentials',
           client_id: datamodel.models.clients[0].id,

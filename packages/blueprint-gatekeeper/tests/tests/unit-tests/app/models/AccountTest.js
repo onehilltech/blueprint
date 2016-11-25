@@ -3,7 +3,7 @@ var expect = require ('chai').expect
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
-const appPath = require ('../../../fixtures/appPath')
+const appPath = require ('../../../../fixtures/appPath')
   ;
 
 var data = {

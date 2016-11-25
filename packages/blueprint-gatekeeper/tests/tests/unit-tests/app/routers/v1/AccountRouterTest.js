@@ -4,8 +4,7 @@ var request   = require ('supertest')
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
-const datamodel  = require ('../../../../fixtures/datamodel')
-  , appPath = require ('../../../../fixtures/appPath')
+const datamodel = require ('../../../../../fixtures/datamodel')
   , bm = blueprint.messaging
   ;
 

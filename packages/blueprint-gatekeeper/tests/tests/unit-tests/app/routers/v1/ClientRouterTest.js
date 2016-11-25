@@ -4,7 +4,7 @@ var blueprint = require ('@onehilltech/blueprint')
   , async     = require ('async')
   ;
 
-var datamodel = require ('../../../../fixtures/datamodel')
+var datamodel = require ('../../../../../fixtures/datamodel')
   ;
 
 describe ('ClientRouter', function () {
