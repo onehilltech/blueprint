@@ -21,3 +21,29 @@ var scope = {
 var exports = module.exports = scope;
 
 exports.superuser = '*';
+
+function compile (name) {
+  var regex = new RegExp (name);
+  return new Scope (name, regex);
+}
+
+exports.compile = compile;
+
+function Scope (value, compiled) {
+  this._value = value;
+  this._compiled = compiled;
+}
+
+Scope.prototype.__defineGetter__ ('value', function () {
+  return this._value;
+});
+
+/**
+ * Test if the scope matches the specified value
+ *
+ * @param value
+ * @returns {Boolean}
+ */
+Scope.prototype.match = function (value) {
+  return this._compiled.test (value);
+};
