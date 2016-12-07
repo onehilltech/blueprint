@@ -3,6 +3,7 @@ var util      = require ('util')
   , _         = require ('underscore')
   , pluralize = require ('pluralize')
   , blueprint = require ('@onehilltech/blueprint')
+  , winston   = require ('winston')
   ;
 
 var validationSchema = require ('./ValidationSchema');
