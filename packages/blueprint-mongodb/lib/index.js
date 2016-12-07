@@ -4,6 +4,7 @@ var mongoose           = require ('mongoose')
   , ConnectionManager  = require ('./ConnectionManager')
   , ResourceController = require ('./ResourceController')
   , GridFSController   = require ('./GridFSController')
+  , populate           = require ('./populate')
   ;
 
 var exports = module.exports = ConnectionManager;
@@ -14,6 +15,7 @@ exports.model = model;
 exports.modelOn = modelOn;
 exports.ResourceController = ResourceController;
 exports.GridFSController = GridFSController;
+exports.populate = populate;
 
 /**
  * Create a model on the default connection.
