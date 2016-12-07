@@ -8,7 +8,7 @@ var util      = require ('util')
 var validationSchema = require ('./ValidationSchema');
 var populate = require ('./populate');
 
-var BaseController = blueprint.BaseController
+var BaseController = blueprint.ResourceController
   , HttpError = blueprint.errors.HttpError
   , messaging = blueprint.messaging
   ;
@@ -136,6 +136,9 @@ ResourceController.prototype.create = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
+  if (on.preCreate)
+    winston.log ('warn', 'on.preCreate is deprecated; use on.prepareDocument instead');
+
   var onPrepareDocument = on.preCreate || on.prepareDocument || __onPrepareDocument;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
@@ -217,6 +220,9 @@ ResourceController.prototype.get = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
+  if (on.updateFilter)
+    winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
+
   var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
   var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
@@ -284,6 +290,9 @@ ResourceController.prototype.get = function (opts) {
 ResourceController.prototype.getAll = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
+
+  if (on.updateFilter)
+    winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
 
   var onAuthorize = on.authorize || __onAuthorize;
   var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
@@ -369,6 +378,9 @@ ResourceController.prototype.update = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
+  if (on.updateFilter)
+    winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
+
   var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
@@ -453,6 +465,9 @@ ResourceController.prototype.delete = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
+  if (on.updateFilter)
+    winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
+
   var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
@@ -504,6 +519,9 @@ ResourceController.prototype.count = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
+  if (on.updateFilter)
+    winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
+
   var onAuthorize = on.authorize || __onAuthorize;
   var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
@@ -534,6 +552,69 @@ ResourceController.prototype.count = function (opts) {
         // Rewrite the result in JSON API format.
         function (count, callback) {
           return callback (null, {count: count});
+        }
+      ], makeTaskCompletionHandler (res, callback));
+    }
+  };
+};
+
+/**
+ * Get the first resource that matches the criteria, if specified.
+ *
+ * @param action
+ */
+ResourceController.prototype.getFirst = function (opts) {
+  opts = opts || {};
+  var on = opts.on || {};
+
+  if (on.updateFilter)
+    winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
+
+  var onAuthorize = on.authorize || __onAuthorize;
+  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPostExecute = on.postExecute || __onPostExecute;
+
+  var self = this;
+
+  return {
+    // There is no resource id that needs to be validated. So, we can
+    // just pass control to the onAuthorize method.
+    validate: onAuthorize,
+
+    execute: function __blueprint_getFirst_execute (req, res, callback) {
+      async.waterfall ([
+        async.constant (req.query),
+
+        function (filter, callback) {
+          return onUpdateFilter (req, filter, callback)
+        },
+
+        // Now, let's search our database for the resource in question.
+        function (filter, callback) {
+          var options = req.query.options;
+
+          if (options)
+            filter = _.omit (req.query, ['options']);
+
+          options = options || {};
+
+          var query = self._model.find (filter).select ({__v: 0}).limit (1);
+
+          if (options.sort)
+            query.sort (options.sort);
+
+          query.exec (makeDbCompletionHandler ('Failed to count resources', callback));
+        },
+
+        // Allow the subclass to do any post-execution analysis of the result.
+        function (first, callback) { onPostExecute (req, first, callback); },
+
+        // Rewrite the result in JSON API format.
+        function (first, callback) {
+          var result = {};
+          result[self.name] = first[0];
+
+          return callback (null, result);
         }
       ], makeTaskCompletionHandler (res, callback));
     }
