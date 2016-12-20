@@ -57,7 +57,7 @@ var schema = mongodb.Schema ({
   last_name: {type: String, required: true, trim: true}
 });
 
-module.exports = mongodb.model ('person', schema);
+module.exports = mongodb.model ('person', schema, 'blueprint_people');
 ```
 
 All models are defined on the default connection unless stated otherwise. To define
