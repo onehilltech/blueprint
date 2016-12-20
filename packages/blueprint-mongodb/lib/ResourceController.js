@@ -559,69 +559,6 @@ ResourceController.prototype.count = function (opts) {
   };
 };
 
-/**
- * Get the first resource that matches the criteria, if specified.
- *
- * @param action
- */
-ResourceController.prototype.getFirst = function (opts) {
-  opts = opts || {};
-  var on = opts.on || {};
-
-  if (on.updateFilter)
-    winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
-
-  var onAuthorize = on.authorize || __onAuthorize;
-  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
-  var onPostExecute = on.postExecute || __onPostExecute;
-
-  var self = this;
-
-  return {
-    // There is no resource id that needs to be validated. So, we can
-    // just pass control to the onAuthorize method.
-    validate: onAuthorize,
-
-    execute: function __blueprint_getFirst_execute (req, res, callback) {
-      async.waterfall ([
-        async.constant (req.query),
-
-        function (filter, callback) {
-          return onUpdateFilter (req, filter, callback)
-        },
-
-        // Now, let's search our database for the resource in question.
-        function (filter, callback) {
-          var options = req.query.options;
-
-          if (options)
-            filter = _.omit (req.query, ['options']);
-
-          options = options || {};
-
-          var query = self._model.find (filter).select ({__v: 0}).limit (1);
-
-          if (options.sort)
-            query.sort (options.sort);
-
-          query.exec (makeDbCompletionHandler ('Failed to count resources', callback));
-        },
-
-        // Allow the subclass to do any post-execution analysis of the result.
-        function (first, callback) { onPostExecute (req, first, callback); },
-
-        // Rewrite the result in JSON API format.
-        function (first, callback) {
-          var result = {};
-          result[self.name] = first[0];
-
-          return callback (null, result);
-        }
-      ], makeTaskCompletionHandler (res, callback));
-    }
-  };
-};
-
 ResourceController.prototype.computeEventName = function (action) {
   var prefix = this._eventPrefix || '';
 

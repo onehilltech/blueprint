@@ -1,3 +1,5 @@
+'use strict';
+
 var mongodb = require ('../../../../lib')
   , Degree  = require ('./Degree')
   ;
@@ -21,4 +23,4 @@ var schema = new mongodb.Schema ({
   degrees: [{type: mongodb.Schema.Types.ObjectId, ref: Degree.modelName}]
 });
 
-module.exports = mongodb.model ('person', schema, 'blueprint_persons');
+module.exports = mongodb.resource ('person', schema, 'blueprint_persons');
