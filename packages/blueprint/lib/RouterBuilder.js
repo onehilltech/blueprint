@@ -261,6 +261,9 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
       if (actions.indexOf ('count') !== -1)
         spec['/count'] = {get: makeAction (controllerName, 'count', opts.options)};
 
+      if (actions.indexOf ('outdated') !== -1)
+        spec['/outdated'] = {get: makeAction (controllerName, 'isAllOutdated', opts.options)};
+
       if (actions.indexOf ('first') !== -1)
         spec['/first'] = {get: makeAction (controllerName, 'getFirst', opts.options)};
 
@@ -277,6 +280,9 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
 
       if (actions.indexOf ('delete') !== -1)
         spec[individualPath]['delete'] = makeAction (controllerName, 'delete', opts.options);
+
+      if (actions.indexOf ('outdated') !== -1)
+        spec[individualPath] = {'/outdated': {get: makeAction (controllerName, 'isOutdated', opts.options) }};
 
       self.addSpecification (spec, path)
     }
