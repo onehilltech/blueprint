@@ -53,6 +53,12 @@ var dates = {
   }
 };
 
+/**
+ * Plugin that adds stat information about the resource to each document.
+ *
+ * @param schema
+ * @constructor
+ */
 function StatPlugin (schema) {
   schema.add ({
     _stat: {
