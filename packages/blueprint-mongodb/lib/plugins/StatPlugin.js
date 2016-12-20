@@ -66,22 +66,32 @@ function StatPlugin (schema) {
 
   // We are always going to make sure the created_at timestamp appears in
   // the _stat sub-document.
+
   schema.pre ('save', function (next) {
-    if (this.isNew && !this._stat.created_at)
-      this._stat.created_at = Date.now ();
+    if (this.isNew) {
+      // The document is newly created. Make sure we have the created_at
+      // field in the document.
+      if (!this._stat.created_at)
+        this._stat.created_at = new Date ();
+    }
+    else {
+      // The document is being updated. We need to always set the updated_at
+      // field to the current date/time.
+      this._stat.updated_at = new Date ();
+    }
 
     next ();
   });
 
+  function refreshUpdatedAt () {
+    if (!this._update.$set) this._update.$set = {};
+    this._update.$set["_stat.updated_at"] = new Date ();
+  }
+
   // Middleware hooks for updating the document. When the document is
   // updated, we make sure to update the "updated_at" path.
-  schema.pre ('findOneAndUpdate', function () {
-    this.findOneAndUpdate ({}, {'_stat.updated_at': Date.now ()});
-  });
-
-  schema.pre ('update', function () {
-    this.update ({}, {'_stat.updated_at': Date.now ()});
-  });
+  schema.pre ('findOneAndUpdate', refreshUpdatedAt);
+  schema.pre ('update', refreshUpdatedAt);
 
   // Define helper methods for accessing the stats.
 
