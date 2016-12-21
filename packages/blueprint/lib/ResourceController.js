@@ -37,6 +37,13 @@ function ResourceController (opts) {
 /**
  * Get the resource identifier.
  */
+ResourceController.prototype.__defineGetter__ ('name', function () {
+  return this._name;
+});
+
+/**
+ * Get the resource identifier.
+ */
 ResourceController.prototype.__defineGetter__ ('resourceId', function () {
   return this._id;
 });
