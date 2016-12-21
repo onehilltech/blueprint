@@ -3,7 +3,12 @@ var blueprint = require ('../../../../lib')
   ;
 
 function EchoResourceController () {
-  ResourceController.call (this, {name: 'echo'});
+  ResourceController.call (this, {
+    name: 'echo',
+    actions: {
+      head: {verb: 'head', method: 'header'}
+    }
+  });
 }
 
 module.exports = EchoResourceController;
@@ -25,6 +30,13 @@ function echoWithId (msg, id) {
     }
   }
 }
+
+EchoResourceController.prototype.header = function () {
+  return function (req, res) {
+    res.header ('Method-Call', 'header');
+    res.sendStatus (200);
+  };
+};
 
 EchoResourceController.prototype.create = echo ('create');
 EchoResourceController.prototype.getAll = echo ('getAll');
