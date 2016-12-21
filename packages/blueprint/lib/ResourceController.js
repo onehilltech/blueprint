@@ -8,10 +8,11 @@ var BaseController = require ('./BaseController')
 function ResourceController (opts) {
   BaseController.call (this, opts);
 
-  if (!opts.id)
-    throw new Error ('Options define id property');
+  if (!opts.name)
+    throw new Error ('Options define name property');
 
-  this._id = opts.id;
+  this._name = opts.name;
+  this._id = opts.id || (this._name + 'Id');
 
   const BUILTIN_ACTIONS = {
     // CRUD operations

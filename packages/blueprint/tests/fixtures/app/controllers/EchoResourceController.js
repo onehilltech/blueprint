@@ -3,7 +3,7 @@ var blueprint = require ('../../../../lib')
   ;
 
 function EchoResourceController () {
-  ResourceController.call (this, {id: 'echoId'});
+  ResourceController.call (this, {name: 'echo'});
 }
 
 module.exports = EchoResourceController;
