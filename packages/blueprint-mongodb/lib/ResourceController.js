@@ -14,6 +14,9 @@ var BaseController = blueprint.ResourceController
   , messaging = blueprint.messaging
   ;
 
+const HTTP_HEADER_ETAG = 'ETag';
+const HTTP_HEADER_LAST_MODIFIED = 'Last-Modified';
+
 /**
  * Test if the projection is exclusive. An exclusive projection only has to
  * have one key that is false (or 0). Any empty projection is exclusive as well,
@@ -102,6 +105,15 @@ function ResourceController (opts) {
   if (!opts.name)
     opts.name = opts.model.modelName;
 
+  // We are going to support the HEAD method over /outdated since we are going
+  // return the Last-Modified header with each request, when appropriate.
+  opts.actions = {
+    head: [
+      {verb: 'head', method: 'headersForCollection'},
+      {verb: 'head', path: '/:rcId', method: 'headersForSingleResource'}
+    ]
+  };
+
   // Pass control to the base class.
   BaseController.call (this, opts);
 
@@ -155,7 +167,7 @@ ResourceController.prototype.create = function (opts) {
     },
 
     execute: function __blueprint_create (req, res, callback) {
-      var doc = req.body[self.name];
+      var doc = req.body[self._name];
 
       async.waterfall ([
         async.constant (doc),
@@ -191,8 +203,12 @@ ResourceController.prototype.create = function (opts) {
         function (data, callback) {
           var result = {};
 
-          data = data.toJSON ? data.toJSON () : (data.toObject ? data.toObject () : data);
-          result[self.name] = _.omit (data, '__v');
+          // Set the headers for the response.
+          res.set (HTTP_HEADER_LAST_MODIFIED, data.getLastModified ().toUTCString ());
+
+          // Make the response data.
+          var payload = data.toJSON ? data.toJSON () : (data.toObject ? data.toObject () : data);
+          result[self._name] = _.omit (payload, '__v');
 
           return callback (null, result);
         }
@@ -255,7 +271,10 @@ ResourceController.prototype.get = function (opts) {
         // Rewrite the result in JSON API format.
         function (data, callback) {
           var result = { };
-          result[self.name] = data;
+          result[self._name] = data;
+
+          // Set the headers for the response.
+          res.set (HTTP_HEADER_LAST_MODIFIED, data.getLastModified ().toUTCString ());
 
           if (!req.query.populate) {
             return callback (null, result);
@@ -414,7 +433,7 @@ ResourceController.prototype.update = function (opts) {
 
         // Now, let's search our database for the resource in question.
         function (filter, callback) {
-          var update = { $set: req.body[self.name] };
+          var update = { $set: req.body[self._name] };
           var option = { upsert: false, new: true };
 
           onPrepareProjection (req, function (err, projection) {
@@ -437,7 +456,10 @@ ResourceController.prototype.update = function (opts) {
         // Rewrite the result in JSON API format.
         function (data, callback) {
           var result = { };
-          result[self.name] = data;
+          result[self._name] = data;
+
+          // Set the headers for the response.
+          res.set (HTTP_HEADER_LAST_MODIFIED, data.getLastModified ().toUTCString ());
 
           return callback (null, result);
         }
@@ -494,7 +516,9 @@ ResourceController.prototype.delete = function (opts) {
         },
 
         // Make sure we return 'true'.
-        function (result, callback) { return callback (null, true); }
+        function (result, callback) {
+          return callback (null, true);
+        }
       ], makeTaskCompletionHandler (res, callback));
     }
   };
@@ -547,6 +571,18 @@ ResourceController.prototype.count = function (opts) {
       ], makeTaskCompletionHandler (res, callback));
     }
   };
+};
+
+ResourceController.prototype.headersForSingleResource = function () {
+  return function (req, res) {
+    res.sendStatus (404)
+  }
+};
+
+ResourceController.prototype.headersForCollection = function () {
+  return function (req, res) {
+    res.sendStatus (404);
+  }
 };
 
 ResourceController.prototype.computeEventName = function (action) {
