@@ -1,9 +1,11 @@
-var util      = require ('util')
-  , async     = require ('async')
-  , _         = require ('underscore')
-  , pluralize = require ('pluralize')
-  , blueprint = require ('@onehilltech/blueprint')
-  , winston   = require ('winston')
+const util     = require ('util')
+  , async      = require ('async')
+  , _          = require ('underscore')
+  , pluralize  = require ('pluralize')
+  , blueprint  = require ('@onehilltech/blueprint')
+  , winston    = require ('winston')
+  , DateUtils  = require ('./DateUtils')
+  , HttpHeader = require ('./HttpHeader')
   ;
 
 var validationSchema = require ('./ValidationSchema');
@@ -13,9 +15,6 @@ var BaseController = blueprint.ResourceController
   , HttpError = blueprint.errors.HttpError
   , messaging = blueprint.messaging
   ;
-
-const HTTP_HEADER_ETAG = 'ETag';
-const HTTP_HEADER_LAST_MODIFIED = 'Last-Modified';
 
 /**
  * Test if the projection is exclusive. An exclusive projection only has to
@@ -84,12 +83,6 @@ function makeTaskCompletionHandler (res, callback) {
   }
 }
 
-function makeOnPreCreateHandler (req, onPreCreate) {
-  return function __blueprint_on_prepare_document (doc, callback) {
-    return onPreCreate (req, doc, callback);
-  };
-}
-
 /**
  * @class ResourceController
  *
@@ -104,15 +97,6 @@ function ResourceController (opts) {
 
   if (!opts.name)
     opts.name = opts.model.modelName;
-
-  // We are going to support the HEAD method over /outdated since we are going
-  // return the Last-Modified header with each request, when appropriate.
-  opts.actions = {
-    head: [
-      {verb: 'head', method: 'headersForCollection'},
-      {verb: 'head', path: '/:rcId', method: 'headersForSingleResource'}
-    ]
-  };
 
   // Pass control to the base class.
   BaseController.call (this, opts);
@@ -204,7 +188,7 @@ ResourceController.prototype.create = function (opts) {
           var result = {};
 
           // Set the headers for the response.
-          res.set (HTTP_HEADER_LAST_MODIFIED, data.getLastModified ().toUTCString ());
+          res.set (HttpHeader.LAST_MODIFIED, data.getLastModified ().toUTCString ());
 
           // Make the response data.
           var payload = data.toJSON ? data.toJSON () : (data.toObject ? data.toObject () : data);
@@ -274,7 +258,7 @@ ResourceController.prototype.get = function (opts) {
           result[self._name] = data;
 
           // Set the headers for the response.
-          res.set (HTTP_HEADER_LAST_MODIFIED, data.getLastModified ().toUTCString ());
+          res.set (HttpHeader.LAST_MODIFIED, data.getLastModified ().toUTCString ());
 
           if (!req.query.populate) {
             return callback (null, result);
@@ -356,22 +340,60 @@ ResourceController.prototype.getAll = function (opts) {
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
-        function (result, callback) { onPostExecute (req, result, callback); },
+        function (result, callback) {
+          onPostExecute (req, result, callback);
+        },
 
         // Rewrite the result in JSON API format.
         function (data, callback) {
           var result = { };
           result[self._pluralize] = data;
 
-          if (!opts.populate) {
-            return callback (null, result);
-          }
-          else {
-            return populate (data, self._model, function (err, details) {
-              result = _.extend (result, details);
+          var tasks = [];
+
+          if (data.length > 0)
+            tasks.push (setHeaders);
+
+          tasks.push (function (callback) {
+            if (!opts.populate) {
               return callback (null, result);
-            });
+            }
+            else {
+              return populate (data, self._model, function (err, details) {
+                result = _.extend (result, details);
+                return callback (null, result);
+              });
+            }
+          });
+
+          // We are going to set the headers and populate the data in parallel. This
+          // is possible because neither depends on the other.
+          async.parallel (tasks, callback);
+
+          function setHeaders (callback) {
+            // Reduce the collection to the set of headers that represent the entire
+            // collection.
+            var headers = { };
+            headers[HttpHeader.LAST_MODIFIED] = data[0].getLastModified ();
+
+            async.reduce (data.slice (1), headers, function (memo, item, callback) {
+              var lastModified = item.getLastModified ();
+
+              if (DateUtils.compare (memo[HttpHeader.LAST_MODIFIED], lastModified) == -1)
+                memo[HttpHeader.LAST_MODIFIED] = lastModified;
+
+              return callback (null, memo);
+            }, onComplete);
+
+            function onComplete (err, headers) {
+              if (!err) res.set (headers);
+              return callback (null);
+            }
           }
+       },
+
+        function (data, callback) {
+          return callback (null, data[data.length - 1]);
         }
       ], makeTaskCompletionHandler (res, callback));
     }
@@ -459,7 +481,7 @@ ResourceController.prototype.update = function (opts) {
           result[self._name] = data;
 
           // Set the headers for the response.
-          res.set (HTTP_HEADER_LAST_MODIFIED, data.getLastModified ().toUTCString ());
+          res.set (HttpHeader.LAST_MODIFIED, data.getLastModified ().toUTCString ());
 
           return callback (null, result);
         }
@@ -571,18 +593,6 @@ ResourceController.prototype.count = function (opts) {
       ], makeTaskCompletionHandler (res, callback));
     }
   };
-};
-
-ResourceController.prototype.headersForSingleResource = function () {
-  return function (req, res) {
-    res.sendStatus (404)
-  }
-};
-
-ResourceController.prototype.headersForCollection = function () {
-  return function (req, res) {
-    res.sendStatus (404);
-  }
 };
 
 ResourceController.prototype.computeEventName = function (action) {

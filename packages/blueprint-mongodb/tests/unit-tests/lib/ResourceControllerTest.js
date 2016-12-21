@@ -90,20 +90,29 @@ describe ('ResourceController', function () {
 
     describe ('GET', function () {
       it ('should return a list of persons', function (done) {
+        var expected = {
+          people: [
+            _.omit (testing.lean (datamodel.models.persons[0]), ['__v']),
+            person
+          ],
+
+          degrees: [
+            _.extend (datamodel.data.degrees[0], {_id: datamodel.models.degrees[0].id}),
+            _.extend (datamodel.data.degrees[1], {_id: datamodel.models.degrees[1].id})
+          ]
+        };
+
         request (server.app)
           .get ('/person')
           .query ({options: {populate: true}})
-          .expect (200, {
-            people: [
-              _.omit (testing.lean (datamodel.models.persons[0]), ['__v']),
-              person
-            ],
+          .expect (200, expected)
+          .end (function (err, res) {
+            if (err) return done (err);
 
-            degrees: [
-              _.extend (datamodel.data.degrees[0], {_id: datamodel.models.degrees[0].id}),
-              _.extend (datamodel.data.degrees[1], {_id: datamodel.models.degrees[1].id})
-            ]
-          }, done);
+            expect (res.headers).to.have.property ('last-modified');
+
+            return done (null);
+          });
       });
     });
 
