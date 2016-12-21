@@ -52,137 +52,125 @@ describe ('RouterBuilder', function () {
   });
 
   describe ('resources', function () {
-    var id;
+    describe ('all actions', function () {
+      describe ('create', function () {
+        it ('should invoke the create method', function (done) {
+          request (app.server.app)
+            .post ('/echo')
+            .expect (200, {message: 'create'}, done);
+        });
+      });
 
-    describe ('all', function () {
-      var data = {person: {first_name: 'James', last_name: 'Hill'}};
+      describe ('get', function () {
+        it ('should invoke the get method', function (done) {
+          var id = 7;
 
-      it ('should create a new resource', function (done) {
-        // The callback is not triggering.
-        blueprint.messaging.on ('person.created', function (person) {
-          expect (person).to.have.property ('first', 'James');
-          expect (person).to.have.property ('last', 'Hill');
+          request (app.server.app)
+            .get ('/echo/' + id)
+            .expect (200, {message: 'get', id: id}, done);
         });
 
-        request (app.server.app)
-          .post ('/persons')
-          .send (data)
-          .expect (200, function (err, res) {
-            if (err) return done (err);
-
-            data.person._id = res.body.person._id;
-            expect (res.body).to.deep.equal (data);
-
-            id = res.body.person._id;
-            return done ();
-          });
+        it ('should invoke the getAll method', function (done) {
+          request (app.server.app)
+            .get ('/echo')
+            .expect (200, {message: 'getAll'}, done);
+        })
       });
 
-      it ('should not create a single resource [validation failure]', function (done) {
-        request (app.server.app)
-          .post ('/persons')
-          .expect (400, [
-            { msg: "first_name is required", param: "person.first_name" },
-            { msg: "last_name is required", param: "person.last_name" }
-          ], done);
+      describe ('update', function () {
+        it ('should invoke the update method', function (done) {
+          var id = 19;
+
+          request (app.server.app)
+            .put ('/echo/' + id)
+            .expect (200, {message: 'update', id: id}, done);
+        });
       });
 
-      it ('should retrieve a single resource', function (done) {
-        request (app.server.app)
-          .get ('/persons/' + id)
-          .expect (200, { person: {_id: id, first_name: 'James', last_name: 'Hill'}}, done);
+      describe ('delete', function () {
+        it ('should invoke the delete method', function (done) {
+          var id = 37;
+
+          request (app.server.app)
+            .delete ('/echo/' + id)
+            .expect (200, {message: 'delete', id: id}, done);
+        });
       });
 
-      it ('should retrieve a list of all resources', function (done) {
-        request (app.server.app)
-          .get ('/persons')
-          .expect (200, { persons: [{ _id: id, first_name: 'James', last_name: 'Hill'}]}, done);
+      describe ('outdated', function () {
+        it ('should invoke the outdated method', function (done) {
+          request (app.server.app)
+            .get ('/echo/outdated')
+            .expect (200, {message: 'allOutdated'}, done);
+        });
+
+        it ('should invoke the isAllOutdated method', function (done) {
+          var id = 25;
+
+          request (app.server.app)
+            .get ('/echo/' + id + '/outdated')
+            .expect (200, {message: 'outdated', id: id}, done);
+        });
       });
 
-      it ('should update a single resource', function (done) {
-        async.series ([
-          function (callback) {
-            request (app.server.app)
-              .put ('/persons/' + id)
-              .send ({person: {first_name: 'Lanita', last_name: 'Hill'}})
-              .expect (200, {person: {_id: id, first_name: 'Lanita', last_name: 'Hill'}}, callback);
-          },
-
-          function (callback) {
-            request (app.server.app)
-              .get ('/persons/' + id)
-              .expect (200, {person: {_id: id, first_name: 'Lanita', last_name: 'Hill'}}, callback);
-          }
-
-        ], done);
+      describe ('count', function () {
+        it ('should invoke the count method', function (done) {
+          request (app.server.app)
+            .get ('/echo/count')
+            .expect (200, {message: 'count'}, done);
+        });
       });
 
-      it ('should delete an existing resource', function (done) {
-        request (app.server.app)
-          .delete ('/persons/' + id)
-          .expect (200, 'true', done);
-      });
     });
 
-    // allowed routing...
     describe ('whitelist', function () {
-
       // allow: create, getOne
 
-      it ('should create a new resource', function (done) {
+      it ('should invoke the create method', function (done) {
         request (app.server.app)
           .post ('/allow')
-          .send ({person: {first_name: 'James', last_name: 'Hill'}})
-          .expect (200)
-          .end (function (err, res) {
-            if (err) return done (err);
-
-            id = res.body.person._id;
-
-            return done ();
-          });
+          .expect (200, {message: 'create'}, done);
       });
 
-      it ('should get a single resource', function (done) {
+      it ('should invoke the get method', function (done) {
+        var id = 7;
+
         request (app.server.app)
           .get ('/allow/' + id)
-          .expect (200, done);
+          .expect (200, {message: 'get', id: id}, done);
       });
 
-      it ('should not retrieve all the resources', function (done) {
+      it ('should not invoke the getAll method', function (done) {
         request (app.server.app)
           .get ('/allow')
+          .expect (404, done);
+      });
+
+      it ('should not invoke the update method', function (done) {
+        request (app.server.app)
+          .put ('/allow/7')
+          .expect (404, done);
+      });
+
+      it ('should not invoke the delete method', function (done) {
+        request (app.server.app)
+          .delete ('/allow/7')
           .expect (404, done);
       });
     });
 
     describe ('blacklist', function () {
-
       // deny: delete
 
-      it ('should create a new resource', function (done) {
+      it ('should invoke the create method', function (done) {
         request (app.server.app)
-          .post ('/deny')
-          .send ({person: {first_name: 'James', last_name: 'Hill'}})
-          .expect (200)
-          .end (function (err, res) {
-            if (err) return done (err);
-
-            id = res.body.person._id;
-
-            return done ();
-          });
+          .post ('/allow')
+          .expect (200, {message: 'create'}, done);
       });
 
-      it ('should get a single resource', function (done) {
+      it ('should not invoke the delete method', function (done) {
         request (app.server.app)
-          .get ('/deny/' + id)
-          .expect (200, done);
-      });
-
-      it ('should not delete the resource', function (done) {
-        request (app.server.app)
-          .delete ('/deny')
+          .delete ('/allow/7')
           .expect (404, done);
       });
     });
