@@ -73,5 +73,5 @@ ResourceController.prototype.delete = notFound;
 
 // aggregation functions
 ResourceController.prototype.count = notFound;
-ResourceController.prototype.outdated = util.deprecate (notFound, 'Use HEAD and Last-Modified HTTP headers');
-ResourceController.prototype.allOutdated = util.deprecate (notFound,'Use HEAD and Last-Modified HTTP headers');
+ResourceController.prototype.outdated = util.deprecate (notFound, '/outdated: Use HEAD and Last-Modified HTTP headers');
+ResourceController.prototype.allOutdated = util.deprecate (notFound, '/:rcId/outdated: Use HEAD and Last-Modified HTTP headers');
