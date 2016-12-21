@@ -121,6 +121,14 @@ describe ('RouterBuilder', function () {
         });
       });
 
+      describe ('header', function () {
+        it ('should invoke the header method', function (done) {
+          request (app.server.app)
+            .head ('/echo')
+            .expect ('Method-Call', 'header')
+            .expect (200, done);
+        });
+      });
     });
 
     describe ('whitelist', function () {
