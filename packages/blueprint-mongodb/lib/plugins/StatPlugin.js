@@ -109,6 +109,10 @@ function StatPlugin (schema) {
     return this._stat.updated_at;
   };
 
+  schema.methods.getLastModified = function () {
+    return this._stat.updated_at || this._stat.created_at;
+  };
+
   schema.methods.isOriginal = function () {
     return this._stat.updated_at === undefined;
   };
