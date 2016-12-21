@@ -1,11 +1,14 @@
 {
   "name": "@onehilltech/blueprint-mongodb",
-  "description": "",
+  "description": "Blueprint.js module for MongoDB",
   "version": "0.16.1",
   "private": false,
   "main": "./lib",
   "keywords": [
-    "blueprint-module"
+    "blueprint",
+    "blueprint-module",
+    "mongodb",
+    "mongoose"
   ],
   "scripts": {
     "test": "env NODE_ENV=test mocha --recursive tests/unit-tests",
@@ -13,15 +16,15 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^1.6.0",
-    "mongoose": "^4.7.0",
-    "pluralize": "^3.0.0"
+    "@onehilltech/blueprint": "^1.8.0",
+    "mongoose": "^4.7.4",
+    "multer": "^1.2.1",
+    "pluralize": "^3.1.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "istanbul": "^0.4.5",
-    "mocha": "^3.0.2",
-    "multer": "^1.2.0",
+    "mocha": "^3.2.0",
     "superagent": "^2.3.0",
     "supertest": "^2.0.0"
   },

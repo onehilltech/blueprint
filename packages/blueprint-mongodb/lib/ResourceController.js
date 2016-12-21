@@ -96,36 +96,26 @@ function makeOnPreCreateHandler (req, onPreCreate) {
  * @constructor
  */
 function ResourceController (opts) {
-  BaseController.call (this);
-
-  opts = opts || {};
-
   if (!opts.model)
     throw new Error ('Options must define model property');
 
-  this._id = opts.id;
+  if (!opts.name)
+    opts.name = opts.model.modelName;
+
+  // Pass control to the base class.
+  BaseController.call (this, opts);
+
   this._model = opts.model;
-  this.name = opts.name || opts.model.modelName;
-  this._pluralize = pluralize (this.name);
+  this._pluralize = pluralize (this._name);
   this._eventPrefix = opts.eventPrefix;
 
-  if (!this._id)
-    this._id = this.name + 'Id';
-
   // Build the validation schema for create and update.
-  var validationOpts = {pathPrefix: this.name};
+  var validationOpts = {pathPrefix: this._name};
   this._createValidation = validationSchema (opts.model.schema, validationOpts);
   this._updateValidation = validationSchema (opts.model.schema, _.extend (validationOpts, {allOptional: true}));
 }
 
 util.inherits (ResourceController, BaseController);
-
-/**
- * Get the resource identifier.
- */
-ResourceController.prototype.__defineGetter__ ('resourceId', function () {
-  return this._id;
-});
 
 /**
  * Create a new resource.
@@ -565,7 +555,7 @@ ResourceController.prototype.computeEventName = function (action) {
   if (prefix.length !== 0)
     prefix += '.';
 
-  return prefix + this.name + '.' + action;
+  return prefix + this._name + '.' + action;
 };
 
 module.exports = exports = ResourceController;

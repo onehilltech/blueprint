@@ -180,21 +180,4 @@ describe ('ResourceController', function () {
         .expect (200, {count: 2}, done);
     });
   });
-
-  describe ('getFirst', function () {
-    it ('should get the first person resource', function (done) {
-      request (server.app)
-        .get ('/person/first')
-        .query ({'options[sort]': {last_name: -1}})
-        .expect (404, done);
-    });
-  });
-
-  describe ('getLast', function () {
-    it ('should get the first person resource', function (done) {
-      request (server.app)
-        .get ('/person/last')
-        .expect (404, done);
-    });
-  });
 });

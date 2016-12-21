@@ -22,21 +22,9 @@ var ResourceController = blueprint.ResourceController
  * @constructor
  */
 function GridFSController (conn, opts) {
-  ResourceController.call (this);
-
-  opts = opts || {};
-
-  if (!opts.name)
-    throw new Error ('Options must define id property');
-
-  this.name = opts.name;
-
-  if (!opts.id)
-    this._id = opts.name + 'Id';
+  ResourceController.call (this, opts);
 
   this._resolveUser = opts.resolveUser;
-
-  // Define how we are going to accept uploads.
   this._uploadPath = opts.uploadPath || path.resolve (blueprint.app.appPath, 'temp/uploads');
   this._upload = multer ({dest: this._uploadPath});
 
@@ -66,7 +54,7 @@ GridFSController.prototype.create = function () {
   var self = this;
 
   return [
-    this._upload.single (this.name),
+    this._upload.single (this._name),
     function (req, res) {
       // Store the content type.
       var opts = { contentType: req.file.mimetype};
