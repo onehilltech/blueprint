@@ -1,6 +1,6 @@
 'use strict';
 
-var BaseController = require ('./BaseController')
+const BaseController = require ('./BaseController')
   , util = require ('util')
   , _ = require ('underscore')
   ;
@@ -73,5 +73,5 @@ ResourceController.prototype.delete = notFound;
 
 // aggregation functions
 ResourceController.prototype.count = notFound;
-ResourceController.prototype.outdated = notFound;
-ResourceController.prototype.allOutdated = notFound;
+ResourceController.prototype.outdated = util.deprecate (notFound, 'Use HEAD and Last-Modified HTTP headers');
+ResourceController.prototype.allOutdated = util.deprecate (notFound,'Use HEAD and Last-Modified HTTP headers');
