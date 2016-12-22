@@ -62,12 +62,7 @@ describe ('lib.ResourceController', function () {
             person = res.body.person;
             data.person._id = person._id;
 
-            // When we create the resource, it should only have the "created_at" property,
-            // and not the "modified_at" property.
-            expect (res.body).to.have.deep.property ('person._stat.created_at');
-            expect (res.body).to.not.have.deep.property ('person._stat.modified_at');
-
-            expect (_.omit (res.body.person, ['_stat'])).to.deep.equal (data.person);
+            expect (res.body.person).to.deep.equal (data.person);
 
             return done (null);
           }, done);
@@ -214,11 +209,7 @@ describe ('lib.ResourceController', function () {
             updated = res.body.person;
 
             // Check the _stat fields.
-            expect (updated).to.have.deep.property ('_stat.created_at', person._stat.created_at);
-            expect (updated).to.have.deep.property ('_stat.updated_at');
-            expect (updated._stat.created_at).to.not.equal (updated._stat.updated_at);
-
-            expect (_.omit (res.body.person, ['_stat'])).to.deep.equal (_.omit (person, ['_stat']));
+            expect (res.body.person).to.deep.equal (person);
             return done (null);
           });
       });

@@ -4,6 +4,19 @@ const DateUtils = require ('../DateUtils')
   ;
 
 /**
+ * Transform the document by removing the _stat field.
+ *
+ * @param orig
+ * @returns {Function}
+ */
+function transform (orig) {
+  return function (doc, ret, options) {
+    delete ret._stat;
+    return orig (doc, ret, options);
+  }
+}
+
+/**
  * Plugin that adds stat information about the resource to each document.
  *
  * @param schema
@@ -20,9 +33,22 @@ function StatPlugin (schema) {
     }
   });
 
-  // We are always going to make sure the created_at timestamp appears in
-  // the _stat sub-document.
+  // Always remove the _stat information from the document. We need to
+  // preserve any existing transformation attached to the schema.
 
+  if (!schema.options.toObject)
+    schema.options.toObject = {};
+
+  if (!schema.options.toJSON)
+    schema.options.toJSON = {};
+
+  var origTransform = schema.options.toObject.transform || function (doc, ret) { return ret; };
+  schema.options.toObject.transform = transform (origTransform);
+  schema.options.toJSON.transform = transform (origTransform);
+
+  /*
+   * Ensure the created_at field aways appears in the document.
+   */
   schema.pre ('save', function (next) {
     if (this.isNew) {
       // The document is newly created. Make sure we have the created_at
@@ -39,14 +65,14 @@ function StatPlugin (schema) {
     next ();
   });
 
-  function handleUpdate () {
+  function onUpdate () {
     this.update ({$set: {'_stat.updated_at': new Date ()}});
   }
 
   // Middleware hooks for updating the document. When the document is
   // updated, we make sure to update the "updated_at" path.
-  schema.pre ('findOneAndUpdate', handleUpdate);
-  schema.pre ('update', handleUpdate);
+  schema.pre ('findOneAndUpdate', onUpdate);
+  schema.pre ('update', onUpdate);
 
   // Define helper methods for accessing the stats.
 
