@@ -178,20 +178,18 @@ ResourceController.prototype.create = function (opts) {
           self._model.create (doc, makeDbCompletionHandler ('Failed to create resource', callback));
         },
 
-        // Allow the subclass to do any post-execution analysis of the result.
-        function (result, callback) {
+        function postExecute (result, callback) {
           // Emit that a resource was created.
           messaging.emit (eventName, result);
+
+          // Set the headers for the response.
+          res.set (HttpHeader.LAST_MODIFIED, result.getLastModified ().toUTCString ());
 
           onPostExecute (req, result, callback);
         },
 
-        // Serialize the data in REST format.
-        function (data, callback) {
+        function transfrom (data, callback) {
           var result = {};
-
-          // Set the headers for the response.
-          res.set (HttpHeader.LAST_MODIFIED, data.getLastModified ().toUTCString ());
 
           // Make the response data.
           var payload = data.toJSON ? data.toJSON () : (data.toObject ? data.toObject () : data);
@@ -540,6 +538,10 @@ ResourceController.prototype.update = function (opts) {
         // Allow the subclass to do any post-execution analysis of the result.
         function (result, callback) {
           messaging.emit (eventName, result);
+
+          // Set the headers for the response.
+          res.set (HttpHeader.LAST_MODIFIED, result.getLastModified ().toUTCString ());
+
           onPostExecute (req, result, callback);
         },
 
@@ -547,9 +549,6 @@ ResourceController.prototype.update = function (opts) {
         function (data, callback) {
           var result = { };
           result[self._name] = data;
-
-          // Set the headers for the response.
-          res.set (HttpHeader.LAST_MODIFIED, data.getLastModified ().toUTCString ());
 
           return callback (null, result);
         }
