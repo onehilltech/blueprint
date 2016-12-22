@@ -39,15 +39,14 @@ function StatPlugin (schema) {
     next ();
   });
 
-  function refreshUpdatedAt () {
-    if (!this._update.$set) this._update.$set = {};
-    this._update.$set["_stat.updated_at"] = new Date ();
+  function handleUpdate () {
+    this.update ({$set: {'_stat.updated_at': new Date ()}});
   }
 
   // Middleware hooks for updating the document. When the document is
   // updated, we make sure to update the "updated_at" path.
-  schema.pre ('findOneAndUpdate', refreshUpdatedAt);
-  schema.pre ('update', refreshUpdatedAt);
+  schema.pre ('findOneAndUpdate', handleUpdate);
+  schema.pre ('update', handleUpdate);
 
   // Define helper methods for accessing the stats.
 
