@@ -41,8 +41,9 @@ function modelOn (connName, name, schema, collection) {
 }
 
 function createResource (conn, name, schema, collection) {
-  // Mark the schema as a resource.
-  schema.options.resource = true;
+  Object.defineProperty (schema.options, 'resource', {
+    get: function () { return true}
+  });
 
   schema.plugin (plugins.StatPlugin);
   return conn.model (name, schema, collection);
