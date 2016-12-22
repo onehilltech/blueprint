@@ -95,6 +95,9 @@ function ResourceController (opts) {
   if (!opts.model)
     throw new Error ('Options must define model property');
 
+  if (!opts.model.schema.options.resource)
+    throw new Error (util.format ('%s is not a resource; use the resource () method', opts.model.modelName));
+
   if (!opts.name)
     opts.name = opts.model.modelName;
 
