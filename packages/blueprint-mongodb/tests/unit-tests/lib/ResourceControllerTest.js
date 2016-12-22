@@ -5,13 +5,14 @@ const request = require ('supertest')
   , util      = require ('util')
   , expect    = require ('chai').expect
   , _         = require ('underscore')
-  , testing   = require ('../../../lib/testing')
+  , lib       = require ('../../../lib')
+  , testing   = lib.testing
   , ConnectionManager = require ('../../../lib/ConnectionManager')
   ;
 
 const datamodel = require (path.resolve (__dirname, '../../fixtures/datamodel'));
 
-describe ('ResourceController', function () {
+describe ('lib.ResourceController', function () {
   var server = null;
   var person;
 
@@ -136,6 +137,8 @@ describe ('ResourceController', function () {
   });
 
   describe ('/person/:personId', function () {
+    var updated;
+
     describe ('GET', function () {
       it ('should return a single person', function (done) {
         request (server.app)
@@ -155,6 +158,13 @@ describe ('ResourceController', function () {
             person: person
           }, done);
       });
+
+      it ('should not find the resource', function (done) {
+        request (server.app)
+          .get ('/person/' + new lib.Types.ObjectId ().toString ())
+          .query ({populate: true})
+          .expect (404, done);
+      });
     });
 
     describe ('PUT', function () {
@@ -173,7 +183,7 @@ describe ('ResourceController', function () {
             person.first_name = 'James';
             person.last_name = 'Hill';
 
-            var updated = res.body.person;
+            updated = res.body.person;
 
             // Check the _stat fields.
             expect (updated).to.have.deep.property ('_stat.created_at', person._stat.created_at);
@@ -200,10 +210,34 @@ describe ('ResourceController', function () {
             person.last_name = 'Williams';
 
             var omits = ['_stat'];
-
             expect (_.omit (res.body.person, omits)).to.deep.equal (_.omit (person, omits));
+
+            updated = res.body.person;
+
             return done (null);
           });
+      });
+    });
+
+    describe ('If-Modified-Since', function () {
+      it ('should return resource since it has been modified since date', function (done) {
+        // set date to 3 days ago.
+        var date = Date.now () - (3 * 24 * 60 * 60 * 1000);
+
+        request (server.app)
+          .get ('/person/' + person._id)
+          .set ('If-Modified-Since', new Date (date).toUTCString ())
+          .expect (200, {person: updated}, done);
+      });
+
+      it ('should not return resource since it has not been modified since date', function (done) {
+        // set date to 5 days from now.
+        var date = Date.now () + (5 * 24 * 60 * 60 * 1000);
+
+        request (server.app)
+          .get ('/person/' + person._id)
+          .set ('If-Modified-Since', new Date (date).toUTCString ())
+          .expect (304, done);
       });
     });
 

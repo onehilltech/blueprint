@@ -247,13 +247,25 @@ ResourceController.prototype.get = function (opts) {
           });
         },
 
-        // Allow the subclass to do any post-execution analysis of the result.
-        function (result, callback) {
+        function postExecute (result, callback) {
+          // Check for If-Modified-Since header. This will determine if we should continue
+          // or not. If this header is present and the document has not been modified since
+          // the provided date, we should return delete the result. Ideally, this should
+          // be part of the database query. Unfortunately, that approach would not allow
+          // us to distinguish between 304 and 404.
+
+          if (req.headers[HttpHeader.lowercase.IF_MODIFIED_SINCE]) {
+            var date = Date.parse (req.headers[HttpHeader.lowercase.IF_MODIFIED_SINCE]);
+            var lastModified = result.getLastModified ();
+
+            if (DateUtils.compare (date, lastModified) !== -1)
+              return callback (new HttpError (304, 'Not Changed'));
+          }
+
           onPostExecute (req, result, callback);
         },
 
-        // Rewrite the result in JSON API format.
-        function (data, callback) {
+        function rewrite (data, callback) {
           var result = { };
           result[self._name] = data;
 
