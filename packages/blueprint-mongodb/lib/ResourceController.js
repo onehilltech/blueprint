@@ -248,6 +248,10 @@ ResourceController.prototype.get = function (opts) {
         },
 
         function postExecute (result, callback) {
+          // Set the headers for the response.
+          var lastModified = result.getLastModified ();
+          res.set (HttpHeader.LAST_MODIFIED, lastModified.toUTCString ());
+
           // Check for If-Modified-Since header. This will determine if we should continue
           // or not. If this header is present and the document has not been modified since
           // the provided date, we should return delete the result. Ideally, this should
@@ -256,7 +260,6 @@ ResourceController.prototype.get = function (opts) {
 
           if (req.headers[HttpHeader.lowercase.IF_MODIFIED_SINCE]) {
             var date = Date.parse (req.headers[HttpHeader.lowercase.IF_MODIFIED_SINCE]);
-            var lastModified = result.getLastModified ();
 
             if (DateUtils.compare (date, lastModified) !== -1)
               return callback (new HttpError (304, 'Not Changed'));
@@ -268,9 +271,6 @@ ResourceController.prototype.get = function (opts) {
         function rewrite (data, callback) {
           var result = { };
           result[self._name] = data;
-
-          // Set the headers for the response.
-          res.set (HttpHeader.LAST_MODIFIED, data.getLastModified ().toUTCString ());
 
           if (!req.query.populate) {
             return callback (null, result);
@@ -351,13 +351,11 @@ ResourceController.prototype.getAll = function (opts) {
           });
         },
 
-        // Allow the subclass to do any post-execution analysis of the result.
-        function (result, callback) {
+        function postExecute (result, callback) {
           onPostExecute (req, result, callback);
         },
 
-        // Rewrite the result in JSON API format.
-        function (data, callback) {
+        function rewrite (data, callback) {
           var result = { };
           result[self._pluralize] = data;
 
