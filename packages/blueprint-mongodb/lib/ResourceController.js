@@ -216,7 +216,7 @@ ResourceController.prototype.get = function (opts) {
 
   var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
-  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
@@ -233,7 +233,7 @@ ResourceController.prototype.get = function (opts) {
         async.constant (filter),
 
         function (filter, callback) {
-          return onUpdateFilter (req, filter, callback)
+          return onPrepareFilter (req, filter, callback)
         },
 
         // Prepare the projection, and then execute the database command.
@@ -301,7 +301,7 @@ ResourceController.prototype.getAll = function (opts) {
     winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
 
   var onAuthorize = on.authorize || __onAuthorize;
-  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
   var onPostExecute = on.postExecute || __onPostExecute;
@@ -321,7 +321,7 @@ ResourceController.prototype.getAll = function (opts) {
         async.constant (_.omit (req.query, ['options'])),
 
         function (filter, callback) {
-          return onUpdateFilter (req, filter, callback)
+          return onPrepareFilter (req, filter, callback)
         },
 
         // Now, let's search our database for the resource in question.
@@ -351,59 +351,114 @@ ResourceController.prototype.getAll = function (opts) {
           });
         },
 
+        /**
+         * Perform post execution of the result set.
+         *
+         * @param result
+         * @param callback
+         * @returns {*}
+         */
         function postExecute (result, callback) {
-          onPostExecute (req, result, callback);
+          async.waterfall ([
+            /*
+             * Process the headers in the original request. This has the pontential to
+             * reduce the number of items we return to the client.
+             */
+            function processHeaders (callback) {
+              var tasks = [
+                async.constant (result)
+              ];
+
+              if (req.headers[HttpHeader.lowercase.IF_MODIFIED_SINCE])
+                tasks.push (processIfModifiedSince);
+
+              async.waterfall (tasks, callback);
+
+              /**
+               * Gather the items that were updated after the data defined in the
+               * 'If-Modified-Since' HTTP header.
+               *
+               * @param callback
+               */
+              function processIfModifiedSince (data, callback) {
+                var date = Date.parse (req.headers[HttpHeader.lowercase.IF_MODIFIED_SINCE]);
+
+                async.reduce (data, [], function (memo, item, callback) {
+                  if (DateUtils.compare (date, item.getLastModified ()) === -1)
+                    memo.push (item);
+
+                  return callback (null, memo);
+                }, onReduceComplete);
+
+                function onReduceComplete (err, final) {
+                  if (err) return callback (err);
+                  if (final.length === 0) return callback (new HttpError (304, 'Not Changed'));
+                  return callback (null, final);
+                }
+              }
+            },
+
+            /**
+             * Set the headers on the response based on the retrieved data.
+             *
+             * @param data
+             * @param callback
+             * @returns {*}
+             */
+            function setHeaders (data, callback) {
+              if (data.length === 0)
+                return callback (null, data);
+
+              // Start by initializing the headers based on the data from the
+              // first time. If we have more than one item, then reduce the data
+              // to a single value.
+
+              var headers = { };
+              headers[HttpHeader.LAST_MODIFIED] = data[0].getLastModified ();
+
+              if (data.length === 1)
+                return onReduceComplete (null, headers);
+
+              async.reduce (data.slice (1), headers, function (memo, item, callback) {
+                var lastModified = item.getLastModified ();
+
+                if (DateUtils.compare (memo[HttpHeader.LAST_MODIFIED], lastModified) == -1)
+                  memo[HttpHeader.LAST_MODIFIED] = lastModified;
+
+                return callback (null, memo);
+              }, onReduceComplete);
+
+              function onReduceComplete (err, headers) {
+                if (!err) res.set (headers);
+                return callback (null, data);
+              }
+            }
+          ], onComplete);
+
+          function onComplete (err, data) {
+            if (err) return callback (err);
+            return onPostExecute (req, data, callback);
+          }
         },
 
-        function rewrite (data, callback) {
+        /**
+         * Transform the data into the final result set.
+         *
+         * @param data
+         * @param callback
+         * @returns {*}
+         */
+        function transform (data, callback) {
           var result = { };
           result[self._pluralize] = data;
 
-          var tasks = [];
+          if (!opts.populate)
+            return callback (null, result);
 
-          if (data.length > 0)
-            tasks.push (setHeaders);
-
-          tasks.push (function (callback) {
-            if (!opts.populate) {
-              return callback (null, result);
-            }
-            else {
-              return populate (data, self._model, function (err, details) {
-                result = _.extend (result, details);
-                return callback (null, result);
-              });
-            }
+          return populate (data, self._model, function (err, details) {
+            result = _.extend (result, details);
+            return callback (null, result);
           });
-
-          // We are going to set the headers and populate the data in parallel. This
-          // is possible because neither depends on the other.
-          async.parallel (tasks, callback);
-
-          function setHeaders (callback) {
-            // Reduce the collection to the set of headers that represent the entire
-            // collection.
-            var headers = { };
-            headers[HttpHeader.LAST_MODIFIED] = data[0].getLastModified ();
-
-            async.reduce (data.slice (1), headers, function (memo, item, callback) {
-              var lastModified = item.getLastModified ();
-
-              if (DateUtils.compare (memo[HttpHeader.LAST_MODIFIED], lastModified) == -1)
-                memo[HttpHeader.LAST_MODIFIED] = lastModified;
-
-              return callback (null, memo);
-            }, onComplete);
-
-            function onComplete (err, headers) {
-              if (!err) res.set (headers);
-              return callback (null);
-            }
-          }
-       },
-
-        function (data, callback) {
-          return callback (null, data[data.length - 1]);
         }
       ], makeTaskCompletionHandler (res, callback));
     }
@@ -423,7 +478,7 @@ ResourceController.prototype.update = function (opts) {
   if (on.updateFilter)
     winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
 
-  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
@@ -460,7 +515,7 @@ ResourceController.prototype.update = function (opts) {
         async.constant (filter),
 
         function (filter, callback) {
-          return onUpdateFilter (req, filter, callback)
+          return onPrepareFilter (req, filter, callback)
         },
 
         // Now, let's search our database for the resource in question.
@@ -513,7 +568,7 @@ ResourceController.prototype.delete = function (opts) {
   if (on.updateFilter)
     winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
 
-  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
   var eventName = this.computeEventName ('deleted');
@@ -531,7 +586,7 @@ ResourceController.prototype.delete = function (opts) {
         async.constant (filter),
 
         function (filter, callback) {
-          return onUpdateFilter (req, filter, callback)
+          return onPrepareFilter (req, filter, callback)
         },
 
         // Now, let's search our database for the resource in question.
@@ -570,7 +625,7 @@ ResourceController.prototype.count = function (opts) {
     winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
 
   var onAuthorize = on.authorize || __onAuthorize;
-  var onUpdateFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
@@ -585,7 +640,7 @@ ResourceController.prototype.count = function (opts) {
         async.constant (req.query),
 
         function (filter, callback) {
-          return onUpdateFilter (req, filter, callback)
+          return onPrepareFilter (req, filter, callback)
         },
 
         // Now, let's search our database for the resource in question.

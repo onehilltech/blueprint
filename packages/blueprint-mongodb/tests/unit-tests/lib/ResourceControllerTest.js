@@ -117,13 +117,41 @@ describe ('lib.ResourceController', function () {
       });
     });
 
-    describe ('HEAD', function () {
-      it ('should return the header for the collection of resources', function (done) {
+    describe ('If-Modified-Since', function () {
+      it ('should return all the resources [date in the past]', function (done) {
+        var expected = {
+          people: [
+            _.omit (testing.lean (datamodel.models.persons[0]), ['__v']),
+            person
+          ],
+
+          degrees: [
+            _.extend (datamodel.data.degrees[0], {_id: datamodel.models.degrees[0].id}),
+            _.extend (datamodel.data.degrees[1], {_id: datamodel.models.degrees[1].id})
+          ]
+        };
+
+        // set date to 3 days ago.
+        var date = Date.now () - (3 * 24 * 60 * 60 * 1000);
+
         request (server.app)
-          .head ('/person')
-          .expect (200, done);
+          .get ('/person')
+          .query ({options: {populate: true}})
+          .set ('If-Modified-Since', new Date (date).toUTCString ())
+          .expect (200, expected, done);
+      });
+
+      it ('should return not changed [date in the future]', function (done) {
+        // set date to 5 days from now.
+        var date = Date.now () + (5 * 24 * 60 * 60 * 1000);
+
+        request (server.app)
+          .get ('/person')
+          .set ('If-Modified-Since', new Date (date).toUTCString ())
+          .expect (304, done);
       });
     });
+
   });
 
   describe ('/person/count', function () {
