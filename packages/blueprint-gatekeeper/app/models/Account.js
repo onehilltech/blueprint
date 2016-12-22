@@ -162,4 +162,4 @@ schema.statics.authenticate = function (username, password, done) {
 const MODEL_NAME = 'account';
 const COLLECTION_NAME  = 'gatekeeper_accounts';
 
-module.exports = mongodb.model (MODEL_NAME, schema, COLLECTION_NAME);
+module.exports = mongodb.resource (MODEL_NAME, schema, COLLECTION_NAME);

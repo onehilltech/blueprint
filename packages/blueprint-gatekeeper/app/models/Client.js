@@ -41,4 +41,4 @@ schema.pre ('validate', function (next) {
 const MODEL_NAME = 'client';
 const COLLECTION_NAME = 'gatekeeper_clients';
 
-module.exports = mongodb.model (MODEL_NAME, schema, COLLECTION_NAME);
+module.exports = mongodb.resource (MODEL_NAME, schema, COLLECTION_NAME);
