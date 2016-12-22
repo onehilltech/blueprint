@@ -18,4 +18,4 @@ var schema = new Schema({
 });
 
 const COLLECTION_NAME = 'blueprint_cloud_token';
-module.exports = mongodb.model (COLLECTION_NAME, schema);
+module.exports = mongodb.resource (COLLECTION_NAME, schema);
