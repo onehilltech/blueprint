@@ -360,6 +360,17 @@ ResourceController.prototype.getAll = function (opts) {
          * @returns {*}
          */
         function postExecute (result, callback) {
+          // If the length is 0, then we always return the result set regardless of
+          // Last-Modified been set in the header. The reason being is Last-Modified
+          // does not take into account the contents of the list. Just the modification
+          // times. Unfortunately, Last-Modified works if there are resources in the
+          // list where we can check create/update times.
+          //
+          // A solution to the problem above is to support ETag.
+
+          if (result.length === 0)
+            return onComplete (null, result);
+
           async.waterfall ([
             /*
              * Process the headers in the original request. This has the pontential to
