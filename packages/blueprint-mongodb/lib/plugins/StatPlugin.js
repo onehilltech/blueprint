@@ -42,9 +42,11 @@ function StatPlugin (schema) {
   if (!schema.options.toJSON)
     schema.options.toJSON = {};
 
-  var origTransform = schema.options.toObject.transform || function (doc, ret) { return ret; };
-  schema.options.toObject.transform = transform (origTransform);
-  schema.options.toJSON.transform = transform (origTransform);
+  var objTransform = schema.options.toObject.transform || function (doc, ret) { return ret; };
+  schema.options.toObject.transform = transform (objTransform);
+
+  var jsonTransform = schema.options.toJSON.transform || function (doc, ret) { return ret; };
+  schema.options.toJSON.transform = transform (jsonTransform);
 
   /*
    * Ensure the created_at field aways appears in the document.
