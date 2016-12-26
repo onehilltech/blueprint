@@ -51,6 +51,7 @@ function checkIdThenAuthorize (id, next) {
     return next (req, callback);
   }
 }
+
 /**
  * Make the database completion handler. We have to create a new handler
  * for each execution because we need to bind to a different callback.
@@ -359,7 +360,7 @@ ResourceController.prototype.getAll = function (opts) {
          * @param callback
          * @returns {*}
          */
-        function postExecute (result, callback) {
+          function postExecute (result, callback) {
           // If the length is 0, then we always return the result set regardless of
           // Last-Modified been set in the header. The reason being is Last-Modified
           // does not take into account the contents of the list. Just the modification
@@ -417,7 +418,7 @@ ResourceController.prototype.getAll = function (opts) {
              * @param callback
              * @returns {*}
              */
-            function setHeaders (data, callback) {
+              function setHeaders (data, callback) {
               if (data.length === 0)
                 return callback (null, data);
 
@@ -441,7 +442,16 @@ ResourceController.prototype.getAll = function (opts) {
               }, onReduceComplete);
 
               function onReduceComplete (err, headers) {
-                if (!err) res.set (headers);
+                if (err) return callback (err, null);
+
+                // The Last-Modified header must be in UTC/GMT string format.
+                var lastModified = headers[HttpHeader.LAST_MODIFIED];
+
+                if (lastModified && !_.isString (lastModified))
+                  headers[HttpHeader.LAST_MODIFIED] = lastModified.toUTCString ();
+
+                res.set (headers);
+
                 return callback (null, data);
               }
             }
@@ -460,7 +470,7 @@ ResourceController.prototype.getAll = function (opts) {
          * @param callback
          * @returns {*}
          */
-        function transform (data, callback) {
+          function transform (data, callback) {
           var result = { };
           result[self._pluralize] = data;
 
