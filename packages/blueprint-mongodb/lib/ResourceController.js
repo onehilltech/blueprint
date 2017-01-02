@@ -174,9 +174,22 @@ ResourceController.prototype.create = function (opts) {
           ], callback);
         },
 
-        // Now, let's search our database for the resource in question.
         function (doc, callback) {
-          self._model.create (doc, makeDbCompletionHandler ('Failed to create resource', callback));
+          // We need to resolve the correct model just in case the schema for this
+          // model contains a discriminator.
+
+          var Model = resolveModel (self._model, doc);
+          Model.create (doc, makeDbCompletionHandler ('Failed to create resource', callback));
+
+          function resolveModel (Model, doc) {
+            if (!Model.discriminators) return Model;
+
+            var schema = Model.schema;
+            var discriminatorKey = schema.discriminatorMapping.key;
+            var discriminator = doc[discriminatorKey];
+
+            return discriminator ? Model.discriminators[discriminator] : Model;
+          }
         },
 
         function postExecute (result, callback) {
