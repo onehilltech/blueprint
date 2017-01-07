@@ -88,7 +88,7 @@ describe ('lib.ResourceController', function () {
       it ('should return a list of persons', function (done) {
         var expected = {
           people: [
-            _.omit (testing.lean (datamodel.models.persons[0]), ['__v']),
+            testing.lean (datamodel.models.persons[0]),
             person
           ],
 
@@ -116,7 +116,7 @@ describe ('lib.ResourceController', function () {
       it ('should return all the resources [date in the past]', function (done) {
         var expected = {
           people: [
-            _.omit (testing.lean (datamodel.models.persons[0]), ['__v']),
+            testing.lean (datamodel.models.persons[0]),
             person
           ],
 

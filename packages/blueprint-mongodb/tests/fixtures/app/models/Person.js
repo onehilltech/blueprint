@@ -2,6 +2,7 @@
 
 var mongodb = require ('../../../../lib')
   , Degree  = require ('./Degree')
+  , options = require ('./schemaOptions')
   ;
 
 var schema = new mongodb.Schema ({
@@ -21,6 +22,6 @@ var schema = new mongodb.Schema ({
 
   education: {type: mongodb.Schema.Types.ObjectId, ref: Degree.modelName},
   degrees: [{type: mongodb.Schema.Types.ObjectId, ref: Degree.modelName}]
-});
+}, options);
 
 module.exports = mongodb.resource ('person', schema, 'blueprint_persons');

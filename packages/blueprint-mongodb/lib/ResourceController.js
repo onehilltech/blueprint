@@ -36,7 +36,7 @@ function isProjectionExclusive (projection) {
 
 function __onAuthorize (req, callback) { return callback (null); }
 function __onPrepareProjection (req, callback) { return callback (null, {}); }
-function __onPrepareOptions (req, callback) { return callback (null, {}); }
+function __onPrepareOptions (req, options, callback) { return callback (null, {}); }
 function __onUpdateFilter (req, filter, callback) { return callback (null, filter); }
 function __onPrepareDocument (req, doc, callback) {
   return callback (null, doc);
@@ -192,7 +192,7 @@ ResourceController.prototype.create = function (opts) {
           }
         },
 
-        function postExecute (result, callback) {
+        function (result, callback) {
           // Emit that a resource was created.
           messaging.emit (eventName, result);
 
@@ -202,12 +202,10 @@ ResourceController.prototype.create = function (opts) {
           onPostExecute (req, result, callback);
         },
 
-        function transfrom (data, callback) {
+        function (data, callback) {
+          // Prepare the result sent back to the client.
           var result = {};
-
-          // Make the response data.
-          var payload = data.toJSON ? data.toJSON () : (data.toObject ? data.toObject () : data);
-          result[self._name] = _.omit (payload, '__v');
+          result[self._name] = data;
 
           return callback (null, result);
         }
@@ -244,25 +242,18 @@ ResourceController.prototype.get = function (opts) {
       var filter = {_id: rcId};
 
       async.waterfall ([
-        // First, allow the subclass to update the filter.
-        async.constant (filter),
-
-        function (filter, callback) {
-          return onPrepareFilter (req, filter, callback)
+        function (callback) {
+          async.parallel ({
+            filter: function (callback) { onPrepareFilter (req, filter, callback); },
+            projection: function (callback) { onPrepareProjection (req, callback); }
+          }, callback);
         },
 
-        // Prepare the projection, and then execute the database command.
-        function (filter, callback) {
-          onPrepareProjection (req, function (err, projection) {
-            // Do not include the version field in the projection.
-            if (isProjectionExclusive (projection) && projection['__v'] === undefined)
-              projection['__v'] = 0;
-
-            self._model.findOne (filter, projection, makeDbCompletionHandler ('Failed to retrieve resource', callback));
-          });
+        function (query, callback) {
+          self._model.findOne (query.filter, query.projection, makeDbCompletionHandler ('Failed to retrieve resource', callback));
         },
 
-        function postExecute (result, callback) {
+        function (result, callback) {
           // Set the headers for the response.
           var lastModified = result.getLastModified ();
           res.set (HttpHeader.LAST_MODIFIED, lastModified.toUTCString ());
@@ -283,7 +274,7 @@ ResourceController.prototype.get = function (opts) {
           onPostExecute (req, result, callback);
         },
 
-        function rewrite (data, callback) {
+        function (data, callback) {
           var result = { };
           result[self._name] = data;
 
@@ -331,39 +322,34 @@ ResourceController.prototype.getAll = function (opts) {
     execute: function __blueprint_getall_execute (req, res, callback) {
       // Update the options with those from the query string.
       var opts = req.query.options || {};
+      var options = {};
+
+      if (req.query.options) {
+        delete req.query.options;
+
+        if (opts.skip)
+          options.skip = opts.skip;
+
+        if (opts.limit)
+          options.limit = opts.limit;
+
+        if (opts.sort)
+          options.sort = opts.sort;
+      }
 
       async.waterfall ([
-        async.constant (_.omit (req.query, ['options'])),
-
-        function (filter, callback) {
-          return onPrepareFilter (req, filter, callback)
+        function (callback) {
+          // Prepare the different parts of the query.
+          async.parallel ({
+            filter: function (callback) { onPrepareFilter (req, req.query, callback); },
+            projection: function (callback) { onPrepareProjection (req, callback); },
+            options: function (callback) { onPrepareOptions (req, options, callback); }
+          }, callback);
         },
 
         // Now, let's search our database for the resource in question.
-        function (filter, callback) {
-          onPrepareOptions (req, function (err, options) {
-            if (err) return callback (err);
-            options = options || {};
-
-            if (opts.skip)
-              options['skip'] = opts.skip;
-
-            if (opts.limit)
-              options['limit'] = opts.limit;
-
-            if (opts.sort)
-              options['sort'] = opts.sort;
-
-            onPrepareProjection (req, function (err, projection) {
-              if (err) return callback (err);
-
-              // Do not include the version field in the projection.
-              if (isProjectionExclusive (projection))
-                projection['__v'] = 0;
-
-              self._model.find (filter, projection, options, makeDbCompletionHandler ('Failed to retrieve resource', callback));
-            });
-          });
+        function (query, callback) {
+          self._model.find (query.filter, query.projection, query.options, makeDbCompletionHandler ('Failed to retrieve resource', callback));
         },
 
         /**
@@ -373,7 +359,7 @@ ResourceController.prototype.getAll = function (opts) {
          * @param callback
          * @returns {*}
          */
-          function postExecute (result, callback) {
+        function (result, callback) {
           // If the length is 0, then we always return the result set regardless of
           // Last-Modified been set in the header. The reason being is Last-Modified
           // does not take into account the contents of the list. Just the modification
@@ -483,7 +469,7 @@ ResourceController.prototype.getAll = function (opts) {
          * @param callback
          * @returns {*}
          */
-          function transform (data, callback) {
+        function transform (data, callback) {
           var result = { };
           result[self._pluralize] = data;
 
@@ -515,6 +501,7 @@ ResourceController.prototype.update = function (opts) {
 
   var onPrepareFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
+  var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
   var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
 
@@ -545,28 +532,22 @@ ResourceController.prototype.update = function (opts) {
       var rcId = req.params[self._id];
       var filter = {_id: rcId};
 
-      async.waterfall ([
-        // First, allow the subclass to update the filter.
-        async.constant (filter),
+      var update = { $set: req.body[self._name] };
+      var options = { upsert: false, new: true };
 
-        function (filter, callback) {
-          return onPrepareFilter (req, filter, callback)
+      async.waterfall ([
+        function (callback) {
+          async.parallel ({
+            filter: function (callback) { onPrepareFilter (req, filter, callback); },
+            options: function (callback) { onPrepareOptions (req, options, callback); },
+            projection: function (callback) { onPrepareProjection (req, callback); }
+          }, callback);
         },
 
         // Now, let's search our database for the resource in question.
-        function (filter, callback) {
-          var update = { $set: req.body[self._name] };
-          var option = { upsert: false, new: true };
-
-          onPrepareProjection (req, function (err, projection) {
-            // Do not include the version field in the projection.
-            option.fields = projection;
-
-            if (isProjectionExclusive (projection) && projection['__v'] === undefined)
-              option.fields.__v = 0;
-
-            self._model.findOneAndUpdate (filter, update, option, makeDbCompletionHandler ('Failed to update resource', callback));
-          });
+        function (query, callback) {
+          options.fields = query.projection;
+          self._model.findOneAndUpdate (query.filter, update, options, makeDbCompletionHandler ('Failed to update resource', callback));
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
@@ -619,9 +600,7 @@ ResourceController.prototype.delete = function (opts) {
 
       async.waterfall ([
         // First, allow the subclass to update the filter.
-        async.constant (filter),
-
-        function (filter, callback) {
+        function (callback) {
           return onPrepareFilter (req, filter, callback)
         },
 
