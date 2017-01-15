@@ -2,7 +2,7 @@ const expect  = require ('chai').expect
   , validator = require ('../../../../lib/validators/ObjectID')
   ;
 
-describe ('validator.ObjectId', function () {
+describe ('lib.validators.ObjectId', function () {
   it ('should return a schema for validating an ObjectID', function () {
     var schema = validator ({});
 

@@ -2,7 +2,7 @@ const expect  = require ('chai').expect
   , validator = require ('../../../../lib/validators/Number')
   ;
 
-describe ('validator.Number', function () {
+describe ('lib.validators.Number', function () {
   it ('should return the default schema for a Number', function () {
     var schema = validator ({options: {}});
     expect (schema).to.deep.equal ({});

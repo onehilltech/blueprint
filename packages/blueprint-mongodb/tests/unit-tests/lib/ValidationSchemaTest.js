@@ -4,7 +4,7 @@ const expect  = require ('chai').expect
   , ValidationSchema = require ('../../../lib/ValidationSchema')
   ;
 
-describe ('ValidationSchema', function () {
+describe ('lib.ValidationSchema', function () {
   it ('should create a validation schema', function () {
     var schema = new lib.Schema ({
       name: {
