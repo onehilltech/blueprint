@@ -149,7 +149,7 @@ WorkflowController.prototype.logoutUser = function () {
  * @returns
  */
 WorkflowController.prototype.issueToken = function () {
-  var grantTypes = {
+  const grantTypes = {
     password: {
       validate: function (req, callback) {
         req.check ({
