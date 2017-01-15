@@ -1,5 +1,4 @@
-const request = require ('supertest')
-  , blueprint = require ('@onehilltech/blueprint')
+const blueprint = require ('@onehilltech/blueprint')
   , path      = require ('path')
   , async     = require ('async')
   , util      = require ('util')
@@ -13,7 +12,6 @@ const request = require ('supertest')
 const datamodel = require (path.resolve (__dirname, '../../fixtures/datamodel'));
 
 describe ('lib.ResourceController', function () {
-  var server = null;
   var person;
 
   before (function (done) {
@@ -50,7 +48,7 @@ describe ('lib.ResourceController', function () {
           }
         };
 
-        request (server.app)
+        blueprint.testing.request ()
           .post ('/person')
           .send (data)
           .expect (200)
@@ -69,7 +67,7 @@ describe ('lib.ResourceController', function () {
       });
 
       it ('should not create resource; missing parameters', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .post ('/person')
           .send ({person: {gender: 'Ok'}})
           .expect (400, [
@@ -98,7 +96,7 @@ describe ('lib.ResourceController', function () {
           ]
         };
 
-        request (server.app)
+        blueprint.testing.request ()
           .get ('/person')
           .query ({options: {populate: true}})
           .expect (200, expected)
@@ -129,7 +127,7 @@ describe ('lib.ResourceController', function () {
         // set date to 3 days ago.
         var date = Date.now () - (3 * 24 * 60 * 60 * 1000);
 
-        request (server.app)
+        blueprint.testing.request ()
           .get ('/person')
           .query ({options: {populate: true}})
           .set ('If-Modified-Since', new Date (date).toUTCString ())
@@ -140,7 +138,7 @@ describe ('lib.ResourceController', function () {
         // set date to 5 days from now.
         var date = Date.now () + (5 * 24 * 60 * 60 * 1000);
 
-        request (server.app)
+        blueprint.testing.request ()
           .get ('/person')
           .set ('If-Modified-Since', new Date (date).toUTCString ())
           .expect (304, done);
@@ -152,7 +150,7 @@ describe ('lib.ResourceController', function () {
   describe ('/person/count', function () {
     describe ('GET', function () {
       it ('should count the number of resources', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .get ('/person/count')
           .expect (200, {count: 2}, done);
       });
@@ -164,13 +162,13 @@ describe ('lib.ResourceController', function () {
 
     describe ('GET', function () {
       it ('should return a single person', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .get ('/person/' + person._id)
           .expect (200, done);
       });
 
       it ('should return a single person with a populated data', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .get ('/person/' + person._id)
           .query ({populate: true})
           .expect (200, {
@@ -183,7 +181,7 @@ describe ('lib.ResourceController', function () {
       });
 
       it ('should not find the resource', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .get ('/person/' + new lib.Types.ObjectId ().toString ())
           .query ({populate: true})
           .expect (404, done);
@@ -196,7 +194,7 @@ describe ('lib.ResourceController', function () {
           person: { first_name: 'James', last_name: 'Hill' }
         };
 
-        request (server.app)
+        blueprint.testing.request ()
           .put ('/person/' + person._id)
           .send (data)
           .expect (200)
@@ -219,7 +217,7 @@ describe ('lib.ResourceController', function () {
           person: { firstname: 'Jake', last_name: 'Williams'}
         };
 
-        request (server.app)
+        blueprint.testing.request ()
           .put ('/person/' + person._id)
           .send (data)
           .expect (200)
@@ -243,7 +241,7 @@ describe ('lib.ResourceController', function () {
         // set date to 3 days ago.
         var date = Date.now () - (3 * 24 * 60 * 60 * 1000);
 
-        request (server.app)
+        blueprint.testing.request ()
           .get ('/person/' + person._id)
           .set ('If-Modified-Since', new Date (date).toUTCString ())
           .expect (200, {person: updated}, done);
@@ -253,7 +251,7 @@ describe ('lib.ResourceController', function () {
         // set date to 5 days from now.
         var date = Date.now () + (5 * 24 * 60 * 60 * 1000);
 
-        request (server.app)
+        blueprint.testing.request ()
           .get ('/person/' + person._id)
           .set ('If-Modified-Since', new Date (date).toUTCString ())
           .expect (304, done);
@@ -262,7 +260,7 @@ describe ('lib.ResourceController', function () {
 
     describe ('HEAD', function () {
       it ('should return the header for the single resource', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .head ('/person')
           .expect (200).end (function (err, res) {
             return done (err);
@@ -272,13 +270,13 @@ describe ('lib.ResourceController', function () {
 
     describe ('DELETE', function () {
       it ('should delete a single person from the database', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .delete ('/person/' + person._id)
           .expect (200, 'true', done);
       });
 
       it ('should not delete a already deleted resource', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .delete ('/person/' + person._id)
           .expect (404, done);
       });
