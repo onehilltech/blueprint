@@ -9,6 +9,8 @@ var exports = module.exports;
 exports.createApplicationAndStart = createApplicationAndStart;
 exports.waitFor = waitFor;
 
+exports.request = require ('./request');
+
 var started = false;
 
 /**
