@@ -314,7 +314,8 @@ WorkflowController.prototype.issueToken = function () {
 
   return {
     /**
-     * Validate the request object. We only accept 3 types of grant requests.
+     * Validate the request object. We only accept 3 types of grant requests. We also
+     * need to let the grant_type validate the request.
      *
      * @param req
      * @param callback
