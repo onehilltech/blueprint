@@ -2,6 +2,7 @@
 
 var bcrypt  = require ('bcrypt')
   , mongodb = require ('@onehilltech/blueprint-mongodb')
+  , options = require ('./commonOptions') ()
   ;
 
 var Client = require ('./Client')
@@ -63,7 +64,7 @@ var schema = new Schema ({
   /// Metadata for the account. This allows third-party services/libraries to
   /// associate custom data with the account.
   metadata : { type: Schema.Types.Mixed, default: {} }
-});
+}, options);
 
 /**
  * Hash the user's password before saving it to the database. This will

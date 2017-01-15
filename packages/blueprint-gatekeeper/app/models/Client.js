@@ -2,6 +2,7 @@
 
 var uid     = require ('uid-safe')
   , mongodb = require ('@onehilltech/blueprint-mongodb')
+  , options = require ('./commonOptions') ()
   ;
 
 const DEFAULT_SECRET_LENGTH = 128;
@@ -29,7 +30,7 @@ var schema = new mongodb.Schema ({
   /// Metadata for the client. This allows third-party services to
   /// associate custom data with the client.
   metadata : { type: mongodb.Schema.Types.Mixed, default: {} }
-});
+}, options);
 
 schema.pre ('validate', function (next) {
   if (!this.secret)
