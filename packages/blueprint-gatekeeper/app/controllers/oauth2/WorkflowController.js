@@ -152,10 +152,18 @@ WorkflowController.prototype.issueToken = function () {
   var grantTypes = {
     password: {
       validate: function (req, callback) {
-        req.checkBody ('client_id', 'required').isMongoId ();
-        req.checkBody ('username', 'required').notEmpty();
-        req.checkBody ('password', 'required').notEmpty();
-        return callback (req.validationErrors (true));
+        req.check ({
+          client_id: {in: 'body', notEmpty: true, isMongoId: true},
+          username: {in: 'body', notEmpty: true},
+          password: {in: 'body', notEmpty: true}
+        });
+
+        return callback (req.validationErrors ());
+      },
+
+      sanitize: function (req, callback) {
+        req.body.client_id = new mongodb.Types.ObjectId (req.body.client_id);
+        return callback (null);
       },
 
       execute: function (req, res, callback) {
@@ -302,20 +310,43 @@ WorkflowController.prototype.issueToken = function () {
     }
   };
 
+  const GRANT_TYPES = Object.keys (grantTypes);
+
   return {
+    /**
+     * Validate the request object. We only accept 3 types of grant requests.
+     *
+     * @param req
+     * @param callback
+     */
     validate: function (req, callback) {
-      req.checkBody ('grant_type', 'required').notEmpty ().isIn (Object.keys (grantTypes));
+      req.check ({
+        grant_type: {in: 'body', notEmpty: true, isIn: {options: [GRANT_TYPES]}}
+      });
 
-      if (req.body.grant_type)
-        return grantTypes[req.body.grant_type].validate (req, callback);
-
-      return callback (req.validationErrors (true));
+      var validate = grantTypes[req.body.grant_type].validate || __gatekeeper_validate;
+      validate (req, callback);
     },
 
+    sanitize: function (req, callback) {
+      var sanitize = grantTypes[req.body.grant_type].sanitize || __gatekeeper_sanitize;
+      sanitize (req, callback);
+    },
+
+    /**
+     * Execute the next step in the workflow based on the grant_type.
+     *
+     * @param req
+     * @param res
+     * @param callback
+     */
     execute: function (req, res, callback) {
       grantTypes[req.body.grant_type].execute (req, res, callback);
     }
   };
+
+  function __gatekeeper_validate (req, callback) { return callback (req.validationErrors ()); }
+  function __gatekeeper_sanitize (req, callback) { return callback (null); }
 };
 
 exports = module.exports = WorkflowController;
