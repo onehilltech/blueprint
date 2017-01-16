@@ -1,5 +1,4 @@
 var winston    = require ('winston')
-  , uid        = require ('uid-safe')
   , async      = require ('async')
   , blueprint  = require ('@onehilltech/blueprint')
   , mongodb    = require ('@onehilltech/blueprint-mongodb')
@@ -75,42 +74,49 @@ function sendToken (res, tokens, callback) {
  *
  * @param client
  * @param account
+ * @param scope
  * @param callback
  */
-function createAndSaveUserAccessToken (client, account, callback) {
+function createAndSaveUserAccessToken (opts, callback) {
   async.waterfall ([
     // Create a new AccessToken model. The model is used to determine
     function (callback) {
-      var doc = { client: client._id, account: account._id, refresh_token: new mongodb.Types.ObjectId () };
-      var accessToken = new AccessToken (doc);
+      var doc = {
+        client: opts.client._id,
+        account: opts.account._id,
+        refresh_token: new mongodb.Types.ObjectId ()
+      };
 
-      accessToken.save (callback);
+      AccessToken.create (doc, callback);
     },
 
-    function (accessToken, affected, callback) {
+    function (accessToken, callback) {
       // Use the information in the accessToken to generate a jwt for both the accessToken
       // and the refreshToken.
 
       async.series ({
         access_token: function (callback) {
           var expiresIn = accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN;
-          var opts = {
-            payload: { kind: KIND_USER_TOKEN, roles: account.roles },
+          var jwt = {
+            payload: { kind: KIND_USER_TOKEN, scope: opts.account.scope || [] },
             options: { jwtid: accessToken.id, expiresIn: expiresIn }
           };
 
-          tokenStrategy.generateToken (opts, callback);
+          if (opts.scope)
+            jwt.payload.scope.concat (opts.scope);
+
+          tokenStrategy.generateToken (jwt, callback);
         },
 
         refresh_token: function (callback) {
           var jti = accessToken.refresh_token.toString ();
 
-          var opts = {
+          var jwt = {
             payload: { kind: KIND_REFRESH_TOKEN },
             options: { jwtid: jti }
           };
 
-          tokenStrategy.generateToken (opts, callback);
+          tokenStrategy.generateToken (jwt, callback);
         }
       }, callback);
     }
@@ -229,7 +235,7 @@ WorkflowController.prototype.issueToken = function () {
                * @returns {*}
                */
               function (account, callback) {
-                return createAndSaveUserAccessToken (client, account, callback);
+                return createAndSaveUserAccessToken ({client: client, account: account}, callback);
               }
             ], callback);
           },
@@ -402,7 +408,7 @@ WorkflowController.prototype.issueToken = function () {
           },
 
           function (at, callback) {
-            createAndSaveUserAccessToken (at.client, at.account, callback);
+            createAndSaveUserAccessToken ({client: at.client, account: at.account}, callback);
           },
 
           function (token, callback) {
