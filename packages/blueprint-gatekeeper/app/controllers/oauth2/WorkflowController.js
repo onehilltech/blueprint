@@ -110,6 +110,7 @@ function createAndSaveUserAccessToken (opts, callback) {
             scope.concat (opts.scope);
 
           var expiresIn = accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN;
+
           var jwt = {
             payload: { kind: KIND_USER_TOKEN, scope: scope },
             options: { jwtid: accessToken.id, expiresIn: expiresIn }
