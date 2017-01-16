@@ -96,14 +96,24 @@ function createAndSaveUserAccessToken (opts, callback) {
 
       async.series ({
         access_token: function (callback) {
-          var expiresIn = accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN;
-          var jwt = {
-            payload: { kind: KIND_USER_TOKEN, scope: opts.account.scope || [] },
-            options: { jwtid: accessToken.id, expiresIn: expiresIn }
-          };
+          // Build the scope for the access token. It will be the scope of the client,
+          // plus the scope of the account, plus the on-demand scope.
+          var scope = [];
+
+          if (opts.account.scope)
+            scope.concat (opts.account.scope);
+
+          if (opts.client.scope)
+            scope.concat (opts.client.scope);
 
           if (opts.scope)
-            jwt.payload.scope.concat (opts.scope);
+            scope.concat (opts.scope);
+
+          var expiresIn = accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN;
+          var jwt = {
+            payload: { kind: KIND_USER_TOKEN, scope: scope },
+            options: { jwtid: accessToken.id, expiresIn: expiresIn }
+          };
 
           tokenStrategy.generateToken (jwt, callback);
         },
