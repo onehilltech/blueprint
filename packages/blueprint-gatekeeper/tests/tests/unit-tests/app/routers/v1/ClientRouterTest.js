@@ -1,6 +1,5 @@
 var blueprint = require ('@onehilltech/blueprint')
   , expect    = require ('chai').expect
-  , request   = require ('supertest')
   , async     = require ('async')
   ;
 
@@ -27,7 +26,7 @@ describe ('ClientRouter', function () {
           client_secret: datamodel.models.clients[0].secret
         };
 
-        request (server.app)
+        blueprint.testing.request ()
           .post ('/v1/oauth2/token')
           .send (data)
           .expect (200)
@@ -43,14 +42,10 @@ describe ('ClientRouter', function () {
 
   describe ('/v1/clients', function () {
     describe ('POST', function () {
-      var data = {
-        name: 'test-client',
-        email: 'test-client@contact.me',
-        secret: 'test-client'
-      };
+      var data = {name: 'test-client', email: 'test-client@contact.me', secret: 'test-client' };
 
       it ('should create a client', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .post ('/v1/clients')
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .send ({client: data})
@@ -79,12 +74,10 @@ describe ('ClientRouter', function () {
 
   describe ('/v1/clients/:clientId', function () {
     describe ('PUT', function () {
-      var data = {
-        name: 'updated-name'
-      };
+      var data = {name: 'updated-name'};
 
       it ('should update the client', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .put ('/v1/clients/' + client._id)
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .send ({client: data})
@@ -103,7 +96,7 @@ describe ('ClientRouter', function () {
 
     describe ('DELETE', function () {
       it ('should delete a client', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .delete ('/v1/clients/' + client._id)
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .expect (200, 'true', done);
