@@ -1,5 +1,4 @@
-var request   = require ('supertest')
-  , expect    = require ('chai').expect
+var expect    = require ('chai').expect
   , async     = require ('async')
   , blueprint = require ('@onehilltech/blueprint')
   ;
@@ -13,7 +12,7 @@ describe ('CloudTokenRouter', function () {
   var CloudToken;
 
   function getToken (data, callback) {
-    request (server.app)
+    blueprint.testing.request ()
       .post ('/gatekeeper/v1/oauth2/token').send (data)
       .expect (200)
       .end (function (err, res) {
@@ -55,7 +54,7 @@ describe ('CloudTokenRouter', function () {
     var data = {device: '1234567890', token: 'aabbccdd'};
 
     it ('should post a new cloud token for user', function (done) {
-      request (server.app)
+      blueprint.testing.request ()
         .post ('/v1/cloudtoken')
         .set ('Authorization', 'Bearer ' + userToken)
         .send (data)
