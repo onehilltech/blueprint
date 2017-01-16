@@ -49,8 +49,8 @@ AccountController.prototype.create = function () {
       authorize: function (req, callback) {
         Policy.Definition (
           Policy.or ([
-            Policy.assert ('has_scope', gatekeeper.scope.account.create),
-            Policy.assert ('has_scope', gatekeeper.scope.superuser)
+            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.account.create),
+            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser)
           ])
         ).evaluate (req, callback);
       },
@@ -116,7 +116,7 @@ AccountController.prototype.getAll = function () {
     on: {
       authorize: function (req, callback) {
         Policy.Definition (
-          Policy.assert ('has_scope', gatekeeper.scope.superuser)
+          Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser)
         ).evaluate (req, callback);
       },
 
@@ -138,8 +138,8 @@ AccountController.prototype.get = function () {
       authorize: function (req, callback) {
         Policy.Definition (
           Policy.or ([
-            Policy.assert ('is_account_owner'),
-            Policy.assert ('has_scope', gatekeeper.scope.superuser)
+            Policy.assert ('gatekeeper.is_account_owner'),
+            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser)
           ])
         ).evaluate (req, callback);
       },
@@ -162,8 +162,8 @@ AccountController.prototype.delete = function () {
       authorize: function (req, callback) {
         Policy.Definition (
           Policy.or ([
-            Policy.assert ('is_account_owner'),
-            Policy.assert ('has_scope', gatekeeper.scope.superuser)
+            Policy.assert ('gatekeeper.is_account_owner'),
+            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser)
           ])
         ).evaluate (req, callback);
       }

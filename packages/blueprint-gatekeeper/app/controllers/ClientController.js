@@ -24,8 +24,8 @@ ClientController.prototype.create = function () {
       authorize: function (req, callback) {
         Policy.Definition (
           Policy.or ([
-            Policy.assert ('has_scope', scope.client.create),
-            Policy.assert ('has_scope', scope.superuser)
+            Policy.assert ('gatekeeper.has_scope', scope.client.create),
+            Policy.assert ('gatekeeper.has_scope', scope.superuser)
           ])
         ).evaluate (req, callback);
       }
@@ -39,8 +39,8 @@ ClientController.prototype.update = function () {
       authorize: function (req, callback) {
         Policy.Definition (
           Policy.or ([
-            Policy.assert ('has_scope', scope.client.update),
-            Policy.assert ('has_scope', scope.superuser)
+            Policy.assert ('gatekeeper.has_scope', scope.client.update),
+            Policy.assert ('gatekeeper.has_scope', scope.superuser)
           ])
         ).evaluate (req, callback);
       }
@@ -54,8 +54,8 @@ ClientController.prototype.delete = function () {
       authorize: function (req, callback) {
         Policy.Definition (
           Policy.or ([
-            Policy.assert ('has_scope', scope.client.delete),
-            Policy.assert ('has_scope', scope.superuser)
+            Policy.assert ('gatekeeper.has_scope', scope.client.delete),
+            Policy.assert ('gatekeeper.has_scope', scope.superuser)
           ])
         ).evaluate (req, callback);
       }
