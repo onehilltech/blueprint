@@ -395,17 +395,15 @@ ResourceController.prototype.getAll = function (opts) {
               function processIfModifiedSince (data, callback) {
                 var date = Date.parse (req.headers[HttpHeader.lowercase.IF_MODIFIED_SINCE]);
 
-                async.reduce (data, [], function (memo, item, callback) {
-                  if (DateUtils.compare (date, item.getLastModified ()) === -1)
-                    memo.push (item);
+                async.some (data, function (item, callback) {
+                  var result = DateUtils.compare (date, item.getLastModified ()) === -1;
+                  return callback (null, result);
+                }, complete);
 
-                  return callback (null, memo);
-                }, onReduceComplete);
-
-                function onReduceComplete (err, final) {
+                function complete (err, result) {
                   if (err) return callback (err);
-                  if (final.length === 0) return callback (new HttpError (304, 'Not Changed'));
-                  return callback (null, final);
+                  if (!result) return callback (new HttpError (304, 'Not Changed'));
+                  return callback (null, data);
                 }
               }
             },
