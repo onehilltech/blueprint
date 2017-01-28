@@ -89,12 +89,17 @@ ApplicationModule.prototype.init = function (callback) {
 
   function loadInto (manager, location) {
     return function (module, callback) {
-      var rcPath = path.join (module._appPath, location);
+      try {
+        var rcPath = path.join (module._appPath, location);
 
-      manager.load (rcPath, function (err) {
-        if (err && err.code === 'ENOENT') err = null;
-        return callback (err, module);
-      });
+        manager.load (rcPath, function (err) {
+          if (err && err.code === 'ENOENT') err = null;
+          return callback (err, module);
+        });
+      }
+      catch (ex) {
+        return callback (new Error (util.format ('Failed to load resources in %s [%s]', location, ex.message)));
+      }
     }
   }
 };
