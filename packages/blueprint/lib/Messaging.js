@@ -9,6 +9,7 @@ var async  = require ('async')
 function EventListeners (name) {
   this.name = name;
   this._on = [];
+  this._once = [];
 }
 
 EventListeners.prototype.on = function (listener) {
@@ -16,10 +17,23 @@ EventListeners.prototype.on = function (listener) {
   return new ListenerHandle (this, index);
 };
 
+EventListeners.prototype.once = function (listener) {
+  this._once.push (listener);
+};
+
 EventListeners.prototype.emit = function () {
   var args = arguments;
 
+  // Get the once listeners and reset the collection. We are going
+  // to iterate over them.
+  var once = this._once;
+  this._once = [];
+
   async.each (this._on, function (listener) {
+    listener.apply (null, args);
+  });
+
+  async.each (once, function (listener) {
     listener.apply (null, args);
   });
 };
@@ -61,29 +75,51 @@ function Messenger (key) {
   this._listeners = {};
 }
 
+Messenger.prototype.__defineGetter__ ('listeners', function () {
+  return this._listeners;
+});
+
+/**
+ * Get the listeners for an event.
+ *
+ * @param ev
+ * @returns {*}
+ */
+Messenger.prototype.getListener = function (ev) {
+  if (this._listeners.hasOwnProperty (ev)) {
+    return this._listeners[ev];
+  }
+
+  var listeners = new EventListeners (ev);
+  this._listeners[ev] = listeners;
+
+  return listeners;
+};
+
 /**
  * Register a listener with the messenger.
  *
  * @returns {ListenerHandle}
  */
 Messenger.prototype.on = function (ev, listener) {
-  var listeners;
-
-  if (this._listeners.hasOwnProperty (ev)) {
-    listeners = this._listeners[ev];
-  }
-  else {
-    listeners = new EventListeners (ev);
-    this._listeners[ev] = listeners;
-  }
-
-  return listeners.on (listener);
+  return this.getListener (ev).on (listener);
 };
 
-Messenger.prototype.__defineGetter__ ('listeners', function () {
-  return this._listeners;
-});
+/**
+ * Register a listener for a single invocation of an event.
+ *
+ * @param ev
+ * @param listener
+ * @returns {Emitter|*|EventEmitter}
+ */
+Messenger.prototype.once = function (ev, listener) {
+  return this.getListener (ev).once (listener);
+};
 
+/**
+ * Emit an event to the messenger. The event is sent to all registered
+ * listeners in the messenger.
+ */
 Messenger.prototype.emit = function () {
   var args = Array.from (arguments);
   var name = args.shift ();
@@ -94,8 +130,7 @@ Messenger.prototype.emit = function () {
     listeners.emit.apply (listeners, args);
 };
 
-////////////////////////////////
-// class MessagingFramework
+module.exports = MessagingFramework;
 
 /**
  * @class MessagingFramework
@@ -149,6 +184,12 @@ MessagingFramework.prototype.on = function (ev, listener) {
   return messenger.on (ev, listener);
 };
 
+MessagingFramework.prototype.once = function (ev, listener) {
+  var messenger = this.messengers['_'];
+  return messenger.once (ev, listener);
+};
+
+
 /**
  * Emit an event over the framework.
  */
@@ -175,5 +216,3 @@ MessagingFramework.prototype.relay = function (ev) {
     self.emit.apply (self, args);
   };
 };
-
-module.exports = exports = MessagingFramework;
