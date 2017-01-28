@@ -46,5 +46,3 @@ EchoResourceController.prototype.delete = echoWithId ('delete', 'echoId');
 
 // aggregation functions
 EchoResourceController.prototype.count = echo ('count');
-EchoResourceController.prototype.outdated = echoWithId ('outdated', 'echoId');
-EchoResourceController.prototype.allOutdated = echo ('allOutdated');

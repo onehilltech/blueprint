@@ -97,22 +97,6 @@ describe ('RouterBuilder', function () {
         });
       });
 
-      describe ('outdated', function () {
-        it ('should invoke the outdated method', function (done) {
-          request (app.server.app)
-            .get ('/echo/outdated')
-            .expect (200, {message: 'allOutdated'}, done);
-        });
-
-        it ('should invoke the isAllOutdated method', function (done) {
-          var id = 25;
-
-          request (app.server.app)
-            .get ('/echo/' + id + '/outdated')
-            .expect (200, {message: 'outdated', id: id}, done);
-        });
-      });
-
       describe ('count', function () {
         it ('should invoke the count method', function (done) {
           request (app.server.app)
