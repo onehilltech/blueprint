@@ -10,12 +10,6 @@ function BaseController () {
 
 }
 
-BaseController.prototype.notFound = function () {
-  return function (req, res) {
-    res.status (404).json ({error: 'Not Found'});
-  };
-};
-
 BaseController.prototype.checkSchemaThen = function (schema, then) {
   return function (req, callback) {
     async.series ([

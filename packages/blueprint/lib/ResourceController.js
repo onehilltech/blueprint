@@ -1,8 +1,9 @@
 'use strict';
 
 const BaseController = require ('./BaseController')
-  , util = require ('util')
-  , _ = require ('underscore')
+  , HttpError        = require ('./errors/HttpError')
+  , util             = require ('util')
+  , _                = require ('underscore')
   ;
 
 function ResourceController (opts) {
@@ -23,12 +24,7 @@ function ResourceController (opts) {
     delete: {verb: 'delete', path: '/:rcId', method: 'delete'},
 
     // support operations
-    count: {verb: 'get', path: '/count', method: 'count'},
-
-    outdated: [
-      {verb: 'get', path: '/outdated', method: 'allOutdated'},
-      {verb: 'get', path: '/:rcId/outdated', method: 'outdated'}
-    ]
+    count: {verb: 'get', path: '/count', method: 'count'}
   };
 
   this._actions = _.extend (BUILTIN_ACTIONS, opts.actions || {});
@@ -60,9 +56,11 @@ module.exports = ResourceController;
 util.inherits (ResourceController, BaseController);
 
 function notFound () {
-  return function (req, res) {
-    res.sendStatus (404);
-  }
+  return {
+    execute: function (req, res, callback) {
+      return callback (new HttpError (404, 'not_found', 'Not found'))
+    }
+  };
 }
 
 ResourceController.prototype.create = notFound;
@@ -73,5 +71,3 @@ ResourceController.prototype.delete = notFound;
 
 // aggregation functions
 ResourceController.prototype.count = notFound;
-ResourceController.prototype.outdated = util.deprecate (notFound, '/outdated: Use HEAD and Last-Modified HTTP headers');
-ResourceController.prototype.allOutdated = util.deprecate (notFound, '/:rcId/outdated: Use HEAD and Last-Modified HTTP headers');
