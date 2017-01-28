@@ -1,5 +1,7 @@
 'use strict';
 
+const async = require ('async');
+
 /**
  * @class BaseController
  * @constructor
@@ -10,6 +12,17 @@ function BaseController () {
 
 }
 
+module.exports = BaseController;
+
+/**
+ * Check the request against the schema, and then execute the follow-up function
+ * if the schema check passes. This function should be used to generate the validate
+ * function for a controller action.
+ *
+ * @param schema
+ * @param then
+ * @returns {Function}
+ */
 BaseController.prototype.checkSchemaThen = function (schema, then) {
   return function (req, callback) {
     async.series ([
@@ -18,9 +31,9 @@ BaseController.prototype.checkSchemaThen = function (schema, then) {
         return callback (req.validationErrors ());
       },
 
-      then
+      function (callback) {
+        then (req, callback);
+      }
     ], callback);
   };
 };
-
-module.exports = exports = BaseController;
