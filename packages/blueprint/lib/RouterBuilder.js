@@ -67,13 +67,22 @@ function handleError (err, res) {
 
       res.send (data);
     }
-    else {
+    else if (err instanceof Error) {
       // If this is a plan error object from JavaScript, then the only attribute
       // guaranteed is the message attribute.
-
       res.status (500).send ({
         errors: {
           message: err.message
+        }
+      });
+    }
+    else {
+      // This is just a regular object. We are going to set the details
+      // attribute on the returned error object.
+
+      res.status (500).send ({
+        errors: {
+          details: err
         }
       });
     }
