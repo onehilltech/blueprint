@@ -93,8 +93,13 @@ function validateBySchema (schema) {
   return function __blueprint_validate_schema (req, res, next) {
     try {
       req.check (schema);
+
+      // Validate the request using the provided schema.
       var errors = req.validationErrors ();
-      return !errors ? next () : handleError (errors, res);
+      if (!errors) return next ();
+
+      var err = new errors.HttpError (400, 'validation_failed', 'Request validation failed', errors);
+      return handleError (err, res);
     }
     catch (ex) {
       handleError (ex, res);
