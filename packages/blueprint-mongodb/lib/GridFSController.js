@@ -1,13 +1,13 @@
 'use strict';
 
-var util = require ('util')
-  , path = require ('path')
+var util      = require ('util')
+  , path      = require ('path')
   , blueprint = require ('@onehilltech/blueprint')
-  , mongodb = require ('mongodb')
-  , multer = require ('multer')
-  , winston = require ('winston')
-  , async = require ('async')
-  , fs = require ('fs')
+  , mongodb   = require ('mongodb')
+  , multer    = require ('multer')
+  , winston   = require ('winston')
+  , async     = require ('async')
+  , fs        = require ('fs')
   ;
 
 var ResourceController = blueprint.ResourceController
@@ -37,6 +37,8 @@ function GridFSController (conn, opts) {
 }
 
 blueprint.controller (GridFSController, ResourceController);
+
+module.exports = GridFSController;
 
 /**
  * Get the resource identifier.
@@ -206,4 +208,13 @@ GridFSController.prototype.delete = function () {
   };
 };
 
-module.exports = exports = GridFSController;
+/**
+ * Count the number of resources.
+ *
+ * @returns {*[]}
+ */
+GridFSController.prototype.count = function () {
+  return function (req, res) {
+    res.sendStatus (404);
+  };
+};
