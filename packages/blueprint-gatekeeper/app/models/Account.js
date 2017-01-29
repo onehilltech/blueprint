@@ -45,22 +45,6 @@ var schema = new Schema ({
   /// token for the account.
   scope: {type: [String], default: []},
 
-  /**
-   * Activation information for the account. An account can be created, but it
-   * may not be activated. A service has the option of allowing unactivated accounts
-   * to access its resource, or deny access until the account has been verified.
-   */
-  activation : {
-    /// The account requires activation.
-    required: { type: Boolean, required: true, default: false },
-
-    /// Verification token for the account.
-    token : { type : String },
-
-    /// Date when the account was activated.
-    date : { type: Date }
-  },
-
   /// Metadata for the account. This allows third-party services/libraries to
   /// associate custom data with the account.
   metadata : { type: Schema.Types.Mixed, default: {} }
