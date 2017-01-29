@@ -159,6 +159,34 @@ describe ('Policy', function () {
       ]);
 
       expect (definition).to.be.a.function;
-    })
+    });
+
+    describe ('.evaluate', function () {
+      it ('should pass policy evaluation', function (done) {
+        function complete (err) {
+          expect (err).to.be.null;
+
+          return done ();
+        }
+
+        Policy.Definition (
+          Policy.assert (passthrough, true)
+        ).evaluate (null, complete);
+      });
+
+      it ('should fail policy evaluation', function (done) {
+        function complete (err) {
+          expect (err.statusCode).to.equal (403);
+          expect (err.code).to.equal ('policy_failed');
+          expect (err.message).to.equal ('Policy failed');
+
+          return done ();
+        }
+
+        Policy.Definition (
+          Policy.assert (passthrough, false)
+        ).evaluate (null, complete);
+      });
+    });
   });
 });

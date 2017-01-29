@@ -18,18 +18,21 @@ function PolicyDefinition (def) {
 }
 
 /**
- * Evaluate the policy definition.
+ * Evaluate the policy definition. If the policy evaluation fails, then 403 is
+ * returned to the client.
  *
  * @param req
  * @param callback
  * @returns {*}
  */
 PolicyDefinition.prototype.evaluate = function (req, callback) {
-  return this._def (req, function (err, result) {
+  function complete (err, result) {
     if (err) return callback (err);
-    if (!result) return callback (new HttpError (403, 'Unauthorized access'));
+    if (!result) return callback (new HttpError (403, 'policy_failed', 'Policy failed'));
     return callback (null);
-  });
+  }
+
+  return this._def (req, complete);
 };
 
 function PolicyDefinitionFactory (def) {
