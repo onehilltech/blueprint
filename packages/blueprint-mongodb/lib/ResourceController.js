@@ -29,7 +29,7 @@ function __onPrepareUpdate (req, update, callback) { return callback (null, upda
  *
  * @param id
  * @param next
- * @returns {__blueprint_checkIdThenAuthorize}
+ * @returns {function(req, callback)}
  */
 function checkIdThenAuthorize (id, next) {
   return function __blueprint_checkIdThenAuthorize (req, callback) {
