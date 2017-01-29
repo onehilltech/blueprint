@@ -41,10 +41,10 @@ messaging.on ('app.init', function (app) {
  */
 function verifyClient (clientId, clientSecret, callback) {
   Client.findById (clientId, function (err, client) {
-    if (err) return callback (new HttpError (400, 'Failed to lookup client'));
-    if (!client) return callback (new HttpError (400, 'Client not found'));
-    if (!client.enabled) return callback (new HttpError (403, 'Client is disabled'));
-    if (clientSecret && client.secret !== clientSecret) return callback (new HttpError (400, 'Incorrect client secret'));
+    if (err) return callback (new HttpError (400, 'internal_error', 'Failed to lookup client'));
+    if (!client) return callback (new HttpError (400, 'invalid_client', 'Client not found'));
+    if (!client.enabled) return callback (new HttpError (403, 'client_disabled', 'Client is disabled'));
+    if (clientSecret && client.secret !== clientSecret) return callback (new HttpError (400, 'invalid_secret', 'Incorrect client secret'));
 
     callback (null, client);
   });
@@ -173,16 +173,16 @@ WorkflowController.prototype.logoutUser = function () {
  * @returns
  */
 WorkflowController.prototype.issueToken = function () {
+  var self = this;
+
+  function novalidate (req, callback) { return callback (null); }
+
   const grantTypes = {
     password: {
-      validate: function (req, callback) {
-        req.check ({
-          username: {in: 'body', notEmpty: true},
-          password: {in: 'body', notEmpty: true}
-        });
-
-        return callback (req.validationErrors ());
-      },
+      validate: self.checkSchemaThen ({
+        username: {in: 'body', notEmpty: true},
+        password: {in: 'body', notEmpty: true}
+      }, novalidate),
 
       execute: function (req, res, callback) {
         var clientId = req.body.client_id;
@@ -214,9 +214,9 @@ WorkflowController.prototype.issueToken = function () {
                 Account.findOne ({username: username}, function (err, account) {
                   // Check the result of the operation. If the account does not exist or the
                   // account is disabled, then return the appropriate error message.
-                  if (err) return callback (new HttpError (500, 'Failed to retrieve account'));
-                  if (!account) return callback (new HttpError (400, 'Invalid username'));
-                  if (!account.enabled) return callback (new HttpError (403, 'Account is disabled'));
+                  if (err) return callback (new HttpError (500, 'internal_error', 'Failed to retrieve account'));
+                  if (!account) return callback (new HttpError (400, 'invalid_username', 'Invalid username'));
+                  if (!account.enabled) return callback (new HttpError (403, 'account_disabled', 'Account is disabled'));
 
                   return callback (null, account);
                 });
@@ -232,8 +232,8 @@ WorkflowController.prototype.issueToken = function () {
                 account.verifyPassword (password, function (err, match) {
                   // Check the result of the operation. If there is an error, or the password
                   // does not match, then return an error.
-                  if (err) return callback (new HttpError (500, 'Failed to verify password'));
-                  if (!match) return callback (new HttpError (400, 'Incorrect password'));
+                  if (err) return callback (new HttpError (500, 'internal_error', 'Failed to verify password'));
+                  if (!match) return callback (new HttpError (400, 'invalid_password', 'Incorrect password'));
                   return callback (err, account);
                 });
               },
@@ -273,13 +273,9 @@ WorkflowController.prototype.issueToken = function () {
        * @param callback
        * @returns {*}
        */
-      validate: function (req, callback) {
-        req.check ({
-          client_secret: {in: 'body', optional: true, notEmpty: true},
-        });
-
-        return callback (req.validationErrors ());
-      },
+      validate: self.checkSchemaThen ({
+        client_secret: {in: 'body', optional: true, notEmpty: true}
+      }, novalidate),
 
       /**
        * Issue a token that has client-level access.
@@ -365,13 +361,9 @@ WorkflowController.prototype.issueToken = function () {
        * @param callback      Callback function
        * @returns {*}
        */
-      validate: function (req, callback) {
-        req.check ({
-          refresh_token: {in: 'body', notEmpty: true}
-        });
-
-        return callback (req.validationErrors ());
-      },
+      validate: self.checkSchemaThen ({
+        refresh_token: {in: 'body', notEmpty: true}
+      }, novalidate),
 
       /**
        * Execute the generation of a new token based on the refresh token.
@@ -432,6 +424,11 @@ WorkflowController.prototype.issueToken = function () {
 
   const GRANT_TYPES = Object.keys (grantTypes);
 
+  function validate (req, callback) {
+    var val = grantTypes[req.body.grant_type].validate || __gatekeeper_validate;
+    val (req, callback);
+  }
+
   return {
     /**
      * Validate the request object. We only accept 3 types of grant requests. We also
@@ -440,15 +437,10 @@ WorkflowController.prototype.issueToken = function () {
      * @param req
      * @param callback
      */
-    validate: function (req, callback) {
-      req.check ({
-        grant_type: {in: 'body', notEmpty: true, isIn: {options: [GRANT_TYPES]}},
-        client_id: {in: 'body', notEmpty: true, isMongoId: true}
-      });
-
-      var validate = grantTypes[req.body.grant_type].validate || __gatekeeper_validate;
-      validate (req, callback);
-    },
+    validate: this.checkSchemaThen ({
+      grant_type: {in: 'body', notEmpty: true, isIn: {options: [GRANT_TYPES]}},
+      client_id: {in: 'body', notEmpty: true, isMongoId: true}
+    }, validate),
 
     /**
      * Sanitize the request data.

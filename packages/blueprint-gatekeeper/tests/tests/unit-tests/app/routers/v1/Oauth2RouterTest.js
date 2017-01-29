@@ -73,7 +73,7 @@ describe ('Oauth2Router', function () {
         blueprint.testing.request()
           .post(TOKEN_URL)
           .send(data)
-          .expect (403, {errors: 'Client is disabled'}, done);
+          .expect (403, {errors: {code: 'client_disabled', message: 'Client is disabled'}}, done);
       });
 
       it ('should not grant token because account is disabled', function (done) {
@@ -87,7 +87,7 @@ describe ('Oauth2Router', function () {
         blueprint.testing.request()
           .post(TOKEN_URL)
           .send(data)
-          .expect (403, {errors: 'Account is disabled'}, done);
+          .expect (403, {errors: {code: 'account_disabled', message: 'Account is disabled'}}, done);
       });
 
       it ('should not grant token because password is incorrect', function (done) {
@@ -101,7 +101,7 @@ describe ('Oauth2Router', function () {
         blueprint.testing.request ()
           .post (TOKEN_URL)
           .send (data)
-          .expect (400, {errors: 'Incorrect password'}, done);
+          .expect (400, {errors: {code: 'invalid_password', message: 'Incorrect password'}}, done);
       });
     });
 
@@ -136,7 +136,7 @@ describe ('Oauth2Router', function () {
 
         blueprint.testing.request ()
           .post(TOKEN_URL).send(data)
-          .expect (403, {errors: 'Client is disabled'}, done);
+          .expect (403, {errors: {code: 'client_disabled', message: 'Client is disabled'}}, done);
       });
 
       it ('should not grant token because invalid secret', function (done) {
@@ -148,7 +148,7 @@ describe ('Oauth2Router', function () {
 
         blueprint.testing.request ()
           .post(TOKEN_URL).send(data)
-          .expect (400, {errors: 'Incorrect client secret'}, done);
+          .expect (400, {errors: {code: 'invalid_secret', message: 'Incorrect client secret'}}, done);
       });
     });
 

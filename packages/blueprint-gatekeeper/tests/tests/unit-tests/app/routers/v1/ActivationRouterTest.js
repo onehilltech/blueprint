@@ -7,7 +7,7 @@ var request   = require ('supertest')
 var datamodel = require ('../../../../../fixtures/datamodel')
   ;
 
-describe ('ActivationRouter', function () {
+describe.skip ('ActivationRouter', function () {
   var server;
   var Account;
   var clientToken;
@@ -108,8 +108,8 @@ describe ('ActivationRouter', function () {
           function (callback) { getActivationToken (data, callback); },
           function (token, callback) {
             request (server.app)
-              .get ('/v1/activate?token=' + token + '&redirect_uri=http://localhost:8080/activate')
-              .expect (302, callback);
+              .get ('/v1/activate?token=' + token)
+              .expect (200, 'true', callback);
           }
         ], done);
       });

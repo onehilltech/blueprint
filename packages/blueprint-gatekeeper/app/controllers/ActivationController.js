@@ -28,24 +28,16 @@ messaging.on ('app.init', function (app) {
  * Activate an account.
  */
 ActivationController.prototype.activate = function () {
-  var schema = {
-    token: {
-      in: 'query',
-      notEmpty: {
-        errorMessage: 'Missing account activation token'
+  return {
+    validate: {
+      token: {
+        in: 'query',
+        notEmpty: {
+          errorMessage: 'Missing activation token'
+        }
       }
     },
-    redirect_uri: {
-      in: 'query',
-      optional: true,
-      isURL: {
-        errorMessage: 'Invalid URL'
-      }
-    }
-  };
 
-  return {
-    validate: schema,
     execute: function (req, res, callback) {
       async.waterfall ([
         async.constant (req.query.token),
@@ -59,36 +51,17 @@ ActivationController.prototype.activate = function () {
           var filter = {email: payload.email, username: payload.username};
 
           Account.findOne (filter, function (err, account) {
-            if (err) return callback (new HttpError (400, 'Failed to activate account'));
-            if (!account) return callback (new HttpError (400, 'Account does not exist'));
-            if (account.isActivated ()) return callback (new HttpError (400, 'Account already activated'));
+            if (err) return callback (new HttpError (400, 'activation_failed', 'Failed to activate account'));
+            if (!account) return callback (new HttpError (400, 'invalid_account', 'Account does not exist'));
+            if (account.isActivated ()) return callback (new HttpError (400, 'account_activated', 'Account already activated'));
 
             account.activation.date = Date.now ();
             account.save (callback);
           });
         }
-      ], function (err, account) {
-        if (err) {
-          if (req.query.redirect_uri) {
-            var failure_url = req.query.redirect_uri + '?success=0&error=' + err.message;
-            res.redirect (failure_url);
-          }
-          else if ((err instanceof HttpError)) {
-            return callback (err);
-          }
-          else {
-            return callback (new HttpError (500, 'Failed to activate account'));
-          }
-        }
-        else {
-          if (req.query.redirect_uri) {
-            var success_url = req.query.redirect_uri + '?success=1';
-            res.redirect (success_url);
-          }
-          else {
-            return res.status (200).json (true);
-          }
-        }
+      ], function (err) {
+        if (err) return callback (err);
+        return res.status (200).json (true);
       });
     }
   };
