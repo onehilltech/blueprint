@@ -1,6 +1,7 @@
 'use strict';
 
-const async = require ('async');
+const async = require ('async'),
+  HttpError = require ('./errors').HttpError
 
 /**
  * @class BaseController
@@ -28,7 +29,10 @@ BaseController.prototype.checkSchemaThen = function (schema, then) {
     async.series ([
       function (callback) {
         req.check (schema);
-        return callback (req.validationErrors ());
+        var errors = req.validationErrors ();
+        var err = !errors ? null : new HttpError (400, 'validation_failed', 'Bad request', errors);
+
+        return callback (err);
       },
 
       function (callback) {
