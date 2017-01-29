@@ -70,15 +70,23 @@ describe ('lib.ResourceController', function () {
         blueprint.testing.request ()
           .post ('/person')
           .send ({person: {gender: 'Ok'}})
-          .expect (400, [
-            { param: "person.age", msg: "Invalid/missing Int"},
-            { param: "person.gender", msg: "Expected [ 'Female', 'Male' ]", value: 'Ok'},
-            { param: "person.dob", msg: "Invalid date format"},
-            { param: 'person.address.street', msg: 'Invalid param' },
-            { param: 'person.address.city', msg: 'Invalid param' },
-            { param: 'person.address.state', msg: 'Invalid param' },
-            { param: 'person.address.zipcode', msg: 'Invalid param' }
-          ], done);
+          .expect (400, {
+            errors: {
+              code: 'validation_failed',
+              message: 'Bad request',
+              details: {
+                validation: [
+                  { param: "person.age", msg: "Invalid/missing Int"},
+                  { param: "person.gender", msg: "Expected [ 'Female', 'Male' ]", value: 'Ok'},
+                  { param: "person.dob", msg: "Invalid date format"},
+                  { param: 'person.address.street', msg: 'Invalid param' },
+                  { param: 'person.address.city', msg: 'Invalid param' },
+                  { param: 'person.address.state', msg: 'Invalid param' },
+                  { param: 'person.address.zipcode', msg: 'Invalid param' }
+                ]
+              }
+            }
+          }, done);
       });
     });
 
@@ -201,8 +209,8 @@ describe ('lib.ResourceController', function () {
           .end (function (err, res) {
             if (err) return done (err);
 
-            person.first_name = 'James';
-            person.last_name = 'Hill';
+            person.first_name = data.person.first_name;
+            person.last_name = data.person.last_name;
 
             updated = res.body.person;
 
@@ -214,7 +222,7 @@ describe ('lib.ResourceController', function () {
 
       it ('should update resource, excluding unknown param', function (done) {
         var data = {
-          person: { firstname: 'Jake', last_name: 'Williams'}
+          person: { fname: 'Jake', last_name: 'Williams'}
         };
 
         blueprint.testing.request ()

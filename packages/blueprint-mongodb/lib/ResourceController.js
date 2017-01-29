@@ -16,37 +16,25 @@ var BaseController = blueprint.ResourceController
   , messaging = blueprint.messaging
   ;
 
-/**
- * Test if the projection is exclusive. An exclusive projection only has to
- * have one key that is false (or 0). Any empty projection is exclusive as well,
- * meaning that all fields will be included.
- *
- * @param projection
- * @returns {*}
- */
-function isProjectionExclusive (projection) {
-  var keys = Object.keys (projection);
-
-  if (keys.length === 0)
-    return true;
-
-  var value = projection[keys[0]];
-  return value === false || value === 0;
-}
-
 function __onAuthorize (req, callback) { return callback (null); }
 function __onPrepareProjection (req, callback) { return callback (null, {}); }
-function __onPrepareOptions (req, options, callback) { return callback (null, {}); }
+function __onPrepareOptions (req, options, callback) { return callback (null, options); }
 function __onUpdateFilter (req, filter, callback) { return callback (null, filter); }
-function __onPrepareDocument (req, doc, callback) {
-  return callback (null, doc);
-}
+function __onPrepareDocument (req, doc, callback) { return callback (null, doc); }
 function __onPostExecute (req, result, callback) { return callback (null, result); }
+function __onPrepareUpdate (req, update, callback) { return callback (null, update); }
 
+/**
+ * Check for the presence of the id parameter.
+ *
+ * @param id
+ * @param next
+ * @returns {__blueprint_checkIdThenAuthorize}
+ */
 function checkIdThenAuthorize (id, next) {
   return function __blueprint_checkIdThenAuthorize (req, callback) {
     if (!req.params[id])
-      return callback (new HttpError (400, 'Missing resource id'));
+      return callback (new HttpError (400, 'invalid_id', 'Missing resource id'));
 
     return next (req, callback);
   }
@@ -59,10 +47,10 @@ function checkIdThenAuthorize (id, next) {
  * @param callback
  * @returns {Function}
  */
-function makeDbCompletionHandler (errMsg, callback) {
+function makeDbCompletionHandler (code, message, callback) {
   return function __blueprint_db_execution_complete (err, result) {
-    if (err) return callback (new HttpError (400, errMsg));
-    if (!result) return callback (new HttpError (404, 'Not Found'));
+    if (err) return callback (new HttpError (400, code, message));
+    if (!result) return callback (new HttpError (404, 'not_found', 'Not Found'));
 
     return callback (null, result);
   }
@@ -117,6 +105,8 @@ function ResourceController (opts) {
 
 util.inherits (ResourceController, BaseController);
 
+module.exports = ResourceController;
+
 /**
  * Create a new resource.
  *
@@ -127,10 +117,7 @@ ResourceController.prototype.create = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  if (on.preCreate)
-    winston.log ('warn', 'on.preCreate is deprecated; use on.prepareDocument instead');
-
-  var onPrepareDocument = on.preCreate || on.prepareDocument || __onPrepareDocument;
+  var onPrepareDocument = on.prepareDocument || __onPrepareDocument;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
   var eventName = this.computeEventName ('created');
@@ -138,21 +125,7 @@ ResourceController.prototype.create = function (opts) {
   var self = this;
 
   return {
-    validate: function (req, callback) {
-      async.series ([
-        // First, validate the input based on the target model. If any part of the
-        // schema validation fails, we return as
-        function (callback) {
-          req.checkBody (self._createValidation);
-          return callback (req.validationErrors ());
-        },
-
-        // Next, allow the subclass to perform its own validation.
-        function (callback) {
-          onAuthorize (req, callback);
-        }
-      ], callback);
-    },
+    validate: this.checkSchemaThen (self._createValidation, onAuthorize),
 
     execute: function __blueprint_create (req, res, callback) {
       var doc = req.body[self._name];
@@ -179,7 +152,7 @@ ResourceController.prototype.create = function (opts) {
           // model contains a discriminator.
 
           var Model = resolveModel (self._model, doc);
-          Model.create (doc, makeDbCompletionHandler ('Failed to create resource', callback));
+          Model.create (doc, makeDbCompletionHandler ('create_failed', 'Failed to create resource', callback));
 
           function resolveModel (Model, doc) {
             if (!Model.discriminators) return Model;
@@ -224,12 +197,9 @@ ResourceController.prototype.get = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  if (on.updateFilter)
-    winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
-
   var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
-  var onPrepareFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
@@ -250,7 +220,9 @@ ResourceController.prototype.get = function (opts) {
         },
 
         function (query, callback) {
-          self._model.findOne (query.filter, query.projection, makeDbCompletionHandler ('Failed to retrieve resource', callback));
+          self._model.findOne (query.filter,
+                               query.projection,
+                               makeDbCompletionHandler ('retrieve_failed', 'Failed to retrieve resource', callback));
         },
 
         function (result, callback) {
@@ -303,11 +275,8 @@ ResourceController.prototype.getAll = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  if (on.updateFilter)
-    winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
-
   var onAuthorize = on.authorize || __onAuthorize;
-  var onPrepareFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.prepareFilter || __onUpdateFilter;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
   var onPostExecute = on.postExecute || __onPostExecute;
@@ -349,7 +318,10 @@ ResourceController.prototype.getAll = function (opts) {
 
         // Now, let's search our database for the resource in question.
         function (query, callback) {
-          self._model.find (query.filter, query.projection, query.options, makeDbCompletionHandler ('Failed to retrieve resource', callback));
+          self._model.find (query.filter,
+                            query.projection,
+                            query.options,
+                            makeDbCompletionHandler ('retrieve_failed', 'Failed to retrieve resource', callback));
         },
 
         /**
@@ -494,37 +466,19 @@ ResourceController.prototype.update = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  if (on.updateFilter)
-    winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
-
-  var onPrepareFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
+  var onPrepareUpdate = on.prepareUpdate || __onPrepareUpdate;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
   var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
 
-  var eventName = this.computeEventName("updated");
+  var eventName = this.computeEventName ('updated');
 
   var self = this;
 
   return {
-    validate: checkIdThenAuthorize (self._id, function (req, callback) {
-      async.series ([
-        // First, validate the input based on the target model. If any part of the
-        // schema validation fails, we return as
-        function (callback) {
-          req.checkBody (self._updateValidation);
-          var errors = req.validationErrors ();
-
-          return callback (errors);
-        },
-
-        // Next, allow the subclass to perform its own validation.
-        function (callback) {
-          onAuthorize (req, callback);
-        }
-      ], callback);
-    }),
+    validate: checkIdThenAuthorize (self._id, this.checkSchemaThen (self._updateValidation, onAuthorize)),
 
     execute: function __blueprint_update_execute (req, res, callback) {
       var rcId = req.params[self._id];
@@ -538,14 +492,20 @@ ResourceController.prototype.update = function (opts) {
           async.parallel ({
             filter: function (callback) { onPrepareFilter (req, filter, callback); },
             options: function (callback) { onPrepareOptions (req, options, callback); },
+            update: function (callback) { onPrepareUpdate (req, update, callback); },
             projection: function (callback) { onPrepareProjection (req, callback); }
           }, callback);
         },
 
         // Now, let's search our database for the resource in question.
         function (query, callback) {
+          var options = query.options;
           options.fields = query.projection;
-          self._model.findOneAndUpdate (query.filter, update, options, makeDbCompletionHandler ('Failed to update resource', callback));
+
+          self._model.findOneAndUpdate (query.filter,
+                                        query.update,
+                                        options,
+                                        makeDbCompletionHandler ('update_failed', 'Failed to update resource', callback));
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
@@ -580,10 +540,7 @@ ResourceController.prototype.delete = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  if (on.updateFilter)
-    winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
-
-  var onPrepareFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
   var eventName = this.computeEventName ('deleted');
@@ -604,7 +561,8 @@ ResourceController.prototype.delete = function (opts) {
 
         // Now, let's search our database for the resource in question.
         function (filter, callback) {
-          self._model.findOneAndRemove (filter, makeDbCompletionHandler ('Failed to delete resource', callback));
+          self._model.findOneAndRemove (filter,
+                                        makeDbCompletionHandler ('delete_failed', 'Failed to delete resource', callback));
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
@@ -634,11 +592,8 @@ ResourceController.prototype.count = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  if (on.updateFilter)
-    winston.log ('warn', 'on.updateFilter is deprecated; use on.prepareFilter instead');
-
   var onAuthorize = on.authorize || __onAuthorize;
-  var onPrepareFilter = on.updateFilter || on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.prepareFilter || __onUpdateFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
@@ -658,7 +613,7 @@ ResourceController.prototype.count = function (opts) {
 
         // Now, let's search our database for the resource in question.
         function (filter, callback) {
-          self._model.count (filter, makeDbCompletionHandler ('Failed to count resources', callback));
+          self._model.count (filter, makeDbCompletionHandler ('count_failed', 'Failed to count resources', callback));
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
@@ -681,5 +636,3 @@ ResourceController.prototype.computeEventName = function (action) {
 
   return prefix + this._name + '.' + action;
 };
-
-module.exports = exports = ResourceController;
