@@ -19,10 +19,10 @@ var BaseController = blueprint.ResourceController
 function __onAuthorize (req, callback) { return callback (null); }
 function __onPrepareProjection (req, callback) { return callback (null, {}); }
 function __onPrepareOptions (req, options, callback) { return callback (null, options); }
-function __onUpdateFilter (req, filter, callback) { return callback (null, filter); }
+function __onPrepareFilter (req, filter, callback) { return callback (null, filter); }
 function __onPrepareDocument (req, doc, callback) { return callback (null, doc); }
+function __onPreExecute (req, callback) { return callback (null); }
 function __onPostExecute (req, result, callback) { return callback (null, result); }
-function __onPrepareUpdate (req, update, callback) { return callback (null, update); }
 
 /**
  * Check for the presence of the id parameter.
@@ -118,7 +118,10 @@ ResourceController.prototype.create = function (opts) {
   var on = opts.on || {};
 
   var onPrepareDocument = on.prepareDocument || __onPrepareDocument;
+
+  var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
+
   var onAuthorize = on.authorize || __onAuthorize;
   var eventName = this.computeEventName ('created');
 
@@ -148,21 +151,34 @@ ResourceController.prototype.create = function (opts) {
         },
 
         function (doc, callback) {
-          // We need to resolve the correct model just in case the schema for this
-          // model contains a discriminator.
-
-          var Model = resolveModel (self._model, doc);
-          Model.create (doc, makeDbCompletionHandler ('create_failed', 'Failed to create resource', callback));
-
-          function resolveModel (Model, doc) {
-            if (!Model.discriminators) return Model;
-
-            var schema = Model.schema;
-            var discriminatorKey = schema.discriminatorMapping.key;
-            var discriminator = doc[discriminatorKey];
-
-            return discriminator ? Model.discriminators[discriminator] : Model;
+          function completion (err, result) {
+            if (err) return callback (err);
+            return callback (null, result.execute);
           }
+
+          async.series ({
+            pre: function (callback) {
+              return onPreExecute (req, callback);
+            },
+
+            execute: function (callback) {
+              // We need to resolve the correct model just in case the schema for this
+              // model contains a discriminator.
+
+              var Model = resolveModel (self._model, doc);
+              Model.create (doc, makeDbCompletionHandler ('create_failed', 'Failed to create resource', callback));
+
+              function resolveModel (Model, doc) {
+                if (!Model.discriminators) return Model;
+
+                var schema = Model.schema;
+                var discriminatorKey = schema.discriminatorMapping.key;
+                var discriminator = doc[discriminatorKey];
+
+                return discriminator ? Model.discriminators[discriminator] : Model;
+              }
+            }
+          }, completion);
         },
 
         function (result, callback) {
@@ -199,7 +215,9 @@ ResourceController.prototype.get = function (opts) {
 
   var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
-  var onPrepareFilter = on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
+
+  var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
@@ -220,9 +238,21 @@ ResourceController.prototype.get = function (opts) {
         },
 
         function (query, callback) {
-          self._model.findOne (query.filter,
-                               query.projection,
-                               makeDbCompletionHandler ('retrieve_failed', 'Failed to retrieve resource', callback));
+          function completion (err, result) {
+            if (err) return callback (err);
+            return callback (null, result.execute);
+          }
+
+          async.series ({
+            pre: function (callback) {
+              return onPreExecute (req, callback);
+            },
+
+            execute: function (callback) {
+              var dbCompletion = makeDbCompletionHandler ('retrieve_failed', 'Failed to retrieve resource', callback);
+              self._model.findOne (query.filter, query.projection, dbCompletion);
+            }
+          }, completion);
         },
 
         function (result, callback) {
@@ -276,9 +306,11 @@ ResourceController.prototype.getAll = function (opts) {
   var on = opts.on || {};
 
   var onAuthorize = on.authorize || __onAuthorize;
-  var onPrepareFilter = on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
+
+  var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
@@ -318,10 +350,20 @@ ResourceController.prototype.getAll = function (opts) {
 
         // Now, let's search our database for the resource in question.
         function (query, callback) {
-          self._model.find (query.filter,
-                            query.projection,
-                            query.options,
-                            makeDbCompletionHandler ('retrieve_failed', 'Failed to retrieve resource', callback));
+          function completion (err, result) {
+            if (err) return callback (err);
+            return callback (null, result.execute);
+          }
+
+          async.series ({
+            pre: function (callback) {
+              return onPreExecute (req, callback);
+            },
+            execute: function (callback) {
+              var dbCompletion = makeDbCompletionHandler ('retrieve_failed', 'Failed to retrieve resource', callback);
+              self._model.find (query.filter, query.projection, query.options, dbCompletion);
+            }
+          }, completion);
         },
 
         /**
@@ -463,11 +505,16 @@ ResourceController.prototype.getAll = function (opts) {
  * @returns
  */
 ResourceController.prototype.update = function (opts) {
+  function __onPrepareUpdate (req, update, callback) { return callback (null, update); }
+
   opts = opts || {};
   var on = opts.on || {};
 
-  var onPrepareFilter = on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
+
+  var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
+
   var onPrepareUpdate = on.prepareUpdate || __onPrepareUpdate;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
   var onAuthorize = on.authorize || __onAuthorize;
@@ -499,13 +546,24 @@ ResourceController.prototype.update = function (opts) {
 
         // Now, let's search our database for the resource in question.
         function (query, callback) {
-          var options = query.options;
-          options.fields = query.projection;
+          function completion (err, result) {
+            if (err) return callback (err);
+            return callback (null, result.execute);
+          }
 
-          self._model.findOneAndUpdate (query.filter,
-                                        query.update,
-                                        options,
-                                        makeDbCompletionHandler ('update_failed', 'Failed to update resource', callback));
+          async.series ({
+            pre: function (callback) {
+              onPreExecute (req, callback);
+            },
+
+            execute: function (callback) {
+              var options = query.options;
+              options.fields = query.projection;
+
+              var dbCompletion = makeDbCompletionHandler ('update_failed', 'Failed to update resource', callback);
+              self._model.findOneAndUpdate (query.filter, query.update, options, dbCompletion);
+            }
+          }, completion);
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
@@ -540,7 +598,8 @@ ResourceController.prototype.delete = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onPrepareFilter = on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
+  var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
   var onAuthorize = on.authorize || __onAuthorize;
   var eventName = this.computeEventName ('deleted');
@@ -561,8 +620,21 @@ ResourceController.prototype.delete = function (opts) {
 
         // Now, let's search our database for the resource in question.
         function (filter, callback) {
-          self._model.findOneAndRemove (filter,
-                                        makeDbCompletionHandler ('delete_failed', 'Failed to delete resource', callback));
+          function completion (err, result) {
+            if (err) return callback (err);
+            return callback (null, result.execute);
+          }
+
+          async.series ({
+            pre: function (callback) {
+              onPreExecute (req, callback);
+            },
+
+            execute: function (callback) {
+              var dbCompletion = makeDbCompletionHandler ('delete_failed', 'Failed to delete resource', callback);
+              self._model.findOneAndRemove (filter, dbCompletion);
+            }
+          }, completion);
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
@@ -593,7 +665,7 @@ ResourceController.prototype.count = function (opts) {
   var on = opts.on || {};
 
   var onAuthorize = on.authorize || __onAuthorize;
-  var onPrepareFilter = on.prepareFilter || __onUpdateFilter;
+  var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
