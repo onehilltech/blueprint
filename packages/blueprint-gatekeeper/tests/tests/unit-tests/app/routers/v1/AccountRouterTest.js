@@ -156,10 +156,6 @@ describe ('AccountRouter', function () {
               function (callback) {
                 expect (res.body).to.deep.equal ({account: {_id: accountId}});
                 Account.findById (accountId, callback);
-              },
-              function (account, callback) {
-                expect (account.activation.token).to.not.be.undefined;
-                return callback ();
               }
             ], done);
           });
