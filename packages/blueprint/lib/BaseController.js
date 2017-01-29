@@ -30,7 +30,7 @@ BaseController.prototype.checkSchemaThen = function (schema, then) {
       function (callback) {
         req.check (schema);
         var errors = req.validationErrors ();
-        var err = !errors ? null : new HttpError (400, 'validation_failed', 'Bad request', errors);
+        var err = !errors ? null : new HttpError (400, 'validation_failed', 'Bad request', {validation: errors});
 
         return callback (err);
       },
