@@ -331,7 +331,7 @@ WorkflowController.prototype.issueToken = function () {
                 var expiresIn = accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN;
 
                 var opts = {
-                  payload: { kind: KIND_CLIENT_TOKEN, roles: client.roles },
+                  payload: { kind: KIND_CLIENT_TOKEN, scope: client.scope },
                   options: { jwtid: accessToken.id, expiresIn: expiresIn }
                 };
 
