@@ -92,7 +92,7 @@ module.exports = exports = function (opts) {
         user = accessToken.account;
       }
 
-      var authInfo = {scope: user.scope, token: accessToken};
+      var authInfo = {scope: payload.scope, token: accessToken};
       return done (null, user, authInfo);
     });
   });
