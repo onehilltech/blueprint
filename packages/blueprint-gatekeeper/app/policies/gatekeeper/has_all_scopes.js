@@ -9,9 +9,6 @@ var async = require ('async')
  * Determine if the user supports all roles specified.
  */
 module.exports = exports = function (expected, req, callback) {
-  if (!req.user)
-    return callback (new HttpError (401, 'Unauthorized'));
-
   var actual = req.authInfo.scope;
 
   async.every (expected, function (role, callback) {

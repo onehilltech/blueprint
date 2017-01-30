@@ -9,9 +9,6 @@ var async = require ('async')
  * Determine if the user has a least 1 role.
  */
 module.exports = exports = function (role, req, callback) {
-  if (!req.user)
-    return callback (new HttpError (401, 'Unauthorized'));
-
   var scopes = req.authInfo.scope;
 
   async.some (scopes,
