@@ -101,13 +101,13 @@ function createAndSaveUserAccessToken (opts, callback) {
           var scope = [];
 
           if (opts.account.scope)
-            scope.concat (opts.account.scope);
+            scope = scope.concat (opts.account.scope);
 
           if (opts.client.scope)
-            scope.concat (opts.client.scope);
+            scope = scope.concat (opts.client.scope);
 
           if (opts.scope)
-            scope.concat (opts.scope);
+            scope = scope.concat (opts.scope);
 
           var expiresIn = accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN;
 
