@@ -3,9 +3,7 @@
 const util = require ('util');
 
 module.exports = function (path) {
-  var schema = {
-    notEmpty: true
-  };
+  var schema = { };
 
   if (path.options.enum) {
     // The path is an enumeration. We can convert this to a isIn() check
