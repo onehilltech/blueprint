@@ -44,7 +44,7 @@ describe ('AccountRouter', function () {
           grant_type: 'password',
           username: datamodel.data.accounts[0].username,
           password: datamodel.data.accounts[0].password,
-          client_id: datamodel.models.clients[0].id
+          client_id: datamodel.models.clients[1].id
         };
 
         getToken (data, function (err, token) {
