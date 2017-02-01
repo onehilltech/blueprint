@@ -76,8 +76,10 @@ describe ('lib.ResourceController', function () {
               message: 'Bad request',
               details: {
                 validation: [
-                  { param: "person.age", msg: "Invalid/missing Int"},
+                  { param: "person.age", msg: 'Invalid param'},
+                  { param: 'person.age', msg: 'Invalid/missing Int'},
                   { param: "person.gender", msg: "Expected [ 'Female', 'Male' ]", value: 'Ok'},
+                  { param: "person.dob", msg: 'Invalid param'},
                   { param: "person.dob", msg: "Invalid date format"},
                   { param: 'person.address.street', msg: 'Invalid param' },
                   { param: 'person.address.city', msg: 'Invalid param' },

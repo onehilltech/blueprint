@@ -15,13 +15,16 @@ function makeValidationForSchemaType (schemaType, opts) {
   // The 'optional' property has to be the first key in the partial schema
   // object in order for validation by schema to work.
   var allOptional = opts.allOptional || false;
+  var hasDefault = objectPath.has (schemaType.options, 'default');
+  var validationOptional = objectPath.get (schemaType.options, 'validation.optional', false);
 
-  if (!schemaType.isRequired ||
-      objectPath.has (schemaType.options, 'default') ||
-      objectPath.get (schemaType.options, 'validation.optional', false) ||
-      allOptional)
+  if (!schemaType.isRequired || hasDefault || validationOptional || allOptional)
   {
     schema.optional = true;
+  }
+  else if (schemaType.isRequired && !(hasDefault || allOptional))
+  {
+    schema.notEmpty = true;
   }
 
   // Build the instance schema for the path.

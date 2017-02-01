@@ -28,11 +28,9 @@ describe ('lib.ValidationSchema', function () {
         notEmpty: true
       },
       'name.middle': {
-        optional: true,
-        notEmpty: true
+        optional: true
       },
       'name.last': {
-        notEmpty: true,
         optional: true
       },
 
