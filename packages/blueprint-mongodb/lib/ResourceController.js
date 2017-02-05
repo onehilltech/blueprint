@@ -5,7 +5,8 @@ const util     = require ('util')
   , blueprint  = require ('@onehilltech/blueprint')
   , winston    = require ('winston')
   , DateUtils  = require ('./DateUtils')
-  , HttpHeader = require ('./HttpHeader')
+  , HttpHeader = blueprint.http.headers
+  , etag       = require ('etag')
   ;
 
 var validationSchema = require ('./ValidationSchema');
@@ -256,22 +257,10 @@ ResourceController.prototype.get = function (opts) {
         },
 
         function (result, callback) {
-          // Set the headers for the response.
+          // Set the Last-Modified header for the response. The ETag header is set
+          // by the underlying Express framework.
           var lastModified = result.getLastModified ();
           res.set (HttpHeader.LAST_MODIFIED, lastModified.toUTCString ());
-
-          // Check for If-Modified-Since header. This will determine if we should continue
-          // or not. If this header is present and the document has not been modified since
-          // the provided date, we should return delete the result. Ideally, this should
-          // be part of the database query. Unfortunately, that approach would not allow
-          // us to distinguish between 304 and 404.
-
-          if (req.headers[HttpHeader.lowercase.IF_MODIFIED_SINCE]) {
-            var date = Date.parse (req.headers[HttpHeader.lowercase.IF_MODIFIED_SINCE]);
-
-            if (DateUtils.compare (date, lastModified) !== -1)
-              return callback (new HttpError (304, 'Not Changed'));
-          }
 
           onPostExecute (req, result, callback);
         },
@@ -374,103 +363,38 @@ ResourceController.prototype.getAll = function (opts) {
          * @returns {*}
          */
         function (result, callback) {
-          // If the length is 0, then we always return the result set regardless of
-          // Last-Modified been set in the header. The reason being is Last-Modified
-          // does not take into account the contents of the list. Just the modification
-          // times. Unfortunately, Last-Modified works if there are resources in the
-          // list where we can check create/update times.
-          //
-          // A solution to the problem above is to support ETag.
+          if (!result) return new callback (new HttpError (404, 'not_found', 'Not found'));
+          if (result.length === 0) return onPostExecute (req, result, callback);
 
-          if (result.length === 0)
-            return onComplete (null, result);
+          // Reduce the result set to a single hash of headers.
 
-          async.waterfall ([
-            /*
-             * Process the headers in the original request. This has the pontential to
-             * reduce the number of items we return to the client.
-             */
-            function processHeaders (callback) {
-              var tasks = [
-                async.constant (result)
-              ];
+          var headers = { };
+          headers[HttpHeader.LAST_MODIFIED] = result[0].getLastModified ();
 
-              if (req.headers[HttpHeader.lowercase.IF_MODIFIED_SINCE])
-                tasks.push (processIfModifiedSince);
+          if (result.length === 1)
+            return onReduceComplete (null, headers);
 
-              async.waterfall (tasks, callback);
+          async.reduce (result.slice (1), headers, function (memo, item, callback) {
+            var lastModified = item.getLastModified ();
 
-              /**
-               * Gather the items that were updated after the data defined in the
-               * 'If-Modified-Since' HTTP header.
-               *
-               * @param callback
-               */
-              function processIfModifiedSince (data, callback) {
-                var date = Date.parse (req.headers[HttpHeader.lowercase.IF_MODIFIED_SINCE]);
+            if (DateUtils.compare (memo[HttpHeader.LAST_MODIFIED], lastModified) == -1)
+              memo[HttpHeader.LAST_MODIFIED] = lastModified;
 
-                async.some (data, function (item, callback) {
-                  var result = DateUtils.compare (date, item.getLastModified ()) === -1;
-                  return callback (null, result);
-                }, complete);
+            return callback (null, memo);
+          }, onReduceComplete);
 
-                function complete (err, result) {
-                  if (err) return callback (err);
-                  if (!result) return callback (new HttpError (304, 'Not Changed'));
-                  return callback (null, data);
-                }
-              }
-            },
+          function onReduceComplete (err, headers) {
+            if (err) return callback (err, null);
 
-            /**
-             * Set the headers on the response based on the retrieved data.
-             *
-             * @param data
-             * @param callback
-             * @returns {*}
-             */
-              function setHeaders (data, callback) {
-              if (data.length === 0)
-                return callback (null, data);
+            // The Last-Modified header must be in string format.
+            var lastModified = headers[HttpHeader.LAST_MODIFIED];
 
-              // Start by initializing the headers based on the data from the
-              // first time. If we have more than one item, then reduce the data
-              // to a single value.
+            if (lastModified)
+              headers[HttpHeader.LAST_MODIFIED] = lastModified.toUTCString ();
 
-              var headers = { };
-              headers[HttpHeader.LAST_MODIFIED] = data[0].getLastModified ();
+            res.set (headers);
 
-              if (data.length === 1)
-                return onReduceComplete (null, headers);
-
-              async.reduce (data.slice (1), headers, function (memo, item, callback) {
-                var lastModified = item.getLastModified ();
-
-                if (DateUtils.compare (memo[HttpHeader.LAST_MODIFIED], lastModified) == -1)
-                  memo[HttpHeader.LAST_MODIFIED] = lastModified;
-
-                return callback (null, memo);
-              }, onReduceComplete);
-
-              function onReduceComplete (err, headers) {
-                if (err) return callback (err, null);
-
-                // The Last-Modified header must be in UTC/GMT string format.
-                var lastModified = headers[HttpHeader.LAST_MODIFIED];
-
-                if (lastModified && !_.isString (lastModified))
-                  headers[HttpHeader.LAST_MODIFIED] = lastModified.toUTCString ();
-
-                res.set (headers);
-
-                return callback (null, data);
-              }
-            }
-          ], onComplete);
-
-          function onComplete (err, data) {
-            if (err) return callback (err);
-            return onPostExecute (req, data, callback);
+            return onPostExecute (req, result, callback)
           }
         },
 

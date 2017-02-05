@@ -3,6 +3,7 @@
 const async   = require ('async')
   , pluralize = require ('pluralize')
   , _         = require ('underscore')
+  , mongoose  = require ('mongoose')
   , PopulateElement = require ('./PopulateElement')
   , PopulateArray   = require ('./PopulateArray')
   ;
@@ -14,11 +15,11 @@ function getKeyFromModel (model) {
 // Populate objects for each corresponding model.
 var populators = {};
 
-function createPopulator (Model) {
+function createPopulator (Model, schema) {
   return function (callback) {
     var populate = {};
 
-    async.eachOf (Model.schema.paths, function (path, pathName, callback) {
+    async.eachOf (schema.paths, function (path, pathName, callback) {
       if (pathName === '__v') return callback (null);
 
       if (path.instance === 'ObjectID' && pathName !== '_id') {
@@ -28,10 +29,16 @@ function createPopulator (Model) {
         populate[pathName] = new PopulateElement (model);
       }
       else if (path.instance === 'Array') {
-        var ref = path.options.type[0].ref;
-        var model = Model.db.models[ref];
+        // We can either be populating references to documents, or sub-documents.
+        var type = path.options.type[0];
 
-        populate[pathName] = new PopulateArray (model);
+        if (type instanceof mongoose.Schema) {
+
+        }
+        else {
+          var model = Model.db.models[type.ref];
+          populate[pathName] = new PopulateArray (model);
+        }
       }
 
       return callback (null);
@@ -163,7 +170,7 @@ module.exports = function (data, model, callback) {
   var tasks = [];
 
   if (!populators[key])
-    tasks.push (createPopulator (model));
+    tasks.push (createPopulator (model, model.schema));
 
   if (_.isArray (data))
     tasks.push (populateArray (key, data));
