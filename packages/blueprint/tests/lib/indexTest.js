@@ -15,7 +15,8 @@ describe ('index', function () {
         'Policy',
         'controller',
         'destroy',
-        'errors'
+        'errors',
+        'http'
       ];
 
       expect (blueprint).to.have.keys (keys);

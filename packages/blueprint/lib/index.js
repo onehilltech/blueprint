@@ -3,15 +3,15 @@
 var util = require ('util')
   ;
 
-var BaseController = require ('./BaseController')
+var BaseController     = require ('./BaseController')
   , ResourceController = require ('./ResourceController')
-  , Application = require ('./Application')
-  , ApplicationModule = require ('./ApplicationModule')
-  , Framework = require ('./Framework')
-  , Env = require ('./Environment')
-  , RouterBuilder = require ('./RouterBuilder')
-  , Policy = require ('./Policy')
-  , ModuleRouter = require ('./ModuleRouter')
+  , Application        = require ('./Application')
+  , ApplicationModule  = require ('./ApplicationModule')
+  , Framework          = require ('./Framework')
+  , Env                = require ('./Environment')
+  , RouterBuilder      = require ('./RouterBuilder')
+  , Policy             = require ('./Policy')
+  , ModuleRouter       = require ('./ModuleRouter')
   ;
 
 var exports = module.exports;
@@ -22,6 +22,8 @@ exports.ApplicationModule = ApplicationModule;
 exports.RouterBuilder = RouterBuilder;
 exports.Policy = Policy;
 exports.ModuleRouter = ModuleRouter;
+
+exports.http = require ('./http');
 
 // Make sure Blueprint has been instantiated in the main process. This instance
 // is used by the current application, and its dependencies to ensure operate in
