@@ -58,6 +58,10 @@ function createPopulator (Model, schema) {
 function populateImpl (populator, data, ids, result, callback) {
   async.eachOf (populator, function (populate, path, callback) {
     const value  = data[path];
+
+    if (!value)
+      return callback (null);
+
     const plural = pluralize (populate.Model.modelName);
 
     // Make sure the result and ids for the current population exists. If not,
