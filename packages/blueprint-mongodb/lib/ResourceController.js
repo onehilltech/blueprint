@@ -6,7 +6,6 @@ const util     = require ('util')
   , winston    = require ('winston')
   , DateUtils  = require ('./DateUtils')
   , HttpHeader = blueprint.http.headers
-  , etag       = require ('etag')
   ;
 
 var validationSchema = require ('./ValidationSchema');
@@ -462,32 +461,28 @@ ResourceController.prototype.update = function (opts) {
         function (callback) {
           async.parallel ({
             filter: function (callback) { onPrepareFilter (req, filter, callback); },
-            options: function (callback) { onPrepareOptions (req, options, callback); },
             update: function (callback) { onPrepareUpdate (req, update, callback); },
-            projection: function (callback) { onPrepareProjection (req, callback); }
+            options: function (callback) { onPrepareOptions (req, options, callback); }
           }, callback);
         },
 
         // Now, let's search our database for the resource in question.
         function (query, callback) {
-          function completion (err, result) {
-            if (err) return callback (err);
-            return callback (null, result.execute);
-          }
-
           async.series ({
             pre: function (callback) {
               onPreExecute (req, callback);
             },
 
             execute: function (callback) {
-              var options = query.options;
-              options.fields = query.projection;
-
               var dbCompletion = makeDbCompletionHandler ('update_failed', 'Failed to update resource', callback);
-              self._model.findOneAndUpdate (query.filter, query.update, options, dbCompletion);
+              self._model.findOneAndUpdate (query.filter, query.update, query.options, dbCompletion);
             }
           }, completion);
+
+          function completion (err, result) {
+            if (err) return callback (err);
+            return callback (null, result.execute);
+          }
         },
 
         // Allow the subclass to do any post-execution analysis of the result.
