@@ -4,6 +4,7 @@ var winston = require ('winston')
   , path    = require ('path')
   , fs      = require ('fs')
   , async   = require ('async')
+  , util    = require ('util')
   ;
 
 var RouterBuilder = require ('./RouterBuilder')
