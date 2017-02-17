@@ -1,6 +1,7 @@
 'use strict';
 
 const DateUtils = require ('../DateUtils')
+  , mongoose    = require ('mongoose')
   ;
 
 /**
@@ -68,7 +69,10 @@ function StatPlugin (schema) {
   });
 
   function onUpdate () {
-    this.update ({$set: {'_stat.updated_at': new Date ()}});
+    if (!this._update.$set)
+      this._update.$set = {};
+
+    this._update.$set['_stat.updated_at'] = new Date ();
   }
 
   // Middleware hooks for updating the document. When the document is
