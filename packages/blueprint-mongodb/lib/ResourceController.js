@@ -50,7 +50,7 @@ function checkIdThenAuthorize (id, next) {
  */
 function makeDbCompletionHandler (code, message, callback) {
   return function __blueprint_db_execution_complete (err, result) {
-    if (err) return callback (new HttpError (400, code, message));
+    if (err) return callback (new HttpError (400, code, message, {code: err.code}));
     if (!result) return callback (new HttpError (404, 'not_found', 'Not Found'));
 
     return callback (null, result);
