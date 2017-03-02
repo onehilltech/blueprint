@@ -13,11 +13,7 @@ module.exports = exports = function (expected, req, callback) {
 
   async.every (expected, function (role, callback) {
     async.some (actual, function (scope, callback) {
-      // We are using async 1.5. This must change for async 2.0 to
-      // callback (null, userRole === role).
-      return callback (scope === role);
+      return callback (null, scope === role);
     }, callback);
-  }, function (result) {
-    return callback (null, result);
-  });
+  }, callback);
 };
