@@ -91,39 +91,6 @@ schema.methods.verifyPassword = function (password, callback) {
 };
 
 /**
- * Test if the account has been activated.
- *
- * @returns {boolean}
- */
-schema.methods.isActivated = function () {
-  return !this.activation.required || this.activation.date !== undefined;
-};
-
-/**
- * Test if the activiation token has expired.
- *
- * @returns {boolean}
- */
-schema.methods.isVerificationTokenExpired = function () {
-  var currTime = Date.now ();
-  var expiration = this.internal_use.verification.token.expires_at;
-
-  return expiration.getTime () < currTime;
-};
-
-/**
- * Verify the account. It is assume the account has not been verify when this
- * method is invoked.
- */
-schema.methods.activate = function (token, callback) {
-  if (this.activation.token !== token)
-    return callback (new Error ('Invalid token'));
-
-  this.activation.date = Date.now ();
-  this.save (callback);
-};
-
-/**
  * Authenticate the username and password.
  *
  * @param username
