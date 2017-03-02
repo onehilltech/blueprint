@@ -13,20 +13,14 @@ const SALT_WORK_FACTOR = 10;
 var Schema = mongodb.Schema;
 
 var schema = new Schema ({
-  /**
-   * Access credentials for the account. This subdocument contains the
-   * account username and password, as well as any access roles for the
-   * user, such as admin.
-   */
-
-  /// Contact email address for the account.
-  email: { type: String, required: true, unique: true, trim: true },
-
   /// Username for the account.
   username: { type: String, required: true, unique: true, index: true },
 
   /// Encrypted password
   password: { type: String, required: true},
+
+  /// Contact email address for the account.
+  email: { type: String, required: true, unique: true, trim: true },
 
   /// The client that created the account.
   created_by: {type: mongodb.Schema.Types.ObjectId, required: true, ref: Client.modelName, index: true, validation: {optional: true}},
