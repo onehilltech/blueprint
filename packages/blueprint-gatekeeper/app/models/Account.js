@@ -28,13 +28,6 @@ var schema = new Schema ({
   /// Encrypted password
   password: { type: String, required: true},
 
-  /**
-   * Internal housekeeping information. This is only use by the service
-   * to manage the account. This includes information such as what client
-   * created the account, and is the account enabled.
-   *
-   */
-
   /// The client that created the account.
   created_by: {type: mongodb.Schema.Types.ObjectId, required: true, ref: Client.modelName, index: true, validation: {optional: true}},
 
