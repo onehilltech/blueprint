@@ -3,6 +3,7 @@ var blueprint  = require ('@onehilltech/blueprint')
   , messaging  = blueprint.messaging
   , uid        = require ('uid-safe')
   , async      = require ('async')
+  , _          = require ('underscore')
   , gatekeeper = require ('../../lib')
   ;
 
@@ -151,6 +152,51 @@ AccountController.prototype.get = function () {
   };
 
   return ResourceController.prototype.get.call (this, options);
+};
+
+/**
+ * Delete an account in the database
+ */
+AccountController.prototype.update = function () {
+  var options = {
+    on: {
+      authorize: function (req, callback) {
+        async.series ([
+          function (callback) {
+            Policy.Definition (
+              Policy.or ([
+                Policy.assert ('gatekeeper.is_account_owner'),
+                Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser)
+              ])
+            ).evaluate (req, callback);
+          }
+        ], callback);
+      },
+
+      /**
+       * Prepare the update document. Depending on the scope of the request, certain
+       * fields can and cannot be updated.
+       *
+       * @param req
+       * @param doc
+       * @param callback
+       * @returns {*}
+       */
+      prepareUpdate: function (req, doc, callback) {
+        // This is permanent field that can never be updated.
+        if (doc.created_by)
+          delete doc.created_by;
+
+        // Only the superuser can update the scope.
+        if (doc.scope && req.authInfo.scope.indexOf (gatekeeper.scope.superuser) === -1)
+          delete doc.scope;
+
+        return callback (null, doc);
+      }
+    }
+  };
+
+  return ResourceController.prototype.update.call (this, options);
 };
 
 /**
