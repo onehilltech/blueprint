@@ -448,10 +448,10 @@ function getUpdateFromBody (body) {
 
   // Include the $set and $unset properties only if there are updates
   // associated with either one.
-  if (!_.isEmpty ($set))
+  if (Object.keys ($set).length !== 0)
     update.$set = $set;
 
-  if (!_.isEmpty ($unset))
+  if (Object.keys ($unset).length !== 0)
     update.$unset = $unset;
 
   return update;
