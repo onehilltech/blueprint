@@ -224,22 +224,39 @@ describe ('lib.ResourceController', function () {
 
       it ('should update resource, excluding unknown param', function (done) {
         var data = {
-          person: { fname: 'Jake', last_name: 'Williams'}
+          person: { fname: 'Jake', middle_name: 'M', last_name: 'Williams'}
         };
 
         blueprint.testing.request ()
           .put ('/person/' + person._id)
-          .send (data)
-          .expect (200)
+          .send (data).expect (200)
           .end (function (err, res) {
             if (err) return done (err);
 
             person.last_name = 'Williams';
+            person.middle_name = 'M';
 
-            var omits = ['_stat'];
-            expect (_.omit (res.body.person, omits)).to.deep.equal (_.omit (person, omits));
+            expect (res.body.person).to.deep.equal (person);
 
             updated = res.body.person;
+
+            return done (null);
+          });
+      });
+
+      it ('should delete a field in the resource', function (done) {
+        var data = {
+          person: { middle_name: null}
+        };
+
+        blueprint.testing.request ()
+          .put ('/person/' + person._id)
+          .send (data).expect (200)
+          .end (function (err, res) {
+            if (err) return done (err);
+
+            updated = res.body.person;
+            expect (updated).to.deep.equal (_.omit (person, ['middle_name']));
 
             return done (null);
           });

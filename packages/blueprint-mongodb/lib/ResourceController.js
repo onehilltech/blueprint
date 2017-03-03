@@ -422,14 +422,39 @@ ResourceController.prototype.getAll = function (opts) {
 };
 
 /**
- * Utility method for creating an update statement from the body
- * of a request.
+ * Utility method for creating an update statement from the body of
+ * a request.
  *
  * @param body
  * @returns {{$set: *}}
  */
 function getUpdateFromBody (body) {
-  return { $set: body };
+  var update = {};
+
+  var $set = {};
+  var $unset = {};
+
+  for (var name in body) {
+    if (!body.hasOwnProperty (name))
+      continue;
+
+    var value = body[name];
+
+    if (value !== null)
+      $set[name] = value;
+    else
+      $unset[name] = 1;
+  }
+
+  // Include the $set and $unset properties only if there are updates
+  // associated with either one.
+  if (!_.isEmpty ($set))
+    update.$set = $set;
+
+  if (!_.isEmpty ($unset))
+    update.$unset = $unset;
+
+  return update;
 }
 
 /**
