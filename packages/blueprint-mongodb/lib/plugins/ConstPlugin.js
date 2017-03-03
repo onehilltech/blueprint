@@ -1,5 +1,9 @@
 'use strict';
 
+var objectPath = require ('object-path')
+  , _          = require ('underscore')
+  ;
+
 /**
  * Schema type for a const field. The ConstSchema is a proxy for the real schema
  * type, delegating all call to the real schema except for applySetters
@@ -66,13 +70,41 @@ function ConstPlugin (schema) {
 
   schema.eachPath (function (path, typeSchema) {
     if (typeSchema.options.const) {
+      // Save the path later usage.
       paths.push (path);
+
+      // Replace the schema with a const schema.
       schema.paths[path] = new ConstSchema (typeSchema);
     }
   });
 
   function onUpdate () {
-    console.log (this);
+    // Remove all const properties from the update object.
+    removeConst (this._update);
+
+    // Remove all const properties from the $set action. If $set is
+    // empty, then we need to remove its operation from the update.
+    if (this._update.$set) {
+      removeConst (this._update.$set);
+
+      if (this._update.$set && _.isEmpty (this._update.$set))
+        delete this._update.$set;
+    }
+
+    // Remove all const properties from the $unset action. If $unset is
+    // empty, then we need to remove its operation from the update.
+    if (this._update.$unset) {
+      removeConst (this._update.$unset);
+
+      if (this._update.$unset && _.isEmpty (this._update.$unset))
+        delete this._update.$unset;
+    }
+
+    function removeConst (obj) {
+      paths.forEach (function (path) {
+        objectPath.del (obj, path);
+      });
+    }
   }
 
   // Middleware hooks for updating the document. When the document is

@@ -63,4 +63,59 @@ describe ('lib.plugins.ConstPlugin', function () {
       ], done);
     });
   });
+
+  describe ('findOneAndUpdate', function () {
+    it ('should not update a const field', function (done) {
+      async.waterfall ([
+        function (callback) {
+          var person = new Person ({first_name: 'John', last_name: 'Doe', creator: 'me'});
+          person.save (callback);
+        },
+
+        function (person, n, callback) {
+          Person.findOneAndUpdate ({_id: person._id}, {creator: 'you'}, {new: true}, callback);
+        },
+
+        function (person, callback) {
+          // The value should still be the same after a save.
+          expect (person.creator).to.equal ('me');
+
+          // Make sure we can pull the original value out of the database.
+          Person.findById (person._id, callback);
+        },
+
+        function (person, callback) {
+          expect (person.creator).to.equal ('me');
+          return callback (null);
+        }
+      ], done);
+    });
+  });
+
+  describe ('update', function () {
+    it ('should not update a const field', function (done) {
+      var person;
+
+      async.waterfall ([
+        function (callback) {
+          person = new Person ({first_name: 'Jack', last_name: 'Black', creator: 'me'});
+          person.save (callback);
+        },
+
+        function (person, n, callback) {
+          Person.update ({_id: person._id}, {creator: 'you'}, callback);
+        },
+
+        function (n, callback) {
+          // Make sure we can pull the original value out of the database.
+          Person.findById (person._id, callback);
+        },
+
+        function (person, callback) {
+          expect (person.creator).to.equal ('me');
+          return callback (null);
+        }
+      ], done);
+    });
+  });
 });
