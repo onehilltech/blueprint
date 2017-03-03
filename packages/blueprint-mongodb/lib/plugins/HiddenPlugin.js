@@ -4,7 +4,7 @@ const objectPath = require ('object-path')
   ;
 
 /**
- * Transform the document by removing the _stat field.
+ * Transform the document by removing the hidden field.
  *
  * @param orig        Original transformation function
  * @param hidden      Fields to hide
@@ -21,14 +21,15 @@ function transform (orig, hidden) {
 }
 
 /**
- * Plugin that adds stat information about the resource to each document.
+ * Plugin that allows you to specify what fields are hidden during transformation
+ * via toObject() and toJSON(). To hide a field, add hidden=true to the field
+ * definition in the model schema.
  *
- * @param schema
+ * @param schema        Mongoose schema
  * @constructor
  */
 function HiddenPlugin (schema) {
-  // Always remove the _stat information from the document. We need to
-  // preserve any existing transformation attached to the schema.
+  // Gather the fields to be hidden during transformation.
   var hidden = [];
 
   schema.eachPath (function (path, schema) {
