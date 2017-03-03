@@ -19,10 +19,10 @@ describe ('lib.plugins.HiddenPlugin', function () {
     });
 
     schema.plugin (HiddenPlugin);
-
-    expect (schema.methods.hidden).to.be.a.function;
+    expect (schema.statics.hidden).to.be.a.function;
 
     Person = mongodb.model ('person', schema, 'blueprint_persons');
+    expect (Person.hidden ()).to.eql (['ssn']);
   });
 
   var person;
