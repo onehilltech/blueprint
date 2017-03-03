@@ -21,21 +21,21 @@ describe ('lib.ValidationSchema', function () {
     expect (validation).to.eql ({
       _id: {
         isMongoId: { errorMessage: 'Invalid/missing ObjectID' },
-        optional: true
+        optional: { options: { checkFalsy: true } }
       },
 
       'name.first': {
         notEmpty: true
       },
       'name.middle': {
-        optional: true
+        optional: { options: { checkFalsy: true } }
       },
       'name.last': {
-        optional: true
+        optional: { options: { checkFalsy: true } }
       },
 
       age: {
-        optional: true,
+        optional: { options: { checkFalsy: true } },
         isInt: {
           errorMessage: 'Invalid/missing Int'
         }
