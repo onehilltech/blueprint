@@ -51,7 +51,7 @@ function HiddenPlugin (schema) {
 
   // Define helper methods
 
-  schema.methods.hidden = function () {
+  schema.statics.hidden = function () {
     return hidden;
   };
 }
