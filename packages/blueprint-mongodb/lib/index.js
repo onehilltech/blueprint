@@ -19,6 +19,9 @@ var exports = module.exports = ConnectionManager;
  * @returns {*}
  */
 function model (name, schema, collection) {
+  // Install the default plugins.
+  schema.plugin (plugins.HiddenPlugin);
+
   return ConnectionManager.getConnectionManager ().defaultConnection.model (name, schema, collection);
 }
 
@@ -36,16 +39,23 @@ function model (name, schema, collection) {
 function modelOn (connName, name, schema, collection) {
   var conn = ConnectionManager.getConnectionManager ().getConnection (connName);
 
-  if (conn)
+  if (conn) {
+    // Install the default plugins.
+    schema.plugin (plugins.HiddenPlugin);
+
     return conn.model (name, schema, collection);
+  }
 }
 
 function createResource (conn, name, schema, collection) {
   Object.defineProperty (schema.options, 'resource', {
-    get: function () { return true}
+    get: function () { return true; }
   });
 
+  // Install the default plugins.
+  schema.plugin (plugins.HiddenPlugin);
   schema.plugin (plugins.StatPlugin);
+
   return conn.model (name, schema, collection);
 }
 
