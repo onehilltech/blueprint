@@ -3,6 +3,7 @@
 const async   = require ('async')
   , path      = require ('path')
   , blueprint = require ('@onehilltech/blueprint')
+  , testing   = require ('../../lib/testing')
   ;
 
 var exports = module.exports;
@@ -19,7 +20,7 @@ function apply (callback) {
 }
 
 function cleanup (callback) {
-  return callback (null);
+  testing.clearData (callback);
 }
 
 var models = { };
