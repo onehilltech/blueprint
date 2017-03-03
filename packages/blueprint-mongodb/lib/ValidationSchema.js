@@ -18,12 +18,11 @@ function makeValidationForSchemaType (schemaType, opts) {
   var hasDefault = objectPath.has (schemaType.options, 'default');
   var validationOptional = objectPath.get (schemaType.options, 'validation.optional', false);
 
-  if (!schemaType.isRequired || hasDefault || validationOptional || allOptional)
-  {
-    schema.optional = true;
+  if (!schemaType.isRequired || hasDefault || validationOptional || allOptional) {
+    // Mark the field as optional, and allow null and undefined values.
+    schema.optional = {options: { checkFalsy: true }};
   }
-  else if (schemaType.isRequired && !(hasDefault || allOptional))
-  {
+  else if (schemaType.isRequired && !(hasDefault || allOptional)) {
     schema.notEmpty = true;
   }
 
