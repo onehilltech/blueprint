@@ -422,6 +422,17 @@ ResourceController.prototype.getAll = function (opts) {
 };
 
 /**
+ * Utility method for creating an update statement from the body
+ * of a request.
+ *
+ * @param body
+ * @returns {{$set: *}}
+ */
+function getUpdateFromBody (body) {
+  return { $set: body };
+}
+
+/**
  * Update a single resource.
  *
  * @param opts
@@ -433,16 +444,12 @@ ResourceController.prototype.update = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
+  var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
-
-  var onPreExecute = on.preExecute || __onPreExecute;
-  var onPostExecute = on.postExecute || __onPostExecute;
-
   var onPrepareUpdate = on.prepareUpdate || __onPrepareUpdate;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
-  var onAuthorize = on.authorize || __onAuthorize;
-  var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
-
+  var onPreExecute = on.preExecute || __onPreExecute;
+  var onPostExecute = on.postExecute || __onPostExecute;
   var eventName = this.computeEventName ('updated');
 
   var self = this;
@@ -454,7 +461,8 @@ ResourceController.prototype.update = function (opts) {
       var rcId = req.params[self._id];
       var filter = {_id: rcId};
 
-      var update = { $set: req.body[self._name] };
+
+      var update = getUpdateFromBody (req.body[self._name]);
       var options = { upsert: false, new: true };
 
       async.waterfall ([
@@ -469,10 +477,19 @@ ResourceController.prototype.update = function (opts) {
         // Now, let's search our database for the resource in question.
         function (query, callback) {
           async.series ({
+            /**
+             * Allow the subclass to perform some action before we execute
+             * the database query.
+             */
             pre: function (callback) {
               onPreExecute (req, callback);
             },
 
+            /**
+             * Execute the database query.
+             *
+             * @param callback
+             */
             execute: function (callback) {
               var dbCompletion = makeDbCompletionHandler ('update_failed', 'Failed to update resource', callback);
               self._model.findOneAndUpdate (query.filter, query.update, query.options, dbCompletion);
