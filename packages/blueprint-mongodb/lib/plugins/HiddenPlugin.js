@@ -49,7 +49,7 @@ function HiddenPlugin (schema) {
   var jsonTransform = schema.options.toJSON.transform || function (doc, ret) { return ret; };
   schema.options.toJSON.transform = transform (jsonTransform, hidden);
 
-  // Define helper methods for accessing the stats.
+  // Define helper methods
 
   schema.methods.hidden = function () {
     return hidden;
