@@ -9,7 +9,6 @@ var path    = require ('path')
 var ApplicationModule = require ('../../lib/ApplicationModule')
   , RouterBuilder     = require ('../../lib/RouterBuilder')
   , appFixture        = require ('../fixtures/app')
-  , blueprint         = require ('../fixtures/lib')
   ;
 
 describe ('RouterBuilder', function () {
@@ -166,5 +165,15 @@ describe ('RouterBuilder', function () {
           .expect (404, done);
       });
     });
+  });
+
+  describe ('policies', function () {
+    it ('should handle the request', function (done) {
+      return done (false);
+    });
+
+    it ('should not handle the request', function (done) {
+      return done (false);
+    })
   });
 });
