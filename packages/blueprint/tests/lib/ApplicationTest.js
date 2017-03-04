@@ -90,7 +90,7 @@ describe ('Application', function () {
           expect (app.modules).to.have.keys (['test-module']);
 
           // Check the policies are added to the application.
-          expect (app.policies).to.have.keys (['module-policy', 'always_true']);
+          expect (app.policies).to.have.keys (['module-policy', 'alwaysTrue', 'alwaysFalse']);
 
           // Check auto-setting of engines on application based on view extensions.
           expect (app._server._engines).to.have.length (3);

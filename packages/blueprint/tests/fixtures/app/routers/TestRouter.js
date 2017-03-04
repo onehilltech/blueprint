@@ -9,5 +9,15 @@ module.exports = exports = {
     }
   },
 
+  '/policies': {
+    '/accepted': {
+      get: 'TestController@helloWorld'
+    },
+
+    '/rejected': {
+      get: 'TestController@helloWorld'
+    }
+  },
+
   '/module': [ function (req, res) {} ]
 };

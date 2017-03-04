@@ -70,7 +70,7 @@ describe ('ApplicationModule', function () {
 
   describe ('#policies', function () {
     it ('should return the loaded policies', function () {
-      expect (appModule.policies).to.have.keys (['always_true']);
+      expect (appModule.policies).to.have.keys (['alwaysTrue', 'alwaysFalse']);
     });
   });
 });

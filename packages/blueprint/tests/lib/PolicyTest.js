@@ -30,7 +30,7 @@ describe ('Policy', function () {
     });
 
     it ('should evaluate policy function by name', function (done) {
-      Policy.evaluate ('always_true', null, function (err, result) {
+      Policy.evaluate ('alwaysTrue', null, function (err, result) {
         expect (err).to.be.null;
         expect (result).to.be.true;
 
@@ -77,7 +77,7 @@ describe ('Policy', function () {
     });
 
     it ('should create an assertion from existing application policy', function (done) {
-      var f = Policy.assert ('always_true');
+      var f = Policy.assert ('alwaysTrue');
 
       f (null, function (err, result) {
         expect (err).to.be.null;
