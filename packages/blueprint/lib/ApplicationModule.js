@@ -34,7 +34,7 @@ function ApplicationModule (appPath) {
   this.policyManager = new PolicyManager ();
   this.modelManager = new ModelManager ();
   this.controllerManager = new ControllerManager ();
-  this.routerManager = new RouterManager ();
+  this.routerManager = new RouterManager (this);
 }
 
 /**
@@ -71,12 +71,6 @@ ApplicationModule.prototype.init = function (callback) {
     loadInto (this.policyManager, 'policies'),
     loadInto (this.listenerManager, 'listeners'),
     loadInto (this.controllerManager, 'controllers'),
-
-    function (module, callback) {
-      module.routerManager.setControllers (module.controllers);
-      return callback (null, module);
-    },
-
     loadInto (this.routerManager, 'routers'),
 
     function (module, callback) {

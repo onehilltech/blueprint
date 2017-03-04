@@ -6,7 +6,8 @@ const express  = require ('express')
   , _          = require ('underscore')
   ;
 
-const errors   = require ('./errors/')
+const errors  = require ('./errors/')
+  , HttpError = errors.HttpError
   ;
 
 const SINGLE_ACTION_CONTROLLER_METHOD = '__invoke';
@@ -98,7 +99,7 @@ function validateBySchema (schema) {
       var errors = req.validationErrors ();
       if (!errors) return next ();
 
-      var err = new errors.HttpError (400, 'validation_failed', 'Request validation failed', errors);
+      var err = new HttpError (400, 'validation_failed', 'Request validation failed', errors);
       return handleError (err, res);
     }
     catch (ex) {
@@ -149,6 +150,28 @@ function sanitizer (sanitize) {
   }
 }
 
+function wrapPolicy (app, policy) {
+  if (_.isString (policy)) {
+    policy = objectPath.get (app.policies, policy);
+
+    if (!policy)
+      throw new Error (util.format ('Policy %s not found', policy));
+  }
+
+  return function __blueprint_policy (req, res, next) {
+    try {
+      policy (req, function (err, result) {
+        if (err) return handleError (err, res);
+        if (!result) return handleError (new HttpError (403, 'policy_failed', 'Policy failed'), res);
+        return next ();
+      });
+    }
+    catch (ex) {
+      return handleError (ex, res);
+    }
+  }
+}
+
 function render (view) {
   return function __blueprint_render (req, res) {
     res.render (view);
@@ -189,47 +212,48 @@ if (!_.isFunction (String.prototype.endsWith)) {
  *
  * Builder class for building an express.Router object.
  *
- * @param controllers       Collection of controllers for binding
- * @param basePath          Base path of the router
+ * @param app           Application object
+ * @param basePath      Base path of the router
  * @constructor
  */
-function RouterBuilder (controllers, basePath) {
-  this._controllers = controllers;
+function RouterBuilder (app, basePath) {
+  this._app = app;
   this._basePath = basePath || '/';
   this._router = express.Router ();
   this._params = [];
+}
 
-  /**
-   * Resolve the controller of an action.
-   *
-   * @param action
-   * @returns {MethodCall}
-   */
-  this.resolveController = function (action) {
-    var parts = action.split ('@');
+/**
+ * Resolve the controller of an action.
+ *
+ * @param action
+ * @returns {MethodCall}
+ */
+RouterBuilder.prototype._resolveController = function (action) {
+  var parts = action.split ('@');
 
-    if (parts.length < 1 || parts.length > 2)
-      throw new Error (util.format ('invalid action format [%s]', action));
+  if (parts.length < 1 || parts.length > 2)
+    throw new Error (util.format ('invalid action format [%s]', action));
 
-    var controllerName = parts[0];
-    var actionName = parts.length === 2 ? parts[1] : SINGLE_ACTION_CONTROLLER_METHOD;
+  var controllerName = parts[0];
+  var actionName = parts.length === 2 ? parts[1] : SINGLE_ACTION_CONTROLLER_METHOD;
 
-    // Locate the controller object in our loaded controllers. If the controller
-    // does not exist, then throw an exception.
-    var controller = objectPath.get (this._controllers, controllerName);
+  // Locate the controller object in our loaded controllers. If the controller
+  // does not exist, then throw an exception.
+  var controllers = this._app.controllers;
+  var controller = objectPath.get (controllers, controllerName);
 
-    if (!controller)
-      throw new Error (util.format ('controller %s not found', controllerName));
+  if (!controller)
+    throw new Error (util.format ('controller %s not found', controllerName));
 
-    // Locate the action method on the loaded controller. If the method does
-    // not exist, then throw an exception.
-    var method = controller[actionName];
+  // Locate the action method on the loaded controller. If the method does
+  // not exist, then throw an exception.
+  var method = controller[actionName];
 
-    if (!method)
-      throw new Error (util.format ('controller %s does not define method %s', controllerName, actionName));
+  if (!method)
+    throw new Error (util.format ('controller %s does not define method %s', controllerName, actionName));
 
-    return new MethodCall (controller, method);
-  }
+  return new MethodCall (controller, method);
 }
 
 /**
@@ -241,224 +265,7 @@ function RouterBuilder (controllers, basePath) {
  * @returns {RouterBuilder}
  */
 RouterBuilder.prototype.addSpecification = function (spec, currPath) {
-  var self = this;
-
-  /**
-   * Register a route with the router. A router starts with a forward slash (/).
-   *
-   * @param verb            Http verb to process
-   * @param currPath        Current path for the specification
-   * @param opts            Options for the path
-   */
-  function processVerb (verb, currPath, opts) {
-    if (verb === 'resource')
-      defineResource (currPath, opts);
-    else
-      defineVerbHandler (verb, currPath, opts);
-
-    /**
-     * Process a resource path. The controller in this path must be an instance
-     * of a ResourceController.
-     */
-    function defineResource (path, opts) {
-      // Define the resource specification.
-
-      winston.log ('debug', 'processing resource %s', path);
-
-      // Locate the controller specified in the options.
-      var controllerName = opts.controller;
-
-      if (!controllerName)
-        throw new Error (util.format ('%s is missing controller property', path));
-
-      var controller = objectPath.get (self._controllers, controllerName);
-
-      if (!controller)
-        throw new Error (util.format ('%s controller does not exist', controllerName));
-
-      // Get the actions of the controller.
-      var actions = controller.actions;
-
-      if (!actions)
-        throw new Error (util.format ('%s must define actions property', controllerName));
-
-      var resourceId = controller['resourceId'];
-
-      if (!resourceId)
-        throw new Error (util.format ('%s must define resourceId property', controllerName));
-
-      if (opts.allow && opts.deny)
-        throw new Error (util.format ('%s can only define allow or deny property, not both', path));
-
-      // All actions in the resource controller are allowed from the beginning. We
-      // adjust this collection based on the actions defined by the allow/deny property.
-
-      var allowed = Object.keys (actions);
-
-      if (opts.allow)
-        allowed = opts.allow;
-
-      if (opts.deny) {
-        // Remove the actions that are being denied.
-        for (var i = 0, len = opts.deny.length; i < len; ++ i)
-          allowed.splice (allowed.indexOf (opts.deny[i]), 1);
-      }
-
-      // Build the specification for managing the resource.
-      var singleBasePath = '/:' + resourceId;
-      var spec = {};
-      var singleSpec = {};
-
-      allowed.forEach (function (name) {
-        var action = actions[name];
-
-        if (_.isArray (action)) {
-          action.forEach (function (item) {
-            processAction (item);
-          });
-        }
-        else if (_.isObject (action)) {
-          processAction (action);
-        }
-
-        function processAction (action) {
-          if (action.path) {
-            if (action.path.startsWith (SINGLE_RESOURCE_BASE_PATH)) {
-              var part = action.path.slice (SINGLE_RESOURCE_BASE_PATH.length);
-
-              if (part.length === 0) {
-                // We are working with an action for a single resource.
-                singleSpec[action.verb] = makeAction (controllerName, action.method, opts.options);
-              }
-              else {
-                if (!singleSpec[part])
-                  singleSpec[part] = {};
-
-                singleSpec[part][action.verb] = makeAction (controllerName, action.method, opts.options);
-              }
-            }
-            else {
-              // We are working with an action for the collective resources.
-              spec[action.path] = {};
-              spec[action.path][action.verb] = makeAction (controllerName, action.method, opts.options);
-            }
-          }
-          else {
-            // We are working with an action for the collective resources.
-            spec[action.verb] = makeAction (controllerName, action.method, opts.options);
-          }
-        }
-      });
-
-      // Add the specification for managing a since resource to the specification
-      // for managing all the resources.
-      spec[singleBasePath] = singleSpec;
-
-      self.addSpecification (spec, path)
-    }
-
-    /**
-     * Define a handler for a single HTTP verb, such as get, put, and delete. The
-     * value of \a verb can be any HTTP verb support by Express.js.
-     *
-     * @param     verb        HTTP verb
-     * @param     path        Path associated with verb
-     * @param     opts        Definition options
-     */
-    function defineVerbHandler (verb, path, opts) {
-      var verbFunc = self._router[verb.toLowerCase ()];
-
-      if (!verbFunc)
-        throw new Error (util.format ('%s is not a valid http verb', verb));
-
-      winston.log ('debug', 'processing %s %s', verb.toUpperCase (), currPath);
-
-      // Make sure there is either an action or view defined.
-      if (opts.action === undefined && opts.view === undefined)
-        throw new Error (util.format ('%s %s must define an action or view property', verb, currPath));
-
-      var middleware = opts.before || [];
-
-      if (opts.action) {
-        // Resolve controller and its method. The expected format is controller@method. We are
-        // also going to pass params to the controller method.
-        var controller = self.resolveController (opts.action);
-        var params = {path: path};
-
-        if (opts.options)
-          params.options = opts.options;
-
-        var result = controller.invoke (params);
-
-        if (_.isFunction (result) || _.isArray (result)) {
-          // Push the function/array onto the middleware stack.
-          middleware.push (result);
-        }
-        else if (_.isObject (result)) {
-          // The user elects to have separate validation, sanitize, and execution
-          // section for the controller method. There must be a execution function.
-          if (!result.execute)
-            throw new Error (util.format ('Controller method must define an \'execute\' property [%s %s]', verb, currPath));
-
-          // The controller method has the option of validating and sanitizing the
-          // input data. We need to check for either one and add middleware functions
-          // if it exists.
-          if (result.validate) {
-            var validate = result.validate;
-
-            if (_.isFunction (validate)) {
-              // The method has its own validation function.
-              middleware.push (validateByFunction (validate));
-            }
-            else if (_.isObject (validate) && !_.isArray (validate)) {
-              // The method is using a express-validator schema for validation.
-              middleware.push (validateBySchema (validate));
-            }
-            else {
-              throw new Error (util.format ('Unsupported validate value [%s]', util.inspect (validate)));
-            }
-          }
-
-          if (result.sanitize)
-            middleware.push (sanitizer (result.sanitize));
-
-          // Lastly, push the execution function onto the middleware stack.
-          middleware.push (executor (result.execute));
-        }
-        else {
-          throw new Error ('Return type of controller method must be a function or object');
-        }
-      }
-      else if (opts.view) {
-        // Use a generic callback to render the view. Make sure we save a reference
-        // to the target view since the opts variable will change during the next
-        // iteration.
-        middleware.push (render (opts.view));
-      }
-
-      // Add all middleware that should happen after processing.
-      if (opts.after)
-        middleware = middleware.concat (opts.after);
-
-      // Define the route path. Let's be safe and make sure there is no
-      // empty middleware being added to the route.
-      if (middleware.length > 0)
-        verbFunc.call (self._router, path, middleware);
-    }
-  }
-
-  /**
-   * Process the <use> statement in the router. If the path is defined, then the
-   * handlers are bound to the path. If there is no path, then the handlers are
-   * used for all paths.
-   *
-   * @param path
-   * @param handlers
-   */
-  function processUse (path, handlers) {
-    winston.log ('debug', 'processing use %s', path);
-    self._router.use (path, handlers);
-  }
+  var _this = this;
 
   if (!currPath)
     currPath = this._basePath;
@@ -470,47 +277,293 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
     this._router.use (currPath, spec);
   }
   else if (_.isObject (spec)) {
-    // First, we start with the head verb since it must be defined before the get
+    // The first step is to apply the policy in the specification, if exists. This
+    // is because we need to determine if the current request can even access the
+    // router path before we attempt to process it.
+    if (spec.policy)
+      this._applyPolicy (currPath, spec.policy);
+
+    // Next, we process any "use" methods.
+    if (spec.use)
+      this._processUse (currPath, spec.use);
+
+    // Next, we start with the head verb since it must be defined before the get
     // verb. Otherwise, express will use the get verb over the head verb.
     if (spec.head)
-      processVerb ('head', currPath, spec.head);
+      this._processToken ('head', currPath, spec.head);
 
     // The specification is a text-based key-value pair. We need to read each key
-    // in the specification and build the described router.
+    // in the specification and apply it accordingly on the router.
     for (var key in spec) {
-      if (!spec.hasOwnProperty (key) || key === 'head')
+      if (!spec.hasOwnProperty (key) || key === 'head' || key === 'use' || key === 'policy')
         continue;
 
-      if (key === 'use') {
-        // This is a use specification, but without a path because it is associated
-        // with the router. So, process the use specification without specifying a path.
-        processUse (currPath, spec[key]);
-      }
-      else {
-        // The first letter of the key is a hint at how to process this key's value.
-        switch (key[0]) {
-          case '/':
-            var innerPath = currPath + (currPath.endsWith ('/') ? key.slice (1) : key);
-            this.addSpecification (spec[key], innerPath);
-            break;
+      // The first letter of the key is a hint at how to process this key's value.
+      switch (key[0]) {
+        case '/':
+          var innerPath = currPath + (currPath.endsWith ('/') ? key.slice (1) : key);
+          this.addSpecification (spec[key], innerPath);
+          break;
 
-          case ':':
-            this.addParameter (key, spec[key]);
-            break;
+        case ':':
+          this.addParameter (key, spec[key]);
+          break;
 
-          default:
-            processVerb (key, currPath, spec[key]);
-        }
+        default:
+          this._processToken (key, currPath, spec[key]);
+          break;
       }
     }
   }
   else {
-    throw Error ('Specification must be a object, router function, or an array of router functions');
+    throw new Error ('Specification must be a object, router function, or an array of router functions');
   }
 
   return this;
 };
 
+/**
+ * Register a route with the router. A router starts with a forward slash (/).
+ *
+ * @param token           String token
+ * @param currPath        Current path for the specification
+ * @param opts            Options for the path
+ */
+RouterBuilder.prototype._processToken = function processToken (token, currPath, opts) {
+  switch (token) {
+    case 'resource':
+      this._defineResource (currPath, opts);
+      break;
+
+    default:
+      this._defineVerbHandler (token, currPath, opts);
+      break;
+  }
+};
+
+/**
+ * Process a resource path. The controller in this path must be an instance
+ * of a ResourceController.
+ */
+RouterBuilder.prototype._defineResource = function (path, opts) {
+  // Define the resource specification.
+
+  winston.log ('debug', 'processing resource %s', path);
+
+  // Locate the controller specified in the options.
+  var controllerName = opts.controller;
+
+  if (!controllerName)
+    throw new Error (util.format ('%s is missing controller property', path));
+
+  var controllers = this._app.controllers;
+  var controller = objectPath.get (controllers, controllerName);
+
+  if (!controller)
+    throw new Error (util.format ('%s controller does not exist', controllerName));
+
+  // Get the actions of the controller.
+  var actions = controller.actions;
+
+  if (!actions)
+    throw new Error (util.format ('%s must define actions property', controllerName));
+
+  var resourceId = controller['resourceId'];
+
+  if (!resourceId)
+    throw new Error (util.format ('%s must define resourceId property', controllerName));
+
+  if (opts.allow && opts.deny)
+    throw new Error (util.format ('%s can only define allow or deny property, not both', path));
+
+  // All actions in the resource controller are allowed from the beginning. We
+  // adjust this collection based on the actions defined by the allow/deny property.
+
+  var allowed = Object.keys (actions);
+
+  if (opts.allow)
+    allowed = opts.allow;
+
+  if (opts.deny) {
+    // Remove the actions that are being denied.
+    for (var i = 0, len = opts.deny.length; i < len; ++ i)
+      allowed.splice (allowed.indexOf (opts.deny[i]), 1);
+  }
+
+  // Build the specification for managing the resource.
+  var singleBasePath = '/:' + resourceId;
+  var spec = {};
+  var singleSpec = {};
+
+  allowed.forEach (function (name) {
+    var action = actions[name];
+
+    if (_.isArray (action)) {
+      action.forEach (function (item) {
+        processAction (item);
+      });
+    }
+    else if (_.isObject (action)) {
+      processAction (action);
+    }
+
+    function processAction (action) {
+      if (action.path) {
+        if (action.path.startsWith (SINGLE_RESOURCE_BASE_PATH)) {
+          var part = action.path.slice (SINGLE_RESOURCE_BASE_PATH.length);
+
+          if (part.length === 0) {
+            // We are working with an action for a single resource.
+            singleSpec[action.verb] = makeAction (controllerName, action.method, opts.options);
+          }
+          else {
+            if (!singleSpec[part])
+              singleSpec[part] = {};
+
+            singleSpec[part][action.verb] = makeAction (controllerName, action.method, opts.options);
+          }
+        }
+        else {
+          // We are working with an action for the collective resources.
+          spec[action.path] = {};
+          spec[action.path][action.verb] = makeAction (controllerName, action.method, opts.options);
+        }
+      }
+      else {
+        // We are working with an action for the collective resources.
+        spec[action.verb] = makeAction (controllerName, action.method, opts.options);
+      }
+    }
+  });
+
+  // Add the specification for managing a since resource to the specification
+  // for managing all the resources.
+  spec[singleBasePath] = singleSpec;
+
+  this.addSpecification (spec, path)
+};
+
+
+/**
+ * Define a handler for a single HTTP verb, such as get, put, and delete. The
+ * value of \a verb can be any HTTP verb support by Express.js.
+ *
+ * @param     verb        HTTP verb
+ * @param     path        Path associated with verb
+ * @param     opts        Definition options
+ */
+RouterBuilder.prototype._defineVerbHandler = function (verb, path, opts) {
+  var verbFunc = this._router[verb.toLowerCase ()];
+
+  if (!verbFunc)
+    throw new Error (util.format ('%s is not a valid http verb', verb));
+
+  winston.log ('debug', 'processing %s %s', verb.toUpperCase (), path);
+
+  // Make sure there is either an action or view defined.
+  if (opts.action === undefined && opts.view === undefined)
+    throw new Error (util.format ('%s %s must define an action or view property', verb, path));
+
+  var middleware = opts.before || [];
+
+  if (opts.action) {
+    // Resolve controller and its method. The expected format is controller@method. We are
+    // also going to pass params to the controller method.
+    var controller = this._resolveController (opts.action);
+    var params = {path: path};
+
+    if (opts.options)
+      params.options = opts.options;
+
+    var result = controller.invoke (params);
+
+    if (_.isFunction (result) || _.isArray (result)) {
+      // Push the function/array onto the middleware stack.
+      middleware.push (result);
+    }
+    else if (_.isObject (result)) {
+      // The user elects to have separate validation, sanitize, and execution
+      // section for the controller method. There must be a execution function.
+      if (!result.execute)
+        throw new Error (util.format ('Controller method must define an \'execute\' property [%s %s]', verb, path));
+
+      // The controller method has the option of validating and sanitizing the
+      // input data. We need to check for either one and add middleware functions
+      // if it exists.
+      if (result.validate) {
+        var validate = result.validate;
+
+        if (_.isFunction (validate)) {
+          // The method has its own validation function.
+          middleware.push (validateByFunction (validate));
+        }
+        else if (_.isObject (validate) && !_.isArray (validate)) {
+          // The method is using a express-validator schema for validation.
+          middleware.push (validateBySchema (validate));
+        }
+        else {
+          throw new Error (util.format ('Unsupported validate value [%s]', util.inspect (validate)));
+        }
+      }
+
+      if (result.sanitize)
+        middleware.push (sanitizer (result.sanitize));
+
+      // Lastly, push the execution function onto the middleware stack.
+      middleware.push (executor (result.execute));
+    }
+    else {
+      throw new Error ('Return type of controller method must be a function or object');
+    }
+  }
+  else if (opts.view) {
+    // Use a generic callback to render the view. Make sure we save a reference
+    // to the target view since the opts variable will change during the next
+    // iteration.
+    middleware.push (render (opts.view));
+  }
+
+  // Add all middleware that should happen after processing.
+  if (opts.after)
+    middleware = middleware.concat (opts.after);
+
+  // Define the route path. Let's be safe and make sure there is no
+  // empty middleware being added to the route.
+  if (middleware.length > 0)
+    verbFunc.call (this._router, path, middleware);
+};
+
+
+/**
+ * Apply the policy to the target path.
+ *
+ * @param targetPath
+ * @param policy
+ */
+RouterBuilder.prototype._applyPolicy = function (targetPath, policy) {
+  winston.log ('debug', 'processing policy for %s', targetPath);
+  this._router.use (targetPath, wrapPolicy (this._app, policy));
+};
+
+/**
+ * Process the <use> statement in the router. If the path is defined, then the
+ * handlers are bound to the path. If there is no path, then the handlers are
+ * used for all paths.
+ *
+ * @param path
+ * @param handlers
+ */
+RouterBuilder.prototype._processUse = function (path, handlers) {
+  winston.log ('debug', 'processing use %s', path);
+  this._router.use (path, handlers);
+};
+
+/**
+ *
+ * @param param
+ * @param opts
+ * @param override
+ */
 RouterBuilder.prototype.addParameter = function (param, opts, override) {
   winston.log ('debug', 'processing parameter %s', param);
 
@@ -528,7 +581,7 @@ RouterBuilder.prototype.addParameter = function (param, opts, override) {
   else if (_.isObject (opts)) {
     if (opts.action) {
       // The parameter invokes an operation on the controller.
-      var controller = this.resolveController (opts.action);
+      var controller = this._resolveController (opts.action);
       handler = controller.invoke ();
     }
     else {
