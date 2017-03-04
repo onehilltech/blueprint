@@ -442,7 +442,7 @@ RouterBuilder.prototype._defineVerbHandler = function (verb, path, opts) {
   var middleware = [];
 
   if (_.isString (opts)) {
-    middleware = middleware.concat (actionStringToMiddleware (opts));
+    middleware = middleware.concat (this._actionStringToMiddleware (opts, path));
   }
   else if (_.isArray (opts)) {
     // Add the array of functions to the middleware.
@@ -457,7 +457,7 @@ RouterBuilder.prototype._defineVerbHandler = function (verb, path, opts) {
       middleware.concat (opts.before);
 
     if (opts.action) {
-      middleware = middleware.concat (actionStringToMiddleware (opts.action));
+      middleware = middleware.concat (this._actionStringToMiddleware (opts.action, path, opts.options));
     }
     else if (opts.view) {
       // Use a generic callback to render the view. Make sure we save a reference
@@ -475,66 +475,67 @@ RouterBuilder.prototype._defineVerbHandler = function (verb, path, opts) {
   // empty middleware being added to the route.
   if (middleware.length > 0)
     verbFunc.call (this._router, path, middleware);
-
-  /**
-   * Convert an action string to a array of middleware functions.
-   *
-   * @param str
-   * @returns {Array}
-   */
-  function actionStringToMiddleware (str) {
-    var middleware = [];
-
-    // Resolve controller and its method. The expected format is controller@method. We are
-    // also going to pass params to the controller method.
-    var controller = _this._resolveController (str);
-    var params = {path: path};
-
-    if (opts.options)
-      params.options = opts.options;
-
-    var result = controller.invoke (params);
-
-    if (_.isFunction (result) || _.isArray (result)) {
-      // Push the function/array onto the middleware stack.
-      middleware.push (result);
-    }
-    else if (_.isObject (result)) {
-      // The user elects to have separate validation, sanitize, and execution
-      // section for the controller method. There must be a execution function.
-      if (!result.execute)
-        throw new Error (util.format ('Controller method must define an \'execute\' property [%s %s]', verb, path));
-
-      // The controller method has the option of validating and sanitizing the
-      // input data. We need to check for either one and add middleware functions
-      // if it exists.
-      if (result.validate) {
-        var validate = result.validate;
-
-        if (_.isFunction (validate)) {
-          // The method has its own validation function.
-          middleware.push (validateByFunction (validate));
-        }
-        else if (_.isObject (validate) && !_.isArray (validate)) {
-          // The method is using a express-validator schema for validation.
-          middleware.push (validateBySchema (validate));
-        }
-        else {
-          throw new Error (util.format ('Unsupported validate value [%s]', util.inspect (validate)));
-        }
-      }
-
-      if (result.sanitize)
-        middleware.push (sanitizer (result.sanitize));
-
-      // Lastly, push the execution function onto the middleware stack.
-      middleware.push (executor (result.execute));
-    }
-
-    return middleware;
-  }
 };
 
+/**
+ * Convert an action string to a array of middleware functions.
+ *
+ * @param str
+ * @param path
+ * @param options
+ * @returns {Array}
+ */
+RouterBuilder.prototype._actionStringToMiddleware = function (str, path, options) {
+  var middleware = [];
+
+  // Resolve controller and its method. The expected format is controller@method. We are
+  // also going to pass params to the controller method.
+  var controller = this._resolveController (str);
+  var params = {path: path};
+
+  if (options)
+    params.options = options;
+
+  var result = controller.invoke (params);
+
+  if (_.isFunction (result) || _.isArray (result)) {
+    // Push the function/array onto the middleware stack.
+    middleware.push (result);
+  }
+  else if (_.isObject (result)) {
+    // The user elects to have separate validation, sanitize, and execution
+    // section for the controller method. There must be a execution function.
+    if (!result.execute)
+      throw new Error (util.format ('Controller method must define an \'execute\' property [%s %s]', verb, path));
+
+    // The controller method has the option of validating and sanitizing the
+    // input data. We need to check for either one and add middleware functions
+    // if it exists.
+    if (result.validate) {
+      var validate = result.validate;
+
+      if (_.isFunction (validate)) {
+        // The method has its own validation function.
+        middleware.push (validateByFunction (validate));
+      }
+      else if (_.isObject (validate) && !_.isArray (validate)) {
+        // The method is using a express-validator schema for validation.
+        middleware.push (validateBySchema (validate));
+      }
+      else {
+        throw new Error (util.format ('Unsupported validate value [%s]', util.inspect (validate)));
+      }
+    }
+
+    if (result.sanitize)
+      middleware.push (sanitizer (result.sanitize));
+
+    // Lastly, push the execution function onto the middleware stack.
+    middleware.push (executor (result.execute));
+  }
+
+  return middleware;
+};
 
 /**
  * Apply the policy to the target path.
