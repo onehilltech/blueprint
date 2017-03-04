@@ -29,9 +29,9 @@ describe ('RouterBuilder', function () {
   describe ('new RouterBuilder ()', function () {
     it ('should create a new RouterBuilder', function () {
       routersPath = path.resolve (__dirname, '../fixtures/app/routers');
-      routerBuilder = new RouterBuilder (app.controllers);
+      routerBuilder = new RouterBuilder (app);
 
-      expect (routerBuilder._controllers).to.equal (app.controllers);
+      expect (routerBuilder._app).to.equal (app);
     });
   });
   
