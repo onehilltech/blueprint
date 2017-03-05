@@ -13,8 +13,6 @@ module.exports = exports = function (role, req, callback) {
 
   async.some (scopes,
     function (scope, callback) {
-      // We are using async 1.5. This must change for async 2.0 to
-      // callback (null, scope === role).
       return callback (null, scope === role);
     }, callback);
 };

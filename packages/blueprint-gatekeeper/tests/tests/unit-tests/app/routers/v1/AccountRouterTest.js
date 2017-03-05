@@ -2,6 +2,7 @@ var request   = require ('supertest')
   , expect    = require ('chai').expect
   , async     = require ('async')
   , blueprint = require ('@onehilltech/blueprint')
+  , mongodb   = require ('@onehilltech/blueprint-mongodb')
   ;
 
 const datamodel = require ('../../../../../fixtures/datamodel')
@@ -206,29 +207,29 @@ describe ('AccountRouter', function () {
   });
 
   describe ('/v1/accounts/:accountId', function () {
-    describe ('GET', function () {
-      var projection = {
-        '__v': 0,
-        'password': 0
-      };
+    var account;
 
+    describe ('GET', function () {
       it ('should return the owner account', function (done) {
         var accountId = datamodel.models.accounts[0]._id;
 
-        Account.findById (accountId, projection, function (err, account) {
+        Account.findById (accountId, function (err, result) {
           if (err) return done (err);
+          account = result;
 
           request (server.app)
             .get ('/v1/accounts/' + accountId)
             .set ('Authorization', 'Bearer ' + userToken)
-            .expect (200, {account: JSON.parse (JSON.stringify (account))}, done);
+            .expect (200, {account: mongodb.testing.lean (account)}).end (function (err, res) {
+              return done (err);
+          });
         });
       });
 
       it ('should retrieve a user account for an admin', function (done) {
         var accountId = datamodel.models.accounts[0]._id;
 
-        Account.findById (accountId, projection, function (err, account) {
+        Account.findById (accountId, function (err, account) {
           if (err) return done (err);
 
           request (server.app)
@@ -245,6 +246,28 @@ describe ('AccountRouter', function () {
           .get ('/v1/accounts/' + accountId)
           .set ('Authorization', 'Bearer ' + userToken)
           .expect (403, done);
+      });
+    });
+
+    describe ('UPDATE', function () {
+      it ('should not update scope and created_by', function (done) {
+        var accountId = datamodel.models.accounts[0]._id;
+
+        request (server.app)
+          .put ('/v1/accounts/' + accountId)
+          .set ('Authorization', 'Bearer ' + userToken)
+          .send ({account: {created_by: new mongodb.Types.ObjectId (), scope: ['the_new_scope']}})
+          .expect (200, {account: mongodb.testing.lean (account)}, done);
+      });
+
+      it ('should update the email', function (done) {
+        var accountId = datamodel.models.accounts[0]._id;
+
+        request (server.app)
+          .put ('/v1/accounts/' + accountId)
+          .set ('Authorization', 'Bearer ' + userToken)
+          .send ({account: {email: 'foo@contact.com'}} )
+          .expect (200, {account: mongodb.testing.lean (account)}, done);
       });
     });
 

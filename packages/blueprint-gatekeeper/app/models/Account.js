@@ -1,12 +1,26 @@
 'use strict';
 
-var bcrypt  = require ('bcrypt')
-  , mongodb = require ('@onehilltech/blueprint-mongodb')
-  , options = require ('./commonOptions') ()
+var bcrypt   = require ('bcrypt')
+  , mongodb  = require ('@onehilltech/blueprint-mongodb')
+  , ObjectId = mongodb.Schema.Types.ObjectId
+  , options  = require ('./commonOptions') ()
   ;
 
 var Client = require ('./Client')
   ;
+
+/**
+ * The default transformation always removes the password from the
+ * account. This ensures we do not leak the password.
+ *
+ * @param doc
+ * @param ret
+ */
+function transform (doc, ret) {
+  delete ret.password;
+}
+
+options.toJSON.transform = options.toObject.transform = transform;
 
 const SALT_WORK_FACTOR = 10;
 
@@ -17,13 +31,13 @@ var schema = new Schema ({
   username: { type: String, required: true, unique: true, index: true },
 
   /// Encrypted password
-  password: { type: String, required: true},
+  password: { type: String, required: true, hidden: true},
 
   /// Contact email address for the account.
-  email: { type: String, required: true, unique: true, trim: true },
+  email: { type: String, required: true, unique: true, trim: true},
 
   /// The client that created the account.
-  created_by: {type: mongodb.Schema.Types.ObjectId, required: true, ref: Client.modelName, index: true, validation: {optional: true}},
+  created_by: {type: ObjectId, required: true, ref: Client.modelName, index: true, validation: {optional: true}, const: true},
 
   /// Enabled state for the account.
   enabled: { type: Boolean, required: true, default: true },
