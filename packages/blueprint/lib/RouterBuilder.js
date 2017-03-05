@@ -18,7 +18,6 @@ const SINGLE_RESOURCE_BASE_PATH = '/:rcId';
  *
  * @param controller
  * @param method
- * @param options
  * @returns {{action: string, options: *}}
  */
 function makeAction (controller, method, options) {
@@ -370,6 +369,9 @@ RouterBuilder.prototype._defineResource = function (path, opts) {
   var singleBasePath = '/:' + resourceId;
   var spec = {};
   var singleSpec = {};
+
+  if (opts.policy)
+    spec.policy = opts.policy;
 
   allowed.forEach (function (name) {
     var action = actions[name];

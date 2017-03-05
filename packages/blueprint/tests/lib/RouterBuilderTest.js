@@ -51,6 +51,32 @@ describe ('RouterBuilder', function () {
     });
   });
 
+  describe ('policies', function () {
+    it ('should handle request because policy passed', function (done) {
+      testing.request ()
+        .get ('/policies/accepted')
+        .expect (200, 'Hello, World!', done);
+    });
+
+    it ('should reject request because policy failed', function (done) {
+      testing.request ()
+        .get ('/policies/rejected')
+        .expect (403, { errors:
+          { code: 'policy_failed',
+            message: 'Policy failed',
+            details: { name: 'alwaysFalse' } } }, done);
+    });
+
+    it ('should reject request because policy failed on a http method', function (done) {
+      testing.request ()
+        .get ('/policies/methods/rejected')
+        .expect (403, { errors:
+          { code: 'policy_failed',
+            message: 'Policy failed',
+            details: { name: 'alwaysFalse' } } }, done);
+    });
+  });
+
   describe ('resources', function () {
     describe ('all actions', function () {
       describe ('create', function () {
@@ -166,31 +192,19 @@ describe ('RouterBuilder', function () {
           .expect (404, done);
       });
     });
-  });
 
-  describe ('policies', function () {
-    it ('should handle request because policy passed', function (done) {
-      testing.request ()
-        .get ('/policies/accepted')
-        .expect (200, 'Hello, World!', done);
-    });
+    describe ('policies', function () {
+      it ('should accept request on all methods', function (done) {
+        testing.request ()
+          .get ('/resource/policies/accepted')
+          .expect (200, done);
+      });
 
-    it ('should reject request because policy failed', function (done) {
-      testing.request ()
-        .get ('/policies/rejected')
-        .expect (403, { errors:
-          { code: 'policy_failed',
-            message: 'Policy failed',
-            details: { name: 'alwaysFalse' } } }, done);
-    });
-
-    it ('should reject request because policy failed on a http method', function (done) {
-      testing.request ()
-        .get ('/policies/methods/rejected')
-        .expect (403, { errors:
-          { code: 'policy_failed',
-            message: 'Policy failed',
-            details: { name: 'alwaysFalse' } } }, done);
+      it ('should reject request on all methods', function (done) {
+        testing.request ()
+          .get ('/resource/policies/rejected')
+          .expect (403, done);
+      });
     });
   });
 });

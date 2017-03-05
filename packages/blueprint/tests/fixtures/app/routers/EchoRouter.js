@@ -17,5 +17,23 @@ module.exports = {
       controller: 'EchoResourceController',
       deny: ['delete']
     }
+  },
+
+  '/resource': {
+    '/policies': {
+      '/accepted': {
+        resource: {
+          controller: 'EchoResourceController',
+          policy: 'alwaysTrue'
+        }
+      },
+
+      '/rejected': {
+        resource: {
+          controller: 'EchoResourceController',
+          policy: 'alwaysFalse'
+        }
+      }
+    }
   }
 };
