@@ -33,6 +33,16 @@ module.exports = {
           controller: 'EchoResourceController',
           policy: 'alwaysFalse'
         }
+      },
+
+      '/methods': {
+        resource: {
+          controller: 'EchoResourceController',
+          actions: {
+            getOne: {policy: 'alwaysTrue'},
+            getAll: {policy: 'alwaysFalse'}
+          }
+        }
       }
     }
   }

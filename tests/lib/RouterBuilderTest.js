@@ -205,6 +205,18 @@ describe ('RouterBuilder', function () {
           .get ('/resource/policies/rejected')
           .expect (403, done);
       });
+
+      it ('should accept request on a single resource action', function (done) {
+        testing.request ()
+          .get ('/resource/policies/methods/id')
+          .expect (200, done);
+      });
+
+      it ('should reject request on a single resource action', function (done) {
+        testing.request ()
+          .get ('/resource/policies/methods')
+          .expect (403, done);
+      })
     });
   });
 });
