@@ -1,6 +1,6 @@
-var async = require ('async')
-  , util = require ('util')
-  , _ = require ('underscore')
+var async     = require ('async')
+  , util      = require ('util')
+  , _         = require ('underscore')
   , Framework = require ('./Framework')
   ;
 
@@ -74,58 +74,30 @@ exports.evaluate = evaluate;
  *
  * @constructor
  */
-function PolicyRule () {
+function policyWrapper () {
   var args = [].slice.call (arguments);
   var policy = args.shift ();
 
+  if (!_.isFunction (policy) && !_.isString (policy))
+    throw new Error ('Policy must be a Function or String');
+
   if (_.isString (policy)) {
     var name = policy;
-    policy = Framework ().app.policyManager.find (policy);
+    policy = Framework ().app.policyManager.find (name);
 
     if (!policy)
       throw new Error (util.format ('Policy %s does not exist', name));
   }
 
   return function __blueprint_policy (req, callback) {
-    // Push the callback as the last argument.
-    args.push (req);
-    args.push (callback);
+    // Clone the arguments array for the policy, then add to request and callback
+    // as the last arguments.
+    var policyArgs = args.slice ();
+    policyArgs.push (req);
+    policyArgs.push (callback);
 
     // Call the check.
-    return policy.apply (null, args);
-  };
-}
-
-/**
- * Collection of policies where at least one must pass.
- *
- * @param policies
- * @returns {function(req, callback)}
- * @constructor
- */
-function orPolicy (policies) {
-  return function __blueprint_or_policy (req, callback) {
-    async.some (policies,
-      function __blueprint_or_iterator (policy, callback) {
-        return policy (req, callback);
-      },
-      callback);
-  };
-}
-
-/**
- * Collection of policies where all must pass.
- *
- * @param policies
- * @returns {function(req, callback)}
- */
-function andPolicy (policies) {
-  return function __blueprint_and_policy (req, callback) {
-    async.every (policies,
-      function __blueprint_and_iterator (policy, callback) {
-        return policy (req, callback);
-      },
-      callback);
+    return policy.apply (null, policyArgs);
   };
 }
 
@@ -135,7 +107,7 @@ function andPolicy (policies) {
  * @param policy
  * @returns {function(req, callback)}
  */
-function notPolicy (policy) {
+function not (policy) {
   return function __blueprint_not_policy (req, callback) {
     return policy (req, function __blueprint_not_result (err, result) {
       return callback (err, !result);
@@ -143,7 +115,48 @@ function notPolicy (policy) {
   };
 }
 
-exports.assert = PolicyRule;
-exports.and = andPolicy;
-exports.not = notPolicy;
-exports.or = orPolicy;
+/**
+ * Accept if one of the policies pass.
+ *
+ * @param list          List of policies
+ * @returns {Function}
+ */
+function any (list) {
+  var policies = [];
+
+  list.forEach (function (policy) {
+    policies.push (policyWrapper (policy));
+  });
+
+  return function (req, callback) {
+    async.some (policies, function (policy, callback) {
+      return policy (req, callback);
+    }, callback);
+  }
+}
+
+/**
+ * Accept if all of the policies pass.
+ *
+ * @param list          List of policies
+ * @returns {Function}
+ */
+function all (list) {
+  var policies = [];
+
+  list.forEach (function (policy) {
+    policies.push (policyWrapper (policy));
+  });
+
+  return function (req, callback) {
+    async.every (policies, function (policy, callback) {
+      return policy (req, callback);
+    }, callback);
+  }
+}
+
+exports.assert = policyWrapper;
+exports.not = not;
+exports.any = any;
+exports.all = all;
+
