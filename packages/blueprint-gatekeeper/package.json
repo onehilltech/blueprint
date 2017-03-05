@@ -4,6 +4,7 @@
   "version": "0.50.9",
   "private": false,
   "main": "./lib",
+  "license": "Apache-2.0",
   "keywords": [
     "blueprint-module"
   ],
