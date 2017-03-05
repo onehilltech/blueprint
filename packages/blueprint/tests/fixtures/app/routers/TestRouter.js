@@ -11,10 +11,12 @@ module.exports = exports = {
 
   '/policies': {
     '/accepted': {
+      policy: 'alwaysTrue',
       get: 'TestController@helloWorld'
     },
 
     '/rejected': {
+      policy: 'alwaysFalse',
       get: 'TestController@helloWorld'
     }
   },
