@@ -6,19 +6,14 @@ var blueprint  = require ('@onehilltech/blueprint')
   , uid        = require ('uid-safe')
   , async      = require ('async')
   , gatekeeper = require ('../../lib')
-  ;
-
-var Account = require ('../models/Account')
+  , Account    = require ('../models/Account')
   ;
 
 var ResourceController = mongodb.ResourceController
-  , Policy = blueprint.Policy
   ;
 
 var gatekeeperConfig;
 var tokenStrategy;
-
-const DEFAULT_ACTIVATION_REQUIRED = false;
 
 var activationConfig;
 
@@ -44,47 +39,16 @@ AccountController.prototype.create = function () {
   var options = {
     on: {
       prepareDocument: function (req, doc, callback) {
-        // Overwrite the current document with one that matches the
-        // data model for an account.
-        var required = activationConfig.required;
-
-        if (required === undefined)
-          required = DEFAULT_ACTIVATION_REQUIRED;
-
         doc = {
           email : req.body.account.email,
           username : req.body.account.username,
           password : req.body.account.password,
-          created_by : req.user,
-          activation: {
-            required: required
-          }
+          created_by : req.user._id
         };
 
-        if (req.body.account.scope)
-          doc.scope = req.body.account.scope;
-
-        async.waterfall ([
-          function (callback) {
-            if (!doc.activation.required)
-              return callback (null);
-
-            var opts = {
-              payload: {email: doc.email, username: doc.username},
-              options: {
-                expiresIn: gatekeeperConfig.activation.expiresIn
-              }
-            };
-
-            tokenStrategy.generateToken (opts, callback);
-          }
-        ], function (err, token) {
-          if (err) return callback (err);
-          if (token) doc.activation.token = token;
-
-          return callback (null, doc);
-        });
+        return callback (null, doc);
       },
+
       postExecute: function (req, account, callback) {
         return callback (null, {_id: account._id});
       }

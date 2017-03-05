@@ -221,6 +221,7 @@ describe ('AccountRouter', function () {
             .get ('/v1/accounts/' + accountId)
             .set ('Authorization', 'Bearer ' + userToken)
             .expect (200, {account: mongodb.testing.lean (account)}).end (function (err, res) {
+              console.log (res.body);
               return done (err);
           });
         });
