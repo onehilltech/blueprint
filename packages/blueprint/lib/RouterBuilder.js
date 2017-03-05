@@ -243,8 +243,6 @@ RouterBuilder.prototype._resolveController = function (action) {
  * @returns {RouterBuilder}
  */
 RouterBuilder.prototype.addSpecification = function (spec, currPath) {
-  var _this = this;
-
   if (!currPath)
     currPath = this._basePath;
 
@@ -259,7 +257,7 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
     // is because we need to determine if the current request can even access the
     // router path before we attempt to process it.
     if (spec.policy)
-      this._applyPolicy (currPath, spec.policy);
+      this._router.use (currPath, this._applyPolicy (spec.policy));
 
     // Next, we process any "use" methods.
     if (spec.use)
@@ -452,8 +450,11 @@ RouterBuilder.prototype._defineVerbHandler = function (verb, path, opts) {
     if (!((opts.action && !opts.view) || (!opts.action && opts.view)))
       throw new Error (util.format ('%s %s must define an action or view property', verb, path));
 
+    if (opts.policy)
+      middleware.push (this._applyPolicy (opts.policy));
+
     if (opts.before)
-      middleware.concat (opts.before);
+      middleware = middleware.concat (opts.before);
 
     if (opts.action) {
       middleware = middleware.concat (this._actionStringToMiddleware (opts.action, path, opts.options));
@@ -539,34 +540,28 @@ RouterBuilder.prototype._actionStringToMiddleware = function (str, path, options
 /**
  * Apply the policy to the target path.
  *
- * @param targetPath
  * @param policy
  */
-RouterBuilder.prototype._applyPolicy = function (targetPath, policy) {
-  winston.log ('debug', 'processing policy for %s', targetPath);
-  this._router.use (targetPath, $policyWrapper (this._app, policy));
+RouterBuilder.prototype._applyPolicy = function (policy) {
+  if (_.isString (policy)) {
+    policy = objectPath.get (this._app.policies, policy);
 
-  function $policyWrapper (app, policy) {
-    if (_.isString (policy)) {
-      policy = objectPath.get (app.policies, policy);
-
-      if (!policy)
-        throw new Error (util.format ('Policy %s not found', policy));
-    }
-
-    return function __blueprint_policy (req, res, next) {
-      try {
-        policy (req, function (err, result) {
-          if (err) return handleError (err, res);
-          if (!result) return handleError (new HttpError (403, 'policy_failed', 'Policy failed', {name: policy.name}), res);
-          return next ();
-        });
-      }
-      catch (ex) {
-        return handleError (ex, res);
-      }
-    }
+    if (!policy)
+      throw new Error (util.format ('Policy %s not found', policy));
   }
+
+  return function __blueprint_policy (req, res, next) {
+    try {
+      policy (req, function (err, result) {
+        if (err) return handleError (err, res);
+        if (!result) return handleError (new HttpError (403, 'policy_failed', 'Policy failed', {name: policy.name}), res);
+        return next ();
+      });
+    }
+    catch (ex) {
+      return handleError (ex, res);
+    }
+  };
 };
 
 /**
