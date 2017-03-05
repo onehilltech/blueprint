@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@onehilltech/blueprint-mongodb": "^0.20.6",
-    "async": "^2.1.4",
+    "async": "^2.1.5",
     "bcrypt": "^0.8.5",
     "commander": "^2.9.0",
     "cors": "^2.7.1",
@@ -23,6 +23,7 @@
     "jsonfile": "^2.2.3",
     "jsonwebtoken": "^7.3.0",
     "mocha": "^3.2.0",
+    "mocha-lcov-reporter": "^1.3.0",
     "nodemailer": "^2.7.2",
     "nonce": "^1.0.4",
     "passport-http-bearer": "^1.0.1",
@@ -32,8 +33,8 @@
     "path": "^0.11.14",
     "prompt": "^1.0.0",
     "pug": "^2.0.0-beta9",
-    "request": "^2.79.0",
-    "uid-safe": "^2.1.3",
+    "request": "^2.80.0",
+    "uid-safe": "^2.1.4",
     "underscore": "^1.8.3",
     "winston": "^0.7.3",
     "yargs": "^3.29.0"
