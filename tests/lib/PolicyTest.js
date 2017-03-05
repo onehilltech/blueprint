@@ -52,14 +52,6 @@ describe ('Policy', function () {
     });
 
     describe ('#', function () {
-      it ('should export several functions', function () {
-        expect (Policy).to.be.a.function;
-        expect (Policy.assert).to.be.a.function;
-        expect (Policy.and).to.be.a.function;
-        expect (Policy.or).to.be.a.function;
-        expect (Policy.not).to.be.a.function;
-      });
-
       it ('should return a successful evaluation', function (done) {
         Policy (
           Policy.assert (passthrough, true)
@@ -88,9 +80,9 @@ describe ('Policy', function () {
     });
   });
 
-  describe ('#and', function () {
+  describe ('#all', function () {
     it ('should evaluate to true since all asserts are true', function () {
-      var policy = Policy.and ([
+      var policy = Policy.all ([
         Policy.assert (passthrough, true),
         Policy.assert (passthrough, true)
       ]);
@@ -102,33 +94,41 @@ describe ('Policy', function () {
     });
 
     it ('should evaluate to false since 1 assertion is false', function () {
-      var policy = Policy.and ([
+      var policy = Policy.all ([
         Policy.assert (passthrough, true),
         Policy.assert (passthrough, false)
       ]);
 
-      policy (null, function (err, result) {
-        expect (err).to.be.null;
-        expect (result).to.be.false;
-      });
+      // Let's ensure we can call this collection of functions more than once
+      // and not get a callback already called error.
+      for (var i = 0; i < 10; ++ i) {
+        policy (null, function (err, result) {
+          expect (err).to.be.null;
+          expect (result).to.be.false;
+        });
+      }
     });
   });
 
-  describe ('#or', function () {
+  describe ('#any', function () {
     it ('should evaluate true since 1 assertion is true', function () {
-      var policy = Policy.or ([
+      var policy = Policy.any ([
         Policy.assert (passthrough, true),
         Policy.assert (passthrough, false)
       ]);
 
-      policy (null, function (err, result) {
-        expect (err).to.be.null;
-        expect (result).to.be.true;
-      });
+      // Let's ensure we can call this collection of functions more than once
+      // and not get a callback already called error.
+      for (var i = 0; i < 10; ++ i) {
+        policy (null, function (err, result) {
+          expect (err).to.be.null;
+          expect (result).to.be.true;
+        });
+      }
     });
 
     it ('should evaluate false since all assertions are false', function () {
-      var policy = Policy.or ([
+      var policy = Policy.any ([
         Policy.assert (passthrough, false),
         Policy.assert (passthrough, false)
       ]);
