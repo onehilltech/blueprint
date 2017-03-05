@@ -1,10 +1,9 @@
 var expect = require ('chai').expect
   , async  = require ('async')
+  , util   = require ('util')
   ;
 
-var blueprint  = require ('../../lib/')
-  , appFixture = require ('../fixtures/app')
-  , HttpError  = blueprint.errors.HttpError
+var appFixture = require ('../fixtures/app')
   ;
 
 var Policy = require ('../../lib/Policy')
@@ -53,16 +52,8 @@ describe ('Policy', function () {
 
     describe ('#', function () {
       it ('should return a successful evaluation', function (done) {
-        Policy (
-          Policy.assert (passthrough, true)
-        ).evaluate (null, done);
-      });
-
-      it ('should return an error for the evaluation', function (done) {
-        Policy (
-          Policy.assert (passthrough, false)
-        ).evaluate (null, function (err) {
-          expect (err).to.be.instanceof (HttpError);
+        Policy.evaluate (passthrough, true, null, function (err, result) {
+          expect (result).to.be.true;
           return done ();
         });
       });
@@ -103,8 +94,12 @@ describe ('Policy', function () {
       // and not get a callback already called error.
       for (var i = 0; i < 10; ++ i) {
         policy (null, function (err, result) {
-          expect (err).to.be.null;
-          expect (result).to.be.false;
+          expect (err).to.have.property ('name', 'BlueprintError');
+          expect (err).to.have.property ('code', 'policy_failed');
+          expect (err).to.have.property ('message', 'Policy failed');
+          expect (err).to.have.property ('details').to.eql ({name: 'passthrough'});
+
+          expect (result).to.be.undefined;
         });
       }
     });
@@ -134,8 +129,12 @@ describe ('Policy', function () {
       ]);
 
       policy (null, function (err, result) {
-        expect (err).to.be.null;
-        expect (result).to.be.false;
+        expect (err).to.have.property ('name', 'BlueprintError');
+        expect (err).to.have.property ('code', 'policy_failed');
+        expect (err).to.have.property ('message', 'Policy failed');
+        expect (err).to.have.property ('details').to.eql ({name: 'passthrough'});
+
+        expect (result).to.be.undefined;
       });
     });
   });
@@ -147,45 +146,6 @@ describe ('Policy', function () {
       policy (null, function (err, result) {
         expect (err).to.be.null;
         expect (result).to.be.false;
-      });
-    });
-  });
-
-  describe ('#Definition', function () {
-    it ('should create a policy definition', function () {
-      var definition = Policy.Definition ([
-        Policy.assert (passthrough, true),
-        Policy.assert (passthrough, true)
-      ]);
-
-      expect (definition).to.be.a.function;
-    });
-
-    describe ('.evaluate', function () {
-      it ('should pass policy evaluation', function (done) {
-        function complete (err) {
-          expect (err).to.be.null;
-
-          return done ();
-        }
-
-        Policy.Definition (
-          Policy.assert (passthrough, true)
-        ).evaluate (null, complete);
-      });
-
-      it ('should fail policy evaluation', function (done) {
-        function complete (err) {
-          expect (err.statusCode).to.equal (403);
-          expect (err.code).to.equal ('policy_failed');
-          expect (err.message).to.equal ('Policy failed');
-
-          return done ();
-        }
-
-        Policy.Definition (
-          Policy.assert (passthrough, false)
-        ).evaluate (null, complete);
       });
     });
   });
