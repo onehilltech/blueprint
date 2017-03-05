@@ -18,6 +18,12 @@ module.exports = exports = {
     '/rejected': {
       policy: 'alwaysFalse',
       get: 'TestController@helloWorld'
+    },
+
+    '/methods': {
+      '/rejected': {
+        get: {action: 'TestController@helloWorld', policy: 'alwaysFalse'}
+      }
     }
   },
 
