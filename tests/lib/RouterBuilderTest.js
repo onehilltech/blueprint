@@ -4,6 +4,7 @@ var path    = require ('path')
   , request = require ('supertest')
   , util    = require ('util')
   , winston = require ('winston')
+  , testing = require ('../../lib/testing')
   ;
 
 var ApplicationModule = require ('../../lib/ApplicationModule')
@@ -54,7 +55,7 @@ describe ('RouterBuilder', function () {
     describe ('all actions', function () {
       describe ('create', function () {
         it ('should invoke the create method', function (done) {
-          request (app.server.app)
+          testing.request ()
             .post ('/echo')
             .expect (200, {message: 'create'}, done);
         });
@@ -64,13 +65,13 @@ describe ('RouterBuilder', function () {
         it ('should invoke the get method', function (done) {
           var id = 7;
 
-          request (app.server.app)
+          testing.request ()
             .get ('/echo/' + id)
             .expect (200, {message: 'get', id: id}, done);
         });
 
         it ('should invoke the getAll method', function (done) {
-          request (app.server.app)
+          testing.request ()
             .get ('/echo')
             .expect (200, {message: 'getAll'}, done);
         })
@@ -80,7 +81,7 @@ describe ('RouterBuilder', function () {
         it ('should invoke the update method', function (done) {
           var id = 19;
 
-          request (app.server.app)
+          testing.request ()
             .put ('/echo/' + id)
             .expect (200, {message: 'update', id: id}, done);
         });
@@ -90,7 +91,7 @@ describe ('RouterBuilder', function () {
         it ('should invoke the delete method', function (done) {
           var id = 37;
 
-          request (app.server.app)
+          testing.request ()
             .delete ('/echo/' + id)
             .expect (200, {message: 'delete', id: id}, done);
         });
@@ -98,7 +99,7 @@ describe ('RouterBuilder', function () {
 
       describe ('count', function () {
         it ('should invoke the count method', function (done) {
-          request (app.server.app)
+          testing.request ()
             .get ('/echo/count')
             .expect (200, {message: 'count'}, done);
         });
@@ -106,7 +107,7 @@ describe ('RouterBuilder', function () {
 
       describe ('header', function () {
         it ('should invoke the header method', function (done) {
-          request (app.server.app)
+          testing.request ()
             .head ('/echo')
             .expect ('Method-Call', 'header')
             .expect (200, done);
@@ -118,7 +119,7 @@ describe ('RouterBuilder', function () {
       // allow: create, getOne
 
       it ('should invoke the create method', function (done) {
-        request (app.server.app)
+        testing.request ()
           .post ('/allow')
           .expect (200, {message: 'create'}, done);
       });
@@ -126,25 +127,25 @@ describe ('RouterBuilder', function () {
       it ('should invoke the get method', function (done) {
         var id = 7;
 
-        request (app.server.app)
+        testing.request ()
           .get ('/allow/' + id)
           .expect (200, {message: 'get', id: id}, done);
       });
 
       it ('should not invoke the getAll method', function (done) {
-        request (app.server.app)
+        testing.request ()
           .get ('/allow')
           .expect (404, done);
       });
 
       it ('should not invoke the update method', function (done) {
-        request (app.server.app)
+        testing.request ()
           .put ('/allow/7')
           .expect (404, done);
       });
 
       it ('should not invoke the delete method', function (done) {
-        request (app.server.app)
+        testing.request ()
           .delete ('/allow/7')
           .expect (404, done);
       });
@@ -154,13 +155,13 @@ describe ('RouterBuilder', function () {
       // deny: delete
 
       it ('should invoke the create method', function (done) {
-        request (app.server.app)
+        testing.request ()
           .post ('/allow')
           .expect (200, {message: 'create'}, done);
       });
 
       it ('should not invoke the delete method', function (done) {
-        request (app.server.app)
+        testing.request ()
           .delete ('/allow/7')
           .expect (404, done);
       });
@@ -168,12 +169,19 @@ describe ('RouterBuilder', function () {
   });
 
   describe ('policies', function () {
-    it ('should handle the request', function (done) {
-      return done (false);
+    it ('should handle request because policy passed', function (done) {
+      testing.request ()
+        .get ('/policies/accepted')
+        .expect (200, 'Hello, World!', done);
     });
 
-    it ('should not handle the request', function (done) {
-      return done (false);
+    it ('should reject request because policy failed', function (done) {
+      testing.request ()
+        .get ('/policies/rejected')
+        .expect (403, { errors:
+          { code: 'policy_failed',
+            message: 'Policy failed',
+            details: { name: 'alwaysFalse' } } }, done);
     })
   });
 });
