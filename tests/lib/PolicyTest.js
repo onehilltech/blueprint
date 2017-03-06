@@ -61,8 +61,9 @@ describe ('Policy', function () {
 
     it ('should create an assertion from existing application policy', function (done) {
       var f = Policy.assert ('alwaysTrue');
+      var req = {};
 
-      f (null, function (err, result) {
+      f (req, function (err, result) {
         expect (err).to.be.null;
         expect (result).to.be.true;
 
