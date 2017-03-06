@@ -97,7 +97,6 @@ describe ('Policy', function () {
         policy (req, function (err, result) {
           expect (err).to.be.null;
           expect (result).to.be.false;
-          expect (req).to.have.property ('failedPolicy', 'passthrough');
         });
       }
     });
@@ -130,7 +129,6 @@ describe ('Policy', function () {
       policy (req, function (err, result) {
         expect (err).to.be.null;
         expect (result).to.be.false;
-        expect (req).to.have.property ('failedPolicy', 'passthrough');
       });
     });
   });
