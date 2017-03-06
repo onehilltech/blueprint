@@ -47,10 +47,6 @@ AccountController.prototype.create = function () {
         };
 
         return callback (null, doc);
-      },
-
-      postExecute: function (req, account, callback) {
-        return callback (null, {_id: account._id});
       }
     }
   };

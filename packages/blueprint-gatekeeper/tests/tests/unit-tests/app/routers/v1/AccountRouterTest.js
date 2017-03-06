@@ -135,12 +135,12 @@ describe ('AccountRouter', function () {
       };
 
       it ('should create a new account', function (done) {
-        var accountId = null;
+        var account = null;
 
         // We know the account was created when we get an event for
         // sending an account activation email.
-        bm.once ('gatekeeper.account.created', function (account) {
-          accountId = account.id;
+        bm.once ('gatekeeper.account.created', function (model) {
+          account = model;
         });
 
         blueprint.testing.request ()
@@ -152,13 +152,12 @@ describe ('AccountRouter', function () {
             if (err) return done (err);
 
             // Wait until the gatekeeper.account.created message is handled.
-            blueprint.testing.waitFor (function () { return accountId !== null },
+            blueprint.testing.waitFor (function () { return account !== null },
               function (err) {
                 if (err) return done (err);
+                expect (res.body).to.eql ({account: mongodb.testing.lean (account)});
 
-                expect (res.body).to.deep.equal ({account: {_id: accountId}});
-
-                Account.findById (accountId, done);
+                return done (null);
               });
           });
       });
