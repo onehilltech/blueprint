@@ -1,6 +1,6 @@
-var expect = require ('chai').expect
+var expect    = require ('chai').expect
   , blueprint = require ('@onehilltech/blueprint')
-  , appPath = require ('../../../fixtures/appPath')
+  , appPath   = require ('../../../fixtures/appPath')
   ;
 
 describe ('CloudToken', function () {
@@ -12,7 +12,8 @@ describe ('CloudToken', function () {
 
   describe ('()', function () {
     it ('should create a new CloudToken model', function () {
-      var CloudToken = blueprint.app.models.CloudToken;
+      var app = blueprint.app;
+      var CloudToken = app.models.CloudToken;
 
       expect (new CloudToken ({})).to.not.be.null;
     });

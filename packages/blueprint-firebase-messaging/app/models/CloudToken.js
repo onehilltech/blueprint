@@ -8,14 +8,19 @@ var Schema  = mongodb.Schema
 
 var schema = new Schema({
   /// Instance id for the token.
-  device: {type: String, required: true, unique: true, index: true},
+  device: {type: String, required: true, unique: true, index: true, const: true},
 
   /// User account that owns the token.
-  owner: {type: Schema.Types.ObjectId, required: true, ref: Account.modelName, validation: {optional: true}},
+  owner: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: Account.modelName,
+    const: true,
+    validation: {optional: true}
+  },
 
   /// Access token for the device.
   token: {type: String, required: true}
 });
 
-const COLLECTION_NAME = 'blueprint_cloud_token';
-module.exports = mongodb.resource (COLLECTION_NAME, schema);
+module.exports = mongodb.resource ('cloud_token', schema, 'blueprint_cloud_tokens');
