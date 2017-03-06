@@ -46,33 +46,15 @@ function policyWrapper () {
   if (!_.isFunction (policy) && !_.isString (policy))
     throw new Error ('invalid_policy', 'Policy must be a Function or String');
 
-  var name;
-
-  if (_.isString (policy)) {
-    name = policy;
+  if (_.isString (policy))
     policy = lookupPolicyByName (policy);
-  }
-  else {
-    name = policy.name;
-  }
 
   return function __blueprint_check_policy (req, callback) {
     // Clone the arguments array for the policy, then add to request and callback
     // as the last arguments.
     var policyArgs = args.slice ();
     policyArgs.push (req);
-    policyArgs.push (function (err, result) {
-      if (err)
-        return callback (new Error ('policy_error', 'Policy error', {name: name, reason: err}));
-
-      // Store the failed policy in the request. This allows the system
-      // the recall the name of the failed policy when sending a 403
-      // response to the caller.
-      if (!result)
-        req.failedPolicy = name;
-
-      return callback (null, result);
-    });
+    policyArgs.push (callback);
 
     // Call the check.
     return policy.apply (null, policyArgs);
