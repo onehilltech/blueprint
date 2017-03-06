@@ -7,7 +7,6 @@ var datamodel = require ('../../../../../fixtures/datamodel')
   ;
 
 describe ('ClientRouter', function () {
-  var server;
   var accessToken;
   var client;
 
@@ -18,8 +17,6 @@ describe ('ClientRouter', function () {
       },
 
       function (result, callback) {
-        server = result[0].server;
-
         var data = {
           grant_type: 'client_credentials',
           client_id: datamodel.models.clients[0].id,

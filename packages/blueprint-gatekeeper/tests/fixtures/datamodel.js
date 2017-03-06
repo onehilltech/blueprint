@@ -5,8 +5,8 @@ var async     = require ('async')
   , testing   = require ('../../lib/testing')
   ;
 
-const appPath = require ('./appPath')
-  , scope     = require ('../../lib/scope')
+const appPath  = require ('./appPath')
+  , gatekeeper = require ('../../lib')
   ;
 
 var Account = undefined
@@ -19,7 +19,7 @@ var data = {
     { email: 'account1@gatekeeper.com', username: 'account1', password: 'account1'},
     { email: 'account2@gatekeeper.com', username: 'account2', password: 'account2' },
     { email: 'account3@gatekeeper.com', username: 'account3', password: 'account3' },
-    { email: 'account4@gatekeeper.com', username: 'account4', password: 'account4', scope: [scope.superuser]},
+    { email: 'account4@gatekeeper.com', username: 'account4', password: 'account4', scope: [gatekeeper.scope.superuser]},
     { email: 'account5@gatekeeper.com', username: 'account5', password: 'account5', enabled: false }
   ],
 
@@ -32,16 +32,25 @@ exports.data = data;
 exports.models = {};
 
 function cleanup (done) {
+  winston.log ('info', 'clearing data from database');
   mongodb.testing.clearData (done);
 }
 
 function seed (done) {
+  winston.log ('info', 'seeding database with data');
+
   async.waterfall ([
     // Create the clients used for testing.
     function (callback) {
       var clients =
         [
-          { firstId: 1, scope: [scope.account.create] },
+          { firstId: 1, scope: [
+            gatekeeper.scope.account.create,
+            gatekeeper.scope.client.create,
+            gatekeeper.scope.client.update,
+            gatekeeper.scope.client.delete
+          ]},
+
           { firstId: 2 },
           { firstId: 3, enabled: false }
         ];
@@ -76,7 +85,7 @@ function seed (done) {
   });
 }
 
-exports.apply = function (done) {
+function apply (done) {
   winston.log ('info', 'applying datamodel to test cases');
 
   async.series ([
@@ -94,6 +103,7 @@ exports.apply = function (done) {
     function (callback) { cleanup (callback); },
     function (callback) { seed (callback); }
   ], done);
-};
+}
 
+exports.apply = apply;
 exports.cleanup = cleanup;

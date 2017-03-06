@@ -7,15 +7,8 @@ var datamodel = require ('../../../../../fixtures/datamodel')
   ;
 
 describe ('Oauth2Router', function () {
-  var server;
-
   before (function (done) {
-    datamodel.apply (function (err) {
-      if (err) return done (err);
-
-      server = blueprint.app.server;
-      return done (null);
-    });
+    datamodel.apply (done);
   });
 
   describe('#getToken (callback)', function () {
