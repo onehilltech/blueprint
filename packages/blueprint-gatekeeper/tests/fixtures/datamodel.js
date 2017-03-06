@@ -1,10 +1,12 @@
-var async   = require ('async')
-  , winston = require ('winston')
+var async     = require ('async')
+  , winston   = require ('winston')
   , blueprint = require ('@onehilltech/blueprint')
+  , mongodb   = require ('@onehilltech/blueprint-mongodb')
+  , testing   = require ('../../lib/testing')
   ;
 
 const appPath = require ('./appPath')
-  , scope = require ('../../lib/scope')
+  , scope     = require ('../../lib/scope')
   ;
 
 var Account = undefined
@@ -30,22 +32,16 @@ exports.data = data;
 exports.models = {};
 
 function cleanup (done) {
-  async.series ([
-      function (cb) { Account.remove ({}, cb); },
-      function (cb) { Client.remove ({}, cb); },
-      function (cb) { AccessToken.remove ({}, cb)}
-    ], done);
+  mongodb.testing.clearData (done);
 }
 
 function seed (done) {
-  var testing = require ('../../lib/testing');
-
   async.waterfall ([
     // Create the clients used for testing.
     function (callback) {
       var clients =
         [
-          { firstId: 1, scope: [scope.superuser] },
+          { firstId: 1, scope: [scope.account.create] },
           { firstId: 2 },
           { firstId: 3, enabled: false }
         ];
@@ -60,12 +56,6 @@ function seed (done) {
     },
 
     function (client, callback) {
-      var accounts = [
-        { firstId: 1 },
-        { firstId: 4 },
-        { firstId: 5, enabled: false }
-      ];
-
       // Update the created_by path on the accounts to the first client.
       for (var i = 0; i < data.accounts.length; ++i)
         data.accounts[i].created_by = client.id;
@@ -74,6 +64,7 @@ function seed (done) {
         if (err) return callback (err);
 
         exports.models.accounts = accounts;
+
         callback (null);
       });
     }

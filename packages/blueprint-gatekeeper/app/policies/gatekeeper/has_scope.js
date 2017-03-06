@@ -1,15 +1,11 @@
 var async = require ('async')
-  , blueprint = require ('@onehilltech/blueprint')
-  , HttpError = blueprint.errors.HttpError
   ;
 
-/**
- * Policy Description:
- *
- * Determine if the user has a least 1 role.
- */
-module.exports = exports = function (role, req, callback) {
+module.exports = function hasScope (role, req, callback) {
   var scopes = req.authInfo.scope;
+
+  if (scopes.length === 0)
+    return callback (null, false);
 
   async.some (scopes,
     function (scope, callback) {

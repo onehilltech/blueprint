@@ -17,25 +17,6 @@ messaging.on ('app.init', function (app) {
 module.exports = exports = function (opts) {
   var tokenStrategy = opts.tokenStrategy;
 
-  var accountPopulation =  {
-    '_id': 1,
-    'username': 1,
-    'email': 1,
-    'enabled': 1,
-    'scope': 1,
-    'activation.required': 1,
-    'activation.date': 1
-  };
-
-  var clientPopulation = {
-    _id: 1,
-    name: 1,
-    email: 1,
-    enabled: 1,
-    scope: 1,
-    metadata: 1
-  };
-
   return new BearerStrategy (function (token, done) {
     async.waterfall ([
       // Verify the token.
@@ -47,8 +28,8 @@ module.exports = exports = function (opts) {
       function (payload, callback) {
         AccessToken
           .findById (payload.jti)
-          .populate ('client', clientPopulation)
-          .populate ('account', accountPopulation)
+          .populate ('client')
+          .populate ('account')
           .exec (function (err, accessToken) {
             return callback (err, payload, accessToken);
           });

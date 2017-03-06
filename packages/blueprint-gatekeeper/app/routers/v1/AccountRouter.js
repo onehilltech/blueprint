@@ -12,17 +12,18 @@ module.exports = {
       controller: 'AccountController',
       deny: ['count'],
 
-      // The default policy for all actions on the resource controller.
-      policy: Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser),
-
       // Define custom settings for the different actions, which includes overriding
       // the default policies on the resource controller.
       actions: {
         create: {
           policy: Policy.any ([
-            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser),
-            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.account.create)
+            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.account.create),
+            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser)
           ])
+        },
+
+        getAll: {
+          policy: Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser)
         },
 
         getOne: {

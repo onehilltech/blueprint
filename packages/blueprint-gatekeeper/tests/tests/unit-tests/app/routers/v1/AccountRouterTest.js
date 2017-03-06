@@ -1,5 +1,4 @@
-var request   = require ('supertest')
-  , expect    = require ('chai').expect
+var expect    = require ('chai').expect
   , async     = require ('async')
   , blueprint = require ('@onehilltech/blueprint')
   , mongodb   = require ('@onehilltech/blueprint-mongodb')
@@ -10,15 +9,13 @@ const datamodel = require ('../../../../../fixtures/datamodel')
   ;
 
 describe ('AccountRouter', function () {
-  var server;
   var userToken;
   var superUserToken;
   var clientToken;
-
   var Account;
 
   function getToken (data, callback) {
-    request (server.app)
+    blueprint.testing.request ()
       .post ('/v1/oauth2/token').send (data)
       .expect (200)
       .end (function (err, res) {
@@ -34,29 +31,37 @@ describe ('AccountRouter', function () {
       },
 
       function (callback) {
-        server  = blueprint.app.server;
         Account = blueprint.app.models.Account;
-        return callback ();
+        return callback (null);
       },
 
-      // 2. get the user token for the tests.
+      /**
+       * Get a user token that has no special access rights. We are going to
+       * use client 0 since it can create an account.
+       *
+       * @param callback
+       */
       function (callback) {
         var data = {
           grant_type: 'password',
           username: datamodel.data.accounts[0].username,
           password: datamodel.data.accounts[0].password,
-          client_id: datamodel.models.clients[1].id
+          client_id: datamodel.models.clients[0].id
         };
 
         getToken (data, function (err, token) {
           if (err) return callback (err);
 
           userToken = token;
-          return callback ();
+          return callback (null);
         });
       },
 
-      // 2a. get the user token for an admin.
+      /**
+       * Get a user token that has superuser rights.
+       *
+       * @param callback
+       */
       function (callback) {
         var data = {
           grant_type: 'password',
@@ -69,11 +74,15 @@ describe ('AccountRouter', function () {
           if (err) return callback (err);
 
           superUserToken = token;
-          return callback ();
+          return callback (null);
         });
       },
 
-      // 3. get a client token for the tests.
+      /**
+       * Get a client-level access token.
+       *
+       * @param callback
+       */
       function (callback) {
         var data = {
           grant_type: 'client_credentials',
@@ -85,7 +94,8 @@ describe ('AccountRouter', function () {
           if (err) return callback (err);
 
           clientToken = token;
-          return callback ();
+
+          return callback (null);
         });
       }
     ], done);
@@ -102,7 +112,7 @@ describe ('AccountRouter', function () {
         Account.find ({}, projection, function (err, accounts) {
           if (err) return done (err);
 
-          request (server.app)
+          blueprint.testing.request ()
             .get ('/v1/accounts')
             .set ('Authorization', 'Bearer ' + superUserToken)
             .expect (200, {'accounts': JSON.parse (JSON.stringify (accounts))}, done);
@@ -110,7 +120,7 @@ describe ('AccountRouter', function () {
       });
 
       it ('should not allow non-admin access to all accounts', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .get ('/v1/accounts')
           .set ('Authorization', 'Bearer ' + userToken)
           .expect (403, done);
@@ -125,15 +135,15 @@ describe ('AccountRouter', function () {
       };
 
       it ('should create a new account', function (done) {
-        var accountId;
+        var accountId = null;
 
         // We know the account was created when we get an event for
         // sending an account activation email.
-        bm.on ('gatekeeper.account.created', function (account) {
+        bm.once ('gatekeeper.account.created', function (account) {
           accountId = account.id;
         });
 
-        request (server.app)
+        blueprint.testing.request ()
           .post ('/v1/accounts')
           .send ({account: data})
           .set ('Authorization', 'Bearer ' + clientToken)
@@ -142,28 +152,19 @@ describe ('AccountRouter', function () {
             if (err) return done (err);
 
             // Wait until the gatekeeper.account.created message is handled.
-            async.waterfall ([
-              function (callback) {
-                async.whilst (
-                  function () {
-                    return accountId === undefined;
-                  },
-                  function (callback) {
-                    setTimeout (function () {
-                      callback (null);
-                    }, 1000);
-                  }, callback);
-              },
-              function (callback) {
+            blueprint.testing.waitFor (function () { return accountId !== null },
+              function (err) {
+                if (err) return done (err);
+
                 expect (res.body).to.deep.equal ({account: {_id: accountId}});
-                Account.findById (accountId, callback);
-              }
-            ], done);
+
+                Account.findById (accountId, done);
+              });
           });
       });
 
       it ('should not create an account [duplicate]', function (done) {
-        request (server.app)
+        blueprint.testing.request ()
           .post ('/v1/accounts').send (data)
           .set ('Authorization', 'Bearer ' + clientToken)
           .expect (400, done);
@@ -175,7 +176,7 @@ describe ('AccountRouter', function () {
           email: 'james@onehilltech.com'
         };
 
-        request (server.app)
+        blueprint.testing.request ()
           .post ('/v1/accounts').send (invalid)
           .set ('Authorization', 'Bearer ' + clientToken)
           .expect (400, done);
@@ -197,7 +198,7 @@ describe ('AccountRouter', function () {
             email: 'james@onehilltech.com'
           };
 
-          request (server.app)
+          blueprint.testing.request ()
             .post ('/v1/accounts').send ({account: account})
             .set ('Authorization', 'Bearer ' + token)
             .expect (403, done);
@@ -217,13 +218,10 @@ describe ('AccountRouter', function () {
           if (err) return done (err);
           account = result;
 
-          request (server.app)
+          blueprint.testing.request ()
             .get ('/v1/accounts/' + accountId)
             .set ('Authorization', 'Bearer ' + userToken)
-            .expect (200, {account: mongodb.testing.lean (account)}).end (function (err, res) {
-              console.log (res.body);
-              return done (err);
-          });
+            .expect (200, {account: mongodb.testing.lean (account)}, done);
         });
       });
 
@@ -233,7 +231,7 @@ describe ('AccountRouter', function () {
         Account.findById (accountId, function (err, account) {
           if (err) return done (err);
 
-          request (server.app)
+          blueprint.testing.request ()
             .get ('/v1/accounts/' + accountId)
             .set ('Authorization', 'Bearer ' + superUserToken)
             .expect (200, {account: JSON.parse (JSON.stringify (account))}, done);
@@ -243,7 +241,7 @@ describe ('AccountRouter', function () {
       it ('should not allow non-admin access to another account', function (done) {
         var accountId = datamodel.models.accounts[1]._id;
 
-        request (server.app)
+        blueprint.testing.request ()
           .get ('/v1/accounts/' + accountId)
           .set ('Authorization', 'Bearer ' + userToken)
           .expect (403, done);
@@ -254,7 +252,7 @@ describe ('AccountRouter', function () {
       it ('should not update scope and created_by', function (done) {
         var accountId = datamodel.models.accounts[0]._id;
 
-        request (server.app)
+        blueprint.testing.request ()
           .put ('/v1/accounts/' + accountId)
           .set ('Authorization', 'Bearer ' + userToken)
           .send ({account: {created_by: new mongodb.Types.ObjectId (), scope: ['the_new_scope']}})
@@ -264,11 +262,14 @@ describe ('AccountRouter', function () {
       it ('should update the email', function (done) {
         var accountId = datamodel.models.accounts[0]._id;
 
-        request (server.app)
+        var updated = account.toObject ();
+        updated.email = 'foo@contact.com';
+
+        blueprint.testing.request ()
           .put ('/v1/accounts/' + accountId)
           .set ('Authorization', 'Bearer ' + userToken)
-          .send ({account: {email: 'foo@contact.com'}} )
-          .expect (200, {account: mongodb.testing.lean (account)}, done);
+          .send ({account: {email: updated.email}} )
+          .expect (200, {account: mongodb.testing.lean (updated)}, done);
       });
     });
 
@@ -276,7 +277,7 @@ describe ('AccountRouter', function () {
       it ('should not allow non-admin to delete another user account', function (done) {
         var accountId = datamodel.models.accounts[2]._id;
 
-        request (server.app)
+        blueprint.testing.request ()
           .delete ('/v1/accounts/' + accountId)
           .set ('Authorization', 'Bearer ' + userToken)
           .expect (403, done);
@@ -285,7 +286,7 @@ describe ('AccountRouter', function () {
       it ('should allow account owner to delete account', function (done) {
         var accountId = datamodel.models.accounts[0]._id;
 
-        request (server.app)
+        blueprint.testing.request ()
           .delete ('/v1/accounts/' + accountId)
           .set ('Authorization', 'Bearer ' + userToken)
           .expect (200, 'true', done);
@@ -294,7 +295,7 @@ describe ('AccountRouter', function () {
       it ('should allow admin to delete user account', function (done) {
         var accountId = datamodel.models.accounts[2]._id;
 
-        request (server.app)
+        blueprint.testing.request ()
           .delete ('/v1/accounts/' + accountId)
           .set ('Authorization', 'Bearer ' + superUserToken)
           .expect (200, 'true', done);
