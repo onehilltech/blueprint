@@ -565,8 +565,12 @@ RouterBuilder.prototype._applyPolicy = function (policy) {
   return function __blueprint_policy (req, res, next) {
     try {
       policy (req, function (err, result) {
-        if (err) return handleError (err, res);
-        if (!result) return handleError (new HttpError (403, 'policy_failed', 'Policy failed', {name: policy.name}), res);
+        if (err)
+          return handleError (err, res);
+
+        if (!result)
+          return handleError (new HttpError (403, 'policy_failed', 'Policy failed', {name: req.failedPolicy || policy.name}), res);
+
         return next ();
       });
     }

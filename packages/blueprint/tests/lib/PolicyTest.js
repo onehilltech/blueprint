@@ -93,13 +93,11 @@ describe ('Policy', function () {
       // Let's ensure we can call this collection of functions more than once
       // and not get a callback already called error.
       for (var i = 0; i < 10; ++ i) {
-        policy (null, function (err, result) {
-          expect (err).to.have.property ('name', 'BlueprintError');
-          expect (err).to.have.property ('code', 'policy_failed');
-          expect (err).to.have.property ('message', 'Policy failed');
-          expect (err).to.have.property ('details').to.eql ({name: 'passthrough'});
-
-          expect (result).to.be.undefined;
+        var req = {};
+        policy (req, function (err, result) {
+          expect (err).to.be.null;
+          expect (result).to.be.false;
+          expect (req).to.have.property ('failedPolicy', 'passthrough');
         });
       }
     });
@@ -128,13 +126,11 @@ describe ('Policy', function () {
         Policy.assert (passthrough, false)
       ]);
 
-      policy (null, function (err, result) {
-        expect (err).to.have.property ('name', 'BlueprintError');
-        expect (err).to.have.property ('code', 'policy_failed');
-        expect (err).to.have.property ('message', 'Policy failed');
-        expect (err).to.have.property ('details').to.eql ({name: 'passthrough'});
-
-        expect (result).to.be.undefined;
+      var req = {};
+      policy (req, function (err, result) {
+        expect (err).to.be.null;
+        expect (result).to.be.false;
+        expect (req).to.have.property ('failedPolicy', 'passthrough');
       });
     });
   });

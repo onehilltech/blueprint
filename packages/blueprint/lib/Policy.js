@@ -62,9 +62,16 @@ function policyWrapper () {
     var policyArgs = args.slice ();
     policyArgs.push (req);
     policyArgs.push (function (err, result) {
-      if (err) return callback (new Error ('policy_error', 'Policy error', {name: name, reason: err}));
-      if (!result) return callback (new Error ('policy_failed', 'Policy failed', {name: name}));
-      return callback (null, true);
+      if (err)
+        return callback (new Error ('policy_error', 'Policy error', {name: name, reason: err}));
+
+      // Store the failed policy in the request. This allows the system
+      // the recall the name of the failed policy when sending a 403
+      // response to the caller.
+      if (!result)
+        req.failedPolicy = name;
+
+      return callback (null, result);
     });
 
     // Call the check.
