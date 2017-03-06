@@ -260,15 +260,24 @@ describe ('AccountRouter', function () {
 
       it ('should update the email', function (done) {
         var accountId = datamodel.models.accounts[0]._id;
-
-        var updated = account.toObject ();
-        updated.email = 'foo@contact.com';
+        account.email = 'foo@contact.com';
 
         blueprint.testing.request ()
           .put ('/v1/accounts/' + accountId)
           .set ('Authorization', 'Bearer ' + userToken)
-          .send ({account: {email: updated.email}} )
-          .expect (200, {account: mongodb.testing.lean (updated)}, done);
+          .send ({account: {email: account.email}} )
+          .expect (200, {account: mongodb.testing.lean (account)}, done);
+      });
+
+      it ('should update the scope', function (done) {
+        var accountId = datamodel.models.accounts[0]._id;
+        account.scope.push ('the_new_scope');
+
+        blueprint.testing.request ()
+          .put ('/v1/accounts/' + accountId)
+          .set ('Authorization', 'Bearer ' + superUserToken)
+          .send ({account: {scope: ['the_new_scope']}})
+          .expect (200, {account: mongodb.testing.lean (account)}, done);
       });
     });
 

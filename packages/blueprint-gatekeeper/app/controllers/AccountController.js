@@ -75,7 +75,7 @@ AccountController.prototype.update = function () {
           delete doc.$set.created_by;
 
         // Only the superuser can update the scope.
-        if (doc.$set.scope && req.authInfo.scope.indexOf (gatekeeper.scope.superuser) === -1)
+        if (!req.superuser)
           delete doc.$set.scope;
 
         return callback (null, doc);
