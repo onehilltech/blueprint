@@ -18,32 +18,32 @@ module.exports = {
         create: {
           policy: Policy.any ([
             Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.account.create),
-            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser)
+            Policy.assert ('gatekeeper.is_superuser')
           ])
         },
 
         getAll: {
-          policy: Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser)
+          policy: Policy.assert ('gatekeeper.is_superuser')
         },
 
         getOne: {
           policy: Policy.any ([
             Policy.assert ('gatekeeper.is_account_owner'),
-            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser)
+            Policy.assert ('gatekeeper.is_superuser')
           ])
         },
 
         update: {
           policy: Policy.any ([
             Policy.assert ('gatekeeper.is_account_owner'),
-            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser)
+            Policy.assert ('gatekeeper.is_superuser')
           ])
         },
 
         delete: {
           policy: Policy.any ([
             Policy.assert ('gatekeeper.is_account_owner'),
-            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.superuser)
+            Policy.assert ('gatekeeper.is_superuser')
           ])
         }
       }

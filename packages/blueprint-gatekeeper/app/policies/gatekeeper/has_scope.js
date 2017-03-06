@@ -1,7 +1,9 @@
+'use strict';
+
 var async = require ('async')
   ;
 
-module.exports = function hasScope (role, req, callback) {
+function hasScope (role, req, callback) {
   var scopes = req.authInfo.scope;
 
   if (scopes.length === 0)
@@ -11,4 +13,6 @@ module.exports = function hasScope (role, req, callback) {
     function (scope, callback) {
       return callback (null, scope === role);
     }, callback);
-};
+}
+
+module.exports = hasScope;
