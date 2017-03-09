@@ -253,7 +253,7 @@ RouterBuilder.prototype.addSpecification = function (spec, currPath) {
     // is because we need to determine if the current request can even access the
     // router path before we attempt to process it.
     if (spec.policy)
-      this._router.use (currPath, this._applyPolicy (spec.policy));
+      this._router.use (currPath, this._makePolicyMiddleware (spec.policy));
 
     // Next, we process any "use" methods.
     if (spec.use)
@@ -448,6 +448,13 @@ RouterBuilder.prototype._defineVerbHandler = function (verb, path, opts) {
 
   winston.log ('debug', 'processing %s %s', verb.toUpperCase (), path);
 
+  // 1. validate
+  // 2. sanitize
+  // 3. policies
+  // 4a. before
+  // 4b. execute
+  // 4c. after
+
   var middleware = [];
 
   if (_.isString (opts)) {
@@ -462,19 +469,16 @@ RouterBuilder.prototype._defineVerbHandler = function (verb, path, opts) {
     if (!((opts.action && !opts.view) || (!opts.action && opts.view)))
       throw new Error (util.format ('%s %s must define an action or view property', verb, path));
 
-    if (opts.policy)
-      middleware.push (this._applyPolicy (opts.policy));
-
-    if (opts.before)
-      middleware = middleware.concat (opts.before);
-
     if (opts.action) {
-      middleware = middleware.concat (this._actionStringToMiddleware (opts.action, path, opts.options));
+      middleware = this._actionStringToMiddleware (opts.action, path, opts);
     }
     else if (opts.view) {
-      // Use a generic callback to render the view. Make sure we save a reference
-      // to the target view since the opts variable will change during the next
-      // iteration.
+      if (opts.policy)
+        middleware.push (this._makePolicyMiddleware (opts.policy));
+
+      if (opts.before)
+        middleware = middleware.concat (opts.before);
+
       middleware.push (render (opts.view));
     }
 
@@ -492,27 +496,40 @@ RouterBuilder.prototype._defineVerbHandler = function (verb, path, opts) {
 /**
  * Convert an action string to a array of middleware functions.
  *
- * @param str
+ * @param action
  * @param path
- * @param options
+ * @param opts
  * @returns {Array}
  */
-RouterBuilder.prototype._actionStringToMiddleware = function (str, path, options) {
+RouterBuilder.prototype._actionStringToMiddleware = function (action, path, opts) {
   var middleware = [];
+  opts = opts || {};
 
   // Resolve controller and its method. The expected format is controller@method. We are
   // also going to pass params to the controller method.
-  var controller = this._resolveController (str);
+  var controller = this._resolveController (action);
   var params = {path: path};
 
-  if (options)
-    params.options = options;
+  if (opts.options)
+    params.options = opts.options;
 
   var result = controller.invoke (params);
 
-  if (_.isFunction (result) || _.isArray (result)) {
-    // Push the function/array onto the middleware stack.
+  if (_.isFunction (result)) {
+    // Push the function/array onto the middleware stack. If there is a policy,
+    // then we need to push that before any of the functions.
+    if (opts.policy)
+      middleware.push (this._makePolicyMiddleware (opts.policy));
+
     middleware.push (result);
+  }
+  else if (_.isArray (result)) {
+    // Push the function/array onto the middleware stack. If there is a policy,
+    // then we need to push that before any of the functions.
+    if (opts.policy)
+      middleware.push (this._makePolicyMiddleware (opts.policy));
+
+    middleware = middleware.concat (result);
   }
   else if (_.isObject (result)) {
     // The user elects to have separate validation, sanitize, and execution
@@ -542,6 +559,12 @@ RouterBuilder.prototype._actionStringToMiddleware = function (str, path, options
     if (result.sanitize)
       middleware.push (sanitizer (result.sanitize));
 
+    if (opts.policy)
+      middleware.push (this._makePolicyMiddleware (opts.policy));
+
+    if (opts.before)
+      middleware = middleware.concat (opts.before);
+
     // Lastly, push the execution function onto the middleware stack.
     middleware.push (executor (result.execute));
   }
@@ -554,7 +577,7 @@ RouterBuilder.prototype._actionStringToMiddleware = function (str, path, options
  *
  * @param policy
  */
-RouterBuilder.prototype._applyPolicy = function (policy) {
+RouterBuilder.prototype._makePolicyMiddleware = function (policy) {
   if (_.isString (policy)) {
     policy = objectPath.get (this._app.policies, policy);
 
