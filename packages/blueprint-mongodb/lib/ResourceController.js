@@ -70,7 +70,6 @@ function ResourceController (opts) {
 
   this._model = opts.model;
   this._pluralize = pluralize (this.name);
-  this._eventPrefix = opts.eventPrefix;
 
   // Build the validation schema for create and update.
   var validationOpts = {pathPrefix: this.name};
@@ -629,7 +628,7 @@ ResourceController.prototype.count = function (opts) {
 };
 
 ResourceController.prototype.computeEventName = function (action) {
-  var prefix = this._eventPrefix || '';
+  var prefix = this.namespace || '';
 
   if (prefix.length !== 0)
     prefix += '.';
