@@ -69,11 +69,11 @@ function ResourceController (opts) {
   BaseController.call (this, opts);
 
   this._model = opts.model;
-  this._pluralize = pluralize (this._name);
+  this._pluralize = pluralize (this.name);
   this._eventPrefix = opts.eventPrefix;
 
   // Build the validation schema for create and update.
-  var validationOpts = {pathPrefix: this._name};
+  var validationOpts = {pathPrefix: this.name};
   this._createValidation = validationSchema (opts.model.schema, validationOpts);
   this._updateValidation = validationSchema (opts.model.schema, _.extend (validationOpts, {allOptional: true}));
 }
@@ -102,7 +102,7 @@ ResourceController.prototype.create = function (opts) {
     sanitize: onSanitize,
 
     execute: function __blueprint_create (req, res, callback) {
-      var doc = req.body[self._name];
+      var doc = req.body[self.name];
 
       async.waterfall ([
         async.constant (doc),
@@ -165,7 +165,7 @@ ResourceController.prototype.create = function (opts) {
         function (data, callback) {
           // Prepare the result sent back to the client.
           var result = {};
-          result[self._name] = data;
+          result[self.name] = data;
 
           return callback (null, result);
         }
@@ -196,7 +196,7 @@ ResourceController.prototype.get = function (opts) {
     sanitize: onSanitize,
 
     execute: function __blueprint_get_execute (req, res, callback) {
-      var rcId = req.params[self._id];
+      var rcId = req.params[self.id];
       var filter = {_id: rcId};
 
       async.waterfall ([
@@ -236,7 +236,7 @@ ResourceController.prototype.get = function (opts) {
 
         function (data, callback) {
           var result = { };
-          result[self._name] = data;
+          result[self.name] = data;
 
           if (!req.query.populate) {
             return callback (null, result);
@@ -451,11 +451,11 @@ ResourceController.prototype.update = function (opts) {
     sanitize: onSanitize,
 
     execute: function __blueprint_update_execute (req, res, callback) {
-      var rcId = req.params[self._id];
+      var rcId = req.params[self.id];
       var filter = {_id: rcId};
 
 
-      var update = getUpdateFromBody (req.body[self._name]);
+      var update = getUpdateFromBody (req.body[self.name]);
       var options = { upsert: false, new: true };
 
       async.waterfall ([
@@ -508,7 +508,7 @@ ResourceController.prototype.update = function (opts) {
         // Rewrite the result in JSON API format.
         function (data, callback) {
           var result = { };
-          result[self._name] = data;
+          result[self.name] = data;
 
           return callback (null, result);
         }
@@ -539,7 +539,7 @@ ResourceController.prototype.delete = function (opts) {
     sanitize: onSanitize,
 
     execute: function __blueprint_delete (req, res, callback) {
-      var rcId = req.params[self._id];
+      var rcId = req.params[self.id];
       var filter = {_id: rcId};
 
       async.waterfall ([
@@ -634,5 +634,5 @@ ResourceController.prototype.computeEventName = function (action) {
   if (prefix.length !== 0)
     prefix += '.';
 
-  return prefix + this._name + '.' + action;
+  return prefix + this.name + '.' + action;
 };

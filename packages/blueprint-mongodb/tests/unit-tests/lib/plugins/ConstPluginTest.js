@@ -53,7 +53,7 @@ describe ('lib.plugins.ConstPlugin', function () {
           expect (person.creator).to.equal ('me');
 
           // Make sure we can pull the original value out of the database.
-          Person.findById (person._id, callback);
+          Person.findById (person.id, callback);
         },
 
         function (person, callback) {
@@ -81,7 +81,7 @@ describe ('lib.plugins.ConstPlugin', function () {
           expect (person.creator).to.equal ('me');
 
           // Make sure we can pull the original value out of the database.
-          Person.findById (person._id, callback);
+          Person.findById (person.id, callback);
         },
 
         function (person, callback) {
@@ -103,12 +103,12 @@ describe ('lib.plugins.ConstPlugin', function () {
         },
 
         function (person, n, callback) {
-          Person.update ({_id: person._id}, {creator: 'you'}, callback);
+          Person.update ({id: person.id}, {creator: 'you'}, callback);
         },
 
         function (n, callback) {
           // Make sure we can pull the original value out of the database.
-          Person.findById (person._id, callback);
+          Person.findById (person.id, callback);
         },
 
         function (person, callback) {

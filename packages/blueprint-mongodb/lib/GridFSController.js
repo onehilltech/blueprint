@@ -41,13 +41,6 @@ blueprint.controller (GridFSController, ResourceController);
 module.exports = GridFSController;
 
 /**
- * Get the resource identifier.
- */
-GridFSController.prototype.__defineGetter__ ('resourceId', function () {
-  return this._id;
-});
-
-/**
  * Upload a new file to the database.
  *
  * @returns {*[]}
@@ -56,7 +49,7 @@ GridFSController.prototype.create = function () {
   var self = this;
 
   return [
-    this._upload.single (this._name),
+    this._upload.single (this.name),
     function (req, res) {
       // Store the content type.
       var opts = { contentType: req.file.mimetype};
@@ -109,8 +102,8 @@ GridFSController.prototype.get = function () {
   return {
     sanitize: function (req, callback) {
       try {
-        var rcid = req.params[self._id];
-        req.params[self._id] = new mongodb.ObjectId (rcid);
+        var rcid = req.params[self.id];
+        req.params[self.id] = new mongodb.ObjectId (rcid);
 
         return callback (null);
       }
@@ -120,7 +113,7 @@ GridFSController.prototype.get = function () {
     },
 
     execute: function (req, res, callback) {
-      var id = req.params[self._id];
+      var id = req.params[self.id];
 
       async.waterfall ([
         function (callback) {
@@ -185,8 +178,8 @@ GridFSController.prototype.delete = function () {
   return {
     sanitize: function (req, callback) {
       try {
-        var rcid = req.params[self._id];
-        req.params[self._id] = new mongodb.ObjectId (rcid);
+        var rcid = req.params[self.id];
+        req.params[self.id] = new mongodb.ObjectId (rcid);
 
         return callback (null);
       }
@@ -196,7 +189,7 @@ GridFSController.prototype.delete = function () {
     },
 
     execute: function (req, res, callback) {
-      var id = req.params[self._id];
+      var id = req.params[self.id];
 
       self._bucket.delete (id, function (err) {
         if (err) return res.status (500).json ({errors: 'Delete operation failed'});

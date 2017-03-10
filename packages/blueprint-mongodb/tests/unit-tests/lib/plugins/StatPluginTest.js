@@ -100,7 +100,7 @@ describe ('lib.plugins.StatPlugin', function () {
           },
 
           function (model, count, callback) {
-            Person.findByIdAndUpdate (model._id, {$set: {first_name: 'Jack'}}, {new: true}, callback);
+            Person.findByIdAndUpdate (model.id, {$set: {first_name: 'Jack'}}, {new: true}, callback);
           },
 
           function (model, callback) {
