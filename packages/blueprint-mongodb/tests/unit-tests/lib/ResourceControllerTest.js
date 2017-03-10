@@ -73,7 +73,7 @@ describe ('lib.ResourceController', function () {
           .expect (400, {
             errors: {
               code: 'validation_failed',
-              message: 'Bad request',
+              message: 'Request validation failed',
               details: {
                 validation: [
                   { param: "person.age", msg: 'Invalid param'},

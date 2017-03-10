@@ -16,7 +16,6 @@ var BaseController = blueprint.ResourceController
   , messaging = blueprint.messaging
   ;
 
-function __onAuthorize (req, callback) { return callback (null); }
 function __onPrepareProjection (req, callback) { return callback (null, {}); }
 function __onPrepareOptions (req, options, callback) { return callback (null, options); }
 function __onPrepareFilter (req, filter, callback) { return callback (null, filter); }
@@ -25,27 +24,8 @@ function __onPreExecute (req, callback) { return callback (null); }
 function __onPostExecute (req, result, callback) { return callback (null, result); }
 
 /**
- * Check for the presence of the id parameter.
- *
- * @param id
- * @param next
- * @returns {function(req, callback)}
- */
-function checkIdThenAuthorize (id, next) {
-  return function __blueprint_checkIdThenAuthorize (req, callback) {
-    if (!req.params[id])
-      return callback (new HttpError (400, 'invalid_id', 'Missing resource id'));
-
-    return next (req, callback);
-  }
-}
-
-/**
  * Make the database completion handler. We have to create a new handler
  * for each execution because we need to bind to a different callback.
- *
- * @param callback
- * @returns {Function}
  */
 function makeDbCompletionHandler (code, message, callback) {
   return function __blueprint_db_execution_complete (err, result) {
@@ -60,9 +40,6 @@ function makeDbCompletionHandler (code, message, callback) {
  * Make the handler that executes after the async.waterfall tasks is complete. We
  * cannot reuse the same method since we have to bind to a different res object
  * for each request.
- *
- * @param res
- * @returns {Function}
  */
 function makeTaskCompletionHandler (res, callback) {
   return function __blueprint_task_complete (err, result) {
@@ -76,9 +53,6 @@ function makeTaskCompletionHandler (res, callback) {
  * @class ResourceController
  *
  * Base class f or all resource controllers.
- *
- * @param opts
- * @constructor
  */
 function ResourceController (opts) {
   if (!opts.model)
@@ -109,26 +83,20 @@ module.exports = ResourceController;
 
 /**
  * Create a new resource.
- *
- * @param opts
- * @returns
  */
 ResourceController.prototype.create = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
   var onPrepareDocument = on.prepareDocument || __onPrepareDocument;
-
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
-
-  var onAuthorize = on.authorize || __onAuthorize;
   var eventName = this.computeEventName ('created');
 
   var self = this;
 
   return {
-    validate: this.checkSchemaThen (self._createValidation, onAuthorize),
+    validate: this._createValidation,
 
     execute: function __blueprint_create (req, res, callback) {
       var doc = req.body[self._name];
@@ -213,18 +181,14 @@ ResourceController.prototype.get = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
-
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
 
   return {
-    validate: checkIdThenAuthorize (self._id, onAuthorize),
-
     execute: function __blueprint_get_execute (req, res, callback) {
       var rcId = req.params[self._id];
       var filter = {_id: rcId};
@@ -293,21 +257,15 @@ ResourceController.prototype.getAll = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
-
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
 
   return {
-    // There is no resource id that needs to be validated. So, we can
-    // just pass control to the onAuthorize method.
-    validate: onAuthorize,
-
     execute: function __blueprint_getall_execute (req, res, callback) {
       // Update the options with those from the query string.
       var opts = req.query.options || {};
@@ -469,7 +427,6 @@ ResourceController.prototype.update = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPrepareUpdate = on.prepareUpdate || __onPrepareUpdate;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
@@ -480,7 +437,7 @@ ResourceController.prototype.update = function (opts) {
   var self = this;
 
   return {
-    validate: checkIdThenAuthorize (self._id, this.checkSchemaThen (self._updateValidation, onAuthorize)),
+    validate: this._updateValidation,
 
     execute: function __blueprint_update_execute (req, res, callback) {
       var rcId = req.params[self._id];
@@ -562,13 +519,11 @@ ResourceController.prototype.delete = function (opts) {
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
-  var onAuthorize = on.authorize || __onAuthorize;
   var eventName = this.computeEventName ('deleted');
+
   var self = this;
 
   return {
-    validate: checkIdThenAuthorize (self._id, onAuthorize),
-
     execute: function __blueprint_delete (req, res, callback) {
       var rcId = req.params[self._id];
       var filter = {_id: rcId};
@@ -625,17 +580,12 @@ ResourceController.prototype.count = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onAuthorize = on.authorize || __onAuthorize;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
 
   return {
-    // There is no resource id that needs to be validated. So, we can
-    // just pass control to the onAuthorize method.
-    validate: onAuthorize,
-
     execute: function __blueprint_count_execute (req, res, callback) {
       async.waterfall ([
         async.constant (req.query),
