@@ -60,6 +60,16 @@ describe ('Application', function () {
                 return callback ();
               });
             }, callback);
+          },
+
+          function (callback) {
+            expect (app.validators).to.have.key ('isMongoIdOrMe')
+              .that.is.a.function;
+
+            expect (app.sanitizers).to.have.key ('customSanitizer')
+              .that.is.a.function;
+
+            return callback (null);
           }
         ], done);
       });

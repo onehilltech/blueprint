@@ -31,7 +31,7 @@ describe ('RouterBuilder', function () {
       routersPath = path.resolve (__dirname, '../fixtures/app/routers');
       routerBuilder = new RouterBuilder (app);
 
-      expect (routerBuilder._app).to.equal (app);
+      expect (routerBuilder._express).to.equal (app);
     });
   });
   
