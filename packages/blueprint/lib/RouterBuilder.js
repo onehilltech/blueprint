@@ -191,7 +191,7 @@ if (!_.isFunction (String.prototype.endsWith)) {
  * @constructor
  */
 function RouterBuilder (app, basePath) {
-  this._app = app;
+  this._express = app;
   this._basePath = basePath || '/';
   this._router = express.Router ();
   this._params = [];
@@ -214,7 +214,7 @@ RouterBuilder.prototype._resolveController = function (action) {
 
   // Locate the controller object in our loaded controllers. If the controller
   // does not exist, then throw an exception.
-  var controllers = this._app.controllers;
+  var controllers = this._express.controllers;
   var controller = objectPath.get (controllers, controllerName);
 
   if (!controller)
@@ -328,7 +328,7 @@ RouterBuilder.prototype._defineResource = function (path, config) {
   if (!controllerName)
     throw new Error (util.format ('%s is missing controller property', path));
 
-  var controllers = this._app.controllers;
+  var controllers = this._express.controllers;
   var controller = objectPath.get (controllers, controllerName);
 
   if (!controller)
@@ -579,7 +579,7 @@ RouterBuilder.prototype._actionStringToMiddleware = function (action, path, opts
  */
 RouterBuilder.prototype._makePolicyMiddleware = function (policy) {
   if (_.isString (policy)) {
-    policy = objectPath.get (this._app.policies, policy);
+    policy = objectPath.get (this._express.policies, policy);
 
     if (!policy)
       throw new Error (util.format ('Policy %s not found', policy));

@@ -7,13 +7,11 @@ var winston = require ('winston')
   , util    = require ('util')
   ;
 
-var RouterBuilder = require ('./RouterBuilder')
-  , Framework     = require ('./Framework')
-  , PolicyManager = require ('./PolicyManager')
-  , ModelManager  = require ('./ModelManager')
-  , ControllerManager = require ('./ControllerManager')
+var RouterBuilder   = require ('./RouterBuilder')
+  , Framework       = require ('./Framework')
   , ListenerManager = require ('./ListenerManager')
-  , RouterManager = require ('./RouterManager')
+  , RouterManager   = require ('./RouterManager')
+  , ResourceManager = require ('./ResourceManager')
   ;
 
 /**
@@ -23,7 +21,6 @@ var RouterBuilder = require ('./RouterBuilder')
  * blueprint.Application() has been called for the top-level project.
  *
  * @param appPath         Location of the application module
- * @param modulesPath     Optional location of ./node_modules
  * @constructor
  */
 function ApplicationModule (appPath) {
@@ -31,10 +28,17 @@ function ApplicationModule (appPath) {
   this._appPath = appPath;
 
   this.listenerManager = new ListenerManager (Framework ().messaging);
-  this.policyManager = new PolicyManager ();
-  this.modelManager = new ModelManager ();
-  this.controllerManager = new ControllerManager ();
+  this.policyManager = new ResourceManager ('policies');
+  this.modelManager = new ResourceManager ('models');
+
+  this.controllerManager = new ResourceManager ('controllers', {
+    resolve: function (Controller) { return new Controller (); },
+    filter: /(.+Controller)\.js$/
+  });
+
   this.routerManager = new RouterManager (this);
+  this.validatorManager = new ResourceManager ('validators', {recursive: false});
+  this.sanitizerManager = new ResourceManager ('sanitizers', {recursive: false});
 }
 
 /**
@@ -72,6 +76,8 @@ ApplicationModule.prototype.init = function (callback) {
     loadInto (this.listenerManager, 'listeners'),
     loadInto (this.controllerManager, 'controllers'),
     loadInto (this.routerManager, 'routers'),
+    loadInto (this.validatorManager, 'validators'),
+    loadInto (this.sanitizerManager, 'sanitizers'),
 
     function (module, callback) {
       // Mark the module as initialized, and notify all listeners.
@@ -104,23 +110,31 @@ ApplicationModule.prototype.__defineGetter__ ('appPath', function () {
 });
 
 ApplicationModule.prototype.__defineGetter__ ('listeners', function () {
-  return this.listenerManager.listeners;
+  return this.listenerManager.resources;
 });
 
 ApplicationModule.prototype.__defineGetter__ ('policies', function () {
-  return this.policyManager.policies;
+  return this.policyManager.resources;
 });
 
 ApplicationModule.prototype.__defineGetter__ ('models', function () {
-  return this.modelManager.models;
+  return this.modelManager.resources;
 });
 
 ApplicationModule.prototype.__defineGetter__ ('controllers', function () {
-  return this.controllerManager.controllers;
+  return this.controllerManager.resources;
 });
 
 ApplicationModule.prototype.__defineGetter__ ('routers', function () {
   return this.routerManager.routers;
+});
+
+ApplicationModule.prototype.__defineGetter__ ('validators', function () {
+  return this.validatorManager.resources;
+});
+
+ApplicationModule.prototype.__defineGetter__ ('sanitizers', function () {
+  return this.sanitizerManager.resources;
 });
 
 /**

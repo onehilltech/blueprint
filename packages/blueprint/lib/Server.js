@@ -11,6 +11,7 @@ var express     = require ('express')
   , bodyParser  = require ('body-parser')
   , validator   = require ('express-validator')
   , _           = require ('underscore')
+  , all         = require ('require-all')
   ;
 
 var Path     = require ('./Path')
@@ -26,105 +27,6 @@ const UPLOAD_PATH = 'temp/uploads';
 const DEFAULT_HTTP_PORT = 5000;
 
 module.exports = Server;
-
-/**
- * Configure the middleware for the application.
- *
- * @param app
- * @param config
- */
-function configureMiddleware (app, config) {
-  config = config || {};
-  
-  // First, install the morgan middleware. It is important that the first
-  // middleware to handle the event is the logging middleware.
-  var morganConfig = config.morgan || { };
-  var env = blueprint.env;
-
-  if (!morganConfig.format)
-    morganConfig.format = (env === 'development' || env === 'test') ? 'dev' : 'combined';
-
-  app.use (morgan (morganConfig.format, morganConfig.options));
-
-  // Next, we need to parse the body of the message, if present. This will
-  // transform from a string into an actionable object. By default, we are
-  // enabling both URL encoded and JSON formats.
-  var bodyParserConfig = config.bodyParser || { json: {}, urlencoded: {extended: false} };
-
-  for (var key in bodyParserConfig) {
-    if (bodyParserConfig.hasOwnProperty(key)) {
-      var middleware = bodyParser[key];
-
-      if (!middleware)
-        throw new Error (util.format ('%s is an unsupported middleware type', key));
-
-      winston.log ('debug', 'bodyParser.%s: %s', key, bodyParserConfig[key]);
-      app.use (middleware.call (bodyParser, bodyParserConfig[key]));
-    }
-  }
-
-  // Now, add validation to the middleware stack. We can validate the request
-  // since the body has been parsed.
-  var validatorConfig = config.validator || {};
-  app.use (validator (validatorConfig));
-
-  // Configure the optional middleware for the server. Some of the middleware
-  // is required. Some of the middleware is optional. For the middleware that is
-  // required, we provide default options if no options are provided. For the
-  // middleware that is optional, it is only included in the server if options
-  // are provided for it.
-
-  var optionalMiddleware = {
-    cookies : function (app, opts) {
-      winston.log('debug', 'cookie parser: %s', opts.cookies);
-      var middleware = require ('cookie-parser');
-
-      app.use (middleware (opts.cookies));
-    },
-
-    session : function (app, opts) {
-      winston.log('debug', 'express session: %s', opts);
-      var middleware = require ('express-session');
-
-      app.use (middleware (opts));
-    }
-  };
-
-  for (key in config) {
-    if (config.hasOwnProperty (key)) {
-      // Locate the configurator for this configuration.
-      var configurator = optionalMiddleware[key];
-
-      if (configurator)
-        configurator (app, config[key])
-    }
-  }
-
-  // Make sure that Passport is configured as the last optioanl out-of-the-box
-  // middleware. It has to come after both session and cookies for it to work
-  // correctly.
-
-  if (config.passport) {
-    var passport = require ('passport');
-    app.use (passport.initialize ());
-
-    if (config.passport.session) {
-      if (!config.session)
-        throw new Error ('Server must enable sessions to use passport-sessions');
-
-      // Configure the Express application to use passport sessions.
-      app.use (passport.session ());
-
-      // Configure Passport to serialize and deserialize user sessions.
-      passport.serializeUser (config.passport.session.serializer);
-      passport.deserializeUser (config.passport.session.deserializer);
-    }
-  }
-
-  // Add the custom middleware to the end.
-  if (config.custom)
-    app.use (config.custom);
-}
 
 /**
  * @class Protocol
@@ -212,13 +114,12 @@ function configureProtocols (configs, app) {
  * Server abstraction that integrates an Express.js application with the
  * protocols for handling events over the network.
  *
- * @param appPath     Path to the application directory
- * @param config      Server configuration
+ * @param app     Framework application
  * @constructor
  */
-function Server (appPath) {
-  this._appPath = appPath;
-  this._app = express ();
+function Server (app) {
+  this._app = app;
+  this._express = express ();
   this._mainRouter = express.Router ();
   this._protocols = [];
   this._engines = [];
@@ -243,13 +144,12 @@ Server.prototype.configure = function (config, callback) {
 
     // Configure the middleware.
     function (server, callback) {
-      configureMiddleware (server._app, config.middleware);
-      return callback (null, server);
+      server._configureMiddleware (callback);
     },
 
     // Configure the protocols.
     function (server, callback) {
-      server._protocols = configureProtocols (config.protocols, server._app);
+      server._protocols = configureProtocols (config.protocols, server._express);
       return callback (null, server);
     },
 
@@ -262,10 +162,10 @@ Server.prototype.configure = function (config, callback) {
         return callback (null, server);
 
       async.each (config.statics, function (item, callback) {
-        var staticPath = path.isAbsolute (item) ? item : path.resolve (server._appPath, item);
+        var staticPath = path.isAbsolute (item) ? item : path.resolve (server._app.appPath, item);
         winston.log ('debug', 'static path: ', staticPath);
 
-        server._app.use (express.static (staticPath));
+        server._express.use (express.static (staticPath));
 
         return callback ();
       }, function (err) {
@@ -277,11 +177,11 @@ Server.prototype.configure = function (config, callback) {
     // single view engine, or there can be multiple view engines. The view
     // engine must be supported by consolidate.js.
     function (server, callback) {
-      server._viewCachePath = path.resolve (server._appPath, VIEW_CACHE_PATH);
-      server._app.set ('views', server._viewCachePath);
+      server._viewCachePath = path.resolve (server._app.appPath, VIEW_CACHE_PATH);
+      server._express.set ('views', server._viewCachePath);
 
       if (config.view_engine)
-        server._app.set ('view engine', config.view_engine);
+        server._express.set ('view engine', config.view_engine);
 
       if (config.engines) {
         // Install the custom engine handlers.
@@ -290,7 +190,7 @@ Server.prototype.configure = function (config, callback) {
             continue;
 
           var engine = config.engines[key];
-          server._app.engine (key, engine);
+          server._express.engine (key, engine);
         }
       }
 
@@ -302,14 +202,14 @@ Server.prototype.configure = function (config, callback) {
     // Set the locals for the server application.
     function (server, callback) {
       if (config.locals)
-        server._app.locals = extend (true, server._app.locals, config.locals);
+        server._express.locals = extend (true, server._express.locals, config.locals);
 
       return callback (null, server)
     },
 
     // Setup the upload path for the server.
     function (server, callback) {
-      var uploadPath = Path.resolve (server._appPath, UPLOAD_PATH);
+      var uploadPath = Path.resolve (server._app.appPath, UPLOAD_PATH);
 
       uploadPath.createIfNotExists (function (err) {
         if (err) return callback (err);
@@ -320,10 +220,112 @@ Server.prototype.configure = function (config, callback) {
     }
   ], function (err, server) {
     if (server)
-      server._app.use (server._mainRouter);
+      server._express.use (server._mainRouter);
 
     return callback (err, server);
   });
+};
+
+/**
+ * Configure the middleware for the application.
+ */
+Server.prototype._configureMiddleware = function (callback) {
+  var config = this._config.middleware || {};
+
+  // First, install the morgan middleware. It is important that the first
+  // middleware to handle the event is the logging middleware.
+  var morganConfig = config.morgan || { };
+  var env = blueprint.env;
+
+  if (!morganConfig.format)
+    morganConfig.format = (env === 'development' || env === 'test') ? 'dev' : 'combined';
+
+  this._express.use (morgan (morganConfig.format, morganConfig.options));
+
+  // Next, we need to parse the body of the message, if present. This will
+  // transform from a string into an actionable object. By default, we are
+  // enabling both URL encoded and JSON formats.
+  var bodyParserConfig = config.bodyParser || { json: {}, urlencoded: {extended: false} };
+
+  for (var key in bodyParserConfig) {
+    if (bodyParserConfig.hasOwnProperty(key)) {
+      var middleware = bodyParser[key];
+
+      if (!middleware)
+        throw new Error (util.format ('%s is an unsupported middleware type', key));
+
+      winston.log ('debug', 'bodyParser.%s: %s', key, bodyParserConfig[key]);
+      this._express.use (middleware.call (bodyParser, bodyParserConfig[key]));
+    }
+  }
+
+  // Now, add validation to the middleware stack. We can validate the request
+  // since the body has been parsed.
+  var validatorConfig = config.validator || {};
+  validatorConfig.customValidators = validatorConfig.customValidators || {};
+  validatorConfig.customSanitizers = validatorConfig.customSanitizers || {};
+
+  extend (validatorConfig.customValidators, this._app.validators);
+  extend (validatorConfig.customSanitizers, this._app.sanitizers);
+  this._express.use (validator (validatorConfig));
+
+  // Configure the optional middleware for the server. Some of the middleware
+  // is required. Some of the middleware is optional. For the middleware that is
+  // required, we provide default options if no options are provided. For the
+  // middleware that is optional, it is only included in the server if options
+  // are provided for it.
+  var optionalMiddleware = {
+    cookies : function (app, opts) {
+      winston.log('debug', 'cookie parser: %s', opts.cookies);
+      var middleware = require ('cookie-parser');
+
+      app.use (middleware (opts.cookies));
+    },
+
+    session : function (app, opts) {
+      winston.log('debug', 'express session: %s', opts);
+      var middleware = require ('express-session');
+
+      app.use (middleware (opts));
+    }
+  };
+
+  for (key in config) {
+    if (config.hasOwnProperty (key)) {
+      // Locate the configurator for this configuration.
+      var configurator = optionalMiddleware[key];
+
+      if (configurator)
+        configurator (this._express, config[key])
+    }
+  }
+
+  // Make sure that Passport is configured as the last optioanl out-of-the-box
+  // middleware. It has to come after both session and cookies for it to work
+  // correctly.
+
+  if (config.passport) {
+    var passport = require ('passport');
+    this._express.use (passport.initialize ());
+
+    if (config.passport.session) {
+      if (!config.session)
+        throw new Error ('Server must enable sessions to use passport-sessions');
+
+      // Configure the Express application to use passport sessions.
+      this._express.use (passport.session ());
+
+      // Configure Passport to serialize and deserialize user sessions.
+      passport.serializeUser (config.passport.session.serializer);
+      passport.deserializeUser (config.passport.session.deserializer);
+    }
+  }
+
+  // Add the custom middleware to the end.
+  if (config.custom)
+    this._express.use (config.custom);
+
+  return callback (null, this);
 };
 
 /**
@@ -398,7 +400,7 @@ Server.prototype.importViews = function (srcPath, callback) {
             var render = consolidate[ext];
 
             if (render) {
-              self._app.engine (ext, render);
+              self._express.engine (ext, render);
               self._engines.push (ext);
             }
             else {
@@ -438,5 +440,5 @@ Server.prototype.setMainRouter = function (router) {
 };
 
 Server.prototype.__defineGetter__ ('app', function () {
-  return this._app;
+  return this._express;
 });

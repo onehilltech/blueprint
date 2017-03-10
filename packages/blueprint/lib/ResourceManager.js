@@ -1,6 +1,7 @@
-var extend = require ('extend')
-  , all = require ('require-all')
+var extend     = require ('extend')
+  , all        = require ('require-all')
   , objectPath = require ('object-path')
+  , util       = require ('util')
   ;
 
 function ResourceManager (kind, opts) {
@@ -18,17 +19,11 @@ ResourceManager.SCM_DIRECTORIES = /^\.(git|svn)$/;
  * @param path        Path to resources
  * @param opts        Options for loading
  */
-ResourceManager.prototype.load = function (path, opts, callback) {
-  if (!callback) {
-    callback = opts;
-    opts = {};
-  }
-
-  opts = opts || {};
-  var recursive = opts.recursive || true;
-  var filter = opts.filter || /(.+)\.js$/;
-  var excludeDirs = opts.excludeDirs || ResourceManager.SCM_DIRECTORIES;
-  var resolve = opts.resolve;
+ResourceManager.prototype.load = function (path, callback) {
+  var recursive = this._opts.recursive || true;
+  var filter = this._opts.filter || /(.+)\.js$/;
+  var excludeDirs = this._opts.excludeDirs || ResourceManager.SCM_DIRECTORIES;
+  var resolve = this._opts.resolve;
 
   try {
     var resources = all ({
@@ -52,13 +47,13 @@ ResourceManager.prototype.load = function (path, opts, callback) {
 /**
  * Merge the resources of a source ResourceManager with this manager.
  *
- * @param mgr
+ * @param src
  */
-ResourceManager.prototype.merge = function (mgr) {
-  if (this._kind !== mgr._kind)
-    throw new Error ('Cannot merge resources of different kind');
+ResourceManager.prototype.merge = function (src) {
+  if (this._kind !== src._kind)
+    throw new Error (util.format ('Cannot merge resources of different kind [%s != %s]', this._kind, src._kind));
 
-  this._resources = extend (true, this._resources, mgr._resources);
+  this._resources = extend (true, this._resources, src._resources);
 };
 
 /**
