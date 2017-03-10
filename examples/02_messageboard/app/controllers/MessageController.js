@@ -99,7 +99,7 @@ MessageController.prototype.deleteMessage = function () {
     execute: function (req, res, callback) {
       var messageId = req.params.messageId;
 
-      Message.remove ({_id : messageId}, function (err) {
+      Message.remove ({id : messageId}, function (err) {
         if (err) return callback (new HttpError (500, 'Failed to delete message'));
 
         res.status (200).json (true);
