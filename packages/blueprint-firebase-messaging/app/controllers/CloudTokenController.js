@@ -45,7 +45,7 @@ CloudTokenController.prototype.create = function () {
 
       var update = {
         device: req.body.device,
-        owner: req.user._id,
+        owner: req.user.id,
         token: req.body.token
       };
 

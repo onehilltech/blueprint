@@ -3,7 +3,7 @@ var winston = require ('winston')
   ;
 
 function removeTokensForAccount (account) {
-  var query = {owner: account._id};
+  var query = {owner: account.id};
 
   CloudToken.remove (query, function (err) {
     if (err)

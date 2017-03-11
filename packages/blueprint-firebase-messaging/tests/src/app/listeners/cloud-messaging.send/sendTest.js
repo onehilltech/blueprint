@@ -12,7 +12,7 @@ describe ('listener:cloud-messaging.send', function () {
 
   it ('should send data to recipients', function (done) {
     var data = {device: '1234567890', token: 'aabbccdd'};
-    var recipient = datamodel.models.accounts[0]._id;
+    var recipient = datamodel.models.accounts[0].id;
 
     messaging.on ('cloud-messaging.send.callback', done);
     messaging.emit ('cloud-messaging.send', recipient, data);

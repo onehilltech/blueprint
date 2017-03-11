@@ -22,7 +22,7 @@ describe ('Sender', function () {
 
     it ('should send a data message', function (done) {
       var sender = new Sender (mockCloudToken, {apiKey: 'AIzaSyDuhZ8sT_ziDTm3SWAaunU2rRnR951eRDE', dryRun: true});
-      var recipient = datamodel.models.accounts[0]._id;
+      var recipient = datamodel.models.accounts[0].id;
 
       sender.send ([recipient], {msg: 'Hello, World!'}, done);
     });

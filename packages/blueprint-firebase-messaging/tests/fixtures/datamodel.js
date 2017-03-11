@@ -86,7 +86,7 @@ function seed (callback) {
     function (client, callback) {
       // Update the created_by path on the accounts to the first client.
       data.accounts.forEach (function (account) {
-        account.created_by = client._id;
+        account.created_by = client.id;
       });
 
       // Insert the participants into the database.
@@ -101,7 +101,7 @@ function seed (callback) {
     function (callback) {
       // Associate an owner account with each token.
       async.eachOf (data.cloudTokens, function (item, index, callback) {
-        item.owner = models.accounts[index]._id;
+        item.owner = models.accounts[index].id;
         return callback ()
       }, callback);
     },
