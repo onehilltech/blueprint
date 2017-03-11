@@ -1,4 +1,4 @@
-var passport   = require ('passport')
+var gatekeeper = require ('../../../../lib')
   ;
 
 module.exports = exports = {
@@ -7,7 +7,7 @@ module.exports = exports = {
   },
 
   '/logout' : {
-    use: passport.authenticate ('bearer', {session: false}),
+    use: gatekeeper.protect (),
     post: { action : 'oauth2.WorkflowController@logoutUser' }
   }
 };

@@ -1,7 +1,6 @@
 'use strict';
 
-var Policy     = require ('@onehilltech/blueprint').Policy
-  , gatekeeper = require ('../../../lib')
+var gatekeeper = require ('../../../lib')
   ;
 
 module.exports = {
