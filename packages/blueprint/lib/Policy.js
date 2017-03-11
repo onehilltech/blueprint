@@ -43,6 +43,34 @@ function __blueprint_optionalPolicy (req, callback) {
 }
 
 /**
+ * Delay load a Policy.
+ */
+function load (opts) {
+  return new Promise (function (resolve, reject) {
+    // If the argument is function, then we are resolved.
+    if (_.isFunction (opts))
+      return resolve (opts);
+
+    // Resolve the policy by its name. If the policy starts with a question mark
+    // (?), then this is an optional policy. Meaning, we do not fail if we cannot
+    // find it.
+    var optional = opts[0] == '?';
+    var policyName = optional ? opts.slice (1) : opts;
+    var policy = lookupPolicyByName (policyName);
+
+    if (!policy && optional)
+      policy = __blueprint_optionalPolicy;
+
+    if (policy)
+      return resolve (policy);
+    else
+      return reject (new Error ('invalid_policy', util.format ('Policy %s does not exist', opts), {name: opts}));
+  });
+}
+
+exports.load = load;
+
+/**
  * Factory method for creating a policy that can be evaluated. This factory
  * return a function that has the signature function (req, callback). The
  * callback (err, result) return true if the policy is passed, or false if
@@ -64,26 +92,7 @@ function policyWrapper () {
   // in the application if loaded from a module. We can use a Promise to handle
   // this concern.
 
-  var promise = new Promise (function (resolve, reject) {
-    // If the argument is function, then we are resolved.
-    if (_.isFunction (firstArg))
-      return resolve (firstArg);
-
-    // Resolve the policy by its name. If the policy starts with a question mark
-    // (?), then this is an optional policy. Meaning, we do not fail if we cannot
-    // find it.
-    var optional = firstArg[0] == '?';
-    var policyName = optional ? firstArg.slice (1) : firstArg;
-    var policy = lookupPolicyByName (policyName);
-
-    if (!policy && optional)
-      policy = __blueprint_optionalPolicy;
-
-    if (policy)
-      return resolve (policy);
-    else
-      return reject (new Error ('invalid_policy', util.format ('Policy %s does not exist', firstArg), {name: firstArg}));
-  });
+  var promise = load (firstArg);
 
   return function __blueprint_checkPolicy (req, callback) {
     promise.then (
