@@ -57,8 +57,6 @@ function makeTaskCompletionHandler (res, callback) {
  * Base class f or all resource controllers.
  */
 function ResourceController (opts) {
-  BaseController.call (this, opts);
-
   if (!opts.model)
     throw new Error ('Options must define model property');
 
@@ -67,6 +65,8 @@ function ResourceController (opts) {
 
   if (!opts.name)
     opts.name = opts.model.modelName;
+
+  BaseController.call (this, opts);
 
   this._model = opts.model;
   this._pluralize = pluralize (this.name);
