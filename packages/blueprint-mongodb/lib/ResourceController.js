@@ -44,7 +44,8 @@ function makeDbCompletionHandler (code, message, callback) {
  */
 function makeTaskCompletionHandler (res, callback) {
   return function __blueprint_task_complete (err, result) {
-    if (err) return callback (err);
+    if (err)
+      return callback (err);
 
     res.status (200).json (result);
   }
@@ -56,7 +57,6 @@ function makeTaskCompletionHandler (res, callback) {
  * Base class f or all resource controllers.
  */
 function ResourceController (opts) {
-  // Pass control to the base class.
   BaseController.call (this, opts);
 
   if (!opts.model)
@@ -73,8 +73,14 @@ function ResourceController (opts) {
 
   // Build the validation schema for create and update.
   var validationOpts = {pathPrefix: this.name};
-  this._createValidation = validationSchema (opts.model.schema, validationOpts);
-  this._updateValidation = validationSchema (opts.model.schema, _.extend (validationOpts, {allOptional: true}));
+
+  this._create = {
+    validate: validationSchema (opts.model.schema, validationOpts)
+  };
+
+  this._update = {
+    validate: validationSchema (opts.model.schema, _.extend (validationOpts, {allOptional: true}))
+  };
 }
 
 util.inherits (ResourceController, BaseController);
@@ -92,12 +98,12 @@ ResourceController.prototype.create = function (opts) {
   var onPrepareDocument = on.prepareDocument || __onPrepareDocument;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
-  var eventName = this.computeEventName ('created');
+  var eventName = this._computeEventName ('created');
 
   var self = this;
 
   return {
-    validate: this._createValidation,
+    validate: this._create.validate,
     sanitize: onSanitize,
 
     execute: function __blueprint_create (req, res, callback) {
@@ -441,12 +447,12 @@ ResourceController.prototype.update = function (opts) {
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
-  var eventName = this.computeEventName ('updated');
+  var eventName = this._computeEventName ('updated');
 
   var self = this;
 
   return {
-    validate: this._updateValidation,
+    validate: this._update.validate,
     sanitize: onSanitize,
 
     execute: function __blueprint_update_execute (req, res, callback) {
@@ -530,7 +536,7 @@ ResourceController.prototype.delete = function (opts) {
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
-  var eventName = this.computeEventName ('deleted');
+  var eventName = this._computeEventName ('deleted');
 
   var self = this;
 
@@ -627,7 +633,10 @@ ResourceController.prototype.count = function (opts) {
   };
 };
 
-ResourceController.prototype.computeEventName = function (action) {
+/**
+ * Calculate the event name for an action.
+ */
+ResourceController.prototype._computeEventName = function (action) {
   var prefix = this.namespace || '';
 
   if (prefix.length !== 0)
