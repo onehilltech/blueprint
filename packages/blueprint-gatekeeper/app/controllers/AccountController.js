@@ -2,27 +2,26 @@
 
 var blueprint  = require ('@onehilltech/blueprint')
   , mongodb    = require ('@onehilltech/blueprint-mongodb')
-  , messaging  = blueprint.messaging
-  , uid        = require ('uid-safe')
   , async      = require ('async')
-  , gatekeeper = require ('../../lib')
+  , objectPath = require ('object-path')
   , Account    = require ('../models/Account')
   ;
 
 var ResourceController = mongodb.ResourceController
   ;
 
-var gatekeeperConfig;
-var tokenStrategy;
+const gatekeeperConfig = blueprint.app.configs.gatekeeper
+  ;
 
-var activationConfig;
+/**
+ * Default account id generator. This generator will just produce a new
+ * ObjectId for each account.
+ */
+function __generateAccountId (account, callback) {
+  callback (null, new mongodb.Types.ObjectId ());
+}
 
-messaging.on ('app.init', function (app) {
-  gatekeeperConfig = app.configs.gatekeeper;
-  activationConfig = gatekeeperConfig.activation || {};
-
-  tokenStrategy = gatekeeper.tokens (gatekeeperConfig.token);
-});
+var generateAccountId = objectPath.get (gatekeeperConfig, 'generators.accountId', __generateAccountId);
 
 function AccountController () {
   ResourceController.call (this, {model: Account, namespace: 'gatekeeper'});
@@ -46,7 +45,18 @@ AccountController.prototype.create = function () {
           created_by : req.user.id
         };
 
-        return callback (null, doc);
+        async.waterfall ([
+          function (callback) {
+            generateAccountId (doc, callback);
+          },
+
+          function (id, callback) {
+            if (id != null)
+              doc._id = id;
+
+            return callback (null, doc);
+          }
+        ], callback);
       }
     }
   };
