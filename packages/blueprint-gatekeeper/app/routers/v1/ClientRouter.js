@@ -9,30 +9,7 @@ module.exports = {
     use: gatekeeper.protect (),
     resource: {
       controller: 'ClientController',
-      allow: ['create', 'update', 'delete'],
-
-      actions: {
-        create: {
-          policy: Policy.any ([
-            Policy.assert ('gatekeeper.hasScope', gatekeeper.scope.client.create),
-            Policy.assert ('gatekeeper.isSuperUser')
-          ])
-        },
-
-        update: {
-          policy: Policy.any ([
-            Policy.assert ('gatekeeper.hasScope', gatekeeper.scope.client.update),
-            Policy.assert ('gatekeeper.isSuperUser')
-          ])
-        },
-
-        delete: {
-          policy: Policy.any ([
-            Policy.assert ('gatekeeper.hasScope', gatekeeper.scope.client.delete),
-            Policy.assert ('gatekeeper.isSuperUser')
-          ])
-        }
-      }
+      allow: ['create', 'update', 'delete']
     }
   }
 };
