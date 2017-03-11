@@ -1,7 +1,7 @@
 'use strict';
 
-var path = require ('path')
-  , async = require ('async')
+var path      = require ('path')
+  , async     = require ('async')
   , blueprint = require ('./lib')
   ;
 
