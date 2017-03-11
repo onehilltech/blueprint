@@ -1,7 +1,7 @@
 'use strict';
 
 var async    = require ('async')
-  , hasScope = require ('./has_scope')
+  , hasScope = require ('./hasScope')
   ;
 
 function isSuperuser (req, callback) {

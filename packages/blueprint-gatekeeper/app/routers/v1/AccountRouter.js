@@ -15,35 +15,28 @@ module.exports = {
       // Define custom settings for the different actions, which includes overriding
       // the default policies on the resource controller.
       actions: {
-        create: {
-          policy: Policy.any ([
-            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.account.create),
-            Policy.assert ('gatekeeper.is_superuser')
-          ])
-        },
-
         getAll: {
-          policy: Policy.assert ('gatekeeper.is_superuser')
+          policy: Policy.assert ('gatekeeper.isSuperUser')
         },
 
         getOne: {
           policy: Policy.any ([
-            Policy.assert ('gatekeeper.is_account_owner'),
-            Policy.assert ('gatekeeper.is_superuser')
+            Policy.assert ('gatekeeper.isAccountOwner'),
+            Policy.assert ('gatekeeper.isSuperUser')
           ])
         },
 
         update: {
           policy: Policy.any ([
-            Policy.assert ('gatekeeper.is_account_owner'),
-            Policy.assert ('gatekeeper.is_superuser')
+            Policy.assert ('gatekeeper.isAccountOwner'),
+            Policy.assert ('gatekeeper.isSuperUser')
           ])
         },
 
         delete: {
           policy: Policy.any ([
-            Policy.assert ('gatekeeper.is_account_owner'),
-            Policy.assert ('gatekeeper.is_superuser')
+            Policy.assert ('gatekeeper.isAccountOwner'),
+            Policy.assert ('gatekeeper.isSuperUser')
           ])
         }
       }

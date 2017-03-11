@@ -25,7 +25,7 @@ messaging.on ('app.init', function (app) {
 });
 
 function AccountController () {
-  ResourceController.call (this, {model: Account, eventPrefix: 'gatekeeper'});
+  ResourceController.call (this, {model: Account, namespace: 'gatekeeper'});
 }
 
 blueprint.controller (AccountController, ResourceController);
@@ -43,7 +43,7 @@ AccountController.prototype.create = function () {
           email : req.body.account.email,
           username : req.body.account.username,
           password : req.body.account.password,
-          created_by : req.user._id
+          created_by : req.user.id
         };
 
         return callback (null, doc);

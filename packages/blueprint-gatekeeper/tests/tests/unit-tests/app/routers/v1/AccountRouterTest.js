@@ -211,7 +211,7 @@ describe ('AccountRouter', function () {
 
     describe ('GET', function () {
       it ('should return the owner account', function (done) {
-        var accountId = datamodel.models.accounts[0]._id;
+        var accountId = datamodel.models.accounts[0].id;
 
         Account.findById (accountId, function (err, result) {
           if (err) return done (err);
@@ -225,7 +225,7 @@ describe ('AccountRouter', function () {
       });
 
       it ('should retrieve a user account for an admin', function (done) {
-        var accountId = datamodel.models.accounts[0]._id;
+        var accountId = datamodel.models.accounts[0].id;
 
         Account.findById (accountId, function (err, account) {
           if (err) return done (err);
@@ -238,7 +238,7 @@ describe ('AccountRouter', function () {
       });
 
       it ('should not allow non-admin access to another account', function (done) {
-        var accountId = datamodel.models.accounts[1]._id;
+        var accountId = datamodel.models.accounts[1].id;
 
         blueprint.testing.request ()
           .get ('/v1/accounts/' + accountId)
@@ -249,7 +249,7 @@ describe ('AccountRouter', function () {
 
     describe ('UPDATE', function () {
       it ('should not update scope and created_by', function (done) {
-        var accountId = datamodel.models.accounts[0]._id;
+        var accountId = datamodel.models.accounts[0].id;
 
         blueprint.testing.request ()
           .put ('/v1/accounts/' + accountId)
@@ -259,7 +259,7 @@ describe ('AccountRouter', function () {
       });
 
       it ('should update the email', function (done) {
-        var accountId = datamodel.models.accounts[0]._id;
+        var accountId = datamodel.models.accounts[0].id;
         account.email = 'foo@contact.com';
 
         blueprint.testing.request ()
@@ -270,7 +270,7 @@ describe ('AccountRouter', function () {
       });
 
       it ('should update the scope', function (done) {
-        var accountId = datamodel.models.accounts[0]._id;
+        var accountId = datamodel.models.accounts[0].id;
         account.scope.push ('the_new_scope');
 
         blueprint.testing.request ()
@@ -283,7 +283,7 @@ describe ('AccountRouter', function () {
 
     describe ('DELETE', function () {
       it ('should not allow non-admin to delete another user account', function (done) {
-        var accountId = datamodel.models.accounts[2]._id;
+        var accountId = datamodel.models.accounts[2].id;
 
         blueprint.testing.request ()
           .delete ('/v1/accounts/' + accountId)
@@ -292,7 +292,7 @@ describe ('AccountRouter', function () {
       });
 
       it ('should allow account owner to delete account', function (done) {
-        var accountId = datamodel.models.accounts[0]._id;
+        var accountId = datamodel.models.accounts[0].id;
 
         blueprint.testing.request ()
           .delete ('/v1/accounts/' + accountId)
@@ -301,7 +301,7 @@ describe ('AccountRouter', function () {
       });
 
       it ('should allow admin to delete user account', function (done) {
-        var accountId = datamodel.models.accounts[2]._id;
+        var accountId = datamodel.models.accounts[2].id;
 
         blueprint.testing.request ()
           .delete ('/v1/accounts/' + accountId)

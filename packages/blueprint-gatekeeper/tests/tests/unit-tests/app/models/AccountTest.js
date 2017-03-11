@@ -62,7 +62,7 @@ describe ('Account', function () {
   describe ('create and save', function () {
     it ('should save a new account to the database', function (done) {
       account = new Account (data.account);
-      account.created_by = client._id;
+      account.created_by = client.id;
 
       account.save (function (err, model) {
         if (err) return done (err);

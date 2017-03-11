@@ -82,8 +82,8 @@ function createAndSaveUserAccessToken (opts, callback) {
     // Create a new AccessToken model. The model is used to determine
     function (callback) {
       var doc = {
-        client: opts.client._id,
-        account: opts.account._id,
+        client: opts.client.id,
+        account: opts.account.id,
         refresh_token: new mongodb.Types.ObjectId ()
       };
 
@@ -305,7 +305,7 @@ WorkflowController.prototype.issueToken = function () {
            * @param callback
            */
           function (client, callback) {
-            var doc = {client: client._id};
+            var doc = {client: client.id};
 
             async.waterfall ([
               /**

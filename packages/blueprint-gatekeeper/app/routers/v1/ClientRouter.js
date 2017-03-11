@@ -14,22 +14,22 @@ module.exports = {
       actions: {
         create: {
           policy: Policy.any ([
-            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.client.create),
-            Policy.assert ('gatekeeper.is_superuser')
+            Policy.assert ('gatekeeper.hasScope', gatekeeper.scope.client.create),
+            Policy.assert ('gatekeeper.isSuperUser')
           ])
         },
 
         update: {
           policy: Policy.any ([
-            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.client.update),
-            Policy.assert ('gatekeeper.is_superuser')
+            Policy.assert ('gatekeeper.hasScope', gatekeeper.scope.client.update),
+            Policy.assert ('gatekeeper.isSuperUser')
           ])
         },
 
         delete: {
           policy: Policy.any ([
-            Policy.assert ('gatekeeper.has_scope', gatekeeper.scope.client.delete),
-            Policy.assert ('gatekeeper.is_superuser')
+            Policy.assert ('gatekeeper.hasScope', gatekeeper.scope.client.delete),
+            Policy.assert ('gatekeeper.isSuperUser')
           ])
         }
       }
