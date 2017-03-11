@@ -8,8 +8,25 @@ var async     = require ('async')
 
 var exports = module.exports = {};
 
-function lookupPolicyByName (name) {
-  return Framework ().app.policyManager.find (name);
+/**
+ * The optional policy is always true.
+ */
+function __blueprint_optionalPolicy (req, callback) {
+  return callback (null, true);
+}
+
+function lookupPolicyByName (app, name) {
+  // Resolve the policy by its name. If the policy starts with a question mark
+  // (?), then this is an optional policy. Meaning, we do not fail if we cannot
+  // find it.
+  var optional = name[0] == '?';
+  var policyName = optional ? name.slice (1) : name;
+  var policy = app.policyManager.find (policyName);
+
+  if (!policy && optional)
+    policy = __blueprint_optionalPolicy;
+
+  return policy;
 }
 
 /**
@@ -23,8 +40,7 @@ function evaluate () {
   var policy = args.shift ();
 
   if (_.isString (policy)) {
-    var policyName = policy;
-    policy = lookupPolicyByName (policy);
+    policy = lookupPolicyByName (Framework ().app, policy);
 
     if (!policy)
       throw new Error ('invalid_policy', util.format ('Policy %s does not exist', policyName), {policy: policyName});
@@ -36,13 +52,6 @@ function evaluate () {
 exports.evaluate = evaluate;
 
 /**
- * The optional policy is always true.
- */
-function __blueprint_optionalPolicy (req, callback) {
-  return callback (null, true);
-}
-
-/**
  * Delay load a Policy.
  */
 function load (opts) {
@@ -51,20 +60,30 @@ function load (opts) {
     if (_.isFunction (opts))
       return resolve (opts);
 
-    // Resolve the policy by its name. If the policy starts with a question mark
-    // (?), then this is an optional policy. Meaning, we do not fail if we cannot
-    // find it.
-    var optional = opts[0] == '?';
-    var policyName = optional ? opts.slice (1) : opts;
-    var policy = lookupPolicyByName (policyName);
+    var app = Framework ().app;
 
-    if (!policy && optional)
-      policy = __blueprint_optionalPolicy;
+    if (app.isInit) {
+      // The application is already initialized. This means we can
+      // perform a lookup for the policy.
+      lookup (app, opts);
+    }
+    else {
+      // We need to wait until the application has been initialized to
+      // perform the lookup of the policy. Otherwise, it will not be
+      // present in the application.
+      Framework ().messaging.once ('app.init', function (app) {
+        lookup (app, opts);
+      });
+    }
 
-    if (policy)
-      return resolve (policy);
-    else
-      return reject (new Error ('invalid_policy', util.format ('Policy %s does not exist', opts), {name: opts}));
+    function lookup (app, policyName) {
+      var policy = lookupPolicyByName (app, policyName);
+      
+      if (policy)
+        return resolve (policy);
+      else
+        return reject (new Error ('invalid_policy', util.format ('Policy %s does not exist', opts), {name: policyName}));
+    }
   });
 }
 
