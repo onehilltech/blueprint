@@ -3,6 +3,7 @@ const util     = require ('util')
   , _          = require ('underscore')
   , pluralize  = require ('pluralize')
   , blueprint  = require ('@onehilltech/blueprint')
+  , objectPath = require ('object-path')
   , winston    = require ('winston')
   , DateUtils  = require ('./DateUtils')
   , HttpHeader = blueprint.http.headers
@@ -71,16 +72,17 @@ function ResourceController (opts) {
 
   this._model = opts.model;
   this._pluralize = pluralize (this.name);
+  this._idOpts = opts.id || {};
 
   // Build the validation schema for create and update.
   var validationOpts = {pathPrefix: this.name};
 
   this._create = {
-    validate: validationSchema (opts.model.schema, validationOpts)
+    schema: validationSchema (opts.model.schema, validationOpts)
   };
 
   this._update = {
-    validate: validationSchema (opts.model.schema, _.extend (validationOpts, {allOptional: true}))
+    schema: validationSchema (opts.model.schema, _.extend (validationOpts, {allOptional: true}))
   };
 }
 
@@ -95,6 +97,7 @@ ResourceController.prototype.create = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
+  var onValidate = on.validate || __onValidate;
   var onPrepareDocument = on.prepareDocument || __onPrepareDocument;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
@@ -103,7 +106,11 @@ ResourceController.prototype.create = function (opts) {
   var self = this;
 
   return {
-    validate: this._create.validate,
+    validate: function (req, callback) {
+      req.check (self._create.schema);
+      onValidate.call (null, req, callback);
+    },
+
     sanitize: on.sanitize || __onSanitize,
 
     execute: function __blueprint_create (req, res, callback) {
@@ -191,12 +198,8 @@ ResourceController.prototype.get = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var validateSchema = {};
-  validateSchema[this.id] = {
-    in: 'params',
-    isMongoId: { errorMessage: 'Invalid resource id'}
-  };
-
+  var idValidationSchema = this._getIdValidationSchema (opts);
+  var onValidate = on.validate || __onValidate;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPreExecute = on.preExecute || __onPreExecute;
@@ -204,7 +207,11 @@ ResourceController.prototype.get = function (opts) {
 
 
   return {
-    validate: on.validate || validateSchema,
+    validate: function (req, callback) {
+      req.check (idValidationSchema);
+      onValidate (req, callback);
+    },
+
     sanitize: on.sanitize || __onSanitize,
 
     execute: function __blueprint_get_execute (req, res, callback) {
@@ -401,42 +408,6 @@ ResourceController.prototype.getAll = function (opts) {
 };
 
 /**
- * Utility method for creating an update statement from the body of
- * a request.
- *
- * @param body
- * @returns {{$set: *}}
- */
-function getUpdateFromBody (body) {
-  var update = {};
-
-  var $set = {};
-  var $unset = {};
-
-  for (var name in body) {
-    if (!body.hasOwnProperty (name))
-      continue;
-
-    var value = body[name];
-
-    if (value !== null)
-      $set[name] = value;
-    else
-      $unset[name] = 1;
-  }
-
-  // Include the $set and $unset properties only if there are updates
-  // associated with either one.
-  if (Object.keys ($set).length !== 0)
-    update.$set = $set;
-
-  if (Object.keys ($unset).length !== 0)
-    update.$unset = $unset;
-
-  return update;
-}
-
-/**
  * Update a single resource.
  *
  * @param opts
@@ -448,6 +419,8 @@ ResourceController.prototype.update = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
+  var idValidationSchema = this._getIdValidationSchema (opts);
+  var onValidate = on.validate || __onValidate;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPrepareUpdate = on.prepareUpdate || __onPrepareUpdate;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
@@ -458,7 +431,13 @@ ResourceController.prototype.update = function (opts) {
   var self = this;
 
   return {
-    validate: this._update.validate,
+    validate: function (req, callback) {
+      req.check (idValidationSchema);
+      req.check (self._update.schema);
+
+      onValidate.call (null, req, callback);
+    },
+
     sanitize: on.sanitize || __onSanitize,
 
     execute: function __blueprint_update_execute (req, res, callback) {
@@ -538,14 +517,8 @@ ResourceController.prototype.delete = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var validateSchema = {};
-
-  validateSchema[this.id] = {
-    in: 'params',
-    isMongoId: { errorMessage: 'Invalid resource id'}
-  };
-
-  var onValidate = on.validate || validateSchema;
+  var idValidationSchema = this._getIdValidationSchema (opts);
+  var onValidate = on.validate || __onValidate;
   var onSanitize = on.sanitize || __onSanitize;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPreExecute = on.preExecute || __onPreExecute;
@@ -555,7 +528,11 @@ ResourceController.prototype.delete = function (opts) {
   var self = this;
 
   return {
-    validate: onValidate,
+    validate: function (req, callback) {
+      req.check (idValidationSchema);
+      onValidate.call (null, req, callback);
+    },
+
     sanitize: onSanitize,
 
     execute: function __blueprint_delete (req, res, callback) {
@@ -661,3 +638,59 @@ ResourceController.prototype._computeEventName = function (action) {
 
   return prefix + this.name + '.' + action;
 };
+
+/**
+ * Get the validation schema for the resource.
+ */
+ResourceController.prototype._getIdValidationSchema = function (opts) {
+  var defaults = objectPath (this._idOpts);
+
+  var id = objectPath (opts.id);
+  var validator = id.get ('validator', defaults.get ('validator', 'isMongoId'));
+  var errorMessage = id.get ('errorMessage', defaults.get ('errorMessage', 'Invalid resource id'));
+
+  var schema = {};
+  schema[this.id] = {
+    in: 'params'
+  };
+
+  schema[this.id][validator] = {errorMessage: errorMessage};
+
+  return schema;
+};
+
+/**
+ * Utility method for creating an update statement from the body of
+ * a request.
+ *
+ * @param body
+ * @returns {{$set: *}}
+ */
+function getUpdateFromBody (body) {
+  var update = {};
+
+  var $set = {};
+  var $unset = {};
+
+  for (var name in body) {
+    if (!body.hasOwnProperty (name))
+      continue;
+
+    var value = body[name];
+
+    if (value !== null)
+      $set[name] = value;
+    else
+      $unset[name] = 1;
+  }
+
+  // Include the $set and $unset properties only if there are updates
+  // associated with either one.
+  if (Object.keys ($set).length !== 0)
+    update.$set = $set;
+
+  if (Object.keys ($unset).length !== 0)
+    update.$unset = $unset;
+
+  return update;
+}
