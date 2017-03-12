@@ -105,8 +105,17 @@ function validateByFunction (validator) {
   return function __blueprint_validate_function (req, res, next) {
     try {
       return validator (req, function (err) {
-        if (!err) return next ();
-        return handleError (err, res);
+        if (err)
+          return handleError (err, res);
+
+        req.getValidationResult ().then (function (result) {
+          // The fast path...
+          if (result.isEmpty ())
+            return next ();
+
+          var err = new HttpError (400, 'validation_failed', 'Request validation failed', {validation: result.mapped ()});
+          handleError (err, res);
+        });
       });
     }
     catch (ex) {
