@@ -70,7 +70,19 @@ describe ('Policy', function () {
         return done ();
       });
     });
-  });
+
+    it ('should return a details reason for policy failure', function (done) {
+      var f = Policy.assert ('alwaysFalse');
+      var req = {};
+
+      f (req, function (err, result) {
+        expect (err).to.be.null;
+        expect (result).to.be.false;
+        expect (req.policyError).to.eql ({code: 'passthrough_failed', message: 'The pass through policy failed'});
+
+        return done ();
+      });
+    });  });
 
   describe ('#all', function () {
     it ('should evaluate to true since all asserts are true', function () {

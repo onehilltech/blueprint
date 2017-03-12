@@ -61,13 +61,13 @@ describe ('RouterBuilder', function () {
     it ('should reject request because policy failed', function (done) {
       testing.request ()
         .get ('/policies/rejected')
-        .expect (403, { errors: { code: 'policy_failed', message: 'Policy failed'}}, done);
+        .expect (403, { errors: { code: 'passthrough_failed', message: 'The pass through policy failed' } }, done);
     });
 
     it ('should reject request because policy failed on a http method', function (done) {
       testing.request ()
         .get ('/policies/methods/rejected')
-        .expect (403, { errors: { code: 'policy_failed', message: 'Policy failed'} }, done);
+        .expect (403, { errors: { code: 'passthrough_failed', message: 'The pass through policy failed' } }, done);
     });
   });
 
