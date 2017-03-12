@@ -123,15 +123,8 @@ function checkPolicy () {
           if (err || result)
             return callback (err, result);
 
-          // The policy failed. Let's see if there are details.
-          if (details) {
-            if (_.isString (details)) {
-              req.policyError = {code: 'policy_failed', message: details };
-            }
-            else {
-              req.policyError = details;
-            }
-          }
+          if (details)
+            req.policyError = details;
 
           return callback (null, false);
         });

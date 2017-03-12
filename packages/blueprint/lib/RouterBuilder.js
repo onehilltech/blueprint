@@ -602,20 +602,21 @@ RouterBuilder.prototype._makePolicyMiddleware = function (policy) {
             if (err)
               return handleError (err, res);
 
-            // The policy failed. Return an appropriate message.
-            if (details) {
-              if (_.isString (details)) {
-                req.policyError = {code: 'policy_failed', message: details}
-              }
-              else {
-                req.policyError = details;
-              }
-            }
+            // The policy failed. We need to determine the kind of response to send
+            // back to the client. Do we send the default http error, or do we send
+            // an more concrete http error.
+            var policyError = details || req.policyError;
 
-            if (req.policyError)
-              return handleError (new HttpError (403, req.policyError.code, req.policyError.message), res);
-            else
+            if (policyError) {
+              if (_.isString (policyError)) {
+                policyError = {reason: 'policy_failed', message: details}
+              }
+
+              return handleError (new HttpError (403, policyError.reason, policyError.message), res);
+            }
+            else {
               return handleError (new HttpError (403, 'policy_failed', 'Policy failed'), res);
+            }
           });
         }
         catch (ex) {

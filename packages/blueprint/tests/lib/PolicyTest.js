@@ -78,7 +78,7 @@ describe ('Policy', function () {
       f (req, function (err, result) {
         expect (err).to.be.null;
         expect (result).to.be.false;
-        expect (req.policyError).to.eql ({code: 'passthrough_failed', message: 'The pass through policy failed'});
+        expect (req.policyError).to.eql ({reason: 'passthrough_failed', message: 'The pass through policy failed'});
 
         return done ();
       });
