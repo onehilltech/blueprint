@@ -94,10 +94,8 @@ exports.load = load;
  * return a function that has the signature function (req, callback). The
  * callback (err, result) return true if the policy is passed, or false if
  * the policy failed.
- *
- * @constructor
  */
-function policyWrapper () {
+function checkPolicy () {
   // The first argument for this function must be the policy. It can either
   // be a string name or a function.
   var args = [].slice.call (arguments);
@@ -120,7 +118,23 @@ function policyWrapper () {
         // as the last arguments.
         var policyArgs = args.slice ();
         policyArgs.push (req);
-        policyArgs.push (callback);
+        policyArgs.push (function (err, result, details) {
+          // If we have an error or the policy passed, then just return.
+          if (err || result)
+            return callback (err, result);
+
+          // The policy failed. Let's see if there are details.
+          if (details) {
+            if (_.isString (details)) {
+              req.policyError = {code: 'policy_failed', message: details };
+            }
+            else {
+              req.policyError = details;
+            }
+          }
+
+          return callback (null, false);
+        });
 
         // Call the check.
         policy.apply (null, policyArgs);
@@ -153,7 +167,7 @@ function makePolicyList (list) {
       policies.push (policy);
     }
     else if (_.isString (policy)) {
-      policies.push (policyWrapper (policy));
+      policies.push (checkPolicy (policy));
     }
     else {
       throw new Error ('invalid_policy', 'Policy must be a String or Function');
@@ -215,7 +229,7 @@ function allSeries (list) {
   }
 }
 
-exports.check = exports.assert = policyWrapper;
+exports.check = exports.assert = checkPolicy;
 exports.not = not;
 exports.any = any;
 exports.anySeries = anySeries;

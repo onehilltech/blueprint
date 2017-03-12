@@ -593,15 +593,28 @@ RouterBuilder.prototype._makePolicyMiddleware = function (policy) {
     promise.then (
       function (policy) {
         try {
-          policy (req, function (err, result) {
+          policy (req, function (err, result, details) {
             // The fast path.
             if (!err && result)
               return next ();
 
+            // We accept the error.
             if (err)
               return handleError (err, res);
 
-            if (!result)
+            // The policy failed. Return an appropriate message.
+            if (details) {
+              if (_.isString (details)) {
+                req.policyError = {code: 'policy_failed', message: details}
+              }
+              else {
+                req.policyError = details;
+              }
+            }
+
+            if (req.policyError)
+              return handleError (new HttpError (403, req.policyError.code, req.policyError.message), res);
+            else
               return handleError (new HttpError (403, 'policy_failed', 'Policy failed'), res);
           });
         }
