@@ -19,9 +19,25 @@ function lookupPolicyByName (app, name) {
   // Resolve the policy by its name. If the policy starts with a question mark
   // (?), then this is an optional policy. Meaning, we do not fail if we cannot
   // find it.
-  var optional = name[0] == '?';
-  var policyName = optional ? name.slice (1) : name;
-  var policy = app.policyManager.find (policyName);
+  var parts = name.split (':');
+  var policyManager;
+  var policyName;
+
+  if (parts.length === 1) {
+    policyManager = app.policyManager;
+    policyName = parts[0];
+  }
+  else {
+    policyManager = app.modules[parts[0]];
+    policyName = parts[1];
+  }
+
+  var optional = policyName[0] == '?';
+
+  if (optional)
+   policyName = policyName.slice (1);
+
+  var policy = policyManager.find (policyName);
 
   if (!policy && optional)
     policy = __blueprint_optionalPolicy;
