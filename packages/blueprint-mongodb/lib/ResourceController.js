@@ -680,6 +680,7 @@ ResourceController.prototype._getIdValidationSchema = function (opts) {
 
   var id = objectPath (opts.id);
   var validator = id.get ('validator', defaults.get ('validator', 'isMongoId'));
+  var validatorOptions = id.get ('validatorOptions', defaults.get ('validatorOptions'));
   var errorMessage = id.get ('errorMessage', defaults.get ('errorMessage', 'Invalid resource id'));
 
   var schema = {};
@@ -688,6 +689,9 @@ ResourceController.prototype._getIdValidationSchema = function (opts) {
   };
 
   schema[this.id][validator] = {errorMessage: errorMessage};
+
+  if (validatorOptions)
+    schema[this.id][validator].options = [validatorOptions];
 
   return schema;
 };
