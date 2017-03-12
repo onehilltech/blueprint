@@ -194,6 +194,26 @@ describe ('lib.ResourceController', function () {
           .query ({populate: true})
           .expect (404, done);
       });
+
+      it ('should return a bad request', function (done) {
+        blueprint.testing.request ()
+          .get ('/person/me')
+          .expect (400, {
+            errors: {
+              code: "validation_failed",
+              message: "Request validation failed",
+              details: {
+                validation: {
+                  personId: {
+                    msg: "Invalid resource id",
+                    param: "personId",
+                    value: "me"
+                  }
+                }
+              }
+            }
+          }, done);
+      });
     });
 
     describe ('PUT', function () {

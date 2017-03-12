@@ -16,6 +16,7 @@ var BaseController = blueprint.ResourceController
   , messaging = blueprint.messaging
   ;
 
+function __onValidate (req, callback) { return callback (null); }
 function __onSanitize (req, callback) { return callback (null); }
 function __onPrepareProjection (req, callback) { return callback (null, {}); }
 function __onPrepareOptions (req, options, callback) { return callback (null, options); }
@@ -94,7 +95,6 @@ ResourceController.prototype.create = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onSanitize = on.sanitize || __onSanitize;
   var onPrepareDocument = on.prepareDocument || __onPrepareDocument;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
@@ -104,7 +104,7 @@ ResourceController.prototype.create = function (opts) {
 
   return {
     validate: this._create.validate,
-    sanitize: onSanitize,
+    sanitize: on.sanitize || __onSanitize,
 
     execute: function __blueprint_create (req, res, callback) {
       var doc = req.body[self.name];
@@ -186,19 +186,26 @@ ResourceController.prototype.create = function (opts) {
  * @returns
  */
 ResourceController.prototype.get = function (opts) {
+  var self = this;
+
   opts = opts || {};
   var on = opts.on || {};
 
-  var onSanitize = on.sanitize || __onSanitize;
+  var validateSchema = {};
+  validateSchema[this.id] = {
+    in: 'params',
+    isMongoId: { errorMessage: 'Invalid resource id'}
+  };
+
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
 
-  var self = this;
 
   return {
-    sanitize: onSanitize,
+    validate: on.validate || validateSchema,
+    sanitize: on.sanitize || __onSanitize,
 
     execute: function __blueprint_get_execute (req, res, callback) {
       var rcId = req.params[self.id];
@@ -268,7 +275,6 @@ ResourceController.prototype.getAll = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onSanitize = on.sanitize || __onSanitize;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
@@ -278,7 +284,8 @@ ResourceController.prototype.getAll = function (opts) {
   var self = this;
 
   return {
-    sanitize: onSanitize,
+    validate: on.validate || __onValidate,
+    sanitize: on.sanitize || __onSanitize,
 
     execute: function __blueprint_getall_execute (req, res, callback) {
       // Update the options with those from the query string.
@@ -441,7 +448,6 @@ ResourceController.prototype.update = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onSanitize = on.sanitize || __onSanitize;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPrepareUpdate = on.prepareUpdate || __onPrepareUpdate;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
@@ -453,7 +459,7 @@ ResourceController.prototype.update = function (opts) {
 
   return {
     validate: this._update.validate,
-    sanitize: onSanitize,
+    sanitize: on.sanitize || __onSanitize,
 
     execute: function __blueprint_update_execute (req, res, callback) {
       var rcId = req.params[self.id];
@@ -532,6 +538,14 @@ ResourceController.prototype.delete = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
+  var validateSchema = {};
+
+  validateSchema[this.id] = {
+    in: 'params',
+    isMongoId: { errorMessage: 'Invalid resource id'}
+  };
+
+  var onValidate = on.validate || validateSchema;
   var onSanitize = on.sanitize || __onSanitize;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPreExecute = on.preExecute || __onPreExecute;
@@ -541,6 +555,7 @@ ResourceController.prototype.delete = function (opts) {
   var self = this;
 
   return {
+    validate: onValidate,
     sanitize: onSanitize,
 
     execute: function __blueprint_delete (req, res, callback) {
@@ -599,6 +614,7 @@ ResourceController.prototype.count = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
+  var onValidate = on.validate || __onValidate;
   var onSanitize = on.sanitize || __onSanitize;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
@@ -606,6 +622,7 @@ ResourceController.prototype.count = function (opts) {
   var self = this;
 
   return {
+    validate: onValidate,
     sanitize: onSanitize,
 
     execute: function __blueprint_count_execute (req, res, callback) {
