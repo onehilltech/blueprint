@@ -17,8 +17,8 @@ var BaseController = blueprint.ResourceController
   , messaging = blueprint.messaging
   ;
 
-function __onValidate (req, callback) { return callback (null); }
-function __onSanitize (req, callback) { return callback (null); }
+function __validate (req, callback) { return callback (null); }
+function __sanitize (req, callback) { return callback (null); }
 function __onPrepareProjection (req, callback) { return callback (null, {}); }
 function __onPrepareOptions (req, options, callback) { return callback (null, options); }
 function __onPrepareFilter (req, filter, callback) { return callback (null, filter); }
@@ -97,7 +97,9 @@ ResourceController.prototype.create = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onValidate = on.validate || __onValidate;
+  var validate = opts.validate || __validate;
+  var sanitize = opts.sanitize || __sanitize;
+
   var onPrepareDocument = on.prepareDocument || __onPrepareDocument;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
@@ -108,10 +110,12 @@ ResourceController.prototype.create = function (opts) {
   return {
     validate: function (req, callback) {
       req.check (self._create.schema);
-      onValidate.call (null, req, callback);
+      validate.call (null, req, callback);
     },
 
-    sanitize: on.sanitize || __onSanitize,
+    sanitize: function (req, callback) {
+      sanitize.call (null, req, callback);
+    },
 
     execute: function __blueprint_create (req, res, callback) {
       var doc = req.body[self.name];
@@ -199,7 +203,11 @@ ResourceController.prototype.get = function (opts) {
   var on = opts.on || {};
 
   var idValidationSchema = this._getIdValidationSchema (opts);
-  var onValidate = on.validate || __onValidate;
+  var idSanitizer = this._getIdSanitizer (opts);
+
+  var sanitize = opts.sanitize || __sanitize;
+  var validate = opts.validate || __validate;
+
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPreExecute = on.preExecute || __onPreExecute;
@@ -209,10 +217,13 @@ ResourceController.prototype.get = function (opts) {
   return {
     validate: function (req, callback) {
       req.check (idValidationSchema);
-      onValidate (req, callback);
+      validate.call (null, req, callback);
     },
 
-    sanitize: on.sanitize || __onSanitize,
+    sanitize: function (req, callback) {
+      req.sanitizeParams (self.id)[idSanitizer] ();
+      sanitize.call (null, req, callback);
+    },
 
     execute: function __blueprint_get_execute (req, res, callback) {
       var rcId = req.params[self.id];
@@ -282,6 +293,9 @@ ResourceController.prototype.getAll = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
+  var validate = opts.validate || __validate;
+  var sanitize = opts.sanitize || __sanitize;
+
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
@@ -291,8 +305,13 @@ ResourceController.prototype.getAll = function (opts) {
   var self = this;
 
   return {
-    validate: on.validate || __onValidate,
-    sanitize: on.sanitize || __onSanitize,
+    validate: function (req, callback) {
+      validate.call (null, req, callback);
+    },
+
+    sanitize: function (req, callback) {
+      sanitize.call (null, req, callback);
+    },
 
     execute: function __blueprint_getall_execute (req, res, callback) {
       // Update the options with those from the query string.
@@ -420,7 +439,11 @@ ResourceController.prototype.update = function (opts) {
   var on = opts.on || {};
 
   var idValidationSchema = this._getIdValidationSchema (opts);
-  var onValidate = on.validate || __onValidate;
+  var idSanitizer = this._getIdSanitizer (opts);
+
+  var validate = opts.validate || __validate;
+  var sanitize = opts.sanitize || __sanitize;
+
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPrepareUpdate = on.prepareUpdate || __onPrepareUpdate;
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
@@ -435,10 +458,13 @@ ResourceController.prototype.update = function (opts) {
       req.check (idValidationSchema);
       req.check (self._update.schema);
 
-      onValidate.call (null, req, callback);
+      validate.call (null, req, callback);
     },
 
-    sanitize: on.sanitize || __onSanitize,
+    sanitize: function (req, callback) {
+      req.sanitizeParams (self.id)[idSanitizer] ();
+      sanitize.call (null, req, callback);
+    },
 
     execute: function __blueprint_update_execute (req, res, callback) {
       var rcId = req.params[self.id];
@@ -518,8 +544,11 @@ ResourceController.prototype.delete = function (opts) {
   var on = opts.on || {};
 
   var idValidationSchema = this._getIdValidationSchema (opts);
-  var onValidate = on.validate || __onValidate;
-  var onSanitize = on.sanitize || __onSanitize;
+  var idSanitizer = this._getIdSanitizer (opts);
+
+  var validate = opts.validate || __validate;
+  var sanitize = opts.sanitize || __sanitize;
+
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
@@ -530,10 +559,13 @@ ResourceController.prototype.delete = function (opts) {
   return {
     validate: function (req, callback) {
       req.check (idValidationSchema);
-      onValidate.call (null, req, callback);
+      validate.call (null, req, callback);
     },
 
-    sanitize: onSanitize,
+    sanitize: function (req, callback) {
+      req.sanitizeParams (self.id)[idSanitizer]();
+      sanitize.call (null, req, callback);
+    },
 
     execute: function __blueprint_delete (req, res, callback) {
       var rcId = req.params[self.id];
@@ -591,16 +623,17 @@ ResourceController.prototype.count = function (opts) {
   opts = opts || {};
   var on = opts.on || {};
 
-  var onValidate = on.validate || __onValidate;
-  var onSanitize = on.sanitize || __onSanitize;
+  var validate = opts.validate || __validate;
+  var sanitize = opts.sanitize || __sanitize;
+
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPostExecute = on.postExecute || __onPostExecute;
 
   var self = this;
 
   return {
-    validate: onValidate,
-    sanitize: onSanitize,
+    validate: validate,
+    sanitize: sanitize,
 
     execute: function __blueprint_count_execute (req, res, callback) {
       async.waterfall ([
@@ -657,6 +690,16 @@ ResourceController.prototype._getIdValidationSchema = function (opts) {
   schema[this.id][validator] = {errorMessage: errorMessage};
 
   return schema;
+};
+
+/**
+ * Get the validation schema for the resource.
+ */
+ResourceController.prototype._getIdSanitizer = function (opts) {
+  var defaults = objectPath (this._idOpts);
+
+  var id = objectPath (opts.id);
+  return id.get ('sanitizer', defaults.get ('sanitizer', 'toMongoId'));
 };
 
 /**
