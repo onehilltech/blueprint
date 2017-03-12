@@ -7,6 +7,7 @@ var express     = require ('express')
   , async       = require ('async')
   , consolidate = require ('consolidate')
   , fse         = require ('fs-extra')
+  , klaw        = require ('klaw')
   , morgan      = require ('morgan')
   , bodyParser  = require ('body-parser')
   , validator   = require ('express-validator')
@@ -16,9 +17,7 @@ var express     = require ('express')
 
 var Path     = require ('./Path')
   , Uploader = require ('./Uploader')
-  ;
-
-var blueprint = require ('./index')
+  , env      = require ('./Environment').name
   ;
 
 const VIEW_CACHE_PATH  = 'temp/views';
@@ -235,7 +234,6 @@ Server.prototype._configureMiddleware = function (callback) {
   // First, install the morgan middleware. It is important that the first
   // middleware to handle the event is the logging middleware.
   var morganConfig = config.morgan || { };
-  var env = blueprint.env;
 
   if (!morganConfig.format)
     morganConfig.format = (env === 'development' || env === 'test') ? 'dev' : 'combined';
@@ -373,43 +371,47 @@ Server.prototype.importViews = function (srcPath, callback) {
     function (callback) {
       var engines = [];
 
-      fse.walk (srcPath)
-        .on ('data', function (item) {
-          if (item.stats.isFile ()) {
-            // The extension of the file is used to determine the view engine.
-            var ext = path.extname (item.path);
+      klaw (srcPath)
+        .on ('data', data)
+        .on ('end', end);
 
-            if (ext.length > 1) {
-              var engine = ext.slice (1);
+      function data (item) {
+        if (item.stats.isFile ()) {
+          // The extension of the file is used to determine the view engine.
+          var ext = path.extname (item.path);
 
-              if (engines.indexOf (engine) === -1)
-                engines.push (engine);
-            }
+          if (ext.length > 1) {
+            var engine = ext.slice (1);
+
+            if (engines.indexOf (engine) === -1)
+              engines.push (engine);
           }
-        })
-        .on ('end', function () {
-          // Remove the custom engines from the list.
-          if (self._config.engines)
-            engines = _.difference (engines, Object.keys (self._config[engines]))
+        }
+      }
 
-          async.each (engines, function (ext, callback) {
-            // There is no need to load the engine more than once.
-            if (self._engines.indexOf (ext) !== -1)
-              return callback (null);
+      function end () {
+        // Remove the custom engines from the list.
+        if (self._config.engines)
+          engines = _.difference (engines, Object.keys (self._config[engines]))
 
-            var render = consolidate[ext];
+        async.each (engines, function (ext, callback) {
+          // There is no need to load the engine more than once.
+          if (self._engines.indexOf (ext) !== -1)
+            return callback (null);
 
-            if (render) {
-              self._express.engine (ext, render);
-              self._engines.push (ext);
-            }
-            else {
-              winston.log ('warn', '%s is an unsupported view extension', ext);
-            }
+          var render = consolidate[ext];
 
-            return callback ();
-          }, callback);
-        });
+          if (render) {
+            self._express.engine (ext, render);
+            self._engines.push (ext);
+          }
+          else {
+            winston.log ('warn', '%s is an unsupported view extension', ext);
+          }
+
+          return callback ();
+        }, callback);
+      }
     }
   ], callback);
 };
