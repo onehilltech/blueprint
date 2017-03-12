@@ -691,7 +691,7 @@ ResourceController.prototype._getIdValidationSchema = function (opts) {
   schema[this.id][validator] = {errorMessage: errorMessage};
 
   if (validatorOptions)
-    schema[this.id][validator].options = [validatorOptions];
+    schema[this.id][validator].options = validatorOptions;
 
   return schema;
 };
