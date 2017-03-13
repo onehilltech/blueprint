@@ -1,6 +1,6 @@
 {
   "name": "@onehilltech/blueprint-cloud-messaging",
-  "version": "0.28.0",
+  "version": "0.28.1",
   "description": "Google cloud messaging module for Blueprint.js",
   "main": "lib/index.js",
   "keywords": [
