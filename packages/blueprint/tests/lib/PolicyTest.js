@@ -1,6 +1,7 @@
 var expect = require ('chai').expect
   , async  = require ('async')
   , util   = require ('util')
+  , http   = require ('http')
   ;
 
 var appFixture = require ('../fixtures/app')
@@ -41,8 +42,8 @@ describe ('Policy', function () {
   describe ('#assert', function () {
     it ('should create an assertion that evaluates to true', function (done) {
       var f = Policy.assert (passthrough, true);
+      var req = new http.IncomingMessage ();
 
-      var req = {};
       Policy.initialize (req);
 
       f (req, function (err, result) {
@@ -64,7 +65,7 @@ describe ('Policy', function () {
 
     it ('should create an assertion from existing application policy', function (done) {
       var f = Policy.assert ('alwaysTrue');
-      var req = {};
+      var req = new http.IncomingMessage ();
 
       Policy.initialize (req);
 
@@ -78,14 +79,14 @@ describe ('Policy', function () {
 
     it ('should return a details reason for policy failure', function (done) {
       var f = Policy.assert ('alwaysFalse');
-      var req = {};
+      var req = new http.IncomingMessage ();
 
       Policy.initialize (req);
 
       f (req, function (err, result) {
         expect (err).to.be.null;
         expect (result).to.be.false;
-        expect (req.policyError).to.eql ({reason: 'passthrough_failed', message: 'The pass through policy failed'});
+        expect (req).to.have.property ('hasPolicyErrors', true);
 
         return done ();
       });
@@ -93,7 +94,7 @@ describe ('Policy', function () {
 
   describe ('#all', function () {
     it ('should evaluate to true since all asserts are true', function () {
-      var req = {};
+      var req = new http.IncomingMessage ();
       Policy.initialize (req);
 
       var policy = Policy.all ([
@@ -137,7 +138,7 @@ describe ('Policy', function () {
       // Let's ensure we can call this collection of functions more than once
       // and not get a callback already called error.
       for (var i = 0; i < 10; ++ i) {
-        var req = {};
+        var req = new http.IncomingMessage ();
         Policy.initialize (req);
 
         policy (req, function (err, result) {
@@ -153,7 +154,7 @@ describe ('Policy', function () {
         Policy.assert (passthrough, false)
       ]);
 
-      var req = {};
+      var req = new http.IncomingMessage ();
       Policy.initialize (req);
 
       policy (req, function (err, result) {
@@ -167,7 +168,7 @@ describe ('Policy', function () {
     it ('should evaluate the negation policy', function () {
       var policy = Policy.not (Policy.assert (passthrough, true));
 
-      var req = {};
+      var req = new http.IncomingMessage ();
       Policy.initialize (req);
 
       policy (req, function (err, result) {

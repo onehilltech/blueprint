@@ -83,6 +83,19 @@ function lookupPolicyByName (app, name) {
 }
 
 /**
+ * Callback function for the policies. It allows us to capture the reason
+ * for the failure, and attach it to the originating request.
+ */
+function policyCallback (req, callback) {
+  return function (err, result, reason) {
+    if (result === false && reason)
+      req._policyError.push (reason);
+
+    return callback (err, result);
+  }
+}
+
+/**
  * Evaluate a policy. The first parameter can either be a policy function,
  * or the name of a policy. In the latter case, the policy function is resolved
  * using the existing policies loaded by the appliction.
@@ -171,16 +184,7 @@ function checkPolicy () {
         // as the last arguments.
         var policyArgs = args.slice ();
         policyArgs.push (req);
-        policyArgs.push (function (err, result, details) {
-          // If we have an error or the policy passed, then just return.
-          if (err || result)
-            return callback (err, result);
-
-          if (details)
-            req.policyError = details;
-
-          return callback (null, false);
-        });
+        policyArgs.push (policyCallback (req, callback));
 
         // Call the check.
         policy.apply (null, policyArgs);
@@ -246,19 +250,6 @@ function anySeries (list) {
     async.someSeries (policies, function (policy, callback) {
       return policy (req, policyCallback (req, callback));
     }, callback);
-  }
-}
-
-/**
- * Callback function for the policies. It allows us to capture the reason
- * for the failure, and attach it to the originating request.
- */
-function policyCallback (req, callback) {
-  return function (err, result, reason) {
-    if (result === false && reason)
-      req._policyError.push (reason);
-
-    return callback (err, result);
   }
 }
 
