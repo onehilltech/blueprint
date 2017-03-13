@@ -6,7 +6,6 @@ var blueprint  = require ('@onehilltech/blueprint')
   ;
 
 module.exports = Policy.any ([
-  Policy.assert ('gatekeeper.isAccountOwner'),
-  Policy.assert ('gatekeeper.isSuperUser')
+  Policy.assert ('gatekeeper.isAccountOwner')
 ]);
 
