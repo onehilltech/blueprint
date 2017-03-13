@@ -10,7 +10,7 @@ var blueprint  = require ('@onehilltech/blueprint')
 var ResourceController = mongodb.ResourceController
   ;
 
-const gatekeeperConfig = blueprint.app.configs.gatekeeper
+const gatekeeperConfig = objectPath (blueprint.app.configs.gatekeeper)
   ;
 
 /**
@@ -21,8 +21,15 @@ function __generateAccountId (account, callback) {
   callback (null, new mongodb.Types.ObjectId ());
 }
 
-var generateAccountId = objectPath.get (gatekeeperConfig, 'generators.accountId', __generateAccountId);
+var generateAccountId = gatekeeperConfig.get ('generators.accountId', __generateAccountId);
 
+/**
+ * Sanitize the account id.
+ *
+ * @param req
+ * @param callback
+ * @returns {*}
+ */
 function idSanitizer (req, callback) {
   if (req.params.accountId === 'me')
     req.params.accountId = req.user._id;
@@ -32,6 +39,11 @@ function idSanitizer (req, callback) {
   return callback (null);
 }
 
+/**
+ * @class AccountController
+ *
+ * @constructor
+ */
 function AccountController () {
   ResourceController.call (this, {
     model: Account,
@@ -46,10 +58,10 @@ function AccountController () {
 
 blueprint.controller (AccountController, ResourceController);
 
+module.exports = AccountController;
+
 /**
- * Create a new account.
- *
- * @returns {*}
+ * Specialize the creation of an account.
  */
 AccountController.prototype.create = function () {
   var options = {
@@ -81,6 +93,9 @@ AccountController.prototype.create = function () {
   return ResourceController.prototype.create.call (this, options);
 };
 
+/**
+ * Specialize the update of an account.
+ */
 AccountController.prototype.update = function () {
   return ResourceController.prototype.update.call (this, {
     on: {
@@ -94,5 +109,3 @@ AccountController.prototype.update = function () {
     }
   });
 };
-
-module.exports = AccountController;
