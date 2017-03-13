@@ -221,14 +221,22 @@ ResourceController.prototype.get = function (opts) {
     },
 
     sanitize: function (req, callback) {
-      if (idSanitizer) {
-        if (_.isFunction (idSanitizer))
-          idSanitizer.call (null, req, callback);
-        else
-          req.sanitizeParams (self.id)[idSanitizer]();
-      }
+      async.series ([
+        function (callback) {
+          if (idSanitizer) {
+            if (_.isFunction (idSanitizer))
+              return idSanitizer.call (null, req, callback);
 
-      sanitize.call (null, req, callback);
+            req.sanitizeParams (self.id)[idSanitizer]();
+          }
+
+          return callback (null);
+        },
+
+        function (callback) {
+          sanitize.call (null, req, callback);
+        }
+      ], callback);
     },
 
     execute: function __blueprint_get_execute (req, res, callback) {
@@ -468,14 +476,22 @@ ResourceController.prototype.update = function (opts) {
     },
 
     sanitize: function (req, callback) {
-      if (idSanitizer) {
-        if (_.isFunction (idSanitizer))
-          idSanitizer.call (null, req, callback);
-        else
-          req.sanitizeParams (self.id)[idSanitizer]();
-      }
+      async.series ([
+        function (callback) {
+          if (idSanitizer) {
+            if (_.isFunction (idSanitizer))
+              return idSanitizer.call (null, req, callback);
 
-      sanitize.call (null, req, callback);
+            req.sanitizeParams (self.id)[idSanitizer]();
+          }
+
+          return callback (null);
+        },
+
+        function (callback) {
+          sanitize.call (null, req, callback);
+        }
+      ], callback);
     },
 
     execute: function __blueprint_update_execute (req, res, callback) {
@@ -575,14 +591,22 @@ ResourceController.prototype.delete = function (opts) {
     },
 
     sanitize: function (req, callback) {
-      if (idSanitizer) {
-        if (_.isFunction (idSanitizer))
-          idSanitizer.call (null, req, callback);
-        else
-          req.sanitizeParams (self.id)[idSanitizer]();
-      }
+      async.series ([
+        function (callback) {
+          if (idSanitizer) {
+            if (_.isFunction (idSanitizer))
+              return idSanitizer.call (null, req, callback);
 
-      sanitize.call (null, req, callback);
+            req.sanitizeParams (self.id)[idSanitizer]();
+          }
+
+          return callback (null);
+        },
+
+        function (callback) {
+          sanitize.call (null, req, callback);
+        }
+      ], callback);
     },
 
     execute: function __blueprint_delete (req, res, callback) {
