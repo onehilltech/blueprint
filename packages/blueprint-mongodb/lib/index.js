@@ -21,6 +21,7 @@ var exports = module.exports = ConnectionManager;
 function model (name, schema, collection) {
   // Install the default plugins.
   schema.plugin (plugins.HiddenPlugin);
+  schema.plugin (plugins.ConstPlugin);
 
   return ConnectionManager.getConnectionManager ().defaultConnection.model (name, schema, collection);
 }
@@ -42,6 +43,7 @@ function modelOn (connName, name, schema, collection) {
   if (conn) {
     // Install the default plugins.
     schema.plugin (plugins.HiddenPlugin);
+    schema.plugin (plugins.ConstPlugin);
 
     return conn.model (name, schema, collection);
   }
@@ -54,6 +56,7 @@ function createResource (conn, name, schema, collection) {
 
   // Install the default plugins.
   schema.plugin (plugins.HiddenPlugin);
+  schema.plugin (plugins.ConstPlugin);
   schema.plugin (plugins.StatPlugin);
 
   return conn.model (name, schema, collection);
