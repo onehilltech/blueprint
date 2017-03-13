@@ -221,7 +221,13 @@ ResourceController.prototype.get = function (opts) {
     },
 
     sanitize: function (req, callback) {
-      req.sanitizeParams (self.id)[idSanitizer] ();
+      if (idSanitizer) {
+        if (_.isFunction (idSanitizer))
+          idSanitizer.call (null, req, callback);
+        else
+          req.sanitizeParams (self.id)[idSanitizer]();
+      }
+
       sanitize.call (null, req, callback);
     },
 
@@ -462,7 +468,13 @@ ResourceController.prototype.update = function (opts) {
     },
 
     sanitize: function (req, callback) {
-      req.sanitizeParams (self.id)[idSanitizer] ();
+      if (idSanitizer) {
+        if (_.isFunction (idSanitizer))
+          idSanitizer.call (null, req, callback);
+        else
+          req.sanitizeParams (self.id)[idSanitizer]();
+      }
+
       sanitize.call (null, req, callback);
     },
 
@@ -563,7 +575,13 @@ ResourceController.prototype.delete = function (opts) {
     },
 
     sanitize: function (req, callback) {
-      req.sanitizeParams (self.id)[idSanitizer]();
+      if (idSanitizer) {
+        if (_.isFunction (idSanitizer))
+          idSanitizer.call (null, req, callback);
+        else
+          req.sanitizeParams (self.id)[idSanitizer]();
+      }
+
       sanitize.call (null, req, callback);
     },
 
