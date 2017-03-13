@@ -619,7 +619,7 @@ RouterBuilder.prototype._makePolicyMiddleware = function (policy) {
 
             if (policyError) {
               if (_.isString (policyError)) {
-                policyError = {reason: 'policy_failed', message: details}
+                policyError = {reason: 'policy_failed', message: policyError}
               }
 
               return handleError (new HttpError (403, policyError.reason, policyError.message), res);
