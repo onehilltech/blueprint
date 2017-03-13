@@ -23,8 +23,25 @@ function __generateAccountId (account, callback) {
 
 var generateAccountId = objectPath.get (gatekeeperConfig, 'generators.accountId', __generateAccountId);
 
+function idSanitizer (req, callback) {
+  if (req.params.accountId === 'me')
+    req.params.accountId = req.user._id;
+  else
+    req.sanitizeParams ('accountId').toMongoId ();
+
+  return callback (null);
+}
+
 function AccountController () {
-  ResourceController.call (this, {model: Account, namespace: 'gatekeeper'});
+  ResourceController.call (this, {
+    model: Account,
+    namespace: 'gatekeeper',
+    idOptions: {
+      validator: 'isMongoIdOrToken',
+      validatorOptions: ['me'],
+      sanitizer: idSanitizer
+    }
+  });
 }
 
 blueprint.controller (AccountController, ResourceController);
@@ -64,26 +81,10 @@ AccountController.prototype.create = function () {
   return ResourceController.prototype.create.call (this, options);
 };
 
-/**
- * Delete an account in the database
- */
 AccountController.prototype.update = function () {
-  var options = {
+  return ResourceController.prototype.update.call (this, {
     on: {
-      /**
-       * Prepare the update document. Depending on the scope of the request, certain
-       * fields can and cannot be updated.
-       *
-       * @param req
-       * @param doc
-       * @param callback
-       * @returns {*}
-       */
       prepareUpdate: function (req, doc, callback) {
-        // This is permanent field that can never be updated.
-        if (doc.$set.created_by)
-          delete doc.$set.created_by;
-
         // Only the superuser can update the scope.
         if (!req.superuser)
           delete doc.$set.scope;
@@ -91,9 +92,7 @@ AccountController.prototype.update = function () {
         return callback (null, doc);
       }
     }
-  };
-
-  return ResourceController.prototype.update.call (this, options);
+  });
 };
 
 module.exports = AccountController;

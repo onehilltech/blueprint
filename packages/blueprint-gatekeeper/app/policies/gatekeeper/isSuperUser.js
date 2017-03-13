@@ -9,7 +9,7 @@ function isSuperuser (req, callback) {
     if (result)
       req.superuser = true;
 
-    return callback (err, result);
+    return callback (err, result, 'Not a super user');
   });
 }
 
