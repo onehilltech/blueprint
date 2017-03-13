@@ -600,10 +600,13 @@ RouterBuilder.prototype._makePolicyMiddleware = function (policy) {
   var promise = Policy.load (policy);
 
   return function __blueprint_policy (req, res, next) {
+    // Initialize the policy for the request.
+    Policy.initialize (req);
+
     promise.then (
       function (policy) {
         try {
-          policy (req, function (err, result, details) {
+          policy (req, Policy.callback (req, function (err, result) {
             // The fast path.
             if (!err && result)
               return next ();
@@ -615,19 +618,11 @@ RouterBuilder.prototype._makePolicyMiddleware = function (policy) {
             // The policy failed. We need to determine the kind of response to send
             // back to the client. Do we send the default http error, or do we send
             // an more concrete http error.
-            var policyError = details || req.policyError;
+            if (req.hasPolicyErrors)
+              return handleError (req.policyError.getFirstHttpError (), res);
 
-            if (policyError) {
-              if (_.isString (policyError)) {
-                policyError = {reason: 'policy_failed', message: policyError}
-              }
-
-              return handleError (new HttpError (403, policyError.reason, policyError.message), res);
-            }
-            else {
-              return handleError (new HttpError (403, 'policy_failed', 'Policy failed'), res);
-            }
-          });
+            return handleError (new HttpError (403, 'unknown_error', 'Unknown error has occurred'), res);
+          }));
         }
         catch (ex) {
           return handleError (ex, res);

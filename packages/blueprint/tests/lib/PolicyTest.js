@@ -42,7 +42,10 @@ describe ('Policy', function () {
     it ('should create an assertion that evaluates to true', function (done) {
       var f = Policy.assert (passthrough, true);
 
-      f (null, function (err, result) {
+      var req = {};
+      Policy.initialize (req);
+
+      f (req, function (err, result) {
         expect (err).to.be.null;
         expect (result).to.be.true;
 
@@ -63,6 +66,8 @@ describe ('Policy', function () {
       var f = Policy.assert ('alwaysTrue');
       var req = {};
 
+      Policy.initialize (req);
+
       f (req, function (err, result) {
         expect (err).to.be.null;
         expect (result).to.be.true;
@@ -75,6 +80,8 @@ describe ('Policy', function () {
       var f = Policy.assert ('alwaysFalse');
       var req = {};
 
+      Policy.initialize (req);
+
       f (req, function (err, result) {
         expect (err).to.be.null;
         expect (result).to.be.false;
@@ -86,12 +93,15 @@ describe ('Policy', function () {
 
   describe ('#all', function () {
     it ('should evaluate to true since all asserts are true', function () {
+      var req = {};
+      Policy.initialize (req);
+
       var policy = Policy.all ([
         Policy.assert (passthrough, true),
         Policy.assert (passthrough, true)
       ]);
 
-      policy (null, function (err, result) {
+      policy (req, function (err, result) {
         expect (err).to.be.null;
         expect (result).to.be.true;
       });
@@ -107,6 +117,8 @@ describe ('Policy', function () {
       // and not get a callback already called error.
       for (var i = 0; i < 10; ++ i) {
         var req = {};
+        Policy.initialize (req);
+
         policy (req, function (err, result) {
           expect (err).to.be.null;
           expect (result).to.be.false;
@@ -125,7 +137,10 @@ describe ('Policy', function () {
       // Let's ensure we can call this collection of functions more than once
       // and not get a callback already called error.
       for (var i = 0; i < 10; ++ i) {
-        policy (null, function (err, result) {
+        var req = {};
+        Policy.initialize (req);
+
+        policy (req, function (err, result) {
           expect (err).to.be.null;
           expect (result).to.be.true;
         });
@@ -139,6 +154,8 @@ describe ('Policy', function () {
       ]);
 
       var req = {};
+      Policy.initialize (req);
+
       policy (req, function (err, result) {
         expect (err).to.be.null;
         expect (result).to.be.false;
@@ -150,7 +167,10 @@ describe ('Policy', function () {
     it ('should evaluate the negation policy', function () {
       var policy = Policy.not (Policy.assert (passthrough, true));
 
-      policy (null, function (err, result) {
+      var req = {};
+      Policy.initialize (req);
+
+      policy (req, function (err, result) {
         expect (err).to.be.null;
         expect (result).to.be.false;
       });

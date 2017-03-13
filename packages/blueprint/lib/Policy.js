@@ -1,10 +1,47 @@
 var async     = require ('async')
+  , http      = require ('http')
   , winston   = require ('winston')
   , util      = require ('util')
   , _         = require ('underscore')
   , Framework = require ('./Framework')
   , Error     = require ('./errors/BlueprintError')
+  , HttpError = require ('./errors/HttpError')
   ;
+
+/**
+ * @class PolicyError
+ */
+function PolicyError () {
+  this._errors = [];
+}
+
+PolicyError.prototype.hasErrors = function () {
+  return this._errors.length !== 0;
+};
+
+PolicyError.prototype.push = function (error) {
+  if (_.isString (error))
+    error = {reason: 'policy_failed', message: error};
+
+  this._errors.push (error);
+};
+
+PolicyError.prototype.getFirstHttpError = function () {
+  var firstError = this._errors[0];
+  return new HttpError (403, firstError.reason, firstError.message)
+};
+
+Object.defineProperty (http.IncomingMessage.prototype, 'hasPolicyErrors', {
+  get: function () {
+    return this._policyError.hasErrors ();
+  }
+});
+
+Object.defineProperty (http.IncomingMessage.prototype, 'policyError', {
+  get: function () {
+    return this._policyError;
+  }
+});
 
 var exports = module.exports = {};
 
@@ -197,7 +234,7 @@ function any (list) {
 
   return function (req, callback) {
     async.some (policies, function (policy, callback) {
-      return policy (req, callback);
+      return policy (req, policyCallback (req, callback));
     }, callback);
   }
 }
@@ -207,8 +244,21 @@ function anySeries (list) {
 
   return function (req, callback) {
     async.someSeries (policies, function (policy, callback) {
-      return policy (req, callback);
+      return policy (req, policyCallback (req, callback));
     }, callback);
+  }
+}
+
+/**
+ * Callback function for the policies. It allows us to capture the reason
+ * for the failure, and attach it to the originating request.
+ */
+function policyCallback (req, callback) {
+  return function (err, result, reason) {
+    if (result === false)
+      req._policyError.push (reason);
+
+    return callback (err, result);
   }
 }
 
@@ -223,7 +273,7 @@ function all (list) {
 
   return function (req, callback) {
     async.every (policies, function (policy, callback) {
-      return policy (req, callback);
+      return policy (req, policyCallback (req, callback));
     }, callback);
   }
 }
@@ -233,7 +283,7 @@ function allSeries (list) {
 
   return function (req, callback) {
     async.everySeries (policies, function (policy, callback) {
-      return policy (req, callback);
+      return policy (req, policyCallback (req, callback));
     }, callback);
   }
 }
@@ -245,3 +295,9 @@ exports.anySeries = anySeries;
 
 exports.all = all;
 exports.allSeries = allSeries;
+
+exports.initialize = function (req) {
+  req._policyError = new PolicyError ();
+};
+
+exports.callback = policyCallback;
