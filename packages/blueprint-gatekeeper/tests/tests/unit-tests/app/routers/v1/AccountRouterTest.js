@@ -207,21 +207,16 @@ describe ('AccountRouter', function () {
   });
 
   describe ('/v1/accounts/:accountId', function () {
-    var account;
+    var updated;
 
     describe ('GET', function () {
       it ('should return the owner account', function (done) {
-        var accountId = datamodel.models.accounts[0].id;
+        var account = datamodel.models.accounts[0];
 
-        Account.findById (accountId, function (err, result) {
-          if (err) return done (err);
-          account = result;
-
-          blueprint.testing.request ()
-            .get ('/v1/accounts/' + accountId)
-            .set ('Authorization', 'Bearer ' + userToken)
-            .expect (200, {account: mongodb.testing.lean (account)}, done);
-        });
+        blueprint.testing.request ()
+          .get ('/v1/accounts/' + account.id)
+          .set ('Authorization', 'Bearer ' + userToken)
+          .expect (200, {account: mongodb.testing.lean (account)}, done);
       });
 
       it ('should retrieve a user account for an admin', function (done) {
@@ -249,35 +244,37 @@ describe ('AccountRouter', function () {
 
     describe ('UPDATE', function () {
       it ('should not update scope and created_by', function (done) {
-        var accountId = datamodel.models.accounts[0].id;
+        var account = datamodel.models.accounts[0];
 
         blueprint.testing.request ()
-          .put ('/v1/accounts/' + accountId)
+          .put ('/v1/accounts/' + account.id)
           .set ('Authorization', 'Bearer ' + userToken)
           .send ({account: {created_by: new mongodb.Types.ObjectId (), scope: ['the_new_scope']}})
           .expect (200, {account: mongodb.testing.lean (account)}, done);
       });
 
       it ('should update the email', function (done) {
-        var accountId = datamodel.models.accounts[0].id;
-        account.email = 'foo@contact.com';
+        var account = datamodel.models.accounts[0];
+
+        updated = account.toObject ();
+        updated.email = 'foo@contact.com';
 
         blueprint.testing.request ()
-          .put ('/v1/accounts/' + accountId)
+          .put ('/v1/accounts/' + account.id)
           .set ('Authorization', 'Bearer ' + userToken)
-          .send ({account: {email: account.email}} )
-          .expect (200, {account: mongodb.testing.lean (account)}, done);
+          .send ({account: {email: updated.email}} )
+          .expect (200, {account: mongodb.testing.lean (updated)}, done);
       });
 
       it ('should update the scope', function (done) {
-        var accountId = datamodel.models.accounts[0].id;
-        account.scope.push ('the_new_scope');
+        var account = datamodel.models.accounts[0];
+        updated.scope.push ('the_new_scope');
 
         blueprint.testing.request ()
-          .put ('/v1/accounts/' + accountId)
+          .put ('/v1/accounts/' + account.id)
           .set ('Authorization', 'Bearer ' + superUserToken)
-          .send ({account: {scope: ['the_new_scope']}})
-          .expect (200, {account: mongodb.testing.lean (account)}, done);
+          .send ({account: {scope: updated.scope}})
+          .expect (200, {account: mongodb.testing.lean (updated)}, done);
       });
     });
 
