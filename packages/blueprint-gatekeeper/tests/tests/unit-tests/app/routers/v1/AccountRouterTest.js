@@ -182,26 +182,30 @@ describe ('AccountRouter', function () {
       });
 
       it ('should not create an account [invalid role]', function (done) {
-        var invalid = {
-          grant_type: 'client_credentials',
-          client_id: datamodel.models.clients[1].id,
-          client_secret: datamodel.models.clients[1].secret
-        };
+        async.waterfall ([
+          function (callback) {
+            var invalid = {
+              grant_type: 'client_credentials',
+              client_id: datamodel.models.clients[1].id,
+              client_secret: datamodel.models.clients[1].secret
+            };
 
-        getToken (invalid, function (err, token) {
-          if (err) return done (err);
+            getToken (invalid, callback);
+          },
 
-          var account = {
-            username: 'tester1',
-            password: 'tester1',
-            email: 'james@onehilltech.com'
-          };
+          function (token, callback) {
+            var account = {
+              username: 'tester1',
+              password: 'tester1',
+              email: 'james@onehilltech.com'
+            };
 
-          blueprint.testing.request ()
-            .post ('/v1/accounts').send ({account: account})
-            .set ('Authorization', 'Bearer ' + token)
-            .expect (403, done);
-        });
+            blueprint.testing.request ()
+              .post ('/v1/accounts').send ({account: account})
+              .set ('Authorization', 'Bearer ' + token)
+              .expect (403, { errors: { code: 'policy_failed', message: 'No scopes defined' } }, callback);
+          }
+        ], done);
       });
     });
   });

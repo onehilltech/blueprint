@@ -11,9 +11,18 @@ var async = require ('async')
 module.exports = exports = function (expected, req, callback) {
   var actual = req.authInfo.scope;
 
-  async.every (expected, function (role, callback) {
-    async.some (actual, function (scope, callback) {
-      return callback (null, scope === role);
-    }, callback);
-  }, callback);
+  async.every (expected,
+    function (role, callback) {
+      async.some (actual,
+        function (scope, callback) {
+          return callback (null, scope === role);
+        },
+        callback);
+    },
+    function (err, result) {
+      if (err || result)
+        return callback (err, result);
+
+      return callback (null, false, 'Request does not have valid scope');
+    });
 };

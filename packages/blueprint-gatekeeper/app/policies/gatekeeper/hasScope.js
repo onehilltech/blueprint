@@ -11,8 +11,14 @@ function hasScope (role, req, callback) {
 
   async.some (scopes,
     function (scope, callback) {
-      return callback (null, scope === role, 'Invalid scope');
-    }, callback);
+      return callback (null, scope === role);
+    },
+    function (err, result) {
+      if (err || result)
+        return callback (err, result);
+
+      return callback (null, false, 'Request does not have valid scope');
+    });
 }
 
 module.exports = hasScope;
