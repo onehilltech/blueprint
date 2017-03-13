@@ -219,6 +219,15 @@ describe ('AccountRouter', function () {
           .expect (200, {account: mongodb.testing.lean (account)}, done);
       });
 
+      it ('should get my account', function (done) {
+        var account = datamodel.models.accounts[0];
+
+        blueprint.testing.request ()
+          .get ('/v1/accounts/me')
+          .set ('Authorization', 'Bearer ' + userToken)
+          .expect (200, {account: mongodb.testing.lean (account)}, done);
+      });
+
       it ('should retrieve a user account for an admin', function (done) {
         var accountId = datamodel.models.accounts[0].id;
 
