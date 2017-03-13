@@ -6,5 +6,6 @@ var blueprint  = require ('@onehilltech/blueprint')
   ;
 
 module.exports = Policy.any ([
+  Policy.assert ('gatekeeper.isSuperUser'),
   Policy.assert ('gatekeeper.hasScope', gatekeeper.scope.account.create)
 ]);
