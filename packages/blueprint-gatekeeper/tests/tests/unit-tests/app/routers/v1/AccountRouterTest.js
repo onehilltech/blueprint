@@ -306,13 +306,13 @@ describe ('AccountRouter', function () {
           .expect (200, 'true', done);
       });
 
-      it ('should allow admin to delete user account', function (done) {
+      it ('should not allow admin to delete account', function (done) {
         var accountId = datamodel.models.accounts[2].id;
 
         blueprint.testing.request ()
           .delete ('/v1/accounts/' + accountId)
           .set ('Authorization', 'Bearer ' + superUserToken)
-          .expect (200, 'true', done);
+          .expect (403, { errors: { code: 'policy_failed', message: 'Not the account owner' } }, done);
       });
     });
   });
