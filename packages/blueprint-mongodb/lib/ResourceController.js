@@ -72,7 +72,7 @@ function ResourceController (opts) {
 
   this._model = opts.model;
   this._pluralize = pluralize (this.name);
-  this._idOpts = opts.id || {};
+  this._idOpts = opts.idOptions || {};
 
   // Build the validation schema for create and update.
   var validationOpts = {pathPrefix: this.name};
