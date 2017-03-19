@@ -2,11 +2,27 @@ var expect    = require ('chai').expect
   , async     = require ('async')
   , blueprint = require ('@onehilltech/blueprint')
   , mongodb   = require ('@onehilltech/blueprint-mongodb')
+  , winston   = require ('winston')
+  , util      = require ('util')
   ;
 
 const datamodel = require ('../../../../../fixtures/datamodel')
   , bm = blueprint.messaging
   ;
+
+function getToken (data, callback) {
+  blueprint.testing.request ()
+    .post ('/v1/oauth2/token')
+    .send (data).end (function (err, res) {
+      if (err)
+        return callback (err);
+
+      if (res.statusCode !== 200)
+        winston.log ('error', util.inspect (res.body));
+
+      return callback (null, res.body.access_token);
+    });
+}
 
 describe ('AccountRouter', function () {
   var userToken;
@@ -14,20 +30,10 @@ describe ('AccountRouter', function () {
   var clientToken;
   var Account;
 
-  function getToken (data, callback) {
-    blueprint.testing.request ()
-      .post ('/v1/oauth2/token')
-      .send (data)
-      .expect (200)
-      .end (function (err, res) {
-        if (err) return callback (err);
-        return callback (null, res.body.access_token);
-      });
-  }
-
   before (function (done) {
     async.series ([
       function (callback) {
+        winston.log ('info', 'applying data model for test cases');
         datamodel.apply (callback);
       },
 
@@ -43,6 +49,8 @@ describe ('AccountRouter', function () {
        * @param callback
        */
       function (callback) {
+        winston.log ('info', 'getting user token');
+
         var data = {
           grant_type: 'password',
           username: datamodel.data.accounts[0].username,
@@ -64,6 +72,8 @@ describe ('AccountRouter', function () {
        * @param callback
        */
       function (callback) {
+        winston.log ('info', 'getting user token for super user');
+
         var data = {
           grant_type: 'password',
           username: datamodel.data.accounts[3].username,
@@ -85,6 +95,8 @@ describe ('AccountRouter', function () {
        * @param callback
        */
       function (callback) {
+        winston.log ('info', 'getting client token');
+
         var data = {
           grant_type: 'client_credentials',
           client_id: datamodel.models.clients[0].id,
@@ -99,9 +111,7 @@ describe ('AccountRouter', function () {
           return callback (null);
         });
       }
-    ], function (err) {
-      done (err);
-    });
+    ], done);
   });
 
   describe ('/v1/accounts', function () {

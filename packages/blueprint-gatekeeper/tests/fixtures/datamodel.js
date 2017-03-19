@@ -15,6 +15,31 @@ var Account = undefined
   ;
 
 var data = {
+  clients: [
+    {
+      name: 'client1',
+      email: 'client1@gatekeeper.com',
+      secret: 'client1',
+      scope: [
+        gatekeeper.scope.account.create,
+        gatekeeper.scope.client.create,
+        gatekeeper.scope.client.update,
+        gatekeeper.scope.client.delete
+      ]
+    },
+    {
+      name: 'client2',
+      email: 'client2@gatekeeper.com',
+      secret: 'client2'
+    },
+    {
+      name: 'client3',
+      email: 'client3@gatekeeper.com',
+      secret: 'client3',
+      enabled: false
+    }
+  ],
+
   accounts: [
     { email: 'account1@gatekeeper.com', username: 'account1', password: 'account1'},
     { email: 'account2@gatekeeper.com', username: 'account2', password: 'account2' },
@@ -28,8 +53,10 @@ var data = {
   ]
 };
 
+var models = {};
+
 exports.data = data;
-exports.models = {};
+exports.models = models;
 
 function cleanup (done) {
   winston.log ('info', 'clearing data from database');
@@ -40,68 +67,62 @@ function seed (done) {
   winston.log ('info', 'seeding database with data');
 
   async.waterfall ([
-    // Create the clients used for testing.
+    /*
+     * Add clients to the database.
+     */
     function (callback) {
-      var clients =
-        [
-          { firstId: 1, scope: [
-            gatekeeper.scope.account.create,
-            gatekeeper.scope.client.create,
-            gatekeeper.scope.client.update,
-            gatekeeper.scope.client.delete
-          ]},
-
-          { firstId: 2 },
-          { firstId: 3, enabled: false }
-        ];
-
-      async.concat (clients, testing.clients.createTimes (1), function (err, clients) {
-        if (err) return callback (err);
-
-        exports.models.clients = clients;
-
-        callback (null, clients[0]);
-      });
+      Client.create (data.clients, callback);
     },
 
-    function (client, callback) {
-      // Update the created_by path on the accounts to the first client.
+    /*
+     * Add accounts to the database.
+     */
+    function (clients, callback) {
+      models.clients = clients;
+
       for (var i = 0; i < data.accounts.length; ++i)
-        data.accounts[i].created_by = client.id;
+        data.accounts[i].created_by = models.clients[0].id;
 
-      Account.create (data.accounts, function (err, accounts) {
-        if (err) return callback (err);
+      Account.create (data.accounts, callback);
+    },
 
-        exports.models.accounts = accounts;
-
-        callback (null);
-      });
+    /*
+     * Save the accounts for access.
+     */
+    function (accounts, callback) {
+      models.accounts = accounts;
+      return callback (null);
     }
-  ], function (err) {
-    if (err) return done (err);
-    
-    winston.log ('info', 'done seeding the database');
-    return done ();
-  });
+  ], done);
 }
 
 function apply (done) {
-  winston.log ('info', 'applying datamodel to test cases');
+  winston.log ('info', 'applying data model for test cases');
 
   async.series ([
     function (callback) {
       blueprint.testing.createApplicationAndStart (appPath, function (err, app) {
         if (err) return callback (err);
 
-        if (!Client) Client = app.models.Client;
-        if (!Account) Account = app.models.Account;
-        if (!AccessToken) AccessToken = app.models.oauth2.AccessToken;
+        if (!Client)
+          Client = app.models.Client;
+
+        if (!Account)
+          Account = app.models.Account;
+
+        if (!AccessToken)
+          AccessToken = app.models.oauth2.AccessToken;
 
         return callback (null, app);
       });
     },
-    function (callback) { cleanup (callback); },
-    function (callback) { seed (callback); }
+    function (callback) {
+      cleanup (callback);
+    },
+
+    function (callback) {
+      seed (callback);
+    }
   ], done);
 }
 

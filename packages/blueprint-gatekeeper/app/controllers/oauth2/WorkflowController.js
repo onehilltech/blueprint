@@ -41,10 +41,17 @@ messaging.on ('app.init', function (app) {
  */
 function verifyClient (clientId, clientSecret, callback) {
   Client.findById (clientId, function (err, client) {
-    if (err) return callback (new HttpError (400, 'internal_error', 'Failed to lookup client'));
-    if (!client) return callback (new HttpError (400, 'invalid_client', 'Client not found'));
-    if (!client.enabled) return callback (new HttpError (403, 'client_disabled', 'Client is disabled'));
-    if (clientSecret && client.secret !== clientSecret) return callback (new HttpError (400, 'invalid_secret', 'Incorrect client secret'));
+    if (err)
+      return callback (new HttpError (400, 'internal_error', 'Failed to lookup client'));
+
+    if (!client)
+      return callback (new HttpError (400, 'invalid_client', 'Client not found'));
+
+    if (!client.enabled)
+      return callback (new HttpError (403, 'client_disabled', 'Client is disabled'));
+
+    if (clientSecret && client.secret !== clientSecret)
+      return callback (new HttpError (400, 'invalid_secret', 'Incorrect client secret'));
 
     callback (null, client);
   });
@@ -214,9 +221,14 @@ WorkflowController.prototype.issueToken = function () {
                 Account.findOne ({username: username}, function (err, account) {
                   // Check the result of the operation. If the account does not exist or the
                   // account is disabled, then return the appropriate error message.
-                  if (err) return callback (new HttpError (500, 'internal_error', 'Failed to retrieve account'));
-                  if (!account) return callback (new HttpError (400, 'invalid_username', 'Invalid username'));
-                  if (!account.enabled) return callback (new HttpError (403, 'account_disabled', 'Account is disabled'));
+                  if (err)
+                    return callback (new HttpError (500, 'internal_error', 'Failed to retrieve account'));
+
+                  if (!account)
+                    return callback (new HttpError (400, 'invalid_username', 'Invalid username'));
+
+                  if (!account.enabled)
+                    return callback (new HttpError (403, 'account_disabled', 'Account is disabled'));
 
                   return callback (null, account);
                 });
@@ -232,8 +244,12 @@ WorkflowController.prototype.issueToken = function () {
                 account.verifyPassword (password, function (err, match) {
                   // Check the result of the operation. If there is an error, or the password
                   // does not match, then return an error.
-                  if (err) return callback (new HttpError (500, 'internal_error', 'Failed to verify password'));
-                  if (!match) return callback (new HttpError (400, 'invalid_password', 'Incorrect password'));
+                  if (err)
+                    return callback (new HttpError (500, 'internal_error', 'Failed to verify password'));
+
+                  if (!match)
+                    return callback (new HttpError (400, 'invalid_password', 'Incorrect password'));
+
                   return callback (err, account);
                 });
               },
