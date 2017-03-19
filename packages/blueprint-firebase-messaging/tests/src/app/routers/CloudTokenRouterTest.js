@@ -61,11 +61,14 @@ describe ('CloudTokenRouter', function () {
         .expect (200, 'true', function (err) {
           if (err) return done (err);
 
-          CloudToken.findOne ({device: data.device}, '-__v', function (err, cloudToken) {
-            if (err) return done (err);
-            if (!cloudToken) return done (new HttpError ('Token cannot be found'));
+          CloudToken.findOne ({device: data.device}, function (err, cloudToken) {
+            if (err)
+              return done (err);
 
-            cloudToken = cloudToken.toJSON ();
+            if (!cloudToken)
+              return done (new HttpError ('Token cannot be found'));
+
+            cloudToken = cloudToken.toObject ();
             cloudToken.owner = cloudToken.owner.toString ();
 
             expect (cloudToken).to.deep.equal ({
