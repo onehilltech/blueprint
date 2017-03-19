@@ -16,7 +16,8 @@ describe ('AccountRouter', function () {
 
   function getToken (data, callback) {
     blueprint.testing.request ()
-      .post ('/v1/oauth2/token').send (data)
+      .post ('/v1/oauth2/token')
+      .send (data)
       .expect (200)
       .end (function (err, res) {
         if (err) return callback (err);
@@ -98,18 +99,15 @@ describe ('AccountRouter', function () {
           return callback (null);
         });
       }
-    ], done);
+    ], function (err) {
+      done (err);
+    });
   });
 
   describe ('/v1/accounts', function () {
     describe ('GET', function () {
       it ('should return all the accounts for an admin', function (done) {
-        var projection = {
-          '__v': 0,
-          'password': 0
-        };
-
-        Account.find ({}, projection, function (err, accounts) {
+        Account.find ({}, function (err, accounts) {
           if (err) return done (err);
 
           blueprint.testing.request ()
@@ -288,6 +286,46 @@ describe ('AccountRouter', function () {
           .set ('Authorization', 'Bearer ' + superUserToken)
           .send ({account: {scope: updated.scope}})
           .expect (200, {account: mongodb.testing.lean (updated)}, done);
+      });
+    });
+
+    describe ('/password', function () {
+      it ('should not change the password because current is wrong', function (done) {
+        var account = datamodel.models.accounts[0];
+
+        blueprint.testing.request ()
+          .post ('/v1/accounts/' + account.id + '/password')
+          .set ('Authorization', 'Bearer ' + userToken)
+          .send ({'change-password': { current: 'bad-password', new: 'new-password'}})
+          .expect (400, { errors: { code: 'invalid_password', message: 'Current password is invalid' } }, done);
+      });
+
+      it ('should change the password', function (done) {
+        var account = datamodel.models.accounts[0];
+
+        async.series ([
+          function (callback) {
+            blueprint.testing.request ()
+              .post ('/v1/accounts/' + account.id + '/password')
+              .set ('Authorization', 'Bearer ' + userToken)
+              .send ({'change-password': { current: datamodel.data.accounts[0].password, new: 'new-password'}})
+              .expect (200, 'true')
+              .end (callback);
+          },
+
+          function (callback) {
+            async.waterfall ([
+              function (callback) {
+                Account.findById (account._id, callback);
+              },
+
+              function (changed, callback) {
+                expect (changed.password).to.not.equal (account.password);
+                return callback (null);
+              }
+            ], callback);
+          }
+        ], done);
       });
     });
 

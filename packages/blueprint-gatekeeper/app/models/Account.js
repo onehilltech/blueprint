@@ -2,6 +2,7 @@
 
 var bcrypt   = require ('bcrypt')
   , mongodb  = require ('@onehilltech/blueprint-mongodb')
+  , async    = require ('async')
   , ObjectId = mongodb.Schema.Types.ObjectId
   , options  = require ('./commonOptions') ()
   ;
@@ -62,21 +63,20 @@ schema.pre ('save', function (next) {
 
   var account = this;
 
-  // generate a salt
-  bcrypt.genSalt (SALT_WORK_FACTOR, function (err, salt) {
-    if (err)
-      return next (err);
+  async.waterfall ([
+    function (callback) {
+      bcrypt.genSalt (SALT_WORK_FACTOR, callback);
+    },
 
-    // hash the password along with our new salt
-    bcrypt.hash (account.password, salt, function (err, hash) {
-      if (err)
-        return next (err);
+    function (salt, callback) {
+      bcrypt.hash (account.password, salt, callback);
+    },
 
-      // override the clear text password with the hashed one
+    function (hash, callback) {
       account.password = hash;
-      next ();
-    });
-  });
+      return callback (null);
+    }
+  ], next);
 });
 
 /**
