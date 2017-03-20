@@ -2,6 +2,7 @@ var winston    = require ('winston')
   , async      = require ('async')
   , blueprint  = require ('@onehilltech/blueprint')
   , mongodb    = require ('@onehilltech/blueprint-mongodb')
+  , request    = require ('request')
   , messaging  = blueprint.messaging
   , gatekeeper = require ('../../../lib')
   ;
@@ -211,27 +212,49 @@ WorkflowController.prototype.issueToken = function () {
           function (client, callback) {
             async.waterfall ([
               /**
+               * Perform any pre-validation based on the type of client.
+               *
+               * @param callback
+               * @returns {*}
+               */
+              function (callback) {
+                switch (client.type) {
+                  case 'recaptcha':
+                    async.waterfall ([
+                      function (callback) {
+                        request ({
+                          method: 'POST',
+                          url: 'https://www.google.com/recaptcha/api/siteverify',
+                          json: true,
+                          body: {
+                            secret: blueprint.app.configs.gatekeeper.recaptcha.secretKey,
+                            response: req.body.recaptcha,
+                            remoteip: req.connection.remoteAddress
+                          }
+                        }, callback);
+                      },
+
+                      function (response, body, callback) {
+                        if (body.success)
+                          return callback (null);
+
+                        return callback (new HttpError (400, 'recaptcha_failed', 'Failed to verify site', {reasons: body['error-codes']}));
+                      }
+                    ], callback);
+                    break;
+
+                  default:
+                    return callback (null);
+                }
+              },
+
+              /**
                * Locate the account for the username.
                *
                * @param callback
                */
               function (callback) {
-                // Authenticate the username/password combo. Upon authentication, we
-                // are to return the token/refresh_token combo.
-                Account.findOne ({username: username}, function (err, account) {
-                  // Check the result of the operation. If the account does not exist or the
-                  // account is disabled, then return the appropriate error message.
-                  if (err)
-                    return callback (new HttpError (500, 'internal_error', 'Failed to retrieve account'));
-
-                  if (!account)
-                    return callback (new HttpError (400, 'invalid_username', 'Invalid username'));
-
-                  if (!account.enabled)
-                    return callback (new HttpError (403, 'account_disabled', 'Account is disabled'));
-
-                  return callback (null, account);
-                });
+                Account.findOne ({username: username}, callback);
               },
 
               /**
@@ -241,6 +264,12 @@ WorkflowController.prototype.issueToken = function () {
                * @param callback
                */
               function (account, callback) {
+                if (!account)
+                  return callback (new HttpError (400, 'invalid_username', 'Invalid username'));
+
+                if (!account.enabled)
+                  return callback (new HttpError (403, 'account_disabled', 'Account is disabled'));
+
                 account.verifyPassword (password, function (err, match) {
                   // Check the result of the operation. If there is an error, or the password
                   // does not match, then return an error.

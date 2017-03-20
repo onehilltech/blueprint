@@ -5,6 +5,8 @@ var uid     = require ('uid-safe')
   , options = require ('./commonOptions') ()
   ;
 
+options.discriminatorKey = 'type';
+
 const DEFAULT_SECRET_LENGTH = 128;
 
 var schema = new mongodb.Schema ({
