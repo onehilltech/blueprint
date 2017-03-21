@@ -227,7 +227,7 @@ WorkflowController.prototype.issueToken = function () {
                           url: 'https://www.google.com/recaptcha/api/siteverify',
                           json: true,
                           body: {
-                            secret: blueprint.app.configs.gatekeeper.recaptcha.secretKey,
+                            secret: client.recaptcha_secret,
                             response: req.body.recaptcha,
                             remoteip: req.connection.remoteAddress
                           }
