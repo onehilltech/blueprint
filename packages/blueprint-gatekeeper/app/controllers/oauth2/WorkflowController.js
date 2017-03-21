@@ -205,7 +205,7 @@ WorkflowController.prototype.issueToken = function () {
            *
            * @param callback
            */
-          function (callback) {
+            function (callback) {
             verifyClient (clientId, null, callback);
           },
 
@@ -217,28 +217,37 @@ WorkflowController.prototype.issueToken = function () {
                * @param callback
                * @returns {*}
                */
-              function (callback) {
+                function (callback) {
                 switch (client.type) {
                   case 'recaptcha':
                     async.waterfall ([
                       function (callback) {
-                        request ({
-                          method: 'POST',
+                        var options = {
+                          method: 'GET',
                           url: 'https://www.google.com/recaptcha/api/siteverify',
-                          json: true,
-                          body: {
+                          qs: {
                             secret: client.recaptcha_secret,
                             response: req.body.recaptcha,
                             remoteip: req.connection.remoteAddress
                           }
-                        }, callback);
+                        };
+
+                        request (options, callback);
                       },
 
                       function (response, body, callback) {
-                        if (body.success)
-                          return callback (null);
+                        if (response.statusCode === 200) {
+                          var result = JSON.parse (body);
 
-                        return callback (new HttpError (400, 'recaptcha_failed', 'Failed to verify site', {reasons: body['error-codes']}));
+                          if (result.success)
+                            return callback (null);
+
+                          return callback (new HttpError (400, 'recaptcha_failed', 'Failed to verify site', {reasons: result['error-codes']}));
+                        }
+                        else {
+                          return callback (new HttpError (400, 'recaptcha_failed', 'Failed to verify site'));
+                        }
+
                       }
                     ], callback);
                     break;
@@ -253,7 +262,7 @@ WorkflowController.prototype.issueToken = function () {
                *
                * @param callback
                */
-              function (callback) {
+                function (callback) {
                 Account.findOne ({username: username}, callback);
               },
 
@@ -263,7 +272,7 @@ WorkflowController.prototype.issueToken = function () {
                * @param account
                * @param callback
                */
-              function (account, callback) {
+                function (account, callback) {
                 if (!account)
                   return callback (new HttpError (400, 'invalid_username', 'Invalid username'));
 
@@ -290,7 +299,7 @@ WorkflowController.prototype.issueToken = function () {
                * @param callback
                * @returns {*}
                */
-              function (account, callback) {
+                function (account, callback) {
                 return createAndSaveUserAccessToken ({client: client, account: account}, callback);
               }
             ], callback);
@@ -303,7 +312,7 @@ WorkflowController.prototype.issueToken = function () {
            * @param callback        Callback function
            * @returns {*}
            */
-          function (tokens, callback) {
+            function (tokens, callback) {
             return sendToken (res, tokens, callback);
           }
         ], callback);
@@ -339,7 +348,7 @@ WorkflowController.prototype.issueToken = function () {
            *
            * @param callback
            */
-          function (callback) {
+            function (callback) {
             verifyClient (clientId, clientSecret, callback);
           },
 
@@ -349,7 +358,7 @@ WorkflowController.prototype.issueToken = function () {
            * @param client
            * @param callback
            */
-          function (client, callback) {
+            function (client, callback) {
             var doc = {client: client.id};
 
             async.waterfall ([
@@ -358,7 +367,7 @@ WorkflowController.prototype.issueToken = function () {
                *
                * @param callback
                */
-              function (callback) {
+                function (callback) {
                 var accessToken = new AccessToken (doc);
                 accessToken.save (callback);
               },
@@ -370,7 +379,7 @@ WorkflowController.prototype.issueToken = function () {
                * @param n
                * @param callback
                */
-              function (accessToken, n, callback) {
+                function (accessToken, n, callback) {
                 // Authenticate the username/password combo. Upon authentication, we
                 // are to return the token/refresh_token combo.
                 var expiresIn = accessConfig.expiresIn || DEFAULT_ACCESS_EXPIRES_IN;
@@ -391,7 +400,7 @@ WorkflowController.prototype.issueToken = function () {
            * @param token
            * @param callback
            */
-          function (token, callback) {
+            function (token, callback) {
             sendToken (res, {access_token: token}, callback);
           }
         ], callback);
