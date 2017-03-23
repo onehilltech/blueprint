@@ -4,6 +4,7 @@ var blueprint  = require ('@onehilltech/blueprint')
   , mongodb    = require ('@onehilltech/blueprint-mongodb')
   , async      = require ('async')
   , objectPath = require ('object-path')
+  , request    = require ('request')
   , Account    = require ('../models/Account')
   , HttpError  = blueprint.errors.HttpError
   ;
@@ -19,7 +20,7 @@ const gatekeeperConfig = objectPath (blueprint.app.configs.gatekeeper)
  * ObjectId for each account.
  */
 function __generateAccountId (account, callback) {
-  callback (null, new mongodb.Types.ObjectId ());
+  callback (null, account._id || new mongodb.Types.ObjectId ());
 }
 
 var generateAccountId = gatekeeperConfig.get ('generators.accountId', __generateAccountId);
@@ -49,6 +50,7 @@ function AccountController () {
   ResourceController.call (this, {
     model: Account,
     namespace: 'gatekeeper',
+    modelPath: 'created_by',
     idOptions: {
       validator: 'isMongoIdOrToken',
       validatorOptions: ['me'],
@@ -68,12 +70,7 @@ AccountController.prototype.create = function () {
   var options = {
     on: {
       prepareDocument: function (req, doc, callback) {
-        doc = {
-          email : req.body.account.email,
-          username : req.body.account.username,
-          password : req.body.account.password,
-          created_by : req.user.id
-        };
+        doc.created_by = req.user._id;
 
         async.waterfall ([
           function (callback) {
@@ -87,6 +84,39 @@ AccountController.prototype.create = function () {
             return callback (null, doc);
           }
         ], callback);
+      },
+
+      prepareResponse: function (req, result, callback) {
+        if (!req.query.login)
+          return callback (null, result);
+
+        // Login the user.
+        async.waterfall ([
+          function (callback) {
+            const data = {
+              grant_type: 'password',
+              client_id: req.user._id,
+              username: req.body.account.username,
+              password: req.body.account.password
+            };
+
+            const options = {
+              method: 'POST',
+              url: req.protocol + '://' + req.get ('host') + '/v1/oauth2/token',
+              json: true,
+              body: data
+            };
+
+            request (options, callback);
+          },
+
+          function (res, body, callback) {
+            result.token = body;
+            return callback (null, result);
+          }
+        ], function (err, res, body) {
+          return callback (err, res, body);
+        });
       }
     }
   };

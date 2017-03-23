@@ -4,6 +4,7 @@ var expect    = require ('chai').expect
   , mongodb   = require ('@onehilltech/blueprint-mongodb')
   , winston   = require ('winston')
   , util      = require ('util')
+  , _         = require ('underscore')
   ;
 
 const datamodel = require ('../../../../../fixtures/datamodel')
@@ -167,6 +168,39 @@ describe ('AccountRouter', function () {
 
                 return done (null);
               });
+          });
+      });
+
+      it ('should create a new account, and login the user', function (done) {
+        var autoLogin = {
+          _id: mongodb.Types.ObjectId (),
+          username: 'auto-login',
+          password: 'auto-login',
+          email: 'auto-login@onehilltech.com'
+        };
+
+        blueprint.testing.request ()
+          .post ('/v1/accounts')
+          .query ({login: true})
+          .send ({account: autoLogin})
+          .set ('Authorization', 'Bearer ' + clientToken)
+          .expect (200)
+          .end (function (err, res) {
+            if (err) return done (err);
+
+            var actual = mongodb.testing.lean (_.omit (_.extend (autoLogin, {
+              created_by: datamodel.models.clients[0].id,
+              scope: [],
+              enabled: true
+            }), ['password']));
+
+            expect (res.body.account).to.eql (actual);
+            expect (res.body).to.have.property ('token');
+
+            expect (res.body.token).to.have.keys (['token_type', 'access_token', 'refresh_token']);
+            expect (res.body.token).to.have.property ('token_type', 'Bearer');
+
+            return done (null);
           });
       });
 
