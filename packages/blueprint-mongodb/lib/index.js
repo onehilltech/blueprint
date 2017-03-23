@@ -3,6 +3,7 @@
 var mongoose           = require ('mongoose')
   , ConnectionManager  = require ('./ConnectionManager')
   , ResourceController = require ('./ResourceController')
+  , UserResourceController = require ('./UserResourceController')
   , GridFSController   = require ('./GridFSController')
   , populate           = require ('./populate')
   , plugins            = require ('./plugins')
@@ -103,6 +104,7 @@ exports.plugins = plugins;
 exports.model = model;
 exports.modelOn = modelOn;
 exports.ResourceController = ResourceController;
+exports.UserResourceController = UserResourceController;
 exports.GridFSController = GridFSController;
 exports.populate = populate;
 exports.resource = resource;

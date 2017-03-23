@@ -1,5 +1,5 @@
 var mongodb = require ('../../../../lib')
-  , options = require ('./schemaOptions')
+  , options = require ('./schemaOptions') ()
   ;
 
 var schema = new mongodb.Schema ({

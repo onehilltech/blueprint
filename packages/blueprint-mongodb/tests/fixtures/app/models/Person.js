@@ -2,7 +2,7 @@
 
 var mongodb = require ('../../../../lib')
   , Degree  = require ('./Degree')
-  , options = require ('./schemaOptions')
+  , options = require ('./schemaOptions') ()
   ;
 
 var schema = new mongodb.Schema ({

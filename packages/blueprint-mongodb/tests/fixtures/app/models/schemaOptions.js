@@ -1,8 +1,10 @@
-module.exports = {
-  toObject: {
-    versionKey: false
-  },
-  toJSON: {
-    versionKey: false
-  }
+module.exports = function () {
+  return {
+    toObject: {
+      versionKey: false
+    },
+    toJSON: {
+      versionKey: false
+    }
+  };
 };
