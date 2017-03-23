@@ -25,6 +25,7 @@ function __onPrepareFilter (req, filter, callback) { return callback (null, filt
 function __onPrepareDocument (req, doc, callback) { return callback (null, doc); }
 function __onPreExecute (req, callback) { return callback (null); }
 function __onPostExecute (req, result, callback) { return callback (null, result); }
+function __onPrepareResponse (req, result, callback) { return callback (null, result); }
 
 /**
  * Make the database completion handler. We have to create a new handler
@@ -103,6 +104,8 @@ ResourceController.prototype.create = function (opts) {
   var onPrepareDocument = on.prepareDocument || __onPrepareDocument;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
+  var onPrepareResponse = on.prepareResponse || __onPrepareResponse;
+
   var eventName = this._computeEventName ('created');
 
   var self = this;
@@ -121,20 +124,8 @@ ResourceController.prototype.create = function (opts) {
       var doc = req.body[self.name];
 
       async.waterfall ([
-        async.constant (doc),
-
-        function (doc, callback) {
-          async.waterfall ([
-            // First, remove all elements from the body that are not part of
-            // the target model.
-            function (callback) {
-              return callback (null, doc);
-            },
-
-            function (doc, callback) {
-              return onPrepareDocument (req, doc, callback);
-            }
-          ], callback);
+         function (callback) {
+          onPrepareDocument (req, doc, callback);
         },
 
         function (doc, callback) {
@@ -184,6 +175,10 @@ ResourceController.prototype.create = function (opts) {
           result[self.name] = data;
 
           return callback (null, result);
+        },
+
+        function (result, callback) {
+          onPrepareResponse (req, result, callback);
         }
       ], makeTaskCompletionHandler (res, callback));
     }
@@ -212,7 +207,7 @@ ResourceController.prototype.get = function (opts) {
   var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
-
+  var onPrepareResponse = on.prepareResponse || __onPrepareResponse;
 
   return {
     validate: function (req, callback) {
@@ -291,6 +286,10 @@ ResourceController.prototype.get = function (opts) {
               return callback (null, result);
             });
           }
+        },
+
+        function (result, callback) {
+          onPrepareResponse (req, result, callback);
         }
       ], makeTaskCompletionHandler (res, callback));
     }
@@ -315,6 +314,7 @@ ResourceController.prototype.getAll = function (opts) {
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
+  var onPrepareResponse = on.prepareResponse || __onPrepareResponse;
 
   var self = this;
 
@@ -434,6 +434,10 @@ ResourceController.prototype.getAll = function (opts) {
             result = _.extend (result, details);
             return callback (null, result);
           });
+        },
+
+        function (result, callback) {
+          onPrepareResponse (req, result, callback);
         }
       ], makeTaskCompletionHandler (res, callback));
     }
@@ -463,6 +467,8 @@ ResourceController.prototype.update = function (opts) {
   var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
   var onPreExecute = on.preExecute || __onPreExecute;
   var onPostExecute = on.postExecute || __onPostExecute;
+  var onPrepareResponse = on.prepareResponse || __onPrepareResponse;
+
   var eventName = this._computeEventName ('updated');
 
   var self = this;
@@ -555,6 +561,10 @@ ResourceController.prototype.update = function (opts) {
           result[self.name] = data;
 
           return callback (null, result);
+        },
+
+        function (result, callback) {
+          onPrepareResponse (req, result, callback);
         }
       ], makeTaskCompletionHandler (res, callback));
     }
