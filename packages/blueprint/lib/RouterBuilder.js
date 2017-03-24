@@ -527,7 +527,7 @@ RouterBuilder.prototype._actionStringToMiddleware = function (action, path, opts
       middleware.push (sanitizer (result.sanitize));
 
     if (opts.policy)
-      middleware.push (this._makePolicyMiddleware (opts.policy));
+      middleware.push (Policy.middleware (opts.policy));
 
     if (opts.before)
       middleware = middleware.concat (opts.before);
