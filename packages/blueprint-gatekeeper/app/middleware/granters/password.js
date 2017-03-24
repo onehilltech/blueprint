@@ -61,14 +61,14 @@ exports.policies = function (req, callback) {
 /**
  * Create an access token.
  *
- * @param req
+ * @param opts
  * @param callback
  */
-exports.createToken = function (req, callback) {
+exports.createToken = function (opts, callback) {
   var doc = {
-    client: req.client._id,
-    account: req.account._id,
-    scope: _.union (req.client.scope, req.account.scope),
+    client: opts.client._id,
+    account: opts.account._id,
+    scope: _.union (opts.client.scope, opts.account.scope),
     refresh_token: new ObjectId ()
   };
 

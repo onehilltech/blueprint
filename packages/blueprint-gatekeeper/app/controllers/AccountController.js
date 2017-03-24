@@ -4,8 +4,10 @@ var blueprint  = require ('@onehilltech/blueprint')
   , mongodb    = require ('@onehilltech/blueprint-mongodb')
   , async      = require ('async')
   , objectPath = require ('object-path')
-  , request    = require ('request')
+  , _          = require ('underscore')
   , Account    = require ('../models/Account')
+  , password   = require ('../middleware/granters/password')
+  , serializer = require ('../middleware/serializers') (blueprint.app.configs.gatekeeper.token)
   , HttpError  = blueprint.errors.HttpError
   ;
 
@@ -90,33 +92,21 @@ AccountController.prototype.create = function () {
         if (!req.query.login)
           return callback (null, result);
 
-        // Login the user.
         async.waterfall ([
           function (callback) {
-            const data = {
-              grant_type: 'password',
-              client_id: req.user._id,
-              username: req.body.account.username,
-              password: req.body.account.password
-            };
-
-            const options = {
-              method: 'POST',
-              url: req.protocol + '://' + req.get ('host') + '/v1/oauth2/token',
-              json: true,
-              body: data
-            };
-
-            request (options, callback);
+            var data = {client: req.user, account: result.account};
+            password.createToken (data, callback);
           },
 
-          function (res, body, callback) {
-            result.token = body;
+          function (accessToken, callback) {
+            accessToken.serialize (serializer, callback);
+          },
+
+          function (token, callback) {
+            result.token = _.extend ({token_type: 'Bearer'}, token);
             return callback (null, result);
           }
-        ], function (err, res, body) {
-          return callback (err, res, body);
-        });
+        ], callback);
       }
     }
   };

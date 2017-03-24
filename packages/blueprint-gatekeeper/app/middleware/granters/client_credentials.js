@@ -17,7 +17,7 @@ exports.policies = function (req, callback) {
   return callback (null, true);
 };
 
-exports.createToken = function (req, callback) {
-  var doc = {client: req.client._id, scope: req.client.scope};
+exports.createToken = function (opts, callback) {
+  var doc = {client: opts.client._id, scope: opts.client.scope};
   ClientToken.create (doc, callback);
 };
