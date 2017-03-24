@@ -19,7 +19,8 @@ module.exports = exports = {
       algorithm: 'RS256',
       publicKey:  blueprint.app.resource ('ssl/server.crt'),
       privateKey: blueprint.app.resource ('ssl/server.key'),
-      issuer: 'engage'
+      issuer: 'gatekeeper',
+      expiresIn: '1h'
     }
   }
 };

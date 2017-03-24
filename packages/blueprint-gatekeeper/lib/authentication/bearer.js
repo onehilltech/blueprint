@@ -9,7 +9,7 @@ var blueprint      = require ('@onehilltech/blueprint')
 var AccessToken;
 
 messaging.on ('app.init', function (app) {
-  AccessToken = app.models.oauth2.AccessToken;
+  AccessToken = app.models.AccessToken;
 });
 
 // TODO Allow roles to be passed to options.
@@ -62,7 +62,7 @@ module.exports = exports = function (opts) {
       // Set the user to the client id.
       var user = accessToken.client;
 
-      if (payload.kind === 'user') {
+      if (accessToken.kind === 'user_token') {
         if (!accessToken.account)
           return done (null, false, {message: 'Unknown account'});
 

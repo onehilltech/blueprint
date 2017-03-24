@@ -3,11 +3,11 @@ var gatekeeper = require ('../../../../lib')
 
 module.exports = exports = {
   '/token': {
-    post: { action: 'oauth2.WorkflowController@issueToken' }
+    post: { action: 'WorkflowController@issueToken', policy: 'gatekeeper.issueToken' }
   },
 
   '/logout' : {
     use: gatekeeper.protect (),
-    post: { action : 'oauth2.WorkflowController@logoutUser' }
+    post: { action : 'WorkflowController@logoutUser' }
   }
 };

@@ -111,7 +111,7 @@ function apply (done) {
           Account = app.models.Account;
 
         if (!AccessToken)
-          AccessToken = app.models.oauth2.AccessToken;
+          AccessToken = app.models.AccessToken;
 
         return callback (null, app);
       });
