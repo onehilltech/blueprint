@@ -18,7 +18,7 @@ var schema = new Schema ({
   account: {type: ObjectId, ref: Account.modelName, index: true},
 
   /// Optional refresh token for the user.
-  refresh_token: {type: ObjectId, index: true, unique: true}
+  refresh_token: {type: ObjectId, index: true, unique: true, sparse: true}
 }, options);
 
 schema.methods.serialize = function (serializer, callback) {
