@@ -67,24 +67,22 @@ module.exports = exports = {
 ### Protecting routes
 
 The router definition above will expose the Gatekeeper routers at `/gatekeeper`.
-Lastly, define the routes you want to protect. For example, you can protect all
-routes on a give path.
+Lastly, define the routes you want to protect using the ```gatekeeper.auth.bearer```
+Blueprint policy. For example, you can protect all routes on a given path:
 
 ```javascript
-// app/routers/IndexRouter.js
+// EndpointRouters.js
 
-var gatekeeper = require ('@onehilltech/gatekeeper')
-  ;
-
-exports = module.exports = {
-  '/v1': [gatekeeper.protect ()]
+module.exports = {
+  '/v1': {
+    policy: 'gatekeeper.auth.bearer'
+  }
 };
 ```
 
 The router above will protect all routes under the `/v1` path, which
 includes all routers located in `app/routers/v1` directory. The client will
 need to define the `Authorization` header and include a generated token.
-Otherwise, the protected routes will return `401`.
 
 For more details on allowed routes, see `app/routers` for Gatekeeper.
 
