@@ -3,7 +3,8 @@ var passport = require ('passport')
 
 module.exports = exports = {
   '/cloudtoken' : {
-    use: passport.authenticate ('bearer', {session: false}),
+    policy: 'gatekeeper.auth.bearer',
+
     resource: {
       controller : 'CloudTokenController',
       allow: ['create']
