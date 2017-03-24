@@ -1,7 +1,6 @@
-var passport = require ('passport')
-  ;
+'use strict';
 
-module.exports = exports = {
+module.exports = {
   '/cloudtoken' : {
     policy: 'gatekeeper.auth.bearer',
 
