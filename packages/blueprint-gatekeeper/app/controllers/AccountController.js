@@ -2,6 +2,7 @@
 
 var blueprint  = require ('@onehilltech/blueprint')
   , mongodb    = require ('@onehilltech/blueprint-mongodb')
+  , ObjectId   = mongodb.Types.ObjectId
   , async      = require ('async')
   , objectPath = require ('object-path')
   , _          = require ('underscore')
@@ -14,18 +15,15 @@ var blueprint  = require ('@onehilltech/blueprint')
 var ResourceController = mongodb.ResourceController
   ;
 
-const gatekeeperConfig = objectPath (blueprint.app.configs.gatekeeper)
-  ;
-
 /**
  * Default account id generator. This generator will just produce a new
  * ObjectId for each account.
  */
 function __generateAccountId (account, callback) {
-  callback (null, account._id || new mongodb.Types.ObjectId ());
+  callback (null, account._id || new ObjectId ());
 }
 
-var generateAccountId = gatekeeperConfig.get ('generators.accountId', __generateAccountId);
+var generateAccountId = objectPath.get (blueprint.app.configs.gatekeeper, 'generators.accountId', __generateAccountId);
 
 /**
  * Sanitize the account id.
