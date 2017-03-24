@@ -6,6 +6,7 @@ const async   = require ('async')
   , HttpError = blueprint.errors.HttpError
   , Client    = require ('../../models/Client')
   , granters  = require ('../../middleware/granters')
+  , clients   = require ('./clients')
   ;
 
 module.exports = Policy.allSeries ([
@@ -13,11 +14,9 @@ module.exports = Policy.allSeries ([
    * The client must exist, and be in good standing.
    */
   function (req, callback) {
-    var clientId = req.body.client_id;
-
     async.waterfall ([
       function (callback) {
-        Client.findById (clientId, callback);
+        Client.findById (req.body.client_id, callback);
       },
 
       function (client, callback) {
@@ -34,16 +33,31 @@ module.exports = Policy.allSeries ([
     ], callback);
   },
 
-  /*
-   * Evaluate the policies for the granter.
-   */
-  function (req, callback) {
-    const grantType = req.body.grant_type;
-    const policies = granters[grantType].policies;
+  Policy.all ([
+    /*
+     * Check the policies for the client type.
+     */
+    function (req, callback) {
+      var clientPolicies = clients[req.client.type];
 
-    if (policies)
-      return policies (req, callback);
-    else
-      return callback (null, true);
-  }
+      if (!clientPolicies)
+        return callback (null, true);
+
+      return clientPolicies (req, callback);
+    },
+
+    /*
+     * Evaluate the policies for the granter.
+     */
+    function (req, callback) {
+      const grantType = req.body.grant_type;
+      const policies = granters[grantType].policies;
+
+      if (policies)
+        return policies (req, callback);
+      else
+        return callback (null, true);
+    }
+  ])
 ]);
+
