@@ -7,7 +7,7 @@ module.exports = exports = {
   },
 
   '/logout' : {
-    use: gatekeeper.protect (),
+    policy: 'gatekeeper.auth.bearer',
     post: { action : 'WorkflowController@logoutUser' }
   }
 };

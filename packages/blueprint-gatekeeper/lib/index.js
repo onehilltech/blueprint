@@ -7,7 +7,6 @@ exports.authentication = exports.auth;
 
 exports.scope = require ('./scope');
 exports.tokens = require ('./tokens');
-exports.protect = require ('./protect');
 
 exports.__defineGetter__ ('testing', function () {
   return require ('./testing');

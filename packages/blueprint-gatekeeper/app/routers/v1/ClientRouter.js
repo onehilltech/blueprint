@@ -5,7 +5,7 @@ var gatekeeper = require ('../../../lib')
 
 module.exports = {
   '/clients': {
-    use: gatekeeper.protect (),
+    policy: 'gatekeeper.auth.bearer',
     resource: {
       controller: 'ClientController',
       allow: ['create', 'update', 'delete']

@@ -4,7 +4,7 @@ var async = require ('async')
   ;
 
 function hasScope (role, req, callback) {
-  var scopes = req.authInfo.scope;
+  var scopes = req.scope;
 
   if (scopes.length === 0)
     return callback (null, false, 'No scopes defined');

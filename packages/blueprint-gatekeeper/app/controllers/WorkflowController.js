@@ -40,8 +40,7 @@ WorkflowController.prototype.logoutUser = function () {
     execute: function (req, res, callback) {
       async.waterfall ([
         function (callback) {
-          var token = req.authInfo.token;
-          token.remove (callback);
+          req.accessToken.remove (callback);
         },
 
         function (token, callback) {

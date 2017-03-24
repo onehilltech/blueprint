@@ -1,6 +1,6 @@
-var async = require ('async')
-  , blueprint = require ('@onehilltech/blueprint')
-  , HttpError = blueprint.errors.HttpError
+'use strict';
+
+const async = require ('async')
   ;
 
 /**
@@ -9,7 +9,7 @@ var async = require ('async')
  * Determine if the user supports all roles specified.
  */
 module.exports = exports = function (expected, req, callback) {
-  var actual = req.authInfo.scope;
+  var actual = req.scope;
 
   async.every (expected,
     function (role, callback) {
