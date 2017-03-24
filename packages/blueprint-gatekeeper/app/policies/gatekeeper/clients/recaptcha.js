@@ -1,6 +1,7 @@
 'use strict';
 
 const request = require ('request')
+  , async     = require ('async')
   ;
 
 module.exports = function (req, callback) {
@@ -26,7 +27,7 @@ module.exports = function (req, callback) {
     function (response, body, callback) {
       if (response.statusCode === 200) {
         if (body.success)
-          return callback (null);
+          return callback (null, true);
 
         return callback (new HttpError (400, 'recaptcha_failed', 'Failed to verify site', {reasons: body['error-codes']}));
       }
