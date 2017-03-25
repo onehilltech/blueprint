@@ -2,6 +2,7 @@
 
 const async     = require ('async')
   , blueprint   = require ('@onehilltech/blueprint')
+  , HttpError   = blueprint.errors.HttpError
   , Policy      = blueprint.Policy
   , passport    = require ('passport')
   , AccessToken = require ('../../../models/AccessToken')
