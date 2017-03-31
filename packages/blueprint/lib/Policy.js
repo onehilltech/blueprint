@@ -1,6 +1,6 @@
 var async       = require ('async')
   , http        = require ('http')
-  , winston     = require ('winston')
+  , debug       = require ('debug') ('blueprint:policy')
   , util        = require ('util')
   , _           = require ('underscore')
   , Framework   = require ('./Framework')
@@ -191,7 +191,7 @@ function checkPolicy () {
         policy.apply (null, policyArgs);
       },
       function (err) {
-        winston.log ('error', util.inspect (err));
+        debug (util.inspect (err));
       });
   };
 }
