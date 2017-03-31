@@ -28,13 +28,18 @@ describe ('Application', function () {
   describe ('#init', function () {
     it ('should initialize the application', function (done) {
       app.init (function (err, app) {
-        if (err) return done (err);
+        if (err)
+          return done (err);
+
+        expect (app.server).to.not.be.undefined;
+
+        expect (app.validators).to.have.key ('isMongoIdOrMe')
+          .that.is.a.function;
+
+        expect (app.sanitizers).to.have.key ('customSanitizer')
+          .that.is.a.function;
 
         async.parallel ([
-          function (callback) {
-            expect (app.server).to.not.be.undefined;
-            return callback ();
-          },
           function (callback) {
             // Make sure the data directory has been created.
             var tempPath = path.resolve (app.appPath, 'temp');
@@ -65,16 +70,6 @@ describe ('Application', function () {
                 return callback ();
               });
             }, callback);
-          },
-
-          function (callback) {
-            expect (app.validators).to.have.key ('isMongoIdOrMe')
-              .that.is.a.function;
-
-            expect (app.sanitizers).to.have.key ('customSanitizer')
-              .that.is.a.function;
-
-            return callback (null);
           }
         ], done);
       });

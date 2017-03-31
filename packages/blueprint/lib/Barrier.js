@@ -31,12 +31,10 @@ Barrier.prototype._signalAndWait = function (participant, callback) {
   // Add the callback to the waiting list.
   this._waiting.push (callback);
 
-  // Increment the signal count.
-  ++ this._signals;
+  const pending = this.pendingCount;
+  debug (util.format ('barrier %s waiting for %d signals', this._name, pending));
 
-  debug (util.format ('barrier %s waiting for %d signals', this._name, (this._participants - this._signals)));
-
-  if (this._signals === this.participantCount) {
+  if (pending === 0) {
     debug (util.format ('barrier %s notifying all participants', this._name));
 
     async.each (this._waiting, function (participant, callback) {
@@ -47,6 +45,10 @@ Barrier.prototype._signalAndWait = function (participant, callback) {
     });
   }
 };
+
+Barrier.prototype.__defineGetter__ ('pendingCount', function () {
+  return this.participantCount - this._waiting.length;
+});
 
 function Barrier (name) {
   this._name = name;
