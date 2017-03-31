@@ -129,7 +129,7 @@ function load (opts) {
 
     var app = Framework ().app;
 
-    if (app.isModuleInit) {
+    if (app.isInit) {
       // The application is already initialized. This means we can
       // perform a lookup for the policy.
       lookup (app, opts);

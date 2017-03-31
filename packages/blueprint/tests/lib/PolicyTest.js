@@ -69,12 +69,17 @@ describe ('Policy', function () {
 
       Policy.initialize (req);
 
-      f (req, function (err, result) {
-        expect (err).to.be.null;
-        expect (result).to.be.true;
+      try {
+        f (req, function (err, result) {
+          expect (err).to.be.null;
+          expect (result).to.be.true;
 
-        return done ();
-      });
+          return done ();
+        });
+      }
+      catch (ex) {
+        console.log (ex);
+      }
     });
 
     it ('should return a details reason for policy failure', function (done) {
@@ -83,14 +88,20 @@ describe ('Policy', function () {
 
       Policy.initialize (req);
 
-      f (req, function (err, result) {
-        expect (err).to.be.null;
-        expect (result).to.be.false;
-        expect (req).to.have.property ('hasPolicyErrors', true);
+      try {
+        f (req, function (err, result) {
+          expect (err).to.be.null;
+          expect (result).to.be.false;
+          expect (req).to.have.property ('hasPolicyErrors', true);
 
-        return done ();
-      });
-    });  });
+          return done ();
+        });
+      }
+      catch (ex) {
+        console.log (ex);
+      }
+    });
+  });
 
   describe ('#all', function () {
     it ('should evaluate to true since all asserts are true', function () {
