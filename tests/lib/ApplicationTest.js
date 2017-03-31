@@ -6,12 +6,17 @@ var expect = require ('chai').expect
   ;
 
 var Application = require ('../../lib/Application')
+  , Barrier     = require ('../../lib/Barrier')
   , ApplicationModule = require ('../../lib/ApplicationModule')
   ;
 
 describe ('Application', function () {
   var appPath = path.resolve (__dirname, '../fixtures/app');
   var app;
+
+  before (function () {
+    Barrier.removeAll ();
+  });
 
   describe ('new Application ()', function () {
     it ('should create and initialize a new application', function () {
