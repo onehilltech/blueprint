@@ -3,8 +3,8 @@ var expect = require ('chai').expect
   , path   = require ('path')
   ;
 
-var appFixture = require ('../fixtures/app')
-  , ModuleRouter = require ('../../lib/ModuleRouter')
+var appFixture        = require ('../fixtures/app')
+  , ModuleRouter      = require ('../../lib/ModuleRouter')
   , ApplicationModule = require ('../../lib/ApplicationModule')
   ;
 
@@ -14,7 +14,9 @@ describe ('ModuleRouter', function () {
     var appModule = new ApplicationModule (location);
 
     async.waterfall ([
-      function (callback) { appFixture (callback); },
+      function (callback) {
+        appFixture (callback);
+      },
       function (app, callback) {
         appModule.init (function (err) {
           return callback (err, app);

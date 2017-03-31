@@ -6,13 +6,13 @@ describe ('Barrier', function () {
   var b1, b2;
 
   it ('should create a barrier with 1 participant', function () {
-    b1 = Barrier ('testBarrier');
-    expect (b1.participantCount).to.equal (1);
+    b1 = Barrier ('testBarrier', 'b1');
+    expect (b1.barrier.participantCount).to.equal (1);
   });
 
   it ('should create a barrier with 2 participants', function () {
-    b2 = Barrier ('testBarrier');
-    expect (b2.participantCount).to.equal (2);
+    b2 = Barrier ('testBarrier', 'b2');
+    expect (b2.barrier.participantCount).to.equal (2);
   });
 
   it ('should wait for all barriers to signal', function (done) {

@@ -1,19 +1,22 @@
-var winston = require ('winston')
-  , path = require ('path')
-  , util = require ('util')
-  , fs = require ('fs-extra')
-  , all = require ('require-all')
-  , async = require ('async')
+'use strict';
+
+const winston = require ('winston')
+  , path      = require ('path')
+  , util      = require ('util')
+  , fs        = require ('fs-extra')
+  , all       = require ('require-all')
+  , async     = require ('async')
   ;
 
-var Server = require ('./Server')
-  , RouterBuilder = require ('./RouterBuilder')
-  , Configuration = require ('./Configuration')
+const Server          = require ('./Server')
+  , RouterBuilder     = require ('./RouterBuilder')
+  , Configuration     = require ('./Configuration')
   , ApplicationModule = require ('./ApplicationModule')
-  , Framework = require ('./Framework')
-  , Path = require ('./Path')
-  , Env = require ('./Environment')
-  , ModuleLoader = require ('./ModuleLoader')
+  , Framework         = require ('./Framework')
+  , Path              = require ('./Path')
+  , Env               = require ('./Environment')
+  , ModuleLoader      = require ('./ModuleLoader')
+  , Barrier           = require ('./Barrier')
   ;
 
 /**
@@ -28,6 +31,8 @@ function Application (appPath) {
   ApplicationModule.call (this, appPath);
 
   this._modules = {};
+  this._appInit = Barrier ('app.init', 'blueprint.app');
+  this._appStart = Barrier ('app.start', 'blueprint.app');
 }
 
 util.inherits (Application, ApplicationModule);
@@ -118,16 +123,21 @@ Application.prototype.init = function (callback) {
       app._server.setMainRouter (app._router);
 
       return callback (null, app);
+    },
+
+    function (app, callback) {
+      // Mark the application as initialized.
+      app.isInit = true;
+
+      // Notify all listeners the application is initialized.
+      Framework ().messaging.emit ('app.init', app);
+
+      // Wait for all participants to signal they are ready to move on.
+      app._appInit.signalAndWait (function () {
+        callback (null, app);
+      });
     }
-  ], function (err, app) {
-    if (err) return callback (err);
-
-    // Notify all listeners the application is initialized.
-    Framework ().messaging.emit ('app.init', app);
-    app.isInit = true;
-
-    return callback (null, app);
-  });
+  ], callback);
 };
 
 /**
@@ -178,35 +188,38 @@ Application.prototype.addModule = function (name, appModule, callback) {
  * Start the application. This method connects to the database, creates a
  * new server, and starts listening for incoming messages.
  *
- * @param done
+ * @param callback
  */
 Application.prototype.start = function (callback) {
-  async.waterfall ([
-    async.constant (this),
+  async.series ([
+    /*
+     * Connect to the database.
+     */
+    function (callback) {
+      if (!this._db)
+        return callback (null);
 
-    // Connect to the database.
-    function (app, callback) {
-      if (!app._db)
-        return callback (null, app);
+      this._db.connect (callback);
+    }.bind (this),
 
-      app._db.connect (function (err) {
-        return callback (err, app);
-      });
-    },
+    /*
+     * Start listening for events.
+     */
+    function (callback) {
+      this._server.listen (callback);
+    }.bind (this),
 
-    // Listen for events.
-    function (app, callback) {
-      app._server.listen (function (err) {
-        return callback (err, app);
-      });
-    }
-  ], function (err, app) {
-    if (err) return callback (err);
+    /*
+     * Notify all that we have started.
+     */
+    function (callback) {
+      // Send a message to all listeners.
+      Framework ().messaging.emit ('app.start', this);
 
-    Framework ().messaging.emit ('app.start', app);
-
-    return callback (null, app);
-  });
+      // Wait for all to respond that we can move on.
+      this._appStart.signalAndWait (callback);
+    }.bind (this)
+  ], callback);
 };
 
 /**
