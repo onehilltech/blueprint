@@ -28,7 +28,8 @@ describe ('ApplicationModule', function () {
   describe ('#init', function () {
     it ('should initialize the application module', function (done) {
       appModule.init (function (err, module) {
-        if (err) return done (err);
+        if (err)
+          return done (err);
 
         expect (module.isInit).to.be.true;
         expect (module.controllerManager).to.be.defined;
