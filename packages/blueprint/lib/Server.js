@@ -13,8 +13,8 @@ var express     = require ('express')
   , validator   = require ('express-validator')
   , _           = require ('underscore')
   , all         = require ('require-all')
-  , winston     = require ('winston')
   , util        = require ('util')
+  , winston     = require ('winston')
   , Uploader    = require ('./Uploader')
   , env         = require ('./Environment').name
   ;
@@ -235,7 +235,7 @@ Server.prototype._configureMiddleware = function (callback) {
       if (!middleware)
         throw new Error (util.format ('%s is an unsupported middleware type', key));
 
-      winston.log ('debug', 'bodyParser.%s: %s', key, bodyParserConfig[key]);
+      debug (util.format ('bodyParser.%s: %s', key, bodyParserConfig[key]));
       this._express.use (middleware.call (bodyParser, bodyParserConfig[key]));
     }
   }
@@ -257,16 +257,16 @@ Server.prototype._configureMiddleware = function (callback) {
   // are provided for it.
   var optionalMiddleware = {
     cookies : function (app, opts) {
-      winston.log('debug', 'cookie parser: %s', opts.cookies);
-      var middleware = require ('cookie-parser');
+      debug ('cookie parser: ' + opts.cookies);
 
+      var middleware = require ('cookie-parser');
       app.use (middleware (opts.cookies));
     },
 
     session : function (app, opts) {
-      winston.log('debug', 'express session: %s', opts);
-      var middleware = require ('express-session');
+      debug ('express session: ' + opts);
 
+      var middleware = require ('express-session');
       app.use (middleware (opts));
     }
   };
@@ -312,13 +312,9 @@ Server.prototype._configureMiddleware = function (callback) {
 /**
  * Start listening for requests.
  *
- * @param listenCallback
  * @param done
  */
 Server.prototype.listen = function (done) {
-  if (this._protocols.length === 0)
-    winston.log ('warn', 'server has no protocols; cannot receive any requests');
-
   async.each (this._protocols, function (protocol, callback) {
     protocol.listen (callback);
   }, done);
@@ -332,7 +328,7 @@ Server.prototype.listen = function (done) {
  * @param callback      Completion callback
  */
 Server.prototype.importViews = function (srcPath, callback) {
-  winston.log ('debug', 'importing views from %s', srcPath);
+  debug ('importing views from ' + srcPath);
 
   // We need to walk the import path to copy the files into the view cache
   // path and detect the different view engines. Ideally, we would like to
