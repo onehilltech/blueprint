@@ -348,6 +348,10 @@ Server.prototype.importViews = function (srcPath, callback) {
   // both tasks in parallel.
   var self = this;
 
+  function complete (err) {
+    return callback (err);
+  }
+
   async.parallel ([
     function (callback) {
       // Walk the path. For each view we find, we need to copy the file and then
@@ -401,7 +405,7 @@ Server.prototype.importViews = function (srcPath, callback) {
         }, callback);
       }
     }
-  ], callback);
+  ], complete);
 };
 
 /**

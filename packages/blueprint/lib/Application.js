@@ -98,7 +98,7 @@ Application.prototype.init = function (callback) {
     // server object. Part of loading the routers requires force loading of
     // the controllers. Otherwise, the router builder will not be able to
     // resolve any of the defined actions.
-    function (dummy, callback) {
+    function (callback) {
       var routersPath = path.resolve (this._appPath, 'routers');
       var builder = new RouterBuilder (this.controllers, routersPath);
 
