@@ -43,7 +43,8 @@ ConnectionManager.prototype.getConnection = function (name) {
 var singleton = null;
 
 exports.getConnectionManager = function (opts) {
-  if (singleton) return singleton;
+  if (singleton)
+    return singleton;
 
   singleton = new ConnectionManager (opts);
   return singleton;
