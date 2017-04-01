@@ -21,6 +21,10 @@ BarrierParticipant.prototype.__defineGetter__ ('name', function () {
   return this._name;
 });
 
+BarrierParticipant.prototype.signal = function () {
+  this.signalAndWait (function () {});
+};
+
 BarrierParticipant.prototype.signalAndWait = function (callback) {
   this._barrier._signalAndWait (this, callback);
 };
