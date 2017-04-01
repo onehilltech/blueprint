@@ -86,12 +86,12 @@ Application.prototype.init = function (callback) {
     /*
      * Move the views to the correct location.
      */
-    function (server, callback) {
+    function (callback) {
       if (!this.getSupportsViews ())
         return callback (null);
 
       var viewsPath = this.getViewsPath ();
-      server.importViews (viewsPath, callback);
+      this._server.importViews (viewsPath, callback);
     }.bind (this),
 
     // Make the router for the application. Then, install the router in the
