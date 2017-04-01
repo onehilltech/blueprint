@@ -1,6 +1,6 @@
 'use strict';
 
-var mongodb = require ('../../../../lib')
+var mongodb = require ('../../../../../lib')
   , Person  = require ('./Person')
   , options = require ('./schemaOptions') ()
   ;

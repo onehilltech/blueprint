@@ -1,7 +1,7 @@
 'use strict';
 
 var blueprint        = require ('@onehilltech/blueprint')
-  , mongodb          = require ('../../../../lib')
+  , mongodb          = require ('../../../../../lib')
   , GridFSController = mongodb.GridFSController
   ;
 

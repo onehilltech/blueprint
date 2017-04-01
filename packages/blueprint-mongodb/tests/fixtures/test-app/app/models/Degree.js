@@ -1,5 +1,7 @@
-var mongodb = require ('../../../../lib')
-  , options = require ('./schemaOptions') ()
+'use strict';
+
+const mongodb = require ('../../../../../lib')
+  , options   = require ('./schemaOptions') ()
   ;
 
 var schema = new mongodb.Schema ({

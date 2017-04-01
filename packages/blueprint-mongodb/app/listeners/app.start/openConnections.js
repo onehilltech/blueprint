@@ -1,38 +1,62 @@
 'use strict';
 
-var mongodb = require ('../../../lib')
-  , winston = require ('winston')
-  , util    = require ('util')
+const mongodb = require ('../../../lib')
+  , blueprint = require ('@onehilltech/blueprint')
+  , appStart  = blueprint.barrier ('app.start', 'mongodb.openConnection')
+  , debug     = require ('debug')('blueprint:modules:mongodb')
+  , async     = require ('async')
+  , winston   = require ('winston')
+  , util      = require ('util')
   ;
-
-module.exports = openConnections;
-
-/**
- * Open all connections defined in the configuration.
- */
-function openConnections (app) {
-  winston.log ('info', 'opening all connections to the database');
-
-  var config = app.configs.mongodb;
-  var connMgr = mongodb.getConnectionManager ();
-
-  for (var key in config.connections) {
-    if (config.connections.hasOwnProperty (key)) {
-      var opts = config.connections[key];
-      connMgr.openConnection (key, opts, errorHandler (key));
-    }
-  }
-}
 
 /**
  * Error handler for opening database connections.
  *
  * @param key
- * @returns {Function}
+ * @param callback
  */
-function errorHandler (key) {
+function errorHandler (key, callback) {
   return function (err) {
     if (err)
-      winston.log ('error', 'Failed to connect to %s [%s]', key, util.inspect (err));
+      winston.log ('error', 'failed to open connection %s [%s]', key, util.inspect (err));
+
+    return callback (err);
   }
 }
+
+/**
+ * Open all connections defined in the configuration.
+ */
+function openConnections (app) {
+  debug ('opening all connections to the database');
+
+  var config = app.configs.mongodb;
+  var connMgr = mongodb.getConnectionManager ();
+
+  function done (err) {
+    if (err)
+      winston.log ('error', 'failed to open 1 or more connections');
+
+    // Notify the barrier app.init barrier.
+    appStart.signal ();
+  }
+
+  async.eachOf (config.connections, function (connOpts, connName, callback) {
+    async.series ([
+      function (callback) {
+        debug ('opening connection ' + connName);
+
+        connMgr.openConnection (connName, connOpts, errorHandler (connName, callback));
+      },
+
+      function (callback) {
+        // Send a notification that we have open the connection.
+        blueprint.messaging.emit ('mongodb.connection.open', connName);
+
+        return callback (null);
+      }
+    ], callback);
+  }, done);
+}
+
+module.exports = openConnections;

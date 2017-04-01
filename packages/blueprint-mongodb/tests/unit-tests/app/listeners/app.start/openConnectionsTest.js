@@ -1,15 +1,16 @@
-var blueprint = require ('@onehilltech/blueprint')
-  , path      = require ('path')
-  , async     = require ('async')
-  , mongodb   = require ('../../../../../lib')
+'use strict';
+
+const blueprint    = require ('@onehilltech/blueprint')
+  , async          = require ('async')
+  , mongodb        = require ('../../../../../lib')
+  , testAppFactory = require ('../../../../fixtures/test-app')
   ;
 
-var appPath = path.resolve (__dirname, '../../../../fixtures/app');
-
-describe ('listeners: app.start: openConnections', function () {
+describe ('listeners: app.start/openConnections', function () {
   it ('should open all connections to the database', function (done) {
-    blueprint.testing.createApplicationAndStart (appPath, function (err) {
-      if (err) return done (err);
+    testAppFactory (function (err) {
+      if (err)
+        return done (err);
 
       async.every (mongodb.getConnectionManager ().connections, function (conn, callback) {
         var readyState = conn.readyState;
