@@ -34,6 +34,7 @@ function Application (appPath) {
   this._appInit = Barrier ('app.init', 'blueprint.app');
   this._appStart = Barrier ('app.start', 'blueprint.app');
   this._isInit = false;
+  this._isStarted = false;
 }
 
 util.inherits (Application, ApplicationModule);
@@ -171,6 +172,9 @@ Application.prototype.addModule = function (name, appModule, callback) {
  * @param callback
  */
 Application.prototype.start = function (callback) {
+  if (this._isStarted)
+    return callback (null, this);
+
   async.series ([
     /*
      * Start listening for events.
