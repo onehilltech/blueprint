@@ -1,11 +1,12 @@
 'use strict';
 
-const winston = require ('winston')
-  , path      = require ('path')
-  , util      = require ('util')
-  , fs        = require ('fs-extra')
-  , all       = require ('require-all')
-  , async     = require ('async')
+const winston  = require ('winston')
+  , path       = require ('path')
+  , util       = require ('util')
+  , fs         = require ('fs-extra')
+  , all        = require ('require-all')
+  , async      = require ('async')
+  , objectPath = require ('object-path')
   ;
 
 const Server          = require ('./Server')
@@ -63,13 +64,37 @@ Application.prototype.init = function (callback) {
       Configuration (configPath, Env.name, callback);
     }.bind (this),
 
-    // Load all the modules for the application.
+    // Load all the modules for the application that appear in the node_modules
+    // directory. We consider these the auto-loaded modules for the application.
+    // We handle these before the modules that are explicitly loaded by the application.
     function (configs, callback) {
       this._configs = configs;
+      this.name = objectPath.get (this._configs, 'app.name', 'unnamed');
 
       var modulesPath = path.resolve (this._appPath, '../node_modules');
       var moduleLoader = new ModuleLoader (this, modulesPath);
       moduleLoader.load (this._appPath, callback);
+    }.bind (this),
+
+    // Let's load the modules in the application config. These are modules that are
+    // not automatically loaded by the application for reasons such as there not being
+    // a node_modules directory for the application.
+    function (callback) {
+      var modules = objectPath.get (this._configs, 'app.modules', {});
+
+      async.eachOf (modules, function (value, moduleName, callback) {
+        const modulePath = path.isAbsolute (value) ? value : path.resolve (this._appPath, value);
+
+        async.waterfall ([
+          function (callback) {
+            blueprint.ApplicationModule.createFromPath (modulePath, callback);
+          }.bind (this),
+
+          function (module, callback) {
+            app.addModule (moduleName, module, callback);
+          }.bind (this)
+        ], callback);
+      }.bind (this), callback);
     }.bind (this),
 
     // Let's configure the application module portion of the application.

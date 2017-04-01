@@ -25,9 +25,14 @@ ModuleLoader.prototype.load = function (appPath, callback) {
   var modules = {};
 
   fs.readJson (packageFile, function (err, packageObj) {
-    if (err && err.code === 'ENOENT') err = null;
-    if (err) return callback (err);
-    if (!packageObj || !packageObj.dependencies) return callback (null);
+    if (err && err.code === 'ENOENT')
+      err = null;
+
+    if (err)
+      return callback (err);
+
+    if (!packageObj || !packageObj.dependencies)
+      return callback (null);
 
     handleDependencies (packageObj.dependencies, callback);
   });
@@ -43,8 +48,11 @@ ModuleLoader.prototype.load = function (appPath, callback) {
     var packageFile = path.resolve (modulePath, FILE_PACKAGE_JSON);
 
     fs.readJson (packageFile, function (err, packageObj) {
-      if (err && err.code === 'ENOENT') return callback (null);
-      if (err) return callback (err);
+      if (err && err.code === 'ENOENT')
+        return callback (null);
+
+      if (err)
+        return callback (err);
 
       if (isBlueprintModule (packageObj) && !modules[name]) {
         var appPath = path.resolve (modulePath, 'app');
