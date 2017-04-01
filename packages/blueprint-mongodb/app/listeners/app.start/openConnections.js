@@ -35,9 +35,10 @@ function openConnections (app) {
 
   function done (err) {
     if (err)
-      winston.log ('error', 'failed to open 1 or more connections');
+      throw err;
 
     // Notify the barrier app.init barrier.
+    blueprint.messaging.emit ('mongodb.connections.open', config.connections);
     appStart.signal ();
   }
 
@@ -45,13 +46,12 @@ function openConnections (app) {
     async.series ([
       function (callback) {
         debug ('opening connection ' + connName);
-
         connMgr.openConnection (connName, connOpts, errorHandler (connName, callback));
       },
 
       function (callback) {
-        // Send a notification that we have open the connection.
-        blueprint.messaging.emit ('mongodb.connection.open', connName);
+        const eventName = 'mongodb.connection.' + connName + '.open';
+        blueprint.messaging.emit (eventName, connName);
 
         return callback (null);
       }

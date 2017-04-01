@@ -10,8 +10,8 @@ const mongodb = require ('../../../lib')
 ;
 
 
-function seed (connName) {
-  winston.log ('error', 'seeding ' + connName);
+function seed (connections) {
+  winston.log ('error', 'seeding ' + util.inspect (connections));
   appStart.signal ();
 }
 
