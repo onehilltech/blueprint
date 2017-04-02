@@ -1,3 +1,7 @@
 module.exports = exports = {
-  name : 'blueprint-mongodb-app'
+  name : 'blueprint-mongodb-app',
+
+  modules: {
+    mongodb: '../../../../app'
+  }
 };

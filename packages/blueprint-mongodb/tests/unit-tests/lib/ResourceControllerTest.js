@@ -9,8 +9,6 @@ const blueprint = require ('@onehilltech/blueprint')
   , ConnectionManager = require ('../../../lib/ConnectionManager')
   ;
 
-const datamodel = require (path.resolve (__dirname, '../../fixtures/datamodel'));
-
 describe ('lib.ResourceController', function () {
   var person;
 

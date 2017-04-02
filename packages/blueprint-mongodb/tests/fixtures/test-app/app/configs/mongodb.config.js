@@ -1,7 +1,9 @@
-module.exports = exports = {
+'use strict';
+
+module.exports = {
   connections: {
     $default: {
-      connstr: 'mongodb://localhost/blueprint_tests',
+      connstr: 'mongodb://localhost/blueprint_mongodb_tests',
 
       options : {
         db: {
