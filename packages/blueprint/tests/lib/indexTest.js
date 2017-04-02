@@ -7,6 +7,7 @@ describe ('index', function () {
     it ('should have keys for events', function () {
       var keys = [
         'createApplication',
+        'createApplicationAndStart',
         'destroyApplication',
         'BaseController',
         'Controller',

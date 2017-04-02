@@ -45,12 +45,12 @@ Object.defineProperty (exports, 'version', {
  *
  * @constructor
  */
-exports.createApplication = function (appPath, callback) {
+function createApplication (appPath, callback) {
   const Application = require ('./Application');
 
   if (appInstance) {
     if (appPath !== appInstance.appPath)
-      return callback (new Error (util.format ('Application is already initialized [path=%s]', appPath)));
+      return callback (new Error ('Application is already initialized [' + appPath + ']'));
 
     return callback (null, appInstance)
   }
@@ -59,12 +59,30 @@ exports.createApplication = function (appPath, callback) {
   appInstance.init (callback);
 
   return appInstance;
-};
+}
+
+/**
+ * Create an application, and start it.
+ *
+ * @param appPath
+ * @param callback
+ */
+function createApplicationAndStart (appPath, callback) {
+  async.waterfall ([
+    function (callback) {
+      createApplication (appPath, callback);
+    },
+
+    function (app, callback) {
+      app.start (callback);
+    }
+  ], callback);
+}
 
 /**
  * Destroy the application.
  */
-exports.destroyApplication = function (callback) {
+function destroyApplication (callback) {
   if (!appInstance)
     return callback (null);
 
@@ -81,4 +99,8 @@ exports.destroyApplication = function (callback) {
       return callback (null);
     }
   ], callback);
-};
+}
+
+exports.createApplication = createApplication;
+exports.createApplicationAndStart = createApplicationAndStart;
+exports.destroyApplication = destroyApplication;

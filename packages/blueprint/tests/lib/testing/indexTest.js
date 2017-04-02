@@ -24,24 +24,4 @@ describe ('testing', function () {
       }, done);
     });
   });
-
-  describe ('createApplicationAndStart', function () {
-    //before (function (done) {
-      //blueprint.destroyApplication (done);
-    //});
-
-    it ('should create an application and start it', function (done) {
-      async.waterfall ([
-        function (callback) {
-          const appPath = path.resolve (__dirname, '../../fixtures/app');
-          testing.createApplicationAndStart (appPath, callback);
-        },
-
-        function (app, callback) {
-          expect (app.isStarted).to.be.true;
-          return callback (null);
-        }
-      ], done);
-    });
-  });
 });
