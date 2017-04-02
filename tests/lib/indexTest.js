@@ -1,7 +1,6 @@
 'use strict';
 
 const expect   = require ('chai').expect
-  , path       = require ('path')
   , blueprint  = require ('../../lib')
   , appFixture = require ('../fixtures/app')
   ;
