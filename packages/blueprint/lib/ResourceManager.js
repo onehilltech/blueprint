@@ -1,5 +1,7 @@
-var extend     = require ('extend')
-  , all        = require ('require-all')
+'use strict';
+
+const all      = require ('./require')
+  , extend     = require ('extend')
   , objectPath = require ('object-path')
   , util       = require ('util')
   ;
@@ -7,7 +9,6 @@ var extend     = require ('extend')
 function ResourceManager (kind, opts) {
   this._kind = kind;
   this._resources = {};
-
   this._opts = opts || {};
 }
 
@@ -25,23 +26,21 @@ ResourceManager.prototype.load = function (path, callback) {
   var excludeDirs = this._opts.excludeDirs || ResourceManager.SCM_DIRECTORIES;
   var resolve = this._opts.resolve;
 
-  try {
-    var resources = all ({
-      dirname: path,
-      filter: filter,
-      excludeDirs: excludeDirs,
-      recursive: recursive,
-      resolve: resolve
-    });
+  const opts = {
+    dirname: path,
+    filter: filter,
+    excludeDirs: excludeDirs,
+    recursive: recursive,
+    resolve: resolve
+  };
 
-    // We are going to extend the existing resources. Any existing resources
-    // will be overwritten with what we just loaded.
-    this._resources = extend (true, this._resources, resources);
+  all (opts, true, function (err, objects) {
+    if (err)
+      return callback (err);
 
+    this._resources = extend (true, this._resources, objects);
     return callback (null, this);
-  } catch (e) {
-    return callback (e, this);
-  }
+  }.bind (this));
 };
 
 /**
