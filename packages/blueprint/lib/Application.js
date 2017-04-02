@@ -89,7 +89,7 @@ Application.prototype.init = function (callback) {
 
         async.waterfall ([
           function (callback) {
-            ApplicationModule.createFromPath (modulePath, callback);
+            ApplicationModule.createFromPath (modulePath, this._messaging, callback);
           }.bind (this),
 
           function (module, callback) {

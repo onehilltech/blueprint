@@ -50,8 +50,8 @@ module.exports = ApplicationModule;
  * @param modulePath        Path of the application module
  * @param callback
  */
-ApplicationModule.createFromPath = function (modulePath, callback) {
-  var appModule = new ApplicationModule (modulePath);
+ApplicationModule.createFromPath = function (modulePath, messaging, callback) {
+  var appModule = new ApplicationModule (modulePath, messaging);
   appModule.init (callback);
 };
 
