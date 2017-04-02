@@ -2,6 +2,7 @@
 
 var expect    = require ('chai').expect
   , path      = require ('path')
+  , async     = require ('async')
   , Framework = require ('../../lib/Framework')
   , Messaging = require ('../../lib/Messaging')
   ;
@@ -35,6 +36,26 @@ describe ('Framework', function () {
 
         return done (null);
       });
+    });
+  });
+
+  describe ('createApplicationAndStart', function () {
+    after (function (done) {
+      Framework.destroyApplication (done);
+    });
+
+    it ('should create an application and start it', function (done) {
+      async.waterfall ([
+        function (callback) {
+          const appPath = path.resolve (__dirname, '../fixtures/app');
+          Framework.createApplicationAndStart (appPath, callback);
+        },
+
+        function (app, callback) {
+          expect (app.isStarted).to.be.true;
+          return callback (null);
+        }
+      ], done);
     });
   });
 });
