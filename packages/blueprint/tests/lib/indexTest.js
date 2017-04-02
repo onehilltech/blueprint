@@ -42,5 +42,9 @@ describe ('blueprint', function () {
       expect (blueprint ('model://Person')).to.be.a.function;
       expect (blueprint ('model://inner.TestModel2')).to.be.a.function;
     });
+
+    it ('should resolve a controller in a module', function () {
+      expect (blueprint ('controller://test-module:ModuleTestController')).to.be.a.function;
+    });
   });
 });
