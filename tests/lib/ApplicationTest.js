@@ -7,11 +7,13 @@ var expect = require ('chai').expect
 
 var Application = require ('../../lib/Application')
   , Barrier     = require ('../../lib/Barrier')
+  , Messaging   = require ('../../lib/Messaging')
   , ApplicationModule = require ('../../lib/ApplicationModule')
   ;
 
 describe ('Application', function () {
-  var appPath = path.resolve (__dirname, '../fixtures/app');
+  const messaging = new Messaging ();
+  const appPath = path.resolve (__dirname, '../fixtures/app');
   var app;
 
   before (function () {
@@ -20,7 +22,7 @@ describe ('Application', function () {
 
   describe ('new Application ()', function () {
     it ('should create and initialize a new application', function () {
-      app = new Application (appPath);
+      app = new Application (appPath, messaging);
       expect (app).to.be.instanceof (ApplicationModule);
     });
   });
@@ -77,6 +79,10 @@ describe ('Application', function () {
   });
 
   describe ('#start', function () {
+    after (function (done) {
+      app.destroy (done);
+    });
+
     it ('should start the application', function (done) {
       app.start (done);
     });
@@ -85,7 +91,7 @@ describe ('Application', function () {
   describe ('#addModule', function (done) {
     it ('should load an application module into the main application', function (done) {
       var modulePath = path.resolve (__dirname, '../fixtures/app-module');
-      var appModule  = new ApplicationModule (modulePath);
+      var appModule  = new ApplicationModule (modulePath, new Messaging ());
 
       async.waterfall ([
         async.constant (appModule),
@@ -96,7 +102,8 @@ describe ('Application', function () {
         function (module, callback) {
           app.addModule ('test-module', module, callback);
         },
-        function (callback) {
+
+        function (app, callback) {
           expect (app.modules).to.have.keys (['test-module']);
 
           // Check the policies are added to the application.
@@ -114,14 +121,15 @@ describe ('Application', function () {
 
           async.each (views, function (view, callback) {
             fs.stat (view, function (err, stat) {
-              if (err) return callback (err);
+              if (err)
+                return callback (err);
 
               expect (stat.isFile()).to.be.true;
-              return callback ();
+              return callback (null);
             });
-          }, done);
+          }, callback);
         }
       ], done);
-    });
+    }, done);
   });
 });

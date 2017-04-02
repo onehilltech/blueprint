@@ -11,5 +11,5 @@ module.exports = function (callback) {
 
   // Create the application.
   var appPath = path.resolve (__dirname, 'app');
-  var app = blueprint.Application (appPath, callback);
+  blueprint.createApplication (appPath, callback);
 };

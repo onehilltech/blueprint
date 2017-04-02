@@ -6,16 +6,15 @@ describe ('index', function () {
   describe ('module.exports', function () {
     it ('should have keys for events', function () {
       var keys = [
-        'Application',
-        'ApplicationModule',
+        'createApplication',
+        'destroyApplication',
         'BaseController',
+        'Controller',
         'barrier',
         'ResourceController',
-        'RouterBuilder',
         'ModuleRouter',
         'Policy',
         'controller',
-        'destroy',
         'errors',
         'http'
       ];

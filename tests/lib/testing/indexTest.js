@@ -1,6 +1,9 @@
-var path = require ('path')
-  , expect = require ('chai').expect
-  , testing = require ('../../../lib/testing')
+'use strict';
+
+const path    = require ('path')
+  , expect    = require ('chai').expect
+  , async     = require ('async')
+  , testing   = require ('../../../lib/testing')
   , blueprint = require ('../../../lib')
   , messaging = blueprint.messaging
   ;
@@ -23,23 +26,22 @@ describe ('testing', function () {
   });
 
   describe ('createApplicationAndStart', function () {
+    //before (function (done) {
+      //blueprint.destroyApplication (done);
+    //});
+
     it ('should create an application and start it', function (done) {
-      var started = false;
+      async.waterfall ([
+        function (callback) {
+          const appPath = path.resolve (__dirname, '../../fixtures/app');
+          testing.createApplicationAndStart (appPath, callback);
+        },
 
-      messaging.on ('app.start', function handleStart (app) {
-        started = true;
-      });
-
-      var appPath = path.resolve (__dirname, '../../fixtures/app');
-
-      testing.createApplicationAndStart (appPath, function (err, app) {
-        if (err) return done (err);
-        expect (app).to.not.be.null;
-      });
-
-      testing.waitFor (function () {
-        return started;
-      }, done)
+        function (app, callback) {
+          expect (app.isStarted).to.be.true;
+          return callback (null);
+        }
+      ], done);
     });
   });
 });

@@ -1,25 +1,23 @@
-var expect     = require ('chai').expect
-  , path       = require ('path')
-  , async      = require ('async')
-  , fs         = require ('fs')
-  , blueprint  = require ('../fixtures/lib')
-  , appFixture = require ('../fixtures/app')
+'use strict';
+
+const expect = require ('chai').expect
+  , path     = require ('path')
+  , async    = require ('async')
+  , fs       = require ('fs')
   ;
 
-var ApplicationModule = blueprint.ApplicationModule
+const ApplicationModule = require ('../../lib/ApplicationModule')
+  , Messaging           = require ('../../lib/Messaging')
   ;
 
 describe ('ApplicationModule', function () {
   var appModule;
-  var appPath = path.resolve (__dirname, '../fixtures/app');
-
-  before (function (done) {
-    appFixture (done);
-  });
+  var appPath   = path.resolve (__dirname, '../fixtures/app');
+  var messaging = new Messaging ();
 
   describe ('new ApplicationModule', function () {
     it ('should create a new application module', function () {
-      appModule = new ApplicationModule (appPath);
+      appModule = new ApplicationModule (appPath, messaging);
 
       expect (appModule.appPath).to.equal (appPath);
     });
@@ -51,8 +49,8 @@ describe ('ApplicationModule', function () {
       expect (appModule.listeners['app.init']['TargetListener']).to.have.property ('targetMessenger');
       expect (appModule.listeners['custom.event']).to.have.keys (['CustomListener1', 'CustomListener2']);
 
-      expect (blueprint.messaging.messengers).to.have.keys (['_', 'testTarget']);
-      expect (blueprint.messaging.getMessenger ('_').listeners).to.have.keys (['app.init', 'custom.event']);
+      expect (messaging.messengers).to.have.keys (['_', 'testTarget']);
+      expect (messaging.getMessenger ('_').listeners).to.have.keys (['app.init', 'custom.event']);
     });
   });
 
