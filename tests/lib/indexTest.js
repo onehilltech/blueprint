@@ -8,6 +8,8 @@ const expect   = require ('chai').expect
 describe ('blueprint', function () {
   describe ('module.exports', function () {
     it ('should have keys for events', function () {
+      expect (blueprint).to.be.a.function;
+
       var keys = [
         'createApplication',
         'createApplicationAndStart',
@@ -16,7 +18,6 @@ describe ('blueprint', function () {
         'Controller',
         'barrier',
         'ResourceController',
-        'ModuleRouter',
         'Policy',
         'controller',
         'errors',

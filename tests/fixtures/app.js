@@ -3,13 +3,28 @@
 var path      = require ('path')
   , async     = require ('async')
   , blueprint = require ('./lib')
+  , ApplicationModule = require ('../../lib/ApplicationModule')
   ;
 
 module.exports = function (callback) {
   // Remove all previous barriers.
   blueprint.barrier.removeAll ();
 
-  // Create the application.
-  var appPath = path.resolve (__dirname, 'app');
-  blueprint.createApplication (appPath, callback);
+  async.waterfall ([
+    function (callback) {
+      // Create the application.
+      var appPath = path.resolve (__dirname, './app');
+      blueprint.createApplication (appPath, callback);
+    },
+
+    function (app, callback) {
+      const location = path.resolve (__dirname, './app-module');
+      const appModule = new ApplicationModule (location, app.messaging);
+
+      if (app.hasModule ('test-module'))
+        return callback (null, app);
+
+      app.addModule ('test-module', appModule, callback);
+    }
+  ], callback);
 };
