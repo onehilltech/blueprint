@@ -1,7 +1,8 @@
 'use strict';
 
-const async = require ('async'),
-  HttpError = require ('./errors').HttpError
+const async   = require ('async')
+  , HttpError = require ('./errors').HttpError
+  ;
 
 /**
  * @class BaseController

@@ -1,44 +1,36 @@
 'use strict';
 
-var async = require ('async')
-  , lib = require ('../index')
-  , messaging = lib.messaging
+var async     = require ('async')
+  , blueprint = require ('../index')
   ;
 
-var exports = module.exports;
-exports.createApplicationAndStart = createApplicationAndStart;
-exports.waitFor = waitFor;
-
+var exports = module.exports = {};
 exports.request = require ('./request');
 
-var started = false;
-
 /**
- * Create an application, and emulate starting the application. Multiple
- * calls to this function will not produce different side-effects.
+ * Create an application, and start it. Calling this function multiple times
+ * will not produce multiple side-effects.
  *
  * @param appPath
  * @param callback
  */
 function createApplicationAndStart (appPath, callback) {
-  lib.Application (appPath, function (err, app) {
-    if (err)
-      return callback (err);
+  async.waterfall ([
+    function (callback) {
+      blueprint.createApplication (appPath, callback);
+    },
 
-    if (!started) {
-      messaging.emit ('app.start', app);
-      started = true;
+    function (app, callback) {
+      app.start (callback);
     }
-
-    return callback (null, app);
-  })
+  ], callback);
 }
 
 /**
  * Wait for a condition to occur before continuing.
  *
  * @param condition
- * @param callback
+ * @param done
  */
 function waitFor (condition, done) {
   async.until (
@@ -49,3 +41,6 @@ function waitFor (condition, done) {
       }, 1000);
     }, done);
 }
+
+exports.createApplicationAndStart = createApplicationAndStart;
+exports.waitFor = waitFor;

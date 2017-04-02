@@ -130,18 +130,25 @@ Messenger.prototype.emit = function () {
     listeners.emit.apply (listeners, args);
 };
 
-module.exports = MessagingFramework;
-
 /**
  * @class MessagingFramework
  *
  * @constructor
  */
 function MessagingFramework () {
+  this.reset ();
+}
+
+module.exports = MessagingFramework;
+
+/**
+ * Clear the messaging framework.
+ */
+MessagingFramework.prototype.reset = function () {
   this.messengers = {
     _ : new Messenger ('_')
   };
-}
+};
 
 /**
  * Test if the messaging service has a specified messenger.

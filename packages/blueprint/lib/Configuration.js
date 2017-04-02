@@ -1,13 +1,15 @@
-var path    = require ('path')
-  , all     = require ('require-all')
-  , winston = require ('winston')
-  , fs      = require ('fs')
-  , extend  = require ('extend')
+'use strict';
+
+const path = require ('path')
+  , all    = require ('require-all')
+  , debug  = require ('debug') ('configuration')
+  , fs     = require ('fs-extra')
+  , extend = require ('extend')
   ;
 
 function getConfigs (configPath, env, callback) {
-  winston.log ('info', 'configuration path: %s', configPath);
-  winston.log ('info', 'configuration environment: %s', env);
+  debug ('configuration path: ' + configPath);
+  debug ('configuration environment: ', env);
 
   var filter = /(.+)\.config\.(js|json)$/;
 
@@ -22,7 +24,8 @@ function getConfigs (configPath, env, callback) {
   var envConfigPath = path.join (configPath, env);
 
   fs.stat (envConfigPath, function (err, stats) {
-    if (err) return callback (null, configs);
+    if (err)
+      return callback (null, configs);
 
     if (stats.isDirectory ()) {
       // Load the configurations specific to the environment.
@@ -41,4 +44,4 @@ function getConfigs (configPath, env, callback) {
   });
 }
 
-module.exports = exports = getConfigs;
+module.exports = getConfigs;

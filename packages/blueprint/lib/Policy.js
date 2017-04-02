@@ -1,10 +1,12 @@
-var async       = require ('async')
+'use strict';
+
+const async     = require ('async')
   , http        = require ('http')
   , debug       = require ('debug') ('blueprint:policy')
   , util        = require ('util')
   , _           = require ('underscore')
-  , Framework   = require ('./Framework')
   , handleError = require ('./handleError')
+  , Framework   = require ('./Framework')
   , Error       = require ('./errors/BlueprintError')
   , HttpError   = require ('./errors/HttpError')
   ;
@@ -107,7 +109,7 @@ function evaluate () {
   var policy = args.shift ();
 
   if (_.isString (policy)) {
-    policy = lookupPolicyByName (Framework ().app, policy);
+    policy = lookupPolicyByName (Framework.app, policy);
 
     if (!policy)
       throw new Error ('invalid_policy', util.format ('Policy %s does not exist', policyName), {policy: policyName});
@@ -127,7 +129,7 @@ function load (opts) {
     if (_.isFunction (opts))
       return resolve (opts);
 
-    var app = Framework ().app;
+    var app = Framework.app;
 
     if (app.isInit) {
       // The application is already initialized. This means we can
@@ -138,7 +140,7 @@ function load (opts) {
       // We need to wait until the application has been initialized to
       // perform the lookup of the policy. Otherwise, it will not be
       // present in the application.
-      Framework ().messaging.once ('app.init', function (app) {
+      Framework.messaging.once ('app.init', function (app) {
         lookup (app, opts);
       });
     }

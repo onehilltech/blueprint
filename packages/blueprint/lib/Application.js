@@ -13,8 +13,6 @@ const Server          = require ('./Server')
   , RouterBuilder     = require ('./RouterBuilder')
   , Configuration     = require ('./Configuration')
   , ApplicationModule = require ('./ApplicationModule')
-  , Framework         = require ('./Framework')
-  , Path              = require ('./Path')
   , Env               = require ('./Environment')
   , ModuleLoader      = require ('./ModuleLoader')
   , Barrier           = require ('./Barrier')
@@ -25,11 +23,13 @@ const Server          = require ('./Server')
  *
  * The main Blueprint.js application.
  *
- * @param appPath
+ * @param appPath         Path to the application
+ * @param messaging       Messaging module
+ *
  * @constructor
  */
-function Application (appPath) {
-  ApplicationModule.call (this, appPath);
+function Application (appPath, messaging) {
+  ApplicationModule.call (this, appPath, messaging);
 
   this._modules = {};
   this._appInit = Barrier ('app.init', 'blueprint.app');
@@ -39,6 +39,8 @@ function Application (appPath) {
 }
 
 util.inherits (Application, ApplicationModule);
+
+module.exports = Application;
 
 /**
  * Initialize the application.
@@ -132,9 +134,7 @@ Application.prototype.init = function (callback) {
 
       // Mark the application as initialized.
       this._isInit = true;
-
-      // Notify all listeners the application is initialized.
-      Framework ().messaging.emit ('app.init', this);
+      this._messaging.emit ('app.init', this);
 
       // Wait for all participants to signal they are ready to move on.
       this._appInit.signalAndWait (callback);
@@ -200,6 +200,10 @@ Application.prototype.start = function (callback) {
   if (this._isStarted)
     return callback (null, this);
 
+  function done (err) {
+    return callback (err, this);
+  }
+
   async.series ([
     /*
      * Start listening for events.
@@ -213,40 +217,47 @@ Application.prototype.start = function (callback) {
      */
     function (callback) {
       this._isStarted = true;
-
-      // Send a message to all listeners.
-      Framework ().messaging.emit ('app.start', this);
+      this._messaging.emit ('app.start', this);
 
       // Wait for all to respond that we can move on.
       this._appStart.signalAndWait (callback);
     }.bind (this)
-  ], callback);
+  ], done.bind (this));
 };
 
 /**
- * Get modules loaded by the application.
+ * Destroy the application.
+ *
+ * @param callback
  */
+Application.prototype.destroy = function (callback) {
+  this._isStarted = false;
+  this._isInit = false;
+
+  if (!this._server)
+    return callback (this);
+
+  this._server.close (function (err) {
+    return callback (err, this);
+  }.bind (this));
+};
+
 Application.prototype.__defineGetter__ ('isInit', function () {
   return this._isModuleInit && this._isInit;
 });
 
-/**
- * Get modules loaded by the application.
- */
+Application.prototype.__defineGetter__ ('isStarted', function () {
+  return this._isStarted;
+});
+
 Application.prototype.__defineGetter__ ('modules', function () {
   return this._modules;
 });
 
-/**
- * Get the application database.
- */
 Application.prototype.__defineGetter__ ('configs', function () {
   return this._configs;
 });
 
-/**
- * Get the application server.
- */
 Application.prototype.__defineGetter__ ('server', function () {
   if (!this._server)
     throw new Error ('application did not configure server');
@@ -271,5 +282,3 @@ Application.prototype.resource = function (location, opts, callback) {
   else
     return fs.readFileSync (fullPath, opts);
 };
-
-module.exports = exports = Application;

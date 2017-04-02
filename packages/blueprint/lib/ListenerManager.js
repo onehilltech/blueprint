@@ -1,4 +1,6 @@
-var util   = require ('util')
+'use strict';
+
+const util = require ('util')
   , extend = require ('extend')
   , path   = require ('path')
   , fs     = require ('fs')
@@ -10,10 +12,13 @@ var ResourceManager = require ('./ResourceManager')
 
 function ListenerManager (messaging, opts) {
   ResourceManager.call (this, 'policies', opts);
+
   this._messaging = messaging;
 }
 
 util.inherits (ListenerManager, ResourceManager);
+
+module.exports = ListenerManager;
 
 /**
  * Load the listeners in the specified locations.
@@ -23,67 +28,62 @@ util.inherits (ListenerManager, ResourceManager);
  * @param callback        Callback object
  */
 ListenerManager.prototype.load = function (location, callback) {
-  var messaging = this._messaging;
+  function done (err) {
+    return callback (err, this);
+  }
 
   async.waterfall ([
-    async.constant (this),
-    
-    function (manager, callback) {
-      fs.stat (location, function (err, stats) {
-        if (err) return callback (err);
-        if (!stats.isDirectory ()) return callback (new Error ('Path is not a directory'));
-        return callback (null, manager);
-      });
+    function (callback) {
+      fs.stat (location, callback);
     },
 
-    function (manager, callback) {
-      fs.readdir (location, function (err, files) {
-        return callback (err, manager, files);
-      });
+    function (stats, callback) {
+      if (!stats.isDirectory ())
+        return callback (new Error ('not a directory: ' + location));
+
+      fs.readdir (location, callback);
     },
 
-    function (manager, files, callback) {
+    function (files, callback) {
       async.forEach (files, function (eventName, callback) {
         // Determine if the current file is a directory. If the path is a directory,
         // then we are processing an event name.
-        var eventPath = path.join (location, eventName);
-
-        function resolve (listener) {
-          var key = listener.targetMessenger || '_';
-          var messenger = messaging.getMessenger (key);
-
-          messenger.on (eventName, listener);
-
-          return listener;
-        }
+        const eventPath = path.join (location, eventName);
 
         async.waterfall ([
-          function (callback) { fs.stat (eventPath, callback); },
+          function (callback) {
+            fs.stat (eventPath, callback);
+          },
 
           function (stats, callback) {
-            if (!stats.isDirectory ()) return callback (null);
+            if (!stats.isDirectory ())
+              return callback (null);
 
             var tmpManager = new ResourceManager ('listeners', {
               recursive: false,
               excludeDirs : /.*/,
-              resolve: resolve
+              resolve: function resolve (listener) {
+                var key = listener.targetMessenger || '_';
+                var messenger = this._messaging.getMessenger (key);
+
+                messenger.on (eventName, listener);
+
+                return listener;
+              }.bind (this)
             });
 
             tmpManager.load (eventPath, function (err) {
-              if (err) return callback (err);
+              if (err)
+                return callback (err);
 
-              var listeners = manager._resources[eventName] || {};
-              manager._resources[eventName] = extend (true, listeners, tmpManager._resources);
+              var listeners = this._resources[eventName] || {};
+              this._resources[eventName] = extend (true, listeners, tmpManager._resources);
 
               return callback (null);
-            });
-          }
+            }.bind (this));
+          }.bind (this)
         ], callback);
-      }, function (err) {
-        return callback (err, manager);
-      });
-    }
-  ], callback);
+      }.bind (this), callback);
+    }.bind (this)
+  ], done.bind (this));
 };
-
-module.exports = exports = ListenerManager;

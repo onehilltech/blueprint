@@ -17,6 +17,7 @@ var express     = require ('express')
   , winston     = require ('winston')
   , Uploader    = require ('./Uploader')
   , env         = require ('./Environment').name
+  , Protocol    = require ('./Protocol')
   ;
 
 const VIEW_CACHE_PATH  = 'temp/views';
@@ -25,38 +26,6 @@ const UPLOAD_PATH = 'temp/uploads';
 const DEFAULT_HTTP_PORT = 5000;
 
 module.exports = Server;
-
-/**
- * @class Protocol
- */
-function Protocol (name, server, port) {
-  this.name = name;
-  this._server = server;
-  this.port = port;
-}
-
-/**
- * Instruct the protocol to start listening for events.
- *
- * @param port
- * @param callback
- */
-Protocol.prototype.listen = function (port, callback) {
-  if (!callback)
-    callback = port;
-
-  if (_.isFunction (port))
-    port = this.port;
-
-  port = port || this.port;
-
-  console.log (util.format ('[%s]: listening on port %d', this.name, port));
-  this._server.listen (port, callback);
-};
-
-Protocol.prototype.__defineGetter__ ('server', function () {
-  return this._server;
-});
 
 /**
  * Private function to configure the protocols based on the configuration.
@@ -112,7 +81,7 @@ function configureProtocols (configs, app, callback) {
  * Server abstraction that integrates an Express.js application with the
  * protocols for handling events over the network.
  *
- * @param app     Framework application
+ * @param app     The Blueprint application
  * @constructor
  */
 function Server (app) {
@@ -327,6 +296,12 @@ Server.prototype.listen = function (done) {
   async.each (this._protocols, function (protocol, callback) {
     protocol.listen (callback);
   }, done);
+};
+
+Server.prototype.close = function (callback) {
+  async.each (this._protocols, function (protocol, callback) {
+    protocol.close (callback);
+  }, callback);
 };
 
 /**

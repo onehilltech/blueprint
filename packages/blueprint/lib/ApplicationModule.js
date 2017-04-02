@@ -1,15 +1,13 @@
 'use strict';
 
-var path    = require ('path')
-  , fs      = require ('fs')
-  , async   = require ('async')
-  , util    = require ('util')
-  , debug   = require ('debug') ('blueprint:app-module')
+const path = require ('path')
+  , fs     = require ('fs')
+  , async  = require ('async')
+  , util   = require ('util')
+  , debug  = require ('debug') ('blueprint:app-module')
   ;
 
-var RouterBuilder   = require ('./RouterBuilder')
-  , Framework       = require ('./Framework')
-  , ListenerManager = require ('./ListenerManager')
+var ListenerManager = require ('./ListenerManager')
   , RouterManager   = require ('./RouterManager')
   , ResourceManager = require ('./ResourceManager')
   ;
@@ -20,14 +18,16 @@ var RouterBuilder   = require ('./RouterBuilder')
  * Application that is loaded via the node_modules. This class only works if
  * blueprint.Application() has been called for the top-level project.
  *
- * @param appPath         Location of the application module
+ * @param appPath     Location of the application module
+ * @param messaging   Messaging framework
  * @constructor
  */
-function ApplicationModule (appPath) {
+function ApplicationModule (appPath, messaging) {
   this._isModuleInit = false;
   this._appPath = appPath;
+  this._messaging = messaging;
 
-  this.listenerManager = new ListenerManager (Framework ().messaging);
+  this.listenerManager = new ListenerManager (this._messaging);
   this.policyManager = new ResourceManager ('policies');
   this.modelManager = new ResourceManager ('models');
 
@@ -40,6 +40,8 @@ function ApplicationModule (appPath) {
   this.validatorManager = new ResourceManager ('validators', {recursive: false});
   this.sanitizerManager = new ResourceManager ('sanitizers', {recursive: false});
 }
+
+module.exports = ApplicationModule;
 
 /**
  * Create an application module from the specified path. The returned application
@@ -55,22 +57,17 @@ ApplicationModule.createFromPath = function (modulePath, callback) {
 
 function loadInto (manager, location) {
   return function (callback) {
-    try {
-      var rcPath = path.join (this._appPath, location);
-      debug ('loading resources from ' + rcPath);
+    var rcPath = path.join (this._appPath, location);
+    debug ('loading resources from ' + rcPath);
 
-      manager.load (rcPath, function (err) {
-        if (err && err.code === 'ENOENT') {
-          debug (rcPath + ' does not exist');
-          err = null;
-        }
+    manager.load (rcPath, function (err) {
+      if (err && err.code === 'ENOENT') {
+        debug (rcPath + ' does not exist');
+        err = null;
+      }
 
-        return callback (err);
-      });
-    }
-    catch (ex) {
-      return callback (new Error (util.format ('Failed to load resources in %s [%s]', location, ex.message)));
-    }
+      return callback (err);
+    });
   }.bind (this);
 }
 
@@ -116,11 +113,9 @@ ApplicationModule.prototype.init = function (callback) {
     loadInto.call (this, this.sanitizerManager, 'sanitizers'),
 
     function (callback) {
-      // Mark the module as initialized.
+      // Mark the module as initialized, and notify all.
       this._isModuleInit = true;
-
-      // Notify all parties that are listening.
-      Framework ().messaging.emit ('module.init', this);
+      this._messaging.emit ('module.init', this);
 
       return callback (null, this);
     }.bind (this)
@@ -133,6 +128,10 @@ ApplicationModule.prototype.__defineGetter__ ('isInit', function () {
 
 ApplicationModule.prototype.__defineGetter__ ('appPath', function () {
   return this._appPath;
+});
+
+ApplicationModule.prototype.__defineGetter__ ('messaging', function () {
+  return this._messaging;
 });
 
 ApplicationModule.prototype.__defineGetter__ ('listeners', function () {
@@ -203,5 +202,3 @@ ApplicationModule.prototype.getSupportsViews = function () {
 ApplicationModule.prototype.getViewsPath = function () {
   return path.resolve (this._appPath, 'views');
 };
-
-module.exports = ApplicationModule;

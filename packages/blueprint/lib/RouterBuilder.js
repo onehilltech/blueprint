@@ -1,3 +1,5 @@
+'use strict';
+
 const express   = require ('express')
   , winston     = require ('winston')
   , util        = require ('util')
@@ -145,11 +147,13 @@ if (!_.isFunction (String.prototype.endsWith)) {
  * @constructor
  */
 function RouterBuilder (app, basePath) {
-  this._express = app;
+  this._app = app;
   this._basePath = basePath || '/';
   this._router = express.Router ();
   this._params = [];
 }
+
+module.exports = RouterBuilder;
 
 /**
  * Resolve the controller of an action.
@@ -168,7 +172,7 @@ RouterBuilder.prototype._resolveController = function (action) {
 
   // Locate the controller object in our loaded controllers. If the controller
   // does not exist, then throw an exception.
-  var controllers = this._express.controllers;
+  var controllers = this._app.controllers;
   var controller = objectPath.get (controllers, controllerName);
 
   if (!controller)
@@ -282,7 +286,7 @@ RouterBuilder.prototype._defineResource = function (path, config) {
   if (!controllerName)
     throw new Error (util.format ('%s is missing controller property', path));
 
-  var controllers = this._express.controllers;
+  var controllers = this._app.controllers;
   var controller = objectPath.get (controllers, controllerName);
 
   if (!controller)
@@ -617,5 +621,3 @@ RouterBuilder.prototype.addRouters = function (routers) {
 
   return this;
 };
-
-module.exports = exports = RouterBuilder;
