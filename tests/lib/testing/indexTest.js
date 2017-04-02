@@ -1,8 +1,6 @@
 'use strict';
 
 const path    = require ('path')
-  , expect    = require ('chai').expect
-  , async     = require ('async')
   , testing   = require ('../../../lib/testing')
   , blueprint = require ('../../../lib')
   , messaging = blueprint.messaging
