@@ -2,47 +2,56 @@
 
 const mongodb = require ('../../../lib')
   , blueprint = require ('@onehilltech/blueprint')
+  , _         = require ('underscore')
   , appStart  = blueprint.barrier ('app.start', 'mongodb.seed')
   , debug     = require ('debug')('blueprint:modules:mongodb')
   , async     = require ('async')
   , winston   = require ('winston')
   , util      = require ('util')
   , path      = require ('path')
-  , fs        = require ('fs-extra')
   , dab       = require ('@onehilltech/dab')
   ;
 
-function buildAndSeed (seedFile, callback) {
-  var seed = require (seedFile);
+const SEEDS_RELATIVE_PATH = './seeds/mongodb';
+
+function buildAndSeed (connName, spec, callback) {
+  var conn = mongodb.getConnectionManager ().connections[connName];
+
+  if (!conn)
+    return callback (null);
+
+  debug ('seeding connection ' + connName);
 
   async.waterfall ([
     /*
      * Clear the current data on the default connection.
      */
     function (callback) {
-      dab.clear (mongodb.getConnectionManager ().defaultConnection, callback)
+      dab.build (spec, callback);
     },
 
     /*
-     * Build the data model
-     */
-    function (callback) {
-      dab.build (seed, callback);
-    },
-
-    /*
-     * Use the data model to seed the database.
+     * Build and seed the data model
      */
     function (data, callback) {
-      dab.seed (data, mongodb.getConnectionManager ().defaultConnection, callback);
-    },
+      async.waterfall ([
+        function (callback) {
+          dab.clear (conn, callback)
+        },
 
-    function (models, callback) {
-      blueprint.messaging.emit ('mongodb.connection.seeded', models);
-      return callback (null);
+        function (callback) {
+          dab.seed (data, conn, callback);
+        }
+      ], callback);
     }
   ], callback);
 }
+
+var app = null;
+
+blueprint.messaging.on ('app.init', function (param) {
+  app = param;
+});
 
 /**
  * The listener is complete, and can signal the application.
@@ -60,15 +69,31 @@ function complete (err) {
  * Main entry point for the listener to seed the database.
  */
 function seed () {
-  debug ('seeding default connection');
-  const seed = path.resolve (blueprint.app.appPath, './seeds/mongodb/' + blueprint.env + '.js');
+  debug ('seeding database connections');
 
-  if (fs.existsSync (seed)) {
-    buildAndSeed (seed, complete);
-  }
-  else {
-    complete (null);
-  }
+  const opts = {
+    dirname: path.join (blueprint.app.appPath, SEEDS_RELATIVE_PATH),
+    filter: /(.+)\.js$/,
+    recursive: false,
+    excludeDirs: /^\.(git|svn)$/
+  };
+
+  async.waterfall ([
+    function (callback) {
+      blueprint.require (opts, true, callback);
+    },
+
+    function (objects, callback) {
+      async.mapValues (objects, function (dabSpec, connName, callback) {
+        buildAndSeed (connName, dabSpec, callback)
+      }, callback);
+    },
+
+    function (seeds, callback) {
+      app.seeds = seeds;
+      return callback (null);
+    }
+  ], complete);
 }
 
 module.exports = seed;
