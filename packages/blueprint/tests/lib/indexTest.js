@@ -17,6 +17,7 @@ describe ('blueprint', function () {
         'BaseController',
         'Controller',
         'barrier',
+        'require',
         'ResourceController',
         'Policy',
         'controller',
