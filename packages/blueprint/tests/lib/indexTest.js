@@ -1,6 +1,7 @@
 'use strict';
 
 const expect   = require ('chai').expect
+  , async      = require ('async')
   , blueprint  = require ('../../lib')
   , appFixture = require ('../fixtures/app')
   ;
@@ -29,15 +30,16 @@ describe ('blueprint', function () {
     });
   });
 
-  describe ('blueprint ()', function () {
-    var app;
-
+  describe ('blueprint()', function () {
     before (function (done) {
-      appFixture (function (err, result) {
-        if (err) return done (err);
-        app = result;
-        return done (null);
-      });
+      async.waterfall ([
+        function (callback) {
+          blueprint.destroyApplication (callback);
+        },
+        function (callback) {
+          appFixture (callback);
+        }
+      ], done);
     });
 
     it ('should resolve a model', function () {
@@ -45,8 +47,12 @@ describe ('blueprint', function () {
       expect (blueprint ('model://inner.TestModel2')).to.be.a.function;
     });
 
-    it ('should resolve a controller in a module', function () {
+    it ('should resolve a module controller', function () {
+      expect (blueprint ('controller://ModuleTestController')).to.be.a.function;
       expect (blueprint ('controller://test-module:ModuleTestController')).to.be.a.function;
+
+      expect (blueprint ('router://test-module:ModuleTest')).to.be.a.function;
+      expect (blueprint ('router://test-module:inner')).to.be.a.function;
     });
   });
 });

@@ -46,8 +46,6 @@ Object.defineProperty (exports, 'version', {
  * @constructor
  */
 function createApplication (appPath, callback) {
-  const Application = require ('./Application');
-
   if (appInstance) {
     if (appPath !== appInstance.appPath)
       return callback (new Error ('Application is already initialized [' + appPath + ']'));
@@ -55,6 +53,7 @@ function createApplication (appPath, callback) {
     return callback (null, appInstance)
   }
 
+  const Application = require ('./Application');
   appInstance = new Application (appPath, msgInstance);
   appInstance.init (callback);
 

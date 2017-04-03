@@ -5,6 +5,7 @@ var expect    = require ('chai').expect
   , async     = require ('async')
   , Framework = require ('../../lib/Framework')
   , Messaging = require ('../../lib/Messaging')
+  , Barrier   = require ('../../lib/Barrier')
   ;
 
 describe ('Framework', function () {
@@ -24,6 +25,11 @@ describe ('Framework', function () {
   });
 
   describe ('createApplication', function () {
+    before (function (done) {
+      Barrier.removeAll ();
+      Framework.destroyApplication (done);
+    });
+
     it ('should create an application in the framework', function (done) {
       const appPath = path.resolve (__dirname, '../fixtures/app');
 
@@ -40,7 +46,8 @@ describe ('Framework', function () {
   });
 
   describe ('createApplicationAndStart', function () {
-    after (function (done) {
+    before (function (done) {
+      Barrier.removeAll ();
       Framework.destroyApplication (done);
     });
 
