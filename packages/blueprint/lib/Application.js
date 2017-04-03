@@ -92,6 +92,17 @@ Application.prototype.init = function (callback) {
 
         async.waterfall ([
           function (callback) {
+            fs.stat (location, callback);
+          },
+
+          function (stats, callback) {
+            if (!stats.isDirectory ())
+              return callback (new Error ('module path must be a directory: ' + location));
+
+            return callback (null);
+          },
+
+          function (callback) {
             ApplicationModule.createFromPath (modulePath, this._messaging, callback);
           }.bind (this),
 
