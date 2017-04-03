@@ -94,20 +94,22 @@ describe ('Application', function () {
       var appModule  = new ApplicationModule (modulePath, new Messaging ());
 
       async.waterfall ([
-        async.constant (appModule),
-
-        function (module, callback) {
-          module.init (callback);
+        function (callback) {
+          appModule.init (callback);
         },
         function (module, callback) {
           app.addModule ('test-module', module, callback);
         },
 
         function (app, callback) {
-          expect (app.modules).to.have.keys (['test-module']);
-
-          // Check the policies are added to the application.
+          // Check the application resources.
           expect (app.policies).to.have.keys (['module-policy', 'alwaysTrue', 'alwaysFalse']);
+
+          // Check the module resources
+          expect (app).to.have.deep.property ('modules.test-module');
+          expect (app).to.have.deep.property ('modules.test-module.controllers.ModuleTestController').that.is.a.function;
+          expect (app).to.have.deep.property ('modules.test-module.policies.module-policy').that.is.a.function;
+          expect (app).to.have.deep.property ('modules.test-module.routers.ModuleTest').that.is.a.function;
 
           // Check auto-setting of engines on application based on view extensions.
           expect (app._server._engines).to.have.length (3);

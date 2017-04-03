@@ -19,12 +19,19 @@ module.exports = function (callback) {
 
     function (app, callback) {
       const location = path.resolve (__dirname, './app-module');
-      const appModule = new ApplicationModule (location, app.messaging);
 
       if (app.hasModule ('test-module'))
         return callback (null, app);
 
-      app.addModule ('test-module', appModule, callback);
+      async.waterfall ([
+        function (callback) {
+          ApplicationModule.createFromPath (location, app.messaging, callback);
+        },
+
+        function (appModule, callback) {
+          app.addModule ('test-module', appModule, callback);
+        }
+      ], callback);
     }
   ], callback);
 };
