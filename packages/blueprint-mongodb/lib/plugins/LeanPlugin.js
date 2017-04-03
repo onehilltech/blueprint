@@ -1,7 +1,7 @@
 'use strict';
 
 const DateUtils = require ('../DateUtils')
-  ;
+;
 
 /**
  * Transform the document by removing the _stat field.
@@ -100,7 +100,7 @@ function StatPlugin (schema) {
   schema.methods.isOutdated = function (lastUpdateTime) {
     return this._stat.updated_at && DateUtils.compare (this._stat.updated_at, lastUpdateTime) == 1;
   };
-  
+
   // Index the fields in _stat. This will make it easier to search for documents
   // based on the corresponding timestamps.
   schema.path ('_stat.created_at').index (true);

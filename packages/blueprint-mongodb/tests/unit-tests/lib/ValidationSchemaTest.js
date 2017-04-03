@@ -1,6 +1,8 @@
+'use strict';
+
 const expect  = require ('chai').expect
   , validator = require ('validator')
-  , lib = require ('../../../lib')
+  , lib       = require ('../../../lib')
   , ValidationSchema = require ('../../../lib/ValidationSchema')
   ;
 

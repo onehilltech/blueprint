@@ -1,5 +1,7 @@
-var ConnectionManager = require ('../../../lib/ConnectionManager')
-  , expect = require ('chai').expect
+'use strict';
+
+const expect          = require ('chai').expect
+  , ConnectionManager = require ('../../../lib/ConnectionManager')
   ;
 
 describe ('ConnectionManager', function () {

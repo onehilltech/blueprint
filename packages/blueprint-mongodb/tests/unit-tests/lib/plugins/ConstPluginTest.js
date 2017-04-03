@@ -3,18 +3,11 @@
 const mongodb   = require ('../../../../lib')
   , expect      = require ('chai').expect
   , ConstPlugin = require ('../../../../lib/plugins/ConstPlugin')
-  , datamodel   = require ('../../../fixtures/datamodel')
   , async       = require ('async')
   ;
 
 describe ('lib.plugins.ConstPlugin', function () {
   var Person;
-
-  before (function (done) {
-    datamodel.apply (function (err) {
-      return done (err);
-    });
-  });
 
   it ('should create a schema with the const fields', function () {
     var schema = new mongodb.Schema ({

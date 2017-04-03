@@ -1,6 +1,8 @@
-var blueprint = require ('@onehilltech/blueprint')
-  , expect    = require ('chai').expect
-  , mongodb   = require ('../../../lib')
+'use strict';
+
+const blueprint = require ('@onehilltech/blueprint')
+  , expect      = require ('chai').expect
+  , mongodb     = require ('../../../lib')
   ;
 
 describe ('index', function () {

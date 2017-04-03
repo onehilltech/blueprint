@@ -1,29 +1,17 @@
+'use strict';
+
 const blueprint = require ('@onehilltech/blueprint')
-  , path      = require ('path')
-  , async     = require ('async')
-  , util      = require ('util')
-  , expect    = require ('chai').expect
-  , _         = require ('underscore')
-  , lib       = require ('../../../lib')
-  , testing   = lib.testing
-  , ConnectionManager = require ('../../../lib/ConnectionManager')
+  , path    = require ('path')
+  , async   = require ('async')
+  , util    = require ('util')
+  , expect  = require ('chai').expect
+  , _       = require ('underscore')
+  , lib     = require ('../../../lib')
+  , testing = lib.testing
   ;
 
 describe ('lib.ResourceController', function () {
   var person;
-
-  before (function (done) {
-    async.waterfall ([
-      function (callback) {
-        datamodel.apply (callback);
-      },
-      function (result, callback) {
-        // Make sure the default connection is open.
-        server = result[0].server;
-        return callback (null);
-      }
-    ], done);
-  });
 
   describe ('/person', function () {
     describe ('POST', function () {
@@ -38,10 +26,10 @@ describe ('lib.ResourceController', function () {
               state: 'TN',
               zipcode: '12345'
             },
-            education: datamodel.models.degrees[0].id,
+            education: blueprint.app.seeds.$default.degrees[0].id,
             degrees: [
-              datamodel.models.degrees[0].id,
-              datamodel.models.degrees[1].id
+              blueprint.app.seeds.$default.degrees[0].id,
+              blueprint.app.seeds.$default.degrees[1].id
             ]
           }
         };
@@ -92,13 +80,13 @@ describe ('lib.ResourceController', function () {
       it ('should return a list of persons', function (done) {
         var expected = {
           people: [
-            testing.lean (datamodel.models.persons[0]),
+            testing.lean (blueprint.app.seeds.$default.persons[0]),
             person
           ],
 
           degrees: [
-            _.extend (datamodel.data.degrees[0], {_id: datamodel.models.degrees[0].id}),
-            _.extend (datamodel.data.degrees[1], {_id: datamodel.models.degrees[1].id})
+            _.extend (testing.lean (blueprint.app.seeds.$default.degrees[0]), {_id: blueprint.app.seeds.$default.degrees[0].id}),
+            _.extend (testing.lean (blueprint.app.seeds.$default.degrees[1]), {_id: blueprint.app.seeds.$default.degrees[1].id})
           ]
         };
 
@@ -120,13 +108,13 @@ describe ('lib.ResourceController', function () {
       it ('should return all the resources [date in the past]', function (done) {
         var expected = {
           people: [
-            testing.lean (datamodel.models.persons[0]),
+            testing.lean (blueprint.app.seeds.$default.persons[0]),
             person
           ],
 
           degrees: [
-            _.extend (datamodel.data.degrees[0], {_id: datamodel.models.degrees[0].id}),
-            _.extend (datamodel.data.degrees[1], {_id: datamodel.models.degrees[1].id})
+            _.extend (testing.lean (blueprint.app.seeds.$default.degrees[0]), {_id: blueprint.app.seeds.$default.degrees[0].id}),
+            _.extend (testing.lean (blueprint.app.seeds.$default.degrees[1]), {_id: blueprint.app.seeds.$default.degrees[1].id})
           ]
         };
 
@@ -179,8 +167,8 @@ describe ('lib.ResourceController', function () {
           .query ({populate: true})
           .expect (200, {
             degrees: [
-              _.extend (datamodel.data.degrees[0], {_id: datamodel.models.degrees[0].id}),
-              _.extend (datamodel.data.degrees[1], {_id: datamodel.models.degrees[1].id})
+              _.extend (testing.lean (blueprint.app.seeds.$default.degrees[0]), {_id: blueprint.app.seeds.$default.degrees[0].id}),
+              _.extend (testing.lean (blueprint.app.seeds.$default.degrees[1]), {_id: blueprint.app.seeds.$default.degrees[1].id})
             ],
             person: person
           }, done);
