@@ -1,9 +1,7 @@
-var async     = require ('async')
-  , blueprint = require ('@onehilltech/blueprint')
-  , Sender    = require ('../../../lib/Sender')
-  ;
+'use strict';
 
-var datamodel  = require ('../../fixtures/datamodel')
+var blueprint = require ('@onehilltech/blueprint')
+  , Sender    = require ('../../../lib/Sender')
   ;
 
 describe ('Sender', function () {
@@ -13,16 +11,12 @@ describe ('Sender', function () {
     }
   };
 
-  before (function (done) {
-    datamodel.apply (done);
-  });
-
   describe ('.send', function () {
     var data = {device: '1234567890', token: 'aabbccdd'};
 
     it ('should send a data message', function (done) {
       var sender = new Sender (mockCloudToken, {apiKey: 'AIzaSyDuhZ8sT_ziDTm3SWAaunU2rRnR951eRDE', dryRun: true});
-      var recipient = datamodel.models.accounts[0].id;
+      var recipient = blueprint.app.seeds.$default.accounts[0].id;
 
       sender.send ([recipient], {msg: 'Hello, World!'}, done);
     });

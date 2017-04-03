@@ -1,6 +1,8 @@
+'use strict';
+
 var blueprint = require ('@onehilltech/blueprint')
   ;
 
-module.exports = exports = {
-  '/gatekeeper': blueprint.ModuleRouter ('@onehilltech/gatekeeper:v1')
+module.exports = {
+  '/gatekeeper': blueprint ('router://@onehilltech/gatekeeper:v1')
 };

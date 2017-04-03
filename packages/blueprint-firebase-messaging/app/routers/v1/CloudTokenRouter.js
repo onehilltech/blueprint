@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  '/cloudtoken' : {
+  '/cloud-tokens' : {
     policy: 'gatekeeper.auth.bearer',
 
     resource: {
