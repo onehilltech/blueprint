@@ -1,9 +1,9 @@
+'use strict';
+
 var blueprint = require ('@onehilltech/blueprint')
   , expect    = require ('chai').expect
   , async     = require ('async')
-  ;
-
-var datamodel = require ('../../../../../fixtures/datamodel')
+  , getToken  = require ('../../../getToken')
   ;
 
 describe ('ClientRouter', function () {
@@ -11,30 +11,20 @@ describe ('ClientRouter', function () {
   var client;
 
   before (function (done) {
-    async.waterfall ([
-      function (callback) {
-        datamodel.apply (callback);
-      },
+    var data = {
+      grant_type: 'client_credentials',
+      client_id: blueprint.app.seeds.$default.clients[0].id,
+      client_secret: blueprint.app.seeds.$default.clients[0].secret
+    };
 
-      function (result, callback) {
-        var data = {
-          grant_type: 'client_credentials',
-          client_id: datamodel.models.clients[0].id,
-          client_secret: datamodel.models.clients[0].secret
-        };
+    getToken (data, function (err, result) {
+      if (err)
+        return done (err);
 
-        blueprint.testing.request ()
-          .post ('/v1/oauth2/token')
-          .send (data)
-          .expect (200)
-          .end (function (err, res) {
-            if (err) return callback (err);
-            accessToken = res.body;
-            return callback (null);
-          });
-      }
-    ], done);
+      accessToken = result;
 
+      return done (null);
+    });
   });
 
   describe ('/v1/clients', function () {
@@ -48,7 +38,8 @@ describe ('ClientRouter', function () {
           .send ({client: data})
           .expect (200)
           .end (function (err, res) {
-            if (err) return done (err);
+            if (err)
+              return done (err);
 
             client = res.body.client;
 

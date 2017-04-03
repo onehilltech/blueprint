@@ -1,5 +1,7 @@
+'use strict';
+
 const expect = require ('chai').expect
-  , scope = require ('../../../../lib/scope')
+  , scope    = require ('../../../lib/scope')
   ;
 
 describe ('scope', function () {
