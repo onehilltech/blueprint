@@ -9,7 +9,7 @@
     "messaging"
   ],
   "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive tests/src --reporter spec"
+    "test": "env NODE_ENV=test mocha --recursive tests/unit-tests --reporter spec"
   },
   "repository": {
     "type": "git",
