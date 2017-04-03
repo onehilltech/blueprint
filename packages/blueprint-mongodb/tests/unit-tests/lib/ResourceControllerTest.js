@@ -80,13 +80,13 @@ describe ('lib.ResourceController', function () {
       it ('should return a list of persons', function (done) {
         var expected = {
           people: [
-            testing.lean (blueprint.app.seeds.$default.persons[0]),
+            blueprint.app.seeds.$default.persons[0].lean (),
             person
           ],
 
           degrees: [
-            _.extend (testing.lean (blueprint.app.seeds.$default.degrees[0]), {_id: blueprint.app.seeds.$default.degrees[0].id}),
-            _.extend (testing.lean (blueprint.app.seeds.$default.degrees[1]), {_id: blueprint.app.seeds.$default.degrees[1].id})
+            blueprint.app.seeds.$default.degrees[0].lean (),
+            blueprint.app.seeds.$default.degrees[1].lean ()
           ]
         };
 
@@ -108,13 +108,13 @@ describe ('lib.ResourceController', function () {
       it ('should return all the resources [date in the past]', function (done) {
         var expected = {
           people: [
-            testing.lean (blueprint.app.seeds.$default.persons[0]),
+            blueprint.app.seeds.$default.persons[0].lean (),
             person
           ],
 
           degrees: [
-            _.extend (testing.lean (blueprint.app.seeds.$default.degrees[0]), {_id: blueprint.app.seeds.$default.degrees[0].id}),
-            _.extend (testing.lean (blueprint.app.seeds.$default.degrees[1]), {_id: blueprint.app.seeds.$default.degrees[1].id})
+            blueprint.app.seeds.$default.degrees[0].lean (),
+            blueprint.app.seeds.$default.degrees[1].lean ()
           ]
         };
 
@@ -167,8 +167,8 @@ describe ('lib.ResourceController', function () {
           .query ({populate: true})
           .expect (200, {
             degrees: [
-              _.extend (testing.lean (blueprint.app.seeds.$default.degrees[0]), {_id: blueprint.app.seeds.$default.degrees[0].id}),
-              _.extend (testing.lean (blueprint.app.seeds.$default.degrees[1]), {_id: blueprint.app.seeds.$default.degrees[1].id})
+              blueprint.app.seeds.$default.degrees[0].lean (),
+              blueprint.app.seeds.$default.degrees[1].lean ()
             ],
             person: person
           }, done);

@@ -23,6 +23,7 @@ function model (name, schema, collection) {
   // Install the default plugins.
   schema.plugin (plugins.HiddenPlugin);
   schema.plugin (plugins.ConstPlugin);
+  schema.plugin (plugins.LeanPlugin);
 
   return ConnectionManager.getConnectionManager ().defaultConnection.model (name, schema, collection);
 }
@@ -45,6 +46,7 @@ function modelOn (connName, name, schema, collection) {
     // Install the default plugins.
     schema.plugin (plugins.HiddenPlugin);
     schema.plugin (plugins.ConstPlugin);
+    schema.plugin (plugins.LeanPlugin);
 
     return conn.model (name, schema, collection);
   }
@@ -59,6 +61,7 @@ function createResource (conn, name, schema, collection) {
   schema.plugin (plugins.HiddenPlugin);
   schema.plugin (plugins.ConstPlugin);
   schema.plugin (plugins.StatPlugin);
+  schema.plugin (plugins.LeanPlugin);
 
   return conn.model (name, schema, collection);
 }
@@ -91,13 +94,6 @@ function resourceOn (connName, name, schema, collection) {
     return createResource (conn, name, schema, collection);
 }
 
-/**
- * Load the testing module on demand.
- */
-exports.__defineGetter__ ('testing', function () {
-  return require ('./testing');
-});
-
 exports.Types = mongoose.Types;
 exports.Schema = mongoose.Schema;
 exports.plugins = plugins;
@@ -109,4 +105,5 @@ exports.GridFSController = GridFSController;
 exports.populate = populate;
 exports.resource = resource;
 exports.resourceOn = resourceOn;
+exports.lean = require ('./lean');
 

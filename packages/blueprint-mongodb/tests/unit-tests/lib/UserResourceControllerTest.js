@@ -20,7 +20,7 @@ describe ('mongodb.UserResourceController', function () {
           .post ('/friends')
           .set ('user', user.toString ())
           .send ({friend: data})
-          .expect (200, mongodb.testing.lean ({
+          .expect (200, mongodb.lean ({
             friend: {
               _id: data._id,
               friend: data.friend,
@@ -42,7 +42,7 @@ describe ('mongodb.UserResourceController', function () {
           .post ('/friends')
           .set ('user', user.toString ())
           .send ({friend: data})
-          .expect (200, mongodb.testing.lean ({
+          .expect (200, mongodb.lean ({
             friend: {
               _id: data._id,
               friend: data.friend,
