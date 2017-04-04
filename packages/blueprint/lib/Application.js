@@ -30,10 +30,12 @@ function Application (appPath, messaging) {
   ApplicationModule.call (this, appPath, messaging);
 
   this._modules = {};
-  this._appInit = Barrier ('app.init', 'blueprint.app');
-  this._appStart = Barrier ('app.start', 'blueprint.app');
   this._isInit = false;
   this._isStarted = false;
+
+  this._appInit = Barrier ('app.init', 'blueprint.app');
+  this._appStart = Barrier ('app.start', 'blueprint.app');
+  this._appRestart = Barrier ('app.restart', 'blueprint.app');
 }
 
 util.inherits (Application, ApplicationModule);
@@ -238,6 +240,15 @@ Application.prototype.start = function (callback) {
       this._appStart.signalAndWait (callback);
     }.bind (this)
   ], done.bind (this));
+};
+
+/**
+ * Restart the application.
+ *
+ * @param callback
+ */
+Application.prototype.restart = function (callback) {
+  this._appRestart.signalAndWait (callback);
 };
 
 /**
