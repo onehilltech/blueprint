@@ -8,7 +8,6 @@ var blueprint  = require ('@onehilltech/blueprint')
   , _          = require ('underscore')
   , Account    = require ('../models/Account')
   , password   = require ('../middleware/granters/password')
-  , serializer = require ('../middleware/serializers') (blueprint.app.configs.gatekeeper.token)
   , HttpError  = blueprint.errors.HttpError
   ;
 
@@ -97,7 +96,7 @@ AccountController.prototype.create = function () {
           },
 
           function (accessToken, callback) {
-            accessToken.serialize (serializer, callback);
+            accessToken.serialize (callback);
           },
 
           function (token, callback) {

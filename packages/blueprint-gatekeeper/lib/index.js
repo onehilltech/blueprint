@@ -7,10 +7,4 @@ exports.authentication = exports.auth;
 
 exports.scope = require ('./scope');
 exports.tokens = require ('./tokens');
-
-exports.__defineGetter__ ('testing', function () {
-  return require ('./testing');
-});
-
-
-
+exports.middleware = require ('../app/middleware');

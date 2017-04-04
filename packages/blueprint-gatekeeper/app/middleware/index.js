@@ -1,3 +1,3 @@
-var exports = module.exports = {};
+'use strict';
 
-exports.createToken = require ('./createToken');
+exports.serializers = require ('./serializers');

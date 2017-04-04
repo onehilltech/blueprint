@@ -9,10 +9,7 @@ const winston   = require ('winston')
   , Account     = require ('../models/Account')
   , AccessToken = require ('../models/AccessToken')
   , HttpError   = blueprint.errors.HttpError
-  ;
-
-const granters = require ('../middleware/granters')
-  , serializer = require ('../middleware/serializers') (blueprint.app.configs.gatekeeper.token)
+  , granters    = require ('../middleware/granters')
   ;
 
 /**
@@ -83,7 +80,7 @@ WorkflowController.prototype.issueToken = function () {
         },
 
         function (accessToken, callback) {
-          accessToken.serialize (serializer, callback);
+          accessToken.serialize (callback);
         },
 
         function (payload, callback) {

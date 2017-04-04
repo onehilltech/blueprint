@@ -1,11 +1,13 @@
 'use strict';
 
 const mongodb   = require ('@onehilltech/blueprint-mongodb')
+  , blueprint   = require ('@onehilltech/blueprint')
   , async       = require ('async')
   , Schema      = mongodb.Schema
   , ObjectId    = mongodb.Schema.Types.ObjectId
   , AccessToken = require ('./AccessToken')
   , Account     = require ('./Account')
+  , serializer  = require ('../middleware/serializers') (blueprint.app.configs.gatekeeper.token)
   ;
 
 var options     = require ('./commonOptions') ()
@@ -21,7 +23,7 @@ var schema = new Schema ({
   refresh_token: {type: ObjectId, index: true, unique: true, sparse: true}
 }, options);
 
-schema.methods.serialize = function (serializer, callback) {
+schema.methods.serialize = function (callback) {
   async.parallel ({
     access_token: function (callback) {
       const payload = { scope: this.scope };
