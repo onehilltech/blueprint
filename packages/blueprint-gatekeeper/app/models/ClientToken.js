@@ -26,4 +26,10 @@ schema.methods.serialize = function (callback) {
   }, callback);
 };
 
+schema.methods.serializeSync = function () {
+  return {
+    access_token: serializer.generateToken ({ scope: this.scope }, { jwtid: this.id })
+  };
+};
+
 module.exports = AccessToken.discriminator ('client_token', schema);

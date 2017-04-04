@@ -41,4 +41,11 @@ schema.methods.serialize = function (callback) {
   }, callback);
 };
 
+schema.methods.serializeSync = function () {
+  return {
+    access_token: serializer.generateToken ({ scope: this.scope }, { jwtid: this.id }),
+    refresh_token: serializer.generateToken ({ }, { jwtid: this.refresh_token.toString () })
+  };
+};
+
 module.exports = AccessToken.discriminator ('user_token', schema);
