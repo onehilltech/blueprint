@@ -135,4 +135,5 @@ var exports = module.exports = addParticipant;
 
 exports.removeAll = removeAll;
 exports.reset = reset;
+exports.remove = remove;
 
