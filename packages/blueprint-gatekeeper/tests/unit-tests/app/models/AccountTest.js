@@ -1,8 +1,6 @@
 'use strict';
 
-var expect    = require ('chai').expect
-  , async     = require ('async')
-  , blueprint = require ('@onehilltech/blueprint')
+var blueprint = require ('@onehilltech/blueprint')
   , Account   = require ('../../../../app/models/Account')
   ;
 
@@ -34,35 +32,6 @@ describe ('Account', function () {
           return done (err);
 
         account = model;
-        return done ();
-      });
-    });
-  });
-
-  describe ('metadata', function () {
-    var obj = {
-      key1 : 'value1',
-      key2 : 'value2'
-    };
-
-    it ('should put the metadata in the account', function (done) {
-      account.metadata.test = obj;
-      account.markModified ('metadata');
-
-      account.save (function (err, model) {
-        if (err) return done (err);
-
-        account = model;
-        return done ();
-      });
-    });
-
-    it ('should get the metadata from the account', function (done) {
-      Account.findById (account.id, function (err, account) {
-        if (err) return done (err);
-
-        expect (account.metadata).to.eql ({ test : obj });
-
         return done ();
       });
     });

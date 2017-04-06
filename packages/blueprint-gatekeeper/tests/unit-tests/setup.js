@@ -8,3 +8,7 @@ before (function (done) {
   const appPath = path.resolve (__dirname, '../../app');
   blueprint.createApplicationAndStart (appPath, done);
 });
+
+beforeEach (function (done) {
+  blueprint.app.restart (done);
+});

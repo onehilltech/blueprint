@@ -93,13 +93,17 @@ describe ('AccountRouter', function () {
   describe ('/v1/accounts', function () {
     describe ('GET', function () {
       it ('should return all the accounts for an admin', function (done) {
+        const accessToken = blueprint.app.seeds.$default.user_tokens[3].serializeSync ();
+
         Account.find ({}, function (err, accounts) {
-          if (err) return done (err);
+          if (err)
+            return done (err);
 
           blueprint.testing.request ()
             .get ('/v1/accounts')
-            .set ('Authorization', 'Bearer ' + superUserToken)
-            .expect (200, {'accounts': JSON.parse (JSON.stringify (accounts))}, done);
+            .query ({options: {sort: {username: 1}}})
+            .set ('Authorization', 'Bearer ' + accessToken.access_token)
+            .expect (200, {'accounts': mongodb.lean (blueprint.app.seeds.$default.accounts)}, done);
         });
       });
 
@@ -119,6 +123,7 @@ describe ('AccountRouter', function () {
       };
 
       it ('should create a new account', function (done) {
+        const accessToken = blueprint.app.seeds.$default.client_tokens[0].serializeSync ();
         var account = null;
 
         // We know the account was created when we get an event for
@@ -130,7 +135,7 @@ describe ('AccountRouter', function () {
         blueprint.testing.request ()
           .post ('/v1/accounts')
           .send ({account: data})
-          .set ('Authorization', 'Bearer ' + clientToken)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .expect (200)
           .end (function (err, res) {
             if (err)
@@ -148,7 +153,8 @@ describe ('AccountRouter', function () {
       });
 
       it ('should create a new account, and login the user', function (done) {
-        var autoLogin = {
+        const accessToken = blueprint.app.seeds.$default.client_tokens[0].serializeSync ();
+        const autoLogin = {
           _id: mongodb.Types.ObjectId (),
           username: 'auto-login',
           password: 'auto-login',
@@ -159,10 +165,11 @@ describe ('AccountRouter', function () {
           .post ('/v1/accounts')
           .query ({login: true})
           .send ({account: autoLogin})
-          .set ('Authorization', 'Bearer ' + clientToken)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .expect (200)
           .end (function (err, res) {
-            if (err) return done (err);
+            if (err)
+              return done (err);
 
             var actual = mongodb.lean (_.omit (_.extend (autoLogin, {
               created_by: blueprint.app.seeds.$default.clients[0].id,
@@ -181,81 +188,69 @@ describe ('AccountRouter', function () {
       });
 
       it ('should not create an account [duplicate]', function (done) {
+        const accessToken = blueprint.app.seeds.$default.client_tokens[0].serializeSync ();
+        const account = blueprint.app.seeds.$default.accounts[0];
+        const dup = {username: account.username, password: account.password, email: account.email, created_by: account.created_by};
+
         blueprint.testing.request ()
-          .post ('/v1/accounts').send (data)
-          .set ('Authorization', 'Bearer ' + clientToken)
+          .post ('/v1/accounts')
+          .send ({account: dup})
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .expect (400, done);
       });
 
       it ('should not create an account [missing parameter]', function (done) {
-        var invalid = {
-          password: 'tester1',
-          email: 'james@onehilltech.com'
-        };
+        const accessToken = blueprint.app.seeds.$default.client_tokens[0].serializeSync ();
+        const invalid = {password: 'tester1', email: 'james@onehilltech.com'};
 
         blueprint.testing.request ()
-          .post ('/v1/accounts').send (invalid)
-          .set ('Authorization', 'Bearer ' + clientToken)
+          .post ('/v1/accounts')
+          .send (invalid)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .expect (400, done);
       });
 
       it ('should not create an account [invalid role]', function (done) {
-        async.waterfall ([
-          function (callback) {
-            var invalid = {
-              grant_type: 'client_credentials',
-              client_id: blueprint.app.seeds.$default.clients[1].id,
-              client_secret: blueprint.app.seeds.$default.clients[1].secret
-            };
+        const accessToken = blueprint.app.seeds.$default.client_tokens[1].serializeSync ();
+        const account = { username: 'tester1', password: 'tester1', email: 'james@onehilltech.com'};
 
-            getToken (invalid, callback);
-          },
-
-          function (token, callback) {
-            var account = {
-              username: 'tester1',
-              password: 'tester1',
-              email: 'james@onehilltech.com'
-            };
-
-            blueprint.testing.request ()
-              .post ('/v1/accounts').send ({account: account})
-              .set ('Authorization', 'Bearer ' + token.access_token)
-              .expect (403, { errors: { code: 'policy_failed', message: 'No scopes defined' } }, callback);
-          }
-        ], done);
+        blueprint.testing.request ()
+          .post ('/v1/accounts').send ({account: account})
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
+          .expect (403, { errors: { code: 'policy_failed', message: 'No scopes defined' } }, done);
       });
     });
   });
 
   describe ('/v1/accounts/:accountId', function () {
-    var updated;
-
     describe ('GET', function () {
       it ('should return the owner account', function (done) {
-        var account = blueprint.app.seeds.$default.accounts[0];
+        const account = blueprint.app.seeds.$default.accounts[0];
+        const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
 
         blueprint.testing.request ()
           .get ('/v1/accounts/' + account.id)
-          .set ('Authorization', 'Bearer ' + userToken)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .expect (200, {account: account.lean ()}, done);
       });
 
       it ('should get my account', function (done) {
-        var account = blueprint.app.seeds.$default.accounts[0];
+        const account = blueprint.app.seeds.$default.accounts[0];
+        const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
 
         blueprint.testing.request ()
           .get ('/v1/accounts/me')
-          .set ('Authorization', 'Bearer ' + userToken)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .expect (200, {account: account.lean ()}, done);
       });
 
       it ('should retrieve a user account for an admin', function (done) {
-        var account = blueprint.app.seeds.$default.accounts[0];
+        const account = blueprint.app.seeds.$default.accounts[0];
+        const accessToken = blueprint.app.seeds.$default.user_tokens[3].serializeSync ();
 
         blueprint.testing.request ()
           .get ('/v1/accounts/' + account.id)
-          .set ('Authorization', 'Bearer ' + superUserToken)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .expect (200, {account: account.lean ()}, done);
       });
 
@@ -271,59 +266,55 @@ describe ('AccountRouter', function () {
 
     describe ('UPDATE', function () {
       it ('should not update scope and created_by', function (done) {
-        var account = blueprint.app.seeds.$default.accounts[0];
+        const account = blueprint.app.seeds.$default.accounts[0];
+        const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
 
         blueprint.testing.request ()
           .put ('/v1/accounts/' + account.id)
-          .set ('Authorization', 'Bearer ' + userToken)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .send ({account: {created_by: new mongodb.Types.ObjectId (), scope: ['the_new_scope']}})
           .expect (200, {account: account.lean ()}, done);
       });
 
       it ('should update the email', function (done) {
-        var account = blueprint.app.seeds.$default.accounts[0];
+        const account = blueprint.app.seeds.$default.accounts[0];
+        const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
 
-        updated = account.toObject ();
+        var updated = account.lean ();
         updated.email = 'foo@contact.com';
 
         blueprint.testing.request ()
           .put ('/v1/accounts/' + account.id)
-          .set ('Authorization', 'Bearer ' + userToken)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .send ({account: {email: updated.email}} )
-          .expect (200, {account: mongodb.lean (updated)}, done);
+          .expect (200, {account: updated}, done);
       });
 
-      it ('should update the scope', function (done) {
-        var account = blueprint.app.seeds.$default.accounts[0];
+      it ('should allow admin to update the scope', function (done) {
+        const account = blueprint.app.seeds.$default.accounts[0];
+        const accessToken = blueprint.app.seeds.$default.user_tokens[3].serializeSync ();
+
+        var updated = account.lean ();
         updated.scope.push ('the_new_scope');
 
         blueprint.testing.request ()
           .put ('/v1/accounts/' + account.id)
-          .set ('Authorization', 'Bearer ' + superUserToken)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .send ({account: {scope: updated.scope}})
-          .expect (200, {account: mongodb.lean (updated)}, done);
+          .expect (200, {account: updated}, done);
       });
     });
 
     describe ('/password', function () {
-      it ('should not change the password because current is wrong', function (done) {
-        var account = blueprint.app.seeds.$default.accounts[0];
-
-        blueprint.testing.request ()
-          .post ('/v1/accounts/' + account.id + '/password')
-          .set ('Authorization', 'Bearer ' + userToken)
-          .send ({'change-password': { current: 'bad-password', new: 'new-password'}})
-          .expect (400, { errors: { code: 'invalid_password', message: 'Current password is invalid' } }, done);
-      });
-
       it ('should change the password', function (done) {
-        var account = blueprint.app.seeds.$default.accounts[0];
+        const account = blueprint.app.seeds.$default.accounts[0];
+        const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
 
         async.series ([
           function (callback) {
             blueprint.testing.request ()
               .post ('/v1/accounts/' + account.id + '/password')
-              .set ('Authorization', 'Bearer ' + userToken)
+              .set ('Authorization', 'Bearer ' + accessToken.access_token)
               .send ({'change-password': { current: account.username, new: 'new-password'}})
               .expect (200, 'true')
               .end (callback);
@@ -343,34 +334,38 @@ describe ('AccountRouter', function () {
           }
         ], done);
       });
+
+      it ('should not change the password because current is wrong', function (done) {
+        const account = blueprint.app.seeds.$default.accounts[0];
+        const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
+
+        blueprint.testing.request ()
+          .post ('/v1/accounts/' + account.id + '/password')
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
+          .send ({'change-password': { current: 'bad-password', new: 'new-password'}})
+          .expect (400, { errors: { code: 'invalid_password', message: 'Current password is invalid' } }, done);
+      });
     });
 
     describe ('DELETE', function () {
-      it ('should not allow non-admin to delete another user account', function (done) {
-        var accountId = blueprint.app.seeds.$default.accounts[2].id;
-
-        blueprint.testing.request ()
-          .delete ('/v1/accounts/' + accountId)
-          .set ('Authorization', 'Bearer ' + userToken)
-          .expect (403, done);
-      });
-
       it ('should allow account owner to delete account', function (done) {
-        var accountId = blueprint.app.seeds.$default.accounts[0].id;
+        const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
+        const account = blueprint.app.seeds.$default.accounts[0];
 
         blueprint.testing.request ()
-          .delete ('/v1/accounts/' + accountId)
-          .set ('Authorization', 'Bearer ' + userToken)
+          .delete ('/v1/accounts/' + account.id)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .expect (200, 'true', done);
       });
 
-      it ('should not allow admin to delete account', function (done) {
-        var accountId = blueprint.app.seeds.$default.accounts[2].id;
+      it ('should not allow user to delete account of another user', function (done) {
+        const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
+        const account = blueprint.app.seeds.$default.accounts[1];
 
         blueprint.testing.request ()
-          .delete ('/v1/accounts/' + accountId)
-          .set ('Authorization', 'Bearer ' + superUserToken)
-          .expect (403, { errors: { code: 'policy_failed', message: 'Not the account owner' } }, done);
+          .delete ('/v1/accounts/' + account.id)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
+          .expect (403, { errors: { code: 'policy_failed', message: 'Not the account owner' }}, done);
       });
     });
   });
