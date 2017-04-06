@@ -96,51 +96,39 @@ module.exports = Policy.anySeries ([
      * Check the state of the access token model.
      */
     function (req, callback) {
+      var accessToken = req.accessToken;
+
+      if (!accessToken)
+        return callback (null, false, 'Unknown access token');
+
+      if (!accessToken.enabled)
+        return callback (null, false, 'Token is disabled');
+
+      if (!accessToken.client)
+        return callback (null, false, 'Client is unknown');
+
+      if (!accessToken.client.enabled)
+        return callback (null, false, 'Client is disabled');
+
+      // Set the user to the client id.
+      var user = accessToken.client;
+
+      if (accessToken.kind === 'user_token') {
+        if (!accessToken.account)
+          return callback (null, false, 'Account is unknown');
+
+        if (!accessToken.account.enabled)
+          return callback (null, false, 'Account is disabled');
+
+        // Update the user to the account id.
+        user = accessToken.account;
+      }
+
       async.waterfall ([
-        /**
-         * Check the access token, and login the user.
-         *
-         * @param callback
-         * @returns {*}
-         */
         function (callback) {
-          var accessToken = req.accessToken;
-
-          if (!accessToken)
-            return callback (null, false, 'Unknown access token');
-
-          if (!accessToken.enabled)
-            return callback (null, false, 'Token is disabled');
-
-          if (!accessToken.client)
-            return callback (null, false, 'Client is unknown');
-
-          if (!accessToken.client.enabled)
-            return callback (null, false, 'Client is disabled');
-
-          // Set the user to the client id.
-          var user = accessToken.client;
-
-          if (accessToken.kind === 'user_token') {
-            if (!accessToken.account)
-              return callback (null, false, 'Account is unknown');
-
-            if (!accessToken.account.enabled)
-              return callback (null, false, 'Account is disabled');
-
-            // Update the user to the account id.
-            user = accessToken.account;
-          }
-
           req.login (user, {session: false}, callback);
         },
 
-        /**
-         * The policy has passed.
-         *
-         * @param callback
-         * @returns {*}
-         */
         function (callback) {
           return callback (null, true);
         }
