@@ -45,6 +45,10 @@ module.exports = {
     };
 
     return callback (null, model);
+  }),
+
+  client_tokens: dab.map (dab.get ('clients'), function (client, opts, callback) {
+    return callback (null, {client: client._id});
   })
 };
 
