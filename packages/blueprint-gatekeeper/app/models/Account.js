@@ -46,10 +46,6 @@ var schema = new Schema ({
   /// The default scope for the account. This is applied to the access
   /// token for the account.
   scope: {type: [String], default: []},
-
-  /// Metadata for the account. This allows third-party services/libraries to
-  /// associate custom data with the account.
-  metadata : { type: Schema.Types.Mixed, default: {} }
 }, options);
 
 /**
