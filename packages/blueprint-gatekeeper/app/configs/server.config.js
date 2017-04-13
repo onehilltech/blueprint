@@ -1,7 +1,9 @@
-module.exports = exports = {
+'use strict';
+
+module.exports = {
   protocols: {
     http: {
-      port: 5000
+      port: 8080
     }
   },
 
