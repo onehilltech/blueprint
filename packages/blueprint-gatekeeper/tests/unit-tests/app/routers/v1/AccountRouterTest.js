@@ -7,89 +7,10 @@ const expect  = require ('chai').expect
   , winston   = require ('winston')
   , util      = require ('util')
   , _         = require ('underscore')
-  , getToken  = require ('../../../getToken')
   , Account   = require ('../../../../../app/models/Account')
   ;
 
 describe ('AccountRouter', function () {
-  var userToken;
-  var superUserToken;
-  var clientToken;
-
-  before (function (done) {
-    async.series ([
-      /**
-       * Get a user token that has no special access rights. We are going to
-       * use client 0 since it can create an account.
-       *
-       * @param callback
-       */
-      function (callback) {
-        var data = {
-          grant_type: 'password',
-          username: blueprint.app.seeds.$default.accounts[0].username,
-          password: blueprint.app.seeds.$default.accounts[0].username,
-          client_id: blueprint.app.seeds.$default.clients[0].id
-        };
-
-        getToken (data, function (err, token) {
-          if (err)
-            return callback (err);
-
-          userToken = token.access_token;
-          return callback (null);
-        });
-      },
-
-      /**
-       * Get a user token that has superuser rights.
-       *
-       * @param callback
-       */
-      function (callback) {
-        winston.log ('info', 'getting user token for super user');
-
-        var data = {
-          grant_type: 'password',
-          username: blueprint.app.seeds.$default.accounts[3].username,
-          password: blueprint.app.seeds.$default.accounts[3].username,
-          client_id: blueprint.app.seeds.$default.clients[0].id
-        };
-
-        getToken (data, function (err, token) {
-          if (err)
-            return callback (err);
-
-          superUserToken = token.access_token;
-          return callback (null);
-        });
-      },
-
-      /**
-       * Get a client-level access token.
-       *
-       * @param callback
-       */
-      function (callback) {
-        winston.log ('info', 'getting client token');
-
-        var data = {
-          grant_type: 'client_credentials',
-          client_id: blueprint.app.seeds.$default.clients[0].id,
-          client_secret: blueprint.app.seeds.$default.clients[0].secret
-        };
-
-        getToken (data, function (err, token) {
-          if (err) return callback (err);
-
-          clientToken = token.access_token;
-
-          return callback (null);
-        });
-      }
-    ], done);
-  });
-
   describe ('/v1/accounts', function () {
     describe ('GET', function () {
       it ('should return all the accounts for an admin', function (done) {
@@ -108,9 +29,11 @@ describe ('AccountRouter', function () {
       });
 
       it ('should not allow non-admin access to all accounts', function (done) {
+        const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
+
         blueprint.testing.request ()
           .get ('/v1/accounts')
-          .set ('Authorization', 'Bearer ' + userToken)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .expect (403, done);
       });
     });
@@ -255,11 +178,12 @@ describe ('AccountRouter', function () {
       });
 
       it ('should not allow non-admin access to another account', function (done) {
+        const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
         var account = blueprint.app.seeds.$default.accounts[1];
 
         blueprint.testing.request ()
           .get ('/v1/accounts/' + account.id)
-          .set ('Authorization', 'Bearer ' + userToken)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .expect (403, done);
       });
     });

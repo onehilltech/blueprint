@@ -70,7 +70,7 @@ module.exports = Policy.anySeries ([
               return callback (new HttpError (401, 'token_expired', 'Token has expired'));
 
             if (err.name === 'JsonWebTokenError')
-              return callback (new HttpError (400, 'invalid_token', err.message));
+              return callback (new HttpError (403, 'invalid_token', err.message));
           });
         },
 
@@ -99,26 +99,26 @@ module.exports = Policy.anySeries ([
       var accessToken = req.accessToken;
 
       if (!accessToken)
-        return callback (null, false, 'Unknown access token');
+        return callback (null, false, {reason: 'unknown_token', message: 'Unknown access token'});
 
       if (!accessToken.enabled)
-        return callback (null, false, 'Token is disabled');
+        return callback (null, false, {reason: 'token_disabled', message: 'Token is disabled'});
 
       if (!accessToken.client)
-        return callback (null, false, 'Client is unknown');
+        return callback (null, false, {reason: 'unknown_client', message: 'Unknown client'});
 
       if (!accessToken.client.enabled)
-        return callback (null, false, 'Client is disabled');
+        return callback (null, false, {reason: 'client_disabled', message: 'Client is disabled'});
 
       // Set the user to the client id.
       var user = accessToken.client;
 
       if (accessToken.kind === 'user_token') {
         if (!accessToken.account)
-          return callback (null, false, 'Account is unknown');
+          return callback (null, false, {reason: 'unknown_account', message: 'Unknown account'});
 
         if (!accessToken.account.enabled)
-          return callback (null, false, 'Account is disabled');
+          return callback (null, false, {reason: 'account_disabled', message: 'Account is disabled'});
 
         // Update the user to the account id.
         user = accessToken.account;
