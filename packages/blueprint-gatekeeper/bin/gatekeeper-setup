@@ -23,11 +23,7 @@ async.waterfall ([
 function execute (args, callback) {
   async.waterfall ([
     function (callback) {
-      blueprint.Application (appPath, callback);
-    },
-
-    function (app, callback) {
-      app.start (callback);
+      blueprint.createApplicationAndStart (appPath, callback);
     },
 
     function (app, callback) {
