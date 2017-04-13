@@ -3,6 +3,8 @@
 var async = require ('async')
   , gcm   = require ('node-gcm')
   , _     = require ('underscore')
+  , util  = require ('util')
+  , debug = require ('debug') ('blueprint:messaging:sender')
   ;
 
 const MAX_RECIPIENTS = 1000;
@@ -30,7 +32,7 @@ function Sender (model, opts) {
  * @param callback
  */
 Sender.prototype.send = function (recipients, data, callback) {
-  var self = this;
+  debug ('sending message to ' + util.inspect (recipients));
 
   if (!_.isArray (recipients))
     recipients = [recipients];
@@ -39,12 +41,12 @@ Sender.prototype.send = function (recipients, data, callback) {
     // Get the tokens for all recipients.
     function (callback) {
       var filter = { owner: {$in: recipients} };
-      self._model.distinct ('token', filter, callback);
-    },
+      this._model.distinct ('token', filter, callback);
+    }.bind (this),
 
     function (tokens, callback) {
       var message = new gcm.Message ({
-        dryRun : self._dryRun,
+        dryRun : this._dryRun,
         data : data
       });
 
@@ -57,18 +59,21 @@ Sender.prototype.send = function (recipients, data, callback) {
           var currTokens = tokens.slice (i, i + MAX_RECIPIENTS);
           var recipient = { registrationTokens: currTokens };
 
-          self.sendMessage (recipient, message, function (err, res) {
-            if (err)
-              return callback (err);
+          async.waterfall ([
+            function (callback) {
+              this.sendMessage (recipient, message, callback);
+            }.bind (this),
 
-            // Move the next set of recipients
-            i += currTokens.length;
+            function (res, callback) {
+              // Move the next set of recipients
+              i += currTokens.length;
 
-            return callback (null, res);
-          })
-        },
+              return callback (null, res);
+            }
+          ], callback);
+        }.bind (this),
         callback);
-    }
+    }.bind (this)
   ], callback);
 };
 
@@ -80,6 +85,8 @@ Sender.prototype.send = function (recipients, data, callback) {
  * @param callback
  */
 Sender.prototype.publish = function (topic, data, callback) {
+  debug ('publishing message to ' + topic);
+
   var message = new gcm.Message ({
     dryRun : this._dryRun,
     data : data
@@ -103,36 +110,41 @@ Sender.prototype.publish = function (topic, data, callback) {
  * @param callback
  */
 Sender.prototype.sendMessage = function (recipient, message, callback) {
-  var self = this;
+  async.waterfall ([
+    /*
+     * Send the message to the cloud service.
+     */
+    function (callback) {
+      this._sender.send (message, recipient, callback);
+    }.bind (this),
 
-  this._sender.send (message, recipient, function (err, res) {
-    if (err) return callback (err);
+    function (res, callback) {
+      var finishTasks = [];
 
-    var finishTasks = [];
+      if (res.failure > 0 && recipient.registrationTokens) {
+        // There were some failures. We need to check what the failure is, and
+        // remove registration information if the id is not registered.
 
-    if (res.failure > 0 && recipient.registrationTokens) {
-      // There were some failures. We need to check what the failure is, and
-      // remove registration information if the id is not registered.
+        var tokens = recipient.registrationTokens;
+        var badTokens = [];
 
-      var tokens = recipient.registrationTokens;
-      var badTokens = [];
-
-      res.results.forEach (function (result, index) {
-        if (result.error === ERROR_NOT_REGISTERED) {
-          badTokens.push (tokens[index]);
-        }
-      });
-
-      if (badTokens.length > 0) {
-        // Remove all tokens from the database with the bad ids.
-        finishTasks.push (function (callback) {
-          self._model.remove ({token: {$in: badTokens}}, callback);
+        res.results.forEach (function (result, index) {
+          if (result.error === ERROR_NOT_REGISTERED) {
+            badTokens.push (tokens[index]);
+          }
         });
-      }
-    }
 
-    async.series (finishTasks, function (err) {
-      return callback (err, res);
-    });
-  });
+        if (badTokens.length > 0) {
+          // Remove all tokens from the database with the bad ids.
+          finishTasks.push (function (callback) {
+            this._model.remove ({token: {$in: badTokens}}, callback);
+          }.bind (this));
+        }
+      }
+
+      async.series (finishTasks, function (err) {
+        return callback (err, res);
+      });
+    }.bind (this)
+  ], callback);
 };

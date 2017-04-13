@@ -1,10 +1,14 @@
 'use strict';
 
-const blueprint = require ('@onehilltech/blueprint')
-  , path        = require ('path')
-  ;
+const path    = require ('path')
+  , blueprint = require ('@onehilltech/blueprint')
+;
 
-before (function (done) {
+before ('create application and start', function (done) {
   const appPath = path.resolve (__dirname, '../../app');
   blueprint.createApplicationAndStart (appPath, done);
+});
+
+beforeEach ('restart application', function (done) {
+  blueprint.app.restart (done);
 });

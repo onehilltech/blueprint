@@ -21,7 +21,6 @@ module.exports = CloudTokenController;
 /**
  * Register a token.
  *
- * @returns {{validate: validate, execute: execute}}
  */
 CloudTokenController.prototype.create = function () {
   return {

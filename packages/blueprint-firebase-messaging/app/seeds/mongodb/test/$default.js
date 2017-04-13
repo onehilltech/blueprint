@@ -18,6 +18,17 @@ module.exports = {
     return callback (null, { username: whoami, password: whoami, email: 'contact@' + whoami + '.com'})
   }),
 
+  user_tokens: dab.map (dab.get ('accounts'), function (account, opts, callback) {
+    const model = {
+      client: dab.get ('clients.0'),
+      account: account._id,
+      refresh_token: new ObjectId (),
+      scope: account.scope
+    };
+
+    return callback (null, model);
+  }),
+
   cloud_tokens: [
     { device: new ObjectId (), owner: dab.ref ('accounts.0'), token: '123' },
     { device: new ObjectId (), owner: dab.ref ('accounts.0'), token: '456' },

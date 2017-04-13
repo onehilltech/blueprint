@@ -5,71 +5,42 @@ var expect    = require ('chai').expect
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
-function getToken (data, callback) {
-  blueprint.testing.request ()
-    .post ('/gatekeeper/v1/oauth2/token')
-    .send (data)
-    .expect (200)
-    .end (function (err, res) {
-      if (err)
-        return callback (err);
-
-      return callback (null, res.body.access_token);
-    });
-}
-
 describe ('CloudTokenRouter', function () {
-  var userToken;
-
-  before (function (done) {
-
-    var data = {
-      grant_type: 'password',
-      username: blueprint.app.seeds.$default.accounts[0].username,
-      password: blueprint.app.seeds.$default.accounts[0].username,
-      client_id: blueprint.app.seeds.$default.clients[0].id
-    };
-
-    getToken (data, function (err, token) {
-      if (err)
-        return done (err);
-
-      userToken = token;
-      return done (null);
-    });
-  });
-
   describe ('POST /v1/cloud-tokens', function () {
-    var data = {device: '1234567890', token: 'aabbccdd'};
-
     it ('should post a new cloud token for user', function (done) {
-      blueprint.testing.request ()
-        .post ('/v1/cloud-tokens')
-        .set ('Authorization', 'Bearer ' + userToken)
-        .send (data)
-        .expect (200, 'true', function (err) {
-          if (err) return done (err);
+      const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
+      const data = {device: '1234567890', token: 'aabbccdd'};
 
-          blueprint.app.models.CloudToken.findOne ({device: data.device}, function (err, cloudToken) {
-            if (err)
-              return done (err);
+      async.series ([
+        function (callback) {
+          blueprint.testing.request ()
+            .post ('/v1/cloud-tokens')
+            .set ('Authorization', 'Bearer ' + accessToken.access_token)
+            .send (data)
+            .expect (200, 'true', callback);
+        },
 
-            if (!cloudToken)
-              return done (new HttpError ('Token cannot be found'));
+        function (callback) {
+          async.waterfall ([
+            function (callback) {
+              blueprint.app.models.CloudToken.findOne ({device: data.device}, callback);
+            },
 
-            cloudToken = cloudToken.toObject ();
-            cloudToken.owner = cloudToken.owner.toString ();
+            function (cloudToken, callback) {
+              expect (cloudToken).to.be.defined;
 
-            expect (cloudToken).to.deep.equal ({
-              _id: cloudToken._id,
-              device: data.device,
-              owner: blueprint.app.seeds.$default.accounts[0].id,
-              token: data.token
-            });
+              expect (cloudToken.lean ()).to.deep.equal ({
+                _id: cloudToken.id,
+                device: data.device,
+                owner: blueprint.app.seeds.$default.accounts[0].id,
+                token: data.token
+              });
 
-            return done ();
-          });
-        });
+              return callback (null);
+            }
+          ], callback);
+        }
+      ], done);
     });
   });
 });

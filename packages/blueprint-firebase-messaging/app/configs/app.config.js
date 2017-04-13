@@ -1,7 +1,5 @@
-module.exports = exports = {
-  name : 'blueprint-cloud-messaging',
+'use strict';
 
-  modules: {
-    'cloud-messaging': '../../../app'
-  }
+module.exports = {
+  name : 'blueprint-cloud-messaging'
 };
