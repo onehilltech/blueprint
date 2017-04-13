@@ -3,14 +3,13 @@
 const blueprint = require ('@onehilltech/blueprint')
   , expect      = require ('chai').expect
   , async       = require ('async')
-  , getToken    = require ('../../../getToken')
+  , getToken    = require ('../../../../getToken')
   ;
 
 describe ('Oauth2Router', function () {
   describe('#issueToken', function () {
     var TOKEN_URL = '/v1/oauth2/token';
     var accessToken;
-    var refreshToken;
 
     describe ('password', function () {
       it ('should get a token for the username/password', function (done) {
