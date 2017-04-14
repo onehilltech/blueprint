@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 'use strict';
 
-var program          = require ('commander')
-  , gatekeeper       = require ('@onehilltech/gatekeeper')
+var program    = require ('commander')
+  , gatekeeper = require ('@onehilltech/gatekeeper')
+  , async      = require ('async')
+  , winston    = require ('winston')
+  , prompt     = require ('prompt')
+  , _          = require ('underscore')
+  , util       = require ('util')
   , gatekeeperClient = require ('../lib/GatekeeperClient')
-  , async            = require ('async')
-  , winston          = require ('winston')
-  , prompt           = require ('prompt')
-  , _                = require ('underscore')
   ;
 
 const base = {
@@ -19,7 +20,7 @@ const base = {
 var schemas = { };
 
 schemas.native = _.extend (_.clone (base), {
-  client_secret: {required: true, hidden: true}
+  client_secret: {hidden: true}
 });
 
 schemas.recaptcha = _.extend (_.clone (base), {
@@ -37,7 +38,7 @@ program
 
 function actionComplete (err, result) {
   if (err)
-    return winston.log ('error', err.message);
+    return winston.log ('error', util.inspect (err));
   else
     console.log (result.client);
 }
@@ -72,16 +73,22 @@ async.waterfall ([
           },
 
           function (client, callback) {
-            client.type = options.type;
-
-            gatekeeperClient (client, callback);
+            return callback (null, _.extend (client, options));
           }
         ], callback);
       }
     ], callback);
   },
 
-  function (client, callback) {
-    client.createClient ({name: name, email: email, scope: scope}, callback);
+  function (options, callback) {
+    async.waterfall ([
+      function (callback) {
+        gatekeeperClient (program.base, callback);
+      },
+
+      function (client, callback) {
+        client.createClient (options, callback);
+      }
+    ], callback);
   }
 ], actionComplete);

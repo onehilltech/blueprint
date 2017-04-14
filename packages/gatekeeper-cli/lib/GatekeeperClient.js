@@ -58,8 +58,11 @@ function newInstance (opts, callback) {
 
   var url = opts.baseUri + '/v1/oauth2/token';
   request ({url: url, method: 'POST', json: data}, function (err, res, body) {
-    if (err) return callback (err);
-    if (res.statusCode !== 200) return callback (new Error (body));
+    if (err)
+      return callback (err);
+
+    if (res.statusCode !== 200)
+      return callback (new Error (body));
 
     var token = body.access_token;
     var client = new GatekeeperClient (opts, token);
