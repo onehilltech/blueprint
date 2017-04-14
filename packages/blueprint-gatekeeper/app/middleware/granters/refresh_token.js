@@ -5,7 +5,6 @@ const async     = require ('async')
   , mongodb     = require ('@onehilltech/blueprint-mongodb')
   , ObjectId    = mongodb.Types.ObjectId
   , HttpError   = blueprint.errors.HttpError
-  , _           = require ('underscore')
   , Account     = require ('../../models/Account')
   , UserToken   = require ('../../models/UserToken')
   , AccessToken = require ('../../models/AccessToken')
@@ -27,7 +26,18 @@ exports.policies = function (req, callback) {
 
   async.waterfall ([
     function (callback) {
-      serializer.verifyToken (refreshToken, {}, callback);
+      serializer.verifyToken (refreshToken, {}, function (err, payload) {
+        if (!err)
+          return callback (null, payload);
+
+        // Process the error message. We have to check the name because the error
+        // could be related to token verification.
+        if (err.name === 'TokenExpiredError')
+          return callback (new HttpError (401, 'token_expired', 'Token has expired'));
+
+        if (err.name === 'JsonWebTokenError')
+          return callback (new HttpError (403, 'invalid_token', err.message));
+      });
     },
 
     function (payload, callback) {
