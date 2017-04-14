@@ -88,17 +88,9 @@ function GatekeeperClient (opts, token) {
  * @param callback
  * @returns {*}
  */
-GatekeeperClient.prototype.createClient = function (opts, callback) {
+GatekeeperClient.prototype.createClient = function (client, callback) {
   var url = this.getCompleteUrl ('/clients');
-  var data = { name: opts.name, email: opts.email };
-
-  if (opts.scope)
-    data.scope = opts.scope;
-
-  if (opts.redirectUri)
-    data.redirect_uri = opts.redirectUri;
-
-  var req = this.makeRequest ({url: url, method: 'POST', json: {client: data}});
+  var req = this.makeRequest ({url: url, method: 'POST', json: {client: client}});
 
   return request (req, handleResponse (callback));
 };

@@ -6,30 +6,82 @@ var program          = require ('commander')
   , gatekeeperClient = require ('../lib/GatekeeperClient')
   , async            = require ('async')
   , winston          = require ('winston')
+  , prompt           = require ('prompt')
+  , _                = require ('underscore')
   ;
+
+const base = {
+  name: {required: true},
+  email: {required: true},
+  enabled: {default: 'true'}
+};
+
+var schemas = { };
+
+schemas.native = _.extend (_.clone (base), {
+  client_secret: {required: true, hidden: true}
+});
+
+schemas.recaptcha = _.extend (_.clone (base), {
+  recaptcha_secret: {required: true, hidden: true}
+});
+
+schemas.android = _.extend (_.clone (schemas.native), {
+  package: {required: true}
+});
+
 
 program
   .option ('-b, --base <base>', 'Base uri for the Gatekeeper service')
-  .arguments ('<name> <email> [scope]')
-  .action (addClient)
   .parse (process.argv);
 
-function addClient (name, email, scope) {
-  async.waterfall ([
-    function (callback) {
-      gatekeeperClient (program.base, callback);
-    },
-    function (client, callback) {
-      winston.log ('info', 'adding client to service');
-      client.createClient ({name: name, email: email, scope: scope}, callback);
-    }], actionComplete);
-}
-
 function actionComplete (err, result) {
-  if (err) return winston.log ('error', err.message);
-
-  winston.log ('info', 'successfully added client to service');
-
-  console.log ('client_id: ' + result.client._id);
-  console.log ('client_secret: ' + result.client.secret);
+  if (err)
+    return winston.log ('error', err.message);
+  else
+    console.log (result.client);
 }
+
+async.waterfall ([
+  function (callback) {
+    prompt.start ();
+
+    async.waterfall ([
+      function (callback) {
+        prompt.message = 'client';
+        prompt.delimiter = ':';
+
+        prompt.get ({
+          properties: {
+            type: {required: true}
+          }
+        }, callback);
+      },
+
+      function (options, callback) {
+        // Get the prompt schema for the client type. If the client does not exist,
+        // then we need to stop.
+        const typeSchema = schemas[options.type];
+
+        if (!typeSchema)
+          return callback (new Error ('invalid client type'));
+
+        async.waterfall ([
+          function (callback) {
+            prompt.get ({properties: typeSchema}, callback);
+          },
+
+          function (client, callback) {
+            client.type = options.type;
+
+            gatekeeperClient (client, callback);
+          }
+        ], callback);
+      }
+    ], callback);
+  },
+
+  function (client, callback) {
+    client.createClient ({name: name, email: email, scope: scope}, callback);
+  }
+], actionComplete);
