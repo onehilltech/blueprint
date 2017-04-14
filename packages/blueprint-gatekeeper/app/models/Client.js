@@ -12,7 +12,7 @@ var schema = new mongodb.Schema ({
   type: {type: String, required: true},
 
   /// Name of the client.
-  name: {type: String, required: true, trim: true, unique: true},
+  name: {type: String, required: true, trim: true},
 
   /// Contact email address for the client.
   email: {type: String, required: true, trim: true},
