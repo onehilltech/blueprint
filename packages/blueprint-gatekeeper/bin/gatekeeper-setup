@@ -34,7 +34,7 @@ function execute (args, callback) {
 
     function (exists, callback) {
       var data = [
-        {name: 'gatekeeper-cli', email: args.email, scope: DEFAULT_SCOPE}
+        {type: 'native', name: 'gatekeeper-cli', email: args.email, scope: DEFAULT_SCOPE}
       ];
 
       blueprint.app.models.Client.create (data, callback);
@@ -43,7 +43,6 @@ function execute (args, callback) {
     function (clients, callback) {
       async.each (clients, function (client, callback) {
         var data = {
-          type: 'native',
           client_id: client.id,
           client_secret: client.secret
         };
@@ -55,7 +54,8 @@ function execute (args, callback) {
 }
 
 function setupComplete (err) {
-  if (err) throw err;
+  if (err)
+    throw err;
 
   winston.log ('info', 'setup complete!');
   process.exit (0);
