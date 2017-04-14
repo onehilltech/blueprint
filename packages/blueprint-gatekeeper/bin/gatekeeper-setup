@@ -44,7 +44,7 @@ function execute (args, callback) {
       async.each (clients, function (client, callback) {
         var data = {
           client_id: client.id,
-          client_secret: client.secret
+          client_secret: client.client_secret
         };
 
         var filename = path.resolve (rcPath, client.name);
