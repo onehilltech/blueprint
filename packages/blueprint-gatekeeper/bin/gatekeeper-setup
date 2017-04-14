@@ -37,7 +37,8 @@ function execute (args, callback) {
         {type: 'native', name: 'gatekeeper-cli', email: args.email, scope: DEFAULT_SCOPE}
       ];
 
-      blueprint.app.models.Client.create (data, callback);
+      const Client = blueprint.app.models.Client;
+      Client.create (data, callback);
     },
 
     function (clients, callback) {
