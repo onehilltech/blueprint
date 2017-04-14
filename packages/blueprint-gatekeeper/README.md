@@ -55,12 +55,12 @@ module.exports = {
 Define a route (or router) to import the Gatekeeper routes into the application:
 
 ```javascript
-// app/routers/GatekeeperRouter.js
-var blueprint = require ('@onehilltech/blueprint')
+// app/routers/EndpointRouter.js
+const blueprint = require ('@onehilltech/blueprint')
   ;
 
 module.exports = exports = {
-  '/gatekeeper': [ blueprint.ModuleRouter ('@onehilltech/gatekeeper:v1') ]
+  '/gatekeeper': blueprint ('router://@onehilltech/gatekeeper:v1')
 };
 ```
 
@@ -84,6 +84,8 @@ The router above will protect all routes under the `/v1` path, which
 includes all routers located in `app/routers/v1` directory. The client will
 need to define the `Authorization` header and include a generated token.
 
-For more details on allowed routes, see `app/routers` for Gatekeeper.
+Next Steps
+-----------
 
-Happy Coding!
+See the [Wiki](https://github.com/onehilltech/blueprint-gatekeeper/wiki) for 
+more information.
