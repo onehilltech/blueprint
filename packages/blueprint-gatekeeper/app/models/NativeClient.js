@@ -16,7 +16,7 @@ var schema = new mongodb.Schema ({
 }, options);
 
 schema.pre ('validate', function (next) {
-  if (!this.client_secret)
+  if (!this.client_secret || this.client_secret === '')
     this.client_secret = uid.sync (DEFAULT_SECRET_LENGTH);
 
   return next ();
