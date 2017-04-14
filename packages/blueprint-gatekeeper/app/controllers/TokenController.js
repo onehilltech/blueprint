@@ -2,14 +2,12 @@ const winston   = require ('winston')
   , async       = require ('async')
   , blueprint   = require ('@onehilltech/blueprint')
   , mongodb     = require ('@onehilltech/blueprint-mongodb')
-  , request     = require ('request')
   , _           = require ('underscore')
   , ObjectId    = mongodb.Types.ObjectId
   , Client      = require ('../models/Client')
-  , Account     = require ('../models/Account')
-  , AccessToken = require ('../models/AccessToken')
   , HttpError   = blueprint.errors.HttpError
   , granters    = require ('../middleware/granters')
+  , validators  = require ('../middleware/validators')
   ;
 
 /**
@@ -55,17 +53,38 @@ WorkflowController.prototype.logoutUser = function () {
 /**
  * Issue an access token. The issue workflow depends on the grant_type
  * body parameter.
- *
- * @param callback
- * @returns
  */
 WorkflowController.prototype.issueToken = function () {
   const grantTypes = Object.keys (granters);
+  const baseSchema = {
+    grant_type: {in: 'body', notEmpty: true, isIn: {options: [grantTypes]}},
+    client_id: {in: 'body', notEmpty: true, isMongoId: true}
+  };
 
   return {
-    validate: {
-      grant_type: {in: 'body', notEmpty: true, isIn: {options: [grantTypes]}},
-      client_id: {in: 'body', notEmpty: true, isMongoId: true}
+    validate: function (req, callback) {
+      async.waterfall ([
+        function (callback) {
+          Client.findById (req.body.client_id, callback);
+        },
+
+        function (client, callback) {
+          if (!client)
+            return callback (new HttpError (400, 'invalid_client', 'Client not found'));
+
+          // Cache the client to later.
+          req.client = client;
+
+          // Different clients have different validation requirements. So, let's
+          // find the validator for the client, and use it.
+          const typeSchema = validators[client.type] || {};
+          const schema = _.extend (baseSchema, typeSchema);
+
+          req.check (schema);
+
+          return callback (null);
+        }
+      ], callback);
     },
 
     sanitize: function (req, callback) {

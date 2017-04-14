@@ -3,41 +3,59 @@
 const blueprint = require ('@onehilltech/blueprint')
   , expect      = require ('chai').expect
   , async       = require ('async')
-  , getToken    = require ('../../../../getToken')
   ;
+
+function getToken (data, callback) {
+  blueprint.testing.request ()
+    .post ('/v1/oauth2/token')
+    .send (data)
+    .expect (200).expect('Content-Type', /json/)
+    .end (function (err, res) {
+      if (err)
+        return callback (err);
+
+      return callback (null, res.body);
+    });
+}
 
 describe ('Oauth2Router', function () {
   describe('#issueToken', function () {
-    var TOKEN_URL = '/v1/oauth2/token';
-    var accessToken;
+    const TOKEN_URL = '/v1/oauth2/token';
 
     describe ('password', function () {
       it ('should get a token for the username/password', function (done) {
-        var data = {
+        const native = blueprint.app.seeds.$default.native[0];
+
+        const data = {
           grant_type: 'password',
           username: blueprint.app.seeds.$default.accounts[1].username,
           password: blueprint.app.seeds.$default.accounts[1].username,
-          client_id: blueprint.app.seeds.$default.clients[0].id
+          client_id: native.id,
+          client_secret: native.client_secret
         };
 
-        getToken (data, function (err, result) {
-          if (err)
-            return done (err);
+        async.waterfall ([
+          function (callback) {
+            getToken (data, callback);
+          },
 
-          expect (result).to.have.all.keys (['token_type', 'access_token', 'refresh_token']);
-          expect (result).to.have.property ('token_type', 'Bearer');
+          function (token, callback) {
+            expect (token).to.have.all.keys (['token_type', 'access_token', 'refresh_token']);
+            expect (token).to.have.property ('token_type', 'Bearer');
 
-          accessToken = result;
-
-          return done (null);
-        });
+            return callback (null);
+          }
+        ], done);
       });
 
       it ('should return 400 for missing grant_type', function (done) {
-        var data = {
+        const native = blueprint.app.seeds.$default.native[0];
+
+        const data = {
           username: blueprint.app.seeds.$default.accounts[0].username,
           password: blueprint.app.seeds.$default.accounts[0].password,
-          client_id: blueprint.app.seeds.$default.clients[0].id
+          client_id: native.id,
+          client_secret: native.client_secret
         };
 
 
@@ -48,11 +66,14 @@ describe ('Oauth2Router', function () {
       });
 
       it ('should not grant token because client is disabled', function (done) {
-        var data = {
+        const native = blueprint.app.seeds.$default.native[2];
+
+        const data = {
           grant_type: 'password',
           username: blueprint.app.seeds.$default.accounts[0].username,
           password: blueprint.app.seeds.$default.accounts[0].password,
-          client_id: blueprint.app.seeds.$default.clients[2].id
+          client_id: native.id,
+          client_secret: native.client_secret
         };
 
         blueprint.testing.request ()
@@ -62,11 +83,14 @@ describe ('Oauth2Router', function () {
       });
 
       it ('should not grant token because account is disabled', function (done) {
-        var data = {
+        const native = blueprint.app.seeds.$default.native[0];
+
+        const data = {
           grant_type: 'password',
           username: blueprint.app.seeds.$default.accounts[4].username,
           password: blueprint.app.seeds.$default.accounts[4].password,
-          client_id: blueprint.app.seeds.$default.clients[0].id
+          client_id: native.id,
+          client_secret: native.client_secret
         };
 
         blueprint.testing.request ()
@@ -76,11 +100,14 @@ describe ('Oauth2Router', function () {
       });
 
       it ('should not grant token because password is incorrect', function (done) {
-        var data = {
+        const native = blueprint.app.seeds.$default.native[0];
+
+        const data = {
           grant_type: 'password',
           username: blueprint.app.seeds.$default.accounts[1].username,
           password: 'incorrect_password',
-          client_id: blueprint.app.seeds.$default.clients[0].id
+          client_id: native.id,
+          client_secret: native.client_secret
         };
 
         blueprint.testing.request ()
@@ -92,28 +119,35 @@ describe ('Oauth2Router', function () {
 
     describe ('client_credentials', function () {
       it ('should get a token for client credentials', function (done) {
-        var data = {
+        const native = blueprint.app.seeds.$default.native[0];
+
+        const data = {
           grant_type: 'client_credentials',
-          client_id: blueprint.app.seeds.$default.clients[0].id,
-          client_secret: blueprint.app.seeds.$default.clients[0].secret
+          client_id: native.id,
+          client_secret: native.client_secret
         };
 
-        getToken (data, function (err, result) {
-          if (err)
-            return done(err);
+        async.waterfall ([
+          function (callback) {
+            getToken (data, callback);
+          },
 
-          expect (result).to.have.all.keys (['token_type', 'access_token']);
-          expect (result).to.have.property ('token_type', 'Bearer');
+          function (token, callback) {
+            expect (token).to.have.all.keys (['token_type', 'access_token']);
+            expect (token).to.have.property ('token_type', 'Bearer');
 
-          return done (null);
-        });
+            return callback (null);
+          }
+        ], done);
       });
 
       it ('should not grant token because client is disabled', function (done) {
-        var data = {
+        const native = blueprint.app.seeds.$default.native[2];
+
+        const data = {
           grant_type: 'client_credentials',
-          client_id: blueprint.app.seeds.$default.clients[2].id,
-          client_secret: blueprint.app.seeds.$default.clients[2].secret
+          client_id: native.id,
+          client_secret: native.client_secret
         };
 
         blueprint.testing.request ()
@@ -121,28 +155,34 @@ describe ('Oauth2Router', function () {
           .expect (403, {errors: {code: 'client_disabled', message: 'Client is disabled'}}, done);
       });
 
-      it ('should not grant token because invalid secret', function (done) {
-        var data = {
+      it ('should not grant token because incorrect secret', function (done) {
+        const native = blueprint.app.seeds.$default.native[0];
+
+        const data = {
           grant_type: 'client_credentials',
-          client_id: blueprint.app.seeds.$default.clients[0].id,
+          client_id: native.id,
           client_secret: 'bad_secret'
         };
 
         blueprint.testing.request ()
-          .post(TOKEN_URL).send(data)
-          .expect (400, {errors: {code: 'incorrect_secret', message: 'Client secret is incorrect'}}, done);
+          .post (TOKEN_URL)
+          .send (data)
+          .expect (403, {errors: {code: 'incorrect_secret', message: 'Incorrect client secret'}}, done);
       });
     });
 
     describe ('refresh_token', function () {
       it ('should refresh the access and refresh token', function (done) {
+        const native = blueprint.app.seeds.$default.native[0];
+
         async.waterfall ([
           function (callback) {
             const data = {
               grant_type: 'password',
               username: blueprint.app.seeds.$default.accounts[1].username,
               password: blueprint.app.seeds.$default.accounts[1].username,
-              client_id: blueprint.app.seeds.$default.clients[0].id
+              client_id: native.id,
+              client_secret: native.client_secret
             };
 
             getToken (data, callback);
@@ -153,7 +193,8 @@ describe ('Oauth2Router', function () {
               function (callback) {
                 const data = {
                   grant_type: 'refresh_token',
-                  client_id: blueprint.app.seeds.$default.clients[0].id,
+                  client_id: native.id,
+                  client_secret: native.client_secret,
                   refresh_token: accessToken.refresh_token
                 };
 
@@ -173,38 +214,46 @@ describe ('Oauth2Router', function () {
           }
         ], done);
       });
+
+      it ('should not refresh token because missing secret', function (done) {
+        const accessToken = blueprint.app.seeds.$default.user_tokens[1].serializeSync ();
+        const native = blueprint.app.seeds.$default.native[0];
+
+        const data = {
+          grant_type: 'refresh_token',
+          client_id: native.id,
+          refresh_token: accessToken.refresh_token
+        };
+
+        blueprint.testing.request()
+          .post (TOKEN_URL)
+          .send (data)
+          .expect (400, {
+            errors: {
+              code: "validation_failed",
+              message: "Request validation failed",
+              details: {
+                validation: {
+                  client_secret: {
+                    msg: "Missing client secret",
+                    param: "client_secret"
+                  }
+                }
+              }
+            }
+          }, done);
+      });
     });
   });
 
-  describe('#logoutUser (callback)', function () {
-    var accessToken;
-
+  describe('/v1/oauth2/logout', function () {
     it ('should logout the current user', function (done) {
-      async.waterfall ([
-        function (callback) {
-          var data = {
-            grant_type: 'password',
-            username: blueprint.app.seeds.$default.accounts[1].username,
-            password: blueprint.app.seeds.$default.accounts[1].username,
-            client_id: blueprint.app.seeds.$default.clients[0].id
-          };
+      const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
 
-          blueprint.testing.request ()
-            .post ('/v1/oauth2/token').send (data)
-            .expect (200, function (err, res) {
-              return callback (err, res);
-            });
-        },
-
-        function (res, callback) {
-          accessToken = res.body.access_token;
-
-          blueprint.testing.request ()
-            .post ('/v1/oauth2/logout')
-            .set ('Authorization', 'Bearer ' + accessToken)
-            .expect (200, callback);
-        }
-      ], done);
+      blueprint.testing.request ()
+        .post ('/v1/oauth2/logout')
+        .set ('Authorization', 'Bearer ' + accessToken.access_token)
+        .expect (200, 'true', done);
     });
   });
 });

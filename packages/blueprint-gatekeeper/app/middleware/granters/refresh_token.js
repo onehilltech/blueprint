@@ -21,8 +21,7 @@ var password = require ('./password');
  * @param callback
  */
 exports.policies = function (req, callback) {
-  var clientSecret = req.body.client_secret;
-  var refreshToken = req.body.refresh_token;
+  const refreshToken = req.body.refresh_token;
 
   async.waterfall ([
     function (callback) {
@@ -51,9 +50,6 @@ exports.policies = function (req, callback) {
 
       if (!accessToken.client.enabled)
         return callback (new HttpError (403, 'client_disabled', 'Client is disabled'));
-
-      if (clientSecret && accessToken.client.secret !== clientSecret)
-        return callback (new HttpError (400, 'incorrect_secret', 'Incorrect client secret'));
 
       // Check the state of the account.
       if (!accessToken.account.enabled)

@@ -95,7 +95,7 @@ describe ('AccountRouter', function () {
               return done (err);
 
             var actual = mongodb.lean (_.omit (_.extend (autoLogin, {
-              created_by: blueprint.app.seeds.$default.clients[0].id,
+              created_by: blueprint.app.seeds.$default.native[0].id,
               scope: [],
               enabled: true
             }), ['password']));

@@ -25,7 +25,7 @@ describe ('Account', function () {
   describe ('create and save', function () {
     it ('should save a new account to the database', function (done) {
       account = new Account (data.account);
-      account.created_by = blueprint.app.seeds.$default.clients[0]._id;
+      account.created_by = blueprint.app.seeds.$default.native[0]._id;
 
       account.save (function (err, model) {
         if (err)

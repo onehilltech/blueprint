@@ -11,7 +11,7 @@ describe ('ClientRouter', function () {
   describe ('/v1/clients', function () {
     describe ('POST', function () {
       it ('should create a client', function (done) {
-        const client = {_id: new ObjectId (), name: 'test-client', email: 'test-client@contact.me', secret: 'test-client'};
+        const client = {_id: new ObjectId (), type: 'native', name: 'test-client', email: 'test-client@contact.me', client_secret: 'test-client'};
         const accessToken = blueprint.app.seeds.$default.client_tokens[0].serializeSync ();
 
         blueprint.testing.request ()
@@ -27,7 +27,7 @@ describe ('ClientRouter', function () {
     describe ('PUT', function () {
       it ('should update the client', function (done) {
         const accessToken = blueprint.app.seeds.$default.client_tokens[0].serializeSync ();
-        const client = blueprint.app.seeds.$default.clients[0];
+        const client = blueprint.app.seeds.$default.native[0];
         const update = {name: 'updated-name'};
 
         blueprint.testing.request ()
@@ -41,7 +41,7 @@ describe ('ClientRouter', function () {
     describe ('DELETE', function () {
       it ('should delete a client', function (done) {
         const accessToken = blueprint.app.seeds.$default.client_tokens[0].serializeSync ();
-        const client = blueprint.app.seeds.$default.clients[0];
+        const client = blueprint.app.seeds.$default.native[0];
 
         blueprint.testing.request ()
           .delete ('/v1/clients/' + client.id)

@@ -7,11 +7,11 @@ const dab      = require ('@onehilltech/dab')
 
 
 module.exports = {
-  clients: [
+  native: [
     {
       name: 'client1',
       email: 'client1@gatekeeper.com',
-      secret: 'client1',
+      client_secret: 'client1',
       scope: [
         gatekeeper.scope.account.create,
         gatekeeper.scope.client.create,
@@ -22,27 +22,27 @@ module.exports = {
     {
       name: 'client2',
       email: 'client2@gatekeeper.com',
-      secret: 'client2'
+      client_secret: 'client2'
     },
     {
       name: 'client3',
       email: 'client3@gatekeeper.com',
-      secret: 'client3',
+      client_secret: 'client3',
       enabled: false
     }
   ],
 
   accounts: [
-    { email: 'account1@gatekeeper.com', username: 'account1', password: 'account1', created_by: dab.ref ('clients.0')},
-    { email: 'account2@gatekeeper.com', username: 'account2', password: 'account2', created_by: dab.ref ('clients.0')},
-    { email: 'account3@gatekeeper.com', username: 'account3', password: 'account3', created_by: dab.ref ('clients.0')},
-    { email: 'account4@gatekeeper.com', username: 'account4', password: 'account4', created_by: dab.ref ('clients.0'), scope: [gatekeeper.scope.superuser]},
-    { email: 'account5@gatekeeper.com', username: 'account5', password: 'account5', created_by: dab.ref ('clients.0'), enabled: false}
+    { email: 'account1@gatekeeper.com', username: 'account1', password: 'account1', created_by: dab.ref ('native.0')},
+    { email: 'account2@gatekeeper.com', username: 'account2', password: 'account2', created_by: dab.ref ('native.0')},
+    { email: 'account3@gatekeeper.com', username: 'account3', password: 'account3', created_by: dab.ref ('native.0')},
+    { email: 'account4@gatekeeper.com', username: 'account4', password: 'account4', created_by: dab.ref ('native.0'), scope: [gatekeeper.scope.superuser]},
+    { email: 'account5@gatekeeper.com', username: 'account5', password: 'account5', created_by: dab.ref ('native.0'), enabled: false}
   ],
 
   user_tokens: dab.map (dab.get ('accounts'), function (account, opts, callback) {
     const model = {
-      client: dab.get ('clients.0'),
+      client: dab.get ('native.0'),
       account: account._id,
       refresh_token: new ObjectId (),
       scope: account.scope
@@ -51,7 +51,7 @@ module.exports = {
     return callback (null, model);
   }),
 
-  client_tokens: dab.map (dab.get ('clients'), function (client, opts, callback) {
+  client_tokens: dab.map (dab.get ('native'), function (client, opts, callback) {
     const token = {client: client._id, scope: client.scope };
     return callback (null, token);
   })

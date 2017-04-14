@@ -6,11 +6,11 @@ const dab      = require ('@onehilltech/dab')
 ;
 
 module.exports = {
-  clients: [
+  native: [
     {
       _id: new ObjectId ('58ed90e1105aee00001e429f'),
       name: 'gatekeeper-android',
-      secret: 'gatekeeper-android',
+      client_secret: 'gatekeeper-android',
       email: 'james@onehilltech.com',
       scope: [gatekeeper.scope.account.create]
     }
@@ -22,7 +22,7 @@ module.exports = {
       email: 'tester@onehilltech.com',
       username: 'account1',
       password: 'account1',
-      created_by: dab.ref ('clients.0')
+      created_by: dab.ref ('native.0')
     }
   ]
 };

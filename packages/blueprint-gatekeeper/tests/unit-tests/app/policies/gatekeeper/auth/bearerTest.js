@@ -71,7 +71,7 @@ describe ('policy:gatekeeper.auth.bearer', function () {
 
   it ('should have policy failure; unknown client', function (done) {
     const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
-    const client = blueprint.app.seeds.$default.clients[0];
+    const client = blueprint.app.seeds.$default.native[0];
 
     async.series ([
       function (callback) {
@@ -89,7 +89,7 @@ describe ('policy:gatekeeper.auth.bearer', function () {
 
   it ('should have policy failure; client disabled', function (done) {
     const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
-    const client = blueprint.app.seeds.$default.clients[0];
+    const client = blueprint.app.seeds.$default.native[0];
 
     async.series ([
       function (callback) {

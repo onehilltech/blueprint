@@ -4,6 +4,17 @@ const request = require ('request')
   , async     = require ('async')
   ;
 
+const VERIFY_METHOD = 'GET';
+const VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
+
+/**
+ * Check the policy for a Google ReCAPTCHA client. The request must include
+ * a recaptcha value that is combined with the client's recaptcha secret and
+ * verified via Google.
+ *
+ * @param req
+ * @param callback
+ */
 module.exports = function (req, callback) {
   async.waterfall ([
     /*
@@ -11,8 +22,8 @@ module.exports = function (req, callback) {
      */
     function (callback) {
       var options = {
-        method: 'GET',
-        url: 'https://www.google.com/recaptcha/api/siteverify',
+        method: VERIFY_METHOD,
+        url: VERIFY_URL,
         json: true,
         qs: {
           secret: req.client.recaptcha_secret,
