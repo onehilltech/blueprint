@@ -2,6 +2,7 @@
 
 var exports = module.exports = {};
 
-exports.recaptcha = require ('./recaptcha');
+exports.android = require ('./android');
 exports.native = require ('./native');
+exports.recaptcha = require ('./recaptcha');
 
