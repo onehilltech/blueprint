@@ -1,9 +1,5 @@
 'use strict';
 
-const request = require ('request')
-  , async     = require ('async')
-;
-
 /**
  * Check the policy of a native client. The native client is expected to have a
  * client secret.
