@@ -14,7 +14,7 @@ var program    = require ('commander')
 const base = {
   name: {required: true},
   email: {required: true},
-  enabled: {default: 'true'}
+  enabled: {default: true, type: 'boolean'}
 };
 
 var schemas = { };
@@ -54,7 +54,7 @@ async.waterfall ([
 
         prompt.get ({
           properties: {
-            type: {required: true}
+            type: {required: true, description: '[' + Object.keys (schemas).join (',') + ']'}
           }
         }, callback);
       },
