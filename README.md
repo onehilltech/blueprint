@@ -30,8 +30,4 @@ Next Steps
 See our [Wiki](https://github.com/onehilltech/blueprint/wiki) for more details 
 on using Blueprint.
 
-Need help?
-------------------
-
-* [Contact us](mailto:contact@onehilltech.com)
-* [Inquire about training](mailto:training@onehilltech.com)
+* Interested in training? [Contact us](mailto:training@onehilltech.com)
