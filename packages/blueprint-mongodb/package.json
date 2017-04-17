@@ -17,8 +17,8 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^3.0.0-13",
-    "@onehilltech/dab": "^0.5.4",
-    "mongoose": "^4.9.3",
+    "@onehilltech/dab": "^0.6.0",
+    "mongoose": "^4.9.5",
     "multer": "^1.3.0",
     "pluralize": "^4.0.0"
   },
