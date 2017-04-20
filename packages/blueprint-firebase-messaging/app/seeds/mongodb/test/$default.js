@@ -6,10 +6,10 @@ const dab      = require ('@onehilltech/dab')
   ;
 
 module.exports = {
-  clients: [
-    { name: 'client1', email: 'contact@client1.com', secret: 'client1', scope: [gatekeeper.scope.client.create] },
-    { name: 'client2', email: 'contact@client2.com', secret: 'client2'},
-    { name: 'client3', email: 'contact@client3.com', secret: 'client3', enabled: false }
+  native: [
+    { name: 'client1', email: 'contact@client1.com', client_secret: 'client1', scope: [gatekeeper.scope.client.create] },
+    { name: 'client2', email: 'contact@client2.com', client_secret: 'client2'},
+    { name: 'client3', email: 'contact@client3.com', client_secret: 'client3', enabled: false }
   ],
 
   accounts: dab.times (5, function (i, opts, callback) {
@@ -20,7 +20,7 @@ module.exports = {
 
   user_tokens: dab.map (dab.get ('accounts'), function (account, opts, callback) {
     const model = {
-      client: dab.get ('clients.0'),
+      client: dab.get ('native.0'),
       account: account._id,
       refresh_token: new ObjectId (),
       scope: account.scope
