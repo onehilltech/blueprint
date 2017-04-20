@@ -61,6 +61,24 @@ WorkflowController.prototype.issueToken = function () {
     client_id: {in: 'body', notEmpty: true, isMongoId: true}
   };
 
+  var typeSchemaCache = {};
+
+  function getTypeSchemaFromCache (type) {
+    var typeSchema = typeSchemaCache[type];
+
+    if (typeSchema)
+      return typeSchema;
+
+    // This is the first time we have seen this client type. We need to
+    // generate the full schema, and store it for subsequent requests.
+    typeSchema = validators[type] || {};
+    typeSchema = _.extend (typeSchema, baseSchema);
+
+    typeSchemaCache[type] = typeSchema;
+
+    return typeSchema;
+  }
+
   return {
     validate: function (req, callback) {
       async.waterfall ([
@@ -72,15 +90,12 @@ WorkflowController.prototype.issueToken = function () {
           if (!client)
             return callback (new HttpError (400, 'invalid_client', 'Client not found'));
 
-          // Cache the client to later.
+          // Cache the client to later. We make need to move this to a
+          // different property (e.g., gatekeeper.client).
           req.client = client;
 
-          // Different clients have different validation requirements. So, let's
-          // find the validator for the client, and use it.
-          const typeSchema = validators[client.type] || {};
-          const schema = _.extend (baseSchema, typeSchema);
-
-          req.check (schema);
+          const typeSchema = getTypeSchemaFromCache (client.type);
+          req.check (typeSchema);
 
           return callback (null);
         }
