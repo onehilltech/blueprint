@@ -34,17 +34,21 @@ PolicyError.prototype.getFirstHttpError = function () {
   return new HttpError (403, firstError.reason, firstError.message)
 };
 
-Object.defineProperty (http.IncomingMessage.prototype, 'hasPolicyErrors', {
-  get: function () {
-    return this._policyError.hasErrors ();
-  }
-});
+if (!http.IncomingMessage.prototype.hasPolicyErrors) {
+  Object.defineProperty (http.IncomingMessage.prototype, 'hasPolicyErrors', {
+    get: function () {
+      return this._policyError.hasErrors ();
+    }
+  });
+}
 
-Object.defineProperty (http.IncomingMessage.prototype, 'policyError', {
-  get: function () {
-    return this._policyError;
-  }
-});
+if (!http.IncomingMessage.prototype.policyError) {
+  Object.defineProperty (http.IncomingMessage.prototype, 'policyError', {
+    get: function () {
+      return this._policyError;
+    }
+  });
+}
 
 var exports = module.exports = {};
 
