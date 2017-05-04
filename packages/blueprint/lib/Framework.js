@@ -1,6 +1,10 @@
 'use strict';
 
 const async   = require ('async')
+  , fs        = require ('fs')
+  , path      = require ('path')
+  , process   = require ('process')
+  , Env       = require ('./Environment')
   , Messaging = require ('./Messaging')
   , version   = require ('../package.json').version
   ;
@@ -37,6 +41,31 @@ Object.defineProperty (exports, 'version', {
 });
 
 /**
+ * Get the cluster support for the application from its configuration.
+ *
+ * @param appPath
+ * @returns {boolean}
+ */
+function getClusterOption (appPath) {
+  const appConfigPath = path.resolve (appPath, 'configs/app.config.js');
+  const envAppConfigPath = path.resolve (appPath, 'configs/' + Env.name + '/app.config.js');
+
+  var appConfig = require (appConfigPath);
+  var clusterSupport = appConfig.cluster || null;
+
+  if (fs.existsSync (envAppConfigPath)) {
+    var envAppConfig = require (envAppConfigPath);
+
+    if (envAppConfig.cluster) {
+      clusterSupport = envAppConfig.cluster;
+    }
+  }
+
+  return clusterSupport;
+}
+
+
+/**
  * Factory method for creating an Blueprint.js application. The application is installed
  * in the main module.
  *
@@ -53,10 +82,17 @@ function createApplication (appPath, callback) {
     return callback (null, appInstance)
   }
 
-  const Application = require ('./Application');
-  appInstance = new Application (appPath, msgInstance);
-  appInstance.init (callback);
+  const clusterOption = getClusterOption (appPath);
 
+  if (clusterOption) {
+    appInstance = require ('./cluster') (appPath, msgInstance, clusterOption, callback);
+  }
+  else {
+    const Application = require ('./Application');
+    appInstance = new Application (appPath, msgInstance);
+  }
+
+  appInstance.init (callback);
   return appInstance;
 }
 
