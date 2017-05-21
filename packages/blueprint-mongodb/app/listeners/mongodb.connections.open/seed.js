@@ -1,6 +1,7 @@
 'use strict';
 
 const seed    = require ('../../support/seed')
+  , util      = require ('util')
   , blueprint = require ('@onehilltech/blueprint')
   , appStart  = blueprint.barrier ('app.start', 'mongodb.seed')
   , debug     = require ('debug')('blueprint:modules:mongodb')
@@ -10,6 +11,11 @@ const seed    = require ('../../support/seed')
 module.exports = function () {
   debug ('seeding database connections');
 
+  function complete (err) {
+    if (err)
+      console.error (util.inspect (err))
+  }
+
   async.waterfall ([
     function (callback) {
       seed (blueprint.app, callback);
@@ -18,5 +24,5 @@ module.exports = function () {
     function (callback) {
       appStart.signalAndWait (callback);
     }
-  ]);
+  ], complete);
 };
