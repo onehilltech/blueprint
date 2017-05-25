@@ -3,10 +3,11 @@
 const async   = require ('async')
   , _         = require ('underscore')
   , mongoose  = require ('mongoose')
+  , debug     = require ('debug')('blueprint:module:mongodb')
   , PopulateElement = require ('./PopulateElement')
   , PopulateArray   = require ('./PopulateArray')
   , Population      = require ('./Population')
-  ;
+;
 
 function getKeyFromModel (model) {
   return model.db.name + ':' + model.modelName;
@@ -21,7 +22,10 @@ function createPopulatorImpl (Model, schema, callback) {
   if (populators[key])
     return callback (null);
 
+  debug ('creating populator for ' + key);
+
   var populate = {};
+  var pending = [];
 
   async.eachOf (schema.paths, function (path, pathName, callback) {
     if (pathName === '__v')
@@ -35,7 +39,7 @@ function createPopulatorImpl (Model, schema, callback) {
 
       // Let's continue down the tree, and populate the fields of this
       // element. We want the result to be self-containing.
-      return createPopulatorImpl (element, element.schema, callback);
+      pending.push ({element: element, schema: element.schema});
     }
     else if (path.instance === 'Array') {
       // We can either be populating references to documents, or sub-documents.
@@ -61,7 +65,9 @@ function createPopulatorImpl (Model, schema, callback) {
 
     populators[key] = populate;
 
-    return callback (null);
+    async.each (pending, function (value, callback) {
+      createPopulatorImpl (value.element, value.schema, callback)
+    }, callback);
   }
 }
 
