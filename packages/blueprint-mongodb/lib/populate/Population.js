@@ -11,6 +11,10 @@ function Population (populators) {
   this.population = {};
 }
 
+Population.getKeyFromModel = function (model) {
+  return model.db.name + ':' + model.modelName;
+};
+
 module.exports = Population;
 
 Population.prototype.flatten = function (callback) {
@@ -21,11 +25,18 @@ Population.prototype.flatten = function (callback) {
 
 Population.prototype.populateElement = function (key, model, callback) {
   const populator = this._populators[key];
+
+  if (!populator)
+    return callback (null);
+
   this._populate (populator, model, callback);
 };
 
 Population.prototype.populateArray = function (key, arr, callback) {
   const populator = this._populators[key];
+
+  if (!populator)
+    return callback (null);
 
   // Iterate over each element in the array, and populate each one. The
   // partial result can be ignored since we are will be adding the populated
@@ -96,14 +107,22 @@ Population.prototype._populate = function (populator, data, callback) {
         if (!remaining)
           return callback (null);
 
-        populate.populate (remaining, function (err, model) {
-          if (err)
-            return callback (err);
+        async.waterfall ([
+          function (callback) {
+            populate.populate (remaining, callback);
+          },
 
-          this.population[plural].push (model);
+          function (model, callback) {
+            this.population[plural].push (model);
 
-          return callback (null);
-        }.bind (this));
+            const key = Population.getKeyFromModel (populate.Model);
+
+            if (_.isArray (model))
+              this.populateArray (key, model, callback);
+            else
+              this.populateElement (key, model, callback);
+          }.bind (this)
+        ], callback);
       }.bind (this)
     ], callback);
   }.bind (this), callback);

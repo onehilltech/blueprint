@@ -119,6 +119,10 @@ describe ('lib.ResourceController', function () {
           degrees: [
             blueprint.app.seeds.$default.degrees[0].lean (),
             blueprint.app.seeds.$default.degrees[1].lean ()
+          ],
+
+          schools: [
+            blueprint.app.seeds.$default.schools[1].lean ()
           ]
         };
 
@@ -174,7 +178,10 @@ describe ('lib.ResourceController', function () {
               blueprint.app.seeds.$default.degrees[0].lean (),
               blueprint.app.seeds.$default.degrees[1].lean ()
             ],
-            person: person
+            person: person,
+            schools: [
+              blueprint.app.seeds.$default.schools[1].lean ()
+            ]
           }, done);
       });
 
