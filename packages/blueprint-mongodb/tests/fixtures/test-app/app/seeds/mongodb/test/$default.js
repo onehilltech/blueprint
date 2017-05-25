@@ -5,9 +5,9 @@ const dab = require ('@onehilltech/dab')
 
 module.exports = {
   degrees: [
-    {degree: 'PhD', major: 'Computer Science', school: 'Vanderbilt University'},
-    {degree: 'MS', major: 'Computer Science', school: 'Vanderbilt University'},
-    {degree: 'BS', major: 'Computer Science', school: 'Morehouse College'}
+    {degree: 'PhD', major: 'Computer Science', school: dab.ref ('schools.1')},
+    {degree: 'MS', major: 'Computer Science', school: dab.ref ('schools.1')},
+    {degree: 'BS', major: 'Computer Science', school: dab.ref ('schools.0')}
   ],
 
   persons: [
@@ -27,6 +27,12 @@ module.exports = {
 
       education: dab.ref ('degrees.0')
     }
+  ],
+
+  schools: [
+    {name: 'Morehouse College'},
+    {name: 'Vanderbilt University'}
   ]
+
 
 };
