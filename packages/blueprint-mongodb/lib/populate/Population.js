@@ -49,6 +49,9 @@ Population.prototype.populateArray = function (key, arr, callback) {
 };
 
 Population.prototype._populate = function (populator, data, callback) {
+  if (!data)
+    return callback (null);
+
   async.eachOf (populator, function (populate, path, callback) {
     const value  = data[path];
 
