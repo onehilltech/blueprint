@@ -32,7 +32,7 @@ Populators.prototype.addModel = function (Model, callback) {
 
   async.waterfall ([
     function (callback) {
-      this._makePopulate (key, Model.db, Model.schema, callback);
+      this._makePopulate (Model.db, Model.schema, callback);
     }.bind (this),
 
     function (populate, callback) {
@@ -43,7 +43,7 @@ Populators.prototype.addModel = function (Model, callback) {
   ], callback);
 };
 
-Populators.prototype._makePopulate = function (key, db, schema, callback) {
+Populators.prototype._makePopulate = function (db, schema, callback) {
   var populate = {};
 
   async.eachOf (schema.paths, function (path, pathName, callback) {
