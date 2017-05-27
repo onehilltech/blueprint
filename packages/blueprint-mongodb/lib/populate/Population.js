@@ -42,9 +42,7 @@ Population.prototype.populateArray = function (key, arr, callback) {
   // partial result can be ignored since we are will be adding the populated
   // object directly to the result.
   async.each (arr, function (model, callback) {
-    this._populate (populator, model, function (err, result) {
-      return callback (err, result);
-    });
+    this._populate (populator, model, callback);
   }.bind (this), callback);
 };
 

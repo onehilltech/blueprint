@@ -25,7 +25,11 @@ module.exports = {
         zipcode: '12345'
       },
 
-      education: dab.ref ('degrees.0')
+      education: dab.ref ('degrees.0'),
+
+      applications: [
+        {school: dab.ref ('schools.0'), status: 'Accepted'}
+      ]
     }
   ],
 
@@ -33,6 +37,4 @@ module.exports = {
     {name: 'Morehouse College'},
     {name: 'Vanderbilt University'}
   ]
-
-
 };

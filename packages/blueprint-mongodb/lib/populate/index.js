@@ -4,28 +4,47 @@ const async   = require ('async')
   , _         = require ('underscore')
   , mongoose  = require ('mongoose')
   , debug     = require ('debug')('blueprint:module:mongodb')
-  , PopulateElement = require ('./PopulateElement')
-  , PopulateArray   = require ('./PopulateArray')
-  , Population      = require ('./Population')
+  , PopulateElement  = require ('./PopulateElement')
+  , PopulateElements = require ('./PopulateElements')
+  , PopulateArray    = require ('./PopulateArray')
+  , Population       = require ('./Population')
 ;
 
 function getKeyFromModel (model) {
   return model.db.name + ':' + model.modelName;
 }
 
-// Populate objects for each corresponding model.
-var populators = {};
+function Populators () {
+  this.populators = {};
+}
 
-function createPopulatorImpl (Model, schema, callback) {
-  const key = getKeyFromModel(Model);
+Populators.prototype.addModel = function (Model, callback) {
+  const key = getKeyFromModel (Model);
 
-  if (populators[key])
+  if (this.populators[key])
     return callback (null);
+
+  // Put in a placeholder for the time being. This will prevent a model from
+  // being processed multiple times.
+  this.populators[key] = null;
 
   debug ('creating populator for ' + key);
 
+  async.waterfall ([
+    function (callback) {
+      this._makePopulate (key, Model.db, Model.schema, callback);
+    }.bind (this),
+
+    function (populate, callback) {
+      this.populators[key] = populate;
+
+      return callback (null);
+    }.bind (this)
+  ], callback);
+};
+
+Populators.prototype._makePopulate = function (key, db, schema, callback) {
   var populate = {};
-  var pending = [];
 
   async.eachOf (schema.paths, function (path, pathName, callback) {
     if (pathName === '__v')
@@ -33,43 +52,37 @@ function createPopulatorImpl (Model, schema, callback) {
 
     if (path.instance === 'ObjectID' && pathName !== '_id') {
       var ref = path.options.ref;
-      var element = Model.db.models[ref];
+      var elementModel = db.models[ref];
 
-      populate[pathName] = new PopulateElement (element);
+      populate[pathName] = new PopulateElement (elementModel);
 
-      // Let's continue down the tree, and populate the fields of this
-      // element. We want the result to be self-containing.
-      pending.push ({element: element, schema: element.schema});
+      return this.addModel (elementModel, callback);
     }
     else if (path.instance === 'Array') {
       // We can either be populating references to documents, or sub-documents.
       var type = path.options.type[0];
 
       if (type instanceof mongoose.Schema) {
-
+        //populate[pathName] = new PopulateElements (populators);
+        //createPopulatorImpl (Model, type, callback);
       }
       else {
-        var arr = Model.db.models[type.ref];
-        populate[pathName] = new PopulateArray (arr);
+        const arrModel = db.models[type.ref];
+        populate[pathName] = new PopulateArray (arrModel);
 
-        // TODO Populate the fields in each element.
+        return this.addModel (arrModel, callback);
       }
     }
 
     return callback (null);
-  }, complete);
+  }.bind (this), complete);
 
   function complete (err) {
-    if (err)
-      return callback (err);
-
-    populators[key] = populate;
-
-    async.each (pending, function (value, callback) {
-      createPopulatorImpl (value.element, value.schema, callback)
-    }, callback);
+    return callback (err, populate);
   }
-}
+};
+
+var populators = new Populators ();
 
 /**
  * Create the populator for a Model. The populator will contain the
@@ -79,9 +92,9 @@ function createPopulatorImpl (Model, schema, callback) {
  * @param schema
  * @returns {Function}
  */
-function createPopulator (Model, schema) {
+function createPopulator (Model) {
   return function (callback) {
-    createPopulatorImpl (Model, schema, callback);
+    populators.addModel (Model, callback);
   }
 }
 
@@ -90,9 +103,9 @@ module.exports = function (data, model, callback) {
   var tasks = [];
 
   if (!populators[key])
-    tasks.push (createPopulator (model, model.schema));
+    tasks.push (createPopulator (model));
 
-  var population = new Population (populators);
+  var population = new Population (populators.populators);
 
   tasks.push (function (callback) {
     if (_.isArray (data))

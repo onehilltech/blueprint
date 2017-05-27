@@ -2,8 +2,14 @@
 
 var mongodb = require ('../../../../../lib')
   , Degree  = require ('./Degree')
+  , School  = require ('./School')
   , options = require ('./schemaOptions') ()
   ;
+
+var applicationSchema = new mongodb.Schema ({
+  school: {type: mongodb.Schema.Types.ObjectId, ref: School.modelName, required: true},
+  status: {type: String, enum: ['Submitted', 'Rejected', 'Accepted', 'Waitlist'], required: true, default: 'Submitted'}
+});
 
 var schema = new mongodb.Schema ({
   first_name: {type: String, required: true, default: 'New'},
@@ -19,6 +25,8 @@ var schema = new mongodb.Schema ({
     state: {type: String, required: true},
     zipcode: {type: String, required: true}
   },
+
+  applications: [applicationSchema],
 
   education: {type: mongodb.Schema.Types.ObjectId, ref: Degree.modelName},
   degrees: [{type: mongodb.Schema.Types.ObjectId, ref: Degree.modelName}]

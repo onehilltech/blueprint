@@ -45,6 +45,7 @@ describe ('lib.ResourceController', function () {
 
             person = res.body.person;
             data.person._id = person._id;
+            data.person.applications = [];
 
             expect (res.body.person).to.deep.equal (data.person);
 
@@ -170,17 +171,19 @@ describe ('lib.ResourceController', function () {
       });
 
       it ('should return a single person with a populated data', function (done) {
+        const person = blueprint.app.seeds.$default.persons[0];
+
         blueprint.testing.request ()
           .get ('/person/' + person._id)
           .query ({populate: true})
           .expect (200, {
             degrees: [
-              blueprint.app.seeds.$default.degrees[0].lean (),
-              blueprint.app.seeds.$default.degrees[1].lean ()
+              blueprint.app.seeds.$default.degrees[0].lean ()
             ],
-            person: person,
+            person: person.lean (),
             schools: [
-              blueprint.app.seeds.$default.schools[1].lean ()
+              blueprint.app.seeds.$default.schools[1].lean (),
+              blueprint.app.seeds.$default.schools[0].lean ()
             ]
           }, done);
       });
