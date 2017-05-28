@@ -55,8 +55,12 @@ Populators.prototype._makePopulate = function (db, schema, callback) {
       return callback (null);
 
     if (path.instance === 'ObjectID' && pathName !== '_id') {
-      var ref = path.options.ref;
-      var elementModel = db.models[ref];
+      const ref = path.options.ref;
+
+      if (!ref)
+        return callback (null);
+
+      const elementModel = db.models[ref];
 
       populate[pathName] = new PopulateElement (elementModel);
 
