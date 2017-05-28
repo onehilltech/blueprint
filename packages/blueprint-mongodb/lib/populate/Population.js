@@ -56,72 +56,50 @@ Population.prototype._populate = function (populator, data, callback) {
     if (!value)
       return callback (null);
 
-    const plural = pluralize (populate.Model.modelName);
-
-    // Make sure the result and ids for the current population exists. If not,
-    // then we start with the default array.
-
-    if (!this.population[plural])
-      this.population[plural] = [];
-
-    if (!this._ids[plural])
-      this._ids[plural] = [];
-
     async.waterfall ([
-      // Determine the ids that we need to search for.
+      // Determine the ids that we need to populate at this point in time. If we have seen
+      // all the ids, then there is no need to populate the value(s).
       function (callback) {
-        populate.accept ({
-          visitPopulateElement: function () {
-            const idStr = value.toString ();
-            const coll = this._ids[plural];
-
-            if (coll.indexOf (idStr) !== -1)
-              return callback (null, null);
-
-            coll.push (idStr);
-
-            return callback (null, value);
-          }.bind (this),
-
-          visitPopulateArray: function () {
-            const coll = this._ids[plural];
-
-            async.filter (value, function (id, callback) {
-              const idStr = id.toString ();
-              const firstTime = coll.indexOf (idStr) === -1;
-
-              if (firstTime)
-                coll.push (idStr);
-
-              return callback (null, firstTime);
-            }, complete);
-
-            function complete (err, result) {
-              return callback (err, result.length > 0 ? result : null);
-            }
-          }.bind (this)
-        })
+        populate.getUnseenIds (value, this._ids, callback);
       }.bind (this),
 
-      // Populate populate the remaining ids.
-      function (remaining, callback) {
-        if (!remaining)
+      // Populate populate the remaining values.
+      function (unseen, callback) {
+        if (!unseen)
           return callback (null);
 
         async.waterfall ([
           function (callback) {
-            populate.populate (remaining, callback);
+            populate.populate (unseen, callback);
           },
 
-          function (model, callback) {
-            this.population[plural].push (model);
+          function (models, callback) {
+            async.series ([
+              function (callback) {
+                // Merge the populated models with the reset of the population.
+                populate.merge (models, this.population, callback);
+              }.bind (this),
 
-            const key = Population.getKeyFromModel (populate.Model);
+              function (callback) {
+                // Now continue down the tree by populating the paths of the new
+                // populated model elements.
+                populate.accept ({
+                  visitPopulateElement: function (item) {
+                    const key = Population.getKeyFromModel (item.Model);
+                    this.populateElement (key, models, callback);
+                  }.bind (this),
 
-            if (_.isArray (model))
-              this.populateArray (key, model, callback);
-            else
-              this.populateElement (key, model, callback);
+                  visitPopulateArray: function (item) {
+                    const key = Population.getKeyFromModel (item.Model);
+                    this.populateArray (key, models, callback);
+                  }.bind (this),
+
+                  visitPopulateEmbedArray: function () {
+                    return callback (null);
+                  }
+                });
+              }.bind (this)
+            ], callback);
           }.bind (this)
         ], callback);
       }.bind (this)

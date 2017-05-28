@@ -91,6 +91,7 @@ describe ('lib.ResourceController', function () {
           ],
 
           schools: [
+            blueprint.app.seeds.$default.schools[0].lean (),
             blueprint.app.seeds.$default.schools[1].lean ()
           ]
         };
@@ -123,6 +124,7 @@ describe ('lib.ResourceController', function () {
           ],
 
           schools: [
+            blueprint.app.seeds.$default.schools[0].lean (),
             blueprint.app.seeds.$default.schools[1].lean ()
           ]
         };
@@ -182,8 +184,8 @@ describe ('lib.ResourceController', function () {
             ],
             person: person.lean (),
             schools: [
-              blueprint.app.seeds.$default.schools[1].lean (),
-              blueprint.app.seeds.$default.schools[0].lean ()
+              blueprint.app.seeds.$default.schools[0].lean (),
+              blueprint.app.seeds.$default.schools[1].lean ()
             ]
           }, done);
       });

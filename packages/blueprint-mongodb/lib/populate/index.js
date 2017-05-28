@@ -4,10 +4,10 @@ const async   = require ('async')
   , _         = require ('underscore')
   , mongoose  = require ('mongoose')
   , debug     = require ('debug')('blueprint:module:mongodb')
-  , PopulateElement  = require ('./PopulateElement')
-  , PopulateElements = require ('./PopulateElements')
-  , PopulateArray    = require ('./PopulateArray')
-  , Population       = require ('./Population')
+  , PopulateElement    = require ('./PopulateElement')
+  , PopulateEmbedArray = require ('./PopulateEmbedArray')
+  , PopulateArray      = require ('./PopulateArray')
+  , Population         = require ('./Population')
 ;
 
 function getKeyFromModel (model) {
@@ -43,6 +43,10 @@ Populators.prototype.addModel = function (Model, callback) {
   ], callback);
 };
 
+Populators.prototype._addSchema = function (db, schema, callback) {
+  return callback (null);
+};
+
 Populators.prototype._makePopulate = function (db, schema, callback) {
   var populate = {};
 
@@ -63,8 +67,24 @@ Populators.prototype._makePopulate = function (db, schema, callback) {
       var type = path.options.type[0];
 
       if (type instanceof mongoose.Schema) {
-        //populate[pathName] = new PopulateElements (populators);
-        //createPopulatorImpl (Model, type, callback);
+        // This path is for an embedded array of documents. We need to build
+        // the populate map for the embedded array type. If there is at least
+        // one field that can be populated, then we need to add this path to
+        // the populate object.
+        return async.waterfall ([
+          function (callback) {
+            this._makePopulate (db, type, callback);
+          }.bind (this),
+
+          function (result, callback) {
+            if (Object.keys (result).length === 0)
+              return callback (null);
+
+            populate[pathName] = new PopulateEmbedArray (result);
+
+            return callback (null);
+          }
+        ], callback);
       }
       else {
         const arrModel = db.models[type.ref];
