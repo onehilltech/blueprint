@@ -21,7 +21,7 @@ function Populators () {
 Populators.prototype.addModel = function (Model, callback) {
   const key = getKeyFromModel (Model);
 
-  if (this.populators[key])
+  if (this.populators[key] !== undefined)
     return callback (null);
 
   // Put in a placeholder for the time being. This will prevent a model from
