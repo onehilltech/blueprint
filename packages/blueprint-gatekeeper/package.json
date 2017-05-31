@@ -13,7 +13,7 @@
     "url": "https://github.com/onehilltech/gatekeeper.git"
   },
   "dependencies": {
-    "@onehilltech/blueprint-mongodb": "^0.32.13",
+    "@onehilltech/blueprint-mongodb": "^0.33.0",
     "async": "^2.4.1",
     "bcrypt": "^0.8.5",
     "commander": "^2.9.0",
