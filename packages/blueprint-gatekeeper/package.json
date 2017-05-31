@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/gatekeeper",
   "description": "Authentication framework for Web application programming interfaces (APIs)",
-  "version": "0.64.8",
+  "version": "0.65.0",
   "private": false,
   "main": "./lib",
   "license": "Apache-2.0",
