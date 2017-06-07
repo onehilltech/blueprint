@@ -1,15 +1,12 @@
 #!/usr/bin/env node
 
-var winston   = require ('winston')
-  , blueprint = require ('@onehilltech/blueprint')
-  ;
+var blueprint = require ('@onehilltech/blueprint')
+  , winston   = require ('winston')
+;
 
-blueprint.Application (__dirname, function (err, app) {
-  if (err) throw err;
+blueprint.createApplicationAndStart (__dirname, function (err) {
+  if (err)
+    winston.log ('error', err);
 
-  app.start (function (err) {
-    if (err) throw err;
-
-    winston.log ('info', 'application started...');
-  });
+  winston.log ('info', 'application started...');
 });

@@ -7,10 +7,10 @@ var program = require ('commander')
   ;
 
 var commands = {
-  new: 'create a new application',
   controller: 'manage application controllers',
   model: 'manage application models',
-  module: 'module support'
+  module: 'module support',
+  new: 'create a new Blueprint application'
 };
 
 function execute (err) {
