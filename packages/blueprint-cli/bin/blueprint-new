@@ -57,8 +57,7 @@ function generateApplication (name) {
         [
           'install',
           '--save',
-          '@onehilltech/blueprint',
-          '@onehilltech/blueprint-mongodb'
+          '@onehilltech/blueprint'
         ],
         [
           'install',
