@@ -46,7 +46,7 @@ describe ('GridFSController', function () {
       it ('should not find the image', function (done) {
         blueprint.testing.request ()
           .get ('/images/5')
-          .expect (404, done);
+          .expect (400, done);
       });
 
       it ('does not support querying for resource', function (done) {

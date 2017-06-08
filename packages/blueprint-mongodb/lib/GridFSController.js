@@ -100,38 +100,40 @@ GridFSController.prototype.get = function () {
   var self = this;
 
   return {
-    sanitize: function (req, callback) {
-      try {
-        var rcid = req.params[self.id];
-        req.params[self.id] = new mongodb.ObjectId (rcid);
-
-        return callback (null);
-      }
-      catch (e) {
-        return callback (new HttpError (404));
+    validate: {
+      [this.id]: {
+        in: 'params',
+        isMongoId: { errorMessage: 'Invalid resource id' }
       }
     },
 
+    sanitize: function (req, callback) {
+      req.sanitizeParams (self.id).toMongoId ();
+      return callback (null);
+    },
+
     execute: function (req, res, callback) {
-      var id = req.params[self.id];
+      let id = req.params[self.id];
 
       async.waterfall ([
         function (callback) {
           // Find information about the file.
-          var cursor = self._bucket.find ({_id: id});
-          return callback (null, cursor);
-        },
-        function (cursor, callback) {
+          let cursor = self._bucket.find ({_id: id}, {limit: 1});
+
           cursor.next (function (err, item) {
             // Make sure we close the cursor.
             cursor.close ();
 
-            if (!item)
-              return callback (new HttpError (404, 'Resource does not exist'));
+            if (err)
+              return callback (err);
 
-            return callback (err, item)
+            if (!item)
+              return callback (new HttpError (404, 'not_found', 'Resource does not exist'));
+
+            return callback (null, item)
           });
         },
+
         function (file, callback) {
           // Download the file.
           var downloadStream = self._bucket.openDownloadStream (id);
