@@ -90,7 +90,7 @@ Populators.prototype._makePopulate = function (db, schema, callback) {
           }
         ], callback);
       }
-      else {
+      else if (type.ref) {
         const arrModel = db.models[type.ref];
         populate[pathName] = new PopulateArray (arrModel);
 
