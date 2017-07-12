@@ -57,6 +57,10 @@ ConstSchema.prototype.checkRequired = function() {
   return this._schema.checkRequired.apply (this._schema, arguments);
 };
 
+ConstSchema.prototype.castForQueryWrapper = function () {
+  return this._schema.castForQueryWrapper.apply (this._schema, arguments);
+};
+
 /**
  * Plugin that allows you to specify what fields are marked as constant. This
  * means that the field must be set at creation time, and cannot be updated
