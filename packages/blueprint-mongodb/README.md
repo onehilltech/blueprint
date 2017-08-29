@@ -93,7 +93,7 @@ The resource controller exposes the following actions:
 | retrieve one | GET         | /resource/:rcId | N/A                        | {\<resource\>: { values }}        |
 | retrieve all | GET         | /resource       | N/A                        | {\<plural-resource\>: { values }} |   
 | count        | GET         | /resource/count | N/A                        | {count: n}                        |   
-| update       | UPDATE      | /resource/:rcId | {\<resource\>: { values }} | {\<resource\>: { values }}        |
+| update       | PUT      | /resource/:rcId | {\<resource\>: { values }} | {\<resource\>: { values }}        |
 | delete       | DELETE      | /resource/:rcId | N/A                        | `true` or `false`                 |
 
 For example, the `PersonController` exposes the following actions:
@@ -104,7 +104,7 @@ For example, the `PersonController` exposes the following actions:
 | retrieve one | GET | /person/id | N/A  | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}`  |
 | retrieve all | GET | /person | N/A  | `{persons: [{_id: 'id', first_name: 'James', last_name: 'Hill' }]}` |   
 | count   | GET   | /person/count | N/A                        | {count: n} |   
-| update  | UPDATE | /person/id | `{person: { first_name: 'John' }}` | `{person: {_id: 'id', first_name: 'John', last_name: 'Hill }}`        |
+| update  | PUT | /person/id | `{person: { first_name: 'John' }}` | `{person: {_id: 'id', first_name: 'John', last_name: 'Hill }}`        |
 | delete       | DELETE    | /person/id   | N/A                        | `true` or `false`                 |
 
 
