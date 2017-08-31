@@ -182,6 +182,7 @@ describe ('lib.ResourceController', function () {
             degrees: [
               blueprint.app.seeds.$default.degrees[0].lean ()
             ],
+            people: [],
             person: person.lean (),
             schools: [
               blueprint.app.seeds.$default.schools[0].lean (),

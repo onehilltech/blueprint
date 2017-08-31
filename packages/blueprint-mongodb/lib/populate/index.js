@@ -130,6 +130,7 @@ module.exports = function (data, model, callback) {
     tasks.push (createPopulator (model));
 
   var population = new Population (populators.populators);
+  population.addModels (model.modelName, data);
 
   tasks.push (function (callback) {
     if (_.isArray (data))

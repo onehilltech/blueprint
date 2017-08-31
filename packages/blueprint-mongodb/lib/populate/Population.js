@@ -15,7 +15,20 @@ Population.getKeyFromModel = function (model) {
   return model.db.name + ':' + model.modelName;
 };
 
-module.exports = Population;
+Population.prototype.addModels = function (key, models) {
+  let plural = pluralize (key);
+
+  if (this.population[plural])
+    this.population[plural].push (models);
+  else
+    this.population[plural] = models;
+
+  if (!this._ids[plural])
+    this._ids[plural] = [];
+  
+  for (var i = 0; i < models.length; ++ i)
+    this._ids[plural].push (models[i].id);
+}
 
 Population.prototype.flatten = function (callback) {
   async.mapValues (this.population, function (values, key, callback) {
@@ -106,3 +119,5 @@ Population.prototype._populate = function (populator, data, callback) {
     ], callback);
   }.bind (this), callback);
 };
+
+module.exports = Population;
