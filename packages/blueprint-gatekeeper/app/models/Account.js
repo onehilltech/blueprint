@@ -10,6 +10,7 @@ var bcrypt   = require ('bcrypt')
 var Client = require ('./Client')
   ;
 
+
 /**
  * The default transformation always removes the password from the
  * account. This ensures we do not leak the password.
@@ -22,6 +23,7 @@ function transform (doc, ret) {
 }
 
 options.toJSON.transform = options.toObject.transform = transform;
+options.toJSON.stats = options.toObject.stats = true;
 
 const SALT_WORK_FACTOR = 10;
 
