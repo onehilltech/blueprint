@@ -18,6 +18,7 @@ module.exports = function () {
 
   async.waterfall ([
     function (callback) {
+      blueprint.messaging.emit ('mongodb.seed.start', blueprint.app);
       seed (blueprint.app, callback);
     },
 
