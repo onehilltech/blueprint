@@ -23,7 +23,6 @@ function transform (doc, ret) {
 }
 
 options.toJSON.transform = options.toObject.transform = transform;
-options.toJSON.stats = options.toObject.stats = true;
 
 const SALT_WORK_FACTOR = 10;
 
