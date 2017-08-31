@@ -33,20 +33,23 @@ function StatPlugin (schema) {
     }
   });
 
-  // Always remove the _stat information from the document. We need to
-  // preserve any existing transformation attached to the schema.
-
+  // By default, the _stats property is not included in the transformed document. It
+  // should be included if you want to ensure updated documents have different ETags.
   if (!schema.options.toObject)
     schema.options.toObject = {};
 
   if (!schema.options.toJSON)
     schema.options.toJSON = {};
 
-  var objTransform = schema.options.toObject.transform || function (doc, ret) { return ret; };
-  schema.options.toObject.transform = transform (objTransform);
+  if (!schema.options.toObject.stats) {
+    let objTransform = schema.options.toObject.transform || function (doc, ret) { return ret; };
+    schema.options.toObject.transform = transform (objTransform);
+  }
 
-  var jsonTransform = schema.options.toJSON.transform || function (doc, ret) { return ret; };
-  schema.options.toJSON.transform = transform (jsonTransform);
+  if (!schema.options.toJSON.stats) {
+    let jsonTransform = schema.options.toJSON.transform || function (doc, ret) { return ret; };
+    schema.options.toJSON.transform = transform (jsonTransform);
+  }
 
   /*
    * Ensure the created_at field aways appears in the document.
