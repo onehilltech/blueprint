@@ -1,4 +1,6 @@
-var winston       = require ('winston')
+'use strict';
+
+const winston     = require ('winston')
   , blueprint     = require ('@onehilltech/blueprint')
   , messaging     = blueprint.messaging
   , nodemailer    = require ('nodemailer')
@@ -8,17 +10,17 @@ var winston       = require ('winston')
   ;
 
 // TODO Construct the real location of the template directory.
-var templateDir = path.resolve (__dirname, '../../resources/email-templates/account.activation');
-var activationEmail = new EmailTemplate (templateDir);
+let templateDir = path.resolve (__dirname, '../../resources/email-templates/account.activation');
+let activationEmail = new EmailTemplate (templateDir);
 
 const DEFAULT_STYLE = {
   primaryColor: '#2196F3'
 };
 
-var appConfig;
-var gatekeeperConfig;
-var activationConfig;
-var transport;
+let appConfig;
+let gatekeeperConfig;
+let activationConfig;
+let transport;
 
 /**
  * app.init
@@ -49,9 +51,9 @@ function sendActivationEmail (account) {
   if (!transport || !activationConfig.required)
     return;
 
-  var email = account.email;
+  let email = account.email;
 
-  var data = {
+  let data = {
     appName: appConfig.name,
     gatekeeperBaseUri: gatekeeperConfig.baseuri,
     twitterHandle: gatekeeperConfig.email.twitterHandle,
@@ -66,9 +68,9 @@ function sendActivationEmail (account) {
     if (err)
       return winston.log ('error', util.inspect (err));
 
-    var subject = appConfig.name + ' - Account confirmation';
+    let subject = appConfig.name + ' - Account confirmation';
 
-    var mailOptions = {
+    let mailOptions = {
       from: gatekeeperConfig.email.from,
       to: email,
       subject: subject,
