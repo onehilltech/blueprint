@@ -22,6 +22,7 @@ module.exports = function () {
     },
 
     function (callback) {
+      blueprint.messaging.emit ('mongodb.seed.complete', blueprint.app);
       appStart.signalAndWait (callback);
     }
   ], complete);
