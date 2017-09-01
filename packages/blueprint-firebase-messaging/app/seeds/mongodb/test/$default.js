@@ -1,7 +1,7 @@
 'use strict';
 
 const dab      = require ('@onehilltech/dab')
-  , gatekeeper = require ('@onehilltech/gatekeeper')
+  , gatekeeper = require ('@onehilltech/blueprint-gatekeeper')
   , ObjectId   = require ('mongoose').Types.ObjectId
   ;
 

@@ -4,5 +4,5 @@ var blueprint = require ('@onehilltech/blueprint')
   ;
 
 module.exports = {
-  '/gatekeeper': blueprint ('router://@onehilltech/gatekeeper:v1')
+  '/gatekeeper': blueprint ('router://@onehilltech/blueprint-gatekeeper:v1')
 };

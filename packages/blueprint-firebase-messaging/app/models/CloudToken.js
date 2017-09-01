@@ -4,7 +4,7 @@ const blueprint = require ('@onehilltech/blueprint')
   , mongodb     = require ('@onehilltech/blueprint-mongodb')
   , Schema      = mongodb.Schema
   , ObjectId    = Schema.Types.ObjectId
-  , Account     = blueprint ('model://@onehilltech/gatekeeper:Account')
+  , Account     = blueprint ('model://@onehilltech/blueprint-gatekeeper:Account')
   ;
 
 const options = {
