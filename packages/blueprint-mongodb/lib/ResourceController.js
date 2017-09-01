@@ -9,10 +9,10 @@ const util     = require ('util')
   , HttpHeader = blueprint.http.headers
   ;
 
-var validationSchema = require ('./ValidationSchema');
-var populate = require ('./populate');
+let validationSchema = require ('./ValidationSchema');
+let populate = require ('./populate');
 
-var BaseController = blueprint.ResourceController
+let BaseController = blueprint.ResourceController
   , HttpError = blueprint.errors.HttpError
   , messaging = blueprint.messaging
   ;
@@ -76,7 +76,7 @@ function ResourceController (opts) {
   this._idOpts = opts.idOptions || {};
 
   // Build the validation schema for create and update.
-  var validationOpts = {pathPrefix: this.name};
+  let validationOpts = {pathPrefix: this.name};
 
   this._create = {
     schema: validationSchema (opts.model.schema, validationOpts)
@@ -96,19 +96,19 @@ module.exports = ResourceController;
  */
 ResourceController.prototype.create = function (opts) {
   opts = opts || {};
-  var on = opts.on || {};
+  let on = opts.on || {};
 
-  var validate = opts.validate || __validate;
-  var sanitize = opts.sanitize || __sanitize;
+  let validate = opts.validate || __validate;
+  let sanitize = opts.sanitize || __sanitize;
 
-  var onPrepareDocument = on.prepareDocument || __onPrepareDocument;
-  var onPreExecute = on.preExecute || __onPreExecute;
-  var onPostExecute = on.postExecute || __onPostExecute;
-  var onPrepareResponse = on.prepareResponse || __onPrepareResponse;
+  let onPrepareDocument = on.prepareDocument || __onPrepareDocument;
+  let onPreExecute = on.preExecute || __onPreExecute;
+  let onPostExecute = on.postExecute || __onPostExecute;
+  let onPrepareResponse = on.prepareResponse || __onPrepareResponse;
 
-  var eventName = this._computeEventName ('created');
+  let eventName = this._computeEventName ('created');
 
-  var self = this;
+  let self = this;
 
   return {
     validate: function (req, callback) {
@@ -121,7 +121,7 @@ ResourceController.prototype.create = function (opts) {
     },
 
     execute: function __blueprint_create (req, res, callback) {
-      var doc = req.body[self.name];
+      let doc = req.body[self.name];
 
       async.waterfall ([
          function (callback) {
@@ -143,15 +143,15 @@ ResourceController.prototype.create = function (opts) {
               // We need to resolve the correct model just in case the schema for this
               // model contains a discriminator.
 
-              var Model = resolveModel (self._model, doc);
+              let Model = resolveModel (self._model, doc);
               Model.create (doc, makeDbCompletionHandler ('create_failed', 'Failed to create resource', callback));
 
               function resolveModel (Model, doc) {
                 if (!Model.discriminators) return Model;
 
-                var schema = Model.schema;
-                var discriminatorKey = schema.discriminatorMapping.key;
-                var discriminator = doc[discriminatorKey];
+                let schema = Model.schema;
+                let discriminatorKey = schema.discriminatorMapping.key;
+                let discriminator = doc[discriminatorKey];
 
                 return discriminator ? Model.discriminators[discriminator] : Model;
               }
@@ -171,7 +171,7 @@ ResourceController.prototype.create = function (opts) {
 
         function (data, callback) {
           // Prepare the result sent back to the client.
-          var result = {};
+          let result = {};
           result[self.name] = data;
 
           return callback (null, result);
@@ -192,22 +192,22 @@ ResourceController.prototype.create = function (opts) {
  * @returns
  */
 ResourceController.prototype.get = function (opts) {
-  var self = this;
+  let self = this;
 
   opts = opts || {};
-  var on = opts.on || {};
+  let on = opts.on || {};
 
-  var idValidationSchema = this._getIdValidationSchema (opts);
-  var idSanitizer = this._getIdSanitizer (opts);
+  let idValidationSchema = this._getIdValidationSchema (opts);
+  let idSanitizer = this._getIdSanitizer (opts);
 
-  var sanitize = opts.sanitize || __sanitize;
-  var validate = opts.validate || __validate;
+  let sanitize = opts.sanitize || __sanitize;
+  let validate = opts.validate || __validate;
 
-  var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
-  var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
-  var onPreExecute = on.preExecute || __onPreExecute;
-  var onPostExecute = on.postExecute || __onPostExecute;
-  var onPrepareResponse = on.prepareResponse || __onPrepareResponse;
+  let onPrepareProjection = on.prepareProjection || __onPrepareProjection;
+  let onPrepareFilter = on.prepareFilter || __onPrepareFilter;
+  let onPreExecute = on.preExecute || __onPreExecute;
+  let onPostExecute = on.postExecute || __onPostExecute;
+  let onPrepareResponse = on.prepareResponse || __onPrepareResponse;
 
   return {
     validate: function (req, callback) {
@@ -235,8 +235,8 @@ ResourceController.prototype.get = function (opts) {
     },
 
     execute: function __blueprint_get_execute (req, res, callback) {
-      var rcId = req.params[self.id];
-      var filter = {_id: rcId};
+      let rcId = req.params[self.id];
+      let filter = {_id: rcId};
 
       async.waterfall ([
         function (callback) {
@@ -258,7 +258,7 @@ ResourceController.prototype.get = function (opts) {
             },
 
             execute: function (callback) {
-              var dbCompletion = makeDbCompletionHandler ('retrieve_failed', 'Failed to retrieve resource', callback);
+              let dbCompletion = makeDbCompletionHandler ('retrieve_failed', 'Failed to retrieve resource', callback);
               self._model.findOne (query.filter, query.projection, dbCompletion);
             }
           }, completion);
@@ -267,14 +267,14 @@ ResourceController.prototype.get = function (opts) {
         function (result, callback) {
           // Set the Last-Modified header for the response. The ETag header is set
           // by the underlying Express framework.
-          var lastModified = result.getLastModified ();
+          let lastModified = result.getLastModified ();
           res.set (HttpHeader.LAST_MODIFIED, lastModified.toUTCString ());
 
           onPostExecute (req, result, callback);
         },
 
         function (data, callback) {
-          var result = { };
+          let result = { };
           result[self.name] = data;
 
           if (!req.query.populate) {
@@ -304,19 +304,19 @@ ResourceController.prototype.get = function (opts) {
  */
 ResourceController.prototype.getAll = function (opts) {
   opts = opts || {};
-  var on = opts.on || {};
+  let on = opts.on || {};
 
-  var validate = opts.validate || __validate;
-  var sanitize = opts.sanitize || __sanitize;
+  let validate = opts.validate || __validate;
+  let sanitize = opts.sanitize || __sanitize;
 
-  var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
-  var onPrepareProjection = on.prepareProjection || __onPrepareProjection;
-  var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
-  var onPreExecute = on.preExecute || __onPreExecute;
-  var onPostExecute = on.postExecute || __onPostExecute;
-  var onPrepareResponse = on.prepareResponse || __onPrepareResponse;
+  let onPrepareFilter = on.prepareFilter || __onPrepareFilter;
+  let onPrepareProjection = on.prepareProjection || __onPrepareProjection;
+  let onPrepareOptions = on.prepareOptions || __onPrepareOptions;
+  let onPreExecute = on.preExecute || __onPreExecute;
+  let onPostExecute = on.postExecute || __onPostExecute;
+  let onPrepareResponse = on.prepareResponse || __onPrepareResponse;
 
-  var self = this;
+  let self = this;
 
   return {
     validate: function (req, callback) {
@@ -329,8 +329,8 @@ ResourceController.prototype.getAll = function (opts) {
 
     execute: function __blueprint_getall_execute (req, res, callback) {
       // Update the options with those from the query string.
-      var opts = req.query.options || {};
-      var options = {};
+      let opts = req.query.options || {};
+      let options = {};
 
       if (req.query.options) {
         delete req.query.options;
@@ -367,7 +367,7 @@ ResourceController.prototype.getAll = function (opts) {
               return onPreExecute (req, callback);
             },
             execute: function (callback) {
-              var dbCompletion = makeDbCompletionHandler ('retrieve_failed', 'Failed to retrieve resource', callback);
+              let dbCompletion = makeDbCompletionHandler ('retrieve_failed', 'Failed to retrieve resource', callback);
               self._model.find (query.filter, query.projection, query.options, dbCompletion);
             }
           }, completion);
@@ -386,14 +386,14 @@ ResourceController.prototype.getAll = function (opts) {
 
           // Reduce the result set to a single hash of headers.
 
-          var headers = { };
+          let headers = { };
           headers[HttpHeader.LAST_MODIFIED] = result[0].getLastModified ();
 
           if (result.length === 1)
             return onReduceComplete (null, headers);
 
           async.reduce (result.slice (1), headers, function (memo, item, callback) {
-            var lastModified = item.getLastModified ();
+            let lastModified = item.getLastModified ();
 
             if (DateUtils.compare (memo[HttpHeader.LAST_MODIFIED], lastModified) == -1)
               memo[HttpHeader.LAST_MODIFIED] = lastModified;
@@ -405,7 +405,7 @@ ResourceController.prototype.getAll = function (opts) {
             if (err) return callback (err, null);
 
             // The Last-Modified header must be in string format.
-            var lastModified = headers[HttpHeader.LAST_MODIFIED];
+            let lastModified = headers[HttpHeader.LAST_MODIFIED];
 
             if (lastModified)
               headers[HttpHeader.LAST_MODIFIED] = lastModified.toUTCString ();
@@ -424,7 +424,7 @@ ResourceController.prototype.getAll = function (opts) {
          * @returns {*}
          */
         function transform (data, callback) {
-          var result = { };
+          let result = { };
           result[self._pluralize] = data;
 
           if (!opts.populate)
@@ -454,24 +454,24 @@ ResourceController.prototype.update = function (opts) {
   function __onPrepareUpdate (req, update, callback) { return callback (null, update); }
 
   opts = opts || {};
-  var on = opts.on || {};
+  let on = opts.on || {};
 
-  var idValidationSchema = this._getIdValidationSchema (opts);
-  var idSanitizer = this._getIdSanitizer (opts);
+  let idValidationSchema = this._getIdValidationSchema (opts);
+  let idSanitizer = this._getIdSanitizer (opts);
 
-  var validate = opts.validate || __validate;
-  var sanitize = opts.sanitize || __sanitize;
+  let validate = opts.validate || __validate;
+  let sanitize = opts.sanitize || __sanitize;
 
-  var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
-  var onPrepareUpdate = on.prepareUpdate || __onPrepareUpdate;
-  var onPrepareOptions = on.prepareOptions || __onPrepareOptions;
-  var onPreExecute = on.preExecute || __onPreExecute;
-  var onPostExecute = on.postExecute || __onPostExecute;
-  var onPrepareResponse = on.prepareResponse || __onPrepareResponse;
+  let onPrepareFilter = on.prepareFilter || __onPrepareFilter;
+  let onPrepareUpdate = on.prepareUpdate || __onPrepareUpdate;
+  let onPrepareOptions = on.prepareOptions || __onPrepareOptions;
+  let onPreExecute = on.preExecute || __onPreExecute;
+  let onPostExecute = on.postExecute || __onPostExecute;
+  let onPrepareResponse = on.prepareResponse || __onPrepareResponse;
 
-  var eventName = this._computeEventName ('updated');
+  let eventName = this._computeEventName ('updated');
 
-  var self = this;
+  let self = this;
 
   return {
     validate: function (req, callback) {
@@ -501,12 +501,12 @@ ResourceController.prototype.update = function (opts) {
     },
 
     execute: function __blueprint_update_execute (req, res, callback) {
-      var rcId = req.params[self.id];
-      var filter = {_id: rcId};
+      let rcId = req.params[self.id];
+      let filter = {_id: rcId};
 
 
-      var update = getUpdateFromBody (req.body[self.name]);
-      var options = { upsert: false, new: true };
+      let update = getUpdateFromBody (req.body[self.name]);
+      let options = { upsert: false, new: true };
 
       async.waterfall ([
         function (callback) {
@@ -534,7 +534,7 @@ ResourceController.prototype.update = function (opts) {
              * @param callback
              */
             execute: function (callback) {
-              var dbCompletion = makeDbCompletionHandler ('update_failed', 'Failed to update resource', callback);
+              let dbCompletion = makeDbCompletionHandler ('update_failed', 'Failed to update resource', callback);
               self._model.findOneAndUpdate (query.filter, query.update, query.options, dbCompletion);
             }
           }, completion);
@@ -557,7 +557,7 @@ ResourceController.prototype.update = function (opts) {
 
         // Rewrite the result in JSON API format.
         function (data, callback) {
-          var result = { };
+          let result = { };
           result[self.name] = data;
 
           return callback (null, result);
@@ -579,20 +579,20 @@ ResourceController.prototype.update = function (opts) {
  */
 ResourceController.prototype.delete = function (opts) {
   opts = opts || {};
-  var on = opts.on || {};
+  let on = opts.on || {};
 
-  var idValidationSchema = this._getIdValidationSchema (opts);
-  var idSanitizer = this._getIdSanitizer (opts);
+  let idValidationSchema = this._getIdValidationSchema (opts);
+  let idSanitizer = this._getIdSanitizer (opts);
 
-  var validate = opts.validate || __validate;
-  var sanitize = opts.sanitize || __sanitize;
+  let validate = opts.validate || __validate;
+  let sanitize = opts.sanitize || __sanitize;
 
-  var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
-  var onPreExecute = on.preExecute || __onPreExecute;
-  var onPostExecute = on.postExecute || __onPostExecute;
-  var eventName = this._computeEventName ('deleted');
+  let onPrepareFilter = on.prepareFilter || __onPrepareFilter;
+  let onPreExecute = on.preExecute || __onPreExecute;
+  let onPostExecute = on.postExecute || __onPostExecute;
+  let eventName = this._computeEventName ('deleted');
 
-  var self = this;
+  let self = this;
 
   return {
     validate: function (req, callback) {
@@ -620,8 +620,8 @@ ResourceController.prototype.delete = function (opts) {
     },
 
     execute: function __blueprint_delete (req, res, callback) {
-      var rcId = req.params[self.id];
-      var filter = {_id: rcId};
+      let rcId = req.params[self.id];
+      let filter = {_id: rcId};
 
       async.waterfall ([
         // First, allow the subclass to update the filter.
@@ -642,7 +642,7 @@ ResourceController.prototype.delete = function (opts) {
             },
 
             execute: function (callback) {
-              var dbCompletion = makeDbCompletionHandler ('delete_failed', 'Failed to delete resource', callback);
+              let dbCompletion = makeDbCompletionHandler ('delete_failed', 'Failed to delete resource', callback);
               self._model.findOneAndRemove (filter, dbCompletion);
             }
           }, completion);
@@ -673,15 +673,15 @@ ResourceController.prototype.delete = function (opts) {
  */
 ResourceController.prototype.count = function (opts) {
   opts = opts || {};
-  var on = opts.on || {};
+  let on = opts.on || {};
 
-  var validate = opts.validate || __validate;
-  var sanitize = opts.sanitize || __sanitize;
+  let validate = opts.validate || __validate;
+  let sanitize = opts.sanitize || __sanitize;
 
-  var onPrepareFilter = on.prepareFilter || __onPrepareFilter;
-  var onPostExecute = on.postExecute || __onPostExecute;
+  let onPrepareFilter = on.prepareFilter || __onPrepareFilter;
+  let onPostExecute = on.postExecute || __onPostExecute;
 
-  var self = this;
+  let self = this;
 
   return {
     validate: validate,
@@ -716,7 +716,7 @@ ResourceController.prototype.count = function (opts) {
  * Calculate the event name for an action.
  */
 ResourceController.prototype._computeEventName = function (action) {
-  var prefix = this.namespace || '';
+  let prefix = this.namespace || '';
 
   if (prefix.length !== 0)
     prefix += '.';
@@ -728,14 +728,14 @@ ResourceController.prototype._computeEventName = function (action) {
  * Get the validation schema for the resource.
  */
 ResourceController.prototype._getIdValidationSchema = function (opts) {
-  var defaults = objectPath (this._idOpts);
+  let defaults = objectPath (this._idOpts);
 
-  var id = objectPath (opts.id);
-  var validator = id.get ('validator', defaults.get ('validator', 'isMongoId'));
-  var validatorOptions = id.get ('validatorOptions', defaults.get ('validatorOptions'));
-  var errorMessage = id.get ('errorMessage', defaults.get ('errorMessage', 'Invalid resource id'));
+  let id = objectPath (opts.id);
+  let validator = id.get ('validator', defaults.get ('validator', 'isMongoId'));
+  let validatorOptions = id.get ('validatorOptions', defaults.get ('validatorOptions'));
+  let errorMessage = id.get ('errorMessage', defaults.get ('errorMessage', 'Invalid resource id'));
 
-  var schema = {};
+  let schema = {};
   schema[this.id] = {
     in: 'params'
   };
@@ -752,9 +752,9 @@ ResourceController.prototype._getIdValidationSchema = function (opts) {
  * Get the validation schema for the resource.
  */
 ResourceController.prototype._getIdSanitizer = function (opts) {
-  var defaults = objectPath (this._idOpts);
+  let defaults = objectPath (this._idOpts);
 
-  var id = objectPath (opts.id);
+  let id = objectPath (opts.id);
   return id.get ('sanitizer', defaults.get ('sanitizer', 'toMongoId'));
 };
 
@@ -766,16 +766,16 @@ ResourceController.prototype._getIdSanitizer = function (opts) {
  * @returns {{$set: *}}
  */
 function getUpdateFromBody (body) {
-  var update = {};
+  let update = {};
 
-  var $set = {};
-  var $unset = {};
+  let $set = {};
+  let $unset = {};
 
-  for (var name in body) {
+  for (let name in body) {
     if (!body.hasOwnProperty (name))
       continue;
 
-    var value = body[name];
+    let value = body[name];
 
     if (value !== null)
       $set[name] = value;

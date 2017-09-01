@@ -10,6 +10,7 @@ function FriendController () {
   UserResourceController.call (this, {
     model: Friend,
     userPath: 'headers.user',
+    userPathIsModel: false,
     modelPath: 'person'
   });
 }
