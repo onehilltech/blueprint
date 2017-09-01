@@ -140,7 +140,7 @@ describe ('AccountRouter', function () {
         blueprint.testing.request ()
           .post ('/v1/accounts').send ({account: account})
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
-          .expect (403, { errors: { code: 'policy_failed', message: 'No scopes defined' } }, done);
+          .expect (403, { errors: { code: 'policy_failed', message: 'Not a super user' } }, done);
       });
     });
   });
