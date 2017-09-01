@@ -3,7 +3,7 @@ Gatekeeper
 
 OAuth 2.0 token server and module for Blueprint.js
 
-[![npm version](https://img.shields.io/npm/v/@onehilltech/gatekeeper.svg?maxAge=2592000)](https://www.npmjs.com/package/@onehilltech/gatekeeper)
+[![npm version](https://img.shields.io/npm/v/@onehilltech/blueprint-gatekeeper.svg?maxAge=2592000)](https://www.npmjs.com/package/@onehilltech/blueprint-gatekeeper)
 [![Build Status](https://travis-ci.org/onehilltech/gatekeeper.svg?branch=master)](https://travis-ci.org/onehilltech/gatekeeper)
 [![Dependencies](https://david-dm.org/onehilltech/gatekeeper.svg)](https://david-dm.org/onehilltech/gatekeeper)
 [![Coverage Status](https://coveralls.io/repos/github/onehilltech/gatekeeper/badge.svg?branch=master)](https://coveralls.io/github/onehilltech/gatekeeper?branch=master)
@@ -60,7 +60,7 @@ const blueprint = require ('@onehilltech/blueprint')
   ;
 
 module.exports = exports = {
-  '/gatekeeper': blueprint ('router://@onehilltech/gatekeeper:v1')
+  '/gatekeeper': blueprint ('router://@onehilltech/blueprint-gatekeeper:v1')
 };
 ```
 
