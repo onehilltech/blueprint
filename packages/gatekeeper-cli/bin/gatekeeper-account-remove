@@ -2,7 +2,7 @@
 'use strict';
 
 var program          = require ('commander')
-  , gatekeeper       = require ('@onehilltech/gatekeeper')
+  , gatekeeper       = require ('@onehilltech/blueprint-gatekeeper')
   , gatekeeperClient = require ('../lib/GatekeeperClient')
   , async            = require ('async')
   , winston          = require ('winston')

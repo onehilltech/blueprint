@@ -3,7 +3,7 @@ gatekeeper-cli
 
 command-line interface for Gatekeeper
 
-[![npm version](https://img.shields.io/npm/v/@onehilltech/gatekeeper-cli.svg?maxAge=2592000)](https://www.npmjs.com/package/@onehilltech/gatekeeper-cli)
+[![npm version](https://img.shields.io/npm/v/@onehilltech/blueprint-gatekeeper-cli.svg?maxAge=2592000)](https://www.npmjs.com/package/@onehilltech/blueprint-gatekeeper-cli)
 [![Build Status](https://travis-ci.org/onehilltech/gatekeeper-cli.svg?branch=master)](https://travis-ci.org/onehilltech/gatekeeper-cli)
 [![Dependencies](https://david-dm.org/onehilltech/gatekeeper-cli.svg)](https://david-dm.org/onehilltech/gatekeeper-cli)
 [![Coverage Status](https://coveralls.io/repos/github/onehilltech/gatekeeper-cli/badge.svg?branch=master)](https://coveralls.io/github/onehilltech/gatekeeper-cli?branch=master)
@@ -11,7 +11,7 @@ command-line interface for Gatekeeper
 Installation
 --------------
 
-    npm install -g @onehilltech/gatekeeper-cli
+    npm install -g @onehilltech/blueprint-gatekeeper-cli
  
 Getting Started
 ---------------

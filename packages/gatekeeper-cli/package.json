@@ -1,5 +1,5 @@
 {
-  "name": "@onehilltech/gatekeeper-cli",
+  "name": "@onehilltech/blueprint-gatekeeper-cli",
   "description": "command-line interface for Gatekeeper",
   "version": "0.3.0",
   "private": false,
@@ -9,7 +9,7 @@
     "url": "https://github.com/onehilltech/gatekeeper-cli.git"
   },
   "dependencies": {
-    "@onehilltech/gatekeeper": "0.39.1",
+    "@onehilltech/blueprint-gatekeeper": "0.39.1",
     "async": "^2.1.2",
     "commander": "^2.9.0",
     "prompt": "^1.0.0",
