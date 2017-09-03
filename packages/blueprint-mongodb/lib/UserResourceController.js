@@ -20,7 +20,7 @@ function UserResourceController (opts) {
   this.userPathIsModel = opts.userPathIsModel !== undefined ? opts.userPathIsModel : true;
 
   if (this.userPathIsModel) {
-    this.modelIdPath = opts.modelIdPath || '._id';
+    this.modelIdPath = opts.modelIdPath || '_id';
   }
 
   this.modelPath = opts.modelPath || 'user';
