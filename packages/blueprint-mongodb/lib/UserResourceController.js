@@ -2,10 +2,10 @@
 
 const util     = require ('util')
   , objectPath = require ('object-path')
-  ;
+;
 
 let ResourceController = require ('./ResourceController')
-  ;
+;
 
 /**
  * @class UserResourceController
@@ -38,51 +38,60 @@ function __prepareFilter (req, filter, callback) { return callback (null, filter
  * Create a new resource.
  */
 UserResourceController.prototype.create = function (opts) {
-  let prepareDocument = opts.prepareDocument || __prepareDocument;
+  let on = opts.on || {};
+  let prepareDocument = on.prepareDocument || __prepareDocument;
   let controller = this;
 
-  return ResourceController.prototype.create.call (this, {
-    on: {
-      prepareDocument (req, doc, callback) {
-        // Get the user id from the request, and set the user id on the model path.
-        let user = objectPath.get (req, controller.userPath);
-        objectPath.set (doc, controller.modelPath, user);
+  on.prepareDocument = function (req, doc, callback) {
+    // Get the user id from the request, and set the user id on the model path.
+    let user = objectPath.get (req, controller.userPath);
+    objectPath.set (doc, controller.modelPath, user);
 
-        // Pass control to the subclass.
-        return prepareDocument (req, doc, callback);
-      }
-    }
-  });
+    // Pass control to the subclass.
+    return prepareDocument (req, doc, callback);
+  };
+
+  opts.on = on;
+
+  return ResourceController.prototype.create.call (this, opts);
 };
 
 /**
  * Create a new resource.
  */
 UserResourceController.prototype.getAll = function (opts) {
-  let prepareFilter = opts.prepareFilter || __prepareFilter;
+  let on = opts.on || {};
+  let prepareFilter = on.prepareFilter || __prepareFilter;
   let controller = this;
 
-  return ResourceController.prototype.getAll.call (this, {
-    on: {
-      prepareFilter (req, filter, callback) {
-        if (!controller.allowAllAccess) {
-          // The user resource can only be access by the person that created it. Let's
-          // update the filter to prevent users who do not own the resource from access
-          // the resource.
-          let userId = objectPath.get (req, controller.userPath);
+  on.prepareFilter = function (req, filter, callback) {
+    if (!controller.allowAllAccess) {
+      // The user resource can only be access by the person that created it. Let's
+      // update the filter to prevent users who do not own the resource from access
+      // the resource.
+      let userId = objectPath.get (req, controller.userPath);
 
-          if (controller.userPathIsModel) {
-            userId = userId[controller.modelIdPath];
-          }
+      if (controller.userPathIsModel) {
+        userId = userId[controller.modelIdPath];
+      }
 
-          filter.$or = [
-            {user: {$exists: false}},
-            {user: {$eq: userId}}];
-        }
+      filter.$or = [
+        {user: {$exists: false}}
+      ];
 
-        // Pass control to the subclass.
-        return prepareFilter (req, filter, callback);
+      if (!filter._public) {
+        filter.$or.push ({user: {$eq: userId}});
+      }
+      else {
+        delete filter._public;
       }
     }
-  });
+
+    // Pass control to the subclass.
+    return prepareFilter (req, filter, callback);
+  };
+
+  opts.on = on;
+
+  return ResourceController.prototype.getAll.call (this, opts);
 };
