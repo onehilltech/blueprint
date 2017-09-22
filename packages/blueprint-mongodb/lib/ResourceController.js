@@ -1,10 +1,11 @@
+'use strict';
+
 const util     = require ('util')
   , async      = require ('async')
   , _          = require ('underscore')
   , pluralize  = require ('pluralize')
   , blueprint  = require ('@onehilltech/blueprint')
   , objectPath = require ('object-path')
-  , winston    = require ('winston')
   , DateUtils  = require ('./DateUtils')
   , HttpHeader = blueprint.http.headers
   ;
