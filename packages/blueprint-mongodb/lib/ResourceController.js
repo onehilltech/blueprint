@@ -505,7 +505,7 @@ ResourceController.prototype.update = function (opts) {
       let filter = {_id: rcId};
 
 
-      let update = getUpdateFromBody (req.body[self.name]);
+      let update = self._getUpdateFromBody (req.body[self.name]);
       let options = { upsert: false, new: true };
 
       async.waterfall ([
@@ -765,14 +765,14 @@ ResourceController.prototype._getIdSanitizer = function (opts) {
  * @param body
  * @returns {{$set: *}}
  */
-function getUpdateFromBody (body) {
+ResourceController.prototype._getUpdateFromBody = function (body) {
   let update = {};
 
   let $set = {};
   let $unset = {};
 
   for (let name in body) {
-    if (!body.hasOwnProperty (name))
+    if (!body.hasOwnProperty (name) || name === '_id')
       continue;
 
     let value = body[name];
@@ -792,4 +792,4 @@ function getUpdateFromBody (body) {
     update.$unset = $unset;
 
   return update;
-}
+};
