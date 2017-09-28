@@ -30,9 +30,9 @@ module.exports = Policy.anySeries ([
          */
         function (callback) {
           if (req.headers && req.headers.authorization) {
-            var parts = req.headers.authorization.split (' ');
+            let parts = req.headers.authorization.split (' ');
 
-            if (parts.length == 2) {
+            if (parts.length === 2) {
               if (/^Bearer$/i.test (parts[0])) {
                 return callback (null, parts[1]);
               }
@@ -95,7 +95,7 @@ module.exports = Policy.anySeries ([
      * Check the state of the access token model.
      */
     function (req, callback) {
-      var accessToken = req.accessToken;
+      let accessToken = req.accessToken;
 
       if (!accessToken)
         return callback (null, false, {reason: 'unknown_token', message: 'Unknown access token'});
@@ -110,7 +110,7 @@ module.exports = Policy.anySeries ([
         return callback (null, false, {reason: 'client_disabled', message: 'Client is disabled'});
 
       // Set the user to the client id.
-      var user = accessToken.client;
+      req.user = accessToken.client;
 
       if (accessToken.kind === 'user_token') {
         if (!accessToken.account)
@@ -120,18 +120,10 @@ module.exports = Policy.anySeries ([
           return callback (null, false, {reason: 'account_disabled', message: 'Account is disabled'});
 
         // Update the user to the account id.
-        user = accessToken.account;
+        req.user = accessToken.account;
       }
 
-      async.waterfall ([
-        function (callback) {
-          req.login (user, {session: false}, callback);
-        },
-
-        function (callback) {
-          return callback (null, true);
-        }
-      ], callback);
+      return callback (null, true);
     }
   ])
 ]);

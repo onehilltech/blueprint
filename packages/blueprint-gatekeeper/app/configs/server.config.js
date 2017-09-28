@@ -10,7 +10,6 @@ module.exports = {
   middleware : {
     validator  : { },
     bodyParser : { json : { } },
-    passport   : {  },
 
     morgan: {
       format: 'dev',
