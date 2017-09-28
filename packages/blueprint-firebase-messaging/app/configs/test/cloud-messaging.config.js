@@ -5,6 +5,6 @@ module.exports = {
   dryRun: true,
 
   claimTicketOptions: {
-    secretOrPrivateKey: 'SSSHHH'
+    secret: 'SSSHHH'
   }
 };

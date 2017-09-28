@@ -29,8 +29,9 @@ describe ('CloudTokenRouter', function () {
               function (callback) {
                 let claimTicketOptions = blueprint.app.configs['cloud-messaging'].claimTicketOptions;
                 let options = {issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
+                let cert = claimTicketOptions.secret || claimTicketOptions.publicKey;
 
-                jwt.verify (res.body.claim_ticket.claim_ticket, claimTicketOptions.secretOrPrivateKey, options, callback);
+                jwt.verify (res.body.claim_ticket.claim_ticket, cert, options, callback);
               },
 
               function (payload, callback) {
@@ -100,8 +101,9 @@ describe ('CloudTokenRouter', function () {
             let cloudToken = blueprint.app.seeds.$default.cloud_tokens[0];
             let claimTicketOptions = blueprint.app.configs['cloud-messaging'].claimTicketOptions;
             let options = {jwtid: cloudToken.id, issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
+            let cert = claimTicketOptions.secret || claimTicketOptions.privateKey;
 
-            jwt.sign ({device: 'device_123'}, claimTicketOptions.secretOrPrivateKey, options, callback);
+            jwt.sign ({device: 'device_123'}, cert, options, callback);
           },
 
           function (claimTicket, callback) {

@@ -56,7 +56,9 @@ CloudTokenController.prototype.registerToken = function () {
 
           if (!token.owner) {
             let options = {jwtid: token.id, issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
-            let claimTicket = jwt.sign ({device: token.device}, claimTicketOptions.secretOrPrivateKey, options);
+            let cert = claimTicketOptions.secret || claimTicketOptions.privateKey;
+
+            let claimTicket = jwt.sign ({device: token.device}, cert, options);
             ret.claim_ticket = {claim_ticket: claimTicket};
           }
 
@@ -82,8 +84,9 @@ CloudTokenController.prototype.claimDevice = function () {
         function (callback) {
           let claimTicket = req.body.claim_ticket;
           let options = {issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
+          let cert = claimTicketOptions.secret || claimTicketOptions.publicKey;
 
-          jwt.verify (claimTicket, claimTicketOptions.secretOrPrivateKey, options, callback);
+          jwt.verify (claimTicket, cert, options, callback);
         },
 
         function (payload, callback) {
