@@ -1,13 +1,11 @@
 'use strict';
 
-var blueprint          = require ('@onehilltech/blueprint')
-  , mongodb            = require ('@onehilltech/blueprint-mongodb')
-  , async              = require ('async')
+let blueprint  = require ('@onehilltech/blueprint')
+  , mongodb    = require ('@onehilltech/blueprint-mongodb')
+  , async      = require ('async')
+  , CloudToken = require ('../models/CloudToken')
   , ResourceController = mongodb.ResourceController
   , HttpError          = blueprint.errors.HttpError
-  ;
-
-var CloudToken = require ('../models/CloudToken')
   ;
 
 function CloudTokenController () {
@@ -18,44 +16,57 @@ blueprint.controller (CloudTokenController, ResourceController);
 
 module.exports = CloudTokenController;
 
-/**
- * Register a token.
- *
- */
-CloudTokenController.prototype.create = function () {
+CloudTokenController.prototype.registerToken = function () {
   return {
     validate: {
       device: {
-        notEmpty: {
-          errorMessage: 'Missing device id parameter'
-        }
+        notEmpty: { errorMessage: 'Missing device id parameter.' }
       },
 
       token: {
-        notEmpty: {
-          errorMessage: 'Missing token parameter'
-        }
+        notEmpty: { errorMessage: 'Missing token parameter.'}
       }
     },
 
     execute: function (req, res, callback) {
       async.waterfall ([
         function (callback) {
-          var query = {device: req.body.device};
-          var update = {device: req.body.device, owner: req.user._id, token: req.body.token};
-          var options = {upsert: true, new: true};
+          let query = {device: req.body.device};
+          let update = {device: req.body.device, token: req.body.token};
+          let options = {upsert: true, new: true};
+
+          // If the request if from a user, we can go ahead and allow the user to claim
+          // this token.
+
+          if (req.accessToken.kind === 'user_token')
+            update.owner = req.accessToken.account._id;
 
           CloudToken.findOneAndUpdate (query, update, options, callback);
         },
 
         function (token, callback) {
-          if (!token)
-            return callback (new HttpError (400, 'Bad request'));
-
-          res.status (200).json (true);
+          res.status (200).json (!!token);
           return callback (null);
         }
       ], callback);
-    }
+    },
+  }
+};
+
+CloudTokenController.prototype.claimToken = function () {
+  return function (req, res, callback) {
+    async.waterfall ([
+      function (callback) {
+        let query = {device: req.params.deviceId};
+        let update = {owner: req.user._id};
+
+        CloudToken.findOneAndUpdate (query, update, callback);
+      },
+
+      function (token, callback) {
+        res.status (200).json (!!token);
+        return callback (null);
+      }
+    ], callback);
   }
 };

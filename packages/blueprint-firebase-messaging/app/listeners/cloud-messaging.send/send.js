@@ -1,15 +1,17 @@
-var blueprint = require ('@onehilltech/blueprint')
+'use strict';
+
+let blueprint = require ('@onehilltech/blueprint')
   , messaging = blueprint.messaging
   , Sender    = require ('../../../lib/Sender')
   ;
 
-var sender;
+let sender;
 
 const DEFAULT_RELAY_CALLBACK = 'cloud-messaging.send.callback';
 
 messaging.on ('app.init', function (app) {
-  var config = app.configs['cloud-messaging'];
-  var CloudToken = app.models.CloudToken;
+  let config = app.configs['cloud-messaging'];
+  let CloudToken = app.models.CloudToken;
 
   sender = new Sender (CloudToken, config);
 });

@@ -2,7 +2,6 @@
 
 const dab      = require ('@onehilltech/dab')
   , gatekeeper = require ('@onehilltech/blueprint-gatekeeper')
-  , ObjectId   = require ('mongoose').Types.ObjectId
   ;
 
 module.exports = {
@@ -13,27 +12,31 @@ module.exports = {
   ],
 
   accounts: dab.times (5, function (i, opts, callback) {
-    const whoami = 'account' + i;
+    const username = 'account' + i;
 
-    return callback (null, { username: whoami, password: whoami, email: 'contact@' + whoami + '.com'})
+    return callback (null, { username: username, password: username, email: `${username}@.no-reply.com`})
+  }),
+
+  client_tokens: dab.map (dab.get ('native'), function (client, opts, callback) {
+    const model = { client: dab.get ('native.0'), account: client._id };
+    return callback (null, model);
   }),
 
   user_tokens: dab.map (dab.get ('accounts'), function (account, opts, callback) {
     const model = {
       client: dab.get ('native.0'),
       account: account._id,
-      refresh_token: new ObjectId (),
-      scope: account.scope
+      refresh_token: dab.id ()
     };
 
     return callback (null, model);
   }),
 
   cloud_tokens: [
-    { device: new ObjectId (), owner: dab.ref ('accounts.0'), token: '123' },
-    { device: new ObjectId (), owner: dab.ref ('accounts.0'), token: '456' },
-    { device: new ObjectId (), owner: dab.ref ('accounts.0'), token: '789' },
-    { device: new ObjectId (), owner: dab.ref ('accounts.0'), token: 'abc' },
-    { device: new ObjectId (), owner: dab.ref ('accounts.0'), token: 'def' }
+    { device: dab.id (), owner: dab.ref ('accounts.0'), token: '123' },
+    { device: dab.id (), owner: dab.ref ('accounts.0'), token: '456' },
+    { device: dab.id (), owner: dab.ref ('accounts.0'), token: '789' },
+    { device: dab.id (), owner: dab.ref ('accounts.0'), token: 'abc' },
+    { device: dab.id (), owner: dab.ref ('accounts.0'), token: 'def' }
   ]
 };

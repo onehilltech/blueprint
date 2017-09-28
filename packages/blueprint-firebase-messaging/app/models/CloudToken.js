@@ -19,15 +19,15 @@ const options = {
   }
 };
 
-var schema = new Schema({
+let schema = new Schema({
   /// Instance id for the token.
   device: {type: String, required: true, unique: true, index: true, const: true},
 
-  /// User account that owns the token.
-  owner: {type: ObjectId, required: true, ref: Account.modelName, validation: {optional: true} },
-
   /// Access token for the device.
-  token: {type: String, required: true}
+  token: {type: String, required: true},
+
+  /// User account that owns the token.
+  owner: {type: ObjectId, required: true, ref: Account.modelName, validation: {optional: true}}
 }, options);
 
-module.exports = mongodb.resource ('cloud_token', schema, 'blueprint_cloud_tokens');
+module.exports = mongodb.resource ('cloud_token', schema, 'cloud_tokens');

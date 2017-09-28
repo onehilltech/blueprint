@@ -4,9 +4,10 @@ module.exports = {
   '/cloud-tokens' : {
     policy: 'gatekeeper.auth.bearer',
 
-    resource: {
-      controller : 'CloudTokenController',
-      allow: ['create']
+    post: 'CloudTokenController@registerToken',
+
+    '/:deviceId': {
+      put: {action: 'CloudTokenController@claimToken', policy: 'gatekeeper.request.isFromUser'}
     }
   }
 };
