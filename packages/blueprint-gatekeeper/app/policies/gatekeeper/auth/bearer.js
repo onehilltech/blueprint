@@ -10,10 +10,10 @@ const async     = require ('async')
 
 module.exports = Policy.anySeries ([
   /*
-   * Either we are already authenticiated.
+   * Either we are already authenticated.
    */
   function (req, callback) {
-    return callback (null, req.isAuthenticated ());
+    return callback (null, !!req.user);
   },
 
   /*
