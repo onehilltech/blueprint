@@ -33,9 +33,9 @@ module.exports = {
   }),
 
   cloud_tokens: [
-    { device: dab.id (), owner: dab.ref ('accounts.0'), token: '123' },
-    { device: dab.id (), owner: dab.ref ('accounts.0'), token: '456' },
-    { device: dab.id (), owner: dab.ref ('accounts.0'), token: '789' },
+    { device: 'device_123', token: '123' },
+    { device: 'device_456', token: '456' },
+    { device: 'device_789', token: '789' },
     { device: dab.id (), owner: dab.ref ('accounts.0'), token: 'abc' },
     { device: dab.id (), owner: dab.ref ('accounts.0'), token: 'def' }
   ]
