@@ -7,7 +7,7 @@ module.exports = {
     post: 'CloudTokenController@registerToken',
 
     '/:deviceId': {
-      put: {action: 'CloudTokenController@claimToken', policy: 'gatekeeper.request.isFromUser'}
+      get: {action: 'CloudTokenController@claimDevice', policy: 'gatekeeper.request.isFromUser'},
     }
   }
 };

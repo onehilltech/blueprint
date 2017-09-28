@@ -53,7 +53,7 @@ CloudTokenController.prototype.registerToken = function () {
   }
 };
 
-CloudTokenController.prototype.claimToken = function () {
+CloudTokenController.prototype.claimDevice = function () {
   return function (req, res, callback) {
     async.waterfall ([
       function (callback) {

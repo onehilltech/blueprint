@@ -79,8 +79,8 @@ describe ('CloudTokenRouter', function () {
   });
 
   describe ('/v1/cloud-tokens/:deviceId', function () {
-    describe ('PUT', function () {
-      it ('should claim an unclaimed token', function (done) {
+    describe ('GET', function () {
+      it ('should claim an unclaimed device', function (done) {
         let userToken = blueprint.app.seeds.$default.user_tokens[0];
         let accessToken = userToken.serializeSync ();
         let deviceId = 'device_123';
@@ -88,7 +88,7 @@ describe ('CloudTokenRouter', function () {
         async.series ([
           function (callback) {
             blueprint.testing.request ()
-              .put (`/v1/cloud-tokens/${deviceId}`)
+              .get (`/v1/cloud-tokens/${deviceId}`)
               .set ('Authorization', 'Bearer ' + accessToken.access_token)
               .expect (200, 'true', callback);
           },
@@ -114,13 +114,13 @@ describe ('CloudTokenRouter', function () {
         ], done);
       });
 
-      it ('should not allow client to claim an unclaimed token', function (done) {
+      it ('should not allow client to claim a device', function (done) {
         let clientToken = blueprint.app.seeds.$default.client_tokens[0];
         let accessToken = clientToken.serializeSync ();
         let deviceId = 'device_123';
 
         blueprint.testing.request ()
-          .put (`/v1/cloud-tokens/${deviceId}`)
+          .get (`/v1/cloud-tokens/${deviceId}`)
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .expect (403, {errors:{code: 'policy_failed', message: 'Not a user token'}}, done);
       });
