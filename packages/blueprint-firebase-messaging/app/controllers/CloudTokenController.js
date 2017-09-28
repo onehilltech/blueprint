@@ -4,15 +4,22 @@ let blueprint  = require ('@onehilltech/blueprint')
   , mongodb    = require ('@onehilltech/blueprint-mongodb')
   , async      = require ('async')
   , CloudToken = require ('../models/CloudToken')
+  , jwt        = require ('jsonwebtoken')
   , ResourceController = mongodb.ResourceController
-  , HttpError          = blueprint.errors.HttpError
   ;
+
+let claimTicketOptions = null;
+
+blueprint.messaging.on ('app.init', function (app) {
+  claimTicketOptions = app.configs['cloud-messaging'].claimTicketOptions;
+});
 
 function CloudTokenController () {
   ResourceController.call (this, {name: 'token', model: CloudToken});
 }
 
 blueprint.controller (CloudTokenController, ResourceController);
+
 
 module.exports = CloudTokenController;
 
@@ -45,7 +52,16 @@ CloudTokenController.prototype.registerToken = function () {
         },
 
         function (token, callback) {
-          res.status (200).json (!!token);
+          let ret = {};
+
+          if (!token.owner) {
+            let options = {jwtid: token.id, issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
+            let claimTicket = jwt.sign ({device: token.device}, claimTicketOptions.secretOrPrivateKey, options);
+            ret.claim_ticket = {claim_ticket: claimTicket};
+          }
+
+          res.status (200).json (ret);
+
           return callback (null);
         }
       ], callback);
@@ -54,19 +70,32 @@ CloudTokenController.prototype.registerToken = function () {
 };
 
 CloudTokenController.prototype.claimDevice = function () {
-  return function (req, res, callback) {
-    async.waterfall ([
-      function (callback) {
-        let query = {device: req.params.deviceId};
-        let update = {owner: req.user._id};
-
-        CloudToken.findOneAndUpdate (query, update, callback);
-      },
-
-      function (token, callback) {
-        res.status (200).json (!!token);
-        return callback (null);
+  return {
+    validate: {
+      claim_ticket: {
+        notEmpty: { errorMessage: 'You must provide a claim ticket.' }
       }
-    ], callback);
-  }
+    },
+
+    execute (req, res, callback) {
+      async.waterfall ([
+        function (callback) {
+          let claimTicket = req.body.claim_ticket;
+          let options = {issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
+
+          jwt.verify (claimTicket, claimTicketOptions.secretOrPrivateKey, options, callback);
+        },
+
+        function (payload, callback) {
+          let update = {owner: req.user._id};
+          CloudToken.findByIdAndUpdate (payload.jti, update, callback);
+        },
+
+        function (token, callback) {
+          res.status (200).json (!!token);
+          return callback (null);
+        }
+      ], callback);
+    }
+  };
 };

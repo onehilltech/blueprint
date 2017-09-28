@@ -2,5 +2,9 @@
 
 module.exports = {
   apiKey: 'AIzaSyDuhZ8sT_ziDTm3SWAaunU2rRnR951eRDE',
-  dryRun: true
+  dryRun: true,
+
+  claimTicketOptions: {
+    secretOrPrivateKey: 'SSSHHH'
+  }
 };

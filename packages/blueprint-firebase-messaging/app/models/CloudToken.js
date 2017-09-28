@@ -27,7 +27,7 @@ let schema = new Schema({
   token: {type: String, required: true},
 
   /// User account that owns the token.
-  owner: {type: ObjectId, ref: Account.modelName, validation: {optional: true}}
+  owner: {type: ObjectId, ref: Account.modelName, validation: {optional: true}},
 }, options);
 
 module.exports = mongodb.resource ('cloud_token', schema, 'cloud_tokens');

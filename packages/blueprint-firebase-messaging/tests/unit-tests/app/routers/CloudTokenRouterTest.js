@@ -2,6 +2,7 @@
 
 var expect    = require ('chai').expect
   , async     = require ('async')
+  , jwt       = require ('jsonwebtoken')
   , blueprint = require ('@onehilltech/blueprint')
   ;
 
@@ -12,19 +13,28 @@ describe ('CloudTokenRouter', function () {
         const accessToken = blueprint.app.seeds.$default.client_tokens[0].serializeSync ();
         const data = {device: '1234567890', token: 'aabbccdd'};
 
-        async.series ([
+        async.waterfall ([
           function (callback) {
             blueprint.testing.request ()
               .post ('/v1/cloud-tokens')
               .set ('Authorization', 'Bearer ' + accessToken.access_token)
               .send (data)
-              .expect (200, 'true', callback);
+              .expect (200, callback);
           },
 
-          function (callback) {
+          function (res, callback) {
+            expect (res.body).to.have.deep.property ('claim_ticket.claim_ticket');
+
             async.waterfall ([
               function (callback) {
-                blueprint.app.models.CloudToken.findOne ({device: data.device}, callback);
+                let claimTicketOptions = blueprint.app.configs['cloud-messaging'].claimTicketOptions;
+                let options = {issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
+
+                jwt.verify (res.body.claim_ticket.claim_ticket, claimTicketOptions.secretOrPrivateKey, options, callback);
+              },
+
+              function (payload, callback) {
+                blueprint.app.models.CloudToken.findById (payload.jti, callback);
               },
 
               function (cloudToken, callback) {
@@ -52,7 +62,7 @@ describe ('CloudTokenRouter', function () {
               .post ('/v1/cloud-tokens')
               .set ('Authorization', 'Bearer ' + accessToken.access_token)
               .send (data)
-              .expect (200, 'true', callback);
+              .expect (200, {}, callback);
           },
 
           function (callback) {
@@ -78,22 +88,34 @@ describe ('CloudTokenRouter', function () {
     });
   });
 
-  describe ('/v1/cloud-tokens/:deviceId', function () {
-    describe ('GET', function () {
+  describe ('/v1/cloud-tokens/claims', function () {
+    describe ('POST', function () {
       it ('should claim an unclaimed device', function (done) {
         let userToken = blueprint.app.seeds.$default.user_tokens[0];
         let accessToken = userToken.serializeSync ();
         let deviceId = 'device_123';
 
-        async.series ([
+        async.waterfall ([
           function (callback) {
+            let cloudToken = blueprint.app.seeds.$default.cloud_tokens[0];
+            let claimTicketOptions = blueprint.app.configs['cloud-messaging'].claimTicketOptions;
+            let options = {jwtid: cloudToken.id, issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
+
+            jwt.sign ({device: 'device_123'}, claimTicketOptions.secretOrPrivateKey, options, callback);
+          },
+
+          function (claimTicket, callback) {
+            // generate the expected token for the first device, and submit the
+            // claim ticket.
+
             blueprint.testing.request ()
-              .get (`/v1/cloud-tokens/${deviceId}`)
+              .post ('/v1/cloud-tokens/claims')
               .set ('Authorization', 'Bearer ' + accessToken.access_token)
+              .send ({claim_ticket: claimTicket})
               .expect (200, 'true', callback);
           },
 
-          function (callback) {
+          function (res, callback) {
             async.waterfall ([
               function (callback) {
                 blueprint.app.models.CloudToken.findOne ({device: deviceId}, callback);
@@ -117,12 +139,12 @@ describe ('CloudTokenRouter', function () {
       it ('should not allow client to claim a device', function (done) {
         let clientToken = blueprint.app.seeds.$default.client_tokens[0];
         let accessToken = clientToken.serializeSync ();
-        let deviceId = 'device_123';
 
         blueprint.testing.request ()
-          .get (`/v1/cloud-tokens/${deviceId}`)
+          .post ('/v1/cloud-tokens/claims')
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
-          .expect (403, {errors:{code: 'policy_failed', message: 'Not a user token'}}, done);
+          .send ({claim_ticket: '1234567890'})
+          .expect (403, {errors: {code: 'policy_failed', message: 'Not a user token'}}, done);
       });
 
     });
