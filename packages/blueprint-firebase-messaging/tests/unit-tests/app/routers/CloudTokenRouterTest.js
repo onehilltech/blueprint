@@ -113,6 +113,18 @@ describe ('CloudTokenRouter', function () {
           }
         ], done);
       });
+
+      it ('should not allow client to claim an unclaimed token', function (done) {
+        let clientToken = blueprint.app.seeds.$default.client_tokens[0];
+        let accessToken = clientToken.serializeSync ();
+        let deviceId = 'device_123';
+
+        blueprint.testing.request ()
+          .put (`/v1/cloud-tokens/${deviceId}`)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
+          .expect (403, {errors:{code: 'policy_failed', message: 'Not a user token'}}, done);
+      });
+
     });
   });
 
