@@ -35,6 +35,8 @@ describe ('CloudTokenRouter', function () {
               },
 
               function (payload, callback) {
+                expect (payload).to.have.keys (['aud', 'jti', 'iat', 'iss', 'sub']);
+
                 blueprint.app.models.CloudToken.findById (payload.jti, callback);
               },
 
@@ -89,7 +91,7 @@ describe ('CloudTokenRouter', function () {
     });
   });
 
-  describe ('/v1/cloud-tokens/claims', function () {
+  describe ('/v1/cloud-tokens/:deviceId/claim', function () {
     describe ('POST', function () {
       it ('should claim an unclaimed device', function (done) {
         let userToken = blueprint.app.seeds.$default.user_tokens[0];
@@ -103,7 +105,7 @@ describe ('CloudTokenRouter', function () {
             let options = {jwtid: cloudToken.id, issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
             let cert = claimTicketOptions.secret || claimTicketOptions.privateKey;
 
-            jwt.sign ({device: 'device_123'}, cert, options, callback);
+            jwt.sign ({}, cert, options, callback);
           },
 
           function (claimTicket, callback) {
@@ -111,7 +113,7 @@ describe ('CloudTokenRouter', function () {
             // claim ticket.
 
             blueprint.testing.request ()
-              .post ('/v1/cloud-tokens/claims')
+              .post ('/v1/cloud-tokens/device_123/claim')
               .set ('Authorization', 'Bearer ' + accessToken.access_token)
               .send ({claim_ticket: claimTicket})
               .expect (200, 'true', callback);
@@ -143,12 +145,33 @@ describe ('CloudTokenRouter', function () {
         let accessToken = clientToken.serializeSync ();
 
         blueprint.testing.request ()
-          .post ('/v1/cloud-tokens/claims')
+          .post ('/v1/cloud-tokens/device_123/claim')
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .send ({claim_ticket: '1234567890'})
           .expect (403, {errors: {code: 'policy_failed', message: 'Not a user token'}}, done);
       });
+    });
 
+    describe ('DELETE', function () {
+      it ('should release a claimed device', function (done) {
+        let accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
+        let cloudToken = blueprint.app.seeds.$default.cloud_tokens[3];
+
+        blueprint.testing.request ()
+          .delete (`/v1/cloud-tokens/${cloudToken.device}/claim`)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
+          .expect (200, 'true', done);
+      });
+
+      it ('should delete a claim device', function (done) {
+        let accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
+        let cloudToken = blueprint.app.seeds.$default.cloud_tokens[4];
+
+        blueprint.testing.request ()
+          .delete (`/v1/cloud-tokens/${cloudToken.device}/claim`)
+          .set ('Authorization', 'Bearer ' + accessToken.access_token)
+          .expect (404, {errors: {code: 'not_found', message: 'Device registration does not exist.'}}, done);
+      });
     });
   });
 

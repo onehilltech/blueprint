@@ -1,6 +1,7 @@
 'use strict';
 
 let blueprint  = require ('@onehilltech/blueprint')
+  , HttpError  = blueprint.errors.HttpError
   , mongodb    = require ('@onehilltech/blueprint-mongodb')
   , async      = require ('async')
   , CloudToken = require ('../models/CloudToken')
@@ -58,7 +59,7 @@ CloudTokenController.prototype.registerToken = function () {
             let options = {jwtid: token.id, issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
             let cert = claimTicketOptions.secret || claimTicketOptions.privateKey;
 
-            let claimTicket = jwt.sign ({device: token.device}, cert, options);
+            let claimTicket = jwt.sign ({}, cert, options);
             ret.claim_ticket = {claim_ticket: claimTicket};
           }
 
@@ -90,12 +91,36 @@ CloudTokenController.prototype.claimDevice = function () {
         },
 
         function (payload, callback) {
+          let query = {_id: payload.jti, device: req.params.deviceId};
           let update = {owner: req.user._id};
-          CloudToken.findByIdAndUpdate (payload.jti, update, callback);
+
+          CloudToken.findOneAndUpdate (query, update, callback);
         },
 
         function (token, callback) {
           res.status (200).json (!!token);
+          return callback (null);
+        }
+      ], callback);
+    }
+  };
+};
+
+CloudTokenController.prototype.release = function () {
+  return {
+    execute (req, res, callback) {
+      async.waterfall ([
+        function (callback) {
+          let query = {device: req.params.deviceId, owner: req.user._id};
+
+          CloudToken.findOneAndRemove (query, callback);
+        },
+
+        function (doc, callback) {
+          if (!doc)
+            return callback (new HttpError (404, 'not_found', 'Device registration does not exist.'));
+
+          res.status (200).json (true);
           return callback (null);
         }
       ], callback);
