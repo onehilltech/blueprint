@@ -33,7 +33,7 @@ ConnectionManager.prototype.createConnection = function (name) {
 };
 
 ConnectionManager.prototype.openConnection = function (name, opts, callback) {
-  this._connections[name].open (opts.connstr, opts.database, opts.port, opts.options, callback);
+  this._connections[name].openUri (opts.connstr, opts.options, callback);
 };
 
 ConnectionManager.prototype.getConnection = function (name) {
