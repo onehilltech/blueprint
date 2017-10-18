@@ -1,6 +1,6 @@
 'use strict';
 
-var objectPath = require ('object-path')
+let objectPath = require ('object-path')
   , _          = require ('underscore')
   ;
 
@@ -13,8 +13,8 @@ var objectPath = require ('object-path')
 function ConstSchema (schema) {
   this._schema = schema;
 
-  var properties = ['path', 'options', 'instance', 'validators', 'getters', 'setters'];
-  var _this = this;
+  let properties = ['path', 'options', 'instance', 'validators', 'getters', 'setters'];
+  let _this = this;
 
   properties.forEach (function (name) {
     Object.defineProperty (_this, name, {set: function (val) { _this._schema[name] = val;}, get: function () { return _this._schema[name]; }});
@@ -70,7 +70,7 @@ ConstSchema.prototype.castForQueryWrapper = function () {
  * @constructor
  */
 function ConstPlugin (schema) {
-  var paths = [];
+  let paths = [];
 
   schema.eachPath (function (path, typeSchema) {
     if (typeSchema.options.const) {

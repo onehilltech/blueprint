@@ -7,10 +7,10 @@ const mongodb   = require ('../../../../lib')
   ;
 
 describe ('lib.plugins.ConstPlugin', function () {
-  var Person;
+  let Person;
 
   it ('should create a schema with the const fields', function () {
-    var schema = new mongodb.Schema ({
+    let schema = new mongodb.Schema ({
       first_name: String,
       last_name: String,
 
@@ -19,7 +19,6 @@ describe ('lib.plugins.ConstPlugin', function () {
     });
 
     schema.plugin (ConstPlugin);
-    expect (schema.methods.const).to.be.a.function;
 
     Person = mongodb.model ('person', schema, 'blueprint_persons');
     expect (Person.const ()).to.eql (['creator']);
@@ -29,7 +28,7 @@ describe ('lib.plugins.ConstPlugin', function () {
     it ('should not update a const field', function (done) {
       async.waterfall ([
         function (callback) {
-          var person = new Person ({first_name: 'James', last_name: 'Hill', creator: 'me'});
+          let person = new Person ({first_name: 'James', last_name: 'Hill', creator: 'me'});
           person.save (callback);
         },
 
@@ -61,7 +60,7 @@ describe ('lib.plugins.ConstPlugin', function () {
     it ('should not update a const field', function (done) {
       async.waterfall ([
         function (callback) {
-          var person = new Person ({first_name: 'John', last_name: 'Doe', creator: 'me'});
+          let person = new Person ({first_name: 'John', last_name: 'Doe', creator: 'me'});
           person.save (callback);
         },
 
@@ -87,7 +86,7 @@ describe ('lib.plugins.ConstPlugin', function () {
 
   describe ('update', function () {
     it ('should not update a const field', function (done) {
-      var person;
+      let person;
 
       async.waterfall ([
         function (callback) {

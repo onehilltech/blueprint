@@ -19,7 +19,6 @@ describe ('lib.plugins.HiddenPlugin', function () {
     });
 
     schema.plugin (HiddenPlugin);
-    expect (schema.statics.hidden).to.be.a.function;
 
     Person = mongodb.model ('person', schema, 'blueprint_persons');
     expect (Person.hidden ()).to.eql (['ssn']);
