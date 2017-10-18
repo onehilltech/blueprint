@@ -31,3 +31,5 @@ See our [Wiki](https://github.com/onehilltech/blueprint/wiki) for more details
 on using Blueprint.
 
 Interested in training classes? [Contact us](mailto:training@onehilltech.com)
+
+
