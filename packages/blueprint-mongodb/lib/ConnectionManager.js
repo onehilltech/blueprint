@@ -1,6 +1,7 @@
 'use strict';
 
 let mongoose = require ('mongoose')
+  , _        = require ('underscore')
   ;
 
 var exports = module.exports = ConnectionManager;
@@ -38,7 +39,7 @@ ConnectionManager.prototype.openConnection = function (name, opts, callback) {
   if (!conn)
     throw new Error (`Connection ${name} does not exist.`);
 
-  conn.openUri (opts.connstr, opts.options, callback);
+  conn.openUri (opts.connstr, _.extend ({useMongoClient: true}, opts.options), callback);
 };
 
 ConnectionManager.prototype.getConnection = function (name) {
