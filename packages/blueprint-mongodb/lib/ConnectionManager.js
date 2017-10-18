@@ -1,6 +1,6 @@
 'use strict';
 
-var mongoose = require ('mongoose')
+let mongoose = require ('mongoose')
   ;
 
 var exports = module.exports = ConnectionManager;
@@ -26,21 +26,26 @@ ConnectionManager.prototype.createConnection = function (name) {
   if (name === this._defaultName)
     return mongoose.connections[0];
 
-  var conn = mongoose.createConnection ();
+  let conn = mongoose.createConnection ();
   this._connections[name] = conn;
 
   return conn;
 };
 
 ConnectionManager.prototype.openConnection = function (name, opts, callback) {
-  this._connections[name].openUri (opts.connstr, opts.options, callback);
+  let conn = this._connections[name];
+
+  if (!conn)
+    throw new Error (`Connection ${name} does not exist.`);
+
+  conn.openUri (opts.connstr, opts.options, callback);
 };
 
 ConnectionManager.prototype.getConnection = function (name) {
   return name === this._defaultName ? mongoose.connections[0] : this._connections[name];  
 };
 
-var singleton = null;
+let singleton = null;
 
 exports.getConnectionManager = function (opts) {
   if (singleton)
