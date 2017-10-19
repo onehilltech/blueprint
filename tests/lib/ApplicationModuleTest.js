@@ -30,11 +30,11 @@ describe ('ApplicationModule', function () {
           return done (err);
 
         expect (module.isInit).to.be.true;
-        expect (module.controllerManager).to.be.defined;
-        expect (module.modelManager).to.be.defined;
-        expect (module.routerManager).to.be.defined;
-        expect (module.listenerManager).to.be.defined;
-        expect (module.policyManager).to.be.defined;
+        expect (module.controllerManager).to.not.be.undefined;
+        expect (module.modelManager).to.not.be.undefined;
+        expect (module.routerManager).to.not.be.undefined;
+        expect (module.listenerManager).to.not.be.undefined;
+        expect (module.policyManager).to.not.be.undefined;
         expect (module.initState).to.equal ('Hello, World!');
 
         return done ();
@@ -56,8 +56,8 @@ describe ('ApplicationModule', function () {
 
   describe ('#models', function () {
     it ('should return the loaded models', function () {
-      expect (appModule.models).to.have.deep.property ('TestModel1');
-      expect (appModule.models).to.have.deep.property ('inner.TestModel2');
+      expect (appModule.models).to.have.nested.property ('TestModel1');
+      expect (appModule.models).to.have.nested.property ('inner.TestModel2');
     });
   });
 
