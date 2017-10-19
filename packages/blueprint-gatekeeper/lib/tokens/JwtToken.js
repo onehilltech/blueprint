@@ -1,4 +1,4 @@
-var jwt = require ('jsonwebtoken')
+let jwt = require ('jsonwebtoken')
   ;
 
 const DEFAULT_ALGORITHM = 'HS256';
@@ -11,10 +11,10 @@ function JwtToken (opts) {
 }
 
 JwtToken.prototype.generateToken = function (opts, callback) {
-  var payload = opts.payload;
-  var options = opts.options;
+  let payload = opts.payload;
+  let options = opts.options;
 
-  var hash = this._opts.secret || this._opts.privateKey;
+  let hash = this._opts.secret || this._opts.privateKey;
 
   if (this._opts.privateKey)
     options.algorithm = this._opts.algorithm || DEFAULT_ALGORITHM;
@@ -32,7 +32,7 @@ JwtToken.prototype.generateToken = function (opts, callback) {
 };
 
 JwtToken.prototype.verifyToken = function (token, opts, callback) {
-  var hash = this._opts.secret || this._opts.publicKey;
+  let hash = this._opts.secret || this._opts.publicKey;
 
   if (this._opts.publicKey)
     opts.algorithms = [this._opts.algorithm || DEFAULT_ALGORITHM];

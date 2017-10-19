@@ -1,16 +1,15 @@
-var blueprint = require ('@onehilltech/blueprint')
+'use strict';
+
+let blueprint = require ('@onehilltech/blueprint')
   ;
 
-module.exports = exports = {
-  baseuri : 'http://localhost:5000/gatekeeper',
+module.exports = {
+  baseUrl : 'http://localhost:5000/gatekeeper',
+  activationRequired: true,
 
   email : {
     from : 'noreply@onehilltech.com',
-    twitterHandle: 'onehilltech',
-
-    nodemailer : {
-      transport: 'stub'
-    }
+    twitterHandle: 'onehilltech'
   },
 
   token: {

@@ -1,7 +1,7 @@
-var JwtToken = require ('./JwtToken')
+let JwtToken = require ('./JwtToken')
   ;
 
-module.exports = exports = function (opts) {
+module.exports = function (opts) {
   if (opts.kind === 'jwt')
     return new JwtToken (opts.options);
   else

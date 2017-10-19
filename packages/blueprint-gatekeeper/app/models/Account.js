@@ -1,13 +1,13 @@
 'use strict';
 
-var bcrypt   = require ('bcrypt')
+let bcrypt   = require ('bcrypt')
   , mongodb  = require ('@onehilltech/blueprint-mongodb')
   , async    = require ('async')
   , ObjectId = mongodb.Schema.Types.ObjectId
   , options  = require ('./commonOptions') ()
   ;
 
-var Client = require ('./Client')
+let Client = require ('./Client')
   ;
 
 
@@ -26,9 +26,9 @@ options.toJSON.transform = options.toObject.transform = transform;
 
 const SALT_WORK_FACTOR = 10;
 
-var Schema = mongodb.Schema;
+let Schema = mongodb.Schema;
 
-var schema = new Schema ({
+let schema = new Schema ({
   /// Username for the account.
   username: { type: String, required: true, unique: true, index: true },
 
@@ -47,6 +47,13 @@ var schema = new Schema ({
   /// The default scope for the account. This is applied to the access
   /// token for the account.
   scope: {type: [String], default: []},
+
+  /// Verification object used to generate verification token.
+  verification: {type: ObjectId, hidden: true},
+
+  /// The date the account was verified. If accounts do not need to
+  /// be verified, then this value will always be null.
+  verified_at: {type: Date}
 }, options);
 
 /**
@@ -58,7 +65,7 @@ schema.pre ('save', function (next) {
   if (!this.isModified ('password'))
     return next ();
 
-  var account = this;
+  let account = this;
 
   async.waterfall ([
     function (callback) {
@@ -109,7 +116,4 @@ schema.statics.authenticate = function (username, password, done) {
   });
 };
 
-const MODEL_NAME = 'account';
-const COLLECTION_NAME  = 'gatekeeper_accounts';
-
-module.exports = mongodb.resource (MODEL_NAME, schema, COLLECTION_NAME);
+module.exports = mongodb.resource ('account', schema, 'gatekeeper_accounts');
