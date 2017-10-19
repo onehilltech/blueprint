@@ -63,13 +63,13 @@ describe ('lib.ResourceController', function () {
               message: 'Request validation failed',
               details: {
                 validation: {
-                  'person.address.city': { param: 'person.address.city', msg: 'Invalid param' },
-                  'person.address.state': { param: 'person.address.state', msg: 'Invalid param' },
-                  'person.address.street': { param: 'person.address.street', msg: 'Invalid param' },
-                  'person.address.zipcode': { param: 'person.address.zipcode', msg: 'Invalid param' },
-                  'person.age': { param: 'person.age', msg: 'Invalid/missing Int'},
-                  'person.gender': { param: "person.gender", msg: "Expected [ 'Female', 'Male' ]", value: 'Ok'},
-                  'person.dob': { param: "person.dob", msg: 'Invalid date format'}
+                  'person.address.city': { location: 'params', param: 'person.address.city', msg: 'Invalid value' },
+                  'person.address.state': { location: 'params', param: 'person.address.state', msg: 'Invalid value' },
+                  'person.address.street': { location: 'params', param: 'person.address.street', msg: 'Invalid value' },
+                  'person.address.zipcode': { location: 'params', param: 'person.address.zipcode', msg: 'Invalid value' },
+                  'person.age': { location: 'params', param: 'person.age', msg: 'Invalid value'},
+                  'person.gender': { location: 'body', param: "person.gender", msg: "Expected [ 'Female', 'Male' ]", value: 'Ok'},
+                  'person.dob': { location: 'params', param: "person.dob", msg: 'Invalid value'}
                 }
               }
             }
@@ -208,6 +208,7 @@ describe ('lib.ResourceController', function () {
               details: {
                 validation: {
                   personId: {
+                    location: "params",
                     msg: "Invalid resource id",
                     param: "personId",
                     value: "me"
