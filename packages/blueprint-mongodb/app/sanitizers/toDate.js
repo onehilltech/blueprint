@@ -1,12 +1,12 @@
 'use strict';
 
-let validator = require ('validator')
-  , moment    = require ('moment')
+let moment    = require ('moment')
+  , validator = require ('validator')
   ;
 
 module.exports = function (str) {
   if (str === undefined || str === null)
-    return false;
+    return str;
 
   if (validator.isNumeric (str)) {
     let n = Number.parseInt (str);
