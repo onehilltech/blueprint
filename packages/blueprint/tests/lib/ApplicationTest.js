@@ -34,12 +34,8 @@ describe ('Application', function () {
           return done (err);
 
         expect (app.server).to.not.be.undefined;
-
-        expect (app.validators).to.have.key ('isMongoIdOrMe')
-          .that.is.a.function;
-
-        expect (app.sanitizers).to.have.key ('customSanitizer')
-          .that.is.a.function;
+        expect (app.validators).to.have.key ('isMongoIdOrMe');
+        expect (app.sanitizers).to.have.key ('customSanitizer');
 
         async.parallel ([
           function (callback) {
@@ -106,10 +102,10 @@ describe ('Application', function () {
           expect (app.policies).to.have.keys (['module-policy', 'alwaysTrue', 'alwaysFalse']);
 
           // Check the module resources
-          expect (app).to.have.deep.property ('modules.test-module');
-          expect (app).to.have.deep.property ('modules.test-module.controllers.ModuleTestController').that.is.a.function;
-          expect (app).to.have.deep.property ('modules.test-module.policies.module-policy').that.is.a.function;
-          expect (app).to.have.deep.property ('modules.test-module.routers.ModuleTest').that.is.a.function;
+          expect (app).to.have.nested.property ('modules.test-module');
+          expect (app).to.have.nested.property ('modules.test-module.controllers.ModuleTestController');
+          expect (app).to.have.nested.property ('modules.test-module.policies.module-policy');
+          expect (app).to.have.nested.property ('modules.test-module.routers.ModuleTest');
 
           // Check auto-setting of engines on application based on view extensions.
           expect (app._server._engines).to.have.length (3);

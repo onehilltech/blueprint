@@ -9,9 +9,9 @@ const expect   = require ('chai').expect
 describe ('blueprint', function () {
   describe ('module.exports', function () {
     it ('should have keys for events', function () {
-      expect (blueprint).to.be.a.function;
+      expect (blueprint).to.exist;
 
-      var keys = [
+      const keys = [
         'createApplication',
         'createApplicationAndStart',
         'destroyApplication',
@@ -43,16 +43,16 @@ describe ('blueprint', function () {
     });
 
     it ('should resolve a model', function () {
-      expect (blueprint ('model://Person')).to.be.a.function;
-      expect (blueprint ('model://inner.TestModel2')).to.be.a.function;
+      expect (blueprint ('model://Person')).to.exist;
+      expect (blueprint ('model://inner.TestModel2')).to.exist;
     });
 
     it ('should resolve a module controller', function () {
-      expect (blueprint ('controller://ModuleTestController')).to.be.a.function;
-      expect (blueprint ('controller://test-module:ModuleTestController')).to.be.a.function;
+      expect (blueprint ('controller://ModuleTestController')).to.exist;
+      expect (blueprint ('controller://test-module:ModuleTestController')).to.exist;
 
-      expect (blueprint ('router://test-module:ModuleTest')).to.be.a.function;
-      expect (blueprint ('router://test-module:inner')).to.be.a.function;
+      expect (blueprint ('router://test-module:ModuleTest')).to.exist;
+      expect (blueprint ('router://test-module:inner')).to.exist;
     });
   });
 });
