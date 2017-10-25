@@ -63,7 +63,8 @@ function sendActivationEmail (account) {
         style: gatekeeperConfig.email.style || DEFAULT_STYLE,
         account: {
           id: account.id,
-          token: token
+          token: null,
+          verificationToken: token
         }
       };
 
