@@ -235,6 +235,7 @@ describe ('Oauth2Router', function () {
               details: {
                 validation: {
                   client_secret: {
+                    location: "body",
                     msg: "Missing client secret",
                     param: "client_secret"
                   }
