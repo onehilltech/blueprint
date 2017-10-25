@@ -2,21 +2,41 @@
 
 let moment    = require ('moment')
   , validator = require ('validator')
-  ;
+;
 
-module.exports = function (str) {
-  if (str === undefined || str === null)
-    return str;
+module.exports = function (value, opts) {
+  if (value === undefined || value === null)
+    return value;
 
-  if (validator.isNumeric (str)) {
-    let n = Number.parseInt (str);
-    return moment (n).isValid ();
+  let m = null;
+
+  if (validator.isNumeric (value)) {
+    let n = Number.parseInt (value);
+    m = moment (n);
   }
-  else if (validator.isJSON (str)) {
-    let obj = JSON.parse (str);
-    return moment (obj).isValid ();
+  else if (validator.isJSON (value)) {
+    let obj = JSON.parse (value);
+    m = moment (obj);
   }
   else {
-    return moment (str).isValid ();
+    if (opts.format) {
+      switch (opts.format) {
+        case 'utc':
+          m = moment.utc (value);
+          break;
+
+        case 'seconds':
+          m = moment.unix (value);
+          break;
+
+        default:
+          throw new Error (`Unknown format: ${opts.format}`);
+      }
+    }
+    else {
+      m = moment (value);
+    }
   }
+
+  return m.toDate ();
 };
