@@ -8,6 +8,7 @@ module.exports = function (value, opts) {
   if (value === undefined || value === null)
     return value;
 
+  opts = opts || {};
   let m = null;
 
   if (validator.isNumeric (value)) {
