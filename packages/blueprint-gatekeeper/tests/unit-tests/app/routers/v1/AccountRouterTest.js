@@ -239,7 +239,7 @@ describe ('AccountRouter', function () {
             blueprint.testing.request ()
               .post ('/v1/accounts/' + account.id + '/password')
               .set ('Authorization', 'Bearer ' + accessToken.access_token)
-              .send ({'change-password': { current: account.username, new: 'new-password'}})
+              .send ({password: { current: account.username, new: 'new-password'}})
               .expect (200, 'true')
               .end (callback);
           },
@@ -266,7 +266,7 @@ describe ('AccountRouter', function () {
         blueprint.testing.request ()
           .post ('/v1/accounts/' + account.id + '/password')
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
-          .send ({'change-password': { current: 'bad-password', new: 'new-password'}})
+          .send ({password: { current: 'bad-password', new: 'new-password'}})
           .expect (400, { errors: { code: 'invalid_password', message: 'Current password is invalid' } }, done);
       });
     });

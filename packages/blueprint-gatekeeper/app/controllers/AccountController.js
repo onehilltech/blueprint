@@ -141,12 +141,12 @@ AccountController.prototype.changePassword = function () {
           options: ['me']
         }
       },
-      'change-password.current': {
+      'password.current': {
         in: 'body',
         notEmpty: true
       },
 
-      'change-password.new': {
+      'password.new': {
         in: 'body',
         notEmpty: true
       }
@@ -155,8 +155,8 @@ AccountController.prototype.changePassword = function () {
     sanitize: idSanitizer,
 
     execute: function (req, res, callback) {
-      const currentPassword = req.body['change-password'].current;
-      const newPassword = req.body['change-password'].new;
+      const currentPassword = req.body.password.current;
+      const newPassword = req.body.password.new;
 
       async.waterfall ([
         function (callback) {
