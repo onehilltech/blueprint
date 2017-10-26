@@ -33,7 +33,7 @@ module.exports = {
   ],
 
   accounts: [
-    { email: 'account1@gatekeeper.com', username: 'account1', password: 'account1', created_by: dab.ref ('native.0')},
+    { email: 'hilljh82@gmail.com', username: 'account1', password: 'account1', created_by: dab.ref ('native.0')},
     { email: 'account2@gatekeeper.com', username: 'account2', password: 'account2', created_by: dab.ref ('native.0')},
     { email: 'account3@gatekeeper.com', username: 'account3', password: 'account3', created_by: dab.ref ('native.0')},
     { email: 'account4@gatekeeper.com', username: 'account4', password: 'account4', created_by: dab.ref ('native.0'), scope: [gatekeeper.scope.superuser]},

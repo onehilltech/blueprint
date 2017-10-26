@@ -8,8 +8,17 @@ module.exports = {
   activationRequired: true,
 
   email : {
-    from : 'noreply@onehilltech.com',
-    twitterHandle: 'onehilltech'
+    views: {
+      options: {
+        extension: 'ejs'
+      }
+    },
+    message: {
+      from : 'no-reply@onehilltech.com',
+    },
+    locals: {
+      twitterHandle: 'onehilltech'
+    },
   },
 
   token: {

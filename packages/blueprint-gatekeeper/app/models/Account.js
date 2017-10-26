@@ -48,9 +48,6 @@ let schema = new Schema ({
   /// token for the account.
   scope: {type: [String], default: []},
 
-  /// Verification object used to generate verification token.
-  verification: {type: ObjectId, hidden: true},
-
   /// The date the account was verified. If accounts do not need to
   /// be verified, then this value will always be null.
   verified_at: {type: Date}
