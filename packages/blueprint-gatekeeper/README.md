@@ -42,7 +42,7 @@ module.exports = {
 
 ### Initial setup
 
-First, run the setup script from the project directory:
+Run the setup script from the project directory:
 
     ./bin/gatekeeper-setup
     
