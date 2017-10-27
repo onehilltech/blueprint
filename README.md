@@ -3,8 +3,8 @@ Blueprint
 
 A lightweight, simple, elegant framework for building mean applications
 
-[![npm version](https://img.shields.io/npm/v/@onehilltech/blueprint.svg)]
-[![node version](https://img.shields.io/node/v/@onehilltech/blueprint.svg)]
+![npm version](https://img.shields.io/npm/v/@onehilltech/blueprint.svg)
+![node version](https://img.shields.io/node/v/@onehilltech/blueprint.svg)
 
 [![Build Status](https://travis-ci.org/onehilltech/blueprint.svg?branch=master)](https://travis-ci.org/onehilltech/blueprint)
 
