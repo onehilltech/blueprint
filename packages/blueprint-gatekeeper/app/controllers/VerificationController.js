@@ -42,7 +42,7 @@ VerificationController.prototype.__invoke = function () {
           if (req.query.redirect) {
             let code = n === 1 ? 'success' : 'verify_failed';
 
-            res.redirect (`${req.query.redirect}?email=${account.email}&code=${code}`);
+            res.redirect (`${req.query.redirect}?email=${encodeURIComponent (account.email)}&code=${code}`);
           }
           else {
             let verified = n === 1;
