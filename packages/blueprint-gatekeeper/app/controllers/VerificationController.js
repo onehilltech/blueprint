@@ -21,6 +21,14 @@ VerificationController.prototype.__invoke = function () {
         notEmpty: {
           errorMessage: 'Missing verification token'
         }
+      },
+
+      redirect: {
+        in: 'query',
+        optional: true,
+        isURL: {
+          errorMessage: 'Must be a URL'
+        }
       }
     },
 
@@ -31,7 +39,22 @@ VerificationController.prototype.__invoke = function () {
         },
 
         function (account, n, callback) {
-          res.status (200).json (n === 1);
+          if (req.query.redirect) {
+            let code = n === 1 ? 'success' : 'verify_failed';
+
+            res.redirect (`${req.query.redirect}?email=${account.email}&code=${code}`);
+          }
+          else {
+            let verified = n === 1;
+
+            let data = {
+              email: account.email,
+              message: verified ? `You have successfully verified the account for ${account.email}.` : `You failed to verify the account for ${account.email}.`
+            };
+
+            res.status (200).render ('gatekeeper-account-verification.pug', data);
+          }
+
           return callback (null);
         }
       ], callback);
