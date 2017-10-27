@@ -50,7 +50,7 @@ This will register the [gatekeeper-cli](https://github.com/onehilltech/gatekeepe
 client, and other clients, with the server. The client registrations will be placed in 
 `.gatekeeper` under the project directory.
 
-### Defining Gatekeeper router endpoint
+### Mount Gatekeeper router endpoint
 
 Define a route (or router) to import the Gatekeeper routes into the application:
 
