@@ -22,16 +22,6 @@ Installation
 Getting Started
 ----------------
 
-### Initial setup
-
-First, run the setup script from the project directory:
-
-    ./bin/gatekeeper-setup
-    
-This will register the [gatekeeper-cli](https://github.com/onehilltech/gatekeeper-cli) 
-client, and other clients, with the server. The client registrations will be placed in 
-`./gatekeeper` under the project directory.
-
 ### Defining the configuration
 
 Define the configuration file `gatekeeper.config.js` to configure the module
@@ -49,6 +39,16 @@ module.exports = {
   }
 };
 ```
+
+### Initial setup
+
+First, run the setup script from the project directory:
+
+    ./bin/gatekeeper-setup
+    
+This will register the [gatekeeper-cli](https://github.com/onehilltech/gatekeeper-cli) 
+client, and other clients, with the server. The client registrations will be placed in 
+`./gatekeeper` under the project directory.
 
 ### Defining Gatekeeper router endpoint
 
