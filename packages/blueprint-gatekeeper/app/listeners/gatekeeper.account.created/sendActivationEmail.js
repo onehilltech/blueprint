@@ -34,6 +34,9 @@ messaging.on ('app.init', function (app) {
   appConfig = app.configs.app;
   gatekeeperConfig = app.configs.gatekeeper || {};
 
+  if (!gatekeeperConfig.email)
+    return console.warn ('gatekeeper.config.js: no email configuration; not sending activation emails');
+
   // Create the email template for the activation email while preventing the
   // application from changing the location of the email templates.
   let defaults = {

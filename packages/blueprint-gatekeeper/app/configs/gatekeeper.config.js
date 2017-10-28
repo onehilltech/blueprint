@@ -8,6 +8,10 @@ module.exports = {
   activationRequired: true,
 
   email : {
+    transport: {
+      jsonTransport: true
+    },
+
     views: {
       options: {
         extension: 'ejs'
