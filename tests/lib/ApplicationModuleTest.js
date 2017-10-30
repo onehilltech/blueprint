@@ -6,8 +6,8 @@ const expect = require ('chai').expect
   , fs       = require ('fs')
   ;
 
-const ApplicationModule = require ('../../lib/ApplicationModule')
-  , Messaging           = require ('../../lib/Messaging')
+const ApplicationModule = require ('../../../lib/ApplicationModule')
+  , Messaging           = require ('../../../lib/Messaging')
   ;
 
 describe ('ApplicationModule', function () {
