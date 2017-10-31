@@ -13,7 +13,7 @@ describe ('lib | LegacyListener', function () {
 
   context ('create()', function () {
     it ('should create a LegacyListener object', function () {
-      let legacyListener = new LegacyListener (foo);
+      let legacyListener = new LegacyListener ({listener: foo});
 
       expect (legacyListener).to.be.instanceof (LegacyListener);
     });
@@ -21,7 +21,7 @@ describe ('lib | LegacyListener', function () {
 
   context ('doEvent()', function () {
     it ('should call the legacy listener function', function () {
-      let legacyListener = new LegacyListener (foo);
+      let legacyListener = new LegacyListener ({listener: foo});
       legacyListener.doEvent (5, 10);
 
       expect (val1).to.equal (5);
