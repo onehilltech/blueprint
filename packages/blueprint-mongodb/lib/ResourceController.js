@@ -8,7 +8,7 @@ const util     = require ('util')
   , objectPath = require ('object-path')
   , DateUtils  = require ('./DateUtils')
   , HttpHeader = blueprint.http.headers
-  ;
+;
 
 let validationSchema = require ('./ValidationSchema');
 let populate = require ('./populate');
@@ -16,7 +16,7 @@ let populate = require ('./populate');
 let BaseController = blueprint.ResourceController
   , HttpError = blueprint.errors.HttpError
   , messaging = blueprint.messaging
-  ;
+;
 
 function __validate (req, callback) { return callback (null); }
 function __sanitize (req, callback) { return callback (null); }
@@ -125,7 +125,7 @@ ResourceController.prototype.create = function (opts) {
       let doc = req.body[self.name];
 
       async.waterfall ([
-         function (callback) {
+        function (callback) {
           onPrepareDocument (req, doc, callback);
         },
 
@@ -399,7 +399,9 @@ ResourceController.prototype.getAll = function (opts) {
             if (DateUtils.compare (memo[HttpHeader.LAST_MODIFIED], lastModified) == -1)
               memo[HttpHeader.LAST_MODIFIED] = lastModified;
 
-            return callback (null, memo);
+            async.nextTick (() => {
+              return callback (null, memo);
+            })
           }, onReduceComplete);
 
           function onReduceComplete (err, headers) {
