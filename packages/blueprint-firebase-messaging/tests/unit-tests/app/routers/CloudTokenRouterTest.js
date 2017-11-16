@@ -148,7 +148,7 @@ describe ('CloudTokenRouter', function () {
           .post ('/v1/cloud-tokens/device_123/claim')
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .send ({claim_ticket: '1234567890'})
-          .expect (403, {errors: {code: 'policy_failed', message: 'Not a user token'}}, done);
+          .expect (403, {errors: [{status: '403', code: 'policy_failed', detail: 'Not a user token'}] }, done);
       });
     });
 
@@ -170,7 +170,7 @@ describe ('CloudTokenRouter', function () {
         blueprint.testing.request ()
           .delete (`/v1/cloud-tokens/${cloudToken.device}/claim`)
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
-          .expect (404, {errors: {code: 'not_found', message: 'Device registration does not exist.'}}, done);
+          .expect (404, {errors: [{status: '404', code: 'not_found', detail: 'Device registration does not exist.'}] }, done);
       });
     });
   });
