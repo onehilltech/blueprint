@@ -58,10 +58,11 @@ describe ('lib.ResourceController', function () {
           .post ('/person')
           .send ({person: {gender: 'Ok'}})
           .expect (400, {
-            errors: {
+            errors: [{
+              status: '400',
               code: 'validation_failed',
-              message: 'Request validation failed',
-              details: {
+              detail: 'Request validation failed',
+              meta: {
                 validation: {
                   'person.address.city': { location: 'params', param: 'person.address.city', msg: 'Invalid value' },
                   'person.address.state': { location: 'params', param: 'person.address.state', msg: 'Invalid value' },
@@ -72,7 +73,7 @@ describe ('lib.ResourceController', function () {
                   'person.dob': { location: 'params', param: "person.dob", msg: 'Invalid value'}
                 }
               }
-            }
+            }]
           }, done);
       });
     });
@@ -202,10 +203,11 @@ describe ('lib.ResourceController', function () {
         blueprint.testing.request ()
           .get ('/person/me')
           .expect (400, {
-            errors: {
+            errors: [{
+              status: '400',
               code: "validation_failed",
-              message: "Request validation failed",
-              details: {
+              detail: "Request validation failed",
+              meta: {
                 validation: {
                   personId: {
                     location: "params",
@@ -215,7 +217,7 @@ describe ('lib.ResourceController', function () {
                   }
                 }
               }
-            }
+            }]
           }, done);
       });
     });
