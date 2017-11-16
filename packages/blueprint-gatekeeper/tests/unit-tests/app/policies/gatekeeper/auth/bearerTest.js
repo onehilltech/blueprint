@@ -8,28 +8,28 @@ describe ('policy:gatekeeper.auth.bearer', function () {
   it ('should have policy failure; missing access token', function (done) {
     blueprint.testing.request ()
       .get ('/v1/accounts/me')
-      .expect (400, { errors: { code: 'missing_token', message: 'Missing access token' } }, done);
+      .expect (400, { errors: [{ status: '400', code: 'missing_token', detail: 'Missing access token' }]}, done);
   });
 
   it ('should have policy failure; invalid scheme', function (done) {
     blueprint.testing.request ()
       .get ('/v1/accounts/me')
       .set ('Authorization', 'Bad Scheme')
-      .expect (400, { errors: { code: 'invalid_scheme', message: 'Invalid authorization scheme' } }, done);
+      .expect (400, { errors: [{ status: '400', code: 'invalid_scheme', detail: 'Invalid authorization scheme' }] }, done);
   });
 
   it ('should have policy failure; invalid authorization header', function (done) {
     blueprint.testing.request ()
       .get ('/v1/accounts/me')
       .set ('Authorization', 'Bearer')
-      .expect (400, { errors: { code: 'invalid_authorization', message: 'Invalid authorization header' } }, done);
+      .expect (400, { errors: [{ status: '400', code: 'invalid_authorization', detail: 'Invalid authorization header' }] }, done);
   });
 
   it ('should have policy failure; invalid token', function (done) {
     blueprint.testing.request ()
       .get ('/v1/accounts/me')
       .set ('Authorization', 'Bearer bad-token')
-      .expect (403, { errors: { code: 'invalid_token', message: 'jwt malformed' } }, done);
+      .expect (403, { errors: [{ status: '403', code: 'invalid_token', detail: 'jwt malformed' }] }, done);
   });
 
   it ('should have policy failure; unknown access token', function (done) {
@@ -45,7 +45,7 @@ describe ('policy:gatekeeper.auth.bearer', function () {
         blueprint.testing.request ()
           .get ('/v1/accounts/me')
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
-          .expect (403, { errors: { code: 'unknown_token', message: 'Unknown access token' } }, callback);
+          .expect (403, { errors: [{ status: '403', code: 'unknown_token', detail: 'Unknown access token' }] }, callback);
       }
     ], done);
   });
@@ -64,7 +64,7 @@ describe ('policy:gatekeeper.auth.bearer', function () {
         blueprint.testing.request ()
           .get ('/v1/accounts/me')
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
-          .expect (403, { errors: { code: 'token_disabled', message: 'Token is disabled' } }, callback);
+          .expect (403, { errors: [{ status: '403', code: 'token_disabled', detail: 'Token is disabled' }] }, callback);
       }
     ], done);
   });
@@ -82,7 +82,7 @@ describe ('policy:gatekeeper.auth.bearer', function () {
         blueprint.testing.request ()
           .get ('/v1/accounts/me')
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
-          .expect (403, { errors: { code: 'unknown_client', message: 'Unknown client' } }, callback);
+          .expect (403, { errors: [{ status: '403', code: 'unknown_client', detail: 'Unknown client' }] }, callback);
       }
     ], done);
   });
@@ -101,7 +101,7 @@ describe ('policy:gatekeeper.auth.bearer', function () {
         blueprint.testing.request ()
           .get ('/v1/accounts/me')
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
-          .expect (403, { errors: { code: 'client_disabled', message: 'Client is disabled' } }, callback);
+          .expect (403, { errors: [{ status: '403', code: 'client_disabled', detail: 'Client is disabled' }] }, callback);
       }
     ], done);
   });
@@ -119,7 +119,7 @@ describe ('policy:gatekeeper.auth.bearer', function () {
         blueprint.testing.request ()
           .get ('/v1/accounts/me')
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
-          .expect (403, { errors: { code: 'unknown_account', message: 'Unknown account' } }, callback);
+          .expect (403, { errors: [{ status: '403', code: 'unknown_account', detail: 'Unknown account' }] }, callback);
       }
     ], done);
   });
@@ -130,6 +130,6 @@ describe ('policy:gatekeeper.auth.bearer', function () {
     blueprint.testing.request ()
       .get ('/v1/accounts/me')
       .set ('Authorization', 'Bearer ' + accessToken.access_token)
-      .expect (403, { errors: { code: 'account_disabled', message: 'Account is disabled' } }, done);
+      .expect (403, { errors: [{ status: '403', code: 'account_disabled', detail: 'Account is disabled' }] }, done);
   });
 });

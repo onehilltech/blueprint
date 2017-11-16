@@ -1,7 +1,5 @@
 const blueprint  = require ('@onehilltech/blueprint')
   , async        = require ('async')
-  , HttpError    = blueprint.errors.HttpError
-  , Account      = require ('../models/Account')
   , verification = require ('../utils/account-verification')
   ;
 
@@ -14,6 +12,7 @@ function VerificationController () {
 blueprint.controller (VerificationController);
 
 VerificationController.prototype.__invoke = function () {
+
   return {
     validate: {
       token: {
@@ -27,8 +26,8 @@ VerificationController.prototype.__invoke = function () {
         in: 'query',
         optional: true,
         isURL: {
-          errorMessage: 'Must be a URL'
-        }
+          options: [{require_tld: blueprint.env === 'production'}]
+        },
       }
     },
 

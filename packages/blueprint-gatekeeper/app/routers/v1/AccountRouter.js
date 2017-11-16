@@ -1,8 +1,5 @@
 'use strict';
 
-var gatekeeper = require ('../../../lib')
-  ;
-
 module.exports = {
   '/accounts' : {
     policy: 'gatekeeper.auth.bearer',

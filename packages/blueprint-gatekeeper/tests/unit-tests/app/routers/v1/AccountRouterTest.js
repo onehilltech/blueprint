@@ -140,7 +140,7 @@ describe ('AccountRouter', function () {
         blueprint.testing.request ()
           .post ('/v1/accounts').send ({account: account})
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
-          .expect (403, { errors: { code: 'policy_failed', message: 'Not a super user' } }, done);
+          .expect (403, { errors: [{ status: '403', code: 'policy_failed', detail: 'Not a super user' }] }, done);
       });
     });
   });
@@ -267,7 +267,7 @@ describe ('AccountRouter', function () {
           .post ('/v1/accounts/' + account.id + '/password')
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
           .send ({password: { current: 'bad-password', new: 'new-password'}})
-          .expect (400, { errors: { code: 'invalid_password', message: 'Current password is invalid' } }, done);
+          .expect (400, { errors: [{ status: '400', code: 'invalid_password', detail: 'Current password is invalid' }] }, done);
       });
     });
 
@@ -289,7 +289,7 @@ describe ('AccountRouter', function () {
         blueprint.testing.request ()
           .delete ('/v1/accounts/' + account.id)
           .set ('Authorization', 'Bearer ' + accessToken.access_token)
-          .expect (403, { errors: { code: 'policy_failed', message: 'Not the account owner' }}, done);
+          .expect (403, { errors: [{ status: '403', code: 'policy_failed', detail: 'Not the account owner' }]}, done);
       });
     });
   });

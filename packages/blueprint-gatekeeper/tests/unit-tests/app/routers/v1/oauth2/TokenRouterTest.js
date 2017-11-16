@@ -79,7 +79,7 @@ describe ('Oauth2Router', function () {
         blueprint.testing.request ()
           .post (TOKEN_URL)
           .send (data)
-          .expect (403, {errors: {code: 'client_disabled', message: 'Client is disabled'}}, done);
+          .expect (403, {errors: [{status: '403', code: 'client_disabled', detail: 'Client is disabled'}]}, done);
       });
 
       it ('should not grant token because account is disabled', function (done) {
@@ -96,7 +96,7 @@ describe ('Oauth2Router', function () {
         blueprint.testing.request ()
           .post (TOKEN_URL)
           .send (data)
-          .expect (403, {errors: {code: 'policy_failed', message: 'Account is disabled'}}, done);
+          .expect (403, {errors: [{status: '403', code: 'policy_failed', detail: 'Account is disabled'}]}, done);
       });
 
       it ('should not grant token because password is incorrect', function (done) {
@@ -113,7 +113,7 @@ describe ('Oauth2Router', function () {
         blueprint.testing.request ()
           .post (TOKEN_URL)
           .send (data)
-          .expect (400, {errors: {code: 'invalid_password', message: 'Incorrect password'}}, done);
+          .expect (400, {errors: [{status: '400', code: 'invalid_password', detail: 'Incorrect password'}]}, done);
       });
     });
 
@@ -152,7 +152,7 @@ describe ('Oauth2Router', function () {
 
         blueprint.testing.request ()
           .post(TOKEN_URL).send(data)
-          .expect (403, {errors: {code: 'client_disabled', message: 'Client is disabled'}}, done);
+          .expect (403, {errors: [{status: '403', code: 'client_disabled', detail: 'Client is disabled'}]}, done);
       });
 
       it ('should not grant token because incorrect secret', function (done) {
@@ -167,7 +167,7 @@ describe ('Oauth2Router', function () {
         blueprint.testing.request ()
           .post (TOKEN_URL)
           .send (data)
-          .expect (403, {errors: {code: 'incorrect_secret', message: 'Incorrect client secret'}}, done);
+          .expect (403, {errors: [{status: '403', code: 'incorrect_secret', detail: 'Incorrect client secret'}]}, done);
       });
     });
 
@@ -229,10 +229,11 @@ describe ('Oauth2Router', function () {
           .post (TOKEN_URL)
           .send (data)
           .expect (400, {
-            errors: {
+            errors: [{
+              status: '400',
               code: "validation_failed",
-              message: "Request validation failed",
-              details: {
+              detail: "Request validation failed",
+              meta: {
                 validation: {
                   client_secret: {
                     location: "body",
@@ -241,7 +242,7 @@ describe ('Oauth2Router', function () {
                   }
                 }
               }
-            }
+            }]
           }, done);
       });
     });
