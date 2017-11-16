@@ -3,7 +3,7 @@
 const errors  = require ('./errors');
 
 function handleError (err, res) {
-  var errType = typeof err;
+  let errType = typeof err;
 
   if (errType === 'string') {
     res.status (400).type ('text/plain').send ({
@@ -14,8 +14,8 @@ function handleError (err, res) {
     res.type ('application/json');
 
     if (err instanceof errors.Error) {
-      var data = {
-        errors: [{code: err.code, detail: err.message}]
+      let data = {
+        errors: [{code: err.code, detail: err.message, meta: err.details}]
       };
 
       // We are working with an instance of a Blueprint error. This means that we have
@@ -49,11 +49,11 @@ function handleError (err, res) {
       });
     }
     else {
-      // This is just a regular object. We are going to set the details
+      // This is just a regular object. We are going to set the meta
       // attribute on the returned error object.
 
       res.status (500).send ({
-        errors: [{status: '500', detail: err}]
+        errors: [{status: '500', detail: 'Server error', meta: err}]
       });
     }
   }

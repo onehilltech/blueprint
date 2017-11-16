@@ -1,21 +1,14 @@
-var path    = require ('path')
+let path    = require ('path')
   , expect  = require ('chai').expect
-  , async   = require ('async')
-  , request = require ('supertest')
-  , util    = require ('util')
-  , winston = require ('winston')
   , testing = require ('../../lib/testing')
-  ;
-
-var ApplicationModule = require ('../../lib/ApplicationModule')
-  , RouterBuilder     = require ('../../lib/RouterBuilder')
-  , appFixture        = require ('../fixtures/app')
+  , RouterBuilder = require ('../../lib/RouterBuilder')
+  , appFixture    = require ('../fixtures/app')
   ;
 
 describe ('RouterBuilder', function () {
-  var routerBuilder;
-  var routersPath;
-  var app;
+  let routerBuilder;
+  let routersPath;
+  let app;
 
   before (function (done) {
     appFixture (function (err, a) {
@@ -39,10 +32,10 @@ describe ('RouterBuilder', function () {
   
   describe ('#addRoutes', function () {
     it ('should add routes to the router', function () {
-      var spec = require (path.join (routersPath, 'TestRouter'));
+      let spec = require (path.join (routersPath, 'TestRouter'));
 
       routerBuilder.addSpecification (spec);
-      var router = routerBuilder.getRouter ();
+      let router = routerBuilder.getRouter ();
 
       expect (router.params).to.have.keys (['param1']);
       expect (router.params.param1).to.have.length (1);
@@ -63,13 +56,13 @@ describe ('RouterBuilder', function () {
     it ('should reject request because policy failed', function (done) {
       testing.request ()
         .get ('/policies/rejected')
-        .expect (403, { errors: { code: 'passthrough_failed', message: 'The pass through policy failed' } }, done);
+        .expect (403, { errors: [{ status: '403', code: 'passthrough_failed', detail: 'The pass through policy failed' }] }, done);
     });
 
     it ('should reject request because policy failed on a http method', function (done) {
       testing.request ()
         .get ('/policies/methods/rejected')
-        .expect (403, { errors: { code: 'passthrough_failed', message: 'The pass through policy failed' } }, done);
+        .expect (403, { errors: [{ status: '403', code: 'passthrough_failed', detail: 'The pass through policy failed' }] }, done);
     });
   });
 
@@ -85,7 +78,7 @@ describe ('RouterBuilder', function () {
 
       describe ('get', function () {
         it ('should invoke the get method', function (done) {
-          var id = 7;
+          let id = 7;
 
           testing.request ()
             .get ('/echo/' + id)
@@ -101,7 +94,7 @@ describe ('RouterBuilder', function () {
 
       describe ('update', function () {
         it ('should invoke the update method', function (done) {
-          var id = 19;
+          let id = 19;
 
           testing.request ()
             .put ('/echo/' + id)
@@ -111,7 +104,7 @@ describe ('RouterBuilder', function () {
 
       describe ('delete', function () {
         it ('should invoke the delete method', function (done) {
-          var id = 37;
+          let id = 37;
 
           testing.request ()
             .delete ('/echo/' + id)
@@ -147,7 +140,7 @@ describe ('RouterBuilder', function () {
       });
 
       it ('should invoke the get method', function (done) {
-        var id = 7;
+        let id = 7;
 
         testing.request ()
           .get ('/allow/' + id)

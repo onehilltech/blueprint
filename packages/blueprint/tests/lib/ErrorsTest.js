@@ -11,7 +11,7 @@ describe ('blueprint.errors', function () {
     it ('should return an BlueprintError', function (done) {
       blueprint.testing.request ()
         .get ('/errors/blueprint')
-        .expect (500, {errors: {code: 'test_error', message: 'This is a test error', details: {n: 1}}}, done);
+        .expect (500, {errors: [{status: '500', code: 'test_error', detail: 'This is a test error', meta: {n: 1}}]}, done);
     });
   });
 
@@ -19,7 +19,7 @@ describe ('blueprint.errors', function () {
     it ('should return an HttpError', function (done) {
       blueprint.testing.request ()
         .get ('/errors/http')
-        .expect (400, {errors: {code: 'http_error', message: 'This is a http error', details: {n: 2}}}, done);
+        .expect (400, {errors: [{status: '400', code: 'http_error', detail: 'This is a http error', meta: {n: 2}}]}, done);
     });
   });
 });
