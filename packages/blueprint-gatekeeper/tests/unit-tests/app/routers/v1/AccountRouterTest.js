@@ -13,14 +13,14 @@ describe ('AccountRouter', function () {
         blueprint.testing.request ()
           .get ('/v1/accounts')
           .query ({options: {sort: {username: 1}}})
-          .fromUser (3)
+          .withUserToken (3)
           .expect (200, {'accounts': mongodb.lean (blueprint.app.seeds.$default.accounts)}, done);
       });
 
       it ('should not allow non-admin access to all accounts', function (done) {
         blueprint.testing.request ()
           .get ('/v1/accounts')
-          .fromUser (0)
+          .withUserToken (0)
           .expect (403, done);
       });
     });
@@ -44,7 +44,7 @@ describe ('AccountRouter', function () {
         blueprint.testing.request ()
           .post ('/v1/accounts')
           .send ({account: data})
-          .fromClient (0)
+          .withClientToken (0)
           .expect (200)
           .end (function (err, res) {
             if (err)
@@ -73,7 +73,7 @@ describe ('AccountRouter', function () {
           .post ('/v1/accounts')
           .query ({login: true})
           .send ({account: autoLogin})
-          .fromClient (0)
+          .withClientToken (0)
           .expect (200)
           .end (function (err, res) {
             if (err)
@@ -102,7 +102,7 @@ describe ('AccountRouter', function () {
         blueprint.testing.request ()
           .post ('/v1/accounts')
           .send ({account: dup})
-          .fromClient (0)
+          .withClientToken (0)
           .expect (400, done);
       });
 
@@ -112,7 +112,7 @@ describe ('AccountRouter', function () {
         blueprint.testing.request ()
           .post ('/v1/accounts')
           .send (invalid)
-          .fromClient (0)
+          .withClientToken (0)
           .expect (400, done);
       });
 
@@ -121,7 +121,7 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .post ('/v1/accounts').send ({account: account})
-          .fromClient (1)
+          .withClientToken (1)
           .expect (403, { errors: [{ status: '403', code: 'policy_failed', detail: 'Not a super user' }] }, done);
       });
     });
@@ -134,7 +134,7 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .get ('/v1/accounts/' + account.id)
-          .fromUser (0)
+          .withUserToken (0)
           .expect (200, {account: account.lean ()}, done);
       });
 
@@ -143,7 +143,7 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .get ('/v1/accounts/me')
-          .fromUser (0)
+          .withUserToken (0)
           .expect (200, {account: account.lean ()}, done);
       });
 
@@ -152,7 +152,7 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .get ('/v1/accounts/' + account.id)
-          .fromUser (3)
+          .withUserToken (3)
           .expect (200, {account: account.lean ()}, done);
       });
 
@@ -161,7 +161,7 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .get ('/v1/accounts/' + account.id)
-          .fromUser (0)
+          .withUserToken (0)
           .expect (403, done);
       });
     });
@@ -172,7 +172,7 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .put ('/v1/accounts/' + account.id)
-          .fromUser (0)
+          .withUserToken (0)
           .send ({account: {created_by: new mongodb.Types.ObjectId (), scope: ['the_new_scope']}})
           .expect (200, {account: account.lean ()}, done);
       });
@@ -185,7 +185,7 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .put ('/v1/accounts/' + account.id)
-          .fromUser (0)
+          .withUserToken (0)
           .send ({account: {email: updated.email}} )
           .expect (200, {account: updated}, done);
       });
@@ -198,7 +198,7 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .put ('/v1/accounts/' + account.id)
-          .fromUser (3)
+          .withUserToken (3)
           .send ({account: {scope: updated.scope}})
           .expect (200, {account: updated}, done);
       });
@@ -212,7 +212,7 @@ describe ('AccountRouter', function () {
           function (callback) {
             blueprint.testing.request ()
               .post ('/v1/accounts/' + account.id + '/password')
-              .fromUser (0)
+              .withUserToken (0)
               .send ({password: { current: account.username, new: 'new-password'}})
               .expect (200, 'true')
               .end (callback);
@@ -238,7 +238,7 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .post ('/v1/accounts/' + account.id + '/password')
-          .fromUser (0)
+          .withUserToken (0)
           .send ({password: { current: 'bad-password', new: 'new-password'}})
           .expect (400, { errors: [{ status: '400', code: 'invalid_password', detail: 'Current password is invalid' }] }, done);
       });
@@ -250,7 +250,7 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .delete ('/v1/accounts/' + account.id)
-          .fromUser (0)
+          .withUserToken (0)
           .expect (200, 'true', done);
       });
 
@@ -259,7 +259,7 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .delete ('/v1/accounts/' + account.id)
-          .fromUser (0)
+          .withUserToken (0)
           .expect (403, { errors: [{ status: '403', code: 'policy_failed', detail: 'Not the account owner' }]}, done);
       });
     });

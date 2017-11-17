@@ -9,7 +9,7 @@ const blueprint = require ('@onehilltech/blueprint')
  * @param i       Index of user from dab file
  * @param conn    Name of database connection
  */
-Test.prototype.fromUser = function (i, conn = '$default') {
+Test.prototype.withUserToken = Test.prototype.fromUser = function (i, conn = '$default') {
   let accessToken = blueprint.app.seeds[conn].user_tokens[i].serializeSync ();
 
   assert (!!accessToken, `Your dab file does not have a user_tokens.[${i}]`);
@@ -23,7 +23,7 @@ Test.prototype.fromUser = function (i, conn = '$default') {
  * @param i     Index of client from dab file
  * @param conn    Name of database connection
  */
-Test.prototype.fromClient = function (i, conn = '$default') {
+Test.prototype.withClientToken = Test.prototype.fromClient = function (i, conn = '$default') {
   let accessToken = blueprint.app.seeds[conn].client_tokens[i].serializeSync ();
 
   assert (!!accessToken, `Your dab file does not have a client_tokens.[${i}]`);
