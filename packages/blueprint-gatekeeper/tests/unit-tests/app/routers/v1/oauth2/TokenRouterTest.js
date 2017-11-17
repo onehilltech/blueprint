@@ -11,10 +11,7 @@ function getToken (data, callback) {
     .send (data)
     .expect (200).expect('Content-Type', /json/)
     .end (function (err, res) {
-      if (err)
-        return callback (err);
-
-      return callback (null, res.body);
+      return callback (err, err ? null : res.body);
     });
 }
 
@@ -228,6 +225,7 @@ describe ('Oauth2Router', function () {
         blueprint.testing.request()
           .post (TOKEN_URL)
           .send (data)
+          .withUserToken (1)
           .expect (400, {
             errors: [{
               status: '400',
@@ -250,11 +248,9 @@ describe ('Oauth2Router', function () {
 
   describe('/v1/oauth2/logout', function () {
     it ('should logout the current user', function (done) {
-      const accessToken = blueprint.app.seeds.$default.user_tokens[0].serializeSync ();
-
       blueprint.testing.request ()
         .post ('/v1/oauth2/logout')
-        .set ('Authorization', 'Bearer ' + accessToken.access_token)
+        .withUserToken (0)
         .expect (200, 'true', done);
     });
   });
