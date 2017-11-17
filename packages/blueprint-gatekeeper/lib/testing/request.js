@@ -6,10 +6,11 @@ const blueprint = require ('@onehilltech/blueprint')
 /**
  * Creates a Blueprint testing request that has already be initialized to a user.
  *
- * @param i     Index of user from dab file
+ * @param i       Index of user from dab file
+ * @param conn    Name of database connection
  */
-Test.prototype.fromUser = function (i) {
-  let accessToken = blueprint.app.seeds.$default.user_tokens[i].serializeSync ();
+Test.prototype.fromUser = function (i, conn = '$default') {
+  let accessToken = blueprint.app.seeds[conn].user_tokens[i].serializeSync ();
 
   assert (!!accessToken, `Your dab file does not have a user_tokens.[${i}]`);
 
@@ -20,9 +21,10 @@ Test.prototype.fromUser = function (i) {
  * Creates a Blueprint testing request that has already be initialized to a client.
  *
  * @param i     Index of client from dab file
+ * @param conn    Name of database connection
  */
-Test.prototype.fromClient = function (i) {
-  let accessToken = blueprint.app.seeds.$default.client_tokens[i].serializeSync ();
+Test.prototype.fromClient = function (i, conn = '$default') {
+  let accessToken = blueprint.app.seeds[conn].client_tokens[i].serializeSync ();
 
   assert (!!accessToken, `Your dab file does not have a client_tokens.[${i}]`);
 
