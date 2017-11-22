@@ -32,17 +32,13 @@ module.exports = Policy.anySeries ([
           if (req.headers && req.headers.authorization) {
             let parts = req.headers.authorization.split (' ');
 
-            if (parts.length === 2) {
-              if (/^Bearer$/i.test (parts[0])) {
-                return callback (null, parts[1]);
-              }
-              else {
-                return callback (new HttpError (400, 'invalid_scheme', 'Invalid authorization scheme'));
-              }
-            }
-            else {
+            if (parts.length !== 2)
               return callback (new HttpError (400, 'invalid_authorization', 'Invalid authorization header'));
-            }
+
+            if (!/^Bearer$/i.test (parts[0]))
+              return callback (new HttpError (400, 'invalid_scheme', 'Invalid authorization scheme'));
+
+            return callback (null, parts[1]);
           }
           else if (req.body && req.body.access_token) {
             return callback (null, req.body.access_token);
