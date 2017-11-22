@@ -1,5 +1,3 @@
-'use strict';
-
 const async     = require ('async')
   , blueprint   = require ('@onehilltech/blueprint')
   , HttpError   = blueprint.errors.HttpError
