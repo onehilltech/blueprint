@@ -1,21 +1,19 @@
-'use strict';
-
 const mongodb   = require ('@onehilltech/blueprint-mongodb')
-  , blueprint   = require ('@onehilltech/blueprint')
   , async       = require ('async')
   , Schema      = mongodb.Schema
   , ObjectId    = mongodb.Schema.Types.ObjectId
   , AccessToken = require ('./AccessToken')
   , Account     = require ('./Account')
-  , serializer  = require ('../middleware/serializers') (blueprint.app.configs.gatekeeper.token)
+  , AccessTokenGenerator = require ('../utils/access-token-generator')
   ;
 
-var options     = require ('./commonOptions') ()
+let options     = require ('./commonOptions') ()
   ;
 
+const tokenGenerator = new AccessTokenGenerator ();
 options.discriminatorKey = AccessToken.schema.options.discriminatorKey;
 
-var schema = new Schema ({
+let schema = new Schema ({
   /// Account that owns the token.
   account: {type: ObjectId, ref: Account.modelName, index: true},
 
@@ -29,22 +27,22 @@ schema.methods.serialize = function (callback) {
       const payload = { scope: this.scope };
       const options = { jwtid: this.id };
 
-      serializer.generateToken (payload, options, callback);
+      tokenGenerator.generateToken (payload, options, callback);
     }.bind (this),
 
     refresh_token: function (callback) {
       const payload = {  };
       const options = { jwtid: this.refresh_token.toString () };
 
-      serializer.generateToken (payload, options, callback);
+      tokenGenerator.generateToken (payload, options, callback);
     }.bind (this)
   }, callback);
 };
 
 schema.methods.serializeSync = function () {
   return {
-    access_token: serializer.generateToken ({ scope: this.scope }, { jwtid: this.id }),
-    refresh_token: serializer.generateToken ({ }, { jwtid: this.refresh_token.toString () })
+    access_token: tokenGenerator.generateToken ({ scope: this.scope }, { jwtid: this.id }),
+    refresh_token: tokenGenerator.generateToken ({ }, { jwtid: this.refresh_token.toString () })
   };
 };
 

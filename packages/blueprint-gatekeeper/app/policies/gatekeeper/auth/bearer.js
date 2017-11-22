@@ -5,8 +5,10 @@ const async     = require ('async')
   , HttpError   = blueprint.errors.HttpError
   , Policy      = blueprint.Policy
   , AccessToken = require ('../../../models/AccessToken')
-  , serializer  = require ('../../../middleware/serializers') (blueprint.app.configs.gatekeeper.token)
-;
+  , AccessTokenGenerator = require ('../../../utils/access-token-generator')
+  ;
+
+const tokenGenerator = new AccessTokenGenerator ();
 
 module.exports = Policy.anySeries ([
   /*
@@ -59,7 +61,7 @@ module.exports = Policy.anySeries ([
          * Verify the access token.
          */
         function (accessToken, callback) {
-          serializer.verifyToken (accessToken, {}, function (err, payload) {
+          tokenGenerator.verifyToken (accessToken, {}, function (err, payload) {
             if (!err)
               return callback (null, payload);
 
