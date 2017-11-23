@@ -1,11 +1,5 @@
-'use strict';
-
-var blueprint  = require ('@onehilltech/blueprint')
-  , Policy     = blueprint.Policy
-  , gatekeeper = require ('../../../../lib')
+const blueprint = require ('@onehilltech/blueprint')
+  , Policy      = blueprint.Policy
   ;
 
-module.exports = Policy.any ([
-  Policy.assert ('gatekeeper.hasScope', gatekeeper.scope.client.create),
-  Policy.assert ('gatekeeper.isSuperUser')
-]);
+module.exports = Policy.assert ('gatekeeper.request.scope', 'gatekeeper.client.create');
