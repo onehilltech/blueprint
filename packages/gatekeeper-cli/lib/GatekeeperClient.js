@@ -1,6 +1,6 @@
 'use strict';
 
-var request = require ('request')
+let request = require ('request')
   , winston = require ('winston')
   , path    = require ('path')
   , fse     = require ('fs-extra')
@@ -17,8 +17,8 @@ module.exports = makeClient;
  * @param callback
  */
 function makeClient (baseUri, callback) {
-  var cwd = process.cwd ();
-  var rcFile = path.resolve (cwd, '.gatekeeper/gatekeeper-cli');
+  let cwd = process.cwd ();
+  let rcFile = path.resolve (cwd, '.gatekeeper/gatekeeper-cli');
 
   async.waterfall ([
     function (callback) { fse.readJSON (rcFile, callback); },
@@ -50,13 +50,13 @@ function newInstance (opts, callback) {
   if (opts.clientSecret === undefined)
     return callback (new Error ('clientSecret is not defined'));
 
-  var data = {
+  let data = {
     grant_type : 'client_credentials',
     client_id : opts.clientId,
     client_secret : opts.clientSecret
   };
 
-  var url = opts.baseUri + '/v1/oauth2/token';
+  let url = opts.baseUri + '/v1/oauth2/token';
   request ({url: url, method: 'POST', json: data}, function (err, res, body) {
     if (err)
       return callback (err);
@@ -64,8 +64,8 @@ function newInstance (opts, callback) {
     if (res.statusCode !== 200)
       return callback (new Error (body));
 
-    var token = body.access_token;
-    var client = new GatekeeperClient (opts, token);
+    let token = body.access_token;
+    let client = new GatekeeperClient (opts, token);
 
     return callback (null, client);
   });
@@ -92,8 +92,8 @@ function GatekeeperClient (opts, token) {
  * @returns {*}
  */
 GatekeeperClient.prototype.createClient = function (client, callback) {
-  var url = this.getCompleteUrl ('/clients');
-  var req = this.makeRequest ({url: url, method: 'POST', json: {client: client}});
+  let url = this.getCompleteUrl ('/clients');
+  let req = this.makeRequest ({url: url, method: 'POST', json: {client: client}});
 
   return request (req, handleResponse (callback));
 };
@@ -106,8 +106,8 @@ GatekeeperClient.prototype.createClient = function (client, callback) {
  * @returns {*}
  */
 GatekeeperClient.prototype.deleteClient = function (clientId, callback) {
-  var url = this.getCompleteUrl ('/clients/' + clientId);
-  var req = this.makeRequest ({url: url, method: 'DELETE'});
+  let url = this.getCompleteUrl ('/clients/' + clientId);
+  let req = this.makeRequest ({url: url, method: 'DELETE'});
 
   return request (req, handleResponse (callback));
 };
@@ -119,9 +119,9 @@ GatekeeperClient.prototype.deleteClient = function (clientId, callback) {
  * @param callback
  */
 GatekeeperClient.prototype.addAccount = function (opts, callback) {
-  var url = this.getCompleteUrl ('/accounts');
+  let url = this.getCompleteUrl ('/accounts');
 
-  var data = {
+  let data = {
     username : opts.username,
     password : opts.password,
     email : opts.email
@@ -130,7 +130,7 @@ GatekeeperClient.prototype.addAccount = function (opts, callback) {
   if (opts.scope)
     data.scope = opts.scope;
 
-  var req = this.makeRequest ({url: url, method: 'POST', json: {account: data}});
+  let req = this.makeRequest ({url: url, method: 'POST', json: {account: data}});
   request (req, handleResponse (callback));
 };
 
@@ -142,8 +142,8 @@ GatekeeperClient.prototype.addAccount = function (opts, callback) {
  * @returns {*}
  */
 GatekeeperClient.prototype.deleteAccount = function (accountId, callback) {
-  var url = this.getCompleteUrl ('/accounts/' + accountId);
-  var req = this.makeRequest ({url: url, method: 'DELETE'});
+  let url = this.getCompleteUrl ('/accounts/' + accountId);
+  let req = this.makeRequest ({url: url, method: 'DELETE'});
 
   return request (req, handleResponse (callback));
 };
