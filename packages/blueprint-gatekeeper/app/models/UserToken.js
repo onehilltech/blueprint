@@ -31,6 +31,9 @@ schema.methods.serialize = function (callback) {
     }.bind (this),
 
     refresh_token: function (callback) {
+      if (!this.refresh_token)
+        return callback (null);
+
       const payload = {  };
       const options = { jwtid: this.refresh_token.toString () };
 
@@ -40,10 +43,14 @@ schema.methods.serialize = function (callback) {
 };
 
 schema.methods.serializeSync = function () {
-  return {
-    access_token: tokenGenerator.generateToken ({ scope: this.scope }, { jwtid: this.id }),
-    refresh_token: tokenGenerator.generateToken ({ }, { jwtid: this.refresh_token.toString () })
+  let accessToken = {
+    access_token: tokenGenerator.generateToken ({ scope: this.scope }, { jwtid: this.id })
   };
+
+  if (this.refresh_token)
+    accessToken.refresh_token = tokenGenerator.generateToken ({ }, { jwtid: this.refresh_token.toString () })
+
+  return accessToken;
 };
 
 module.exports = AccessToken.discriminator ('user_token', schema);

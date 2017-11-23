@@ -1,4 +1,5 @@
-'use strict';
+const blueprint = require ('@onehilltech/blueprint')
+  , Policy      = blueprint.Policy
+;
 
-module.exports = require ('../isSuperUser');
-
+module.exports = Policy.assert ('gatekeeper.request.scope', 'gatekeeper.account.get_all');

@@ -1,40 +1,46 @@
-const expect   = require ('chai').expect
-  , async      = require ('async')
-  , blueprint  = require ('@onehilltech/blueprint')
-  , mongodb    = require ('@onehilltech/blueprint-mongodb')
-  , _          = require ('underscore')
-  , Account    = require ('../../../../../app/models/Account')
+const expect  = require ('chai').expect
+  , async     = require ('async')
+  , blueprint = require ('@onehilltech/blueprint')
+  , mongodb   = require ('@onehilltech/blueprint-mongodb')
+  , _         = require ('underscore')
+  , Account   = require ('../../../../../app/models/Account')
   ;
 
-describe ('AccountRouter', function () {
+describe ('app | routers | account', function () {
   describe ('/v1/accounts', function () {
     describe ('GET', function () {
-      it ('should return all the accounts for an admin', function (done) {
-        blueprint.testing.request ()
-          .get ('/v1/accounts')
-          .query ({options: {sort: {username: 1}}})
-          .withUserToken (3)
-          .expect (200, {'accounts': mongodb.lean (blueprint.app.seeds.$default.accounts)}, done);
-      });
-
-      it ('should not allow non-admin access to all accounts', function (done) {
+      it ('should return all the accounts for glob scope', function (done) {
         blueprint.testing.request ()
           .get ('/v1/accounts')
           .withUserToken (0)
-          .expect (403, done);
+          .query ({options: {sort: {username: 1}}})
+          .expect (200, {'accounts': mongodb.lean (blueprint.app.seeds.$default.accounts)}, done);
+      });
+
+      it ('should return all the accounts for valid scope', function (done) {
+        blueprint.testing.request ()
+          .get ('/v1/accounts')
+          .query ({options: {sort: {username: 1}}})
+          .withUserToken (1)
+          .expect (200, {'accounts': mongodb.lean (blueprint.app.seeds.$default.accounts)}, done);
+      });
+
+      it ('should not allow request', function (done) {
+        blueprint.testing.request ()
+          .get ('/v1/accounts')
+          .withUserToken (2)
+          .expect (403, { errors:
+            [ { code: 'invalid_scope',
+              detail: 'This request does not have a valid scope.',
+              status: '403' } ] }, done);
       });
     });
 
-    describe ('POST', function () {
-      let data = {
-        username: 'tester1',
-        password: 'tester1',
-        email: 'james@onehilltech.com'
-      };
+    context ('POST', function () {
+      let data = { username: 'tester1', password: 'tester1', email: 'james@onehilltech.com' };
+      let account = null;
 
       it ('should create a new account', function (done) {
-        let account = null;
-
         // We know the account was created when we get an event for
         // sending an account activation email.
         blueprint.messaging.once ('gatekeeper.account.created', function (model) {
@@ -46,14 +52,16 @@ describe ('AccountRouter', function () {
           .send ({account: data})
           .withClientToken (0)
           .expect (200)
-          .end (function (err, res) {
+          .end ((err, res) => {
             if (err)
               return done (err);
 
             // Wait until the gatekeeper.account.created message is handled.
-            blueprint.testing.waitFor (function () { return account !== null },
+            blueprint.testing.waitFor (() => { return account !== null },
               function (err) {
-                if (err) return done (err);
+                if (err)
+                  return done (err);
+
                 expect (res.body).to.eql ({account: account.lean ()});
 
                 return done (null);
@@ -116,13 +124,13 @@ describe ('AccountRouter', function () {
           .expect (400, done);
       });
 
-      it ('should not create an account [invalid role]', function (done) {
+      it ('should not create an account [invalid scope]', function (done) {
         const account = { username: 'tester1', password: 'tester1', email: 'james@onehilltech.com'};
 
         blueprint.testing.request ()
           .post ('/v1/accounts').send ({account: account})
           .withClientToken (1)
-          .expect (403, { errors: [{ status: '403', code: 'policy_failed', detail: 'Not a super user' }] }, done);
+          .expect (403, { errors: [{ status: '403', code: 'invalid_scope', detail: 'This request does not have a valid scope.' }] }, done);
       });
     });
   });
@@ -134,35 +142,42 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .get ('/v1/accounts/' + account.id)
-          .withUserToken (0)
+          .withUserToken (2)
           .expect (200, {account: account.lean ()}, done);
       });
 
-      it ('should get my account', function (done) {
+      it ('should return the account for me', function (done) {
         const account = blueprint.app.seeds.$default.accounts[0];
 
         blueprint.testing.request ()
           .get ('/v1/accounts/me')
-          .withUserToken (0)
+          .withUserToken (2)
           .expect (200, {account: account.lean ()}, done);
       });
 
-      it ('should retrieve a user account for an admin', function (done) {
-        const account = blueprint.app.seeds.$default.accounts[0];
+      context ('get_all', function () {
+        it ('should return account for a different user', function (done) {
+          let account = blueprint.app.seeds.$default.accounts[1];
 
-        blueprint.testing.request ()
-          .get ('/v1/accounts/' + account.id)
-          .withUserToken (3)
-          .expect (200, {account: account.lean ()}, done);
+          blueprint.testing.request ()
+            .get ('/v1/accounts/' + account.id)
+            .withUserToken (1)
+            .expect (200, {account: account.lean ()}, done);
+        });
       });
 
-      it ('should not allow non-admin access to another account', function (done) {
-        let account = blueprint.app.seeds.$default.accounts[1];
+      context ('!get_all', function () {
+        it ( 'should not return account for different user', function (done) {
+          let account = blueprint.app.seeds.$default.accounts[1];
 
-        blueprint.testing.request ()
-          .get ('/v1/accounts/' + account.id)
-          .withUserToken (0)
-          .expect (403, done);
+          blueprint.testing.request ()
+            .get ('/v1/accounts/' + account.id)
+            .withUserToken (2)
+            .expect (403, { errors:
+              [ { code: 'invalid_scope',
+                detail: 'This request does not have a valid scope.',
+                status: '403' } ] }, done);
+        });
       });
     });
 
@@ -172,7 +187,7 @@ describe ('AccountRouter', function () {
 
         blueprint.testing.request ()
           .put ('/v1/accounts/' + account.id)
-          .withUserToken (0)
+          .withUserToken (2)
           .send ({account: {created_by: new mongodb.Types.ObjectId (), scope: ['the_new_scope']}})
           .expect (200, {account: account.lean ()}, done);
       });
@@ -191,14 +206,14 @@ describe ('AccountRouter', function () {
       });
 
       it ('should allow admin to update the scope', function (done) {
-        const account = blueprint.app.seeds.$default.accounts[0];
+        const account = blueprint.app.seeds.$default.accounts[3];
 
         let updated = account.lean ();
         updated.scope.push ('the_new_scope');
 
         blueprint.testing.request ()
           .put ('/v1/accounts/' + account.id)
-          .withUserToken (3)
+          .withUserToken (0)
           .send ({account: {scope: updated.scope}})
           .expect (200, {account: updated}, done);
       });
@@ -214,8 +229,7 @@ describe ('AccountRouter', function () {
               .post ('/v1/accounts/' + account.id + '/password')
               .withUserToken (0)
               .send ({password: { current: account.username, new: 'new-password'}})
-              .expect (200, 'true')
-              .end (callback);
+              .expect (200, 'true', callback);
           },
 
           function (callback) {
@@ -260,7 +274,10 @@ describe ('AccountRouter', function () {
         blueprint.testing.request ()
           .delete ('/v1/accounts/' + account.id)
           .withUserToken (0)
-          .expect (403, { errors: [{ status: '403', code: 'policy_failed', detail: 'Not the account owner' }]}, done);
+          .expect (403, { errors:
+            [ { code: 'invalid_account',
+              detail: 'You are not the account owner.',
+              status: '403' } ] } , done);
       });
     });
   });

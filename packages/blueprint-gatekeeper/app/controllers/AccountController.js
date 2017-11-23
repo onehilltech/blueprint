@@ -1,6 +1,6 @@
 'use strict';
 
-var blueprint  = require ('@onehilltech/blueprint')
+let blueprint  = require ('@onehilltech/blueprint')
   , mongodb    = require ('@onehilltech/blueprint-mongodb')
   , ObjectId   = mongodb.Types.ObjectId
   , async      = require ('async')
@@ -11,7 +11,7 @@ var blueprint  = require ('@onehilltech/blueprint')
   , HttpError  = blueprint.errors.HttpError
   ;
 
-var ResourceController = mongodb.ResourceController
+let ResourceController = mongodb.ResourceController
   ;
 
 /**
@@ -22,7 +22,7 @@ function __generateAccountId (account, callback) {
   callback (null, account._id || new ObjectId ());
 }
 
-var generateAccountId = objectPath.get (blueprint.app.configs.gatekeeper, 'generators.accountId', __generateAccountId);
+let generateAccountId = objectPath.get (blueprint.app.configs.gatekeeper, 'generators.accountId', __generateAccountId);
 
 /**
  * Sanitize the account id.
@@ -66,7 +66,7 @@ module.exports = AccountController;
  * Specialize the creation of an account.
  */
 AccountController.prototype.create = function () {
-  var options = {
+  let options = {
     on: {
       prepareDocument: function (req, doc, callback) {
         doc.created_by = req.user._id;
@@ -91,7 +91,7 @@ AccountController.prototype.create = function () {
 
         async.waterfall ([
           function (callback) {
-            var data = {client: req.user, account: result.account};
+            let data = {client: req.user, account: result.account};
             password.createToken (data, callback);
           },
 
@@ -118,9 +118,11 @@ AccountController.prototype.update = function () {
   return ResourceController.prototype.update.call (this, {
     on: {
       prepareUpdate: function (req, doc, callback) {
-        // Only the superuser can update the scope.
-        if (!req.superuser)
+        if (req.scope.indexOf ('gatekeeper.account.update') === -1 &&
+            req.scope.indexOf ('gatekeeper.account.*') === -1 &&
+            doc.$set.scope) {
           delete doc.$set.scope;
+        }
 
         return callback (null, doc);
       }
