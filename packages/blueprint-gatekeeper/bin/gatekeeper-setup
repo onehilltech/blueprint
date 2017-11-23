@@ -1,19 +1,17 @@
 #!/usr/bin/env node
-'use strict';
 
-var winston   = require ('winston')
+const winston = require ('winston')
   , prompt    = require ('prompt')
   , blueprint = require ('@onehilltech/blueprint')
   , path      = require ('path')
   , async     = require ('async')
   , fse       = require ('fs-extra')
-  , scope     = require ('../lib').scope
   ;
 
-var appPath = path.resolve (process.cwd (), 'app');
-var rcPath  = path.resolve (process.cwd (), '.gatekeeper');
+let appPath = path.resolve (process.cwd (), 'app');
+let rcPath  = path.resolve (process.cwd (), '.gatekeeper');
 
-const DEFAULT_SCOPE = [scope.superuser];
+const DEFAULT_SCOPE = ['gatekeeper.account.*', 'gatekeeper.client.*'];
 
 async.waterfall ([
   function (callback) { prompt.get (['email'], callback); },
@@ -33,7 +31,7 @@ function execute (args, callback) {
     },
 
     function (exists, callback) {
-      var data = [
+      let data = [
         {type: 'native', name: 'gatekeeper-cli', email: args.email, scope: DEFAULT_SCOPE}
       ];
 
@@ -43,12 +41,12 @@ function execute (args, callback) {
 
     function (clients, callback) {
       async.each (clients, function (client, callback) {
-        var data = {
+        let data = {
           client_id: client.id,
           client_secret: client.client_secret
         };
 
-        var filename = path.resolve (rcPath, client.name);
+        let filename = path.resolve (rcPath, client.name);
         fse.writeJSON (filename, data, {spaces: 2}, callback);
       }, callback);
     }], callback);
