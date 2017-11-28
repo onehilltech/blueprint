@@ -182,14 +182,17 @@ describe ('app | routers | account', function () {
     });
 
     describe ('UPDATE', function () {
-      it ('should not update scope and created_by', function (done) {
+      it ('should not update the scope', function (done) {
         const account = blueprint.app.seeds.$default.accounts[0];
 
         blueprint.testing.request ()
           .put ('/v1/accounts/' + account.id)
           .withUserToken (2)
-          .send ({account: {created_by: new mongodb.Types.ObjectId (), scope: ['the_new_scope']}})
-          .expect (200, {account: account.lean ()}, done);
+          .send ({account: {scope: ['the_new_scope']}})
+          .expect (403, { errors:
+            [ { code: 'unauthorized',
+              detail: 'You are not authorized to update or delete the scope.',
+              status: '403' } ] }, done);
       });
 
       it ('should update the email', function (done) {
@@ -216,6 +219,19 @@ describe ('app | routers | account', function () {
           .withUserToken (0)
           .send ({account: {scope: updated.scope}})
           .expect (200, {account: updated}, done);
+      });
+
+      it ('should not update the password', function (done) {
+        const account = blueprint.app.seeds.$default.accounts[3];
+
+        blueprint.testing.request ()
+          .put ('/v1/accounts/' + account.id)
+          .withUserToken (0)
+          .send ({account: {password: '1234567890'}})
+          .expect (400, { errors:
+            [ { code: 'bad_request',
+              detail: 'You cannot directly change the password.',
+              status: '400' } ] }, done);
       });
     });
 

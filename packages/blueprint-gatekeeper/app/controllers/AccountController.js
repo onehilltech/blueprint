@@ -118,11 +118,16 @@ AccountController.prototype.update = function () {
   return ResourceController.prototype.update.call (this, {
     on: {
       prepareUpdate: function (req, doc, callback) {
-        if (req.scope.indexOf ('gatekeeper.account.update') === -1 &&
-            req.scope.indexOf ('gatekeeper.account.*') === -1 &&
-            doc.$set.scope) {
-          delete doc.$set.scope;
-        }
+        // Make sure the update does not include properties that cannot be updated
+        // and/or deleted.
+        if (req.scope.indexOf ('gatekeeper.account.update') === -1 && req.scope.indexOf ('gatekeeper.account.*') === -1 && (doc.$set.scope || doc.$unset.scope))
+          return callback (new HttpError (403, 'unauthorized', 'You are not authorized to update or delete the scope.'));
+
+        if (doc.$set && doc.$set.password)
+          return callback (new HttpError (400, 'bad_request', 'You cannot directly change the password.'));
+
+        if (doc.$unset && doc.$unset.password)
+          return callback (new HttpError (400, 'bad_request', 'You cannot delete the password.'));
 
         return callback (null, doc);
       }
