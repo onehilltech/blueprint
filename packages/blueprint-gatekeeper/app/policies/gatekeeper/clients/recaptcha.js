@@ -1,7 +1,7 @@
-'use strict';
-
 const request = require ('request')
   , async     = require ('async')
+  , blueprint = require ('@onehilltech/blueprint')
+  , HttpError = blueprint.errors.HttpError
   ;
 
 const VERIFY_METHOD = 'GET';
