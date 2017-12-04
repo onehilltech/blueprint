@@ -15,6 +15,6 @@ describe ('lib | AbstractAction', function () {
   context ('doRequest(req, res)', function () {
     let action = new AbstractAction ();
 
-    expect (action.doRequest).to.throw (assert.AssertionError);
+    expect (action.doRequest.bind (action, {}, {})).to.throw (assert.AssertionError);
   });
 });

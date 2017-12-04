@@ -3,11 +3,11 @@ const LegacyFunctionAction = require ('../../../lib/legacy-function-action')
   ;
 
 function legacyNoCallback (req, res) {
-  res.status = 200;
+  res.status (200);
 }
 
 function legacyWithCallback (req, res, callback) {
-  res.status = 300;
+  res.status (300);
   callback (null);
 }
 
@@ -24,12 +24,18 @@ describe ('lib | LegacyFunctionAction', function () {
   context ('doRequest()', function () {
     context ('no callback', function () {
       it ('should execute the doRequest method', function (done) {
-        let action = new LegacyFunctionAction ({action: legacyNoCallback});
         let req = {};
-        let res = {};
+
+        let res = {
+          status (n) {
+            this._status = n
+          }
+        };
+
+        let action = new LegacyFunctionAction ({action: legacyNoCallback});
 
         action.doRequest (req, res).then (() => {
-          expect (res).to.have.property ('status', 200);
+          expect (res).to.have.property ('_status', 200);
           done (null);
 
         }).catch (reason => done (reason));
@@ -38,12 +44,18 @@ describe ('lib | LegacyFunctionAction', function () {
 
     context ('callback', function () {
       it ('should execute the doRequest method', function (done) {
-        let action = new LegacyFunctionAction ({action: legacyWithCallback});
         let req = {};
-        let res = {};
+
+        let res = {
+          status (n) {
+            this._status = n
+          }
+        };
+
+        let action = new LegacyFunctionAction ({action: legacyWithCallback});
 
         action.doRequest (req, res).then (() => {
-          expect (res).to.have.property ('status', 300);
+          expect (res).to.have.property ('_status', 300);
           done (null);
 
         }).catch (reason => done (reason));
