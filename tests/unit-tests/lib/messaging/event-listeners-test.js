@@ -1,4 +1,6 @@
 const EventListeners = require ('../../../../lib/messaging/event-listeners');
+const Listener = require ('../../../../lib/messaging/listener');
+const NoopListener = require ('../../../../lib/messaging/noop-listener');
 const expect = require ('chai').expect;
 
 describe ('lib | messaging | EventListeners', function () {
@@ -13,7 +15,7 @@ describe ('lib | messaging | EventListeners', function () {
   describe ('on()', function () {
     it ('should add a new listener', function () {
       let listeners = new EventListeners ({name: 'foo'});
-      listeners.on (() => {});
+      listeners.on (new NoopListener ());
 
       expect (listeners._on).to.have.length (1);
     });
@@ -22,7 +24,7 @@ describe ('lib | messaging | EventListeners', function () {
   describe ('once()', function () {
     it ('should add a new listener', function () {
       let listeners = new EventListeners ({name: 'foo'});
-      listeners.once (() => {});
+      listeners.once (new NoopListener ());
 
       expect (listeners._once).to.have.length (1);
     });
@@ -32,7 +34,7 @@ describe ('lib | messaging | EventListeners', function () {
     it ('should remove a listener', function () {
       let listeners = new EventListeners ({name: 'foo'});
 
-      listeners.on (() => {});
+      listeners.on (new NoopListener ());
       listeners.removeListenerAt (0);
 
       expect (listeners._once).to.have.length (0);
@@ -45,17 +47,17 @@ describe ('lib | messaging | EventListeners', function () {
       let e2;
 
       let listeners = new EventListeners ({name: 'foo'});
-      listeners.on ({
+      listeners.on (new Listener ({
         event (e) {
           e1 = e;
         }
-      });
+      }));
 
-      listeners.once ({
+      listeners.once (new Listener ({
         event (e) {
           e2 = e;
         }
-      });
+      }));
 
       listeners.emit (5).then (() => {
         expect (e1).to.equal (5);
