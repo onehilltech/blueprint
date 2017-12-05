@@ -2,6 +2,7 @@ const Messenger = require ('../../../../lib/messaging/messenger');
 const EventListeners = require ('../../../../lib/messaging/event-listeners');
 const ListenerHandle = require ('../../../../lib/messaging/listener-handle');
 const NoopListener = require ('../../../../lib/messaging/noop-listener');
+const Listener = require ('../../../../lib/messaging/listener');
 const expect = require ('chai').expect;
 
 describe ('lib | messaging | Messenger', function () {
@@ -39,6 +40,26 @@ describe ('lib | messaging | Messenger', function () {
       messenger.once ('a.b', new NoopListener ());
 
       expect (messenger._listeners).to.have.key ('a.b');
+    });
+  });
+
+  describe ('emit()', function () {
+    it ('should emit an event', function (done) {
+      let messenger = new Messenger ({key: '_'});
+      let value = null;
+
+      messenger.on ('a.b', new Listener ({
+        event (val) {
+          value = val;
+        }
+      }));
+
+      messenger.emit ('a.b', 5).then (() => {
+        expect (value).to.equal (5);
+        done (null);
+      }).catch (err => {
+        done (err)
+      });
     });
   });
 });
