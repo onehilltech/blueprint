@@ -32,4 +32,13 @@ describe ('lib | messaging | Messenger', function () {
       expect (handle).to.be.instanceof (ListenerHandle);
     });
   });
+
+  describe ('once()', function () {
+    it ('should register handler for event', function () {
+      let messenger = new Messenger ({key: '_'});
+      messenger.once ('a.b', new NoopListener ());
+
+      expect (messenger._listeners).to.have.key ('a.b');
+    });
+  });
 });
