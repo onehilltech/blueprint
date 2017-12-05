@@ -1,14 +1,11 @@
-const expect       = require ('chai').expect
-  , LegacyListener = require ('../../../lib/legacy-listener')
-;
+const expect = require ('chai').expect;
+const LegacyListener = require ('../../../../lib/messaging/legacy-listener');
 
 
 describe ('lib | LegacyListener', function () {
-  let val1 = null, val2 = null;
-
   function foo (p1, p2) {
-    val1 = p1;
-    val2 = p2;
+    this.p1 = p1;
+    this.p2 = p2;
   }
 
   context ('create()', function () {
@@ -19,13 +16,13 @@ describe ('lib | LegacyListener', function () {
     });
   });
 
-  context ('doEvent()', function () {
+  context ('event()', function () {
     it ('should call the legacy listener function', function () {
       let legacyListener = new LegacyListener ({listener: foo});
-      legacyListener.doEvent (5, 10);
+      legacyListener.event (5, 10);
 
-      expect (val1).to.equal (5);
-      expect (val2).to.equal (10);
+      expect (foo.p1).to.equal (5);
+      expect (foo.p2).to.equal (10);
     });
   });
 });

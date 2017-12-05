@@ -1,6 +1,5 @@
-const expect = require ('chai').expect
-  , Listener = require ('../../../lib/listener')
-  ;
+const expect = require ('chai').expect;
+const Listener = require ('../../../../lib/messaging/listener');
 
 describe ('lib | Listener', function () {
   context ('#create', function () {
