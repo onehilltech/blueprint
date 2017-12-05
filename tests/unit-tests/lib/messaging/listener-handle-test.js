@@ -32,6 +32,18 @@ describe ('lib | messaging | ListenerHandle', function () {
       handle.close ();
 
       expect (listeners.removed).to.equal (7);
-    })
+    });
+
+    it ('should not double-close listener handle', function () {
+      let listeners = {
+        removeListenerAt (index) {
+          this.removed = index;
+        }
+      };
+
+      let handle = new ListenerHandle ({listeners, index: 7});
+      handle.close ();
+      handle.close ();
+    });
   })
 });
