@@ -22,13 +22,12 @@
   },
   "homepage": "https://github.com/onehilltech/blueprint-cloud-messaging#readme",
   "dependencies": {
-    "@onehilltech/blueprint-gatekeeper": "^0.70.2",
-    "mocha": "^3.5.3",
+    "@onehilltech/blueprint-gatekeeper": "^0.71.2",
     "node-gcm": "^0.14.6"
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "mocha": "^3.4.2",
+    "mocha": "^3.5.3",
     "supertest": "^2.0.1"
   }
 }
