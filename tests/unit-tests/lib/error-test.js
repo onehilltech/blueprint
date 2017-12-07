@@ -14,12 +14,16 @@ describe ('lib | BlueprintError', function () {
   describe ('accept()', function () {
     it ('should accept a visitor', function () {
       let e = new BlueprintError ('invalid', 'This was an invalid operation', {line: 25});
+      let complete = false;
 
       e.accept ({
         visitBlueprintError (err) {
           expect (e).to.equal (err);
+          complete = true;
         }
-      })
+      });
+
+      expect (complete).to.be.true;
     })
   })
 });
