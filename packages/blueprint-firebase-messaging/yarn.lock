@@ -18,9 +18,9 @@
     qs "^6.5.1"
     underscore.string "^3.3.4"
 
-"@onehilltech/blueprint-gatekeeper@^0.71.3":
-  version "0.71.3"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-gatekeeper/-/blueprint-gatekeeper-0.71.3.tgz#76a5dc5e2bd660b0b012b11e1d7814fcbb477028"
+"@onehilltech/blueprint-gatekeeper@^0.71.5":
+  version "0.71.5"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-gatekeeper/-/blueprint-gatekeeper-0.71.5.tgz#9d380ffc6903d2c4160b6c5b2702d8e45d8e9307"
   dependencies:
     "@onehilltech/blueprint-mongodb" "^0.36.0"
     async "^2.5.0"
