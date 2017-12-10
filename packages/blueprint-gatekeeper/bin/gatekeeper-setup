@@ -1,17 +1,18 @@
 #!/usr/bin/env node
 
-const winston = require ('winston')
-  , prompt    = require ('prompt')
-  , blueprint = require ('@onehilltech/blueprint')
-  , path      = require ('path')
-  , async     = require ('async')
-  , fse       = require ('fs-extra')
-  ;
+const winston = require ('winston');
+const prompt  = require ('prompt');
+const blueprint = require ('@onehilltech/blueprint');
+const mongodb = require ('@onehilltech/blueprint-mongodb');
+const path = require ('path');
+const async = require ('async');
+const fse = require ('fs-extra');
 
-let appPath = path.resolve (process.cwd (), 'app');
-let rcPath  = path.resolve (process.cwd (), '.gatekeeper');
+const appPath = path.resolve (process.cwd (), 'app');
+const rcPath  = path.resolve (process.cwd (), '.gatekeeper');
+const DEFAULT_SCOPE = ['gatekeeper.*'];
 
-const DEFAULT_SCOPE = ['gatekeeper.account.*', 'gatekeeper.client.*'];
+let targetConnection = '$default';
 
 async.waterfall ([
   function (callback) { prompt.get (['email'], callback); },
@@ -21,35 +22,53 @@ async.waterfall ([
 function execute (args, callback) {
   async.waterfall ([
     function (callback) {
-      blueprint.createApplicationAndStart (appPath, callback);
+      blueprint.createApplication (appPath, callback);
     },
 
     function (app, callback) {
-      fse.ensureDir (rcPath, function (err) {
-        return callback (err, app);
-      });
-    },
+      async.waterfall ([
+        /*
+         * Make sure the output directory exists.
+         */
+        function (callback) {
+          fse.ensureDir (rcPath, callback);
+        },
 
-    function (exists, callback) {
-      let data = [
-        {type: 'native', name: 'gatekeeper-cli', email: args.email, scope: DEFAULT_SCOPE}
-      ];
+        /*
+         * Open the connection to the database.
+         */
+        function (exists, callback) {
+          let mongoConfig = blueprint.app.configs.mongodb;
+          let connOptions = mongoConfig.connections[targetConnection];
 
-      const Client = blueprint.app.models.Client;
-      Client.create (data, callback);
-    },
+          mongodb.getConnectionManager ().openConnection (targetConnection, connOptions, callback);
+        },
 
-    function (clients, callback) {
-      async.each (clients, function (client, callback) {
-        let data = {
-          client_id: client.id,
-          client_secret: client.client_secret
-        };
+        /*
+         * Create each of the clients.
+         */
+        function (conn, callback) {
+          let data = [
+            {type: 'native', name: 'gatekeeper-cli', email: args.email, scope: DEFAULT_SCOPE}
+          ];
 
-        let filename = path.resolve (rcPath, client.name);
-        fse.writeJSON (filename, data, {spaces: 2}, callback);
-      }, callback);
-    }], callback);
+          blueprint.app.models.Client.create (data, callback);
+        },
+
+        function (clients, callback) {
+          async.each (clients, function (client, callback) {
+            let data = {
+              client_id: client.id,
+              client_secret: client.client_secret
+            };
+
+            let filename = path.resolve (rcPath, client.name);
+            fse.writeJSON (filename, data, {spaces: 2}, callback);
+          }, callback);
+        }
+      ], callback);
+    }
+  ], callback);
 }
 
 function setupComplete (err) {
