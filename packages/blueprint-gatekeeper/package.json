@@ -47,7 +47,10 @@
     "start": "node ./app.js",
     "test": "env NODE_ENV=test mocha --recursive tests/unit-tests --reporter spec",
     "cover": "env NODE_ENV=test istanbul cover _mocha --recursive tests/tests",
-    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+
+    "postversion": "npm publish",
+    "postpublish": "git push origin master & git push origin --tags"
   },
   "bin": {
     "gatekeeper-setup": "./bin/gatekeeper-setup"
