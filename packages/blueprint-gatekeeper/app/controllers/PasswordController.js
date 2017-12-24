@@ -41,19 +41,10 @@ PasswordController.prototype.forgotPassword = function () {
           if (!account)
             return callback (new HttpError (400, 'unknown_email', 'The email address does not exist.'));
 
-          async.waterfall ([
-            function (callback) {
-              let payload = {email: account.email};
-              let options = {expiresIn: '5m'};
+          messaging.emit ('gatekeeper.password.forgot', account);
+          res.status (200).json (true);
 
-              controller._tokenGenerator.generateToken (payload, options, callback);
-            },
-
-            function (token) {
-              messaging.emit ('gatekeeper.password.forgot', account, token);
-              res.status (200).json (true);
-            }
-          ], callback);
+          return callback (null);
         }
       ], callback);
     }

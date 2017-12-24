@@ -15,20 +15,9 @@ describe ('app | routers | password', function () {
       it ('should initiate forgot password sequence', function (done) {
         let account = blueprint.app.seeds.$default.accounts[0];
 
-        blueprint.messaging.once ('gatekeeper.password.forgot', (acc, token) => {
+        blueprint.messaging.once ('gatekeeper.password.forgot', (acc) => {
           expect (acc.id).to.equal (account.id);
-
-          async.waterfall ([
-            function (callback) {
-              tokenGenerator.verifyToken (token, {}, callback);
-            },
-
-            function (payload, callback) {
-              expect (payload).to.include ({iss: 'gatekeeper', sub: 'gatekeeper.password.reset', email: acc.email});
-
-              return callback (null);
-            }
-          ], done);
+          return done (null);
         });
 
         blueprint.testing.request ()
