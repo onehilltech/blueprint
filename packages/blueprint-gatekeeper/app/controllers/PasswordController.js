@@ -50,7 +50,7 @@ PasswordController.prototype.forgotPassword = function () {
             },
 
             function (token) {
-              messaging.emit ('gatekeeper.password.reset', account, token);
+              messaging.emit ('gatekeeper.password.forgot', account, token);
               res.status (200).json (true);
             }
           ], callback);
@@ -92,7 +92,13 @@ PasswordController.prototype.resetPassword = function () {
         },
 
         function (account, callback) {
+          account.password = password;
+          account.save (callback);
+        },
 
+        function (account, n, callback) {
+          res.status (200).json (true);
+          return callback (null);
         }
       ], callback);
     }

@@ -4,18 +4,18 @@ const async = require ('async');
 const ResetPasswordTokenGenerator = require ('../../../../../app/utils/reset-password-token-generator');
 
 describe ('app | routers | password', function () {
-  describe ('/password/forgot', function () {
+  let tokenGenerator;
+
+  before (function () {
+    tokenGenerator = new ResetPasswordTokenGenerator ();
+  });
+
+  describe ('/v1/password/forgot', function () {
     describe ('POST', function () {
-      let tokenGenerator;
-
-      before (function () {
-        tokenGenerator = new ResetPasswordTokenGenerator ();
-      });
-
       it ('should initiate forgot password sequence', function (done) {
         let account = blueprint.app.seeds.$default.accounts[0];
 
-        blueprint.messaging.once ('gatekeeper.password.reset', (acc, token) => {
+        blueprint.messaging.once ('gatekeeper.password.forgot', (acc, token) => {
           expect (acc.id).to.equal (account.id);
 
           async.waterfall ([
@@ -37,6 +37,18 @@ describe ('app | routers | password', function () {
           .expect (200, 'true').end (function (err) {
             if (err) return done (err);
         });
+      });
+    });
+  });
+
+  describe ('/v1/password/reset', function () {
+    describe ('POST', function () {
+      it ('should reset the account password', function (done) {
+        let account = blueprint.app.seeds.$default.accounts[0];
+
+        async.waterfall ([
+
+        ], done);
       });
     });
   });
