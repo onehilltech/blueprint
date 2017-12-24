@@ -15,13 +15,13 @@ function PasswordController () {
 
 blueprint.controller (PasswordController);
 
-PasswordController.prototype.getResetPasswordLink = function () {
+PasswordController.prototype.forgotPassword = function () {
   let controller = this;
 
   return {
     validate: {
       email: {
-        in: 'query',
+        in: 'body',
         notEmpty: {
           errorMessage: 'The request is missing the email parameter.'
         },
@@ -34,7 +34,7 @@ PasswordController.prototype.getResetPasswordLink = function () {
     execute (req, res, callback) {
       async.waterfall ([
         function (callback) {
-          Account.findOne ({email: req.query.email}, callback);
+          Account.findOne ({email: req.body.email}, callback);
         },
 
         function (account, callback) {
@@ -61,18 +61,40 @@ PasswordController.prototype.getResetPasswordLink = function () {
 };
 
 PasswordController.prototype.resetPassword = function () {
+  let controller = this;
+
   return {
     validate: {
-      'token': {
-
+      'password-reset.token': {
+        in: 'body',
+        notEmpty: {
+          errorMessage: 'The request is missing the token parameter.'
+        }
       },
-      'password': {
-
+      'password-reset.password': {
+        in: 'body',
+        notEmpty: {
+          errorMessage: 'The request is missing the password parameter.'
+        }
       }
     },
 
     execute (req, res, callback) {
+      let {token,password} = req.body['password-reset'];
 
+      async.waterfall ([
+        function (callback) {
+          controller._tokenGenerator.verifyToken (token, callback);
+        },
+
+        function (payload, callback) {
+          Account.findOne ({email: payload.email}, callback);
+        },
+
+        function (account, callback) {
+
+        }
+      ], callback);
     }
   }
 };

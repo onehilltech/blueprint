@@ -1,7 +1,9 @@
 module.exports = {
   '/password': {
+    '/forgot': {
+      post: 'PasswordController@forgotPassword',
+    },
     '/reset': {
-      get: 'PasswordController@getResetPasswordLink',
       post: 'PasswordController@resetPassword'
     },
   }
