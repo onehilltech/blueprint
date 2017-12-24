@@ -65,13 +65,13 @@ PasswordController.prototype.resetPassword = function () {
 
   return {
     validate: {
-      'password-reset.token': {
+      'reset-password.token': {
         in: 'body',
         notEmpty: {
           errorMessage: 'The request is missing the token parameter.'
         }
       },
-      'password-reset.password': {
+      'reset-password.password': {
         in: 'body',
         notEmpty: {
           errorMessage: 'The request is missing the password parameter.'
@@ -80,11 +80,11 @@ PasswordController.prototype.resetPassword = function () {
     },
 
     execute (req, res, callback) {
-      let {token,password} = req.body['password-reset'];
+      let {token,password} = req.body['reset-password'];
 
       async.waterfall ([
         function (callback) {
-          controller._tokenGenerator.verifyToken (token, callback);
+          controller._tokenGenerator.verifyToken (token, {}, callback);
         },
 
         function (payload, callback) {
@@ -97,6 +97,8 @@ PasswordController.prototype.resetPassword = function () {
         },
 
         function (account, n, callback) {
+          messaging.emit ('gatekeeper.password.reset', account);
+
           res.status (200).json (true);
           return callback (null);
         }

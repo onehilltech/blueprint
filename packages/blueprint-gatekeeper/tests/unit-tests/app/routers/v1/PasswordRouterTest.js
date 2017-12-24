@@ -47,7 +47,34 @@ describe ('app | routers | password', function () {
         let account = blueprint.app.seeds.$default.accounts[0];
 
         async.waterfall ([
+          function (callback) {
+            tokenGenerator.generateToken ({email: account.email}, {}, callback);
+          },
 
+          function (token, callback) {
+            blueprint.messaging.once ('gatekeeper.password.reset', (acc) => {
+              expect (acc.id).to.equal (account.id);
+              expect (acc.password).to.not.equal ('1234567890');
+
+              async.waterfall ([
+                function (callback) {
+                  acc.verifyPassword ('1234567890', callback)
+                },
+
+                function (result, callback) {
+                  expect (result).to.be.true;
+                  return callback (null);
+                }
+              ], callback);
+            });
+
+            blueprint.testing.request ()
+              .post ('/v1/password/reset')
+              .send ({'reset-password': {token: token, password: '1234567890'}})
+              .expect (200, 'true').end ((err) => {
+                if (err) return callback (err);
+            });
+          }
         ], done);
       });
     });
