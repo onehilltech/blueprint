@@ -24,6 +24,8 @@ describe ('lib | ApplicationModule', function () {
         expect (result._resources).to.have.nested.property ('models.logger');
         expect (result._resources).to.not.have.nested.property ('models.monitor');
 
+        expect (result._resources).to.have.nested.property ('controllers.module-test');
+
         expect (result._resources).to.have.property ('listeners').to.have.property ('blueprint.module.init');
 
         done (null);
