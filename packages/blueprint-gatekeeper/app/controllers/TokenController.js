@@ -35,12 +35,13 @@ WorkflowController.prototype.logoutUser = function () {
     execute: function (req, res, callback) {
       async.waterfall ([
         function (callback) {
-          req.accessToken.remove (callback);
+          let {accessToken} = req;
+          accessToken.remove (callback);
         },
 
-        function (token, callback) {
-          if (!token)
-            return callback (new HttpError (500, 'invalid_token', 'Invalid access token'));
+        function (accessToken, callback) {
+          if (!accessToken)
+            return callback (new HttpError (400, 'invalid_token', 'The access token is invalid.'));
 
           res.status (200).send (true);
           return callback (null);
@@ -61,10 +62,10 @@ WorkflowController.prototype.issueToken = function () {
     client_id: {in: 'body', notEmpty: true, isMongoId: true}
   };
 
-  var typeSchemaCache = {};
+  let typeSchemaCache = {};
 
   function getTypeSchemaFromCache (type) {
-    var typeSchema = typeSchemaCache[type];
+    let typeSchema = typeSchemaCache[type];
 
     if (typeSchema)
       return typeSchema;

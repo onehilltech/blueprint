@@ -19,7 +19,11 @@ var schema = new Schema ({
   enabled: {type: Boolean, required: true, default : true},
 
   /// The access scopes for the token.
-  scope: [{type: String}]
+  scope: [{type: String}],
+
+  /// Optional origin for binding the token to a host/origin. This is important
+  /// with dealing with x-site scripting.
+  origin: {type: String}
 }, options);
 
 const MODEL_NAME = 'access_token';

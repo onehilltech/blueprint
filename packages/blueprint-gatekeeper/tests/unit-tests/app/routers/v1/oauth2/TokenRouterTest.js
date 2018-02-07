@@ -93,7 +93,7 @@ describe ('Oauth2Router', function () {
         blueprint.testing.request ()
           .post (TOKEN_URL)
           .send (data)
-          .expect (403, {errors: [{status: '403', code: 'policy_failed', detail: 'Account is disabled'}]}, done);
+          .expect (403, {errors: [{status: '403', code: 'policy_failed', detail: 'The account is disabled.'}]}, done);
       });
 
       it ('should not grant token because password is incorrect', function (done) {
@@ -110,7 +110,7 @@ describe ('Oauth2Router', function () {
         blueprint.testing.request ()
           .post (TOKEN_URL)
           .send (data)
-          .expect (400, {errors: [{status: '400', code: 'invalid_password', detail: 'Incorrect password'}]}, done);
+          .expect (400, {errors: [{status: '400', code: 'invalid_password', detail: 'The password for the account is incorrect.'}]}, done);
       });
     });
 

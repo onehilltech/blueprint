@@ -1,18 +1,14 @@
 'use strict';
 
-const async     = require ('async')
-  , blueprint   = require ('@onehilltech/blueprint')
-  , mongodb     = require ('@onehilltech/blueprint-mongodb')
-  , ObjectId    = mongodb.Types.ObjectId
-  , HttpError   = blueprint.errors.HttpError
-  , Account     = require ('../../models/Account')
-  , UserToken   = require ('../../models/UserToken')
-  , AccessToken = require ('../../models/AccessToken')
-  ;
+const async     = require ('async');
+const blueprint   = require ('@onehilltech/blueprint');
+const mongodb     = require ('@onehilltech/blueprint-mongodb');
+const ObjectId    = mongodb.Types.ObjectId;
+const HttpError   = blueprint.errors.HttpError;
+const UserToken   = require ('../../models/UserToken');
+const AccessToken = require ('../../models/AccessToken');
 
-var exports = module.exports = {};
-var serializer = require ('../../middleware/serializers') (blueprint.app.configs.gatekeeper.token)
-var password = require ('./password');
+let serializer = require ('../../middleware/serializers') (blueprint.app.configs.gatekeeper.token)
 
 /**
  * Policies for granting an access token based on password.
@@ -20,7 +16,7 @@ var password = require ('./password');
  * @param req
  * @param callback
  */
-exports.policies = function (req, callback) {
+function policies (req, callback) {
   const refreshToken = req.body.refresh_token;
 
   async.waterfall ([
@@ -40,7 +36,7 @@ exports.policies = function (req, callback) {
     },
 
     function (payload, callback) {
-      var filter = {refresh_token: new ObjectId (payload.jti), client: req.client._id};
+      let filter = {refresh_token: new ObjectId (payload.jti), client: req.client._id};
       AccessToken.findOne (filter).populate ('client account').exec (callback);
     },
 
@@ -60,21 +56,34 @@ exports.policies = function (req, callback) {
       return callback (null, true);
     }
   ], callback);
-};
+}
 
-/**
- * Create an access token.
- *
- * @param req
- * @param callback
- */
-exports.createToken = function (req, callback) {
-  var doc = {
-    client: req.accessToken.client._id,
-    account: req.accessToken.account._id,
-    scope: req.accessToken.scope,
-    refresh_token: new ObjectId ()
-  };
+function createToken (req, callback) {
 
-  UserToken.create (doc, callback);
+  // Let's remove the old token because it is no longer valid, and replace
+  // it with a new access token.
+
+  async.waterfall ([
+    function (callback) {
+      const {accessToken} = req;
+      accessToken.remove (callback);
+    },
+
+    function (accessToken, callback) {
+      const doc = {
+        client : accessToken.client._id,
+        account: accessToken.account._id,
+        scope  : accessToken.scope,
+        origin : accessToken.origin,
+        refresh_token: new ObjectId ()
+      };
+
+      UserToken.create (doc, callback);
+    }
+  ], callback);
+}
+
+module.exports = {
+  createToken,
+  policies
 };

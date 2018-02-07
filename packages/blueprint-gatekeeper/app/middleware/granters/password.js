@@ -1,16 +1,11 @@
-'use strict';
-
-const async   = require ('async')
-  , blueprint = require ('@onehilltech/blueprint')
-  , mongodb   = require ('@onehilltech/blueprint-mongodb')
-  , ObjectId  = mongodb.Types.ObjectId
-  , HttpError = blueprint.errors.HttpError
-  , _         = require ('underscore')
-  , Account   = require ('../../models/Account')
-  , UserToken = require ('../../models/UserToken')
-  ;
-
-var exports = module.exports = {};
+const async     = require ('async');
+const blueprint = require ('@onehilltech/blueprint');
+const mongodb   = require ('@onehilltech/blueprint-mongodb');
+const ObjectId  = mongodb.Types.ObjectId;
+const HttpError = blueprint.errors.HttpError;
+const Account   = require ('../../models/Account');
+const UserToken = require ('../../models/UserToken');
+const {union}   = require ('lodash');
 
 /**
  * Policies for granting an access token based on password.
@@ -18,16 +13,15 @@ var exports = module.exports = {};
  * @param req
  * @param callback
  */
-exports.policies = function (req, callback) {
-  var username = req.body.username;
-  var password = req.body.password;
+function policies (req, callback) {
+  const {username,password} = req.body;
 
   async.waterfall ([
     /*
      * Lookup the account by username.
      */
     function (callback) {
-      Account.findOne ({username: username}, callback);
+      Account.findOne ({username}, callback);
     },
 
     /*
@@ -35,10 +29,10 @@ exports.policies = function (req, callback) {
      */
     function (account, callback) {
       if (!account)
-        return callback (new HttpError (400, 'invalid_username', 'Invalid username'));
+        return callback (new HttpError (400, 'invalid_username', 'The username does not exist.'));
 
       if (!account.enabled)
-        return callback (null, false, 'Account is disabled');
+        return callback (null, false, 'The account is disabled.');
 
       async.waterfall ([
         function (callback) {
@@ -47,7 +41,7 @@ exports.policies = function (req, callback) {
 
         function (match, callback) {
           if (!match)
-            return callback (new HttpError (400, 'invalid_password', 'Incorrect password'));
+            return callback (new HttpError (400, 'invalid_password', 'The password for the account is incorrect.'));
 
           req.account = account;
 
@@ -56,21 +50,27 @@ exports.policies = function (req, callback) {
       ], callback);
     }
   ], callback);
-};
+}
 
 /**
  * Create an access token.
- *
- * @param opts
- * @param callback
  */
-exports.createToken = function (opts, callback) {
-  var doc = {
-    client: opts.client._id,
-    account: opts.account._id,
-    scope: _.union (opts.client.scope, opts.account.scope),
-    refresh_token: new ObjectId ()
+function createToken (req, callback) {
+  const {account,client} = req;
+  const origin = req.get ('origin');
+
+  const doc = {
+    client : client._id,
+    account: account._id,
+    scope  : union (client.scope, account.scope),
+    refresh_token: new ObjectId (),
+    origin,
   };
 
   UserToken.create (doc, callback);
+}
+
+module.exports = {
+  createToken,
+  policies
 };

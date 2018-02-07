@@ -1,12 +1,18 @@
-'use strict';
+const ClientToken = require ('../../models/ClientToken');
 
-const blueprint = require ('@onehilltech/blueprint')
-  , ClientToken = require ('../../models/ClientToken')
-  ;
+function createToken (req, callback) {
+  const {client} = req;
+  const origin = req.get ('origin');
 
-var exports = module.exports = {};
+  const doc = {
+    client: client._id,
+    scope : client.scope,
+    origin
+  };
 
-exports.createToken = function (opts, callback) {
-  var doc = {client: opts.client._id, scope: opts.client.scope};
   ClientToken.create (doc, callback);
+}
+
+module.exports = {
+  createToken
 };

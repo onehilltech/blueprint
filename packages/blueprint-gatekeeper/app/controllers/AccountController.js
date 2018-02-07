@@ -91,8 +91,10 @@ AccountController.prototype.create = function () {
 
         async.waterfall ([
           function (callback) {
-            let data = {client: req.user, account: result.account};
-            password.createToken (data, callback);
+            req.client = req.user;
+            req.account = result.account;
+
+            password.createToken (req, callback);
           },
 
           function (accessToken, callback) {
