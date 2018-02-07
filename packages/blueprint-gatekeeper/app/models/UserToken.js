@@ -25,7 +25,7 @@ schema.methods.serialize = function (callback) {
   async.parallel ({
     access_token: function (callback) {
       const payload = { scope: this.scope };
-      const options = { jwtid: this.id };
+      const options = { jwtid: this.id, audience: this.origin };
 
       tokenGenerator.generateToken (payload, options, callback);
     }.bind (this),
@@ -35,7 +35,7 @@ schema.methods.serialize = function (callback) {
         return callback (null);
 
       const payload = {  };
-      const options = { jwtid: this.refresh_token.toString () };
+      const options = { jwtid: this.refresh_token.toString (), audience: this.origin };
 
       tokenGenerator.generateToken (payload, options, callback);
     }.bind (this)
@@ -44,11 +44,11 @@ schema.methods.serialize = function (callback) {
 
 schema.methods.serializeSync = function () {
   let accessToken = {
-    access_token: tokenGenerator.generateToken ({ scope: this.scope }, { jwtid: this.id })
+    access_token: tokenGenerator.generateToken ({ scope: this.scope }, { jwtid: this.id, audience: this.origin })
   };
 
   if (this.refresh_token)
-    accessToken.refresh_token = tokenGenerator.generateToken ({ }, { jwtid: this.refresh_token.toString () })
+    accessToken.refresh_token = tokenGenerator.generateToken ({ }, { jwtid: this.refresh_token.toString (), audience: this.origin });
 
   return accessToken;
 };
