@@ -29,8 +29,10 @@ module.exports = Policy.anySeries ([
          * Extract the access token from the request.
          */
         function (callback) {
-          if (req.headers && req.headers.authorization) {
-            let parts = req.headers.authorization.split (' ');
+          let authorization = req.get ('authorization');
+
+          if (authorization) {
+            let parts = authorization.split (' ');
 
             if (parts.length !== 2)
               return callback (new HttpError (400, 'invalid_authorization', 'Invalid authorization header'));
