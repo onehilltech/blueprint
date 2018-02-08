@@ -16,7 +16,7 @@ function getToken (data, callback) {
 }
 
 describe ('Oauth2Router', function () {
-  describe('#issueToken', function () {
+  describe('issueToken', function () {
     const TOKEN_URL = '/v1/oauth2/token';
 
     describe ('password', function () {
@@ -43,6 +43,34 @@ describe ('Oauth2Router', function () {
             return callback (null);
           }
         ], done);
+      });
+
+      it ('should grant a token bound to an origin', function (done) {
+        const native = blueprint.app.seeds.$default.native[0];
+
+        const data = {
+          grant_type: 'password',
+          username: blueprint.app.seeds.$default.accounts[1].username,
+          password: blueprint.app.seeds.$default.accounts[1].username,
+          client_id: native.id,
+          client_secret: native.client_secret
+        };
+
+        blueprint.testing.request ()
+          .post ('/v1/oauth2/token')
+          .send (data)
+          .expect (200).expect('Content-Type', /json/)
+          .end ((err, res) => {
+            if (err)
+              return done (err);
+
+            const token = res.body;
+
+            expect (token).to.have.all.keys (['token_type', 'access_token', 'refresh_token']);
+            expect (token).to.have.property ('token_type', 'Bearer');
+
+            return done (null);
+          });
       });
 
       it ('should return 400 for missing grant_type', function (done) {
