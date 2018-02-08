@@ -57,7 +57,10 @@ module.exports = Policy.anySeries ([
          * Verify the access token.
          */
         function (accessToken, callback) {
-          tokenGenerator.verifyToken (accessToken, {}, function (err, payload) {
+          const origin = req.get ('origin');
+          const opts = {audience: origin};
+
+          tokenGenerator.verifyToken (accessToken, opts, function (err, payload) {
             if (!err)
               return callback (null, payload);
 
