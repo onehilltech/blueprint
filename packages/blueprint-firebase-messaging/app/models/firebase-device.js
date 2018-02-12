@@ -35,14 +35,14 @@ let schema = new mongodb.Schema({
   device: {type: String, required: true, unique: true, index: true, const: true},
 
   /// Access token for the device.
-  token: {type: String, required: true},
+  token: {type: String},
 
   /// User account that owns the token.
   owner: {type: ObjectId, ref: 'account', validation: {optional: true}},
 }, options);
 
 schema.virtual ('device_token').get (function () {
-  return deviceToken.generateToken ({}, {jwtid: this.device, subject: 'firebase.device'});
+  return deviceToken.generateToken ({}, {jwtid: this.id, subject: 'firebase.device'});
 });
 
 schema.statics.verifyDeviceToken = function (token, callback) {

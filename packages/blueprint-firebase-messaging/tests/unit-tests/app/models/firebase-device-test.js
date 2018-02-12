@@ -23,7 +23,7 @@ describe ('app | models | FirebaseDevice', function () {
         function (payload, callback) {
           expect (payload).to.have.property ('iss', 'firebase-messaging');
           expect (payload).to.have.property ('sub', 'firebase.device');
-          expect (payload).to.have.property ('jti', '1234567890');
+          expect (payload).to.have.property ('jti', device.id);
 
           return callback (null);
         }

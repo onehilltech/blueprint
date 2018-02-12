@@ -1,40 +1,38 @@
 module.exports = {
   '/firebase': {
-    '/messaging': {
-      '/devices': {
-        resource: {
-          controller: 'FirebaseMessagingController',
-          allow: ['create'],
-        },
+    '/devices': {
+      resource: {
+        controller: 'FirebaseMessagingController',
+        allow: ['create'],
+      },
+
+      /*
+       * Delete the registration for a device.
+       */
+      delete: {action: 'FirebaseMessagingController@removeDevice', policy: 'firebase.device.bearer'},
+
+      '/tokens': {
+        policy: 'firebase.device.bearer',
 
         /*
-         * Delete the registration for a device.
+         * Refresh the device token. This is the token that is provided by the Firebase
+         * SDK to the client application.
          */
-        delete: {action: 'FirebaseMessagingController@unregisterDevice', policy: 'firebase.device.bearer'},
+        post: {action: 'FirebaseMessagingController@refreshToken'}
+      },
 
-        '/tokens': {
-          policy: 'firebase.device.bearer',
+      '/claims': {
+        policy: 'firebase.device.bearer',
 
-          /*
-           * Refresh the device token. This is the token that is provided by the Firebase
-           * SDK to the client application.
-           */
-          post: {action: 'FirebaseMessagingController@refreshToken'}
-        },
+        /*
+         * Claim an existing device.
+         */
+        post: {action: 'FirebaseMessagingController@claimDevice'},
 
-        '/claims': {
-          policy: 'firebase.device.bearer',
-
-          /*
-           * Claim an existing device.
-           */
-          post: {action: 'FirebaseMessagingController@claimDevice'},
-
-          /*
-           * Delete the claim for an existing device.
-           */
-          delete: {action: 'FirebaseMessagingController@unclaimDevice'}
-        }
+        /*
+         * Delete the claim for an existing device.
+         */
+        delete: {action: 'FirebaseMessagingController@unclaimDevice'}
       }
     }
   }

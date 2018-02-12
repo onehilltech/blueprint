@@ -22,20 +22,9 @@ const {
 
 function FirebaseMessagingController () {
   ResourceController.call (this, {model: FirebaseDevice});
-  messaging.on ('app.init', this.doAppInit.bind (this));
 }
 
 blueprint.controller (FirebaseMessagingController, ResourceController);
-
-/**
- * Handle the app.init event.
- *
- * @param app       The parent application.
- */
-FirebaseMessagingController.prototype.doAppInit = function (app) {
-  const firebase = app.configs.firebase;
-  this._claimTicketOptions = firebase.claimTicketOptions;
-};
 
 /**
  * Register a new Firebase instance with the server.
@@ -58,9 +47,18 @@ FirebaseMessagingController.prototype.create = function () {
   return ResourceController.prototype.create.call (this, opts);
 };
 
-FirebaseMessagingController.prototype.unregisterDevice = function () {
-  return (req, res) => {
+FirebaseMessagingController.prototype.removeDevice = function () {
+  return (req, res, callback) => {
+    async.waterfall ([
+      function (callback) {
+        req.device.remove (callback);
+      },
 
+      function (device, callback) {
+        res.status (200).json (true);
+        return callback (null);
+      }
+    ], callback);
   }
 };
 
