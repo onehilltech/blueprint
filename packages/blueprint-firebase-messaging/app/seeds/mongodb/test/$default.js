@@ -32,7 +32,7 @@ module.exports = {
     return callback (null, model);
   }),
 
-  cloud_tokens: [
+  devices: [
     { device: 'device_123', token: '123' },
     { device: 'device_456', token: '456' },
     { device: 'device_789', token: '789' },

@@ -1,30 +1,70 @@
-'use strict';
+const blueprint = require ('@onehilltech/blueprint');
+const mongodb   = require ('@onehilltech/blueprint-mongodb');
+const async     = require ('async');
+const jwt       = require ('jsonwebtoken');
+const FirebaseDevice = require ('../models/firebase-device');
 
-let blueprint  = require ('@onehilltech/blueprint')
-  , HttpError  = blueprint.errors.HttpError
-  , mongodb    = require ('@onehilltech/blueprint-mongodb')
-  , async      = require ('async')
-  , CloudToken = require ('../models/CloudToken')
-  , jwt        = require ('jsonwebtoken')
-  , ResourceController = mongodb.ResourceController
-  ;
+const {
+  ResourceController
+} = mongodb;
 
-let claimTicketOptions = null;
+const {
+  messaging,
+  errors: {
+    HttpError
+  }
+} = blueprint;
 
-blueprint.messaging.on ('app.init', function (app) {
-  claimTicketOptions = app.configs['cloud-messaging'].claimTicketOptions;
-});
+const {
+  waterfall
+} = async;
 
-function CloudTokenController () {
-  ResourceController.call (this, {name: 'token', model: CloudToken});
+
+function FirebaseMessagingController () {
+  ResourceController.call (this, {model: FirebaseDevice});
+  messaging.on ('app.init', this.doAppInit.bind (this));
 }
 
-blueprint.controller (CloudTokenController, ResourceController);
+blueprint.controller (FirebaseMessagingController, ResourceController);
 
+/**
+ * Handle the app.init event.
+ *
+ * @param app       The parent application.
+ */
+FirebaseMessagingController.prototype.doAppInit = function (app) {
+  const firebase = app.configs.firebase;
+  this._claimTicketOptions = firebase.claimTicketOptions;
+};
 
-module.exports = CloudTokenController;
+/**
+ * Register a new Firebase instance with the server.
+ */
+FirebaseMessagingController.prototype.create = function () {
+  const opts = {
+    on: {
+      prepareDocument (req, doc, callback) {
+        if (doc.token)
+          delete doc.token;
 
-CloudTokenController.prototype.registerToken = function () {
+        if (doc.user)
+          delete doc.user;
+
+        return callback (null, doc);
+      }
+    }
+  };
+
+  return ResourceController.prototype.create.call (this, opts);
+};
+
+FirebaseMessagingController.prototype.unregisterDevice = function () {
+  return (req, res) => {
+
+  }
+};
+
+FirebaseMessagingController.prototype.refreshToken = function () {
   return {
     validate: {
       device: {
@@ -37,7 +77,7 @@ CloudTokenController.prototype.registerToken = function () {
     },
 
     execute: function (req, res, callback) {
-      async.waterfall ([
+      waterfall([
         function (callback) {
           let query = {device: req.body.device};
           let update = {device: req.body.device, token: req.body.token};
@@ -72,7 +112,7 @@ CloudTokenController.prototype.registerToken = function () {
   }
 };
 
-CloudTokenController.prototype.claimDevice = function () {
+FirebaseMessagingController.prototype.claimDevice = function () {
   return {
     validate: {
       claim_ticket: {
@@ -81,7 +121,7 @@ CloudTokenController.prototype.claimDevice = function () {
     },
 
     execute (req, res, callback) {
-      async.waterfall ([
+      waterfall([
         function (callback) {
           let claimTicket = req.body.claim_ticket;
           let options = {issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
@@ -106,10 +146,10 @@ CloudTokenController.prototype.claimDevice = function () {
   };
 };
 
-CloudTokenController.prototype.release = function () {
+FirebaseMessagingController.prototype.unclaimDevice = function () {
   return {
     execute (req, res, callback) {
-      async.waterfall ([
+      waterfall([
         function (callback) {
           let query = {device: req.params.deviceId, owner: req.user._id};
 
@@ -127,3 +167,5 @@ CloudTokenController.prototype.release = function () {
     }
   };
 };
+
+module.exports = FirebaseMessagingController;

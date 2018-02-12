@@ -10,10 +10,10 @@ let sender;
 const DEFAULT_RELAY_CALLBACK = 'cloud-messaging.send.callback';
 
 messaging.on ('app.init', function (app) {
-  let config = app.configs['cloud-messaging'];
-  let CloudToken = app.models.CloudToken;
+  const firebase = app.configs.firebase;
+  const FirebaseDevice = app.models['firebase-device'];
 
-  sender = new Sender (CloudToken, config);
+  sender = new Sender (FirebaseDevice, firebase);
 });
 
 function send (recipients, message, relayTopic) {

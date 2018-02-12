@@ -1,5 +1,5 @@
 var winston = require ('winston')
-  , CloudToken = require ('../../models/CloudToken')
+  , CloudToken = require ('../../models/firebase-device')
   ;
 
 function removeTokensForAccount (account) {

@@ -8,10 +8,10 @@ var sender;
 const DEFAULT_RELAY_CALLBACK = 'cloud-messaging.publish.callback';
 
 messaging.on ('app.init', function (app) {
-  var config = app.configs['cloud-messaging'];
-  var CloudToken = app.models.CloudToken;
+  const firebase = app.configs.firebase;
+  const FirebaseDevice = app.models['firebase-device'];
 
-  sender = new Sender (CloudToken, config);
+  sender = new Sender (FirebaseDevice, firebase);
 });
 
 function publish (topic, message, relayTopic) {

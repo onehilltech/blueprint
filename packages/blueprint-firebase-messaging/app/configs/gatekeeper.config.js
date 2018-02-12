@@ -6,8 +6,7 @@ module.exports = {
   token: {
     kind: 'jwt',
     options: {
-      issuer: 'blueprint-cloud-messaging',
-      algorithm : 'RS256',
+      issuer: 'firebase-messaging',
       secret: 'ssshhh'
     }
   }
