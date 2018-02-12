@@ -5,10 +5,10 @@ const mongodb   = require ('@onehilltech/blueprint-mongodb')
   , AccessToken = require ('./AccessToken')
   , Account     = require ('./Account')
   , AccessTokenGenerator = require ('../utils/access-token-generator')
-  ;
+;
 
 let options     = require ('./commonOptions') ()
-  ;
+;
 
 const tokenGenerator = new AccessTokenGenerator ();
 options.discriminatorKey = AccessToken.schema.options.discriminatorKey;
@@ -35,7 +35,10 @@ schema.methods.serialize = function (callback) {
         return callback (null);
 
       const payload = {  };
-      const options = { jwtid: this.refresh_token.toString (), audience: this.origin };
+      const options = { jwtid: this.refresh_token.toString () };
+
+      if (this.origin)
+        options.audience = this.origin;
 
       tokenGenerator.generateToken (payload, options, callback);
     }.bind (this)
@@ -43,12 +46,26 @@ schema.methods.serialize = function (callback) {
 };
 
 schema.methods.serializeSync = function () {
-  let accessToken = {
-    access_token: tokenGenerator.generateToken ({ scope: this.scope }, { jwtid: this.id, audience: this.origin })
-  };
+  // Generate the access token.
+  let options = {jwtid: this.id};
 
-  if (this.refresh_token)
-    accessToken.refresh_token = tokenGenerator.generateToken ({ }, { jwtid: this.refresh_token.toString (), audience: this.origin });
+  if (this.origin)
+    options.audience = this.origin;
+
+  let access_token = tokenGenerator.generateToken ({ scope: this.scope }, options);
+
+  let accessToken = { access_token };
+
+  // Include a refresh token is the access token has a refresh token.
+
+  if (this.refresh_token) {
+    options = {jwtid: this.refresh_token.toString ()};
+
+    if (this.origin)
+      option.audience = this.origin;
+
+    accessToken.refresh_token = tokenGenerator.generateToken ({}, options);
+  }
 
   return accessToken;
 };
