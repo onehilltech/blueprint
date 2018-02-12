@@ -47,6 +47,10 @@ FirebaseMessagingController.prototype.create = function () {
   return ResourceController.prototype.create.call (this, opts);
 };
 
+/**
+ * Remove a device from the database. Once the device has been removed, it can no
+ * longer be communicated with.
+ */
 FirebaseMessagingController.prototype.removeDevice = function () {
   return (req, res, callback) => {
     async.waterfall ([
@@ -62,46 +66,35 @@ FirebaseMessagingController.prototype.removeDevice = function () {
   }
 };
 
+/**
+ * Refresh the token that allows Firebase to communicate with the device.
+ */
 FirebaseMessagingController.prototype.refreshToken = function () {
   return {
     validate: {
-      device: {
-        notEmpty: { errorMessage: 'Missing device id parameter.' }
+      'device.token': {
+        in: 'body',
+        notEmpty: {errorMessage: 'Missing the refresh token.'}
       },
-
-      token: {
-        notEmpty: { errorMessage: 'Missing token parameter.'}
-      }
     },
 
-    execute: function (req, res, callback) {
-      waterfall([
-        function (callback) {
-          let query = {device: req.body.device};
-          let update = {device: req.body.device, token: req.body.token};
-          let options = {upsert: true, new: true};
+    execute (req, res, callback) {
+      let {device} = req;
 
-          // If the request if from a user, we can go ahead and allow the user to claim
-          // this token.
-
-          if (req.accessToken.kind === 'user_token')
-            update.owner = req.accessToken.account._id;
-
-          CloudToken.findOneAndUpdate (query, update, options, callback);
+      waterfall ([
+        (callback) => {
+          device.token = req.body.device.token;
+          device.save (callback);
         },
 
-        function (token, callback) {
-          let ret = {};
+        function (device, n, callback) {
+          if (!device)
+            return callback (new HttpError (400, 'missing_device', 'The device no longer exists.'));
 
-          if (!token.owner) {
-            let options = {jwtid: token.id, issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
-            let cert = claimTicketOptions.secret || claimTicketOptions.privateKey;
+          if (n !== 1)
+            return callback (new HttpError (500, 'update_failed', 'Failed to refresh the token for the device.'));
 
-            let claimTicket = jwt.sign ({}, cert, options);
-            ret.claim_ticket = {claim_ticket: claimTicket};
-          }
-
-          res.status (200).json (ret);
+          res.status (200).json ({device: device});
 
           return callback (null);
         }
