@@ -1,13 +1,10 @@
-var winston = require ('winston')
-  , CloudToken = require ('../../models/firebase-device')
-  ;
+const FirebaseDevice = require ('../../models/firebase-device');
+const util = require ('util');
 
 function removeTokensForAccount (account) {
-  var query = {owner: account.id};
-
-  CloudToken.remove (query, function (err) {
+  FirebaseDevice.remove ({user: account._id}, function (err) {
     if (err)
-      winston.log ('error', util.inspect (err));
+      console.error (util.inspect (err));
   });
 }
 
