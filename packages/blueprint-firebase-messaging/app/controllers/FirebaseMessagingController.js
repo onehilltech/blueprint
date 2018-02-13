@@ -1,7 +1,6 @@
 const blueprint = require ('@onehilltech/blueprint');
 const mongodb   = require ('@onehilltech/blueprint-mongodb');
 const async     = require ('async');
-const jwt       = require ('jsonwebtoken');
 const FirebaseDevice = require ('../models/firebase-device');
 
 const {
