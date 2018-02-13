@@ -8,6 +8,7 @@ describe ('app | routers | v1 | FirebaseMessagingRouter', function () {
     describe ('POST', function () {
       it ('should register a device', function (done) {
         const device = {device: '1234567890'};
+        const native = blueprint.app.seeds.$default.native[0];
 
         async.waterfall ([
           function (callback) {
@@ -20,6 +21,7 @@ describe ('app | routers | v1 | FirebaseMessagingRouter', function () {
 
           function (res, callback) {
             expect (res.body).to.have.deep.property ('device.device_token');
+            expect (res.body).to.have.deep.property ('device.client', native.id);
 
             return callback (null);
           }
@@ -121,64 +123,35 @@ describe ('app | routers | v1 | FirebaseMessagingRouter', function () {
     });
   });
 
-  describe ('/v1/cloud-tokens/:deviceId/claim', function () {
+  describe ('/v1/firebase/devices/claims', function () {
     describe ('POST', function () {
       it ('should claim an unclaimed device', function (done) {
-        let userToken = blueprint.app.seeds.$default.user_tokens[0];
-        let accessToken = userToken.serializeSync ();
-        let deviceId = 'device_123';
+        const device = blueprint.app.seeds.$default.devices[0];
+        const user = blueprint.app.seeds.$default.accounts[0];
 
-        async.waterfall ([
-          function (callback) {
-            let cloudToken = blueprint.app.seeds.$default.cloud_tokens[0];
-            let claimTicketOptions = blueprint.app.configs['cloud-messaging'].claimTicketOptions;
-            let options = {jwtid: cloudToken.id, issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
-            let cert = claimTicketOptions.secret || claimTicketOptions.privateKey;
+        let expected = device.lean ();
+        delete expected.id;
 
-            jwt.sign ({}, cert, options, callback);
-          },
+        expected.user = user.id;
 
-          function (claimTicket, callback) {
-            // generate the expected token for the first device, and submit the
-            // claim ticket.
-
-            blueprint.testing.request ()
-              .post ('/v1/cloud-tokens/device_123/claim')
-              .set ('Authorization', 'Bearer ' + accessToken.access_token)
-              .send ({claim_ticket: claimTicket})
-              .expect (200, 'true', callback);
-          },
-
-          function (res, callback) {
-            async.waterfall ([
-              function (callback) {
-                blueprint.app.models.CloudToken.findOne ({device: deviceId}, callback);
-              },
-
-              function (cloudToken, callback) {
-                expect (cloudToken.lean ()).to.deep.equal ({
-                  _id: cloudToken.id,
-                  device: deviceId,
-                  token: cloudToken.token,
-                  owner: userToken.account.toString ()
-                });
-
-                return callback (null);
-              }
-            ], callback);
-          }
-        ], done);
+        blueprint.testing.request ()
+          .post ('/v1/firebase/devices/claims')
+          .withUserToken (0)
+          .send ({device: {device: device.device_token}})
+          .expect (200, {device: expected}, done);
       });
 
       it ('should not allow client to claim a device', function (done) {
-        let clientToken = blueprint.app.seeds.$default.client_tokens[0];
-        let accessToken = clientToken.serializeSync ();
+        const device = blueprint.app.seeds.$default.devices[0];
 
         blueprint.testing.request ()
-          .post ('/v1/cloud-tokens/device_123/claim')
-          .set ('Authorization', 'Bearer ' + accessToken.access_token)
-          .send ({claim_ticket: '1234567890'})
-          .expect (403, {errors: [{status: '403', code: 'policy_failed', detail: 'Not a user token'}] }, done);
+          .post ('/v1/firebase/devices/claims')
+          .withClientToken (0)
+          .send ({device: {device: device.device_token}})
+          .expect (403, { errors:
+              [ { code: 'policy_failed',
+                detail: 'Not a user token',
+                status: '403' } ] }, done);
       });
     });
   });

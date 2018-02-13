@@ -1,9 +1,6 @@
-'use strict';
+const blueprint = require ('@onehilltech/blueprint');
 
-const blueprint = require ('@onehilltech/blueprint')
-  ;
-
-describe ('listener:cloud-messaging.send', function () {
+describe ('listener | cloud-messaging | send', function () {
   it ('should send data to recipients', function (done) {
     var data = {device: '1234567890', token: 'aabbccdd'};
     var recipient = blueprint.app.seeds.$default.accounts[0].id;

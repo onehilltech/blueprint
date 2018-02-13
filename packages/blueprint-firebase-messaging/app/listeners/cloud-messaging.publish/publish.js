@@ -1,15 +1,14 @@
-var blueprint = require ('@onehilltech/blueprint')
-  , messaging = blueprint.messaging
-  , Sender    = require ('../../../lib/Sender')
-  ;
+const blueprint = require ('@onehilltech/blueprint');
+const messaging = blueprint.messaging;
+const Sender    = require ('../../../lib/Sender');
 
-var sender;
+let sender;
 
 const DEFAULT_RELAY_CALLBACK = 'cloud-messaging.publish.callback';
 
 messaging.on ('app.init', function (app) {
   const firebase = app.configs.firebase;
-  const FirebaseDevice = app.models['firebase-device'];
+  const FirebaseDevice = app.models.device;
 
   sender = new Sender (FirebaseDevice, firebase);
 });

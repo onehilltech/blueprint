@@ -21,7 +21,7 @@ const {
 
 
 function FirebaseMessagingController () {
-  ResourceController.call (this, {model: FirebaseDevice});
+  ResourceController.call (this, {namespace: 'firebase', model: FirebaseDevice});
 }
 
 blueprint.controller (FirebaseMessagingController, ResourceController);
@@ -36,8 +36,7 @@ FirebaseMessagingController.prototype.create = function () {
         if (doc.token)
           delete doc.token;
 
-        if (doc.user)
-          delete doc.user;
+        doc.client = req.user._id;
 
         return callback (null, doc);
       }
@@ -103,33 +102,39 @@ FirebaseMessagingController.prototype.refreshToken = function () {
   }
 };
 
+/**
+ * Claim an existing device.
+ */
 FirebaseMessagingController.prototype.claimDevice = function () {
   return {
     validate: {
-      claim_ticket: {
-        notEmpty: { errorMessage: 'You must provide a claim ticket.' }
+      'device.device': {
+        notEmpty: { errorMessage: 'The device.device is missing the device token.' }
       }
     },
 
     execute (req, res, callback) {
       waterfall([
-        function (callback) {
-          let claimTicket = req.body.claim_ticket;
-          let options = {issuer: 'cloud-messaging', audience: 'user', subject: 'claim-ticket'};
-          let cert = claimTicketOptions.secret || claimTicketOptions.publicKey;
-
-          jwt.verify (claimTicket, cert, options, callback);
+        (callback) => {
+          let deviceToken = req.body.device.device;
+          FirebaseDevice.verifyDeviceToken (deviceToken, callback);
         },
 
         function (payload, callback) {
-          let query = {_id: payload.jti, device: req.params.deviceId};
-          let update = {owner: req.user._id};
+          const update = {user: req.user._id};
 
-          CloudToken.findOneAndUpdate (query, update, callback);
+          FirebaseDevice.findByIdAndUpdate (payload.jti, update, {new: true}, callback);
         },
 
-        function (token, callback) {
-          res.status (200).json (!!token);
+        function (device, callback) {
+          if (!device)
+            return callback (new HttpError (400, 'not_found', 'The device does not exist.'));
+
+          let ret = device.toObject ();
+          delete ret.id;
+
+          res.status (200).json ({device: ret});
+
           return callback (null);
         }
       ], callback);

@@ -1,3 +1,7 @@
+const {
+  Policy
+} = require ('@onehilltech/blueprint');
+
 module.exports = {
   '/firebase': {
     '/devices': {
@@ -9,7 +13,9 @@ module.exports = {
       /*
        * Delete the registration for a device.
        */
-      delete: {action: 'FirebaseMessagingController@removeDevice', policy: 'firebase.device.bearer'},
+      delete: {
+        action: 'FirebaseMessagingController@removeDevice',
+        policy: 'firebase.device.bearer'},
 
       '/tokens': {
         policy: 'firebase.device.bearer',
@@ -22,7 +28,10 @@ module.exports = {
       },
 
       '/claims': {
-        policy: 'firebase.device.bearer',
+        policy: Policy.allSeries ([
+          Policy.assert ('gatekeeper.auth.bearer'),
+          Policy.assert ('gatekeeper.request.isFromUser')
+        ]),
 
         /*
          * Claim an existing device.

@@ -1,36 +1,40 @@
-'use strict';
+const blueprint = require ('@onehilltech/blueprint');
+const Sender    = require ('../../../lib/Sender');
 
-var blueprint = require ('@onehilltech/blueprint')
-  , Sender    = require ('../../../lib/Sender')
-  ;
+describe ('lib | Sender', function () {
+  let Model = {
+    populate () {
+      return this;
+    },
 
-describe ('Sender', function () {
-  var mockCloudToken = {
-    distinct : function (field, filter, callback) {
-      return callback (null, ['1']);
+    exec (callback) {
+      return callback (null, [
+        {client: { enabled: true}}
+      ]);
     }
   };
 
-  describe ('.send', function () {
-    var data = {device: '1234567890', token: 'aabbccdd'};
+  let mockCloudToken = {
+    find () {
+      return Model;
+    }
+  };
 
+  describe ('send', function () {
     it ('should send a data message', function (done) {
-      var sender = new Sender (mockCloudToken, {apiKey: 'AIzaSyDuhZ8sT_ziDTm3SWAaunU2rRnR951eRDE', dryRun: true});
-      var recipient = blueprint.app.seeds.$default.accounts[0].id;
+      let sender = new Sender (mockCloudToken, {apiKey: 'AIzaSyDuhZ8sT_ziDTm3SWAaunU2rRnR951eRDE', dryRun: true});
+      let recipient = blueprint.app.seeds.$default.accounts[0].id;
 
       sender.send ([recipient], {msg: 'Hello, World!'}, done);
     });
   });
 
-  describe ('.publish', function () {
-    var data = {device: '1234567890', token: 'aabbccdd'};
-
+  describe ('publish', function () {
     it ('should send a data message', function (done) {
-      var sender = new Sender (mockCloudToken, {apiKey: 'AIzaSyDuhZ8sT_ziDTm3SWAaunU2rRnR951eRDE', dryRun: true});
-      var topic = '/topics/foo-bar';
+      let sender = new Sender (mockCloudToken, {apiKey: 'AIzaSyDuhZ8sT_ziDTm3SWAaunU2rRnR951eRDE', dryRun: true});
+      let topic = '/topics/foo-bar';
 
       sender.publish (topic, {msg: 'Hello, World!'}, done);
     });
   });
-
 });

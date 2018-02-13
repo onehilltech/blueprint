@@ -1,21 +1,13 @@
-'use strict';
-
-var async = require ('async')
-  , gcm   = require ('node-gcm')
-  , _     = require ('underscore')
-  , util  = require ('util')
-  , debug = require ('debug') ('blueprint:messaging:sender')
-  ;
+const async = require ('async');
+const gcm   = require ('node-gcm');
+const _     = require ('lodash');
+const debug = require ('debug') ('blueprint:messaging:sender');
 
 const MAX_RECIPIENTS = 1000;
 
 const ERROR_NOT_REGISTERED = 'NotRegistered';
 
-module.exports = Sender;
-
-function Sender (model, opts) {
-  opts = opts || {};
-
+function Sender (model, opts = {}) {
   if (!opts.apiKey)
     throw new Error ('Missing apiKey option');
 
@@ -23,6 +15,8 @@ function Sender (model, opts) {
   this._sender = gcm.Sender (opts.apiKey);
   this._model = model;
 }
+
+module.exports = Sender;
 
 /**
  * Send a data message to a set of recipients.
@@ -32,49 +26,56 @@ function Sender (model, opts) {
  * @param callback
  */
 Sender.prototype.send = function (recipients, data, callback) {
-  debug ('sending message to ' + util.inspect (recipients));
+  debug (`sending message to ${recipients}`);
 
   if (!_.isArray (recipients))
     recipients = [recipients];
 
   async.waterfall ([
     // Get the tokens for all recipients.
-    function (callback) {
-      var filter = { owner: {$in: recipients} };
-      this._model.distinct ('token', filter, callback);
-    }.bind (this),
+    (callback) => {
+      let selection = { user: {$in: recipients} };
 
-    function (tokens, callback) {
-      var message = new gcm.Message ({
-        dryRun : this._dryRun,
-        data : data
+      this._model.find (selection)
+        .populate ('user', 'enabled')
+        .populate ('client', 'enabled')
+        .exec (callback);
+    },
+
+    (selection, callback) => {
+      // Create a new Firebase message, and only select the models where the client
+      // is enabled, and the user is enabled, if applicable. We want to filter the
+      // list before we start.
+      let message = new gcm.Message ({ dryRun : this._dryRun, data });
+      let enabled = selection.filter (device => {
+        return device.client.enabled && (!device.user || device.user.enabled);
       });
 
-      var i = 0;
+      let i = 0;
 
       async.whilst (
-        function () { return i < tokens.length; },
-        function (callback) {
+        () => { return i < enabled.length; },
+
+        (callback) => {
           // Get the next N recipients, and send them the message.
-          var currTokens = tokens.slice (i, i + MAX_RECIPIENTS);
-          var recipient = { registrationTokens: currTokens };
+          let registrationTokens = enabled.slice (i, i + MAX_RECIPIENTS).map (device => device.token);
+          let recipient = { registrationTokens };
 
           async.waterfall ([
-            function (callback) {
+            (callback) => {
               this.sendMessage (recipient, message, callback);
-            }.bind (this),
+            },
 
-            function (res, callback) {
+            (res, callback) => {
               // Move the next set of recipients
-              i += currTokens.length;
+              i += registrationTokens.length;
 
               return callback (null, res);
             }
           ], callback);
-        }.bind (this),
+        },
         callback);
-    }.bind (this)
-  ], callback);
+    }], callback);
 };
 
 /**
@@ -85,14 +86,10 @@ Sender.prototype.send = function (recipients, data, callback) {
  * @param callback
  */
 Sender.prototype.publish = function (topic, data, callback) {
-  debug ('publishing message to ' + topic);
+  debug (`publishing message to ${topic}`);
 
-  var message = new gcm.Message ({
-    dryRun : this._dryRun,
-    data : data
-  });
-
-  var recipient = {};
+  let message = new gcm.Message ({ dryRun : this._dryRun, data });
+  let recipient = {};
 
   if (topic[0] === '/')
     recipient.topic = topic;
@@ -114,21 +111,21 @@ Sender.prototype.sendMessage = function (recipient, message, callback) {
     /*
      * Send the message to the cloud service.
      */
-    function (callback) {
+    (callback) => {
       this._sender.send (message, recipient, callback);
-    }.bind (this),
+    },
 
-    function (res, callback) {
-      var finishTasks = [];
+    (res, callback) => {
+      let finishTasks = [];
 
       if (res.failure > 0 && recipient.registrationTokens) {
         // There were some failures. We need to check what the failure is, and
         // remove registration information if the id is not registered.
 
-        var tokens = recipient.registrationTokens;
-        var badTokens = [];
+        let tokens = recipient.registrationTokens;
+        let badTokens = [];
 
-        res.results.forEach (function (result, index) {
+        res.results.forEach ((result, index) => {
           if (result.error === ERROR_NOT_REGISTERED) {
             badTokens.push (tokens[index]);
           }
@@ -136,15 +133,13 @@ Sender.prototype.sendMessage = function (recipient, message, callback) {
 
         if (badTokens.length > 0) {
           // Remove all tokens from the database with the bad ids.
-          finishTasks.push (function (callback) {
+          finishTasks.push ((callback) => {
             this._model.remove ({token: {$in: badTokens}}, callback);
-          }.bind (this));
+          });
         }
       }
 
-      async.series (finishTasks, function (err) {
-        return callback (err, res);
-      });
-    }.bind (this)
+      async.series (finishTasks, (err) => { callback (err, res); });
+    }
   ], callback);
 };
