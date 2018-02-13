@@ -154,5 +154,48 @@ describe ('app | routers | v1 | FirebaseMessagingRouter', function () {
                 status: '403' } ] }, done);
       });
     });
+
+    describe ('DELETE', function () {
+      it ('should unclaim an claimed device', function (done) {
+        const device = blueprint.app.seeds.$default.devices[4];
+
+        let expected = device.lean ();
+        delete expected.id;
+        delete expected.user;
+
+        blueprint.testing.request ()
+          .delete ('/v1/firebase/devices/claims')
+          .withUserToken (0)
+          .send ({device: {device: device.device_token}})
+          .expect (200, {device: expected}, done);
+      });
+
+      it ('should not allow client to unclaim a device', function (done) {
+        const device = blueprint.app.seeds.$default.devices[0];
+
+        blueprint.testing.request ()
+          .delete ('/v1/firebase/devices/claims')
+          .withClientToken (0)
+          .send ({device: {device: device.device_token}})
+          .expect (403, { errors:
+              [ { code: 'policy_failed',
+                detail: 'Not a user token',
+                status: '403' } ] }, done);
+      });
+
+      it ('should not allow user to unclaim another device', function (done) {
+        const device = blueprint.app.seeds.$default.devices[0];
+
+        blueprint.testing.request ()
+          .delete ('/v1/firebase/devices/claims')
+          .withUserToken (0)
+          .send ({device: {device: device.device_token}})
+          .expect (400, { errors:
+              [ { code: 'not_found',
+                detail: 'The device does not exist.',
+                status: '400' } ] }, done);
+      });
+    });
+
   });
 });

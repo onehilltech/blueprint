@@ -144,19 +144,35 @@ FirebaseMessagingController.prototype.claimDevice = function () {
 
 FirebaseMessagingController.prototype.unclaimDevice = function () {
   return {
+    validate: {
+      'device.device': {
+        notEmpty: { errorMessage: 'The device.device is missing the device token.' }
+      }
+    },
+
     execute (req, res, callback) {
       waterfall([
-        function (callback) {
-          let query = {device: req.params.deviceId, owner: req.user._id};
-
-          CloudToken.findOneAndRemove (query, callback);
+        (callback) => {
+          let deviceToken = req.body.device.device;
+          FirebaseDevice.verifyDeviceToken (deviceToken, callback);
         },
 
-        function (doc, callback) {
-          if (!doc)
-            return callback (new HttpError (404, 'not_found', 'Device registration does not exist.'));
+        function (payload, callback) {
+          const selection = {_id: payload.jti, user: req.user._id};
+          const update = {$unset: {user: ''}};
 
-          res.status (200).json (true);
+          FirebaseDevice.findOneAndUpdate (selection, update, {new: true}, callback);
+        },
+
+        function (device, callback) {
+          if (!device)
+            return callback (new HttpError (400, 'not_found', 'The device does not exist.'));
+
+          let ret = device.toObject ();
+          delete ret.id;
+
+          res.status (200).json ({device: ret});
+
           return callback (null);
         }
       ], callback);
