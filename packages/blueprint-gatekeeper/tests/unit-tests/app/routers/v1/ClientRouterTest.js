@@ -16,7 +16,7 @@ describe ('ClientRouter', function () {
           .post ('/v1/clients')
           .withClientToken (0)
           .send ({client: client})
-          .expect (200, {client: mongodb.lean (_.extend (client, {enabled: true, scope: []}))}, done);
+          .expect (200, {client: mongodb.lean (_.extend (client, {enabled: true, scope: [], private: false, allow: [], deny: []}))}, done);
       });
     });
   });
