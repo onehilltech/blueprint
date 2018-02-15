@@ -68,6 +68,14 @@ module.exports = Object.extend ({
    */
   verifyToken (token, opts, callback) {
     let options = merge ({}, this.options, opts);
+
+    if (!options.algorithms) {
+      if (options.algorithm)
+        options.algorithms = [options.algorithm];
+      else
+        options.algorithms = ['none'];
+    }
+
     return jwt.verify (token, this._verifyHash, options, callback);
   }
 });
