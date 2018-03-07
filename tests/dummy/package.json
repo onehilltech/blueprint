@@ -1,0 +1,13 @@
+{
+  "name": "dummy",
+  "version": "0.0.1",
+
+  "dependencies": {
+    "mod_a": "0.0.1"
+  },
+
+  "keywords": [
+    "blueprint",
+    "blueprint-module"
+  ]
+}

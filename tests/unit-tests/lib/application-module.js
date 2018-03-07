@@ -5,17 +5,17 @@ const {expect} = require ('chai');
 describe ('lib | ApplicationModule', function () {
   describe ('constructor', function () {
     it ('should create a new ApplicationModule', function () {
-      let modulePath = path.resolve (__dirname, '../../fixtures/app-module');
-      let appModule = new ApplicationModule ({modulePath});
+      let appPath = path.resolve (__dirname, '../../fixtures/app-module');
+      let appModule = new ApplicationModule ({appPath});
 
-      expect (appModule).to.deep.include ({modulePath, _resources: {}});
+      expect (appModule).to.deep.include ({appPath, _resources: {}});
     });
   });
 
   describe ('configure', function () {
     it ('should load an application module into memory', function (done) {
-      let modulePath = path.resolve (__dirname, '../../fixtures/app-module');
-      let appModule = new ApplicationModule ({modulePath});
+      let appPath = path.resolve (__dirname, '../../fixtures/app-module');
+      let appModule = new ApplicationModule ({appPath});
 
       appModule.configure ().then (result => {
         expect (appModule).to.equal (result);
