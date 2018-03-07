@@ -38,4 +38,21 @@ describe ('lib | server | Server', function () {
       }).catch (err => done (err));
     });
   });
+
+  describe ('importViews', function () {
+    it ('should import view for use by the server', function (done) {
+      const viewsPath = path.resolve (__dirname, '../../../dummy/app/views');
+      const app = { tempPath: '.temp' };
+
+      let server = new Server ({app});
+
+      server.configure ({}).then (() => {
+        return server.importViews (viewsPath);
+      }).then (() => {
+        expect (server._engines).to.eql (['handlebars']);
+
+        done (null);
+      }).catch (done);
+    });
+  });
 });
