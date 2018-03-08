@@ -15,7 +15,8 @@ describe ('lib | server | Server', function () {
 
   describe ('configure', function () {
     it ('should configure the server using default configurations', function (done) {
-      const app = { tempPath: '.temp' };
+      const tempPath = path.resolve (__dirname, '../../../dummy/app/.temp');
+      const app = { tempPath };
 
       const config = {
         protocols: {
@@ -32,7 +33,7 @@ describe ('lib | server | Server', function () {
         expect (s._express).to.not.be.null;
         expect (s._mainRouter).to.not.be.null;
         expect (s._uploader).to.not.be.null;
-        expect (s._viewCachePath).to.equal (path.resolve ('.temp/views'));
+        expect (s._viewCachePath).to.equal (path.join (tempPath, 'views'));
 
         done (null);
       }).catch (err => done (err));
@@ -42,7 +43,9 @@ describe ('lib | server | Server', function () {
   describe ('importViews', function () {
     it ('should import view for use by the server', function (done) {
       const viewsPath = path.resolve (__dirname, '../../../dummy/app/views');
-      const app = { tempPath: '.temp' };
+      const tempPath = path.resolve (__dirname, '../../../dummy/app/.temp');
+
+      const app = { tempPath };
 
       let server = new Server ({app});
 

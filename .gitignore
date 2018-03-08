@@ -54,3 +54,5 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+!/tests/dummy/node_modules/
