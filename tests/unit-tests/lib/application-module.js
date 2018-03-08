@@ -1,6 +1,6 @@
-const ApplicationModule = require ('../../../lib/application-module');
-const path = require ('path');
+const path     = require ('path');
 const {expect} = require ('chai');
+const ApplicationModule = require ('../../../lib/application-module');
 
 describe ('lib | ApplicationModule', function () {
   describe ('constructor', function () {
@@ -30,6 +30,24 @@ describe ('lib | ApplicationModule', function () {
 
         done (null);
       }).catch (err => done (err));
+    });
+  });
+
+  describe ('viewsPath', function () {
+    it ('should get the viewPaths property', function () {
+      let appPath = path.resolve (__dirname, '../../dummy/app');
+      let appModule = new ApplicationModule ({appPath});
+
+      expect (appModule.viewsPath).to.equal (path.join (appPath, 'views'));
+    });
+  });
+
+  describe ('hasViews', function () {
+    it ('should test if the module has views', function () {
+      let appPath = path.resolve (__dirname, '../../dummy/app');
+      let appModule = new ApplicationModule ({appPath});
+
+      expect (appModule.hasViews).to.be.true;
     });
   });
 });
