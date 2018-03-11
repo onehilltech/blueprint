@@ -34,7 +34,7 @@ describe ('lib | LegacyFunctionAction', function () {
 
         let action = new LegacyFunctionAction ({action: legacyNoCallback});
 
-        action.doRequest (req, res).then (() => {
+        action.execute (req, res).then (() => {
           expect (res).to.have.property ('_status', 200);
           done (null);
 
@@ -54,7 +54,7 @@ describe ('lib | LegacyFunctionAction', function () {
 
         let action = new LegacyFunctionAction ({action: legacyWithCallback});
 
-        action.doRequest (req, res).then (() => {
+        action.execute (req, res).then (() => {
           expect (res).to.have.property ('_status', 300);
           done (null);
 
