@@ -296,7 +296,7 @@ describe ('lib | RouterBuilder', function () {
       }).catch (done);
     });
 
-    it ('should build router with a successful policy', function (done) {
+    it ('should build router with successful policy', function (done) {
       const r1 = {
         '/r1': {
           policy: 'success',
@@ -329,7 +329,7 @@ describe ('lib | RouterBuilder', function () {
       }).catch (done);
     });
 
-    it ('should build router with a optional policy', function (done) {
+    it ('should build router with optional policy', function (done) {
       const r1 = {
         '/r1': {
           policy: '?optional',
@@ -356,7 +356,7 @@ describe ('lib | RouterBuilder', function () {
       }).catch (done);
     });
 
-    it ('should build router with a missing policy', function (done) {
+    it ('should build router with missing policy', function (done) {
       const r1 = {
         '/r1': {
           policy: 'missing',
