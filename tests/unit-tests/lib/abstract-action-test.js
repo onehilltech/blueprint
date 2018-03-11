@@ -12,9 +12,9 @@ describe ('lib | AbstractAction', function () {
     });
   });
 
-  context ('doRequest(req, res)', function () {
+  context ('execute(req, res)', function () {
     let action = new AbstractAction ();
 
-    expect (action.doRequest.bind (action, {}, {})).to.throw (assert.AssertionError);
+    expect (action.execute).to.be.null;
   });
 });
