@@ -8,6 +8,7 @@ const Controller = require ('../../../lib/controller');
 const Action = require ('../../../lib/action');
 const HttpError = require ('../../../lib/http-error');
 const Policy = require ('../../../lib/policy');
+const assert = require ('assert');
 
 const MainController = Controller.extend ({
   getFunction () {
@@ -262,7 +263,7 @@ describe ('lib | RouterBuilder', function () {
       }).catch (done);
     });
 
-    it ('should fail its validation phase', function (done) {
+    it ('should build router that fails its validation phase', function (done) {
       const r1 = {
         '/r1': {
           post: {action: 'MainController@postActionWithValidateFail'},
@@ -353,6 +354,29 @@ describe ('lib | RouterBuilder', function () {
           .get ('/r1')
           .expect (200, {result: 'getActionWithValidate'}, done);
       }).catch (done);
+    });
+
+    it ('should build router with a missing policy', function (done) {
+      const r1 = {
+        '/r1': {
+          policy: 'missing',
+          get: {action: 'MainController@getActionWithValidate'},
+        }
+      };
+
+      let builder = new RouterBuilder ({
+        listeners: {},
+        routers: { r1 },
+        controllers: {
+          MainController: new MainController ()
+        },
+        policies: { }
+      });
+
+      builder.build ().then (router => {}).catch (err => {
+        expect (err).to.be.instanceof (assert.AssertionError);
+        done ();
+      });
     });
 
   });
