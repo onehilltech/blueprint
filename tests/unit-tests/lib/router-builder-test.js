@@ -7,6 +7,7 @@ const RouterBuilder = require ('../../../lib/router-builder');
 const Controller = require ('../../../lib/controller');
 const Action = require ('../../../lib/action');
 const HttpError = require ('../../../lib/http-error');
+const Policy = require ('../../../lib/policy');
 
 const MainController = Controller.extend ({
   getFunction () {
@@ -293,5 +294,66 @@ describe ('lib | RouterBuilder', function () {
           .expect (400, {error: 'Request validation failed.'}, done);
       }).catch (done);
     });
+
+    it ('should build router with a successful policy', function (done) {
+      const r1 = {
+        '/r1': {
+          policy: 'success',
+          get: {action: 'MainController@getActionWithValidate'},
+        }
+      };
+
+      let builder = new RouterBuilder ({
+        listeners: {},
+        routers: { r1 },
+        controllers: {
+          MainController: new MainController ()
+        },
+        policies: {
+          success: Policy.extend ({
+            runCheck () {
+              return Promise.resolve (true);
+            }
+          })
+        }
+      });
+
+      builder.build ().then (router => {
+        let app = express ();
+        app.use (router);
+
+        request (app)
+          .get ('/r1')
+          .expect (200, {result: 'getActionWithValidate'}, done);
+      }).catch (done);
+    });
+
+    it ('should build router with a optional policy', function (done) {
+      const r1 = {
+        '/r1': {
+          policy: '?optional',
+          get: {action: 'MainController@getActionWithValidate'},
+        }
+      };
+
+      let builder = new RouterBuilder ({
+        listeners: {},
+        routers: { r1 },
+        controllers: {
+          MainController: new MainController ()
+        },
+        policies: { }
+      });
+
+      builder.build ().then (router => {
+        let app = express ();
+        app.use (router);
+
+        request (app)
+          .get ('/r1')
+          .expect (200, {result: 'getActionWithValidate'}, done);
+      }).catch (done);
+    });
+
   });
 });
