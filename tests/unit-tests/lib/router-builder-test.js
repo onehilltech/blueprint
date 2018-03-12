@@ -107,277 +107,284 @@ const MainController = Controller.extend ({
 
 describe ('lib | RouterBuilder', function () {
   describe ('build', function () {
-    it ('should build router containing action with single function', function (done) {
-      const r1 = {
-        '/r1': {
-          get: {action: 'MainController@getFunction'},
-        }
-      };
+    context ('deprecated', function () {
+      it ('should build router containing legacy object with validate function', function (done) {
+        const r1 = {
+          '/r1': {
+            get: {action: 'MainController@getLegacyObjectWithValidateFunction'},
+          }
+        };
 
-      let builder = new RouterBuilder ({
-        listeners: {},
-        routers: { r1 },
-        controllers: {
-          MainController: new MainController ()
-        },
-        policies: {}
-      });
-
-      builder.build ().then (router => {
-        let app = express ();
-        app.use (router);
-
-        request (app)
-          .get ('/r1')
-          .expect (200, {result: 'getFunction'}, done);
-      }).catch (done);
-    });
-
-    it ('should build router containing action with function array', function (done) {
-      const r1 = {
-        '/r1': {
-          get: {action: 'MainController@getFunctionArray'},
-        }
-      };
-
-      let builder = new RouterBuilder ({
-        listeners: {},
-        routers: { r1 },
-        controllers: {
-          MainController: new MainController ()
-        },
-        policies: {}
-      });
-
-      builder.build ().then (router => {
-        let app = express ();
-        app.use (router);
-
-        request (app)
-          .get ('/r1')
-          .expect (200, {result: 'getFunctionArray'}, done);
-      }).catch (done);
-    });
-
-    it ('should build router containing legacy object with validate function', function (done) {
-      const r1 = {
-        '/r1': {
-          get: {action: 'MainController@getLegacyObjectWithValidateFunction'},
-        }
-      };
-
-      let builder = new RouterBuilder ({
-        listeners: {},
-        routers: { r1 },
-        controllers: {
-          MainController: new MainController ()
-        },
-        policies: {}
-      });
-
-      builder.build ().then (router => {
-        let app = express ();
-        app.use (router);
-
-        request (app)
-          .get ('/r1')
-          .expect (200, {result: 'getLegacyObjectWithValidateFunction'}, done);
-      }).catch (done);
-    });
-
-    it ('should build router containing legacy object with validate schema', function (done) {
-      const r1 = {
-        '/r1': {
-          get: {action: 'MainController@getLegacyObjectWithValidateSchema'},
-        }
-      };
-
-      let builder = new RouterBuilder ({
-        listeners: {},
-        routers: { r1 },
-        controllers: {
-          MainController: new MainController ()
-        },
-        policies: {}
-      });
-
-      builder.build ().then (router => {
-        let app = express ();
-        app.use (router);
-
-        request (app)
-          .get ('/r1')
-          .expect (200, {result: 'getLegacyObjectWithValidateSchema'}, done);
-      }).catch (done);
-    });
-
-    it ('should build router containing controller action with schema', function (done) {
-      const r1 = {
-        '/r1': {
-          get: {action: 'MainController@getActionWithSchema'},
-        }
-      };
-
-      let builder = new RouterBuilder ({
-        listeners: {},
-        routers: { r1 },
-        controllers: {
-          MainController: new MainController ()
-        },
-        policies: {}
-      });
-
-      builder.build ().then (router => {
-        let app = express ();
-        app.use (router);
-
-        request (app)
-          .get ('/r1')
-          .expect (200, {result: 'getActionWithSchema'}, done);
-      }).catch (done);
-    });
-
-    it ('should build router containing controller action with validate', function (done) {
-      const r1 = {
-        '/r1': {
-          get: {action: 'MainController@getActionWithValidate'},
-        }
-      };
-
-      let builder = new RouterBuilder ({
-        listeners: {},
-        routers: { r1 },
-        controllers: {
-          MainController: new MainController ()
-        },
-        policies: {}
-      });
-
-      builder.build ().then (router => {
-        let app = express ();
-        app.use (router);
-
-        request (app)
-          .get ('/r1')
-          .expect (200, {result: 'getActionWithValidate'}, done);
-      }).catch (done);
-    });
-
-    it ('should build router that fails its validation phase', function (done) {
-      const r1 = {
-        '/r1': {
-          post: {action: 'MainController@postActionWithValidateFail'},
-        }
-      };
-
-      let builder = new RouterBuilder ({
-        listeners: {},
-        routers: { r1 },
-        controllers: {
-          MainController: new MainController ()
-        },
-        policies: {}
-      });
-
-      builder.build ().then (router => {
-        let app = express ();
-        app.use (router);
-        app.use ((err, req, res, next) => {
-          expect (err).to.be.instanceof (HttpError);
-          expect (err.message).to.equal ('Request validation failed.');
-          expect (err.code).to.equal ('validation_failed');
-
-          res.status (400).json ({error: err.message});
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { r1 },
+          controllers: {
+            MainController: new MainController ()
+          },
+          policies: {}
         });
 
-        request (app)
-          .post ('/r1')
-          .expect (400, {error: 'Request validation failed.'}, done);
-      }).catch (done);
-    });
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
 
-    it ('should build router with successful policy', function (done) {
-      const r1 = {
-        '/r1': {
-          policy: 'success',
-          get: {action: 'MainController@getActionWithValidate'},
-        }
-      };
-
-      let builder = new RouterBuilder ({
-        listeners: {},
-        routers: { r1 },
-        controllers: {
-          MainController: new MainController ()
-        },
-        policies: {
-          success: Policy.extend ({
-            runCheck () {
-              return Promise.resolve (true);
-            }
-          })
-        }
+          request (app)
+            .get ('/r1')
+            .expect (200, {result: 'getLegacyObjectWithValidateFunction'}, done);
+        }).catch (done);
       });
 
-      builder.build ().then (router => {
-        let app = express ();
-        app.use (router);
+      it ('should build router containing legacy object with validate schema', function (done) {
+        const r1 = {
+          '/r1': {
+            get: {action: 'MainController@getLegacyObjectWithValidateSchema'},
+          }
+        };
 
-        request (app)
-          .get ('/r1')
-          .expect (200, {result: 'getActionWithValidate'}, done);
-      }).catch (done);
-    });
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { r1 },
+          controllers: {
+            MainController: new MainController ()
+          },
+          policies: {}
+        });
 
-    it ('should build router with optional policy', function (done) {
-      const r1 = {
-        '/r1': {
-          policy: '?optional',
-          get: {action: 'MainController@getActionWithValidate'},
-        }
-      };
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
 
-      let builder = new RouterBuilder ({
-        listeners: {},
-        routers: { r1 },
-        controllers: {
-          MainController: new MainController ()
-        },
-        policies: { }
-      });
-
-      builder.build ().then (router => {
-        let app = express ();
-        app.use (router);
-
-        request (app)
-          .get ('/r1')
-          .expect (200, {result: 'getActionWithValidate'}, done);
-      }).catch (done);
-    });
-
-    it ('should build router with missing policy', function (done) {
-      const r1 = {
-        '/r1': {
-          policy: 'missing',
-          get: {action: 'MainController@getActionWithValidate'},
-        }
-      };
-
-      let builder = new RouterBuilder ({
-        listeners: {},
-        routers: { r1 },
-        controllers: {
-          MainController: new MainController ()
-        },
-        policies: { }
-      });
-
-      builder.build ().then (router => {}).catch (err => {
-        expect (err).to.be.instanceof (assert.AssertionError);
-        done ();
+          request (app)
+            .get ('/r1')
+            .expect (200, {result: 'getLegacyObjectWithValidateSchema'}, done);
+        }).catch (done);
       });
     });
 
+    context ('middleware', function () {
+      it ('should build router containing action with single function', function (done) {
+        const r1 = {
+          '/r1': {
+            get: {action: 'MainController@getFunction'},
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { r1 },
+          controllers: {
+            MainController: new MainController ()
+          },
+          policies: {}
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          request (app)
+            .get ('/r1')
+            .expect (200, {result: 'getFunction'}, done);
+        }).catch (done);
+      });
+
+      it ('should build router containing action with function array', function (done) {
+        const r1 = {
+          '/r1': {
+            get: {action: 'MainController@getFunctionArray'},
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { r1 },
+          controllers: {
+            MainController: new MainController ()
+          },
+          policies: {}
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          request (app)
+            .get ('/r1')
+            .expect (200, {result: 'getFunctionArray'}, done);
+        }).catch (done);
+      });
+    });
+
+    context ('validation', function () {
+      it ('should build router containing controller action with schema', function (done) {
+        const r1 = {
+          '/r1': {
+            get: {action: 'MainController@getActionWithSchema'},
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { r1 },
+          controllers: {
+            MainController: new MainController ()
+          },
+          policies: {}
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          request (app)
+            .get ('/r1')
+            .expect (200, {result: 'getActionWithSchema'}, done);
+        }).catch (done);
+      });
+
+      it ('should build router containing controller action with validate', function (done) {
+        const r1 = {
+          '/r1': {
+            get: {action: 'MainController@getActionWithValidate'},
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { r1 },
+          controllers: {
+            MainController: new MainController ()
+          },
+          policies: {}
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          request (app)
+            .get ('/r1')
+            .expect (200, {result: 'getActionWithValidate'}, done);
+        }).catch (done);
+      });
+
+      it ('should build router that fails its validation phase', function (done) {
+        const r1 = {
+          '/r1': {
+            post: {action: 'MainController@postActionWithValidateFail'},
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { r1 },
+          controllers: {
+            MainController: new MainController ()
+          },
+          policies: {}
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+          app.use ((err, req, res, next) => {
+            expect (err).to.be.instanceof (HttpError);
+            expect (err.message).to.equal ('Request validation failed.');
+            expect (err.code).to.equal ('validation_failed');
+
+            res.status (400).json ({error: err.message});
+          });
+
+          request (app)
+            .post ('/r1')
+            .expect (400, {error: 'Request validation failed.'}, done);
+        }).catch (done);
+      });
+    });
+
+    context ('policies', function () {
+      it ('should build router with successful policy', function (done) {
+        const r1 = {
+          '/r1': {
+            policy: 'success',
+            get: {action: 'MainController@getActionWithValidate'},
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { r1 },
+          controllers: {
+            MainController: new MainController ()
+          },
+          policies: {
+            success: Policy.extend ({
+              runCheck () {
+                return Promise.resolve (true);
+              }
+            })
+          }
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          request (app)
+            .get ('/r1')
+            .expect (200, {result: 'getActionWithValidate'}, done);
+        }).catch (done);
+      });
+
+      it ('should build router with optional policy', function (done) {
+        const r1 = {
+          '/r1': {
+            policy: '?optional',
+            get: {action: 'MainController@getActionWithValidate'},
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { r1 },
+          controllers: {
+            MainController: new MainController ()
+          },
+          policies: { }
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          request (app)
+            .get ('/r1')
+            .expect (200, {result: 'getActionWithValidate'}, done);
+        }).catch (done);
+      });
+
+      it ('should build router with missing policy', function (done) {
+        const r1 = {
+          '/r1': {
+            policy: 'missing',
+            get: {action: 'MainController@getActionWithValidate'},
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { r1 },
+          controllers: {
+            MainController: new MainController ()
+          },
+          policies: { }
+        });
+
+        builder.build ().then (router => {}).catch (err => {
+          expect (err).to.be.instanceof (assert.AssertionError);
+          done ();
+        });
+      });
+    });
   });
 });
