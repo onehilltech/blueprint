@@ -213,6 +213,35 @@ describe ('lib | RouterBuilder', function () {
             .expect (200, {result: 'getFunctionArray'}, done);
         }).catch (done);
       });
+
+      it ('should build router with sub-routes', function (done) {
+        const r1 = {
+          '/s1': {
+            '/r1': {
+              get: {action: 'MainController@getFunctionArray'},
+            }
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { r1 },
+          controllers: {
+            MainController: new MainController ()
+          },
+          policies: {}
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          request (app)
+            .get ('/s1/r1')
+            .expect (200, {result: 'getFunctionArray'}, done);
+        }).catch (done);
+
+      });
     });
 
     context ('validation', function () {
