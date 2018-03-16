@@ -48,13 +48,13 @@ describe ('lib | messaging | EventListeners', function () {
 
       let listeners = new EventListeners ({name: 'foo'});
       listeners.on (new Listener ({
-        event (e) {
+        handleEvent (e) {
           e1 = e;
         }
       }));
 
       listeners.once (new Listener ({
-        event (e) {
+        handleEvent (e) {
           e2 = e;
         }
       }));

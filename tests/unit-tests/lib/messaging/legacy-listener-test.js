@@ -19,7 +19,7 @@ describe ('lib | LegacyListener', function () {
   context ('event()', function () {
     it ('should call the legacy listener function', function () {
       let legacyListener = new LegacyListener ({listener: foo});
-      legacyListener.event (5, 10);
+      legacyListener.handleEvent (5, 10);
 
       expect (foo.p1).to.equal (5);
       expect (foo.p2).to.equal (10);

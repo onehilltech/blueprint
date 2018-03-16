@@ -4,7 +4,11 @@ const Listener = require ('../../../../lib/messaging/listener');
 describe ('lib | Listener', function () {
   context ('#create', function () {
     it ('should create a Listener object', function () {
-      let listener = new Listener ({});
+      let listener = new Listener ({
+        handleEvent () {
+
+        }
+      });
       expect (listener).to.be.instanceof (Listener);
     });
   });
@@ -14,12 +18,12 @@ describe ('lib | Listener', function () {
       let handled = false;
 
       let listener = new Listener ({
-        doEvent (ev) {
+        handleEvent (ev) {
           handled = ev;
         }
       });
 
-      listener.doEvent (6);
+      listener.handleEvent (6);
 
       expect (handled).to.equal (6);
     });

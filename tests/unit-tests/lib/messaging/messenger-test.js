@@ -49,7 +49,7 @@ describe ('lib | messaging | Messenger', function () {
       let value = null;
 
       messenger.on ('a.b', new Listener ({
-        event (val) {
+        handleEvent (val) {
           value = val;
         }
       }));
