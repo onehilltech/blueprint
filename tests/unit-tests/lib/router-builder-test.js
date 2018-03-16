@@ -271,104 +271,6 @@ describe ('lib | RouterBuilder', function () {
       });
     });
 
-    context ('resource', function () {
-      it ('should build router with resource', function (done) {
-
-        const users = {
-          '/users': {
-            resource: {
-              controller: 'UserController'
-            }
-          }
-        };
-
-        let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { users },
-          controllers: {
-            UserController: new UserController ()
-          },
-          policies: {}
-        });
-
-        builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
-
-          parallel ([
-            (callback) => { request (app).post ('/users').expect (200, {method: 'create'}, callback); },
-            (callback) => { request (app).get ('/users').expect (200, {method: 'getAll'}, callback); },
-            (callback) => { request (app).get ('/users/1').expect (200, {method: 'getOne', id: 1}, callback); },
-            (callback) => { request (app).put ('/users/1').expect (200, {method: 'update', id: 1}, callback); },
-            (callback) => { request (app).delete ('/users/1').expect (200, {method: 'delete', id: 1}, callback); },
-          ], done);
-        }).catch (done);
-      });
-
-      it ('should allow a subset of actions', function (done) {
-
-        const users = {
-          '/users': {
-            resource: {
-              controller: 'UserController',
-              allow: ['getOne']
-            }
-          }
-        };
-
-        let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { users },
-          controllers: {
-            UserController: new UserController ()
-          },
-          policies: {}
-        });
-
-        builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
-
-          parallel ([
-            (callback) => { request (app).post ('/users').expect (404, callback); },
-            (callback) => { request (app).get ('/users/1').expect (200, {method: 'getOne', id: 1}, callback); },
-          ], done);
-        }).catch (done);
-      });
-
-      it ('should deny a subset of actions', function (done) {
-
-        const users = {
-          '/users': {
-            resource: {
-              controller: 'UserController',
-              deny: ['getOne']
-            }
-          }
-        };
-
-        let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { users },
-          controllers: {
-            UserController: new UserController ()
-          },
-          policies: {}
-        });
-
-        builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
-
-          parallel ([
-            (callback) => { request (app).post ('/users').expect (200, {method: 'create'}, callback); },
-            (callback) => { request (app).get ('/users/1').expect (404, callback); },
-          ], done);
-        }).catch (done);
-      });
-
-    });
-
     context ('validation', function () {
       it ('should build router containing controller action with schema', function (done) {
         const r1 = {
@@ -539,6 +441,148 @@ describe ('lib | RouterBuilder', function () {
           done ();
         });
       });
+    });
+
+    context ('resource', function () {
+      it ('should build router with resource', function (done) {
+
+        const users = {
+          '/users': {
+            resource: {
+              controller: 'UserController'
+            }
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { users },
+          controllers: {
+            UserController: new UserController ()
+          },
+          policies: {}
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          parallel ([
+            (callback) => { request (app).post ('/users').expect (200, {method: 'create'}, callback); },
+            (callback) => { request (app).get ('/users').expect (200, {method: 'getAll'}, callback); },
+            (callback) => { request (app).get ('/users/1').expect (200, {method: 'getOne', id: 1}, callback); },
+            (callback) => { request (app).put ('/users/1').expect (200, {method: 'update', id: 1}, callback); },
+            (callback) => { request (app).delete ('/users/1').expect (200, {method: 'delete', id: 1}, callback); },
+          ], done);
+        }).catch (done);
+      });
+
+      it ('should allow a subset of actions', function (done) {
+
+        const users = {
+          '/users': {
+            resource: {
+              controller: 'UserController',
+              allow: ['getOne']
+            }
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { users },
+          controllers: {
+            UserController: new UserController ()
+          },
+          policies: {}
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          parallel ([
+            (callback) => { request (app).post ('/users').expect (404, callback); },
+            (callback) => { request (app).get ('/users/1').expect (200, {method: 'getOne', id: 1}, callback); },
+          ], done);
+        }).catch (done);
+      });
+
+      it ('should deny a subset of actions', function (done) {
+
+        const users = {
+          '/users': {
+            resource: {
+              controller: 'UserController',
+              deny: ['getOne']
+            }
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { users },
+          controllers: {
+            UserController: new UserController ()
+          },
+          policies: {}
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          parallel ([
+            (callback) => { request (app).post ('/users').expect (200, {method: 'create'}, callback); },
+            (callback) => { request (app).get ('/users/1').expect (404, callback); },
+          ], done);
+        }).catch (done);
+      });
+
+      it ('should build router with resource and policy', function (done) {
+
+        const users = {
+          '/users': {
+            resource: {
+              controller: 'UserController'
+            }
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { users },
+          controllers: {
+            UserController: new UserController ()
+          },
+          policies: {
+            user: {
+              create: Policy.extend ({
+                failureCode: 'create_failed',
+                failureMessage: 'The create policy failed.',
+
+                runCheck () {
+                  return Promise.resolve (false);
+                }
+              })
+            }
+          }
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+          app.use ((err, req, res, next) => {
+            expect (err).to.be.instanceof (HttpError);
+            res.status (403).json ({code: err.code, message: err.message});
+          });
+
+          parallel ([
+            (callback) => { request (app).post ('/users').expect (403, {code: 'create_failed', message: 'The create policy failed.'}, callback); },
+          ], done);
+        }).catch (done);
+      });
+
     });
   });
 });
