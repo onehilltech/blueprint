@@ -304,6 +304,69 @@ describe ('lib | RouterBuilder', function () {
           ], done);
         }).catch (done);
       });
+
+      it ('should allow a subset of actions', function (done) {
+
+        const users = {
+          '/users': {
+            resource: {
+              controller: 'UserController',
+              allow: ['getOne']
+            }
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { users },
+          controllers: {
+            UserController: new UserController ()
+          },
+          policies: {}
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          parallel ([
+            (callback) => { request (app).post ('/users').expect (404, callback); },
+            (callback) => { request (app).get ('/users/1').expect (200, {method: 'getOne', id: 1}, callback); },
+          ], done);
+        }).catch (done);
+      });
+
+      it ('should deny a subset of actions', function (done) {
+
+        const users = {
+          '/users': {
+            resource: {
+              controller: 'UserController',
+              deny: ['getOne']
+            }
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { users },
+          controllers: {
+            UserController: new UserController ()
+          },
+          policies: {}
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          parallel ([
+            (callback) => { request (app).post ('/users').expect (200, {method: 'create'}, callback); },
+            (callback) => { request (app).get ('/users/1').expect (404, callback); },
+          ], done);
+        }).catch (done);
+      });
+
     });
 
     context ('validation', function () {
