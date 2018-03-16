@@ -1,12 +1,17 @@
 const path     = require ('path');
 const {expect} = require ('chai');
 const ApplicationModule = require ('../../../lib/application-module');
+const MessagingFramework = require ('../../../lib/messaging/framework');
 
 describe ('lib | ApplicationModule', function () {
   describe ('constructor', function () {
     it ('should create a new ApplicationModule', function () {
       let appPath = path.resolve (__dirname, '../../fixtures/app-module');
-      let appModule = new ApplicationModule ({appPath});
+
+      let appModule = new ApplicationModule ({
+        appPath,
+        messaging: new MessagingFramework ()
+      });
 
       expect (appModule).to.deep.include ({appPath, _resources: {}});
     });
@@ -15,7 +20,10 @@ describe ('lib | ApplicationModule', function () {
   describe ('configure', function () {
     it ('should load an application module into memory', function (done) {
       let appPath = path.resolve (__dirname, '../../fixtures/app-module');
-      let appModule = new ApplicationModule ({appPath});
+      let appModule = new ApplicationModule ({
+        appPath,
+        messaging: new MessagingFramework ()
+      });
 
       appModule.configure ().then (result => {
         expect (appModule).to.equal (result);
@@ -36,7 +44,10 @@ describe ('lib | ApplicationModule', function () {
   describe ('viewsPath', function () {
     it ('should get the viewPaths property', function () {
       let appPath = path.resolve (__dirname, '../../dummy/app');
-      let appModule = new ApplicationModule ({appPath});
+      let appModule = new ApplicationModule ({
+        appPath,
+        messaging: new MessagingFramework ()
+      });
 
       expect (appModule.viewsPath).to.equal (path.join (appPath, 'views'));
     });
@@ -45,7 +56,10 @@ describe ('lib | ApplicationModule', function () {
   describe ('hasViews', function () {
     it ('should test if the module has views', function () {
       let appPath = path.resolve (__dirname, '../../dummy/app');
-      let appModule = new ApplicationModule ({appPath});
+      let appModule = new ApplicationModule ({
+        appPath,
+        messaging: new MessagingFramework ()
+      });
 
       expect (appModule.hasViews).to.be.true;
     });
