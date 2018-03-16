@@ -2,12 +2,14 @@ const {expect} = require ('chai');
 const request  = require ('supertest');
 const express  = require ('express');
 const {check} = require ('express-validator/check');
+const {parallel} = require ('async');
 
 const RouterBuilder = require ('../../../lib/router-builder');
 const Controller = require ('../../../lib/controller');
 const Action = require ('../../../lib/action');
 const HttpError = require ('../../../lib/http-error');
 const Policy = require ('../../../lib/policy');
+const ResourceController = require ('../../../lib/resource-controller');
 const assert = require ('assert');
 
 const MainController = Controller.extend ({
@@ -104,6 +106,31 @@ const MainController = Controller.extend ({
     });
   }
 });
+
+function simpleHandler (method) {
+  return (req, res, next) => {
+    res.status (200).json ({method});
+    next ();
+  }
+}
+
+function singleEntityHandler (method, param) {
+  return (req, res, next) => {
+    res.status (200).json ({method, id: req.params[param]});
+    next ();
+  }
+}
+const UserController = ResourceController.extend ({
+  name: 'user',
+
+  create () { return simpleHandler ('create'); },
+  getAll () { return simpleHandler ('getAll'); },
+  getOne () { return singleEntityHandler ('getOne', 'userId') },
+  update () { return singleEntityHandler ('update', 'userId') },
+  delete () { return singleEntityHandler ('delete', 'userId') },
+  count () { return simpleHandler ('count'); }
+});
+
 
 describe ('lib | RouterBuilder', function () {
   describe ('build', function () {
@@ -241,6 +268,41 @@ describe ('lib | RouterBuilder', function () {
             .expect (200, {result: 'getFunctionArray'}, done);
         }).catch (done);
 
+      });
+    });
+
+    context ('resource', function () {
+      it ('should build router with resource', function (done) {
+
+        const users = {
+          '/users': {
+            resource: {
+              controller: 'UserController'
+            }
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { users },
+          controllers: {
+            UserController: new UserController ()
+          },
+          policies: {}
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+
+          parallel ([
+            (callback) => { request (app).post ('/users').expect (200, {method: 'create'}, callback); },
+            (callback) => { request (app).get ('/users').expect (200, {method: 'getAll'}, callback); },
+            (callback) => { request (app).get ('/users/1').expect (200, {method: 'getOne', id: 1}, callback); },
+            (callback) => { request (app).put ('/users/1').expect (200, {method: 'update', id: 1}, callback); },
+            (callback) => { request (app).delete ('/users/1').expect (200, {method: 'delete', id: 1}, callback); },
+          ], done);
+        }).catch (done);
       });
     });
 
