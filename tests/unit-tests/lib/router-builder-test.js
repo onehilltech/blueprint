@@ -120,6 +120,7 @@ function singleEntityHandler (method, param) {
     next ();
   }
 }
+
 const UserController = ResourceController.extend ({
   name: 'user',
 
@@ -130,7 +131,6 @@ const UserController = ResourceController.extend ({
   delete () { return singleEntityHandler ('delete', 'userId') },
   count () { return simpleHandler ('count'); }
 });
-
 
 describe ('lib | RouterBuilder', function () {
   describe ('build', function () {
