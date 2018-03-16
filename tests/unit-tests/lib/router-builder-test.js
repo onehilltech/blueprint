@@ -583,6 +583,55 @@ describe ('lib | RouterBuilder', function () {
         }).catch (done);
       });
 
+      it ('should build router with namespace resource and policy', function (done) {
+        const NamespaceUserController = UserController.extend ({
+          namespace: 'test'
+        });
+
+        const users = {
+          '/users': {
+            resource: {
+              controller: 'NamespaceUserController'
+            }
+          }
+        };
+
+        let builder = new RouterBuilder ({
+          listeners: {},
+          routers: { users },
+          controllers: {
+            NamespaceUserController: new NamespaceUserController ()
+          },
+          policies: {
+            test: {
+              user: {
+                create: Policy.extend ({
+                  failureCode: 'create_failed',
+                  failureMessage: 'The create policy failed.',
+
+                  runCheck () {
+                    return Promise.resolve (false);
+                  }
+                })
+              }
+            }
+          }
+        });
+
+        builder.build ().then (router => {
+          let app = express ();
+          app.use (router);
+          app.use ((err, req, res, next) => {
+            expect (err).to.be.instanceof (HttpError);
+            res.status (403).json ({code: err.code, message: err.message});
+          });
+
+          parallel ([
+            (callback) => { request (app).post ('/users').expect (403, {code: 'create_failed', message: 'The create policy failed.'}, callback); },
+          ], done);
+        }).catch (done);
+      });
+
     });
   });
 });
