@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
-var blueprint = require ('@onehilltech/blueprint')
-  , winston   = require ('winston')
-;
+const {
+  createApplicationAndStart
+} = require ('@onehilltech/blueprint');
 
-blueprint.createApplicationAndStart (__dirname, function (err) {
-  if (err)
-    winston.log ('error', err);
-
-  winston.log ('info', 'application started...');
+createApplicationAndStart (__dirname).then (() => {
+  console.log ('The application is started');
+}).catch (err => {
+  console.error (err);
 });

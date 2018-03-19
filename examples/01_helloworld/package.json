@@ -2,10 +2,9 @@
   "name": "helloworld",
   "author": "One Hill Technologies, LLC",
   "version": "1.0.0",
-  "description": "Hello, World! example for Xpression.js",
+  "description": "Hello, World!",
   "main": "./app",
   "dependencies": {
-    "@onehilltech/blueprint": "file:../..",
-    "winston": "^1.0.1"
+    "@onehilltech/blueprint": "file:../.."
   }
 }
