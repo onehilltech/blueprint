@@ -1,7 +1,6 @@
-var blueprint = require ('@onehilltech/blueprint')
-  ;
+const blueprint = require ('@onehilltech/blueprint');
 
-module.exports = exports = {
+module.exports = {
   protocols : {
     http : {
       port: 5000
