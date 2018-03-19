@@ -46,7 +46,7 @@ module.exports = exports = {
         printMessage ('before echoing name to view')
       ],
 
-      action : 'HelloWorldController@echoName',
+      action : 'helloworld@echoName',
 
       /**
        * The after property for an action is the same as for a view. The only difference
