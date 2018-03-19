@@ -1,17 +1,14 @@
-var blueprint = require ('@onehilltech/blueprint')
-  , util      = require ('util')
-  ;
+const {
+  Action,
+  Controller
+} = require ('@onehilltech/blueprint');
 
-function HelloWorldController () {
-  blueprint.BaseController.call (this);
-}
-
-blueprint.controller (HelloWorldController);
-
-HelloWorldController.prototype.echoName = function () {
-  return function echoName (req, res) {
-    return res.render ('helloworld.pug', {name: req.body.whoami});
-  };
-};
-
-module.exports = exports = HelloWorldController;
+module.exports = Controller.extend ({
+  echoName () {
+    return Action.extend ({
+      execute (req, res) {
+        res.render ('helloworld.pug', {name: req.body.whoami});
+      }
+    });
+  }
+});
