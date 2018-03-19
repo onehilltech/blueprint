@@ -40,7 +40,6 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-dummy-module2": "^0.1.1",
     "chai": "^4.1.2",
     "coveralls": "^2.13.1",
     "istanbul": "^0.4.3",
