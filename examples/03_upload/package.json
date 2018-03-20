@@ -6,6 +6,5 @@
   "main": "./app",
   "dependencies": {
     "@onehilltech/blueprint": "file:../..",
-    "winston": "^1.0.1"
   }
 }

@@ -1,4 +1,4 @@
-module.exports = exports = {
+module.exports = {
   protocols : {
     http : {
       port: 5000
@@ -10,13 +10,9 @@ module.exports = exports = {
       immediate: true
     },
 
-    validator  : { },
-
     bodyParser : {
       json : { },
       urlencoded : { extended : false}
-    },
-
-    passport   : {  }
+    }
   }
 };
