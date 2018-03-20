@@ -5,6 +5,7 @@
   "description": "Hello, World!",
   "main": "./app",
   "dependencies": {
-    "@onehilltech/blueprint": "file:../.."
+    "@onehilltech/blueprint": "file:../..",
+    "pug": "^2.0.1"
   }
 }
