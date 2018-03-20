@@ -1,5 +1,5 @@
 {
-  "name": "05_policies",
+  "name": "policies",
   "author": "James H. Hill",
   "version": "0.0.0",
   "description": "a Blueprint.js web application",
@@ -8,6 +8,6 @@
 
   "dependencies": {
     "@onehilltech/blueprint": "file:../..",
-    "winston": "^1.0.1"
+    "pug": "^2.0.1"
   }
 }

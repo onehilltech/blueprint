@@ -1,6 +1,12 @@
-module.exports = exports = {
+module.exports = {
   '/helloworld' : {
-    get  : { view   : 'helloworld.pug' },
-    post : { action : 'HelloWorldController@echoName'},
+    policy: ['passthrough', true],
+
+    get  : { view : 'helloworld.pug'},
+
+    post : {
+      policy : ['passthrough', false],
+      action : 'helloworld@echoName'
+    },
   }
 };

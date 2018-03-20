@@ -1,29 +1,17 @@
-var blueprint = require ('@onehilltech/blueprint')
-  , util      = require ('util')
-  , Policy    = blueprint.Policy
-  ;
+const {
+  Controller,
+  SingleViewAction
+} = require ('@onehilltech/blueprint');
 
-function HelloWorldController () {
-  blueprint.BaseController.call (this);
-}
+module.exports = Controller.extend ({
+  echoName () {
+    return SingleViewAction.extend ({
+      template: 'helloworld.pug',
 
-blueprint.controller (HelloWorldController);
-
-HelloWorldController.prototype.echoName = function () {
-  return {
-    validate: function (req, callback) {
-      Policy.Definition (
-        Policy.and ([
-          Policy.assert ('passthrough', true),
-          Policy.assert (function (req, callback) { return callback (null, true); })
-        ])).evaluate (req, callback);
-    },
-
-    execute: function (req, res, callback) {
-      res.render ('helloworld.pug', {name: req.body.name});
-      return callback (null);
-    }
-  };
-};
-
-module.exports = exports = HelloWorldController;
+      model (req) {
+        const {name} = req.body;
+        return {name};
+      }
+    });
+  }
+});
