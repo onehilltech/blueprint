@@ -374,7 +374,7 @@ describe ('lib | RouterBuilder', function () {
             MainController: new MainController ()
           },
           policies: {
-            success: Policy.extend ({
+            success: new Policy ({
               runCheck () {
                 return Promise.resolve (true);
               }
@@ -557,7 +557,7 @@ describe ('lib | RouterBuilder', function () {
           },
           policies: {
             user: {
-              create: Policy.extend ({
+              create: new Policy ({
                 failureCode: 'create_failed',
                 failureMessage: 'The create policy failed.',
 
@@ -605,7 +605,7 @@ describe ('lib | RouterBuilder', function () {
           policies: {
             test: {
               user: {
-                create: Policy.extend ({
+                create: new Policy ({
                   failureCode: 'create_failed',
                   failureMessage: 'The create policy failed.',
 
