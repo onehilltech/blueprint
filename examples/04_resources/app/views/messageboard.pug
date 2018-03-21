@@ -30,7 +30,7 @@ html(lang="en")
             div.panel.panel-info(ng-repeat="msg in messages")
                 div.panel-heading
                     h3.panel-title {{msg.title}} @ {{msg.timestamp}}
-                        button.close(type="button" class="close" data-dismiss="alert" aria-label="Close", data-message-id="{{msg._id}}" ng-click="deleteMessage($event)")
+                        button.close(type="button" class="close" data-dismiss="alert" aria-label="Close", data-message-id="{{msg.id}}" ng-click="deleteMessage($event)")
                             span(aria-hidden="true") &times;
                 div.panel-body {{msg.content}}
 
@@ -66,7 +66,7 @@ html(lang="en")
                     var messageId = $event.currentTarget.dataset.messageId;
                     var messageUrl = '/messages/' + messageId;
 
-                    $http.delete (messageUrl).success (function ($response) {
+                    $http.delete (messageUrl).success (function () {
                         $scope.getMessages ();
                     });
                 };

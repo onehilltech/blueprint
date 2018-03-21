@@ -1,3 +1,3 @@
-module.exports = exports = {
+module.exports = {
   name : 'blueprint_examples_resources'
 };

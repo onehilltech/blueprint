@@ -1,11 +1,11 @@
-module.exports = exports = {
+module.exports = {
   '/messageboard' : {
     get  : { view : 'messageboard.pug' }
   },
 
   '/messages': {
     resource: {
-      controller: 'MessageController',
+      controller: 'message',
       deny: ['update']
     }
   }
