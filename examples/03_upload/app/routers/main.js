@@ -1,6 +1,6 @@
 module.exports = {
   '/helloworld' : {
-    get: {view: 'helloworld.pug'},
+    get : {view: 'helloworld.pug'},
     post: {action: 'helloworld@uploadImage'}
   }
 };
