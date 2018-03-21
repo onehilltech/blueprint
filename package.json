@@ -35,8 +35,8 @@
     "winston": "^2.4.1"
   },
   "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive tests/lib --reporter spec",
-    "cover": "istanbul cover _mocha --recursive tests/lib",
+    "test": "env NODE_ENV=test mocha --recursive tests/unit-tests --reporter spec",
+    "cover": "istanbul cover _mocha --recursive tests/unit-tests",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "devDependencies": {
