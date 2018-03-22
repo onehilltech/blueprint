@@ -6,16 +6,12 @@ const {
 
 module.exports = {
   '/helloworld' : {
-    policy: check ('passthrough', true),
+    policy: check ('identity', true),
 
     get  : { view : 'helloworld.pug'},
 
     post : {
-      policy: all ([
-        check ('passthrough', true),
-        check ('passthrough', false)
-      ]),
-
+      policy: check ('identity', false),
       action : 'helloworld@echoName'
     },
   }
