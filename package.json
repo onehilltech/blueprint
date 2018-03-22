@@ -36,15 +36,15 @@
     "winston": "^2.4.1"
   },
   "scripts": {
-    "test": "env NODE_ENV=test mocha tests/unit-tests --reporter spec --recursive",
-    "cover": "env NODE_ENV=test istanbul cover _mocha -- tests/unit-tests --recursive",
+    "test": "env NODE_ENV=test mocha --reporter spec tests/**/*-test.js",
+    "cover": "env NODE_ENV=test istanbul cover _mocha -- tests/**/*-test.js",
     "coveralls": "env NODE_ENV=test istanbul cover _mocha --report lcovonly -- tests/unit-tests --recursive && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "devDependencies": {
     "chai": "^4.1.2",
     "coveralls": "^3.0.0",
     "istanbul": "^0.4.5",
-    "mocha": "^5.0.4",
+    "mocha": "^4.0.1",
     "mocha-lcov-reporter": "^1.3.0",
     "supertest": "^3.0.0"
   },
