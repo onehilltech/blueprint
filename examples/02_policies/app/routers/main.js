@@ -1,11 +1,21 @@
+const {
+  policies: {
+    check
+  }
+} = require ('@onehilltech/blueprint');
+
 module.exports = {
   '/helloworld' : {
-    policy: ['passthrough', true],
+    policy: check ('passthrough', true),
 
     get  : { view : 'helloworld.pug'},
 
     post : {
-      policy : ['passthrough', false],
+      policy: all ([
+        check ('passthrough', true),
+        check ('passthrough', false)
+      ]),
+
       action : 'helloworld@echoName'
     },
   }

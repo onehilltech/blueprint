@@ -1,6 +1,6 @@
 module.exports = {
   '/main': {
-    get: {action: 'MainController@performGet'},
-    post: 'MainController'
+    get: {action: 'main@performGet'},
+    post: 'main'
   }
 };

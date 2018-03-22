@@ -12,6 +12,8 @@ const Policy = require ('../../../lib/policy');
 const ResourceController = require ('../../../lib/resource-controller');
 const assert = require ('assert');
 
+const policies = require ('../../../lib/policies');
+
 const MainController = Controller.extend ({
   getFunction () {
     return function (req, res, next) {
@@ -362,7 +364,7 @@ describe ('lib | RouterBuilder', function () {
       it ('should build router with successful policy', function (done) {
         const r1 = {
           '/r1': {
-            policy: 'success',
+            policy: policies.check ('identity', true),
             get: {action: 'MainController@getActionWithValidate'},
           }
         };
@@ -374,11 +376,11 @@ describe ('lib | RouterBuilder', function () {
             MainController: new MainController ()
           },
           policies: {
-            success: new Policy ({
-              runCheck () {
-                return Promise.resolve (true);
-              }
-            })
+            identity (value) {
+              return new Policy ({
+                runCheck () { return value; }
+              })
+            }
           }
         });
 
@@ -395,7 +397,7 @@ describe ('lib | RouterBuilder', function () {
       it ('should build router with optional policy', function (done) {
         const r1 = {
           '/r1': {
-            policy: '?optional',
+            policy: policies.check ('?optional'),
             get: {action: 'MainController@getActionWithValidate'},
           }
         };
@@ -422,7 +424,7 @@ describe ('lib | RouterBuilder', function () {
       it ('should build router with missing policy', function (done) {
         const r1 = {
           '/r1': {
-            policy: 'missing',
+            policy: policies.check ('missing'),
             get: {action: 'MainController@getActionWithValidate'},
           }
         };
@@ -436,8 +438,8 @@ describe ('lib | RouterBuilder', function () {
           policies: { }
         });
 
-        builder.build ().then (router => {}).catch (err => {
-          expect (err).to.be.instanceof (assert.AssertionError);
+        builder.build ().then (() => { done (null) }).catch (err => {
+          expect (err).to.be.instanceof (Error);
           done ();
         });
       });
@@ -540,7 +542,6 @@ describe ('lib | RouterBuilder', function () {
       });
 
       it ('should build router with resource and policy', function (done) {
-
         const users = {
           '/users': {
             resource: {
@@ -557,14 +558,16 @@ describe ('lib | RouterBuilder', function () {
           },
           policies: {
             user: {
-              create: new Policy ({
-                failureCode: 'create_failed',
-                failureMessage: 'The create policy failed.',
+              create () {
+                return new Policy ({
+                  failureCode: 'create_failed',
+                  failureMessage: 'The create policy failed.',
 
-                runCheck () {
-                  return Promise.resolve (false);
-                }
-              })
+                  runCheck () {
+                    return false;
+                  }
+                });
+              }
             }
           }
         });
@@ -578,7 +581,9 @@ describe ('lib | RouterBuilder', function () {
           });
 
           parallel ([
-            (callback) => { request (app).post ('/users').expect (403, {code: 'create_failed', message: 'The create policy failed.'}, callback); },
+            (callback) => {
+              request (app).post ('/users').expect (403, {code: 'create_failed', message: 'The create policy failed.'}, callback);
+            },
           ], done);
         }).catch (done);
       });
@@ -605,14 +610,16 @@ describe ('lib | RouterBuilder', function () {
           policies: {
             test: {
               user: {
-                create: new Policy ({
-                  failureCode: 'create_failed',
-                  failureMessage: 'The create policy failed.',
+                create () {
+                  return new Policy ({
+                    failureCode: 'create_failed',
+                    failureMessage: 'The create policy failed.',
 
-                  runCheck () {
-                    return Promise.resolve (false);
-                  }
-                })
+                    runCheck () {
+                      return false;
+                    }
+                  });
+                }
               }
             }
           }
@@ -620,14 +627,20 @@ describe ('lib | RouterBuilder', function () {
 
         builder.build ().then (router => {
           let app = express ();
+
           app.use (router);
+
           app.use ((err, req, res, next) => {
             expect (err).to.be.instanceof (HttpError);
             res.status (403).json ({code: err.code, message: err.message});
           });
 
           parallel ([
-            (callback) => { request (app).post ('/users').expect (403, {code: 'create_failed', message: 'The create policy failed.'}, callback); },
+            (callback) => {
+              request (app)
+                .post ('/users')
+                .expect (403, {code: 'create_failed', message: 'The create policy failed.'}, callback);
+            },
           ], done);
         }).catch (done);
       });
