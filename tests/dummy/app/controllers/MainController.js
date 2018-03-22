@@ -1,15 +1,18 @@
-const Blueprint = require ('../../../../lib');
+const {
+  Controller,
+  Action
+} = require ('../../../../lib');
 
-module.exports = Blueprint.Controller.extend ({
+module.exports = Controller.extend ({
   __invoke () {
-    return (req, res) => {
+    return Action.extend ({
 
-    };
+    });
   },
 
   performGet () {
-    return (res, res) => {
+    return Action.extend ({
 
-    };
+    });
   }
 });

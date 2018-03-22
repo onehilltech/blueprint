@@ -64,4 +64,23 @@ describe ('lib | ApplicationModule', function () {
       expect (appModule.hasViews).to.be.true;
     });
   });
+
+  describe ('lookup', function () {
+    it ('should lookup an entity', function (done) {
+      let appPath = path.resolve (__dirname, '../../dummy/app');
+      let appModule = new ApplicationModule ({
+        appPath,
+        messaging: new MessagingFramework ()
+      });
+
+      appModule.configure ().then (() => {
+        let controller = appModule.lookup ('controller:MainController');
+
+        expect (controller).to.not.be.undefined;
+        done ();
+      }).catch (done);
+
+
+    });
+  });
 });
