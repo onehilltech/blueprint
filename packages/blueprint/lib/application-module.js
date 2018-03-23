@@ -47,7 +47,7 @@ module.exports = CoreObject.extend ({
       {
         name: 'services',
         opts: {
-          resolve (Service) { return Service (); }
+          resolve (Service) { return Service ({app: this}); }
         }
       },
       {
