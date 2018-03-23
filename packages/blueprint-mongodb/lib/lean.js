@@ -1,7 +1,8 @@
-'use strict';
+const {
+  parse,
+  stringify
+} = JSON;
 
-function lean (value) {
-  return JSON.parse (JSON.stringify (value));
-}
-
-module.exports = lean;
+module.exports = function lean (value) {
+  return parse (stringify (value));
+};
