@@ -1,9 +1,8 @@
-'use strict';
-
-var validator = require ('validator')
-  ;
+const {
+  isMongoId
+} = require ('validator') ;
 
 module.exports = function (str, token) {
-  return validator.isMongoId (str) || str === token;
+  return isMongoId (str) || str === token;
 };
 
