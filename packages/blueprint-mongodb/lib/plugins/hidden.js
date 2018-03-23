@@ -1,7 +1,4 @@
-'use strict';
-
-const objectPath = require ('object-path')
-  ;
+const objectPath = require ('object-path');
 
 /**
  * Transform the document by removing the hidden field.
@@ -28,9 +25,9 @@ function transform (orig, hidden) {
  * @param schema        Mongoose schema
  * @constructor
  */
-function HiddenPlugin (schema) {
+module.exports = function (schema) {
   // Gather the fields to be hidden during transformation.
-  var hidden = [];
+  let hidden = [];
 
   schema.eachPath (function (path, schema) {
     if (schema.options.hidden)
@@ -43,10 +40,10 @@ function HiddenPlugin (schema) {
   if (!schema.options.toJSON)
     schema.options.toJSON = {};
 
-  var objTransform = schema.options.toObject.transform || function (doc, ret) { return ret; };
+  let objTransform = schema.options.toObject.transform || function (doc, ret) { return ret; };
   schema.options.toObject.transform = transform (objTransform, hidden);
 
-  var jsonTransform = schema.options.toJSON.transform || function (doc, ret) { return ret; };
+  let jsonTransform = schema.options.toJSON.transform || function (doc, ret) { return ret; };
   schema.options.toJSON.transform = transform (jsonTransform, hidden);
 
   // Define helper methods
@@ -54,6 +51,4 @@ function HiddenPlugin (schema) {
   schema.statics.hidden = function () {
     return hidden;
   };
-}
-
-module.exports = HiddenPlugin;
+};
