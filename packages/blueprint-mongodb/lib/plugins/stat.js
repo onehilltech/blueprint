@@ -1,7 +1,4 @@
-'use strict';
-
-const DateUtils = require ('../DateUtils')
-  ;
+const DateUtils = require ('../date-utils');
 
 /**
  * Transform the document by removing the _stat field.
@@ -22,7 +19,7 @@ function transform (orig) {
  * @param schema
  * @constructor
  */
-function StatPlugin (schema) {
+module.exports = function (schema) {
   schema.add ({
     _stat: {
       /// The time/date the resource was created.
@@ -109,5 +106,3 @@ function StatPlugin (schema) {
   schema.path ('_stat.created_at').index (true);
   schema.path ('_stat.updated_at').index (true);
 }
-
-module.exports = StatPlugin;
