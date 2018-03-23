@@ -23,6 +23,6 @@ module.exports = Listener.extend ({
   },
 
   handleEvent () {
-    this.listener.call (this.listener, ...arguments);
+    return this.listener.call (this.listener, ...arguments);
   }
 });
