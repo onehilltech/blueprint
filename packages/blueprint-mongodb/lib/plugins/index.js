@@ -1,8 +1,6 @@
-'use strict';
+module.exports = exports = {};
 
-var exports = module.exports;
-
-exports.StatPlugin = require ('./StatPlugin');
-exports.HiddenPlugin = require ('./HiddenPlugin');
-exports.ConstPlugin = require ('./ConstPlugin');
-exports.LeanPlugin = require ('./LeanPlugin');
+exports.StatPlugin = require ('./stat');
+exports.HiddenPlugin = require ('./hidden');
+exports.ConstPlugin = require ('./const');
+exports.LeanPlugin = require ('./lean');

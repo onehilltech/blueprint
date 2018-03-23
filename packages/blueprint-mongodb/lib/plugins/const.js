@@ -1,8 +1,8 @@
-'use strict';
+const objectPath = require ('object-path');
 
-let objectPath = require ('object-path')
-  , _          = require ('underscore')
-  ;
+const {
+  isEmpty
+} = require ('lodash');
 
 /**
  * Schema type for a const field. The ConstSchema is a proxy for the real schema
@@ -13,11 +13,18 @@ let objectPath = require ('object-path')
 function ConstSchema (schema) {
   this._schema = schema;
 
-  let properties = ['path', 'options', 'instance', 'validators', 'getters', 'setters'];
-  let _this = this;
+  const properties = ['path', 'options', 'instance', 'validators', 'getters', 'setters'];
 
-  properties.forEach (function (name) {
-    Object.defineProperty (_this, name, {set: function (val) { _this._schema[name] = val;}, get: function () { return _this._schema[name]; }});
+  properties.forEach (name => {
+    Object.defineProperty (this, name, {
+      set: function (val) {
+        this._schema[name] = val;
+      },
+
+      get: function () {
+        return this._schema[name];
+      }
+    });
   });
 }
 
@@ -91,7 +98,7 @@ function ConstPlugin (schema) {
     if (this._update.$set) {
       removeConst (this._update.$set);
 
-      if (this._update.$set && _.isEmpty (this._update.$set))
+      if (this._update.$set && isEmpty (this._update.$set))
         delete this._update.$set;
     }
 
@@ -100,7 +107,7 @@ function ConstPlugin (schema) {
     if (this._update.$unset) {
       removeConst (this._update.$unset);
 
-      if (this._update.$unset && _.isEmpty (this._update.$unset))
+      if (this._update.$unset && isEmpty (this._update.$unset))
         delete this._update.$unset;
     }
 
