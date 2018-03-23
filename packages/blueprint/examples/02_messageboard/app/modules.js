@@ -1,1 +1,0 @@
-module.exports = exports = ['@onehilltech/blueprint-mongodb'];

@@ -1,0 +1,12 @@
+{
+  "name": "blueprint_examples_resources",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./app",
+  "author": "One Hill Technologies, LLC",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@onehilltech/blueprint": "file:../..",
+    "pug": "^2.0.2"
+  }
+}

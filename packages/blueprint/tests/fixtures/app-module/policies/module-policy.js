@@ -1,6 +1,7 @@
-'use strict';
+const Policy = require ('../../../../lib/policy');
 
-module.exports = function (req, callback) {
-  return callback (null, true);
-};
-
+module.exports = Policy.extend ({
+  runCheck () {
+    return true;
+  }
+});
