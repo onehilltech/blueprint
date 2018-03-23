@@ -1,8 +1,12 @@
-'use strict';
+const moment = require ('moment');
+const {
+  isNumeric,
+  isJSON
+} = require ('validator');
 
-let moment    = require ('moment')
-  , validator = require ('validator')
-;
+const {
+  parse
+} = JSON;
 
 module.exports = function (value, opts) {
   if (value === undefined || value === null)
@@ -11,12 +15,12 @@ module.exports = function (value, opts) {
   opts = opts || {};
   let m = null;
 
-  if (validator.isNumeric (value)) {
-    let n = Number.parseInt (value);
+  if (isNumeric (value)) {
+    let n = parseInt (value);
     m = moment (n);
   }
-  else if (validator.isJSON (value)) {
-    let obj = JSON.parse (value);
+  else if (isJSON (value)) {
+    let obj = parse (value);
     m = moment (obj);
   }
   else {

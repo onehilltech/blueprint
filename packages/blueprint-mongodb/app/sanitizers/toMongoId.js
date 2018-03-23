@@ -1,8 +1,8 @@
-'use strict';
-
-var mongoose = require ('mongoose')
-  , ObjectId = mongoose.Types.ObjectId
-  ;
+const {
+  Types: {
+    ObjectId
+  }
+} = require ('mongoose');
 
 module.exports = function (str) {
   return ObjectId (str);
