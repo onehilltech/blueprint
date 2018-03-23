@@ -6,7 +6,7 @@ const {version} = require ('../package.json');
 const ClusterApplication = require ('./cluster');
 const Application = require ('./application');
 const CoreObject  = require ('./object');
-const MessagingFramework = require ('./messaging/framework');
+const messaging = require ('./messaging');
 
 /**
  * @class Framework
@@ -57,7 +57,7 @@ module.exports = CoreObject.extend ({
     if (this.cluster)
       this._app = new ClusterApplication ({appPath, cluster: this.cluster});
     else
-      this._app = new Application ({appPath, messaging: new MessagingFramework ()});
+      this._app = new Application ({appPath, messaging: messaging () });
 
     return this._app.configure ();
   },
