@@ -14,6 +14,8 @@ const debug = require ('debug')('blueprint-mongodb:mongodb');
 
 const DEFAULT_CONNECTION_NAME = '$default';
 
+mongoose.Promise = Promise;
+
 module.exports = Service.extend ({
   /// Named connections managed by the service.
   _connections: { },
@@ -25,6 +27,10 @@ module.exports = Service.extend ({
 
     Object.defineProperty (this, 'defaultConnection', {
       get () { return this._connections[this._defaultName]; }
+    });
+
+    Object.defineProperty (this, 'connections', {
+      get () { return this._connections; }
     });
 
     // setup the messaging.
@@ -58,6 +64,10 @@ module.exports = Service.extend ({
     forOwn (connections, (opts, name) => this.createConnection (name));
   },
 
+  destroy () {
+    return this.closeConnections ();
+  },
+
   /**
    * Create a new connection.
    *
@@ -89,7 +99,7 @@ module.exports = Service.extend ({
       let options = merge ({useMongoClient: true}, opts.options);
       let connection = this._connections[name];
 
-      connecting.push (connection.connect (opts.connstr, options));
+      connecting.push (connection.openUri (opts.connstr, options));
     });
 
     return Promise.all (connecting).then (() => {
@@ -97,5 +107,19 @@ module.exports = Service.extend ({
 
       return this._appStart.signal ();
     });
+  },
+
+  /**
+   * Close all open connections.
+   */
+  closeConnections () {
+    let pending = [];
+
+    forOwn (this._connections, conn => {
+      if (conn.readyState !== 0)
+        pending.push (conn.close ());
+    });
+
+    return Promise.all (pending);
   }
 });
