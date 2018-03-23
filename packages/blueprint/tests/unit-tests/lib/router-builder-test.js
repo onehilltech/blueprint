@@ -10,7 +10,6 @@ const Action = require ('../../../lib/action');
 const HttpError = require ('../../../lib/http-error');
 const Policy = require ('../../../lib/policy');
 const ResourceController = require ('../../../lib/resource-controller');
-const assert = require ('assert');
 
 const policies = require ('../../../lib/policies');
 
