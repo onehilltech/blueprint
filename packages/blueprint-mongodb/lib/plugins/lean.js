@@ -1,5 +1,3 @@
-'use strict';
-
 const lean = require ('../lean');
 
 /**
@@ -13,10 +11,8 @@ const lean = require ('../lean');
  * @param schema
  * @constructor
  */
-function LeanPlugin (schema) {
+module.exports = function (schema) {
   schema.methods.lean = function () {
     return lean (this);
   };
-}
-
-module.exports = LeanPlugin;
+};
