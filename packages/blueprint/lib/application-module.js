@@ -3,13 +3,7 @@ const debug  = require ('debug') ('blueprint:application-module');
 const path   = require ('path');
 const assert = require ('assert');
 
-const {
-  get
-} = require ('object-path');
-
-const {
-  plural
-} = require('pluralize');
+const lookup = require ('./-lookup');
 
 const {
   merge
@@ -20,11 +14,11 @@ const Loader = require ('./loader');
 const ListenerLoader = require ('./listener-loader');
 
 module.exports = CoreObject.extend ({
-  /// The application path for the module.
-  appPath: null,
+  /// Application hosting the module.
+  app: null,
 
-  /// Reference to the target messaging framework.
-  messaging: null,
+  /// The path for the application module.
+  modulePath: null,
 
   /// The path where the views are located.
   _viewsPath: null,
@@ -38,22 +32,25 @@ module.exports = CoreObject.extend ({
     this._super.init.apply (this, arguments);
     this._resources = {};
 
-    assert (!!this.appPath, "You must define the 'appPath' property.");
-    assert (!!this.messaging, "You must define the 'messaging' property.");
+    assert (!!this.app, "You must define the 'app' property.");
+    assert (!!this.modulePath, "You must define the 'modulePath' property.");
+
+    // The entities that are loaded by the application module. The order of the
+    // entities is important.
 
     this._entities = [
-      { name: 'models'},
-      { name: 'listeners', loader: new ListenerLoader ({messaging: this.messaging}) },
+      { name: 'listeners', loader: new ListenerLoader ({messaging: this.app.messaging}) },
       {
         name: 'services',
         opts: {
-          resolve (Service) { return Service ({app: this}); }
+          resolve: this._instantiateComponent.bind (this)
         }
       },
+      { name: 'models'},
       {
         name: 'controllers',
         opts: {
-          resolve (Controller) { return new Controller (); }
+          resolve: this._instantiateComponent.bind (this)
         }
       },
       { name: 'policies'},
@@ -66,7 +63,7 @@ module.exports = CoreObject.extend ({
 
     Object.defineProperty (this, 'viewsPath', {
       get () {
-        return path.join (this.appPath, 'views');
+        return path.join (this.modulePath, 'views');
       }
     });
 
@@ -84,6 +81,10 @@ module.exports = CoreObject.extend ({
     Object.defineProperty (this, 'resources', {
       get () { return this._resources; }
     });
+  },
+
+  _instantiateComponent (Component) {
+    return new Component ({app: this.app});
   },
 
   /**
@@ -113,7 +114,7 @@ module.exports = CoreObject.extend ({
       // Compute the location of the resources we are loading. Then load the resources
       // into memory and save the resources to our application module
       let location = entity.location || entity.name;
-      let rcPath = path.resolve (this.appPath, location);
+      let rcPath = path.resolve (this.modulePath, location);
       let opts = merge ({dirname: rcPath}, entity.opts);
 
       debug (`loading ${entity.name} in ${rcPath}`);
@@ -145,19 +146,7 @@ module.exports = CoreObject.extend ({
    * @param component
    */
   lookup (component) {
-    const [type,name] = component.split (':');
-    const types = plural (type);
-    const entities = this.resources[types];
-
-    if (!entities)
-      throw new Error (`${type} is not a valid type`);
-
-    let entity = get (entities, name);
-
-    if (!entity)
-      throw new Error (`${component} does not exist`);
-
-    return entity;
+    return lookup (this.resources, component);
   },
 
   /**
@@ -169,7 +158,7 @@ module.exports = CoreObject.extend ({
    * @returns {*}
    */
   resource (filename, opts, callback) {
-    let fullPath = path.resolve (this.appPath, 'resources', filename);
+    let fullPath = path.resolve (this.modulePath, 'resources', filename);
 
     if (callback)
       return fs.readfile (fullPath, opts, callback);

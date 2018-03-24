@@ -65,8 +65,8 @@ module.exports = CoreObject.extend ({
       const moduleAppPath = path.resolve (modulePath, 'app');
 
       const module = new ApplicationModule ({
-        appPath: moduleAppPath,
-        messaging: this.app.messaging
+        app: this.app,
+        modulePath: moduleAppPath
       });
 
       this._modules[name] = module;
