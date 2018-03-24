@@ -1,8 +1,7 @@
-'use strict';
-
 // Source: http://stackoverflow.com/questions/497790
-var dates = {
-  convert:function(d) {
+
+module.exports = {
+  convert (d) {
     // Converts the date in d to a date-object. The input can be:
     //   a date object: returned without modification
     //  an array      : Interpreted as [year,month,day]. NOTE: month is 0-11.
@@ -21,7 +20,8 @@ var dates = {
                 NaN
     );
   },
-  compare:function(a,b) {
+
+  compare (a, b) {
     // Compare two dates (could be of any type supported by the convert
     // function above) and returns:
     //  -1 : if a < b
@@ -36,7 +36,8 @@ var dates = {
         NaN
     );
   },
-  inRange:function(d,start,end) {
+
+  inRange (d, start, end) {
     // Checks if date in d is between dates in start and end.
     // Returns a boolean or NaN:
     //    true  : if d is between start and end (inclusive)
@@ -52,5 +53,3 @@ var dates = {
     );
   }
 };
-
-module.exports = dates;
