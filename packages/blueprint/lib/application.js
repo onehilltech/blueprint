@@ -43,9 +43,9 @@ module.exports = BlueprintObject.extend ({
     this._modules = {};
 
     // barriers
-    this._appInit = barrier ('blueprint.app.init', 'blueprint.application');
-    this._appStart = barrier ('blueprint.app.start', 'blueprint.application');
-    this._appRestart = barrier ('blueprint.app.restart', 'blueprint.application');
+    this._appInit = barrier ('blueprint.app.init', this);
+    this._appStart = barrier ('blueprint.app.start', this);
+    this._appRestart = barrier ('blueprint.app.restart', this);
 
     // First, make sure the temp directory for the application exist. Afterwards,
     // we can progress with configuring the application.

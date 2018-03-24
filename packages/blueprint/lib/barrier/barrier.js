@@ -15,19 +15,15 @@ module.exports = CoreObject.extend ({
   init () {
     this._super.call (this, ...arguments);
 
-    this._participants = {};
+    this._participants = new Map ();
     this._signalled = [];
 
     Object.defineProperty (this, 'participantCount', {
-      get () {
-        return Object.keys (this._participants).length;
-      }
+      get () { return this._participants.size; }
     });
 
     Object.defineProperty (this, 'pendingCount', {
-      get () {
-        return this.participantCount - this._signalled.length;
-      }
+      get () { return this.participantCount - this._signalled.length; }
     });
   },
 
@@ -44,17 +40,17 @@ module.exports = CoreObject.extend ({
    * @returns {BarrierParticipant}
    */
   registerParticipant (participant) {
-    if (this._participants[participant])
-      throw new Error (`participant ${participant} already registered for barrier ${this.name}`);
+    if (this._participants.has (participant))
+      throw new Error (`participant already registered for barrier ${this.name}`);
 
-    let bp = new BarrierParticipant ({barrier: this, name: participant});
-    this._participants[participant] = bp;
+    let bp = new BarrierParticipant ({barrier: this, registrant: participant});
+    this._participants.set (participant, bp);
 
     return bp;
   },
 
   signal (participant) {
-    debug (`participant ${participant.name} signalling barrier ${this.name}`);
+    debug (`participant signalling barrier ${this.name}`);
 
     // Add the callback to the waiting list.
     this._signalled.push (participant);
