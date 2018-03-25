@@ -73,6 +73,11 @@ module.exports = CoreObject.extend ({
     });
   },
 
+  /**
+   * Destroy the application.
+   *
+   * @returns {Promise<any>}
+   */
   destroyApplication () {
     return new Promise (resolve => {
       this._app = null;
@@ -81,7 +86,31 @@ module.exports = CoreObject.extend ({
     });
   },
 
+  /**
+   * Lookup a loaded component.
+   *
+   * The name of the component must have the format <type:name>.
+   *
+   * Ex.
+   *
+   *   lookup ('controller:main')
+   *   lookup ('config:app')
+   *
+   * @param component       Name of the component.
+   */
   lookup (component) {
     return this._app.lookup (component);
+  },
+
+  /**
+   * Load an asset from the main application.
+   *
+   * @param filename
+   * @param opts
+   * @param callback
+   * @returns {*}
+   */
+  asset (filename, opts, callback) {
+    return this._app.asset (name, opts, callback);
   }
 });
