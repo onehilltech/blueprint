@@ -23,7 +23,7 @@ describe ('lib | LegacyFunctionAction', function () {
 
   context ('doRequest()', function () {
     context ('no callback', function () {
-      it ('should execute the doRequest method', function (done) {
+      it ('should execute the doRequest method', function () {
         let req = {};
 
         let res = {
@@ -34,16 +34,15 @@ describe ('lib | LegacyFunctionAction', function () {
 
         let action = new LegacyFunctionAction ({action: legacyNoCallback});
 
-        action.execute (req, res).then (() => {
-          expect (res).to.have.property ('_status', 200);
-          done (null);
-
-        }).catch (reason => done (reason));
+        return action.execute (req, res)
+          .then (() => {
+            expect (res).to.have.property ('_status', 200);
+          });
       });
     });
 
     context ('callback', function () {
-      it ('should execute the doRequest method', function (done) {
+      it ('should execute the doRequest method', function () {
         let req = {};
 
         let res = {
@@ -54,11 +53,10 @@ describe ('lib | LegacyFunctionAction', function () {
 
         let action = new LegacyFunctionAction ({action: legacyWithCallback});
 
-        action.execute (req, res).then (() => {
-          expect (res).to.have.property ('_status', 300);
-          done (null);
-
-        }).catch (reason => done (reason));
+        return action.execute (req, res)
+          .then (() => {
+            expect (res).to.have.property ('_status', 300);
+          });
       });
     });
   });

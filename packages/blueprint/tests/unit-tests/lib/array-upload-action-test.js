@@ -19,7 +19,7 @@ describe ('lib | ArrayUploadAction', function () {
   });
 
   describe ('execute', function () {
-    it ('should upload an array of files', function (done) {
+    it ('should upload an array of files', function () {
       let action = new ArrayUploadAction ({
         uploadPath: './temp',
         name: 'avatar',
@@ -46,17 +46,14 @@ describe ('lib | ArrayUploadAction', function () {
 
       const avatarPng = path.resolve (__dirname, '../../files/avatar.png');
 
-      request (app)
+      return request (app)
         .post ('/profile')
         .field ('name', 'James Hill')
         .attach ('avatar', avatarPng)
         .attach ('avatar', avatarPng)
         .expect (200, {comment: 'The upload is complete!'})
-        .end (err => {
-          if (err) return done (err);
-
+        .then (() => {
           expect (action).to.have.property ('uploadCompleteCalled').to.be.true;
-          done ();
         });
     });
   });
