@@ -1,9 +1,7 @@
-const blueprint = require ('@onehilltech/blueprint');
-
 const {
   Service,
   barrier
-} = blueprint;
+} = require ('@onehilltech/blueprint');
 
 const {
   forOwn,
@@ -36,7 +34,7 @@ module.exports = Service.extend ({
     });
 
     // setup the messaging.
-    this.app.messaging.on ('blueprint.app.starting', this.openConnections.bind (this));
+    this.on ('blueprint.app.starting', this.openConnections.bind (this));
 
     this._loadConfiguration ();
   },
@@ -46,7 +44,7 @@ module.exports = Service.extend ({
     // configuration, then we need to stop processing. This brings attention
     // to the developer to resolve the problem.
 
-    this.config = blueprint.lookup ('config:mongodb');
+    this.config = this.get ('app.configs.mongodb');
 
     if (!this.config)
       throw new Error ('The application does not define a mongodb configuration.');

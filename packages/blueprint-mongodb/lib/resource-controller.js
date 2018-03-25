@@ -14,7 +14,7 @@ let populate = require ('./populate');
 
 let BaseController = blueprint.ResourceController
   , HttpError = blueprint.HttpError
-  , messaging = blueprint.app.messaging
+//  , messaging = blueprint.app.messaging
 ;
 
 function __validate (req, callback) { return callback (null); }
