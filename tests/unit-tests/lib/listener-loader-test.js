@@ -5,13 +5,13 @@ const path = require ('path');
 
 describe ('lib | ListenerLoader', function () {
   describe ('load', function () {
-    it ('should load listeners', function (done) {
+    it ('should load listeners', function () {
       const dirname = path.resolve (__dirname, '../../dummy/app/listeners');
 
       let messaging = new MessagingFramework ();
       let loader = new ListenerLoader ({messaging});
 
-      loader.load ({dirname}).then (results => {
+      return loader.load ({dirname}).then (results => {
         expect (results).to.have.property ('blueprint.app.init').that.has.keys (['echo','legacy']);
 
         expect (messaging)
@@ -21,9 +21,7 @@ describe ('lib | ListenerLoader', function () {
           .to.have.property ('blueprint.app.init')
           .to.have.property ('_on')
           .to.have.length (2);
-
-        done ();
-      }).catch (done);
+      });
     });
   })
 });
