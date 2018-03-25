@@ -18,14 +18,14 @@ describe ('lib | ApplicationModule', function () {
   });
 
   describe ('configure', function () {
-    it ('should load an application module into memory', function (done) {
+    it ('should load an application module into memory', function () {
       let appPath = path.resolve (__dirname, '../../fixtures/app-module');
       let appModule = new ApplicationModule ({
         appPath,
         messaging: new MessagingFramework ()
       });
 
-      appModule.configure ().then (result => {
+      return appModule.configure ().then (result => {
         expect (appModule).to.equal (result);
 
         expect (result._resources).to.have.nested.property ('models.person');
@@ -35,9 +35,7 @@ describe ('lib | ApplicationModule', function () {
         expect (result._resources).to.have.nested.property ('controllers.module-test');
 
         expect (result._resources).to.have.property ('listeners').to.have.property ('blueprint.module.init');
-
-        done (null);
-      }).catch (err => done (err));
+      });
     });
   });
 
@@ -66,21 +64,18 @@ describe ('lib | ApplicationModule', function () {
   });
 
   describe ('lookup', function () {
-    it ('should lookup an entity', function (done) {
+    it ('should lookup an entity', function () {
       let appPath = path.resolve (__dirname, '../../dummy/app');
       let appModule = new ApplicationModule ({
         appPath,
         messaging: new MessagingFramework ()
       });
 
-      appModule.configure ().then (() => {
-        let controller = appModule.lookup ('controller:MainController');
-
-        expect (controller).to.not.be.undefined;
-        done ();
-      }).catch (done);
-
-
+      return appModule.configure ()
+        .then (() => {
+          let controller = appModule.lookup ('controller:MainController');
+          expect (controller).to.not.be.undefined;
+        });
     });
   });
 });
