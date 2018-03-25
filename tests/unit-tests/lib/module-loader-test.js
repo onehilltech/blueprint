@@ -21,10 +21,10 @@ describe ('lib | ModuleLoader', function () {
   });
 
   describe ('load', function () {
-    it ('should the application modules', function (done) {
+    it ('should the application modules', function () {
       let app = new Object ({
         appPath,
-        messaging: new MessagingFramework (),
+        messaging: messaging (),
         modules: {},
 
         addModule (name, module) {
