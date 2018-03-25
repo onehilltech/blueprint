@@ -53,7 +53,17 @@ module.exports = CoreObject.extend ({
   _handleNodeModule (name, version) {
     // Open the package.json file for this node module, and determine
     // if the module is a Blueprint.js module.
-    const modulePath  = path.resolve (this.modulePath, name);
+    let modulePath;
+
+    if (version.startsWith ('file:')) {
+      // The file location is relation to the node application.
+      let relativePath = version.slice (5);
+      modulePath = path.resolve (this.app.appPath, '..', relativePath);
+    }
+    else {
+      modulePath = path.resolve (this.modulePath, name);
+    }
+
     const packageFile = path.resolve (modulePath, FILE_PACKAGE_JSON);
 
     return fs.readJson (packageFile).then (packageObj => {
