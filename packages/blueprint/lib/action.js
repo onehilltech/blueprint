@@ -1,6 +1,4 @@
 const BlueprintObject = require ('./object');
-const SupportsMessaging = require ('./supports-messaging');
-const assert = require ('assert');
 
 /**
  * @class Action
@@ -32,9 +30,19 @@ module.exports = BlueprintObject.extend ({
    */
   execute: null,
 
-  init () {
-    this._super.init.apply (this, arguments);
+  /// {@ Messaging
 
-    BlueprintObject.mixin (this, SupportsMessaging ('controller'));
+  on (name, handler) {
+    this.controller.on (name, handler);
+  },
+
+  once (name, handler) {
+    this.controller.once (name, handler);
+  },
+
+  emit () {
+    this.controller.emit (...arguments);
   }
+
+  /// @}
 });

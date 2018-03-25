@@ -1,6 +1,6 @@
-const BlueprintObject = require ('../object');
 const assert = require ('assert');
-const SupportsMessaging = require ('../supports-messaging');
+const BlueprintObject = require ('../object');
+const ApplicationMessaging = require ('../application-messaging');
 
 /**
  * @class Listener
@@ -19,7 +19,7 @@ module.exports = BlueprintObject.extend ({
   init () {
     this._super.init.apply (this, arguments);
 
-    BlueprintObject.mixin (this, SupportsMessaging ('app'));
+    BlueprintObject.mixin (this, ApplicationMessaging);
   },
 
   /**
