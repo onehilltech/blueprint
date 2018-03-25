@@ -1,0 +1,28 @@
+const {resolve} = require ('path');
+const {expect}  = require ('chai');
+const blueprint = require ('@onehilltech/blueprint');
+const lean = require ('../../../lib/lean');
+
+describe ('lib | lean', function () {
+  beforeEach (function () {
+    return blueprint.createApplication (resolve ('./tests/dummy/app'));
+  });
+
+  afterEach (function () {
+    return blueprint.destroyApplication ();
+  });
+
+  it ('should convert model to raw object', function () {
+    const User = blueprint.lookup ('model:user');
+    const user = new User ({first_name: 'James', last_name: 'Hill', email: 'james@no-reply.com'});
+
+    const leanUser = lean (user);
+
+    expect (leanUser).to.eql ({
+      _id: user.id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email
+    });
+  });
+});
