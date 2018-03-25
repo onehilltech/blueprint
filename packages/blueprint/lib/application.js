@@ -115,6 +115,22 @@ module.exports = BlueprintObject.extend ({
   },
 
   /**
+   * Destroy the application.
+   */
+  destroy () {
+    // Instruct each service to destroy itself.
+    let {services} = this.resources;
+    let promises = [];
+
+    forOwn (services, (service, name) => {
+      debug (`destroying service ${name}`);
+      promises.push (service.destroy ());
+    });
+
+    return Promise.all (promises);
+  },
+
+  /**
    * Add an application module to the application. An application module can only
    * be added once. Two application modules are different if they have the same
    * name, not module path. This will ensure we do not have the same module in

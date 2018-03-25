@@ -79,10 +79,11 @@ module.exports = CoreObject.extend ({
    * @returns {Promise<any>}
    */
   destroyApplication () {
-    return new Promise (resolve => {
-      this._app = null;
+    if (!this._app)
+      return Promise.resolve ();
 
-      resolve (this);
+    return this._app.destroy ().then (() => {
+      this._app = null;
     });
   },
 
