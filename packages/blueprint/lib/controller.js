@@ -10,6 +10,6 @@ module.exports = BlueprintObject.extend ({
   init () {
     this._super.init.apply (this, arguments);
 
-    BlueprintObject.mixin (this, SupportsMessaging);
+    BlueprintObject.mixin (this, SupportsMessaging ('app'));
   }
 });
