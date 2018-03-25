@@ -5,15 +5,14 @@ let HttpError = require ('../../../lib/http-error');
 
 function notFoundTest (method) {
   describe (method, function () {
-    it ('should throw an exception', function (done) {
+    it ('should throw an exception', function () {
       let rc = new ResourceController ({name: 'book'});
 
       let Action = rc[method] ();
       let action = new Action ();
 
-      action.execute ().catch (err => {
+      return action.execute ().catch (err => {
         expect (err).to.be.instanceof (HttpError);
-        done (null);
       });
     });
   });
