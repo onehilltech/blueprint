@@ -15,7 +15,7 @@ describe ('lib | ViewAction', function () {
       expect (() => { new ViewAction () }).to.throw (Error);
     });
 
-    it ('should send a response from a view template', function (done) {
+    it ('should send a response from a view template', function () {
       let req = {};
 
       let res = {
@@ -30,12 +30,10 @@ describe ('lib | ViewAction', function () {
         model () { return {a: 1, b: 2}}
       });
 
-      action.execute (req, res).then (() => {
+      return action.execute (req, res).then (() => {
         expect (res).to.have.property ('view', 'helloworld.pug');
         expect (res).to.have.deep.property ('data', {a: 1, b: 2});
-
-        done (null);
-      }).catch (err => done (err));
+      });
     });
   });
 });

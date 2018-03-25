@@ -19,7 +19,7 @@ describe ('lib | SingleFileUploadAction', function () {
   });
 
   describe ('execute', function () {
-    it ('should upload a file', function (done) {
+    it ('should upload a file', function () {
       let action = new SingleFileUploadAction ({
         uploadPath: './temp',
         name: 'avatar',
@@ -48,16 +48,13 @@ describe ('lib | SingleFileUploadAction', function () {
 
       const avatarPng = path.resolve (__dirname, '../../files/avatar.png');
 
-      request (app)
+      return request (app)
         .post ('/profile')
         .field ('name', 'James Hill')
         .attach ('avatar', avatarPng)
         .expect (200, {comment: 'The upload is complete!'})
-        .end (err => {
-          if (err) return done (err);
-
+        .then (() => {
           expect (action).to.have.property ('uploadCompleteCalled').to.be.true;
-          done ();
         });
     });
   });
