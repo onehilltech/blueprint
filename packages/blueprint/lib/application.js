@@ -91,7 +91,7 @@ module.exports = BlueprintObject.extend ({
 
         forOwn (services, (service, name) => {
           debug (`configuring service ${name}`);
-          promises.push (service.configure (this));
+          promises.push (service.configure ());
         });
 
         return Promise.all (promises);
