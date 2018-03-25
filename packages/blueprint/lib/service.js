@@ -1,4 +1,5 @@
-const CoreObject = require ('./object');
+const BlueprintObject = require ('./object');
+const SupportsMessaging = require ('./supports-messaging');
 
 /**
  * @class Service
@@ -6,7 +7,13 @@ const CoreObject = require ('./object');
  * The service represents an abstraction that runs in the background while the
  * application is live.
  */
-module.exports = CoreObject.extend ({
+module.exports = BlueprintObject.extend ({
+  init () {
+    this._super.init.apply (this, arguments);
+
+    BlueprintObject.mixin (this, SupportsMessaging);
+  },
+
   /**
    * Instruct the service to configure itself. We have the configure() method
    * because the init() method is synchronous. It is therefore hard for the service

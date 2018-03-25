@@ -1,5 +1,6 @@
-const Object = require ('../object');
+const BlueprintObject = require ('../object');
 const assert = require ('assert');
+const SupportsMessaging = require ('../supports-messaging');
 
 /**
  * @class Listener
@@ -14,7 +15,13 @@ const assert = require ('assert');
  * file located in app/listeners. The name of the directory defines the event the
  * listener handles, and the name of the file defines the name of the listener.
  */
-module.exports = Object.extend ({
+module.exports = BlueprintObject.extend ({
+  init () {
+    this._super.init.apply (this, arguments);
+
+    BlueprintObject.mixin (this, SupportsMessaging);
+  },
+
   /**
    * Event handler for the listener. The number of arguments will depend on the
    * number of arguments passed to the emit() method.
