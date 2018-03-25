@@ -6,16 +6,15 @@ const util     = require ('util')
   , pluralize  = require ('pluralize')
   , blueprint  = require ('@onehilltech/blueprint')
   , objectPath = require ('object-path')
-  , DateUtils  = require ('./DateUtils')
-  , HttpHeader = blueprint.http.headers
-;
+  , DateUtils  = require ('./date-utils')
+  ;
 
 let validationSchema = require ('./ValidationSchema');
 let populate = require ('./populate');
 
 let BaseController = blueprint.ResourceController
-  , HttpError = blueprint.errors.HttpError
-  , messaging = blueprint.messaging
+  , HttpError = blueprint.HttpError
+  , messaging = blueprint.app.messaging
 ;
 
 function __validate (req, callback) { return callback (null); }
@@ -27,6 +26,8 @@ function __onPrepareDocument (req, doc, callback) { return callback (null, doc);
 function __onPreExecute (req, callback) { return callback (null); }
 function __onPostExecute (req, result, callback) { return callback (null, result); }
 function __onPrepareResponse (req, result, callback) { return callback (null, result); }
+
+const LAST_MODIFIED = 'Last-Modified';
 
 /**
  * Make the database completion handler. We have to create a new handler
@@ -165,7 +166,7 @@ ResourceController.prototype.create = function (opts) {
           messaging.emit (eventName, result);
 
           // Set the headers for the response.
-          res.set (HttpHeader.LAST_MODIFIED, result.getLastModified ().toUTCString ());
+          res.set (LAST_MODIFIED, result.getLastModified ().toUTCString ());
 
           onPostExecute (req, result, callback);
         },
@@ -269,7 +270,7 @@ ResourceController.prototype.get = function (opts) {
           // Set the Last-Modified header for the response. The ETag header is set
           // by the underlying Express framework.
           let lastModified = result.getLastModified ();
-          res.set (HttpHeader.LAST_MODIFIED, lastModified.toUTCString ());
+          res.set (LAST_MODIFIED, lastModified.toUTCString ());
 
           onPostExecute (req, result, callback);
         },
@@ -388,7 +389,7 @@ ResourceController.prototype.getAll = function (opts) {
           // Reduce the result set to a single hash of headers.
 
           let headers = { };
-          headers[HttpHeader.LAST_MODIFIED] = result[0].getLastModified ();
+          headers[LAST_MODIFIED] = result[0].getLastModified ();
 
           if (result.length === 1)
             return onReduceComplete (null, headers);
@@ -396,8 +397,8 @@ ResourceController.prototype.getAll = function (opts) {
           async.reduce (result.slice (1), headers, function (memo, item, callback) {
             let lastModified = item.getLastModified ();
 
-            if (DateUtils.compare (memo[HttpHeader.LAST_MODIFIED], lastModified) == -1)
-              memo[HttpHeader.LAST_MODIFIED] = lastModified;
+            if (DateUtils.compare (memo[LAST_MODIFIED], lastModified) == -1)
+              memo[LAST_MODIFIED] = lastModified;
 
             async.nextTick (() => {
               return callback (null, memo);
@@ -408,10 +409,10 @@ ResourceController.prototype.getAll = function (opts) {
             if (err) return callback (err, null);
 
             // The Last-Modified header must be in string format.
-            let lastModified = headers[HttpHeader.LAST_MODIFIED];
+            let lastModified = headers[LAST_MODIFIED];
 
             if (lastModified)
-              headers[HttpHeader.LAST_MODIFIED] = lastModified.toUTCString ();
+              headers[LAST_MODIFIED] = lastModified.toUTCString ();
 
             res.set (headers);
 
@@ -553,7 +554,7 @@ ResourceController.prototype.update = function (opts) {
           messaging.emit (eventName, result);
 
           // Set the headers for the response.
-          res.set (HttpHeader.LAST_MODIFIED, result.getLastModified ().toUTCString ());
+          res.set (LAST_MODIFIED, result.getLastModified ().toUTCString ());
 
           onPostExecute (req, result, callback);
         },

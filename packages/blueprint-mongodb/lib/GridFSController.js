@@ -11,7 +11,7 @@ var util      = require ('util')
   ;
 
 var ResourceController = blueprint.ResourceController
-  , HttpError = blueprint.errors.HttpError
+  , HttpError = blueprint.HttpError
   ;
 
 /**
@@ -36,7 +36,7 @@ function GridFSController (conn, opts) {
   });
 }
 
-blueprint.controller (GridFSController, ResourceController);
+util.inherits (GridFSController, ResourceController);
 
 module.exports = GridFSController;
 

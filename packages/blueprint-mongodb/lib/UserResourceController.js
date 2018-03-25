@@ -4,7 +4,7 @@ const util     = require ('util')
   , objectPath = require ('object-path')
 ;
 
-let ResourceController = require ('./ResourceController')
+let ResourceController = require ('./resource-controller')
 ;
 
 /**

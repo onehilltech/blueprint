@@ -1,14 +1,10 @@
-'use strict';
+const blueprint = require ('@onehilltech/blueprint');
+const plugins = require ('./plugins');
 
-var mongoose           = require ('mongoose')
-  , ConnectionManager  = require ('./ConnectionManager')
-  , UserResourceController = require ('./UserResourceController')
-  , GridFSController   = require ('./GridFSController')
-  , populate           = require ('./populate')
-  , plugins            = require ('./plugins')
-  ;
-
-var exports = module.exports = ConnectionManager;
+const {
+  Types,
+  Schema
+} = require ('mongoose');
 
 /**
  * Create a model on the default connection.
@@ -19,12 +15,14 @@ var exports = module.exports = ConnectionManager;
  * @returns {*}
  */
 function model (name, schema, collection) {
+  let mongodb = blueprint.lookup ('service:mongodb');
+
   // Install the default plugins.
   schema.plugin (plugins.HiddenPlugin);
   schema.plugin (plugins.ConstPlugin);
   schema.plugin (plugins.LeanPlugin);
 
-  return ConnectionManager.getConnectionManager ().defaultConnection.model (name, schema, collection);
+  return mongodb.defaultConnection.model (name, schema, collection);
 }
 
 /**
@@ -39,18 +37,28 @@ function model (name, schema, collection) {
  * @param collection    Name of the model collection
  */
 function modelOn (connName, name, schema, collection) {
-  var conn = ConnectionManager.getConnectionManager ().getConnection (connName);
+  let mongodb = blueprint.lookup ('service:mongodb');
+  let connection = mongodb.connections[connName];
 
-  if (conn) {
-    // Install the default plugins.
-    schema.plugin (plugins.HiddenPlugin);
-    schema.plugin (plugins.ConstPlugin);
-    schema.plugin (plugins.LeanPlugin);
+  if (!connection)
+    return null;
 
-    return conn.model (name, schema, collection);
-  }
+  // Install the default plugins.
+  schema.plugin (plugins.HiddenPlugin);
+  schema.plugin (plugins.ConstPlugin);
+  schema.plugin (plugins.LeanPlugin);
+
+  return connection.model (name, schema, collection);
 }
 
+/**
+ * Create a resource on the target connection
+ *
+ * @param conn            Target connection
+ * @param name            Name of resource
+ * @param schema          Schema definition
+ * @param collection      Name of collection
+ */
 function createResource (conn, name, schema, collection) {
   Object.defineProperty (schema.options, 'resource', {
     get: function () { return true; }
@@ -73,36 +81,40 @@ function createResource (conn, name, schema, collection) {
  * @param collection
  */
 function resource (name, schema, collection) {
-  var conn = ConnectionManager.getConnectionManager ().defaultConnection;
-  return createResource (conn, name, schema, collection);
+  let mongodb = blueprint.lookup ('service:mongodb');
+  return createResource (mongodb.defaultConnection, name, schema, collection);
 }
 
 /**
  * Create a resource on a specific connection. If the connection does
  * not exist, then the resource model is not created.
  *
- * @param connName
- * @param name
- * @param schema
- * @param collection
+ * @param connName          Name of connection
+ * @param name              Name of resource
+ * @param schema            Schema definition
+ * @param collection        Name of collection
  */
 function resourceOn (connName, name, schema, collection) {
-  var conn = ConnectionManager.getConnectionManager ().getConnection (connName);
+  let mongodb = blueprint.lookup ('service:mongodb');
+  let connection = mongodb.connections[connName];
 
-  if (conn)
-    return createResource (conn, name, schema, collection);
+  if (connection)
+    return createResource (connection, name, schema, collection);
 }
 
-exports.Types = mongoose.Types;
-exports.Schema = mongoose.Schema;
+exports.Types = Types;
+exports.Schema = Schema;
 exports.plugins = plugins;
+
+// model definitions
 exports.model = model;
 exports.modelOn = modelOn;
-exports.ResourceController = require ('./resource-controller');
-exports.UserResourceController = UserResourceController;
-exports.GridFSController = GridFSController;
-exports.populate = populate;
 exports.resource = resource;
 exports.resourceOn = resourceOn;
+
+exports.ResourceController = require ('./resource-controller');
+exports.UserResourceController = require ('./UserResourceController');
+exports.GridFSController = require ('./GridFSController');
+exports.populate = require ('./populate');
 exports.lean = require ('./lean');
 
