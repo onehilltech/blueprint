@@ -2,7 +2,7 @@ const {expect} = require ('chai');
 const path     = require ('path');
 const Object   = require ('core-object');
 const ModuleLoader = require ('../../../lib/module-loader');
-const MessagingFramework = require ('../../../lib/messaging/framework');
+const messaging = require ('../../../lib/messaging');
 
 const appPath = path.resolve (__dirname, '../../dummy/app');
 
@@ -12,7 +12,7 @@ describe ('lib | ModuleLoader', function () {
       let m = new ModuleLoader ({
         app: {
           appPath,
-          messaging: new MessagingFramework ()
+          messaging: messaging ()
         }
       });
 
@@ -34,12 +34,10 @@ describe ('lib | ModuleLoader', function () {
 
       let loader = new ModuleLoader ({app});
 
-      loader.load ().then (() => {
+      return loader.load ().then (() => {
         expect (app.modules).to.have.property ('mod_a');
         expect (app.modules).to.have.property ('mod_b');
-
-        done (null);
-      }).catch (done);
+      });
     });
   });
 });
