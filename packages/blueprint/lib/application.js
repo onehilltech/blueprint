@@ -60,6 +60,10 @@ module.exports = BlueprintObject.extend ({
     Object.defineProperty (this, 'resources', {
       get () { return this._appModule.resources; }
     });
+
+    Object.defineProperty (this, 'server', {
+      get () { return this._server; }
+    });
   },
 
   /**

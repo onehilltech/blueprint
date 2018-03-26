@@ -1,4 +1,4 @@
-const Object = require ('../object');
+const BlueprintObject = require ('../object');
 const debug  = require ('debug') ('blueprint:server');
 const assert = require ('assert');
 const bodyParser  = require ('body-parser');
@@ -34,7 +34,7 @@ const UPLOAD_PATH = 'uploads';
  *
  * The main abstraction representing the server managed by the application.
  */
-module.exports = Object.extend ({
+module.exports = BlueprintObject.extend ({
   /// The hosting application.
   app: null,
 
@@ -51,6 +51,10 @@ module.exports = Object.extend ({
 
     this._express = express ();
     this._mainRouter = express.Router ();
+
+    Object.defineProperty (this, 'express', {
+      get () { return this._express; }
+    });
   },
 
   /**
