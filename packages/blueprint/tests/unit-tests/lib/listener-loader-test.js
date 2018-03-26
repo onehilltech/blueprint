@@ -1,6 +1,6 @@
 const {expect} = require ('chai');
 const ListenerLoader = require ('../../../lib/listener-loader');
-const MessagingFramework = require ('../../../lib/messaging/framework');
+const messaging = require ('../../../lib/messaging');
 const path = require ('path');
 
 describe ('lib | ListenerLoader', function () {
@@ -8,13 +8,13 @@ describe ('lib | ListenerLoader', function () {
     it ('should load listeners', function () {
       const dirname = path.resolve (__dirname, '../../dummy/app/listeners');
 
-      let messaging = new MessagingFramework ();
-      let loader = new ListenerLoader ({messaging});
+      let app = { messaging: messaging () };
+      let loader = new ListenerLoader ({app});
 
       return loader.load ({dirname}).then (results => {
         expect (results).to.have.property ('blueprint.app.init').that.has.keys (['echo','legacy']);
 
-        expect (messaging)
+        expect (app.messaging)
           .to.have.property ('messengers')
           .to.have.property ('_')
           .to.have.property ('_listeners')
