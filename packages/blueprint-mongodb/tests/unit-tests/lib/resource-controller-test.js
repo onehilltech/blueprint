@@ -56,4 +56,20 @@ describe ('lib | ResourceController', function () {
         });
     });
   });
+
+  describe ('getOne', function () {
+    it ('should get one single resource', function () {
+      const Author = blueprint.lookup ('model:author');
+      const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
+      const result = {author: Object.assign ({}, {__v: 0}, author)};
+
+      return Author.create (author)
+        .then (() => {
+          return blueprint.testing.request ()
+            .get (`/authors/${author._id}`)
+            .expect (200, result);
+        });
+    });
+  });
+
 });

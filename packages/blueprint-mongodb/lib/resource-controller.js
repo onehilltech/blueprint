@@ -262,6 +262,92 @@ module.exports = ResourceController.extend ({
     });
   },
 
+  getOne () {
+    return Action.extend ({
+      execute (req, res) {
+        // Update the options with those from the query string.
+        const id = req.params[this.controller.resourceId];
+        const options = req.query.options || {};
+
+        // Prepare the filter, projection, and options for the request
+        // against the database.
+
+        const preparations = [
+          this.getProjection (req),
+          this.getOptions (req, options)
+        ];
+
+        return Promise.all (preparations)
+          .then (results => {
+            return Promise.resolve (this.preGetModel (req))
+              .then (() => this.getModel (id, ...results))
+              .then (model => {
+                // There was nothing found. This is not the same as having an empty
+                // model set returned from the query.
+                if (!model)
+                  return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
+
+                // Get the last modified date. This value needs to be returned in the
+                // response since it represents when this collection of models was last changed.
+
+                res.set ({
+                  [LAST_MODIFIED]: model.getLastModified ().toUTCString ()
+                });
+
+                return this.postGetModel (req, model);
+              })
+              .then (data => {
+
+                return  {
+                  [this.controller.name]: data
+                };
+
+                /*
+                return populate (data, self._model, function (err, details) {
+                  result = _.extend (result, details);
+                  return callback (null, result);
+                });
+                */
+              })
+              .then (result => {
+                return this.prepareResponse (res, result);
+              })
+              .then (result => {
+                res.status (200).json (result);
+              });
+          });
+      },
+
+      getFilter (req) {
+        return {_id: req.params[this.resourceId]};
+      },
+
+      getProjection () {
+        return {};
+      },
+
+      getOptions (req, options) {
+        return options;
+      },
+
+      preGetModel (req) {
+        return null;
+      },
+
+      getModel (rcId, projection, options) {
+        return this.controller.model.findById (rcId, projection, options);
+      },
+
+      postGetModel (req, models) {
+        return models;
+      },
+
+      prepareResponse (res, result) {
+        return result;
+      }
+    });
+  },
+
   /**
    * Get the Mongoose model definition for the target. This is important if the
    * document if for an inherited model.
