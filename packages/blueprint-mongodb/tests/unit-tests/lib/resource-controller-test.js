@@ -49,7 +49,7 @@ describe ('lib | ResourceController', function () {
         .send ({author})
         .then (() => {
           let controller = blueprint.lookup ('controller:callbacks');
-          expect (controller.createdCallbacks).to.eql ([
+          expect (controller.createCallbacks).to.eql ([
             'prepareDocument',
             'preCreateModel',
             'createModel',
