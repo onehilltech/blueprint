@@ -262,6 +262,11 @@ module.exports = ResourceController.extend ({
     });
   },
 
+  /**
+   * Get a single resource from the collection.
+   *
+   * @returns {*}
+   */
   getOne () {
     return Action.extend ({
       execute (req, res) {
@@ -318,10 +323,6 @@ module.exports = ResourceController.extend ({
           });
       },
 
-      getFilter (req) {
-        return {_id: req.params[this.resourceId]};
-      },
-
       getProjection () {
         return {};
       },
@@ -330,7 +331,7 @@ module.exports = ResourceController.extend ({
         return options;
       },
 
-      preGetModel (req) {
+      preGetModel () {
         return null;
       },
 
