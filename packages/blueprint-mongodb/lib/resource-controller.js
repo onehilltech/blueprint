@@ -263,7 +263,10 @@ module.exports = ResourceController.extend ({
   },
 
   /**
-   * Get a single resource from the collection.
+   * Get a single resource by id from the collection. The id of the target resource
+   * is expected in the request parameters under `[:resourceId]`.
+   *
+   * If you want to query a single resource by fields, then you need to use `getAll`.
    *
    * @returns {*}
    */
@@ -350,7 +353,123 @@ module.exports = ResourceController.extend ({
   },
 
   /**
-   * Delete a single resource from the collection.
+   * Update a single resource in the collection. The id of the target resource to update
+   * is expected in the request parameters under `[:resourceId]`.
+   *
+   * @returns {*}
+   */
+  update () {
+    const defaultOptions = { upsert: false, new: true };
+    const eventName = this._computeEventName ('updated');
+
+    return Action.extend ({
+      /**
+       * Execute the action.
+       *
+       * This is the main entry point for the action.
+       *
+       * @param req
+       * @param res
+       * @returns {Promise<*[]>}
+       */
+      execute (req, res) {
+        const id = req.params[this.controller.resourceId];
+        const update = req.body[this.controller.name];
+
+        // Allow the subclass to override the contents in both the update and
+        // options variable.
+        const preparations = [
+          this.getUpdate (req, update),
+          this.getOptions (req, defaultOptions)
+        ];
+
+        return Promise.all (preparations)
+          .then (([update, options]) => {
+            return Promise.resolve (this.preUpdateModel (req))
+              .then (() => this.updateModel (id, update, options))
+              .then (model => {
+                if (!model)
+                  return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
+
+                this.emit (eventName, model);
+
+                // Set the headers for the response.
+                res.set (LAST_MODIFIED, model.getLastModified ().toUTCString ());
+
+                return this.postUpdateModel (req, model);
+              })
+              .then (model => {
+                return this.prepareResponse (res, {[this.controller.name]: model})
+              })
+              .then (result => {
+                return res.status (200).json (result);
+              });
+          });
+      },
+
+      /**
+       * Get the update values for the resource.
+       *
+       * @param req
+       * @param update
+       * @returns {update|Promise}
+       */
+      getUpdate (req, update) {
+        return update;
+      },
+
+      /**
+       * Get the update options for the request.
+       *
+       * @param req
+       * @param options
+       * @returns {options|Promise}
+       */
+      getOptions (req, options) {
+        return options;
+      },
+
+      /**
+       * Perform an operation before the update.
+       *
+       * @returns {null|Promise}
+       */
+      preUpdateModel () {
+        return null;
+      },
+
+      updateModel (id, update, options) {
+        return this.controller.model.findByIdAndUpdate (id, update, options);
+      },
+
+      /**
+       * Perform an operation after the update. This method must return the result
+       * model, or a Promise the resolve to the result model.
+       *
+       * @param req
+       * @param model
+       * @returns {model|Promise}
+       */
+      postUpdateModel (req, model) {
+        return model;
+      },
+
+      /**
+       * Update the response before it is sent to the client.
+       *
+       * @param res
+       * @param data
+       * @returns {data|Promise}
+       */
+      prepareResponse (res, data) {
+        return data;
+      }
+    });
+  },
+
+  /**
+   * Delete a single resource from the collection. The id of the target resource
+   * to delete is expected in the request parameters under `[:resourceId]`.
    */
   delete () {
     const eventName = this._computeEventName ('deleted');
@@ -432,206 +551,6 @@ module.exports = ResourceController.extend ({
 });
 
 /*
-
-ResourceController.prototype.update = function (opts) {
-  function __onPrepareUpdate (req, update, callback) { return callback (null, update); }
-
-  opts = opts || {};
-  let on = opts.on || {};
-
-  let idValidationSchema = this._getIdValidationSchema (opts);
-  let idSanitizer = this._getIdSanitizer (opts);
-
-  let validate = opts.validate || __validate;
-  let sanitize = opts.sanitize || __sanitize;
-
-  let onPrepareFilter = on.prepareFilter || __onPrepareFilter;
-  let onPrepareUpdate = on.prepareUpdate || __onPrepareUpdate;
-  let onPrepareOptions = on.prepareOptions || __onPrepareOptions;
-  let onPreExecute = on.preExecute || __onPreExecute;
-  let onPostExecute = on.postExecute || __onPostExecute;
-  let onPrepareResponse = on.prepareResponse || __onPrepareResponse;
-
-  let eventName = this._computeEventName ('updated');
-
-  let self = this;
-
-  return {
-    validate: function (req, callback) {
-      req.check (idValidationSchema);
-      req.check (self._update.schema);
-
-      validate.call (null, req, callback);
-    },
-
-    sanitize: function (req, callback) {
-      async.series ([
-        function (callback) {
-          if (idSanitizer) {
-            if (_.isFunction (idSanitizer))
-              return idSanitizer.call (null, req, callback);
-
-            req.sanitizeParams (self.id)[idSanitizer]();
-          }
-
-          return callback (null);
-        },
-
-        function (callback) {
-          sanitize.call (null, req, callback);
-        }
-      ], callback);
-    },
-
-    execute: function __blueprint_update_execute (req, res, callback) {
-      let rcId = req.params[self.id];
-      let filter = {_id: rcId};
-
-
-      let update = self._getUpdateFromBody (req.body[self.name]);
-      let options = { upsert: false, new: true };
-
-      async.waterfall ([
-        function (callback) {
-          async.parallel ({
-            filter: function (callback) { onPrepareFilter (req, filter, callback); },
-            update: function (callback) { onPrepareUpdate (req, update, callback); },
-            options: function (callback) { onPrepareOptions (req, options, callback); }
-          }, callback);
-        },
-
-        // Now, let's search our database for the resource in question.
-        function (query, callback) {
-          async.series ({
-            pre: function (callback) {
-              onPreExecute (req, callback);
-            },
-
-            execute: function (callback) {
-              let dbCompletion = makeDbCompletionHandler ('update_failed', 'Failed to update resource', callback);
-              self._model.findOneAndUpdate (query.filter, query.update, query.options, dbCompletion);
-            }
-          }, completion);
-
-          function completion (err, result) {
-            if (err) return callback (err);
-            return callback (null, result.execute);
-          }
-        },
-
-        // Allow the subclass to do any post-execution analysis of the result.
-        function (result, callback) {
-          messaging.emit (eventName, result);
-
-          // Set the headers for the response.
-          res.set (LAST_MODIFIED, result.getLastModified ().toUTCString ());
-
-          onPostExecute (req, result, callback);
-        },
-
-        // Rewrite the result in JSON API format.
-        function (data, callback) {
-          let result = { };
-          result[self.name] = data;
-
-          return callback (null, result);
-        },
-
-        function (result, callback) {
-          onPrepareResponse (req, result, callback);
-        }
-      ], makeTaskCompletionHandler (res, callback));
-    }
-  };
-};
-
-ResourceController.prototype.delete = function (opts) {
-  opts = opts || {};
-  let on = opts.on || {};
-
-  let idValidationSchema = this._getIdValidationSchema (opts);
-  let idSanitizer = this._getIdSanitizer (opts);
-
-  let validate = opts.validate || __validate;
-  let sanitize = opts.sanitize || __sanitize;
-
-  let onPrepareFilter = on.prepareFilter || __onPrepareFilter;
-  let onPreExecute = on.preExecute || __onPreExecute;
-  let onPostExecute = on.postExecute || __onPostExecute;
-  let eventName = this._computeEventName ('deleted');
-
-  let self = this;
-
-  return {
-    validate: function (req, callback) {
-      req.check (idValidationSchema);
-      validate.call (null, req, callback);
-    },
-
-    sanitize: function (req, callback) {
-      async.series ([
-        function (callback) {
-          if (idSanitizer) {
-            if (_.isFunction (idSanitizer))
-              return idSanitizer.call (null, req, callback);
-
-            req.sanitizeParams (self.id)[idSanitizer]();
-          }
-
-          return callback (null);
-        },
-
-        function (callback) {
-          sanitize.call (null, req, callback);
-        }
-      ], callback);
-    },
-
-    execute: function __blueprint_delete (req, res, callback) {
-      let rcId = req.params[self.id];
-      let filter = {_id: rcId};
-
-      async.waterfall ([
-        // First, allow the subclass to update the filter.
-        function (callback) {
-          return onPrepareFilter (req, filter, callback)
-        },
-
-        // Now, let's search our database for the resource in question.
-        function (filter, callback) {
-          function completion (err, result) {
-            if (err) return callback (err);
-            return callback (null, result.execute);
-          }
-
-          async.series ({
-            pre: function (callback) {
-              onPreExecute (req, callback);
-            },
-
-            execute: function (callback) {
-              let dbCompletion = makeDbCompletionHandler ('delete_failed', 'Failed to delete resource', callback);
-              self._model.findOneAndRemove (filter, dbCompletion);
-            }
-          }, completion);
-        },
-
-        // Allow the subclass to do any post-execution analysis of the result.
-        function (result, callback) {
-          // Emit that a resource was created.
-          messaging.emit (eventName, result);
-
-          onPostExecute (req, result, callback);
-        },
-
-        // Make sure we return 'true'.
-        function (result, callback) {
-          return callback (null, true);
-        }
-      ], makeTaskCompletionHandler (res, callback));
-    }
-  };
-};
 
 ResourceController.prototype.count = function (opts) {
   opts = opts || {};

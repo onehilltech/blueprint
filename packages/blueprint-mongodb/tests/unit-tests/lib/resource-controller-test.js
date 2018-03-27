@@ -40,6 +40,24 @@ describe ('lib | ResourceController', function () {
         .send ({author})
         .expect (200, {author: Object.assign ({}, {__v: 0}, author)});
     });
+
+    it ('should call each subclass method', function () {
+      const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
+
+      return blueprint.testing.request ()
+        .post ('/callbacks')
+        .send ({author})
+        .then (() => {
+          let controller = blueprint.lookup ('controller:callbacks');
+          expect (controller.createdCallbacks).to.eql ([
+            'prepareDocument',
+            'preCreateModel',
+            'createModel',
+            'postCreateModel',
+            'prepareResponse'
+          ]);
+        });
+    });
   });
 
   describe ('getAll', function () {
@@ -69,6 +87,30 @@ describe ('lib | ResourceController', function () {
             .get (`/authors/${author._id}`)
             .expect (200, result);
         });
+    });
+  });
+
+  describe ('update', function () {
+    it ('should update a single resource', function () {
+      const Author = blueprint.lookup ('model:author');
+      const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
+
+      return Author.create (author)
+        .then (() => {
+          return blueprint.testing.request ()
+            .put (`/authors/${author._id}`)
+            .send ({author: {name: 'John Doe'}})
+            .expect (200, {author: Object.assign ({__v: 0}, author, {name: 'John Doe'})});
+        });
+    });
+
+    it ('should not find resource to update', function () {
+      const id = new ObjectId ().toString ();
+
+      return blueprint.testing.request ()
+        .put (`/authors/${id}`)
+        .send ({author: {name: 'John Doe'}})
+        .expect (404, {});
     });
   });
 
