@@ -110,7 +110,7 @@ describe ('lib | ResourceController', function () {
       return blueprint.testing.request ()
         .put (`/authors/${id}`)
         .send ({author: {name: 'John Doe'}})
-        .expect (404, {});
+        .expect (404, { errors: [ { code: 'not_found', detail: 'Not found', status: '404' } ] });
     });
   });
 
