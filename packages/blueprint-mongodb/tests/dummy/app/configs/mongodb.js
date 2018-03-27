@@ -1,11 +1,27 @@
 module.exports = {
   connections: {
     $default: {
-      connstr: 'mongo://blueprint_mongodb'
+      connstr: 'mongodb://localhost/blueprint_mongodb',
+      options : {
+        readPreference: "primary",
+        forceServerObjectId: false,
+        w: 1,
+        autoReconnect: true,
+        keepAlive: 1,
+        poolSize: 5,
+      }
     },
 
     secondary : {
-      connstr: 'mongo://blueprint_mongodb'
+      connstr: 'mongodb://localhost/blueprint_mongodb',
+      options : {
+        readPreference: "primary",
+        forceServerObjectId: false,
+        w: 1,
+        autoReconnect: true,
+        keepAlive: 1,
+        poolSize: 5,
+      }
     }
   }
 };

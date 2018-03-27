@@ -1,198 +1,302 @@
-'use strict';
+const {
+  extend
+} = require ('lodash');
 
-const util     = require ('util')
-  , async      = require ('async')
-  , _          = require ('underscore')
-  , pluralize  = require ('pluralize')
-  , blueprint  = require ('@onehilltech/blueprint')
-  , objectPath = require ('object-path')
-  , DateUtils  = require ('./date-utils')
-  ;
+const pluralize  = require ('pluralize');
+const assert     = require ('assert');
+
+const {
+  Action,
+  ResourceController,
+  HttpError
+} = require ('@onehilltech/blueprint');
+
+const DateUtils  = require ('./date-utils');
 
 let validationSchema = require ('./ValidationSchema');
 let populate = require ('./populate');
 
-let BaseController = blueprint.ResourceController
-  , HttpError = blueprint.HttpError
-//  , messaging = blueprint.app.messaging
-;
-
-function __validate (req, callback) { return callback (null); }
-function __sanitize (req, callback) { return callback (null); }
-function __onPrepareProjection (req, callback) { return callback (null, {}); }
-function __onPrepareOptions (req, options, callback) { return callback (null, options); }
-function __onPrepareFilter (req, filter, callback) { return callback (null, filter); }
-function __onPrepareDocument (req, doc, callback) { return callback (null, doc); }
-function __onPreExecute (req, callback) { return callback (null); }
-function __onPostExecute (req, result, callback) { return callback (null, result); }
-function __onPrepareResponse (req, result, callback) { return callback (null, result); }
-
 const LAST_MODIFIED = 'Last-Modified';
-
-/**
- * Make the database completion handler. We have to create a new handler
- * for each execution because we need to bind to a different callback.
- */
-function makeDbCompletionHandler (code, message, callback) {
-  return function __blueprint_db_execution_complete (err, result) {
-    if (err) return callback (new HttpError (400, code, message, {code: err.code}));
-    if (!result) return callback (new HttpError (404, 'not_found', 'Not Found'));
-
-    return callback (null, result);
-  }
-}
-
-/**
- * Make the handler that executes after the async.waterfall tasks is complete. We
- * cannot reuse the same method since we have to bind to a different res object
- * for each request.
- */
-function makeTaskCompletionHandler (res, callback) {
-  return function __blueprint_task_complete (err, result) {
-    if (err)
-      return callback (err);
-
-    res.status (200).json (result);
-  }
-}
 
 /**
  * @class ResourceController
  *
- * Base class f or all resource controllers.
+ * Resource controller designed to operate on a Mongoose model.
  */
-function ResourceController (opts) {
-  if (!opts.model)
-    throw new Error ('Options must define model property');
+module.exports = ResourceController.extend ({
+  /**
+   * Initialize the resource controller.
+   * @param opts
+   */
+  init () {
+    let [opts, ...params] = arguments;
 
-  if (!opts.model.schema.options.resource)
-    throw new Error (util.format ('%s is not a resource; use the resource () method', opts.model.modelName));
+    if (!opts.name)
+      opts.name = this.model.modelName;
 
-  if (!opts.name)
-    opts.name = opts.model.modelName;
+    // Pass control to the base class.
+    this._super.init.call (this, opts, ...params);
 
-  BaseController.call (this, opts);
+    // Prepare the options for the base class.
+    assert (!!this.model, "You must define the 'model' property.");
+    assert (this.model.schema.options.resource, `${this.model.modelName} is not a resource; model must be created using resource() method`);
 
-  this._model = opts.model;
-  this._pluralize = pluralize (this.name);
-  this._idOpts = opts.idOptions || {};
+    this.plural = pluralize (this.name);
+    this._idOpts = opts.idOptions || {};
 
-  // Build the validation schema for create and update.
-  let validationOpts = {pathPrefix: this.name};
+    // Build the validation schema for create and update.
+    let validationOpts = {pathPrefix: this.name};
 
-  this._create = {
-    schema: validationSchema (opts.model.schema, validationOpts)
-  };
+    this._create = {
+      schema: validationSchema (this.model.schema, validationOpts)
+    };
 
-  this._update = {
-    schema: validationSchema (opts.model.schema, _.extend (validationOpts, {allOptional: true}))
-  };
-}
+    this._update = {
+      schema: validationSchema (this.model.schema, extend ({allOptional: true}, validationOpts))
+    };
+  },
 
-util.inherits (ResourceController, BaseController);
+  /**
+   * Create a new resource.
+   */
+  create () {
+    const eventName = this._computeEventName ('created');
 
-module.exports = ResourceController;
+    return Action.extend ({
+      /// Name of event for completion of action.
+      eventName: null,
 
-/**
- * Create a new resource.
- */
-ResourceController.prototype.create = function (opts) {
-  opts = opts || {};
-  let on = opts.on || {};
+      execute (req, res) {
+        const name = this.controller.name;
+        const document = req.body[name];
 
-  let validate = opts.validate || __validate;
-  let sanitize = opts.sanitize || __sanitize;
+        // First, we are going to allow the user to make any preparations needed to
+        // the document. This can include adding, removing, and editing fields in the
+        // original document.
 
-  let onPrepareDocument = on.prepareDocument || __onPrepareDocument;
-  let onPreExecute = on.preExecute || __onPreExecute;
-  let onPostExecute = on.postExecute || __onPostExecute;
-  let onPrepareResponse = on.prepareResponse || __onPrepareResponse;
+        return Promise.resolve (this.prepareDocument (req, document))
+          .then (document => {
+            // The document is prepare for insertion. Allow the subclass to perform
+            // any task before we insert the document into the database. After we
+            // insert the document, allow the client to make any modifications to the
+            // the inserted document.
+            return Promise.resolve (this.preCreateModel (req))
+              .then (() => this.createModel (document))
+              .then (result => {
+                // Emit that the resource has been created. We do it after the post create
+                // method just in case the subclass makes some edits to the model that was
+                // just created.
+                this.emit (eventName, result);
 
-  let eventName = this._computeEventName ('created');
+                // Set the headers for the response. We want to make sure that we support
+                // the caching headers even if they are not being used.
+                res.set (LAST_MODIFIED, result.getLastModified ().toUTCString ());
 
-  let self = this;
+                return this.postCreateModel (req, result);
+              });
+          })
+          .then (data => {
 
-  return {
-    validate: function (req, callback) {
-      req.check (self._create.schema);
-      validate.call (null, req, callback);
-    },
+            // Initialize the result with the data. We are now going to give the
+            // subclass a chance to add more content to the response.
+            const result = { [name]: data };
+            return this.prepareResponse (res, result);
+          })
+          .then (result => {
+            res.status (200).json (result);
+          });
+      },
 
-    sanitize: function (req, callback) {
-      sanitize.call (null, req, callback);
-    },
+      prepareDocument (req, doc) {
+        return doc;
+      },
 
-    execute: function __blueprint_create (req, res, callback) {
-      let doc = req.body[self.name];
+      preCreateModel () {
+        return null;
+      },
 
-      async.waterfall ([
-        function (callback) {
-          onPrepareDocument (req, doc, callback);
-        },
+      createModel (doc) {
+        const Model = this.controller.getModelForDocument (doc);
+        return Model.create (doc);
+      },
 
-        function (doc, callback) {
-          function completion (err, result) {
-            if (err) return callback (err);
-            return callback (null, result.execute);
-          }
+      postCreateModel (req, result) {
+        return result;
+      },
 
-          async.series ({
-            pre: function (callback) {
-              return onPreExecute (req, callback);
-            },
+      prepareResponse (res, result) {
+        return result;
+      }
+    });
+  },
 
-            execute: function (callback) {
-              // We need to resolve the correct model just in case the schema for this
-              // model contains a discriminator.
+  /**
+   * Get all the resources. The query parameter fields are used to filter the
+   * resources by exact match. The `options` query parameter is used to control
+   * the behavior/presentation of the query response.
+   */
+  getAll () {
+    return Action.extend ({
+      execute (req, res) {
+        // Update the options with those from the query string.
+        const {query} = req;
+        const {options} = query;
+        let opts = {};
 
-              let Model = resolveModel (self._model, doc);
-              Model.create (doc, makeDbCompletionHandler ('create_failed', 'Failed to create resource', callback));
+        if (options) {
+          // Remove the options from the query object because we do not
+          // want them to interfere with the filter parameters.
+          delete query.options;
 
-              function resolveModel (Model, doc) {
-                if (!Model.discriminators) return Model;
+          // Copy over the acceptable options because we do not want to
+          // the client to submit invalid/unacceptable options.
 
-                let schema = Model.schema;
-                let discriminatorKey = schema.discriminatorMapping.key;
-                let discriminator = doc[discriminatorKey];
+          if (options.limit)
+            opts.limit = options.limit;
 
-                return discriminator ? Model.discriminators[discriminator] : Model;
-              }
-            }
-          }, completion);
-        },
+          if (options.skip)
+            opts.skip = options.skip;
 
-        function (result, callback) {
-          // Emit that a resource was created.
-          messaging.emit (eventName, result);
-
-          // Set the headers for the response.
-          res.set (LAST_MODIFIED, result.getLastModified ().toUTCString ());
-
-          onPostExecute (req, result, callback);
-        },
-
-        function (data, callback) {
-          // Prepare the result sent back to the client.
-          let result = {};
-          result[self.name] = data;
-
-          return callback (null, result);
-        },
-
-        function (result, callback) {
-          onPrepareResponse (req, result, callback);
+          if (options.sort)
+            opts.sort = options.sort;
         }
-      ], makeTaskCompletionHandler (res, callback));
-    }
-  }
-};
+        else {
+          // There are not options. Let's initialize the options to
+          // the default options (i.e., empty options).
+          opts = {};
+        }
 
-/**
- * Get a single resource.
- *
- * @param opts
- * @returns
- */
+        // Prepare the filter, projection, and options for the request
+        // against the database.
+
+        const preparations = [
+          this.getFilter (req, query),
+          this.getProjection (req),
+          this.getOptions (req, opts)
+        ];
+
+        return Promise.all (preparations)
+          .then (results => {
+            return Promise.resolve (this.preGetModels (req))
+              .then (() => this.getModels (...results))
+              .then (models => {
+                // There was nothing found. This is not the same as having an empty
+                // model set returned from the query.
+                if (!models)
+                  return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
+
+                // We have any empty set.
+                if (models.length === 0)
+                  return this.postGetModels (req, models);
+
+                // Get the most recent last modified date. This value needs to be returned
+                // in the response since it represents when this collection of models was
+                // last changed.
+
+                const lastModifiedTime = models.reduce ((acc, next) => {
+                  let time = next.getLastModified ().getTime ();
+                  return time > acc ? time : acc;
+                }, models[0].getLastModified ().getTime ());
+
+                res.set ({
+                  [LAST_MODIFIED]: new Date (lastModifiedTime).toUTCString ()
+                });
+
+                return this.postGetModels (req, models);
+              })
+              .then (data => {
+                let result = {
+                  [this.controller.plural]: data
+                };
+
+                if (!opts.populate)
+                  return result;
+
+                /*
+                return populate (data, self._model, function (err, details) {
+                  result = _.extend (result, details);
+                  return callback (null, result);
+                });
+                */
+              })
+              .then (result => {
+                return this.prepareResponse (res, result);
+              })
+              .then (result => {
+                res.status (200).json (result);
+              });
+          });
+      },
+
+      getFilter (req, filter) {
+        return filter;
+      },
+
+      getProjection () {
+        return {};
+      },
+
+      getOptions (req, options) {
+        return options;
+      },
+
+      preGetModels (req) {
+        return null;
+      },
+
+      getModels (filter, projection, options) {
+        return this.controller.model.find (filter, projection, options);
+      },
+
+      postGetModels (req, models) {
+        return models;
+      },
+
+      prepareResponse (res, result) {
+        return result;
+      }
+    });
+  },
+
+  /**
+   * Get the Mongoose model definition for the target. This is important if the
+   * document if for an inherited model.
+   *
+   * @param doc         The document
+   * @returns {Model}
+   * @private
+   */
+  getModelForDocument (doc) {
+    const {discriminators,schema} = this.model;
+
+    if (!discriminators)
+      return this.model;
+
+    let discriminatorKey = schema.discriminatorMapping.key;
+    let discriminator = doc[discriminatorKey];
+
+    return discriminator ? discriminators[discriminator] : this.model;
+  },
+
+  /**
+   * Compute the event name for the resource.
+   *
+   * @param action
+   * @returns {string}
+   * @private
+   */
+  _computeEventName (action) {
+    let prefix = this.namespace || '';
+
+    if (prefix.length !== 0)
+      prefix += '.';
+
+    return `${prefix}${this.name}.${action}`;
+  }
+});
+
+/*
+
 ResourceController.prototype.get = function (opts) {
   let self = this;
 
@@ -298,12 +402,7 @@ ResourceController.prototype.get = function (opts) {
   };
 };
 
-/**
- * Get a list of the resources, if not all.
- *
- * @param opts
- * @returns
- */
+
 ResourceController.prototype.getAll = function (opts) {
   opts = opts || {};
   let on = opts.on || {};
@@ -375,13 +474,6 @@ ResourceController.prototype.getAll = function (opts) {
           }, completion);
         },
 
-        /**
-         * Perform post execution of the result set.
-         *
-         * @param result
-         * @param callback
-         * @returns {*}
-         */
         function (result, callback) {
           if (!result) return new callback (new HttpError (404, 'not_found', 'Not found'));
           if (result.length === 0) return onPostExecute (req, result, callback);
@@ -420,13 +512,6 @@ ResourceController.prototype.getAll = function (opts) {
           }
         },
 
-        /**
-         * Transform the data into the final result set.
-         *
-         * @param data
-         * @param callback
-         * @returns {*}
-         */
         function transform (data, callback) {
           let result = { };
           result[self._pluralize] = data;
@@ -448,12 +533,7 @@ ResourceController.prototype.getAll = function (opts) {
   };
 };
 
-/**
- * Update a single resource.
- *
- * @param opts
- * @returns
- */
+
 ResourceController.prototype.update = function (opts) {
   function __onPrepareUpdate (req, update, callback) { return callback (null, update); }
 
@@ -524,19 +604,10 @@ ResourceController.prototype.update = function (opts) {
         // Now, let's search our database for the resource in question.
         function (query, callback) {
           async.series ({
-            /**
-             * Allow the subclass to perform some action before we execute
-             * the database query.
-             */
             pre: function (callback) {
               onPreExecute (req, callback);
             },
 
-            /**
-             * Execute the database query.
-             *
-             * @param callback
-             */
             execute: function (callback) {
               let dbCompletion = makeDbCompletionHandler ('update_failed', 'Failed to update resource', callback);
               self._model.findOneAndUpdate (query.filter, query.update, query.options, dbCompletion);
@@ -575,12 +646,6 @@ ResourceController.prototype.update = function (opts) {
   };
 };
 
-/**
- * Delete a single resource.
- *
- * @param opts
- * @returns
- */
 ResourceController.prototype.delete = function (opts) {
   opts = opts || {};
   let on = opts.on || {};
@@ -669,12 +734,6 @@ ResourceController.prototype.delete = function (opts) {
   };
 };
 
-/**
- * Count the number of resources.
- *
- * @param opts
- * @returns
- */
 ResourceController.prototype.count = function (opts) {
   opts = opts || {};
   let on = opts.on || {};
@@ -716,21 +775,6 @@ ResourceController.prototype.count = function (opts) {
   };
 };
 
-/**
- * Calculate the event name for an action.
- */
-ResourceController.prototype._computeEventName = function (action) {
-  let prefix = this.namespace || '';
-
-  if (prefix.length !== 0)
-    prefix += '.';
-
-  return prefix + this.name + '.' + action;
-};
-
-/**
- * Get the validation schema for the resource.
- */
 ResourceController.prototype._getIdValidationSchema = function (opts) {
   let defaults = objectPath (this._idOpts);
 
@@ -752,9 +796,6 @@ ResourceController.prototype._getIdValidationSchema = function (opts) {
   return schema;
 };
 
-/**
- * Get the validation schema for the resource.
- */
 ResourceController.prototype._getIdSanitizer = function (opts) {
   let defaults = objectPath (this._idOpts);
 
@@ -762,13 +803,6 @@ ResourceController.prototype._getIdSanitizer = function (opts) {
   return id.get ('sanitizer', defaults.get ('sanitizer', 'toMongoId'));
 };
 
-/**
- * Utility method for creating an update statement from the body of
- * a request.
- *
- * @param body
- * @returns {{$set: *}}
- */
 ResourceController.prototype._getUpdateFromBody = function (body) {
   let update = {};
 
@@ -797,3 +831,5 @@ ResourceController.prototype._getUpdateFromBody = function (body) {
 
   return update;
 };
+
+*/
