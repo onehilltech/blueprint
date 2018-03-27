@@ -20,6 +20,12 @@ Features
 * Encapsulate application logic into reusable components
 * Compose Blueprint applications from other Blueprint applications
 
+Important Notice
+-----------------
+
+We are in the final stages of implementing and testing `Blueprint v4`. If you are
+looking for the most stable release, we recommend you use `v3.3.1`.
+
 Getting Started
 ----------------
 
