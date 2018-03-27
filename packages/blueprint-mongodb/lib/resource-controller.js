@@ -350,6 +350,48 @@ module.exports = ResourceController.extend ({
   },
 
   /**
+   * Delete a single resource from the collection.
+   */
+  delete () {
+    const eventName = this._computeEventName ('deleted');
+
+    return Action.extend ({
+      execute (req, res) {
+        const id = req.params[this.controller.id];
+
+        return Promise.resolve (this.preDeleteModel (req))
+          .then (() => this.deleteModel (id))
+          .then (model => {
+            if (!model)
+              return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
+
+            this.emit (eventName, model);
+
+            return this.postDeleteModel (req, model);
+          })
+          .then (model => this.prepareResponse (res, model, true))
+          .then (result => res.status (200).json (result));
+      },
+
+      preDeleteModel (req) {
+
+      },
+
+      deleteModel (id) {
+        return this.controller.model.findByIdAndRemove (id);
+      },
+
+      postDeleteModel (req, result) {
+        return result;
+      },
+
+      prepareResponse (res, model, response) {
+        return response;
+      }
+    });
+  },
+
+  /**
    * Get the Mongoose model definition for the target. This is important if the
    * document if for an inherited model.
    *
@@ -387,243 +429,6 @@ module.exports = ResourceController.extend ({
 });
 
 /*
-
-ResourceController.prototype.get = function (opts) {
-  let self = this;
-
-  opts = opts || {};
-  let on = opts.on || {};
-
-  let idValidationSchema = this._getIdValidationSchema (opts);
-  let idSanitizer = this._getIdSanitizer (opts);
-
-  let sanitize = opts.sanitize || __sanitize;
-  let validate = opts.validate || __validate;
-
-  let onPrepareProjection = on.prepareProjection || __onPrepareProjection;
-  let onPrepareFilter = on.prepareFilter || __onPrepareFilter;
-  let onPreExecute = on.preExecute || __onPreExecute;
-  let onPostExecute = on.postExecute || __onPostExecute;
-  let onPrepareResponse = on.prepareResponse || __onPrepareResponse;
-
-  return {
-    validate: function (req, callback) {
-      req.check (idValidationSchema);
-      validate.call (null, req, callback);
-    },
-
-    sanitize: function (req, callback) {
-      async.series ([
-        function (callback) {
-          if (idSanitizer) {
-            if (_.isFunction (idSanitizer))
-              return idSanitizer.call (null, req, callback);
-
-            req.sanitizeParams (self.id)[idSanitizer]();
-          }
-
-          return callback (null);
-        },
-
-        function (callback) {
-          sanitize.call (null, req, callback);
-        }
-      ], callback);
-    },
-
-    execute: function __blueprint_get_execute (req, res, callback) {
-      let rcId = req.params[self.id];
-      let filter = {_id: rcId};
-
-      async.waterfall ([
-        function (callback) {
-          async.parallel ({
-            filter: function (callback) { onPrepareFilter (req, filter, callback); },
-            projection: function (callback) { onPrepareProjection (req, callback); }
-          }, callback);
-        },
-
-        function (query, callback) {
-          function completion (err, result) {
-            if (err) return callback (err);
-            return callback (null, result.execute);
-          }
-
-          async.series ({
-            pre: function (callback) {
-              return onPreExecute (req, callback);
-            },
-
-            execute: function (callback) {
-              let dbCompletion = makeDbCompletionHandler ('retrieve_failed', 'Failed to retrieve resource', callback);
-              self._model.findOne (query.filter, query.projection, dbCompletion);
-            }
-          }, completion);
-        },
-
-        function (result, callback) {
-          // Set the Last-Modified header for the response. The ETag header is set
-          // by the underlying Express framework.
-          let lastModified = result.getLastModified ();
-          res.set (LAST_MODIFIED, lastModified.toUTCString ());
-
-          onPostExecute (req, result, callback);
-        },
-
-        function (data, callback) {
-          let result = { };
-          result[self.name] = data;
-
-          if (!req.query.populate) {
-            return callback (null, result);
-          }
-          else {
-            return populate (data, self._model, function (err, details) {
-              result = _.extend (result, details);
-              return callback (null, result);
-            });
-          }
-        },
-
-        function (result, callback) {
-          onPrepareResponse (req, result, callback);
-        }
-      ], makeTaskCompletionHandler (res, callback));
-    }
-  };
-};
-
-
-ResourceController.prototype.getAll = function (opts) {
-  opts = opts || {};
-  let on = opts.on || {};
-
-  let validate = opts.validate || __validate;
-  let sanitize = opts.sanitize || __sanitize;
-
-  let onPrepareFilter = on.prepareFilter || __onPrepareFilter;
-  let onPrepareProjection = on.prepareProjection || __onPrepareProjection;
-  let onPrepareOptions = on.prepareOptions || __onPrepareOptions;
-  let onPreExecute = on.preExecute || __onPreExecute;
-  let onPostExecute = on.postExecute || __onPostExecute;
-  let onPrepareResponse = on.prepareResponse || __onPrepareResponse;
-
-  let self = this;
-
-  return {
-    validate: function (req, callback) {
-      validate.call (null, req, callback);
-    },
-
-    sanitize: function (req, callback) {
-      sanitize.call (null, req, callback);
-    },
-
-    execute: function __blueprint_getall_execute (req, res, callback) {
-      // Update the options with those from the query string.
-      let opts = req.query.options || {};
-      let options = {};
-
-      if (req.query.options) {
-        delete req.query.options;
-
-        if (opts.skip)
-          options.skip = opts.skip;
-
-        if (opts.limit)
-          options.limit = opts.limit;
-
-        if (opts.sort)
-          options.sort = opts.sort;
-      }
-
-      async.waterfall ([
-        function (callback) {
-          // Prepare the different parts of the query.
-          async.parallel ({
-            filter: function (callback) { onPrepareFilter (req, req.query, callback); },
-            projection: function (callback) { onPrepareProjection (req, callback); },
-            options: function (callback) { onPrepareOptions (req, options, callback); }
-          }, callback);
-        },
-
-        // Now, let's search our database for the resource in question.
-        function (query, callback) {
-          function completion (err, result) {
-            if (err) return callback (err);
-            return callback (null, result.execute);
-          }
-
-          async.series ({
-            pre: function (callback) {
-              return onPreExecute (req, callback);
-            },
-            execute: function (callback) {
-              let dbCompletion = makeDbCompletionHandler ('retrieve_failed', 'Failed to retrieve resource', callback);
-              self._model.find (query.filter, query.projection, query.options, dbCompletion);
-            }
-          }, completion);
-        },
-
-        function (result, callback) {
-          if (!result) return new callback (new HttpError (404, 'not_found', 'Not found'));
-          if (result.length === 0) return onPostExecute (req, result, callback);
-
-          // Reduce the result set to a single hash of headers.
-
-          let headers = { };
-          headers[LAST_MODIFIED] = result[0].getLastModified ();
-
-          if (result.length === 1)
-            return onReduceComplete (null, headers);
-
-          async.reduce (result.slice (1), headers, function (memo, item, callback) {
-            let lastModified = item.getLastModified ();
-
-            if (DateUtils.compare (memo[LAST_MODIFIED], lastModified) == -1)
-              memo[LAST_MODIFIED] = lastModified;
-
-            async.nextTick (() => {
-              return callback (null, memo);
-            })
-          }, onReduceComplete);
-
-          function onReduceComplete (err, headers) {
-            if (err) return callback (err, null);
-
-            // The Last-Modified header must be in string format.
-            let lastModified = headers[LAST_MODIFIED];
-
-            if (lastModified)
-              headers[LAST_MODIFIED] = lastModified.toUTCString ();
-
-            res.set (headers);
-
-            return onPostExecute (req, result, callback)
-          }
-        },
-
-        function transform (data, callback) {
-          let result = { };
-          result[self._pluralize] = data;
-
-          if (!opts.populate)
-            return callback (null, result);
-
-          return populate (data, self._model, function (err, details) {
-            result = _.extend (result, details);
-            return callback (null, result);
-          });
-        },
-
-        function (result, callback) {
-          onPrepareResponse (req, result, callback);
-        }
-      ], makeTaskCompletionHandler (res, callback));
-    }
-  };
-};
-
 
 ResourceController.prototype.update = function (opts) {
   function __onPrepareUpdate (req, update, callback) { return callback (null, update); }

@@ -72,4 +72,17 @@ describe ('lib | ResourceController', function () {
     });
   });
 
+  describe ('delete', function () {
+    it ('should delete a single resource', function () {
+      const Author = blueprint.lookup ('model:author');
+      const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
+
+      return Author.create (author)
+        .then (() => {
+          return blueprint.testing.request ()
+            .delete (`/authors/${author._id}`)
+            .expect (200, 'true');
+        });
+    });
+  });
 });
