@@ -362,9 +362,12 @@ module.exports = ResourceController.extend ({
         return Promise.resolve (this.preDeleteModel (req))
           .then (() => this.deleteModel (id))
           .then (model => {
+            // If there is no model, then we need to let the client know.
             if (!model)
               return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
 
+            // Notify all that are listening that we just deleted an resource
+            // from the collection.
             this.emit (eventName, model);
 
             return this.postDeleteModel (req, model);
