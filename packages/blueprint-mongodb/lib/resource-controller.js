@@ -134,6 +134,10 @@ module.exports = ResourceController.extend ({
    * Get all the resources. The query parameter fields are used to filter the
    * resources by exact match. The `options` query parameter is used to control
    * the behavior/presentation of the query response.
+   *
+   * this._super.call (this, ...arguments).extend ({
+   *
+   * });
    */
   getAll () {
     return Action.extend ({
