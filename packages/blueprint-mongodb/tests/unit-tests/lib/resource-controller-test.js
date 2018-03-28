@@ -58,6 +58,24 @@ describe ('lib | ResourceController', function () {
           ]);
         });
     });
+
+    it ('should not create duplicate resources', function () {
+      const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
+
+      return blueprint.testing.request ()
+        .post ('/authors')
+        .send ({author})
+        .then (() => {
+          return blueprint.testing.request ()
+            .post ('/authors')
+            .send ({author})
+            .expect (400, { errors:
+                [ { code: 'already_exists',
+                  detail: 'The resource you are creating already exists.',
+                  status: '400' } ] });
+        });
+
+    });
   });
 
   describe ('getAll', function () {

@@ -19,6 +19,31 @@ let populate = require ('./populate');
 const LAST_MODIFIED = 'Last-Modified';
 
 /**
+ * @class DatabaseAction
+ *
+ * The base class for all database actions. It includes several helper methods
+ * that are needed across all database actions.
+ */
+const DatabaseAction = Action.extend ({
+  /**
+   * Translate an error code from MongoDB to an HttpError.
+   *
+   * @param err       Original error object
+   * @returns {Promise<never>}
+   */
+  translateErrorToHttpError (err) {
+    if (err.code === 11000) {
+      // We are creating a duplicate object. Translate the error to an
+      // HttpError object.
+      return Promise.reject (new HttpError (400, 'already_exists', 'The resource you are creating already exists.'))
+    }
+    else {
+      return Promise.reject (err);
+    }
+  }
+});
+
+/**
  * @class ResourceController
  *
  * Resource controller designed to operate on a Mongoose model.
@@ -62,7 +87,7 @@ module.exports = ResourceController.extend ({
   create () {
     const eventName = this._computeEventName ('created');
 
-    return Action.extend ({
+    return DatabaseAction.extend ({
       /// Name of event for completion of action.
       eventName: null,
 
@@ -82,6 +107,7 @@ module.exports = ResourceController.extend ({
             // the inserted document.
             return Promise.resolve (this.preCreateModel (req))
               .then (() => this.createModel (document))
+              .catch (this.translateErrorToHttpError.bind (this))
               .then (result => {
                 // Emit that the resource has been created. We do it after the post create
                 // method just in case the subclass makes some edits to the model that was
@@ -140,7 +166,7 @@ module.exports = ResourceController.extend ({
    * });
    */
   getAll () {
-    return Action.extend ({
+    return DatabaseAction.extend ({
       execute (req, res) {
         // Update the options with those from the query string.
         const {query} = req;
@@ -271,7 +297,7 @@ module.exports = ResourceController.extend ({
    * @returns {*}
    */
   getOne () {
-    return Action.extend ({
+    return DatabaseAction.extend ({
       execute (req, res) {
         // Update the options with those from the query string.
         const id = req.params[this.controller.resourceId];
@@ -362,7 +388,7 @@ module.exports = ResourceController.extend ({
     const defaultOptions = { upsert: false, new: true };
     const eventName = this._computeEventName ('updated');
 
-    return Action.extend ({
+    return DatabaseAction.extend ({
       /**
        * Execute the action.
        *
@@ -474,7 +500,7 @@ module.exports = ResourceController.extend ({
   delete () {
     const eventName = this._computeEventName ('deleted');
 
-    return Action.extend ({
+    return DatabaseAction.extend ({
       execute (req, res) {
         const id = req.params[this.controller.id];
 
