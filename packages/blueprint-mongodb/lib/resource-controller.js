@@ -11,8 +11,6 @@ const {
   HttpError
 } = require ('@onehilltech/blueprint');
 
-const DateUtils  = require ('./date-utils');
-
 let validationSchema = require ('./ValidationSchema');
 let populate = require ('./populate');
 
