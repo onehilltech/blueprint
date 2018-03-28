@@ -7,7 +7,7 @@ const Population = require ('../../../../lib/populate/population');
 const ModelRegistry = require ('../../../../lib/populate/model-registry');
 const PopulateElement = require ('../../../../lib/populate/populate-element');
 
-describe ('lib | populate | PopulateElement', function () {
+describe ('lib | populate | Population', function () {
   beforeEach (function () {
     const appPath = resolve ('./tests/dummy/app');
 
