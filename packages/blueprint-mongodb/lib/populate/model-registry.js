@@ -26,6 +26,12 @@ const ModelRegistry = CoreObject.extend ({
     Object.defineProperty (this, 'models', {
       get () { return this._models; }
     });
+
+    Object.defineProperty (this, 'modelTypes', {
+      get () {
+        return Object.keys (this._models).map (key => key.split (':')[1]);
+      }
+    })
   },
 
   /**
@@ -34,7 +40,7 @@ const ModelRegistry = CoreObject.extend ({
    * @param Model
    */
   addModel (Model) {
-    const key = this.getKeyFromModel (Model);
+    const key = ModelRegistry.getKeyFromModel (Model);
 
     if (this._models[key] !== undefined)
       return;
@@ -69,10 +75,10 @@ const ModelRegistry = CoreObject.extend ({
         // This is a reference to a model in either this collection, or another
         // collection in the database.
 
-        const elementModel = db.models[ref];
-        populate[pathName] = new PopulateElement (elementModel);
+        const Model = db.models[ref];
+        populate[pathName] = new PopulateElement ({Model});
 
-        this.addModel (elementModel, callback);
+        this.addModel (Model);
       }
       else if (instance === 'Array') {
         // We can either be populating references to documents, or sub-documents.
@@ -91,13 +97,15 @@ const ModelRegistry = CoreObject.extend ({
         }
         else if (type.ref) {
           // We have an array of document references.
-          const arrModel = db.models[type.ref];
-          populate[pathName] = new PopulateArray (arrModel);
+          const Model = db.models[type.ref];
+          populate[pathName] = new PopulateArray ({Model});
 
-          this.addModel (arrModel, callback);
+          this.addModel (Model);
         }
       }
     });
+
+    return populate;
   }
 });
 

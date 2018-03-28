@@ -1,6 +1,7 @@
 const CoreObject = require ('core-object');
-const pluralize = require ('pluralize');
-const assert = require ('assert');
+const pluralize  = require ('pluralize');
+const assert     = require ('assert');
+const PopulateVisitor = require ('./populate-visitor');
 
 const {
   forOwn,
@@ -18,31 +19,43 @@ module.exports = CoreObject.extend ({
     this._super.call (this, ...arguments);
 
     this._ids = {};
-    this._population = {};
+    this._models = {};
+
+    Object.defineProperty (this, 'models', {
+      get () { return this._models; }
+    });
+
+    Object.defineProperty (this, 'ids', {
+      get () { return this._ids; }
+    });
+
+    // Lastly, initialize an empty set of the entire population.
+    const modelTypes = this.registry.modelTypes;
+
+    for (let i = 0, len = modelTypes.length; i < len; ++ i) {
+      const plural = pluralize (modelTypes[i]);
+
+      this._models[plural] = [];
+      this._ids[plural] = [];
+    }
   },
 
   /**
    * Add a collection of models to the population.
    *
-   * @param key       Association key for models.
-   * @param models    Array of models.
+   * @param types       Target segment of the population.
+   * @param models      Array of models.
    */
-  addModels (key, models) {
-    const plural = pluralize (key);
+  addModels (types, models) {
+    let population = this._models[types];
 
-    // Add the models to the population.
-    if (this._population[plural])
-      this._population[plural].push (models);
-    else
-      this._population[plural] = [models];
+    if (population) {
+      // Add the collection of models to the target population.
+      population.push (models);
 
-    // Cache the ids of each model for quicker access.
-    let ids = this._ids[plural];
-
-    if (!ids)
-      this._ids[plural] = ids = [];
-
-    models.forEach (model => ids.push (model.id));
+      // Cache the ids of each model for quicker access.
+      this._ids[types].push (models.map (model => model._id.toString ()));
+    }
   },
 
   /**
@@ -102,14 +115,40 @@ module.exports = CoreObject.extend ({
 
       // Determine the ids that we need to populate at this point in time. If we
       // have seen all the ids, then there is no need to populate the value(s).
+      populate.accept ({
+        _ids: this._ids,
+
+        visitPopulateElement (model) {
+          // Make sure we have a list of ids for this model type.
+          if (!this._ids[this._plural])
+            this._ids[this._plural] = [];
+
+          // Check if the value is included in the list of ids.
+          const idStr = value.toString ();
+          let coll = ids[this._plural];
+
+          if (coll.includes (idStr))
+            return null;
+
+          coll.push (idStr);
+
+          return value;
+        },
+
+        visitPopulateArray (arr) {
+
+        }
+      });
+
       const unseenIds = populate.getUnseenIds (value, this._ids);
+
 
       if (!unseenIds)
         return;
 
       const p = populate.populate (unseenIds).then (models => {
         // Merge the models into the population.
-        populate.merge (models, this._population);
+        populate.merge (models, this._models);
 
         // Now continue down the tree by populating the paths of the new
         // populated model elements.
@@ -144,6 +183,6 @@ module.exports = CoreObject.extend ({
    * Flatten the entire population.
    */
   flatten () {
-    return mapValues (this._population, values => flattenDeep (values));
+    return mapValues (this._models, values => flattenDeep (values));
   }
 });

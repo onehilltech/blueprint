@@ -1,60 +1,46 @@
-'use strict';
+const async     = require ('async')
+const pluralize = require ('pluralize');
+const Populate  = require ('./populate');
 
-const async   = require ('async')
-  , pluralize = require ('pluralize')
-  ;
+module.exports = Populate.extend ({
+  init () {
+    this._super.call (this, ...arguments);
+    this._plural = pluralize (this.Model.modelName);
+  },
 
-function PopulateArray (Model) {
-  this._Model = Model;
-  this._plural = pluralize (this._Model.modelName);
-}
+  populate (ids) {
+    this.Model.find ({_id: {$in: ids}});
+  },
 
-module.exports = PopulateArray;
+  accept (v) {
+    v.visitPopulateArray (this);
+  },
 
-PopulateArray.prototype.populate = function (ids, callback) {
-  this._Model.find ({_id: {$in: ids}}, {__v: 0}, callback);
-};
+  merge (models, population) {
+    if (population[this._plural])
+      population[this._plural].push (models);
+    else
+      population[this._plural] = [models];
+  },
 
-PopulateArray.prototype.__defineGetter__ ('Model', function () {
-  return this._Model;
-});
+  getUnseenIds (values, ids) {
+    if (!ids[this._plural])
+      ids[this._plural] = [];
 
-PopulateArray.prototype.__defineGetter__ ('plural', function () {
-  return this._plural;
-});
+    // The value is an array of ObjectIds. We need to return a list of
+    // ObjectIds that have not been seen.
+    const coll = ids[this._plural];
 
-PopulateArray.prototype.accept = function (visitor) {
-  visitor.visitPopulateArray (this);
-};
+    const result = values.filter (value, (id) => {
+      const idStr = id.toString ();
+      const firstTime = coll.indexOf (idStr) === -1;
 
-PopulateArray.prototype.getUnseenIds = function (value, ids, callback) {
-  if (!ids[this._plural])
-    ids[this._plural] = [];
+      if (firstTime)
+        coll.push (idStr);
 
-  // The value is an array of ObjectIds. We need to return a list of
-  // ObjectIds that have not been seen.
-  const coll = ids[this._plural];
+      return firstTime;
+    });
 
-  async.filter (value, function (id, callback) {
-    const idStr = id.toString ();
-    const firstTime = coll.indexOf (idStr) === -1;
-
-    if (firstTime)
-      coll.push (idStr);
-
-    return callback (null, firstTime);
-  }, complete);
-
-  function complete (err, result) {
-    return callback (err, result.length > 0 ? result : null);
+    return result.length ? result : null;
   }
-};
-
-PopulateArray.prototype.merge = function (value, population, callback) {
-  if (population[this._plural])
-    population[this._plural].push (value);
-  else
-    population[this._plural] = value;
-
-  return callback (null);
-};
+});
