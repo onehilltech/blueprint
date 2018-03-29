@@ -4,9 +4,10 @@ const assert     = require ('assert');
 const PopulateVisitor = require ('./populate-visitor');
 
 const {
+  differenceWith,
   forOwn,
   flattenDeep,
-  mapValues
+  mapValues,
 } = require ('lodash');
 
 /**
@@ -45,17 +46,45 @@ module.exports = CoreObject.extend ({
    *
    * @param types       Target segment of the population.
    * @param models      Array of models.
+   * @param saveIds     Save the ids
    */
-  addModels (types, models) {
+  addModels (types, models, saveIds = false) {
     let population = this._models[types];
 
     if (population) {
-      // Add the collection of models to the target population.
       population.push (models);
 
-      // Cache the ids of each model for quicker access.
-      this._ids[types].push (models.map (model => model._id.toString ()));
+      if (saveIds)
+        this._ids[types].push (models.map (model => model._id));
     }
+  },
+
+  /**
+   * Test if the population has seen an id.
+   *
+   * @param type      Target population segment
+   * @param id        Id of interest
+   */
+  saveUnseenId (type, id) {
+    const [unseen] = this.saveUnseenIds (type, [id]);
+
+    return unseen;
+  },
+
+  /**
+   * Get a list of unseen ids for the given ids.
+   *
+   * @param type
+   * @param ids
+   */
+  saveUnseenIds (type, ids) {
+    const arrOfIds = this._ids[type];
+    const unseen = differenceWith (ids, ...arrOfIds, (l, r) => l.equals (r));
+
+    if (unseen.length > 0)
+      arrOfIds.push (unseen);
+
+    return unseen;
   },
 
   /**
@@ -96,84 +125,56 @@ module.exports = CoreObject.extend ({
   /**
    * Use the populator to populate the data.
    *
-   * @param populator       Target populator.
+   * @param populators       Target populator.
    * @param data            Data to populate
    * @returns {Promise|null}
    * @private
    */
-  _populate (populator, data) {
+  _populate (populators, data) {
     if (!data)
       return null;
 
     let tasks = [];
 
-    forOwn (populator, (populate, path) => {
+    forOwn (populators, (populator, path) => {
       const value = data[path];
 
-      if (!value)
+      if (!value || value.length === 0)
         return;
 
       // Determine the ids that we need to populate at this point in time. If we
       // have seen all the ids, then there is no need to populate the value(s).
-      populate.accept ({
-        _ids: this._ids,
+      const unseen = populator.saveUnseenIds (value, this);
 
-        visitPopulateElement (model) {
-          // Make sure we have a list of ids for this model type.
-          if (!this._ids[this._plural])
-            this._ids[this._plural] = [];
-
-          // Check if the value is included in the list of ids.
-          const idStr = value.toString ();
-          let coll = ids[this._plural];
-
-          if (coll.includes (idStr))
-            return null;
-
-          coll.push (idStr);
-
-          return value;
-        },
-
-        visitPopulateArray (arr) {
-
-        }
-      });
-
-      const unseenIds = populate.getUnseenIds (value, this._ids);
-
-
-      if (!unseenIds)
+      if (!unseen || (unseen.length && unseen.length === 0))
         return;
 
-      const p = populate.populate (unseenIds).then (models => {
-        // Merge the models into the population.
-        populate.merge (models, this._models);
+      const promise = populator.populate (unseen)
+        .then (populated => {
+          // Add the populated models to our population.
+          populator.addToPopulation (this, populated);
 
-        // Now continue down the tree by populating the paths of the new
-        // populated model elements.
-        const v = {
-          visitPopulateElement (item) {
-            const key = this.registry.getKeyFromModel (item.Model);
-            this.p = this.populateElement (key, models);
-          },
+          // Now continue down the tree by populating the paths of the new
+          // populated model elements.
+          const v = new PopulateVisitor ({
+            promise: null,
+            population: this,
 
-          visitPopulateArray (item) {
-            const key = this.registry.getKeyFromModel (item.Model);
-            this.p = this.populateArray (key, models);
-          },
+            visitPopulateElement (item) {
+              this.promise = this.population.populateElement (item.key, populated);
+            },
 
-          visitPopulateEmbedArray () {
-            this.p = null;
-          }
-        };
+            visitPopulateArray (item) {
+              this.promise = this.population.populateArray (item.key, populated);
+            }
+          });
+          
+          populator.accept (v);
 
-        populate.accept (v);
+          return v.promise;
+        });
 
-        return v.p;
-      });
-
-      tasks.push (p);
+      tasks.push (promise);
     });
 
     return Promise.all (tasks);

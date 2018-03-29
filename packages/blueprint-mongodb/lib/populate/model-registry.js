@@ -76,7 +76,9 @@ const ModelRegistry = CoreObject.extend ({
         // collection in the database.
 
         const Model = db.models[ref];
-        populate[pathName] = new PopulateElement ({Model});
+        const key = ModelRegistry.getKeyFromModel (Model);
+
+        populate[pathName] = new PopulateElement ({Model, key});
 
         this.addModel (Model);
       }
@@ -98,7 +100,9 @@ const ModelRegistry = CoreObject.extend ({
         else if (type.ref) {
           // We have an array of document references.
           const Model = db.models[type.ref];
-          populate[pathName] = new PopulateArray ({Model});
+          const key = ModelRegistry.getKeyFromModel (Model);
+
+          populate[pathName] = new PopulateArray ({Model, key});
 
           this.addModel (Model);
         }

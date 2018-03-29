@@ -10,6 +10,10 @@ module.exports = Populate.extend ({
   init () {
     this._super.call (this, ...arguments);
     this._plural = pluralize (this.Model.modelName);
+
+    Object.defineProperty (this, 'plural', {
+      get () { return this._plural; }
+    });
   },
 
   /**
@@ -29,36 +33,18 @@ module.exports = Populate.extend ({
    * @param model
    * @param population
    */
-  merge (model, population) {
-    let models = population[this._plural];
-
-    if (models)
-      models.push (model);
-    else
-      population[this._plural] = [model];
+  addToPopulation (population, model) {
+    population.addModels (this._plural, [model]);
   },
 
   /**
    * Get the list of ids that have not been seen.
    *
    * @param value
-   * @param ids
+   * @param population
    */
-  getUnseenIds (value, ids) {
-    // Make sure we have a list of ids for this model type.
-    if (!ids[this._plural])
-      ids[this._plural] = [];
-
-    // Check if the value is included in the list of ids.
-    const idStr = value.toString ();
-    let coll = ids[this._plural];
-
-    if (coll.includes (idStr))
-      return null;
-
-    coll.push (idStr);
-
-    return value;
+  saveUnseenIds (value, population) {
+    return population.saveUnseenId (this._plural, value);
   },
 
   accept (v) {

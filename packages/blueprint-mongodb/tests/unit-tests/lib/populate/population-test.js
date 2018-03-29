@@ -5,7 +5,6 @@ const { resolve } = require ('path');
 const lean = require ('../../../../lib/lean');
 const Population = require ('../../../../lib/populate/population');
 const ModelRegistry = require ('../../../../lib/populate/model-registry');
-const PopulateElement = require ('../../../../lib/populate/populate-element');
 
 describe ('lib | populate | Population', function () {
   beforeEach (function () {
@@ -51,20 +50,102 @@ describe ('lib | populate | Population', function () {
   });
 
   describe ('addModels', function () {
-    it ('should add models to population', function () {
+    context ('do not save ids', function () {
+      it ('should add models to the population', function () {
+        const User = blueprint.lookup ('model:user');
+
+        const registry = new ModelRegistry ();
+        registry.addModel (User);
+
+        const population = new Population ({registry});
+
+        return User.find ().then (users => {
+          population.addModels ('users', users);
+
+          expect (lean (population.models)).to.eql ({authors: [], users: [lean (users)]});
+          expect (population.ids).to.eql ({authors: [], users: []});
+        });
+      });
+    });
+
+    context ('save ids', function () {
+      it ('should add models to population', function () {
+        const User = blueprint.lookup ('model:user');
+
+        const registry = new ModelRegistry ();
+        registry.addModel (User);
+
+        const population = new Population ({registry});
+
+        return User.find ().then (users => {
+          population.addModels ('users', users, true);
+
+          expect (lean (population.models)).to.eql ({authors: [], users: [lean (users)]});
+          expect (population.ids).to.eql ({authors: [], users: [[users[0]._id, users[1]._id]]});
+        });
+      });
+    });
+  });
+
+  describe ('populateElement', function () {
+    it ('should populate an element', function () {
       const User = blueprint.lookup ('model:user');
+      const Author = blueprint.lookup ('model:author');
 
       const registry = new ModelRegistry ();
+
       registry.addModel (User);
 
       const population = new Population ({registry});
+      const uKey = ModelRegistry.getKeyFromModel (User);
 
-      return User.find ().then (users => {
-        population.addModels ('users', users);
+      const promises = [
+        Author.find (),
+        User.find (),
+      ];
 
-        expect (lean (population.models)).to.eql ({authors: [], users: [lean (users)]});
-        expect (population.ids).to.eql ({authors: [], users: [[users[0].id, users[1].id]]});
-      });
+      return Promise.all (promises)
+        .then (([authors, users]) => {
+          const user = users[0];
+
+          return population.populateElement (uKey, user)
+            .then (() => {
+              expect (population.ids).to.eql ({users: [], authors: [[authors[0]._id]]});
+              expect (lean (population.models)).to.eql (lean ({users: [], authors: [authors]}));
+
+            });
+        })
+        .then (() => {
+        });
+    });
+  });
+
+  describe ('populateArray', function () {
+    it ('should populate an array', function () {
+      const User = blueprint.lookup ('model:user');
+      const Author = blueprint.lookup ('model:author');
+
+      const registry = new ModelRegistry ();
+
+      registry.addModel (User);
+
+      const population = new Population ({registry});
+      const uKey = ModelRegistry.getKeyFromModel (User);
+
+      const promises = [
+        Author.find (),
+        User.find (),
+      ];
+
+      return Promise.all (promises)
+        .then (([authors,users]) => {
+          return population.populateArray (uKey, users)
+            .then (() => {
+              expect (population.ids).to.eql ({users: [], authors: [[authors[0]._id]]});
+            });
+        })
+        .then (() => {
+        });
     });
   });
 
@@ -83,26 +164,6 @@ describe ('lib | populate | Population', function () {
         let result = population.flatten ();
 
         expect (lean (result)).to.eql ({authors: [], users: lean (users)});
-      });
-    });
-  });
-
-  describe ('populateElement', function () {
-    it ('should populate an element', function () {
-      const User = blueprint.lookup ('model:user');
-      const Author = blueprint.lookup ('model:author');
-
-      const registry = new ModelRegistry ();
-      const uKey = ModelRegistry.getKeyFromModel (User);
-      const aKey = ModelRegistry.getKeyFromModel (Author);
-
-      registry.models[uKey] = new PopulateElement ({Model: User});
-      registry.models[aKey] = new PopulateElement ({Model: Author});
-
-      const population = new Population ({registry});
-
-      return User.find ().then (users => {
-        return population.populateElement (uKey, users)
       });
     });
   });
