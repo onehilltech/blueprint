@@ -40,6 +40,15 @@ let schema = new mongodb.Schema ({
   deny: {type: [ObjectId], ref: Account.modelName}
 }, options);
 
+
+/**
+ * Get the client id, which is an alias for _id.
+ */
+schema.virtual ('client_id').get (function () {
+  return this._id;
+});
+
+
 const MODEL_NAME = 'client';
 const COLLECTION_NAME = 'gatekeeper_clients';
 

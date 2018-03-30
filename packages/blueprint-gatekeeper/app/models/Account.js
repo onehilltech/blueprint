@@ -93,6 +93,13 @@ schema.methods.verifyPassword = function (password, callback) {
 };
 
 /**
+ * Get the client id, which is an alias for created_by.
+ */
+schema.virtual ('client_id').get (function () {
+  return this.created_by;
+});
+
+/**
  * Authenticate the username and password.
  *
  * @param username

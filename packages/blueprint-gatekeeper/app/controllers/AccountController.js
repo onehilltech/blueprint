@@ -69,7 +69,7 @@ AccountController.prototype.create = function () {
   let options = {
     on: {
       prepareDocument: function (req, doc, callback) {
-        doc.created_by = req.user._id;
+        doc.created_by = req.user.client_id;
 
         async.waterfall ([
           function (callback) {
