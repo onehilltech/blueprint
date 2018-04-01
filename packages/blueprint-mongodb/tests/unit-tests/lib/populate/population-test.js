@@ -6,6 +6,14 @@ const lean = require ('../../../../lib/lean');
 const Population = require ('../../../../lib/populate/population');
 const ModelRegistry = require ('../../../../lib/populate/model-registry');
 
+function createTestPopulation () {
+  const User = blueprint.lookup ('model:user');
+  const registry = new ModelRegistry ();
+  registry.addModel (User);
+
+  return new Population ({registry});
+}
+
 describe ('lib | populate | Population', function () {
   beforeEach (function () {
     const appPath = resolve ('./tests/dummy/app');
@@ -33,14 +41,6 @@ describe ('lib | populate | Population', function () {
   afterEach (function () {
     return blueprint.destroyApplication ();
   });
-
-  function createTestPopulation () {
-    const User = blueprint.lookup ('model:user');
-    const registry = new ModelRegistry ();
-    registry.addModel (User);
-
-    return new Population ({registry});
-  }
 
   describe ('constructor', function () {
     it ('should create population with no types', function () {
