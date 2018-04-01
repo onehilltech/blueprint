@@ -9,6 +9,7 @@ const seed    = require ('../../support/seed')
   ;
 
 module.exports = function () {
+  /*
   debug ('seeding database connections');
 
   function complete (err) {
@@ -18,13 +19,14 @@ module.exports = function () {
 
   async.waterfall ([
     function (callback) {
-      blueprint.messaging.emit ('mongodb.seed.start', blueprint.app);
+      blueprint.app.messaging.emit ('mongodb.seed.start', blueprint.app);
       seed (blueprint.app, callback);
     },
 
     function (callback) {
-      blueprint.messaging.emit ('mongodb.seed.complete', blueprint.app);
-      appStart.signalAndWait (callback);
+      blueprint.app.messaging.emit ('mongodb.seed.complete', blueprint.app);
+      appStart.signal (callback);
     }
   ], complete);
+  */
 };

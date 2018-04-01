@@ -23,11 +23,11 @@ module.exports = CoreObject.extend ({
     this._models = {};
 
     Object.defineProperty (this, 'models', {
-      get () { return this._models; }
+      get () { return mapValues (this._models, flattenDeep); }
     });
 
     Object.defineProperty (this, 'ids', {
-      get () { return this._ids; }
+      get () { return mapValues (this._ids, flattenDeep); }
     });
 
     // Lastly, initialize an empty set of the entire population.
@@ -68,7 +68,7 @@ module.exports = CoreObject.extend ({
   saveUnseenId (type, id) {
     const [unseen] = this.saveUnseenIds (type, [id]);
 
-    return unseen;
+    return unseen || null;
   },
 
   /**

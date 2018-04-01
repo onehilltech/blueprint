@@ -105,10 +105,12 @@ module.exports = Service.extend ({
     });
 
     return Promise.all (connecting).then (() => {
-      this.app.messaging.emit ('mongodb.connections.open');
+      this.emit ('mongodb.connections.open');
 
       return this._appStart.signal ();
-    });
+    }).catch (err => {
+      console.log (err.message);
+    }) ;
   },
 
   /**

@@ -8,11 +8,22 @@ module.exports = Populate.extend ({
   },
 
   populate (ids) {
-    this.Model.find ({_id: {$in: ids}});
+    return this.Model.find ({_id: {$in: ids}});
   },
 
   accept (v) {
     v.visitPopulateArray (this);
+  },
+
+  /**
+   * Merge a single model onto the population. We do not check if the
+   * model is already part of the population.
+   *
+   * @param model
+   * @param population
+   */
+  addToPopulation (population, models) {
+    population.addModels (this._plural, models);
   },
 
   saveUnseenIds (ids, population) {

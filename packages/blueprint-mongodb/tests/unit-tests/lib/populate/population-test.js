@@ -11,15 +11,21 @@ describe ('lib | populate | Population', function () {
     const appPath = resolve ('./tests/dummy/app');
 
     return blueprint.createApplicationAndStart (appPath)
-      .then (() => Promise.all ([
-        blueprint.lookup ('model:author').remove (),
-        blueprint.lookup ('model:user').remove ()
-      ]))
-      .then (() => blueprint.lookup ('model:author').create ({name: 'John Doe'}))
-      .then ((author) => blueprint.lookup ('model:user').create (
+      .then (() => Promise.all (
         [
-          {first_name: 'Paul', last_name: 'Black', favorite_author: author._id},
-          {first_name: 'John', last_name: 'Smith', favorite_author: author._id}
+          blueprint.lookup ('model:author').remove (),
+          blueprint.lookup ('model:user').remove ()
+        ])
+      ).then (() => blueprint.lookup ('model:author').create (
+        [
+          {name: 'John Doe'},
+          {name: 'Robert Young'},
+          {name: 'Tom Smith'}
+        ])
+      ).then ((authors) => blueprint.lookup ('model:user').create (
+        [
+          {first_name: 'Paul', last_name: 'Black', favorite_author: authors[0]._id, blacklist: [authors[0]._id, authors[1]._id]},
+          {first_name: 'John', last_name: 'Smith', favorite_author: authors[0]._id}
         ])
       );
   });
@@ -27,6 +33,14 @@ describe ('lib | populate | Population', function () {
   afterEach (function () {
     return blueprint.destroyApplication ();
   });
+
+  function createTestPopulation () {
+    const User = blueprint.lookup ('model:user');
+    const registry = new ModelRegistry ();
+    registry.addModel (User);
+
+    return new Population ({registry});
+  }
 
   describe ('constructor', function () {
     it ('should create population with no types', function () {
@@ -62,7 +76,7 @@ describe ('lib | populate | Population', function () {
         return User.find ().then (users => {
           population.addModels ('users', users);
 
-          expect (lean (population.models)).to.eql ({authors: [], users: [lean (users)]});
+          expect (lean (population.models)).to.eql ({authors: [], users: lean (users)});
           expect (population.ids).to.eql ({authors: [], users: []});
         });
       });
@@ -80,9 +94,63 @@ describe ('lib | populate | Population', function () {
         return User.find ().then (users => {
           population.addModels ('users', users, true);
 
-          expect (lean (population.models)).to.eql ({authors: [], users: [lean (users)]});
-          expect (population.ids).to.eql ({authors: [], users: [[users[0]._id, users[1]._id]]});
+          expect (lean (population.models)).to.eql ({authors: [], users: lean (users)});
+          expect (population.ids).to.eql ({authors: [], users: [users[0]._id, users[1]._id]});
         });
+      });
+    });
+  });
+
+  describe ('saveUnseenId', function () {
+    it ('should save an unseen id', function () {
+      let population = createTestPopulation ();
+
+      const User = blueprint.lookup ('model:user');
+      return User.find ().then (users => {
+        let unseen = population.saveUnseenId ('users', users[0]._id);
+
+        expect (unseen).to.eql (users[0]._id);
+      });
+    });
+
+    it ('should save an id only once', function () {
+      let population = createTestPopulation ();
+
+      const User = blueprint.lookup ('model:user');
+      return User.find ().then (users => {
+        population.saveUnseenId ('users', users[0]._id);
+        let unseen = population.saveUnseenId ('users', users[0]._id);
+
+        expect (unseen).to.be.null;
+      });
+    });
+  });
+
+  describe ('saveUnseenIds', function () {
+    it ('should save an unseen id', function () {
+      let population = createTestPopulation ();
+
+      const User = blueprint.lookup ('model:user');
+      return User.find ().then (users => {
+        let ids = users.map (user => user._id);
+        let unseen = population.saveUnseenId ('users', ids);
+
+        expect (unseen).to.have.members (ids);
+      });
+    });
+
+    it ('should the same ids only once', function () {
+      let population = createTestPopulation ();
+
+      const User = blueprint.lookup ('model:user');
+
+      return User.find ().then (users => {
+        let ids = users.map (user => user._id);
+
+        population.saveUnseenIds ('users', ids);
+        let unseen = population.saveUnseenIds ('users', ids);
+
+        expect (unseen).to.have.length (0);
       });
     });
   });
@@ -110,12 +178,15 @@ describe ('lib | populate | Population', function () {
 
           return population.populateElement (uKey, user)
             .then (() => {
-              expect (population.ids).to.eql ({users: [], authors: [[authors[0]._id]]});
-              expect (lean (population.models)).to.eql (lean ({users: [], authors: [authors]}));
+              expect (population.ids).to.have.keys (['users','authors']);
+              expect (population.ids).to.have.deep.property ('users', []);
+              expect (population.ids).to.have.deep.property ('authors').to.have.deep.members ([authors[0]._id, authors[1]._id]);
 
+              const models = lean (population.models);
+              expect (models).to.have.keys (['users','authors']);
+              expect (models).to.have.deep.property ('users', []);
+              expect (models).to.have.deep.property ('authors').to.have.deep.members ([authors[0].lean (), authors[1].lean ()]);
             });
-        })
-        .then (() => {
         });
     });
   });
@@ -141,10 +212,15 @@ describe ('lib | populate | Population', function () {
         .then (([authors,users]) => {
           return population.populateArray (uKey, users)
             .then (() => {
-              expect (population.ids).to.eql ({users: [], authors: [[authors[0]._id]]});
+              expect (population.ids).to.have.keys (['users','authors']);
+              expect (population.ids).to.have.deep.property ('users', []);
+              expect (population.ids).to.have.deep.property ('authors').to.have.deep.members ([authors[0]._id, authors[1]._id]);
+
+              const models = lean (population.models);
+              expect (models).to.have.keys (['users','authors']);
+              expect (models).to.have.deep.property ('users', []);
+              expect (models).to.have.deep.property ('authors').to.have.deep.members ([authors[0].lean (), authors[1].lean ()]);
             });
-        })
-        .then (() => {
         });
     });
   });

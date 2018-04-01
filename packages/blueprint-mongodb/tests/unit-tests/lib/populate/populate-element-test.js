@@ -4,6 +4,8 @@ const { resolve } = require ('path');
 
 const lean = require ('../../../../lib/lean');
 const PopulateElement = require ('../../../../lib/populate/populate-element');
+const Population  = require ('../../../../lib/populate/population');
+const ModelRegistry = require ('../../../../lib/populate/model-registry');
 
 describe ('lib | populate | PopulateElement', function () {
   beforeEach (function () {
@@ -37,73 +39,40 @@ describe ('lib | populate | PopulateElement', function () {
     });
   });
 
-  describe ('merge', function () {
-    it ('should merge the model into a new population', function () {
+  describe ('saveUnseenIds', function () {
+    it ('should return a list of unseen ids', function () {
       const User = blueprint.lookup ('model:user');
+      const registry = new ModelRegistry ();
+      registry.addModel (User);
+
       const populate = new PopulateElement ({Model: User});
+      const population = new Population ({registry});
 
       return User.find ().then (users => {
         let user = users[0];
-        let population = {};
+        let unseen = populate.saveUnseenIds (user._id, population);
 
-        populate.merge (user, population);
-
-        expect (lean (population)).to.eql ({
-          users: [user.lean ()]
-        });
+        expect (unseen).to.eql (user._id);
+        expect (population.ids).to.have.property ('users').to.have.members ([user._id]);
       });
     });
 
-    it ('should merge the model into a existing population', function () {
+    it ('should return an empty value', function () {
       const User = blueprint.lookup ('model:user');
+      const registry = new ModelRegistry ();
+      registry.addModel (User);
+
       const populate = new PopulateElement ({Model: User});
+      const population = new Population ({registry});
 
       return User.find ().then (users => {
         let user = users[0];
-        let population = {
-          users: [user.lean ()]
-        };
 
-        populate.merge (user, population);
-
-        expect (lean (population)).to.eql ({
-          users: [user.lean (), user.lean ()]
-        });
-      });
-    });
-  });
-
-  describe ('getUnseenIds', function () {
-    it ('should get a list of unseen ids', function () {
-      const User = blueprint.lookup ('model:user');
-      const populate = new PopulateElement ({Model: User});
-
-      return User.find ().then (users => {
-        let user = users[0];
-        let ids = {};
-
-        let unseen = populate.getUnseenIds (user.favorite_author, ids);
-
-        expect (unseen).to.eql (user.favorite_author);
-        expect (ids).to.eql ({users: [user.favorite_author.toString ()]});
-      });
-    });
-
-    it ('should return an empty list of unseen ids', function () {
-      const Author = blueprint.lookup ('model:author');
-      const User = blueprint.lookup ('model:user');
-      const populate = new PopulateElement ({Model: Author});
-
-      return User.find ().then (users => {
-        let user = users[0];
-        let ids = {
-          authors: [user.favorite_author.toString ()]
-        };
-
-        let unseen = populate.getUnseenIds (user.favorite_author, ids);
+        populate.saveUnseenIds (user._id, population);
+        let unseen = populate.saveUnseenIds (user._id, population);
 
         expect (unseen).to.be.null;
-        expect (ids).to.eql ({authors: [user.favorite_author.toString ()]});
+        expect (population.ids).to.have.property ('users').to.have.members ([user._id]);
       });
     });
   });
