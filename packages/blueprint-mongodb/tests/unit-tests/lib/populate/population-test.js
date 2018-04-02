@@ -117,4 +117,32 @@ describe ('lib | populate | Population', function () {
       });
     });
   });
+
+  describe ('addModels', function () {
+    it ('should add models to the population', function () {
+      let population = createTestPopulation ();
+
+      const User = blueprint.lookup ('model:user');
+      const Author = blueprint.lookup ('model:author');
+
+      const promises = [
+        User.find (),
+        Author.find ()
+      ];
+
+      return Promise.all (promises).then (([users,authors]) => {
+        return population.addModels (users)
+          .then (population => {
+            const ids = population.ids;
+            const models = population.models;
+
+            expect (ids).to.have.keys (['authors','users']);
+            expect (models).to.have.keys (['authors','users']);
+
+            expect (lean (models.users)).to.have.deep.members (lean (users));
+            expect (lean (models.authors)).to.have.deep.members ([authors[0].lean (), authors[1].lean ()]);
+          });
+      });
+    });
+  });
 });

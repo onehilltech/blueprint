@@ -1,6 +1,5 @@
 const CoreObject = require ('core-object');
 const pluralize  = require ('pluralize');
-const assert     = require ('assert');
 const PopulateVisitor = require ('./populate-visitor');
 
 const {
@@ -60,6 +59,18 @@ module.exports = CoreObject.extend ({
 
     let populator = this.registry.lookup (model.constructor);
     return this._populate (populator, model);
+  },
+
+  /**
+   * Add an array of models to the population. We assume that all models
+   * are of the same type, or from the same collection.
+   *
+   * @param models
+   */
+  addModels (models) {
+    // We must iterate over each element in the array just in case the elements
+    // in the array are polymorphic.
+    return Promise.all (models.map (this.addModel.bind (this))).then (() => this);
   },
 
   /**
@@ -179,7 +190,7 @@ module.exports = CoreObject.extend ({
 
       const {unseen} = saveUnseenIds;
 
-      if (!unseen || (unseen.length && unseen.length === 0))
+      if (!unseen || (unseen.length !== undefined && unseen.length === 0))
         return;
 
       const promise = populator.populate (unseen).then (populated => {
