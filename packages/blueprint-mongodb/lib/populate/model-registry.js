@@ -53,6 +53,11 @@ const ModelRegistry = CoreObject.extend ({
     this._models[key] = this._makePopulate (Model.db, Model.schema);
   },
 
+  lookup (Model) {
+    const key = Model.db.name + ':' + Model.modelName;
+    return this._models[key];
+  },
+
   _makePopulate (db, schema) {
     let populate = {};
 

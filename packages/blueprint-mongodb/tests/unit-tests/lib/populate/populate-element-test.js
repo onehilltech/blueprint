@@ -2,10 +2,7 @@ const blueprint   = require ('@onehilltech/blueprint');
 const { expect }  = require ('chai');
 const { resolve } = require ('path');
 
-const lean = require ('../../../../lib/lean');
 const PopulateElement = require ('../../../../lib/populate/populate-element');
-const Population  = require ('../../../../lib/populate/population');
-const ModelRegistry = require ('../../../../lib/populate/model-registry');
 
 describe ('lib | populate | PopulateElement', function () {
   beforeEach (function () {
@@ -35,44 +32,6 @@ describe ('lib | populate | PopulateElement', function () {
         return populate.populate (user._id).then (u => {
           expect (u.lean ()).to.eql (user.lean ());
         });
-      });
-    });
-  });
-
-  describe ('saveUnseenIds', function () {
-    it ('should return a list of unseen ids', function () {
-      const User = blueprint.lookup ('model:user');
-      const registry = new ModelRegistry ();
-      registry.addModel (User);
-
-      const populate = new PopulateElement ({Model: User});
-      const population = new Population ({registry});
-
-      return User.find ().then (users => {
-        let user = users[0];
-        let unseen = populate.saveUnseenIds (user._id, population);
-
-        expect (unseen).to.eql (user._id);
-        expect (population.ids).to.have.property ('users').to.have.members ([user._id]);
-      });
-    });
-
-    it ('should return an empty value', function () {
-      const User = blueprint.lookup ('model:user');
-      const registry = new ModelRegistry ();
-      registry.addModel (User);
-
-      const populate = new PopulateElement ({Model: User});
-      const population = new Population ({registry});
-
-      return User.find ().then (users => {
-        let user = users[0];
-
-        populate.saveUnseenIds (user._id, population);
-        let unseen = populate.saveUnseenIds (user._id, population);
-
-        expect (unseen).to.be.null;
-        expect (population.ids).to.have.property ('users').to.have.members ([user._id]);
       });
     });
   });

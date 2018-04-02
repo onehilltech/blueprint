@@ -21,13 +21,12 @@ function populate (data, Model) {
   // our current progress of populating the data. We are going to start
   // with the data for the root model element.
   let population = new Population ({registry});
-  population.addModels (Model.modelName, data);
 
   let p = isArray (data) ?
     population.populateArray (key, data) :
     population.populateElement (key, data);
 
-  return p.then (() => population.flatten ());
+  return p.then (() => population.models);
 }
 
 module.exports = populate;

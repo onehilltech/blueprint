@@ -42,17 +42,38 @@ module.exports = CoreObject.extend ({
   },
 
   /**
+   * Add a single model to the population.
+   *
+   * @param model
+   */
+  addModel (model) {
+    const modelName = model.constructor.modelName;
+    const type = pluralize (modelName);
+
+    let unseen = this._saveUnseenId (type, model);
+
+    if (!unseen)
+      return Promise.resolve (this);
+
+    // Add the single model to the target collection.
+    this._addModels (type, [model]);
+
+    let populator = this.registry.lookup (model.constructor);
+    return this._populate (populator, model);
+  },
+
+  /**
    * Add a collection of models to the population.
    *
    * @param types       Target segment of the population.
    * @param models      Array of models.
    * @param saveIds     Save the ids
    */
-  addModels (types, models, saveIds = false) {
-    let population = this._models[types];
+  _addModels (types, models, saveIds = false) {
+    let collection = this._models[types];
 
-    if (population) {
-      population.push (models);
+    if (collection) {
+      collection.push (models);
 
       if (saveIds)
         this._ids[types].push (models.map (model => model._id));
@@ -65,8 +86,8 @@ module.exports = CoreObject.extend ({
    * @param type      Target population segment
    * @param id        Id of interest
    */
-  saveUnseenId (type, id) {
-    const [unseen] = this.saveUnseenIds (type, [id]);
+  _saveUnseenId (type, id) {
+    const [unseen] = this._saveUnseenIds (type, [id]);
 
     return unseen || null;
   },
@@ -77,7 +98,7 @@ module.exports = CoreObject.extend ({
    * @param type
    * @param ids
    */
-  saveUnseenIds (type, ids) {
+  _saveUnseenIds (type, ids) {
     const arrOfIds = this._ids[type];
     const unseen = differenceWith (ids, ...arrOfIds, (l, r) => l.equals (r));
 
@@ -94,30 +115,27 @@ module.exports = CoreObject.extend ({
    * @param model
    * @return {Promise|null}
    */
-  populateElement (key, model) {
-    const populator = this.registry.models[key];
-    assert (!!populator, `Failed to locate populator for ${key}`);
+  _populateElement (populator, model) {
+    let unseen = this._saveUnseenId (populator.plural, model._id);
 
-    return this._populate (populator, model);
+    if (!unseen)
+      return null;
+
+    return this._populate (populator, unseen);
   },
 
   /**
    * Populate an array of elements.
    *
-   * @param key
+   * @param populator
    * @param arr
    */
-  populateArray (key, arr) {
-    const populator = this.registry.models[key];
-    assert (!!populator, `Failed to locate populator for ${key}`);
-
+  _populateArray (populator, arr) {
     // Iterate over each element in the array, and populate each one. The
     // partial result can be ignored since we are will be adding the populated
     // object directly to the result.
 
-    let tasks = [];
-
-    arr.forEach (model => tasks.push (this._populate (populator, model)));
+    const tasks = arr.map (model => this._populate (populator, model));
 
     return Promise.all (tasks);
   },
@@ -132,7 +150,7 @@ module.exports = CoreObject.extend ({
    */
   _populate (populators, data) {
     if (!data)
-      return null;
+      return Promise.resolve (this);
 
     let tasks = [];
 
@@ -144,46 +162,51 @@ module.exports = CoreObject.extend ({
 
       // Determine the ids that we need to populate at this point in time. If we
       // have seen all the ids, then there is no need to populate the value(s).
-      const unseen = populator.saveUnseenIds (value, this);
+      const saveUnseenIds = new PopulateVisitor ({
+        unseen: null,
+        population: this,
+
+        visitPopulateElement (item) {
+          this.unseen = this.population._saveUnseenIds (item.plural, [value]);
+        },
+
+        visitPopulateArray (item) {
+          this.unseen = this.population._saveUnseenIds (item.plural, value);
+        }
+      });
+
+      populator.accept (saveUnseenIds);
+
+      const {unseen} = saveUnseenIds;
 
       if (!unseen || (unseen.length && unseen.length === 0))
         return;
 
-      const promise = populator.populate (unseen)
-        .then (populated => {
-          // Add the populated models to our population.
-          populator.addToPopulation (this, populated);
+      const promise = populator.populate (unseen).then (populated => {
+        // Add the populated models to our population.
+        const v = new PopulateVisitor ({
+          population: this,
+          promise: null,
 
-          // Now continue down the tree by populating the paths of the new
-          // populated model elements.
-          const v = new PopulateVisitor ({
-            promise: null,
-            population: this,
+          visitPopulateElement (item) {
+            this.population._addModels (item.plural, [populated]);
+            this.promise = this.population._populateElement (populator, populated);
+          },
 
-            visitPopulateElement (item) {
-              this.promise = this.population.populateElement (item.key, populated);
-            },
-
-            visitPopulateArray (item) {
-              this.promise = this.population.populateArray (item.key, populated);
-            }
-          });
-          
-          populator.accept (v);
-
-          return v.promise;
+          visitPopulateArray (item) {
+            this.population._addModels (item.plural, populated);
+            this.promise = this.population._populateArray (item.key, populated);
+          }
         });
+
+        populator.accept (v);
+
+        return v.promise;
+      });
 
       tasks.push (promise);
     });
 
-    return Promise.all (tasks);
-  },
-
-  /**
-   * Flatten the entire population.
-   */
-  flatten () {
-    return mapValues (this._models, values => flattenDeep (values));
+    return Promise.all (tasks).then (() => this);
   }
 });

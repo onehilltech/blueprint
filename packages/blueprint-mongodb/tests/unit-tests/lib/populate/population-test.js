@@ -63,183 +63,57 @@ describe ('lib | populate | Population', function () {
     });
   });
 
-  describe ('addModels', function () {
-    context ('do not save ids', function () {
-      it ('should add models to the population', function () {
-        const User = blueprint.lookup ('model:user');
-
-        const registry = new ModelRegistry ();
-        registry.addModel (User);
-
-        const population = new Population ({registry});
-
-        return User.find ().then (users => {
-          population.addModels ('users', users);
-
-          expect (lean (population.models)).to.eql ({authors: [], users: lean (users)});
-          expect (population.ids).to.eql ({authors: [], users: []});
-        });
-      });
-    });
-
-    context ('save ids', function () {
-      it ('should add models to population', function () {
-        const User = blueprint.lookup ('model:user');
-
-        const registry = new ModelRegistry ();
-        registry.addModel (User);
-
-        const population = new Population ({registry});
-
-        return User.find ().then (users => {
-          population.addModels ('users', users, true);
-
-          expect (lean (population.models)).to.eql ({authors: [], users: lean (users)});
-          expect (population.ids).to.eql ({authors: [], users: [users[0]._id, users[1]._id]});
-        });
-      });
-    });
-  });
-
-  describe ('saveUnseenId', function () {
-    it ('should save an unseen id', function () {
+  describe ('addModel', function () {
+    it ('should add model to the population', function () {
       let population = createTestPopulation ();
 
-      const User = blueprint.lookup ('model:user');
-      return User.find ().then (users => {
-        let unseen = population.saveUnseenId ('users', users[0]._id);
-
-        expect (unseen).to.eql (users[0]._id);
-      });
-    });
-
-    it ('should save an id only once', function () {
-      let population = createTestPopulation ();
-
-      const User = blueprint.lookup ('model:user');
-      return User.find ().then (users => {
-        population.saveUnseenId ('users', users[0]._id);
-        let unseen = population.saveUnseenId ('users', users[0]._id);
-
-        expect (unseen).to.be.null;
-      });
-    });
-  });
-
-  describe ('saveUnseenIds', function () {
-    it ('should save an unseen id', function () {
-      let population = createTestPopulation ();
-
-      const User = blueprint.lookup ('model:user');
-      return User.find ().then (users => {
-        let ids = users.map (user => user._id);
-        let unseen = population.saveUnseenId ('users', ids);
-
-        expect (unseen).to.have.members (ids);
-      });
-    });
-
-    it ('should the same ids only once', function () {
-      let population = createTestPopulation ();
-
-      const User = blueprint.lookup ('model:user');
-
-      return User.find ().then (users => {
-        let ids = users.map (user => user._id);
-
-        population.saveUnseenIds ('users', ids);
-        let unseen = population.saveUnseenIds ('users', ids);
-
-        expect (unseen).to.have.length (0);
-      });
-    });
-  });
-
-  describe ('populateElement', function () {
-    it ('should populate an element', function () {
       const User = blueprint.lookup ('model:user');
       const Author = blueprint.lookup ('model:author');
 
-      const registry = new ModelRegistry ();
-
-      registry.addModel (User);
-
-      const population = new Population ({registry});
-      const uKey = ModelRegistry.getKeyFromModel (User);
-
       const promises = [
-        Author.find (),
         User.find (),
+        Author.find ()
       ];
 
-      return Promise.all (promises)
-        .then (([authors, users]) => {
-          const user = users[0];
+      return Promise.all (promises).then (([users,authors]) => {
+        return population.addModel (users[0])
+          .then (population => {
+            const ids = population.ids;
+            const models = population.models;
 
-          return population.populateElement (uKey, user)
-            .then (() => {
-              expect (population.ids).to.have.keys (['users','authors']);
-              expect (population.ids).to.have.deep.property ('users', []);
-              expect (population.ids).to.have.deep.property ('authors').to.have.deep.members ([authors[0]._id, authors[1]._id]);
+            expect (ids).to.have.keys (['authors','users']);
+            expect (models).to.have.keys (['authors','users']);
 
-              const models = lean (population.models);
-              expect (models).to.have.keys (['users','authors']);
-              expect (models).to.have.deep.property ('users', []);
-              expect (models).to.have.deep.property ('authors').to.have.deep.members ([authors[0].lean (), authors[1].lean ()]);
-            });
-        });
+            expect (lean (models.users)).to.have.deep.members ([users[0].lean ()]);
+            expect (lean (models.authors)).to.have.deep.members ([authors[0].lean (), authors[1].lean ()]);
+          });
+      });
     });
-  });
 
-  describe ('populateArray', function () {
-    it ('should populate an array', function () {
+    it ('should add same model to the population', function () {
+      let population = createTestPopulation ();
+
       const User = blueprint.lookup ('model:user');
       const Author = blueprint.lookup ('model:author');
 
-      const registry = new ModelRegistry ();
-
-      registry.addModel (User);
-
-      const population = new Population ({registry});
-      const uKey = ModelRegistry.getKeyFromModel (User);
-
       const promises = [
-        Author.find (),
         User.find (),
+        Author.find ()
       ];
 
-      return Promise.all (promises)
-        .then (([authors,users]) => {
-          return population.populateArray (uKey, users)
-            .then (() => {
-              expect (population.ids).to.have.keys (['users','authors']);
-              expect (population.ids).to.have.deep.property ('users', []);
-              expect (population.ids).to.have.deep.property ('authors').to.have.deep.members ([authors[0]._id, authors[1]._id]);
+      return Promise.all (promises).then (([users,authors]) => {
+        return population.addModel (users[0])
+          .then (population => population.addModel (users[0]))
+          .then (population => {
+            const ids = population.ids;
+            const models = population.models;
 
-              const models = lean (population.models);
-              expect (models).to.have.keys (['users','authors']);
-              expect (models).to.have.deep.property ('users', []);
-              expect (models).to.have.deep.property ('authors').to.have.deep.members ([authors[0].lean (), authors[1].lean ()]);
-            });
-        });
-    });
-  });
+            expect (ids).to.have.keys (['authors','users']);
+            expect (models).to.have.keys (['authors','users']);
 
-  describe ('flatten', function () {
-    it ('should flatten the population', function () {
-      const User = blueprint.lookup ('model:user');
-
-      const registry = new ModelRegistry ();
-      registry.addModel (User);
-
-      const population = new Population ({registry});
-
-      return User.find ().then (users => {
-        population.addModels ('users', users);
-
-        let result = population.flatten ();
-
-        expect (lean (result)).to.eql ({authors: [], users: lean (users)});
+            expect (lean (models.users)).to.have.deep.members ([users[0].lean ()]);
+            expect (lean (models.authors)).to.have.deep.members ([authors[0].lean (), authors[1].lean ()]);
+          });
       });
     });
   });
