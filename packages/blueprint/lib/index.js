@@ -16,6 +16,7 @@ exports.barrier = require ('./barrier');
 exports.BlueprintError = require ('./error');
 exports.HttpError = require ('./http-error');
 exports.Policy = require ('./policy');
+exports.Router = require ('./router');
 
 // built-in actions
 exports.Action = require ('./action');
