@@ -1,7 +1,8 @@
 const {get} = require ('object-path');
 const path  = require ('path');
 const {ensureDir} = require ('fs-extra');
-const debug = require ('debug')('blueprint:app');
+const debug  = require ('debug')('blueprint:app');
+const assert = require ('assert');
 
 const {
   forOwn
@@ -230,13 +231,16 @@ module.exports = BlueprintObject.extend ({
    * @param routerName
    */
   mount (routerName) {
-    const routers = get (this.resources, routerName);
+    const router = this.lookup (`router:${routerName}`);
+
+    const controllers = get (this.resources, 'controllers');
     const policies = get (this.resources, 'policies');
-    const listeners = get (this.resources, 'listeners');
 
-    assert (!!root, `The router ${routerName} does not exist.`);
+    assert (!!router, `The router "${routerName}" does not exist.`);
 
-    return new RouterBuilder ({routers, policies, listeners}).build ();
+    return new RouterBuilder ({controllers, policies})
+      .addRouter ('/', router)
+      .build ();
   },
 
   /**

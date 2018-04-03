@@ -7,7 +7,7 @@ module.exports = Controller.extend ({
   __invoke () {
     return Action.extend ({
       execute (req, res) {
-        return res.status (200).json ('true');
+        return res.status (200).json (true);
       }
     });
   },
@@ -15,7 +15,7 @@ module.exports = Controller.extend ({
   performGet () {
     return Action.extend ({
       execute (req, res) {
-        return res.status (200).json ('true');
+        return res.status (200).json (true);
       }
     });
   },
