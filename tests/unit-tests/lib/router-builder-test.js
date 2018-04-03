@@ -2,7 +2,6 @@ const {expect} = require ('chai');
 const request  = require ('supertest');
 const express  = require ('express');
 const {check} = require ('express-validator/check');
-const {parallel} = require ('async');
 
 const RouterBuilder = require ('../../../lib/router-builder');
 const Controller = require ('../../../lib/controller');
