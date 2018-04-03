@@ -144,22 +144,20 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { r1 },
           controllers: {
             MainController: new MainController ()
           },
           policies: {}
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
+        let router = builder.addSpecification (r1).build ();
+        let app = express ();
 
-          return request (app)
-            .get ('/r1')
-            .expect (200, {result: 'getLegacyObjectWithValidateFunction'});
-        });
+        app.use (router);
+
+        return request (app)
+          .get ('/r1')
+          .expect (200, {result: 'getLegacyObjectWithValidateFunction'});
       });
 
       it ('should build router containing legacy object with validate schema', function () {
@@ -170,22 +168,20 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { r1 },
           controllers: {
             MainController: new MainController ()
           },
           policies: {}
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
+        const router = builder.addSpecification (r1).build ();
+        const app = express ();
 
-          return request (app)
-            .get ('/r1')
-            .expect (200, {result: 'getLegacyObjectWithValidateSchema'});
-        });
+        app.use (router);
+
+        return request (app)
+          .get ('/r1')
+          .expect (200, {result: 'getLegacyObjectWithValidateSchema'});
       });
     });
 
@@ -198,22 +194,20 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { r1 },
           controllers: {
             MainController: new MainController ()
           },
           policies: {}
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
+        const router = builder.addSpecification (r1).build ();
+        const app = express ();
 
-          return request (app)
-            .get ('/r1')
-            .expect (200, {result: 'getFunction'});
-        });
+        app.use (router);
+
+        return request (app)
+          .get ('/r1')
+          .expect (200, {result: 'getFunction'});
       });
 
       it ('should build router containing action with function array', function () {
@@ -224,22 +218,20 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { r1 },
           controllers: {
             MainController: new MainController ()
           },
           policies: {}
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
+        const router = builder.addSpecification (r1).build ();
+        const app = express ();
 
-          return request (app)
-            .get ('/r1')
-            .expect (200, {result: 'getFunctionArray'});
-        });
+        app.use (router);
+
+        return request (app)
+          .get ('/r1')
+          .expect (200, {result: 'getFunctionArray'});
       });
 
       it ('should build router with sub-routes', function () {
@@ -252,22 +244,20 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { r1 },
           controllers: {
             MainController: new MainController ()
           },
           policies: {}
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
+        const router = builder.addSpecification (r1).build ();
+        const app = express ();
 
-          return request (app)
-            .get ('/s1/r1')
-            .expect (200, {result: 'getFunctionArray'});
-        });
+        app.use (router);
+
+        return request (app)
+          .get ('/s1/r1')
+          .expect (200, {result: 'getFunctionArray'});
       });
     });
 
@@ -280,22 +270,20 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { r1 },
           controllers: {
             MainController: new MainController ()
           },
           policies: {}
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
+        const router = builder.addSpecification (r1).build ();
+        const app = express ();
 
-          return request (app)
-            .get ('/r1')
-            .expect (200, {result: 'getActionWithSchema'});
-        });
+        app.use (router);
+
+        return request (app)
+          .get ('/r1')
+          .expect (200, {result: 'getActionWithSchema'});
       });
 
       it ('should build router containing controller action with validate', function () {
@@ -306,22 +294,20 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { r1 },
           controllers: {
             MainController: new MainController ()
           },
           policies: {}
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
+        const router = builder.addSpecification (r1).build ();
 
-          return request (app)
-            .get ('/r1')
-            .expect (200, {result: 'getActionWithValidate'});
-        });
+        let app = express ();
+        app.use (router);
+
+        return request (app)
+          .get ('/r1')
+          .expect (200, {result: 'getActionWithValidate'});
       });
 
       it ('should build router that fails its validation phase', function () {
@@ -332,29 +318,27 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { r1 },
           controllers: {
             MainController: new MainController ()
           },
           policies: {}
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
-          app.use ((err, req, res, next) => {
-            expect (err).to.be.instanceof (HttpError);
-            expect (err.message).to.equal ('Request validation failed.');
-            expect (err.code).to.equal ('validation_failed');
+        const router = builder.addSpecification (r1).build ();
+        const app = express ();
 
-            res.status (400).json ({error: err.message});
-          });
+        app.use (router);
+        app.use ((err, req, res, next) => {
+          expect (err).to.be.instanceof (HttpError);
+          expect (err.message).to.equal ('Request validation failed.');
+          expect (err.code).to.equal ('validation_failed');
 
-          return request (app)
-            .post ('/r1')
-            .expect (400, {error: 'Request validation failed.'});
+          res.status (400).json ({error: err.message});
         });
+
+        return request (app)
+          .post ('/r1')
+          .expect (400, {error: 'Request validation failed.'});
       });
     });
 
@@ -368,8 +352,6 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { r1 },
           controllers: {
             MainController: new MainController ()
           },
@@ -382,14 +364,14 @@ describe ('lib | RouterBuilder', function () {
           }
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
+        const router = builder.addSpecification (r1).build ();
+        const app = express ();
 
-          return request (app)
-            .get ('/r1')
-            .expect (200, {result: 'getActionWithValidate'});
-        });
+        app.use (router);
+
+        return request (app)
+          .get ('/r1')
+          .expect (200, {result: 'getActionWithValidate'});
       });
 
       it ('should build router with optional policy', function () {
@@ -401,22 +383,20 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { r1 },
           controllers: {
             MainController: new MainController ()
           },
           policies: { }
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
+        let router = builder.addSpecification (r1).build ();
+        let app = express ();
 
-          return request (app)
-            .get ('/r1')
-            .expect (200, {result: 'getActionWithValidate'});
-        });
+        app.use (router);
+
+        return request (app)
+          .get ('/r1')
+          .expect (200, {result: 'getActionWithValidate'});
       });
 
       it ('should build router with missing policy', function () {
@@ -428,21 +408,13 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { r1 },
           controllers: {
             MainController: new MainController ()
           },
           policies: { }
         });
 
-        return builder.build ()
-          .then (router => {
-            expect (router).to.be.null;
-          })
-          .catch (err => {
-            expect (err).to.be.instanceof (Error);
-          });
+        expect (() => builder.addSpecification (r1).build ()).to.throw ('We cannot locate the policy named missing.');
       });
     });
 
@@ -458,28 +430,26 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { users },
           controllers: {
             UserController: new UserController ()
           },
           policies: {}
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
+        let router = builder.addSpecification (users).build ();
 
-          let requests = [
-            request (app).post ('/users').expect (200, {method: 'create'}),
-            request (app).get ('/users').expect (200, {method: 'getAll'}),
-            request (app).get ('/users/1').expect (200, {method: 'getOne', id: 1}),
-            request (app).put ('/users/1').expect (200, {method: 'update', id: 1}),
-            request (app).delete ('/users/1').expect (200, {method: 'delete', id: 1})
-          ];
+        let app = express ();
+        app.use (router);
 
-          return Promise.all (requests);
-        });
+        let requests = [
+          request (app).post ('/users').expect (200, {method: 'create'}),
+          request (app).get ('/users').expect (200, {method: 'getAll'}),
+          request (app).get ('/users/1').expect (200, {method: 'getOne', id: 1}),
+          request (app).put ('/users/1').expect (200, {method: 'update', id: 1}),
+          request (app).delete ('/users/1').expect (200, {method: 'delete', id: 1})
+        ];
+
+        return Promise.all (requests);
       });
 
       it ('should allow a subset of actions', function () {
@@ -493,25 +463,23 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { users },
           controllers: {
             UserController: new UserController ()
           },
           policies: {}
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
+        let router = builder.addSpecification (users).build ();
+        let app = express ();
 
-          let requests = [
-            request (app).post ('/users').expect (404),
-            request (app).get ('/users/1').expect (200, {method: 'getOne', id: 1})
-          ];
+        app.use (router);
 
-          return Promise.all (requests);
-        });
+        let requests = [
+          request (app).post ('/users').expect (404),
+          request (app).get ('/users/1').expect (200, {method: 'getOne', id: 1})
+        ];
+
+        return Promise.all (requests);
       });
 
       it ('should deny a subset of actions', function () {
@@ -526,25 +494,23 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { users },
           controllers: {
             UserController: new UserController ()
           },
           policies: {}
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
+        let router = builder.addSpecification (users).build ();
 
-          let requests = [
-            request (app).post ('/users').expect (200, {method: 'create'}),
-            request (app).get ('/users/1').expect (404)
-          ];
+        let app = express ();
+        app.use (router);
 
-          return Promise.all (requests);
-        });
+        let requests = [
+          request (app).post ('/users').expect (200, {method: 'create'}),
+          request (app).get ('/users/1').expect (404)
+        ];
+
+        return Promise.all (requests);
       });
 
       it ('should build router with resource and policy', function () {
@@ -557,8 +523,6 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { users },
           controllers: {
             UserController: new UserController ()
           },
@@ -578,18 +542,17 @@ describe ('lib | RouterBuilder', function () {
           }
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
-          app.use (router);
-          app.use ((err, req, res, next) => {
-            expect (err).to.be.instanceof (HttpError);
-            res.status (403).json ({code: err.code, message: err.message});
-          });
-
-          return request (app)
-            .post ('/users')
-            .expect (403, {code: 'create_failed', message: 'The create policy failed.'});
+        let router = builder.addSpecification (users).build ();
+        let app = express ();
+        app.use (router);
+        app.use ((err, req, res, next) => {
+          expect (err).to.be.instanceof (HttpError);
+          res.status (403).json ({code: err.code, message: err.message});
         });
+
+        return request (app)
+          .post ('/users')
+          .expect (403, {code: 'create_failed', message: 'The create policy failed.'});
       });
 
       it ('should build router with namespace resource and policy', function () {
@@ -606,8 +569,6 @@ describe ('lib | RouterBuilder', function () {
         };
 
         let builder = new RouterBuilder ({
-          listeners: {},
-          routers: { users },
           controllers: {
             NamespaceUserController: new NamespaceUserController ()
           },
@@ -629,20 +590,20 @@ describe ('lib | RouterBuilder', function () {
           }
         });
 
-        return builder.build ().then (router => {
-          let app = express ();
+        let router = builder.addSpecification (users).build ();
 
-          app.use (router);
+        let app = express ();
 
-          app.use ((err, req, res, next) => {
-            expect (err).to.be.instanceof (HttpError);
-            res.status (403).json ({code: err.code, message: err.message});
-          });
+        app.use (router);
 
-          return request (app)
-            .post ('/users')
-            .expect (403, {code: 'create_failed', message: 'The create policy failed.'});
+        app.use ((err, req, res, next) => {
+          expect (err).to.be.instanceof (HttpError);
+          res.status (403).json ({code: err.code, message: err.message});
         });
+
+        return request (app)
+          .post ('/users')
+          .expect (403, {code: 'create_failed', message: 'The create policy failed.'});
       });
     });
   });

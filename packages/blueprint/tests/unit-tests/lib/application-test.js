@@ -6,9 +6,8 @@ const messaging   = require ('../../../lib/messaging');
 describe ('lib | Application', function () {
 
   function makeApplication () {
-    const appPath = path.resolve (__dirname, '../../dummy/app');
+    const appPath = path.resolve ('./tests/dummy/app');
     return new Application ({appPath, messaging: messaging ()});
-
   }
 
   describe ('configure', function () {
@@ -20,7 +19,7 @@ describe ('lib | Application', function () {
           expect (app).to.have.nested.property ('resources.controllers').to.have.keys (['main','namespace-user','user']);
           expect (app).to.have.nested.property ('resources.listeners').to.have.property ('blueprint\\.app\\.init').to.have.keys (['echo','legacy']);
           expect (app).to.have.nested.property ('resources.policies').to.have.keys (['identity']);
-          expect (app).to.have.nested.property ('resources.routers').to.have.keys (['main','users','v1']);
+          expect (app).to.have.nested.property ('resources.routers').to.have.keys (['main','users','inner','v1']);
         });
     });
   });
@@ -47,5 +46,17 @@ describe ('lib | Application', function () {
           expect (appConfig).to.equal (app.configs.app);
         })
     });
+  });
+
+  describe ('mount', function () {
+    let app = makeApplication ();
+
+    return app.configure ()
+      .then (app => {
+        const router = app.mount ('inner');
+
+        expect (router).to.not.be.null;
+
+      });
   });
 });
