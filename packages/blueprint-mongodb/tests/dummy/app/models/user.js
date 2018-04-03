@@ -1,6 +1,13 @@
 const mongodb = require ('../../../../lib/');
 const Author  = require ('./author');
 
+const bookstore = new mongodb.Schema ({
+  name: {type: String},
+
+  authors: [{type: mongodb.Schema.Types.ObjectId, ref: 'author'}]
+});
+
+
 const schema = new mongodb.Schema ({
   first_name: {type: String},
 
@@ -15,7 +22,9 @@ const schema = new mongodb.Schema ({
   random_id: {type: mongodb.Schema.Types.ObjectId},
 
   // Array of ObjectIds that can be populated.
-  blacklist: [{type: mongodb.Schema.Types.ObjectId, ref: Author.modelName}]
+  blacklist: [{type: mongodb.Schema.Types.ObjectId, ref: Author.modelName}],
+
+  bookstore: bookstore
 });
 
 module.exports = mongodb.model ('user', schema, 'blueprint_users');

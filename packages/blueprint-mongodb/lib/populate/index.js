@@ -1,32 +1,54 @@
 const ModelRegistry = require ('./model-registry');
 const Population = require ('./Population');
 
-const registry = new ModelRegistry ();
-
 const {
   isArray
 } = require ('lodash');
 
-/**
- * Populate the data.
- *
- * @param data
- * @param Model
- */
-function populate (data, Model) {
-  // First, let's add this model to the global registry.
-  registry.addModel (Model);
-
-  // Now, let's create a population container that will be used to track
-  // our current progress of populating the data. We are going to start
-  // with the data for the root model element.
-  let population = new Population ({registry});
-
-  let p = isArray (data) ?
-    population.populateArray (key, data) :
-    population.populateElement (key, data);
-
-  return p.then (() => population.models);
+function getModel (model) {
+  let name = model.constructor.modelName;
+  return model.db.models[name];
 }
 
-module.exports = populate;
+/**
+ * Populate a model.
+ *
+ * @param   model       Model to populate.
+ * @return  Promise <Population>
+ */
+function populateModel (model) {
+  // Get the registered model type.
+  const Model = getModel (model);
+
+  // Create a new register, and add the root Model to it.
+  const registry = new ModelRegistry ();
+  registry.addModel (Model);
+
+  // Create a new population for this registry. Then, add the
+  // root model to the population.
+  const population = new Population ({registry});
+  return population.addModel (model).then (population => population.models);
+}
+
+/**
+ * Populate an array of models.
+ *
+ * @param models
+ */
+function populateModels (models) {
+  const registry = new ModelRegistry ();
+
+  // Add the model types to the registry.
+  models.forEach (model => {
+    const Model = getModel (model);
+    registry.addModel (Model);
+  });
+
+  // Create a new population for this registry. Then, add the
+  // root model to the population.
+  const population = new Population ({registry});
+  return population.addModels (models).then (population => population.models);
+}
+
+exports.populateModel = populateModel;
+exports.populateModels = populateModels;
