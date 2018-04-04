@@ -19,11 +19,9 @@
     "url": "https://github.com/onehilltech/blueprint-testing/issues"
   },
   "homepage": "https://github.com/onehilltech/blueprint-testing#readme",
-  "devDependencies": {
+  "dependencies": {
+    "path": "^0.12.7",
     "mocha": "^5.0.5",
     "supertest": "^3.0.0"
-  },
-  "dependencies": {
-    "path": "^0.12.7"
   }
 }
