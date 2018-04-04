@@ -44,7 +44,7 @@ describe ('app | services | mongodb', function () {
 
   describe ('createConnection', function () {
     it ('should not create duplicate connections', function () {
-      let service = makeService ()
+      let service = makeService ();
       service.createConnection ('$default');
 
       expect (service.connections).to.have.keys (['$default', 'priority']);

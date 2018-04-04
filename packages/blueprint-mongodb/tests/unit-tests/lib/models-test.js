@@ -2,6 +2,8 @@ const {expect}  = require ('chai');
 const {resolve} = require ('path');
 const blueprint = require ('@onehilltech/blueprint');
 
+const {test} = require ('@onehilltech/blueprint-testing');
+
 const Schema = require ('../../../lib/schema');
 
 const {
@@ -12,15 +14,6 @@ const {
 } = require ('../../../lib/models');
 
 describe ('lib | models', function () {
-  beforeEach (function () {
-    const appPath = resolve ('./tests/dummy/app');
-    return blueprint.createApplication (appPath);
-  });
-
-  afterEach (function () {
-    return blueprint.destroyApplication ();
-  });
-
   describe ('model', function () {
     it ('should create model on default connection', function () {
       const schema = new Schema ({ first_name: String, last_name: String });

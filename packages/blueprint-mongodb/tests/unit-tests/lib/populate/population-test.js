@@ -16,30 +16,18 @@ function createTestPopulation () {
 
 describe ('lib | populate | Population', function () {
   beforeEach (function () {
-    const appPath = resolve ('./tests/dummy/app');
-
-    return blueprint.createApplicationAndStart (appPath)
-      .then (() => Promise.all (
-        [
-          blueprint.lookup ('model:author').remove (),
-          blueprint.lookup ('model:user').remove ()
-        ])
-      ).then (() => blueprint.lookup ('model:author').create (
-        [
-          {name: 'John Doe'},
-          {name: 'Robert Young'},
-          {name: 'Tom Smith'}
-        ])
-      ).then ((authors) => blueprint.lookup ('model:user').create (
-        [
+    return Promise.all ([
+      blueprint.lookup ('model:author').remove (),
+      blueprint.lookup ('model:user').remove ()
+    ]).then (() => blueprint.lookup ('model:author').create ([
+      {name: 'John Doe'},
+      {name: 'Robert Young'},
+      {name: 'Tom Smith'}
+      ]))
+      .then ((authors) => blueprint.lookup ('model:user').create ([
           {first_name: 'Paul', last_name: 'Black', favorite_author: authors[0]._id, blacklist: [authors[0]._id, authors[1]._id]},
           {first_name: 'John', last_name: 'Smith', favorite_author: authors[0]._id}
-        ])
-      );
-  });
-
-  afterEach (function () {
-    return blueprint.destroyApplication ();
+          ]));
   });
 
   describe ('constructor', function () {

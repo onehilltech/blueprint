@@ -20,17 +20,15 @@
     "url": "https://github.com/onehilltech/blueprint-mongodb.git"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.0.0-19",
+    "@onehilltech/blueprint": "^4.0.0-21",
     "@onehilltech/dab": "^0.10.3",
     "moment": "^2.19.1"
   },
   "devDependencies": {
+    "@onehilltech/blueprint-testing": "^0.4.0",
     "chai": "^4.1.2",
     "chai-datetime": "^1.5.0",
-    "istanbul": "^0.4.5",
-    "mocha": "^4.0.1",
-    "superagent": "^3.6.3",
-    "supertest": "^3.0.0"
+    "istanbul": "^0.4.5"
   },
   "license": "Apache-2.0",
   "engines": {

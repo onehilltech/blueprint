@@ -16,14 +16,21 @@ const DEFAULT_CONNECTION_NAME = '$default';
 
 mongoose.Promise = Promise;
 
+/**
+ * @class MongoDbService
+ */
 module.exports = Service.extend ({
   /// Named connections managed by the service.
-  _connections: { },
+  _connections: null,
 
-  _appStart: barrier ('blueprint.app.start', 'blueprint-mongodb:mongodb'),
+  /// The application start barrier.
+  _appStart: null,
 
   init () {
     this._super.apply (this, arguments);
+
+    this._connections = {};
+    this._appStart = barrier ('blueprint.app.start', this);
 
     Object.defineProperty (this, 'defaultConnection', {
       get () { return this._connections[this._defaultName]; }

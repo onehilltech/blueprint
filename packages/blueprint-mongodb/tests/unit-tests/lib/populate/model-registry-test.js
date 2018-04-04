@@ -1,6 +1,5 @@
-const blueprint   = require ('@onehilltech/blueprint');
-const { expect }  = require ('chai');
-const { resolve } = require ('path');
+const blueprint  = require ('@onehilltech/blueprint');
+const { expect } = require ('chai');
 
 const ModelRegistry = require ('../../../../lib/populate/model-registry');
 const PopulateElement = require ('../../../../lib/populate/populate-element');
@@ -8,24 +7,15 @@ const PopulateArray = require ('../../../../lib/populate/populate-array');
 
 describe ('lib | populate | ModelRegistry', function () {
   beforeEach (function () {
-    const appPath = resolve ('./tests/dummy/app');
-
-    return blueprint.createApplicationAndStart (appPath)
-      .then (() => Promise.all ([
-        blueprint.lookup ('model:author').remove (),
-        blueprint.lookup ('model:user').remove ()
-      ]))
-      .then (() => blueprint.lookup ('model:author').create ({name: 'John Doe'}))
-      .then ((author) => blueprint.lookup ('model:user').create (
-        [
-          {first_name: 'Paul', last_name: 'Black', favorite_author: author._id},
-          {first_name: 'John', last_name: 'Smith', favorite_author: author._id}
+    return Promise.all ([
+      blueprint.lookup ('model:author').remove (),
+      blueprint.lookup ('model:user').remove ()
+    ]).then (() => blueprint.lookup ('model:author').create ({name: 'John Doe'}))
+      .then ((author) => blueprint.lookup ('model:user').create ([
+        {first_name: 'Paul', last_name: 'Black', favorite_author: author._id},
+        {first_name: 'John', last_name: 'Smith', favorite_author: author._id}
         ])
       );
-  });
-
-  afterEach (function () {
-    return blueprint.destroyApplication ();
   });
 
   describe ('addModel', function () {

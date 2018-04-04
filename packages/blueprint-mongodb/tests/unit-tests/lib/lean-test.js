@@ -1,17 +1,9 @@
-const {resolve} = require ('path');
 const {expect}  = require ('chai');
 const blueprint = require ('@onehilltech/blueprint');
-const lean = require ('../../../lib/lean');
+const testing   = require ('@onehilltech/blueprint-testing');
+const lean      = require ('../../../lib/lean');
 
 describe ('lib | lean', function () {
-  beforeEach (function () {
-    return blueprint.createApplication (resolve ('./tests/dummy/app'));
-  });
-
-  afterEach (function () {
-    return blueprint.destroyApplication ();
-  });
-
   it ('should convert model to raw object', function () {
     const User = blueprint.lookup ('model:user');
     const user = new User ({first_name: 'James', last_name: 'Hill', email: 'james@no-reply.com'});

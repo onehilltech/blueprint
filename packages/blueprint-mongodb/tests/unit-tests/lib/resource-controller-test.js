@@ -1,6 +1,6 @@
 const {expect}  = require ('chai');
-const {resolve} = require ('path');
 const blueprint = require ('@onehilltech/blueprint');
+const testing   = require ('@onehilltech/blueprint-testing');
 
 const {
   Types: {
@@ -10,14 +10,7 @@ const {
 
 describe ('lib | ResourceController', function () {
   beforeEach (function () {
-    const appPath = resolve ('./tests/dummy/app');
-
-    return blueprint.createApplicationAndStart (appPath)
-      .then (() => blueprint.lookup ('model:author').remove ());
-  });
-
-  afterEach (function () {
-    return blueprint.destroyApplication ();
+    return blueprint.lookup ('model:author').remove ();
   });
 
   describe ('constructor', function () {
@@ -35,7 +28,7 @@ describe ('lib | ResourceController', function () {
     it ('should create a resource', function () {
       const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
 
-      return blueprint.testing.request ()
+      return testing.request ()
         .post ('/authors')
         .send ({author})
         .expect (200, {author: Object.assign ({}, {__v: 0}, author)});
@@ -44,7 +37,7 @@ describe ('lib | ResourceController', function () {
     it ('should call each subclass method', function () {
       const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
 
-      return blueprint.testing.request ()
+      return testing.request ()
         .post ('/callbacks')
         .send ({author})
         .then (() => {
@@ -62,11 +55,11 @@ describe ('lib | ResourceController', function () {
     it ('should not create duplicate resources', function () {
       const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
 
-      return blueprint.testing.request ()
+      return testing.request ()
         .post ('/authors')
         .send ({author})
         .then (() => {
-          return blueprint.testing.request ()
+          return testing.request ()
             .post ('/authors')
             .send ({author})
             .expect (400, { errors:
@@ -86,7 +79,7 @@ describe ('lib | ResourceController', function () {
 
       return Author.create (author)
         .then (() => {
-          return blueprint.testing.request ()
+          return testing.request ()
             .get ('/authors')
             .expect (200, result);
         });
@@ -101,7 +94,7 @@ describe ('lib | ResourceController', function () {
 
       return Author.create (author)
         .then (() => {
-          return blueprint.testing.request ()
+          return testing.request ()
             .get (`/authors/${author._id}`)
             .expect (200, result);
         });
@@ -115,7 +108,7 @@ describe ('lib | ResourceController', function () {
 
       return Author.create (author)
         .then (() => {
-          return blueprint.testing.request ()
+          return testing.request ()
             .put (`/authors/${author._id}`)
             .send ({author: {name: 'John Doe'}})
             .expect (200, {author: Object.assign ({__v: 0}, author, {name: 'John Doe'})});
@@ -125,7 +118,7 @@ describe ('lib | ResourceController', function () {
     it ('should not find resource to update', function () {
       const id = new ObjectId ().toString ();
 
-      return blueprint.testing.request ()
+      return testing.request ()
         .put (`/authors/${id}`)
         .send ({author: {name: 'John Doe'}})
         .expect (404, { errors: [ { code: 'not_found', detail: 'Not found', status: '404' } ] });
@@ -139,7 +132,7 @@ describe ('lib | ResourceController', function () {
 
       return Author.create (author)
         .then (() => {
-          return blueprint.testing.request ()
+          return testing.request ()
             .delete (`/authors/${author._id}`)
             .expect (200, 'true');
         });
