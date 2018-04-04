@@ -4,9 +4,9 @@ const PopulateVisitor = require ('./populate-visitor');
 
 const {
   differenceWith,
-  forOwn,
   flattenDeep,
   mapValues,
+  values
 } = require ('lodash');
 
 /**
@@ -58,6 +58,10 @@ module.exports = CoreObject.extend ({
     this._addModels (type, [model]);
 
     let populator = this.registry.lookup (model.constructor);
+
+    if (!populator)
+      return Promise.reject (`Populator for ${model.constructor} does not exist.`);
+
     return this._populate (populator, model);
   },
 
@@ -163,13 +167,11 @@ module.exports = CoreObject.extend ({
     if (!data)
       return Promise.resolve (this);
 
-    let tasks = [];
-
-    forOwn (populators, (populator, path) => {
+    let mapping = mapValues (populators, (populator, path) => {
       const value = data[path];
 
       if (!value || value.length === 0)
-        return;
+        return null;
 
       // Determine the ids that we need to populate at this point in time. If we
       // have seen all the ids, then there is no need to populate the value(s).
@@ -191,13 +193,13 @@ module.exports = CoreObject.extend ({
       const {unseen} = saveUnseenIds;
 
       if (!unseen || (unseen.length !== undefined && unseen.length === 0))
-        return;
+        return null;
 
-      const promise = populator.populate (unseen).then (populated => {
+      return populator.populate (unseen).then (populated => {
         // Add the populated models to our population.
         const v = new PopulateVisitor ({
-          population: this,
           promise: null,
+          population: this,
 
           visitPopulateElement (item) {
             this.population._addModels (item.plural, [populated]);
@@ -205,8 +207,15 @@ module.exports = CoreObject.extend ({
           },
 
           visitPopulateArray (item) {
-            this.population._addModels (item.plural, populated);
-            this.promise = this.population._populateArray (item.key, populated);
+            const populator = this.population.registry.models [item.key];
+
+            if (populator) {
+              this.population._addModels (item.plural, populated);
+              this.promise = this.population._populateArray (populator, populated);
+            }
+            else {
+              this.promise = Promise.reject (new Error (`Populator for ${item.key} does not exist.`));
+            }
           }
         });
 
@@ -214,10 +223,8 @@ module.exports = CoreObject.extend ({
 
         return v.promise;
       });
-
-      tasks.push (promise);
     });
 
-    return Promise.all (tasks).then (() => this);
+    return Promise.all (values (mapping)).then (() => this);
   }
 });
