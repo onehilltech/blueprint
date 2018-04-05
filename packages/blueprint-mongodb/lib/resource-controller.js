@@ -1,6 +1,7 @@
 const {
   extend,
-  omit
+  omit,
+  forOwn
 } = require ('lodash');
 
 const pluralize  = require ('pluralize');
@@ -361,7 +362,7 @@ module.exports = ResourceController.extend ({
        */
       execute (req, res) {
         const id = req.params[this.controller.resourceId];
-        const update = req.body[this.controller.name];
+        let update = this.controller._getUpdateFromBody (req.body[this.controller.name]);
 
         // Allow the subclass to override the contents in both the update and
         // options variable.
@@ -417,7 +418,7 @@ module.exports = ResourceController.extend ({
        *
        * @returns {null|Promise}
        */
-      preUpdateModel () {
+      preUpdateModel (req) {
         return null;
       },
 
@@ -530,6 +531,37 @@ module.exports = ResourceController.extend ({
       prefix += '.';
 
     return `${prefix}${this.name}.${action}`;
+  },
+
+  /**
+   * Get the update object from the body.
+   *
+   * @param body
+   * @returns {{}}
+   * @private
+   */
+  _getUpdateFromBody (body) {
+    let update = {};
+
+    let $set = {};
+    let $unset = {};
+
+    forOwn (body, (value, name) => {
+      if (value !== null)
+        $set[name] = value;
+      else
+        $unset[name] = 1;
+    });
+
+    // Include the $set and $unset properties only if there are updates
+    // associated with either one.
+    if (Object.keys ($set).length !== 0)
+      update.$set = $set;
+
+    if (Object.keys ($unset).length !== 0)
+      update.$unset = $unset;
+
+    return update;
   }
 });
 
@@ -602,35 +634,6 @@ ResourceController.prototype._getIdSanitizer = function (opts) {
 
   let id = objectPath (opts.id);
   return id.get ('sanitizer', defaults.get ('sanitizer', 'toMongoId'));
-};
-
-ResourceController.prototype._getUpdateFromBody = function (body) {
-  let update = {};
-
-  let $set = {};
-  let $unset = {};
-
-  for (let name in body) {
-    if (!body.hasOwnProperty (name) || name === '_id')
-      continue;
-
-    let value = body[name];
-
-    if (value !== null)
-      $set[name] = value;
-    else
-      $unset[name] = 1;
-  }
-
-  // Include the $set and $unset properties only if there are updates
-  // associated with either one.
-  if (Object.keys ($set).length !== 0)
-    update.$set = $set;
-
-  if (Object.keys ($unset).length !== 0)
-    update.$unset = $unset;
-
-  return update;
 };
 
 */
