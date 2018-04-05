@@ -1,5 +1,6 @@
 const {
-  extend
+  extend,
+  omit
 } = require ('lodash');
 
 const pluralize  = require ('pluralize');
@@ -119,16 +120,10 @@ module.exports = ResourceController.extend ({
                 return this.postCreateModel (req, result);
               });
           })
-          .then (data => {
-
-            // Initialize the result with the data. We are now going to give the
-            // subclass a chance to add more content to the response.
-            const result = { [name]: data };
-            return this.prepareResponse (res, result);
-          })
-          .then (result => {
-            res.status (200).json (result);
-          });
+          // Initialize the result with the data. We are now going to give the
+          // subclass a chance to add more content to the response.
+          .then (data => this.prepareResponse (res, { [name]: data }))
+          .then (result => res.status (200).json (result));
       },
 
       prepareDocument (req, doc) {
@@ -167,32 +162,17 @@ module.exports = ResourceController.extend ({
     return DatabaseAction.extend ({
       execute (req, res) {
         // Update the options with those from the query string.
-        const {query} = req;
-        const {options} = query;
-        let opts = {};
+        let {query} = req;
 
-        if (options) {
-          // Remove the options from the query object because we do not
-          // want them to interfere with the filter parameters.
-          delete query.options;
+        // Copy the directives from the query, and then delete them.
+        const {_populate, _limit, _skip, _sort} = query;
+        query = omit (query, ['_populate','_limit','_skip','_sort']);
 
-          // Copy over the acceptable options because we do not want to
-          // the client to submit invalid/unacceptable options.
+        let options = { };
 
-          if (options.limit)
-            opts.limit = options.limit;
-
-          if (options.skip)
-            opts.skip = options.skip;
-
-          if (options.sort)
-            opts.sort = options.sort;
-        }
-        else {
-          // There are not options. Let's initialize the options to
-          // the default options (i.e., empty options).
-          opts = {};
-        }
+        if (_limit) options.limit = _limit;
+        if (_skip) options.skip = _skip;
+        if (_sort) options.sort = _sort;
 
         // Prepare the filter, projection, and options for the request
         // against the database.
@@ -200,7 +180,7 @@ module.exports = ResourceController.extend ({
         const preparations = [
           this.getFilter (req, query),
           this.getProjection (req),
-          this.getOptions (req, opts)
+          this.getOptions (req, options)
         ];
 
         return Promise.all (preparations)
@@ -233,26 +213,15 @@ module.exports = ResourceController.extend ({
                 return this.postGetModels (req, models);
               })
               .then (data => {
-                let result = {
-                  [this.controller.plural]: data
-                };
-
-                if (!opts.populate)
-                  return result;
-
-                /*
-                return populate (data, self._model, function (err, details) {
-                  result = _.extend (result, details);
-                  return callback (null, result);
-                });
-                */
+                if (_populate) {
+                  return populate.populateModels (data);
+                }
+                else {
+                  return {[this.controller.plural]: data};
+                }
               })
-              .then (result => {
-                return this.prepareResponse (res, result);
-              })
-              .then (result => {
-                res.status (200).json (result);
-              });
+              .then (result => this.prepareResponse (res, result))
+              .then (result => res.status (200).json (result));
           });
       },
 
@@ -299,14 +268,17 @@ module.exports = ResourceController.extend ({
       execute (req, res) {
         // Update the options with those from the query string.
         const id = req.params[this.controller.resourceId];
-        const options = req.query.options || {};
 
-        // Prepare the filter, projection, and options for the request
-        // against the database.
+        // Update the options with those from the query string.
+        let {query} = req;
+
+        // Copy the directives from the query, and then delete them.
+        const {_populate} = query;
+        query = delete query._populate;
 
         const preparations = [
           this.getProjection (req),
-          this.getOptions (req, options)
+          this.getOptions (req, {})
         ];
 
         return Promise.all (preparations)
@@ -329,24 +301,15 @@ module.exports = ResourceController.extend ({
                 return this.postGetModel (req, model);
               })
               .then (data => {
-
-                return  {
-                  [this.controller.name]: data
-                };
-
-                /*
-                return populate (data, self._model, function (err, details) {
-                  result = _.extend (result, details);
-                  return callback (null, result);
-                });
-                */
+                if (_populate) {
+                  return populate.populateModel (data);
+                }
+                else {
+                  return {[this.controller.name]: data};
+                }
               })
-              .then (result => {
-                return this.prepareResponse (res, result);
-              })
-              .then (result => {
-                res.status (200).json (result);
-              });
+              .then (result => this.prepareResponse (res, result))
+              .then (result => res.status (200).json (result));
           });
       },
 
@@ -422,12 +385,8 @@ module.exports = ResourceController.extend ({
 
                 return this.postUpdateModel (req, model);
               })
-              .then (model => {
-                return this.prepareResponse (res, {[this.controller.name]: model})
-              })
-              .then (result => {
-                return res.status (200).json (result);
-              });
+              .then (model => this.prepareResponse (res, {[this.controller.name]: model}))
+              .then (result => res.status (200).json (result));
           });
       },
 
