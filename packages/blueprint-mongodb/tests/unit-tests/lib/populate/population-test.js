@@ -19,15 +19,18 @@ describe ('lib | populate | Population', function () {
     return Promise.all ([
       blueprint.lookup ('model:author').remove (),
       blueprint.lookup ('model:user').remove ()
-    ]).then (() => blueprint.lookup ('model:author').create ([
-      {name: 'John Doe'},
-      {name: 'Robert Young'},
-      {name: 'Tom Smith'}
-      ]))
-      .then ((authors) => blueprint.lookup ('model:user').create ([
-          {first_name: 'Paul', last_name: 'Black', favorite_author: authors[0]._id, blacklist: [authors[0]._id, authors[1]._id]},
-          {first_name: 'John', last_name: 'Smith', favorite_author: authors[0]._id}
-          ]));
+    ]).then (() => blueprint.lookup ('model:author').create (
+      [
+        {name: 'John Doe'},
+        {name: 'Robert Young'},
+        {name: 'Tom Smith'}
+      ])
+    ).then ((authors) => blueprint.lookup ('model:user').create (
+      [
+        {first_name: 'Paul', last_name: 'Black', favorite_author: authors[0]._id, blacklist: [authors[0]._id, authors[1]._id]},
+        {first_name: 'John', last_name: 'Smith', favorite_author: authors[0]._id}
+      ])
+    );
   });
 
   describe ('constructor', function () {
@@ -59,7 +62,7 @@ describe ('lib | populate | Population', function () {
       const Author = blueprint.lookup ('model:author');
 
       const promises = [
-        User.find (),
+        User.find ({first_name: 'Paul', last_name: 'Black'}),
         Author.find ()
       ];
 

@@ -1,6 +1,5 @@
 const blueprint   = require ('@onehilltech/blueprint');
 const { expect }  = require ('chai');
-const { resolve } = require ('path');
 
 const lean = require ('../../../../lib/lean');
 
@@ -36,7 +35,7 @@ describe ('lib | populate', function () {
       const Author = blueprint.lookup ('model:author');
 
       const promises = [
-        User.find (),
+        User.find ({first_name: 'Paul', last_name: 'Black'}),
         Author.find ()
       ];
 

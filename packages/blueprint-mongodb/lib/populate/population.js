@@ -1,6 +1,7 @@
 const CoreObject = require ('core-object');
 const pluralize  = require ('pluralize');
 const PopulateVisitor = require ('./populate-visitor');
+const lean = require ('../../lib/lean');
 
 const {
   differenceWith,
@@ -8,6 +9,8 @@ const {
   mapValues,
   values
 } = require ('lodash');
+
+const util = require ('util');
 
 /**
  * @class Population
@@ -62,7 +65,10 @@ module.exports = CoreObject.extend ({
     if (!populator)
       return Promise.reject (`Populator for ${model.constructor} does not exist.`);
 
-    return this._populate (populator, model);
+    if (Object.keys (populator).length === 0)
+      return Promise.resolve (this);
+
+    return this._populate (populator, model).then (() => this);
   },
 
   /**
@@ -150,9 +156,9 @@ module.exports = CoreObject.extend ({
     // partial result can be ignored since we are will be adding the populated
     // object directly to the result.
 
-    const tasks = arr.map (model => this._populate (populator, model));
-
-    return Promise.all (tasks);
+    return Promise.all (arr.map (model => {
+      this._populateElement (populator, model)
+    }));
   },
 
   /**
@@ -203,15 +209,22 @@ module.exports = CoreObject.extend ({
 
           visitPopulateElement (item) {
             this.population._addModels (item.plural, [populated]);
+
+            if (Object.keys (populator).length === 0)
+              return;
+
             this.promise = this.population._populateElement (populator, populated);
           },
 
           visitPopulateArray (item) {
+            // Add the array of model to our population.
+            this.population._addModels (item.plural, populated);
+
             const populator = this.population.registry.models [item.key];
 
             if (populator) {
-              this.population._addModels (item.plural, populated);
-              this.promise = this.population._populateArray (populator, populated);
+              if (Object.keys (populator).length !== 0)
+                this.promise = this.population._populateArray (populator, populated);
             }
             else {
               this.promise = Promise.reject (new Error (`Populator for ${item.key} does not exist.`));
@@ -225,6 +238,6 @@ module.exports = CoreObject.extend ({
       });
     });
 
-    return Promise.all (values (mapping)).then (() => this);
+    return Promise.all (values (mapping));
   }
 });
