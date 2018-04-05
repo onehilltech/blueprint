@@ -88,7 +88,7 @@ describe ('lib | populate | Population', function () {
       const Author = blueprint.lookup ('model:author');
 
       const promises = [
-        User.find (),
+        User.find ({first_name: 'Paul', last_name: 'Black'}),
         Author.find ()
       ];
 

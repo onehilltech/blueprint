@@ -156,9 +156,7 @@ module.exports = CoreObject.extend ({
     // partial result can be ignored since we are will be adding the populated
     // object directly to the result.
 
-    return Promise.all (arr.map (model => {
-      this._populateElement (populator, model)
-    }));
+    return Promise.all (arr.map (model => this._populateElement (populator, model)));
   },
 
   /**
