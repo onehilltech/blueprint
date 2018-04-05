@@ -123,6 +123,20 @@ describe ('lib | ResourceController', function () {
         .send ({author: {name: 'John Doe'}})
         .expect (404, { errors: [ { code: 'not_found', detail: 'Not found', status: '404' } ] });
     });
+
+    it ('should delete a field on the resource', function () {
+      const User = blueprint.lookup ('model:user');
+      const user = {_id: new ObjectId ().toString (), first_name: 'John', last_name: 'Doe'};
+
+      return User.create (user)
+        .then (() => {
+          return testing.request ()
+            .put (`/users/${user._id}`)
+            .send ({user: {last_name: null}})
+            .expect (200, {user: Object.assign ({__v: 0, _id: user._id}, {first_name: 'John', blacklist: []})});
+        });
+
+    });
   });
 
   describe ('delete', function () {

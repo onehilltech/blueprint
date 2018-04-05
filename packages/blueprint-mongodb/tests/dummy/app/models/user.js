@@ -27,4 +27,4 @@ const schema = new mongodb.Schema ({
   bookstore: bookstore
 });
 
-module.exports = mongodb.model ('user', schema, 'blueprint_users');
+module.exports = mongodb.resource ('user', schema, 'blueprint_users');
