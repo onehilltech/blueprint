@@ -1,10 +1,6 @@
-const {expect}  = require ('chai');
-const {resolve} = require ('path');
 const blueprint = require ('@onehilltech/blueprint');
-
-const {test} = require ('@onehilltech/blueprint-testing');
-
-const Schema = require ('../../../lib/schema');
+const {expect}  = require ('chai');
+const {Schema}  = require ('mongoose');
 
 const {
   model,
