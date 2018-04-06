@@ -53,28 +53,11 @@ describe ('lib.ResourceController', function () {
           }, done);
       });
 
-      it ('should not create resource; missing parameters', function (done) {
-        blueprint.testing.request ()
-          .post ('/person')
-          .send ({person: {gender: 'Ok'}})
-          .expect (400, {
-            errors: [{
-              status: '400',
-              code: 'validation_failed',
-              detail: 'Request validation failed',
-              meta: {
-                validation: {
-                  'person.address.city': { location: 'params', param: 'person.address.city', msg: 'Invalid value' },
-                  'person.address.state': { location: 'params', param: 'person.address.state', msg: 'Invalid value' },
-                  'person.address.street': { location: 'params', param: 'person.address.street', msg: 'Invalid value' },
-                  'person.address.zipcode': { location: 'params', param: 'person.address.zipcode', msg: 'Invalid value' },
-                  'person.age': { location: 'params', param: 'person.age', msg: 'Invalid value'},
-                  'person.gender': { location: 'body', param: "person.gender", msg: "Expected [ 'Female', 'Male' ]", value: 'Ok'},
-                  'person.dob': { location: 'params', param: "person.dob", msg: 'Invalid value'}
-                }
-              }
-            }]
-          }, done);
+      it ('should not create resource; missing parameters', function () {
+        return testing.request ()
+          .post ('/authors')
+          .send ({author: {}})
+          .expect (400, {});
       });
     });
 

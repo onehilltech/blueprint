@@ -69,6 +69,28 @@ describe ('lib | ResourceController', function () {
         });
 
     });
+
+    it ('should not create resource; missing parameters', function () {
+      return testing.request ()
+        .post ('/authors')
+        .send ({author: {}})
+        .expect (400, {
+          errors: [{
+            status: '400',
+            code: 'validation_failed',
+            detail: 'The request validation failed.',
+            meta: {
+              validation: {
+                'author.name': {
+                  location: 'body',
+                  msg: 'This field is required.',
+                  param: 'author.name'
+                }
+              }
+            }
+          }]
+        });
+    });
   });
 
   describe ('getAll', function () {

@@ -51,8 +51,9 @@ function buildValidationForSchemaType (schemaType, opts = {}) {
     schema.optional = {options: { checkFalsy: true }};
   }
   else if (schemaType.isRequired && !(hasDefault || allOptional)) {
-    schema.notEmpty = {
-      errorMessage: '%s is required.',
+    schema.isLength = {
+      errorMessage: 'This field is required.',
+      options: {min: 1}
     };
   }
 
