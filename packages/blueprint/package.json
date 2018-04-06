@@ -36,9 +36,9 @@
     "winston": "^2.4.1"
   },
   "scripts": {
-    "test": "env NODE_ENV=test mocha --reporter spec tests/**/*-test.js",
-    "cover": "env NODE_ENV=test istanbul cover _mocha -- tests/**/*-test.js",
-    "coveralls": "env NODE_ENV=test istanbul cover _mocha --report lcovonly -- tests/unit-tests --recursive && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "test": "env NODE_ENV=test mocha --exit --reporter spec tests/**/*-test.js",
+    "cover": "env NODE_ENV=test istanbul cover _mocha -- --exit tests/**/*-test.js",
+    "coveralls": "env NODE_ENV=test istanbul cover _mocha --exit --report lcovonly -- tests/unit-tests --recursive && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "devDependencies": {
     "chai": "^4.1.2",
