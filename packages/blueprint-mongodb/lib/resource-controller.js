@@ -83,7 +83,6 @@ module.exports = ResourceController.extend ({
     assert (this.model.schema.options.resource, `${modelName} is not a resource; model must be created using resource() method.`);
 
     this.plural = pluralize (this.name);
-    this._idOpts = opts.idOptions || {};
 
     // Build the validation schema for create and update.
     this._defaultValidationOptions = {pathPrefix: this.name};
