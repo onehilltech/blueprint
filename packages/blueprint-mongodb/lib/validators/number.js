@@ -40,7 +40,7 @@ module.exports = function (path) {
   if (!kind)
     return DEFAULT_SCHEMA;
 
-  assert (kinds.includes (kind), `The kind must be one of the following: ${kinds}`);
+  assert (kinds.includes (kind), `The kind must be one of the following: ${kinds}.`);
   const validator = `is${kind}`;
 
   schema[validator] = {

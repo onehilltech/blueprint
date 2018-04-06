@@ -48,6 +48,6 @@ describe ('lib | validators | number', function () {
 
   it ('should fail because of unsupported kind', function () {
     let options = {options: {validation: {kind: 'Bar'}}};
-    expect (validator.bind (validator, options)).to.throw ('The kind must be one of the following: Decimal,Float,Int,Numeric');
+    expect (validator.bind (validator, options)).to.throw ('The kind must be one of the following: Decimal,Float,Int,Numeric.');
   });
 });
