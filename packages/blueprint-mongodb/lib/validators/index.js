@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-exports.Number = require ('./Number');
-exports.ObjectID = require ('./ObjectID');
-exports.String = require ('./String');
-exports.Date = require ('./Date');
+exports.Number = require ('./number');
+exports.ObjectID = require ('./objectid');
+exports.String = require ('./string');
+exports.Date = require ('./date');
