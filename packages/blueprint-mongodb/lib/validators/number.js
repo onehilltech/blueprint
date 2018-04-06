@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const util = require ('util');
+const assert = require ('assert');
 
 const kinds = [
   'Decimal',
@@ -23,27 +23,37 @@ const kinds = [
   'Numeric'
 ];
 
-module.exports = function (path) {
-  var schema = {};
+const DEFAULT_SCHEMA = {
+  isInt: {errorMessage: 'The number is an invalid format.'},
+  toInt: true
+};
 
+module.exports = function (path) {
   const validation = path.options.validation;
 
-  if (validation) {
-    if (validation.kind) {
-      var kind = validation.kind;
+  if (!validation)
+    return DEFAULT_SCHEMA;
 
-      if (kinds.indexOf (kind) === -1)
-        throw new Error (util.format ('Invalid number kind: %s', kind));
+  let schema = {};
+  const {kind, options} = validation;
 
-      const isKind = 'is' + kind;
-      schema[isKind] = {
-        errorMessage: util.format ('Invalid/missing %s', kind)
-      };
+  if (!kind)
+    return DEFAULT_SCHEMA;
 
-      if (validation.options)
-        schema[isKind].options = validation.options;
-    }
-  }
+  assert (kinds.includes (kind), `The kind must be one of the following: ${kinds}`);
+  const validator = `is${kind}`;
+
+  schema[validator] = {
+    errorMessage: 'The number is an invalid format.'
+  };
+
+  if (options)
+    schema[validator].options = options;
+
+  if (kind === 'Float' || kind === 'Decimal')
+    schema.toFloat = true;
+  else if (kind === 'Int' || kind === 'Numeric')
+    schema.toInt = true;
 
   return schema;
 };
