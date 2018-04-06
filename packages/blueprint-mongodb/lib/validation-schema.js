@@ -18,7 +18,14 @@ const {extend}   = require ('lodash');
 const {get, has} = require ('object-path');
 const validators = require ('./validators');
 
-function makeValidationForSchemaType (schemaType, opts = {}) {
+/**
+ * Build the validation of a single schema type.
+ *
+ * @param schemaType
+ * @param opts
+ * @returns {{}}
+ */
+function buildValidationForSchemaType (schemaType, opts = {}) {
   // Build the general-purpose schema for the path.
   let schema = {};
 
@@ -38,7 +45,33 @@ function makeValidationForSchemaType (schemaType, opts = {}) {
     };
   }
 
-  // Build the instance schema for the path.
+  // Add the generic validation before we add the type specific validators
+  // to the schema.
+  const {validation,sanitization} = schemaType;
+
+  if (validation) {
+    const {validator,options,errorMessage} = validation;
+
+    if (validator) {
+      if (options || errorMessage) {
+        schema[validator] = { };
+
+        if (options) {
+          schema[validator].options = options;
+        }
+
+        if (errorMessage) {
+          schema[validator].errorMessage = errorMessage;
+        }
+      }
+      else {
+        schema[validator] = true;
+      }
+    }
+  }
+
+  // Let's add the type specific validator and sanitizer to the schema
+  // definition.
   const {instance} = schemaType;
   const validator = validators[instance];
 
@@ -47,20 +80,37 @@ function makeValidationForSchemaType (schemaType, opts = {}) {
     schema = extend (schema, partialSchema);
   }
 
+  // Lastly, let's add the generic sanitizer to the schema since we know
+  // the type specific validators have already been added.
+
+  if (sanitization) {
+    const {sanitizer} = sanitization;
+
+    if (sanitizer)
+      schema[sanitizer] = true;
+  }
+
   return schema;
 }
 
-function makeValidationSchema (schema, opts = {}) {
+/**
+ * Build the validation schema give the Mongoose schema.
+ *
+ * @param schema
+ * @param opts
+ * @returns {{}}
+ */
+function build (schema, opts = {}) {
   const pathPrefix = opts.pathPrefix ? opts.pathPrefix + '.' : '';
 
   let validation = {};
 
   schema.eachPath ((path, schemaType) => {
     const fullKey = `${pathPrefix}${path}`;
-    validation[fullKey] = makeValidationForSchemaType (schemaType, {allOptional: opts.allOptional});
+    validation[fullKey] = buildValidationForSchemaType (schemaType, {allOptional: opts.allOptional});
   });
 
   return validation;
 }
 
-module.exports = makeValidationSchema;
+module.exports = build;
