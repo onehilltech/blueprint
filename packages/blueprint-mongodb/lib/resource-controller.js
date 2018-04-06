@@ -1,11 +1,27 @@
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const pluralize = require ('pluralize');
+const assert = require ('assert');
+
 const {
   extend,
   omit,
   forOwn
 } = require ('lodash');
-
-const pluralize  = require ('pluralize');
-const assert     = require ('assert');
 
 const {
   Action,
@@ -13,8 +29,8 @@ const {
   HttpError
 } = require ('@onehilltech/blueprint');
 
-let validationSchema = require ('./validation-schema');
-let populate = require ('./populate');
+const validation = require ('./validation');
+const populate = require ('./populate');
 
 const LAST_MODIFIED = 'Last-Modified';
 
@@ -51,34 +67,26 @@ const DatabaseAction = Action.extend ({
 module.exports = ResourceController.extend ({
   /**
    * Initialize the resource controller.
-   * @param opts
    */
   init () {
     let [opts, ...params] = arguments;
+    const {modelName} = this.model;
 
     if (!opts.name)
-      opts.name = this.model.modelName;
+      opts.name = modelName;
 
     // Pass control to the base class.
     this._super.init.call (this, opts, ...params);
 
     // Prepare the options for the base class.
     assert (!!this.model, "You must define the 'model' property.");
-    assert (this.model.schema.options.resource, `${this.model.modelName} is not a resource; model must be created using resource() method`);
+    assert (this.model.schema.options.resource, `${modelName} is not a resource; model must be created using resource() method.`);
 
     this.plural = pluralize (this.name);
     this._idOpts = opts.idOptions || {};
 
     // Build the validation schema for create and update.
-    let validationOpts = {pathPrefix: this.name};
-
-    this._create = {
-      schema: validationSchema (this.model.schema, validationOpts)
-    };
-
-    this._update = {
-      schema: validationSchema (this.model.schema, extend ({allOptional: true}, validationOpts))
-    };
+    this._defaultValidationOptions = {pathPrefix: this.name};
   },
 
   /**
@@ -88,6 +96,8 @@ module.exports = ResourceController.extend ({
     const eventName = this._computeEventName ('created');
 
     return DatabaseAction.extend ({
+      schema: validation (this.model.schema, this._defaultValidationOptions),
+
       /// Name of event for completion of action.
       eventName: null,
 
@@ -351,6 +361,8 @@ module.exports = ResourceController.extend ({
     const eventName = this._computeEventName ('updated');
 
     return DatabaseAction.extend ({
+      schema: validation (this.model.schema, extend ({allOptional: true}, this._defaultValidationOptions)),
+
       /**
        * Execute the action.
        *

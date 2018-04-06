@@ -15,7 +15,7 @@
  */
 
 const {expect}  = require ('chai');
-const validator = require ('../../../../lib/validators/number');
+const validator = require ('../../../../lib/validation/number');
 
 describe ('lib | validators | number', function () {
   it ('should build default validation schema for a number', function () {

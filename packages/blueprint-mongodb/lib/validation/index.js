@@ -16,7 +16,13 @@
 
 const {extend}   = require ('lodash');
 const {get, has} = require ('object-path');
-const validators = require ('./validators');
+
+const validators = {
+  ObjectId: require ('./objectid'),
+  Number: require ('./number'),
+  Date: require ('./date'),
+  String: require ('./string')
+};
 
 /**
  * Build the validation of a single schema type.
@@ -113,4 +119,5 @@ function build (schema, opts = {}) {
   return validation;
 }
 
-module.exports = build;
+module.exports = exports = build;
+extend (exports, validators);

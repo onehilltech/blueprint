@@ -15,7 +15,7 @@
  */
 
 const {expect}  = require ('chai');
-const validator = require ('../../../../lib/validators/date');
+const validator = require ('../../../../lib/validation/date');
 
 describe ('lib | validators | date', function () {
   it ('should return the default schema for a Date', function () {

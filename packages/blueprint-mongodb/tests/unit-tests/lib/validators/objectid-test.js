@@ -15,7 +15,7 @@
  */
 
 const {expect}  = require ('chai');
-const validator = require ('../../../../lib/validators/objectid');
+const validator = require ('../../../../lib/validation/objectid');
 
 describe ('lib | validators | objectId', function () {
   it ('should build schema for validating an ObjectID', function () {
