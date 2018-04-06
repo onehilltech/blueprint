@@ -16,7 +16,7 @@ describe ('lib | server | Server', function () {
   describe ('configure', function () {
     it ('should configure the server using default configurations', function (done) {
       const tempPath = path.resolve (__dirname, '../../../dummy/app/.temp');
-      const app = { tempPath };
+      const app = { tempPath, resources: {} };
 
       const config = {
         protocols: {
@@ -45,7 +45,7 @@ describe ('lib | server | Server', function () {
       const viewsPath = path.resolve (__dirname, '../../../dummy/app/views');
       const tempPath = path.resolve (__dirname, '../../../dummy/app/.temp');
 
-      const app = { tempPath };
+      const app = { tempPath, resources: {} };
 
       let server = new Server ({app});
 
