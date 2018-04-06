@@ -18,6 +18,5 @@ module.exports = function (req, res, next) {
   if (errors.isEmpty ())
     return next ();
 
-  let err = new HttpError (400, 'validation_failed', 'Request validation failed.', {validation: errors.mapped ()});
-  return next (err);
+  return next (new HttpError (400, 'validation_failed', 'The request validation failed.', {validation: errors.mapped ()}));
 };
