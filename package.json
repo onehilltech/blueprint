@@ -10,7 +10,6 @@
     "url": "https://github.com/onehilltech/blueprint.git"
   },
   "dependencies": {
-    "async": "^2.5.0",
     "body-parser": "^1.17.2",
     "commander": "^2.11.0",
     "consolidate": "^0.15.0",
