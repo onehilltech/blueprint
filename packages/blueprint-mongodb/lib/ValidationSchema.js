@@ -1,60 +1,50 @@
-'use strict';
+const {extend}   = require ('lodash');
+const {get, has} = require ('object-path');
+const validators = require ('./validators');
 
-const _        = require ('underscore')
-  , objectPath = require ('object-path')
-  , instances  = require ('./validators')
-  ;
-
-module.exports = makeValidationSchema;
-
-function makeValidationForSchemaType (schemaType, opts) {
+function makeValidationForSchemaType (schemaType, opts = {}) {
   // Build the general-purpose schema for the path.
-  var schema = {};
-  opts = opts || {};
+  let schema = {};
 
   // The 'optional' property has to be the first key in the partial schema
   // object in order for validation by schema to work.
-  var allOptional = opts.allOptional || false;
-  var hasDefault = objectPath.has (schemaType.options, 'default');
-  var validationOptional = objectPath.get (schemaType.options, 'validation.optional', false);
+  const allOptional = opts.allOptional || false;
+  const hasDefault = has (schemaType.options, 'default');
+  const validationOptional = get (schemaType.options, 'validation.optional', false);
 
   if (!schemaType.isRequired || hasDefault || validationOptional || allOptional) {
-    // Mark the field as optional, and allow null and undefined values.
+    // Mark the field as optional. Allow null and undefined values.
     schema.optional = {options: { checkFalsy: true }};
   }
   else if (schemaType.isRequired && !(hasDefault || allOptional)) {
-    schema.notEmpty = true;
+    schema.notEmpty = {
+      errorMessage: '%s is required.',
+    };
   }
 
   // Build the instance schema for the path.
-  var instanceValidator = instances[schemaType.instance];
+  const {instance} = schemaType;
+  const validator = validators[instance];
 
-  if (instanceValidator) {
-    var instanceSchema = instanceValidator (schemaType);
-    schema = _.extend (schema, instanceSchema);
+  if (validator) {
+    let partialSchema = validator (schemaType);
+    schema = extend (schema, partialSchema);
   }
 
   return schema;
 }
 
-function makeValidationSchema (schema, opts) {
-  opts = opts || {};
+function makeValidationSchema (schema, opts = {}) {
+  const pathPrefix = opts.pathPrefix ? opts.pathPrefix + '.' : '';
 
-  var pathPrefix = '';
+  let validation = {};
 
-  if (opts.pathPrefix)
-    pathPrefix = opts.pathPrefix + '.';
-
-  var validation = {};
-
-  var pathOptions = {
-    allOptional: opts.allOptional
-  };
-
-  schema.eachPath (function (path, schemaType) {
-    var fullKey = pathPrefix + path;
-    validation[fullKey] = makeValidationForSchemaType (schemaType, pathOptions);
+  schema.eachPath ((path, schemaType) => {
+    const fullKey = `${pathPrefix}${path}`;
+    validation[fullKey] = makeValidationForSchemaType (schemaType, {allOptional: opts.allOptional});
   });
 
   return validation;
 }
+
+module.exports = makeValidationSchema;
