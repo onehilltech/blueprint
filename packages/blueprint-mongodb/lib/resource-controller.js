@@ -13,7 +13,7 @@ const {
   HttpError
 } = require ('@onehilltech/blueprint');
 
-let validationSchema = require ('./ValidationSchema');
+let validationSchema = require ('./validation-schema');
 let populate = require ('./populate');
 
 const LAST_MODIFIED = 'Last-Modified';

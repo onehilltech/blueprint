@@ -22,7 +22,7 @@ module.exports = function (path) {
   if (validation) {
     if (validation.kind && validation.kind === 'Numeric') {
       schema.isNumeric = {
-        errorMessage: 'The number date is invalid.'
+        errorMessage: 'The numeric date is invalid.'
       }
     }
     else {

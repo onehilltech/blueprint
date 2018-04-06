@@ -22,7 +22,6 @@ exports.resource = resource;
 exports.resourceOn = resourceOn;
 
 exports.ResourceController = require ('./resource-controller');
-exports.UserResourceController = require ('./UserResourceController');
 exports.GridFSController = require ('./GridFSController');
 exports.populate = require ('./populate');
 exports.lean = require ('./lean');
