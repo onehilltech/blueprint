@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-const {extend}   = require ('lodash');
+const {
+  extend,
+  transform,
+  mapValues
+} = require ('lodash');
+
 const {get, has} = require ('object-path');
 
 const validators = {
-  ObjectId: require ('./objectid'),
+  ObjectID: require ('./objectid'),
   Number: require ('./number'),
   Date: require ('./date'),
   String: require ('./string')
@@ -99,6 +104,29 @@ function buildValidationForSchemaType (schemaType, opts = {}) {
   return schema;
 }
 
+function normalize (schema, validators, sanitizers) {
+  const validatorNames = Object.keys (validators);
+  const sanitizerNames = Object.keys (sanitizers);
+
+  return mapValues (schema, (definition) => {
+    return transform (definition, (result, value, key) => {
+      if (validatorNames.includes (key)) {
+        result.custom = {
+          options: validators[key]
+        };
+      }
+      else if (sanitizerNames.includes (key)) {
+        result.customSanitizer = {
+          options: sanitizers[key]
+        }
+      }
+      else {
+        result[key] = value;
+      }
+    }, {});
+  });
+}
+
 /**
  * Build the validation schema give the Mongoose schema.
  *
@@ -115,10 +143,10 @@ function build (schema, opts = {}) {
 
   schema.eachPath ((path, schemaType) => {
     const fullKey = `${scope}${path}`;
-    validation[fullKey] = buildValidationForSchemaType (schemaType, {allOptional, validators, sanitizers});
+    validation[fullKey] = buildValidationForSchemaType (schemaType, {allOptional});
   });
 
-  return validation;
+  return normalize (validation, validators, sanitizers);
 }
 
 module.exports = build;

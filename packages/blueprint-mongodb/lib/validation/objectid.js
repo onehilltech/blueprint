@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-const toMongoId = require ('../../app/sanitizers/toMongoId');
-
 module.exports = function () {
   return {
-    isMongoId : {errorMessage: 'The id is not valid.'},
-    customSanitizer: {
-      options: toMongoId
-    }
+    isMongoId: {errorMessage: 'The id is not valid.'},
+    toMongoId: true
   };
 };

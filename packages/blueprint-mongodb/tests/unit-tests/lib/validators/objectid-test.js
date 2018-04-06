@@ -16,7 +16,6 @@
 
 const {expect}  = require ('chai');
 const validator = require ('../../../../lib/validation/objectid');
-const toMongoId = require ('../../../../app/sanitizers/toMongoId');
 
 describe ('lib | validators | objectId', function () {
   it ('should build schema for validating an ObjectID', function () {
@@ -24,9 +23,7 @@ describe ('lib | validators | objectId', function () {
 
     expect (schema).to.deep.equal ({
       isMongoId: {errorMessage: 'The id is not valid.'},
-      customSanitizer: {
-        options: toMongoId
-      }
+      toMongoId: true
     });
   })
 });

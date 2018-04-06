@@ -85,7 +85,7 @@ module.exports = ResourceController.extend ({
     this.plural = pluralize (this.name);
 
     // Build the validation schema for create and update.
-    this._defaultValidationOptions = {pathPrefix: this.name};
+    this._defaultValidationOptions = {scope: this.name};
   },
 
   /**
@@ -93,9 +93,10 @@ module.exports = ResourceController.extend ({
    */
   create () {
     const eventName = this._computeEventName ('created');
+    const {validators,sanitizers} = this.app.resources;
 
     return DatabaseAction.extend ({
-      schema: validation (this.model.schema, this._defaultValidationOptions),
+      schema: validation (this.model.schema, extend ({}, this._defaultValidationOptions, {validators, sanitizers})),
 
       /// Name of event for completion of action.
       eventName: null,
@@ -358,9 +359,10 @@ module.exports = ResourceController.extend ({
   update () {
     const defaultOptions = { upsert: false, new: true };
     const eventName = this._computeEventName ('updated');
+    const {validators,sanitizers} = this.app.resources;
 
     return DatabaseAction.extend ({
-      schema: validation (this.model.schema, extend ({allOptional: true}, this._defaultValidationOptions)),
+      schema: validation (this.model.schema, extend ({}, this._defaultValidationOptions, {validators, sanitizers})),
 
       /**
        * Execute the action.
