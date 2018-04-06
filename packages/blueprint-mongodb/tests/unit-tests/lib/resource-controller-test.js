@@ -152,4 +152,23 @@ describe ('lib | ResourceController', function () {
         });
     });
   });
+
+  describe ('count', function () {
+    it ('should count the number of resources', function () {
+      const Author = blueprint.lookup ('model:author');
+      const authors =
+        [
+          {_id: new ObjectId (), name: 'Jack Doe'},
+          {_id: new ObjectId (), name: 'John Doe'}
+        ];
+
+      return Author.create (authors)
+        .then (() => {
+          return testing.request ()
+            .get ('/authors/count')
+            .expect (200, {count: 2});
+        });
+    });
+  });
+
 });

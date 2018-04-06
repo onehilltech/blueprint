@@ -498,6 +498,51 @@ module.exports = ResourceController.extend ({
   },
 
   /**
+   * Return the number of resources.
+   */
+  count () {
+    const eventName = this._computeEventName ('counted');
+
+    return DatabaseAction.extend ({
+      execute (req, res) {
+        const query = req.query;
+
+        return Promise.resolve (this.getFilter (req, query))
+          .then (filter => {
+            return Promise.resolve (this.preCountModels (req))
+              .then (() => this.getCount (filter))
+              .then (count => {
+                this.emit (eventName, count);
+                return this.postCountModels (req, count)
+              })
+              .then (count => this.prepareResponse (res, {count: count}))
+              .then (response => res.status (200).json (response));
+          });
+      },
+
+      getFilter (req, query) {
+        return query;
+      },
+
+      getCount (filter) {
+        return this.controller.model.count (filter);
+      },
+
+      preCountModels () {
+
+      },
+
+      postCountModels (req, count) {
+        return count;
+      },
+
+      prepareResponse (res, response) {
+        return response;
+      }
+    });
+  },
+
+  /**
    * Get the Mongoose model definition for the target. This is important if the
    * document if for an inherited model.
    *
@@ -566,47 +611,6 @@ module.exports = ResourceController.extend ({
 });
 
 /*
-
-ResourceController.prototype.count = function (opts) {
-  opts = opts || {};
-  let on = opts.on || {};
-
-  let validate = opts.validate || __validate;
-  let sanitize = opts.sanitize || __sanitize;
-
-  let onPrepareFilter = on.prepareFilter || __onPrepareFilter;
-  let onPostExecute = on.postExecute || __onPostExecute;
-
-  let self = this;
-
-  return {
-    validate: validate,
-    sanitize: sanitize,
-
-    execute: function __blueprint_count_execute (req, res, callback) {
-      async.waterfall ([
-        async.constant (req.query),
-
-        function (filter, callback) {
-          return onPrepareFilter (req, filter, callback)
-        },
-
-        // Now, let's search our database for the resource in question.
-        function (filter, callback) {
-          self._model.count (filter, makeDbCompletionHandler ('count_failed', 'Failed to count resources', callback));
-        },
-
-        // Allow the subclass to do any post-execution analysis of the result.
-        function (count, callback) { onPostExecute (req, count, callback); },
-
-        // Rewrite the result in JSON API format.
-        function (count, callback) {
-          return callback (null, {count: count});
-        }
-      ], makeTaskCompletionHandler (res, callback));
-    }
-  };
-};
 
 ResourceController.prototype._getIdValidationSchema = function (opts) {
   let defaults = objectPath (this._idOpts);
