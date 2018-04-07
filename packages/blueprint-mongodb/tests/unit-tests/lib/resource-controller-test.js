@@ -147,6 +147,15 @@ describe ('lib | ResourceController', function () {
               }));
         });
     });
+
+    it ('should not find the resource', function () {
+      const id = new ObjectId ().toString ();
+
+      return testing.request ()
+        .get (`/authors/${id}`)
+        .query ({populate: true})
+        .expect (404, { errors: [ { code: 'not_found', detail: 'Not found', status: '404' } ] });
+    });
   });
 
   describe ('update', function () {
@@ -218,5 +227,4 @@ describe ('lib | ResourceController', function () {
         });
     });
   });
-
 });

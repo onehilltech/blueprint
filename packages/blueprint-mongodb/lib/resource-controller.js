@@ -362,7 +362,7 @@ module.exports = ResourceController.extend ({
     const {validators,sanitizers} = this.app.resources;
 
     return DatabaseAction.extend ({
-      schema: validation (this.model.schema, extend ({}, this._defaultValidationOptions, {validators, sanitizers})),
+      schema: validation (this.model.schema, extend ({}, this._defaultValidationOptions, {allOptional:true, validators, sanitizers})),
 
       /**
        * Execute the action.
