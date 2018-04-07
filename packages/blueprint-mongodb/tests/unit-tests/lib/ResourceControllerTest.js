@@ -14,54 +14,7 @@ describe ('lib.ResourceController', function () {
   var person;
 
   describe ('/person', function () {
-    describe ('POST', function () {
-      it ('should create a resource', function (done) {
-        var dob  = new Date ().toISOString();
-        var data = {
-          person: {
-            first_name: 'John', last_name: 'Doe', age: 21, gender: 'Male', dob: dob,
-            address: {
-              street: 'Make Believe Lane',
-              city: 'Magic',
-              state: 'TN',
-              zipcode: '12345'
-            },
-            education: blueprint.app.seeds.$default.degrees[0].id,
-            degrees: [
-              blueprint.app.seeds.$default.degrees[0].id,
-              blueprint.app.seeds.$default.degrees[1].id
-            ]
-          }
-        };
-
-        blueprint.testing.request ()
-          .post ('/person')
-          .send (data)
-          .expect (200)
-          .end (function (err, res) {
-            if (err) return done (err);
-
-            expect (res.headers).to.have.property ('last-modified');
-
-            person = res.body.person;
-            data.person._id = person._id;
-            data.person.applications = [];
-
-            expect (res.body.person).to.deep.equal (data.person);
-
-            return done (null);
-          }, done);
-      });
-
-      it ('should not create resource; missing parameters', function () {
-        return testing.request ()
-          .post ('/authors')
-          .send ({author: {}})
-          .expect (400, {});
-      });
-    });
-
-    describe ('GET', function () {
+     describe ('GET', function () {
       it ('should return a list of persons', function (done) {
         var expected = {
           people: [
@@ -136,15 +89,6 @@ describe ('lib.ResourceController', function () {
 
   });
 
-  describe ('/person/count', function () {
-    describe ('GET', function () {
-      it ('should count the number of resources', function (done) {
-        blueprint.testing.request ()
-          .get ('/person/count')
-          .expect (200, {count: 2}, done);
-      });
-    });
-  });
 
   describe ('/person/:personId', function () {
     var updated;

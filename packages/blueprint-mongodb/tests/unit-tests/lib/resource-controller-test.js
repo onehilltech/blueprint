@@ -70,26 +70,28 @@ describe ('lib | ResourceController', function () {
 
     });
 
-    it ('should not create resource; missing parameters', function () {
-      return testing.request ()
-        .post ('/authors')
-        .send ({author: {}})
-        .expect (400, {
-          errors: [{
-            status: '400',
-            code: 'validation_failed',
-            detail: 'The request validation failed.',
-            meta: {
-              validation: {
-                'author.name': {
-                  location: 'body',
-                  msg: 'This field is required.',
-                  param: 'author.name'
+    context ('validation', function () {
+      it ('should fail because of missing required parameters', function () {
+        return testing.request ()
+          .post ('/authors')
+          .send ({author: {}})
+          .expect (400, {
+            errors: [{
+              status: '400',
+              code: 'validation_failed',
+              detail: 'The request validation failed.',
+              meta: {
+                validation: {
+                  'author.name': {
+                    location: 'body',
+                    msg: 'This field is required.',
+                    param: 'author.name'
+                  }
                 }
               }
-            }
-          }]
-        });
+            }]
+          });
+      });
     });
   });
 
@@ -119,6 +121,30 @@ describe ('lib | ResourceController', function () {
           return testing.request ()
             .get (`/authors/${author._id}`)
             .expect (200, result);
+        });
+    });
+
+    it ('should populate the results', function () {
+      const Author = blueprint.lookup ('model:author');
+      const User = blueprint.lookup ('model:user');
+
+      const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
+
+      return Author.create (author)
+        .then (author => {
+          return User.create ({first_name: 'John', last_name: 'Doe', favorite_author: author._id})
+            .then (user => testing.request ()
+              .get (`/users/${user.id}?_populate=true`)
+              .expect (200, {
+                authors:
+                  [
+                    {__v: 0, _id: author.id, name: 'James H. Hill'}
+                  ],
+                users:
+                  [
+                    {__v: 0, _id: user.id, first_name: 'John', last_name: 'Doe', favorite_author: author.id, blacklist: []}
+                  ]
+              }));
         });
     });
   });
