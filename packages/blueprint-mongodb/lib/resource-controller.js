@@ -32,6 +32,8 @@ const {
 const validation = require ('./validation');
 const populate = require ('./populate');
 
+const toMongoId = require ('../app/sanitizers/toMongoId');
+
 const LAST_MODIFIED = 'Last-Modified';
 
 /**
@@ -276,6 +278,18 @@ module.exports = ResourceController.extend ({
    */
   getOne () {
     return DatabaseAction.extend ({
+      schema: {
+        [this.resourceId]: {
+          in: 'params',
+          isMongoId: {
+            errorMessage: 'The id is invalid.'
+          },
+          custom: {
+            options: toMongoId
+          }
+        }
+      },
+
       execute (req, res) {
         // Update the options with those from the query string.
         const id = req.params[this.controller.resourceId];
