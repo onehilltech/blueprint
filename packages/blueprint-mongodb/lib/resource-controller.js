@@ -36,6 +36,16 @@ const toMongoId = require ('../app/sanitizers/toMongoId');
 
 const LAST_MODIFIED = 'Last-Modified';
 
+const RESOURCE_ID_PARAMS_SCHEMA = {
+  in: 'params',
+  isMongoId: {
+    errorMessage: 'The id is invalid.'
+  },
+  custom: {
+    options: toMongoId
+  }
+};
+
 /**
  * @class DatabaseAction
  *
@@ -279,15 +289,7 @@ module.exports = ResourceController.extend ({
   getOne () {
     return DatabaseAction.extend ({
       schema: {
-        [this.resourceId]: {
-          in: 'params',
-          isMongoId: {
-            errorMessage: 'The id is invalid.'
-          },
-          custom: {
-            options: toMongoId
-          }
-        }
+        [this.resourceId]: RESOURCE_ID_PARAMS_SCHEMA
       },
 
       execute (req, res) {
@@ -376,7 +378,9 @@ module.exports = ResourceController.extend ({
     const {validators,sanitizers} = this.app.resources;
 
     return DatabaseAction.extend ({
-      schema: validation (this.model.schema, extend ({}, this._defaultValidationOptions, {allOptional:true, validators, sanitizers})),
+      schema: extend (
+        validation (this.model.schema, extend ({}, this._defaultValidationOptions, {allOptional:true, validators, sanitizers})),
+        {[this.resourceId]: RESOURCE_ID_PARAMS_SCHEMA}),
 
       /**
        * Execute the action.
