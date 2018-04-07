@@ -329,7 +329,7 @@ describe ('lib | RouterBuilder', function () {
         app.use (router);
         app.use ((err, req, res, next) => {
           expect (err).to.be.instanceof (HttpError);
-          expect (err.message).to.equal ('Request validation failed.');
+          expect (err.message).to.equal ('The request validation failed.');
           expect (err.code).to.equal ('validation_failed');
 
           res.status (400).json ({error: err.message});
@@ -337,7 +337,7 @@ describe ('lib | RouterBuilder', function () {
 
         return request (app)
           .post ('/r1')
-          .expect (400, {error: 'Request validation failed.'});
+          .expect (400, {error: 'The request validation failed.'});
       });
     });
 

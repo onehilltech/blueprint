@@ -19,7 +19,7 @@
     "dot": "^1.1.2",
     "express": "^4.16.0",
     "express-session": "^1.15.5",
-    "express-validator": "^5.0.3",
+    "express-validator": "^5.1.1",
     "fs-extra": "^5.0.0",
     "klaw": "^2.1.1",
     "morgan": "^1.9.0",
