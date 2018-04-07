@@ -21,5 +21,5 @@ const {
 } = require ('mongoose');
 
 module.exports = function (str) {
-  return ObjectId (str);
+  return new ObjectId (str);
 };

@@ -41,7 +41,7 @@ const RESOURCE_ID_PARAMS_SCHEMA = {
   isMongoId: {
     errorMessage: 'The id is invalid.'
   },
-  custom: {
+  customSanitizer: {
     options: toMongoId
   }
 };
@@ -490,6 +490,10 @@ module.exports = ResourceController.extend ({
     const eventName = this._computeEventName ('deleted');
 
     return DatabaseAction.extend ({
+      schema: {
+        [this.resourceId]: RESOURCE_ID_PARAMS_SCHEMA
+      },
+
       execute (req, res) {
         const id = req.params[this.controller.id];
 
