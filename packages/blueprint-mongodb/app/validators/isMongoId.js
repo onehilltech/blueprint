@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-const {
-  Types: {
-    ObjectId
-  }
-} = require ('mongoose');
+const {isMongoId} = require ('validator');
 
-module.exports = function toMongoId (str) {
-  return new ObjectId (str);
+module.exports = function isMongoId (str) {
+  return isMongoId (str);
 };

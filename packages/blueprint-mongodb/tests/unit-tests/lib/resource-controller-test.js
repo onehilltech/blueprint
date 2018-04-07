@@ -160,24 +160,7 @@ describe ('lib | ResourceController', function () {
     it ('should return bad request because of bad id', function () {
       return testing.request ()
         .get ('/authors/12')
-        .expect (400, {
-          errors:
-            [{
-              code: 'validation_failed',
-              detail: 'The request validation failed.',
-              status: '400',
-              meta: {
-                validation: {
-                  authorId: {
-                    location: 'params',
-                    msg: 'The id is invalid.',
-                    param: 'authorId',
-                    value: '12'
-                  }
-                }
-              }
-            }]
-        });
+        .expect (400, { errors: [ { detail: 'Argument passed in must be a single String of 12 bytes or a string of 24 hex characters' } ] });
     });
   });
 
