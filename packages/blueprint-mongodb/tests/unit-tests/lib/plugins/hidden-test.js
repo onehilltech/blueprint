@@ -1,16 +1,12 @@
-'use strict';
+const mongodb  = require ('../../../../lib');
+const {expect} = require ('chai');
+const HiddenPlugin = require ('../../../../lib/plugins/hidden');
 
-const mongodb    = require ('../../../../lib')
-  , expect       = require ('chai').expect
-  , HiddenPlugin = require ('../../../../lib/plugins/HiddenPlugin')
-  , async        = require ('async')
-  ;
-
-describe ('lib.plugins.HiddenPlugin', function () {
-  var Person;
+describe ('lib | plugins | HiddenPlugin', function () {
+  let Person;
 
   it ('should create a schema with the Hidden', function () {
-    var schema = new mongodb.Schema ({
+    let schema = new mongodb.Schema ({
       first_name: String,
       last_name: String,
 
@@ -24,12 +20,12 @@ describe ('lib.plugins.HiddenPlugin', function () {
     expect (Person.hidden ()).to.eql (['ssn']);
   });
 
-  var person;
+  let person;
 
   describe ('toObject', function () {
     it ('should not transform the hidden fields', function () {
       person = new Person ({first_name: 'James', last_name: 'Hill', ssn: '123456789'});
-      var obj = person.toObject ();
+      let obj = person.toObject ();
 
       expect (obj).to.eql ({_id: obj._id, first_name: 'James', last_name: 'Hill'});
     });
@@ -38,7 +34,7 @@ describe ('lib.plugins.HiddenPlugin', function () {
   describe ('toJSON', function () {
     it ('should not transform the hidden fields', function () {
       person = new Person ({first_name: 'James', last_name: 'Hill', ssn: '123456789'});
-      var obj = person.toJSON ();
+      let obj = person.toJSON ();
 
       expect (obj).to.eql ({_id: obj._id, first_name: 'James', last_name: 'Hill'});
     });
