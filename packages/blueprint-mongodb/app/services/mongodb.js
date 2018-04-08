@@ -105,10 +105,9 @@ module.exports = Service.extend ({
     forOwn (connections, (opts, name) => {
       debug (`opening connection ${name}`);
 
-      let options = merge ({useMongoClient: true}, opts.options);
       let connection = this._connections[name];
 
-      connecting.push (connection.openUri (opts.connstr, options));
+      connecting.push (connection.openUri (opts.connstr, opts.options));
     });
 
     return Promise.all (connecting).then (() => {

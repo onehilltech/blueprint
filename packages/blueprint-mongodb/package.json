@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.0.0-24",
-    "@onehilltech/dab": "^0.10.3",
+    "@onehilltech/dab": "^0.11.0",
     "express-validator": "^5.1.1",
     "moment": "^2.19.1"
   },
