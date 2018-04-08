@@ -98,7 +98,7 @@ module.exports = function (schema) {
   };
 
   schema.methods.isOutdated = function (lastUpdateTime) {
-    return this._stat.updated_at && DateUtils.compare (this._stat.updated_at, lastUpdateTime) == 1;
+    return this._stat.updated_at && moment (this._stat.updated_at).isAfter (lastUpdateTime);
   };
   
   // Index the fields in _stat. This will make it easier to search for documents

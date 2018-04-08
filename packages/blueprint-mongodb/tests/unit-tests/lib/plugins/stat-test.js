@@ -1,16 +1,12 @@
-'use strict';
+const mongodb  = require ('../../../../lib');
+const {expect} = require ('chai');
+const StatPlugin = require ('../../../../lib/plugins/stat');
 
-const mongodb  = require ('../../../../lib')
-  , expect     = require ('chai').expect
-  , StatPlugin = require ('../../../../lib/plugins/StatPlugin')
-  , async      = require ('async')
-  ;
-
-describe ('lib.plugins.StatPlugin', function () {
-  var Person;
+describe ('lib | plugins | StatPlugin', function () {
+  let Person;
 
   it ('should create a schema with the StatPlugin', function () {
-    var schema = new mongodb.Schema ({first_name: String, last_name: String});
+    let schema = new mongodb.Schema ({first_name: String, last_name: String});
     schema.plugin (StatPlugin);
 
     expect (schema.paths).to.have.property ('_stat.created_at');
@@ -19,19 +15,16 @@ describe ('lib.plugins.StatPlugin', function () {
     Person = mongodb.model ('person', schema, 'blueprint_persons');
   });
 
-  var person;
+  let person;
 
   describe ('saving a new document', function () {
     describe ('#getCreatedAt', function () {
-      it ('should get the date/time the document was created', function (done) {
+      it ('should get the date/time the document was created', function () {
         person = new Person ({first_name: 'James', last_name: 'Hill'});
-        person.save (function (err, model) {
-          if (err) return done (err);
 
+        return person.save ().then (model => {
           expect (model.getCreatedAt ()).to.eql (person._stat.created_at);
-
           person = model;
-          return done ();
         });
       });
     });
@@ -51,16 +44,12 @@ describe ('lib.plugins.StatPlugin', function () {
 
   describe ('saving an existing document', function () {
     describe ('#getCreatedAt', function () {
-      it ('should not change the created_at date/time', function (done) {
+      it ('should not change the created_at date/time', function () {
         person.first_name = 'John';
 
-        person.save (function (err, model) {
-          if (err) return done (err);
-
+        return person.save ().then (model => {
           expect (model.getCreatedAt ()).to.eql (person.getCreatedAt ());
           person = model;
-
-          return done ();
         });
       });
     });
@@ -89,27 +78,18 @@ describe ('lib.plugins.StatPlugin', function () {
   });
 
   describe ('updating an existing document', function () {
-    var updated;
+    let updated;
 
     describe ('#getUpdatedAt', function () {
-      it ('should have an updated date/time', function (done) {
-        async.waterfall ([
-          function (callback) {
-            var person2 = new Person ({first_name: 'John', last_name: 'Doe'});
-            person2.save (callback);
-          },
+      it ('should have an updated date/time', function () {
+        let person2 = new Person ({first_name: 'John', last_name: 'Doe'});
 
-          function (model, count, callback) {
-            Person.findByIdAndUpdate (model.id, {$set: {first_name: 'Jack'}}, {new: true}, callback);
-          },
-
-          function (model, callback) {
+        return person2.save ()
+          .then (model => Person.findByIdAndUpdate (model._id, {$set: {first_name: 'Jack'}}, {new: true}))
+          .then (model => {
             expect (model.getUpdatedAt ()).to.not.be.undefined;
             updated = model;
-
-            return callback (null);
-          }
-        ], done);
+          });
       });
     });
 
