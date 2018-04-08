@@ -32,16 +32,13 @@ const {
 const validation = require ('./validation');
 const populate = require ('./populate');
 
-const isMongoId = require ('../app/validators/isMongoId');
 const toMongoId = require ('../app/sanitizers/toMongoId');
 
 const LAST_MODIFIED = 'Last-Modified';
 
 const RESOURCE_ID_PARAMS_SCHEMA = {
   in: 'params',
-  custom: {
-    options: isMongoId
-  },
+  isMongoId: {errorMessage: 'The id is not valid.'},
   customSanitizer: {
     options: toMongoId
   }

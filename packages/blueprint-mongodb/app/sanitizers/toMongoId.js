@@ -21,5 +21,10 @@ const {
 } = require ('mongoose');
 
 module.exports = function toMongoId (str) {
-  return new ObjectId (str);
+  try {
+    return new ObjectId (str);
+  }
+  catch (err) {
+    return str;
+  }
 };

@@ -1,4 +1,4 @@
-const DateUtils = require ('../date-utils');
+const moment = require ('moment');
 
 /**
  * Transform the document by removing the _stat field.

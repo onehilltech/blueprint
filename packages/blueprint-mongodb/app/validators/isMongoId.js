@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const {isMongoId} = require ('validator');
-
 module.exports = function isMongoId (str) {
-  return isMongoId (str);
+  return true
 };
