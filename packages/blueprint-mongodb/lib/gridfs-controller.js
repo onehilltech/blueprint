@@ -114,7 +114,7 @@ module.exports = ResourceController.extend ({
         const {buffer,encoding} = req.file;
 
         return BluebirdPromise.fromCallback ((callback) => {
-          upload.write (buffer, encoding, callback);
+          upload.end (buffer, encoding, callback);
         });
       },
 
