@@ -21,7 +21,9 @@ const BluebirdPromise = require ('bluebird');
 const {
   ResourceController,
   Action,
-  SingleFileUploadAction
+  SingleFileUploadAction,
+  HttpError,
+  barrier
 } = blueprint;
 
 const {
@@ -31,7 +33,6 @@ const {
 const fs = require ('fs-extra');
 
 const toMongoId = require ('../app/sanitizers/toMongoId');
-
 
 function makeResourceIdSchema (location) {
   return {
@@ -56,6 +57,15 @@ module.exports = ResourceController.extend ({
   /// default target connection.
   connection: '$default',
 
+  /// Number of bytes stored in each chunk. Defaults to 255KB.
+  chunkSizeBytes: 255 * 1024,
+
+  /// Optional write concern to be passed to write operations, for instance { w: 1 }.
+  writeConcern: null,
+
+  /// Optional read preference to be passed to read operations.
+  readPreference: null,
+
   /// The GridFS bucket.
   _bucket: null,
 
@@ -69,7 +79,18 @@ module.exports = ResourceController.extend ({
     assert (!!this._connection, `The connection named ${this.connection} does not exist.`);
 
     // Listen for the connection open event.
-    this._connection.on ('open', this._onConnectionOpen.bind (this));
+    this._connection.once ('open', this._onConnectionOpen.bind (this));
+    this._appStart = barrier ('blueprint.app.start', this);
+
+    Object.defineProperty (this, 'bucket', {
+      get () {
+        if (this._bucket)
+          return this._bucket;
+
+        console.error ('The target bucket does not exist.');
+        throw new Error ('The target bucket does not exist.');
+      }
+    });
   },
 
   /**
@@ -80,34 +101,62 @@ module.exports = ResourceController.extend ({
       name: this.name,
 
       onUploadComplete (req, res) {
-        // Store the content type.
-        let opts = { contentType: req.file.mimetype};
-
-        // Include the user that uploaded the file.
+        let options = { contentType: req.file.mimetype};
         let metadata = {};
 
-        if (Object.keys (metadata).length !== 0)
-          opts.metadata = metadata;
+        let promises = [
+          this.prepareOptions (req, options),
+          this.prepareMetadata (req, metadata)
+        ];
 
-        // Create a new upload stream for the file.
-        const upload = this.controller._bucket.openUploadStream (req.file.originalname, opts);
-        let promise;
+        return Promise.all (promises)
+          .then (([options,metadata]) => {
+            return Promise.resolve (this.preWriteUpload (req))
+              .then (() => {
+                if (Object.keys (metadata).length !== 0)
+                  options.metadata = metadata;
 
-        if (req.file.path) {
-          promise = this._writeFile (req, upload)
-        }
-        else if (req.file.buffer) {
-          promise = this._writeBuffer (req, upload);
-        }
+                return this.controller.bucket.openUploadStream (req.file.originalname, options);
+              })
+              .then (upload => {
+                let promise;
 
-        if (!promise)
-          return;
+                if (req.file.path) {
+                  promise = this._writeFile (req, upload);
+                }
+                else if (req.file.buffer) {
+                  promise = this._writeBuffer (req, upload);
+                }
+                else {
+                  return Promise.reject (new HttpError (500, 'bad_upload', 'Failed to upload and save file.'));
+                }
 
-        return promise.then (() => {
-          res.status (200).json ({[this.controller.name]: {_id: upload.id}});
-        }).catch (err => {
-          console.log (err.message);
-        });
+                return promise
+                  .then (() => this.postWriteUpload (req))
+                  .then (() => this.prepareResponse (res, {[this.controller.name]: {_id: upload.id}}))
+                  .then (response => res.status (200).json (response));
+              });
+          });
+      },
+
+      prepareOptions (req, options) {
+        return options;
+      },
+
+      prepareMetadata (req, metadata) {
+        return metadata;
+      },
+
+      preWriteUpload (req) {
+
+      },
+
+      postWriteUpload (req) {
+
+      },
+
+      prepareResponse (res, data) {
+        return data;
       },
 
       _writeBuffer (req, upload) {
@@ -144,7 +193,7 @@ module.exports = ResourceController.extend ({
         const id = req.params[this.controller.id];
 
         return BluebirdPromise.fromCallback (callback => {
-          this.controller._bucket.delete (id, callback);
+          this.controller.bucket.delete (id, callback);
         }).then (() => {
           res.status (200).json (true);
         });
@@ -153,8 +202,20 @@ module.exports = ResourceController.extend ({
   },
 
   _onConnectionOpen () {
-    const opts = { bucketName: this.name };
+    let opts = {
+      bucketName: this.name,
+      chunkSizeBytes: this.chunkSizeBytes
+    };
+
+    if (this.writeConcern)
+      opts.writeConcern = this.writeConcern;
+
+    if (this.readPreference)
+      opts.readPreference = this.readPreference;
+
     this._bucket = new GridFSBucket (this._connection.db, opts);
+
+    this._appStart.signal ();
   }
 });
 

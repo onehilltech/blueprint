@@ -20,5 +20,7 @@ const GridFSController = require ('../../../../lib/gridfs-controller');
  * @class ImageController
  */
 module.exports = GridFSController.extend ({
-  name: 'image'
+  name: 'image',
+
+  chunkSizeBytes: 255,
 });
