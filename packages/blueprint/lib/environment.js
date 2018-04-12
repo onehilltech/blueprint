@@ -1,5 +1,5 @@
-const Object = require ('./object');
+const BlueprintObject = require ('./object');
 
-module.exports = new Object ({
+module.exports = new BlueprintObject ({
   env: process.env.NODE_ENV || 'development'
 });
