@@ -21,7 +21,7 @@ module.exports = CoreObject.extend ({
   env,
 
   init () {
-    this._super.init.call (this, ...arguments);
+    this._super.call (this, ...arguments);
     this._parseCommandLineOptions ();
 
     Object.defineProperty (this, 'app', {

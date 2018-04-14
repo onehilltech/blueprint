@@ -14,7 +14,7 @@ module.exports = Object.extend ({
 
     assert (!!this.key, 'Missing key property');
 
-    this._listeners = {};
+    this._eventListeners = {};
   },
 
   /**
@@ -24,12 +24,12 @@ module.exports = Object.extend ({
    * @returns {*}
    */
   lookup (ev) {
-    let listeners = this._listeners[ev];
+    let listeners = this._eventListeners[ev];
 
     if (listeners)
       return listeners;
 
-    return this._listeners[ev] = new EventListeners ({name: ev});
+    return this._eventListeners[ev] = new EventListeners ({name: ev});
   },
 
   /**
@@ -61,7 +61,7 @@ module.exports = Object.extend ({
    */
   emit () {
     let [name, ...args] = arguments;
-    let listeners = this._listeners[name];
+    let listeners = this._eventListeners[name];
 
     if (!listeners)
       return Promise.resolve ();
