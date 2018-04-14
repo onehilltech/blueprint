@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const Messenger = require ('../../../../lib/messaging/messenger');
 const EventListeners = require ('../../../../lib/messaging/event-listeners');
 const ListenerHandle = require ('../../../../lib/messaging/listener-handle');
@@ -6,16 +22,16 @@ const Listener = require ('../../../../lib/messaging/listener');
 const expect = require ('chai').expect;
 
 describe ('lib | messaging | Messenger', function () {
-  describe ('create()', function () {
+  describe ('create', function () {
     it ('should create a Messenger object', function () {
       let messenger = new Messenger ({key: '_'});
 
       expect (messenger).to.have.property ('key', '_');
-      expect (messenger).to.have.deep.property ('_listeners', {});
+      expect (messenger).to.have.deep.property ('_eventListeners', {});
     });
   });
 
-  describe ('lookup()', function () {
+  describe ('lookup', function () {
     it ('should lookup a listener container', function () {
       let messenger = new Messenger ({key: '_'});
       let listeners = messenger.lookup ('a.b');
@@ -25,7 +41,7 @@ describe ('lib | messaging | Messenger', function () {
     });
   });
 
-  describe ('on()', function () {
+  describe ('on', function () {
     it ('should register handler for event', function () {
       let messenger = new Messenger ({key: '_'});
       let handle = messenger.on ('a.b', new NoopListener ());
@@ -34,17 +50,17 @@ describe ('lib | messaging | Messenger', function () {
     });
   });
 
-  describe ('once()', function () {
+  describe ('once', function () {
     it ('should register handler for event', function () {
       let messenger = new Messenger ({key: '_'});
       messenger.once ('a.b', new NoopListener ());
 
-      expect (messenger._listeners).to.have.key ('a.b');
+      expect (messenger._eventListeners).to.have.key ('a.b');
     });
   });
 
-  describe ('emit()', function () {
-    it ('should emit an event', function (done) {
+  describe ('emit', function () {
+    it ('should emit an event', function () {
       let messenger = new Messenger ({key: '_'});
       let value = null;
 
@@ -54,11 +70,8 @@ describe ('lib | messaging | Messenger', function () {
         }
       }));
 
-      messenger.emit ('a.b', 5).then (() => {
+      return messenger.emit ('a.b', 5).then (() => {
         expect (value).to.equal (5);
-        done (null);
-      }).catch (err => {
-        done (err)
       });
     });
   });

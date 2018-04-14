@@ -14,30 +14,33 @@
  * limitations under the License.
  */
 
-const Listener = require ('./listener');
-const assert = require ('assert');
+const Mixin = require ('../mixin');
+const Messenger = require ('./messenger');
 
 /**
- * @class LegacyListener
+ * @mixin Events
  *
- * Adapter for porting legacy listener function to Listener objects. The LegacyListener
- * object is provided for backwards compatibility support.
- *
- * The constructor takes a single function, which is mapped to the doEvent() method
- * on the Listener class.
- *
- * This object is used internally by the Blueprint framework.
+ * Mixin for adding event support to an object type.
  */
-module.exports = Listener.extend ({
-  listener: null,
+module.exports = Mixin.create ({
+  /// The underlying messaging for the object.
+  _messenger: null,
 
   init () {
     this._super.call (this, ...arguments);
 
-    assert (!!this.listener, "You must define the 'listener' property");
+    this._messenger = Messenger.create ();
   },
 
-  handleEvent () {
-    return this.listener.call (this.listener, ...arguments);
+  on () {
+    return this._messenger.on (...arguments);
+  },
+
+  once () {
+    return this._messenger.once (...arguments);
+  },
+
+  emit () {
+    return this._messenger.emit (...arguments);
   }
 });

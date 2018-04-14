@@ -1,10 +1,26 @@
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const EventListeners = require ('../../../../lib/messaging/event-listeners');
 const Listener = require ('../../../../lib/messaging/listener');
 const NoopListener = require ('../../../../lib/messaging/noop-listener');
 const expect = require ('chai').expect;
 
 describe ('lib | messaging | EventListeners', function () {
-  describe ('create()', function () {
+  describe ('create', function () {
     it ('should create an EventListener object', function () {
       let listeners = new EventListeners ({name: 'foo'});
 
@@ -12,7 +28,7 @@ describe ('lib | messaging | EventListeners', function () {
     });
   });
 
-  describe ('on()', function () {
+  describe ('on', function () {
     it ('should add a new listener', function () {
       let listeners = new EventListeners ({name: 'foo'});
       listeners.on (new NoopListener ());
@@ -21,7 +37,7 @@ describe ('lib | messaging | EventListeners', function () {
     });
   });
 
-  describe ('once()', function () {
+  describe ('once', function () {
     it ('should add a new listener', function () {
       let listeners = new EventListeners ({name: 'foo'});
       listeners.once (new NoopListener ());
@@ -30,7 +46,7 @@ describe ('lib | messaging | EventListeners', function () {
     });
   });
 
-  describe ('removeListenerAt()', function () {
+  describe ('removeListenerAt', function () {
     it ('should remove a listener', function () {
       let listeners = new EventListeners ({name: 'foo'});
 
@@ -41,8 +57,8 @@ describe ('lib | messaging | EventListeners', function () {
     });
   });
 
-  describe ('emit()', function () {
-    it ('should emit an event', function (done) {
+  describe ('emit', function () {
+    it ('should emit an event', function () {
       let e1;
       let e2;
 
@@ -59,14 +75,10 @@ describe ('lib | messaging | EventListeners', function () {
         }
       }));
 
-      listeners.emit (5).then (() => {
+      return listeners.emit (5).then (() => {
         expect (e1).to.equal (5);
         expect (e2).to.equal (5);
         expect (listeners._once).to.have.length (0);
-
-        done (null);
-      }).catch (err => {
-        done (err);
       })
     });
   });

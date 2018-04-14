@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const Object = require ('../object');
 const Messenger = require ('./messenger');
 
@@ -64,20 +80,5 @@ module.exports = Object.extend ({
    */
   emit () {
     return this.messengers[DEFAULT_MESSENGER_KEY].emit (...arguments);
-  },
-
-  /**
-   * Relay the results of a callback as an event.
-   *
-   * @param ev Target event to relay callback
-   * @returns {Function}
-   */
-  relay (ev) {
-    return () => {
-      let args = Array.from (arguments);
-      args.unshift (ev);
-
-      this.emit (...args);
-    };
   }
 });
