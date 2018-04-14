@@ -30,7 +30,7 @@ module.exports = CoreObject.extend ({
   _entities: null,
 
   init () {
-    this._super.init.apply (this, arguments);
+    this._super.call (this, ...arguments);
     this._resources = {};
 
     assert (!!this.app, "You must define the 'app' property.");

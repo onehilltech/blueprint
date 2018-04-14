@@ -1,8 +1,7 @@
-const CoreObject  = require ('./object');
+const BlueprintObject = require ('./object');
 const assert  = require ('assert');
 const debug   = require ('debug')('blueprint:RouterBuilder');
 const express = require ('express');
-const Router  = require ('./router');
 
 const {
   checkSchema,
@@ -59,19 +58,19 @@ function makeAction (controller, method, opts) {
  * @param method
  * @constructor
  */
-const MethodCall = CoreObject.extend ({
+const MethodCall = BlueprintObject.extend ({
   invoke () {
     return this.method.apply (this.obj, arguments);
   }
 });
 
-module.exports = CoreObject.extend ({
+module.exports = BlueprintObject.extend ({
   basePath: '/',
 
   _router: null,
 
   init () {
-    this._super.init.apply (this, arguments);
+    this._super.call (this, ...arguments);
 
     assert (!!this.controllers, 'You must define the {controllers} property.');
     assert (!!this.policies, 'You must define the {policies} property.');
@@ -300,7 +299,7 @@ module.exports = CoreObject.extend ({
       }
     }
     else {
-      throw new Error (`Parameter specification must be a Function or CoreObject [param=${param}]`);
+      throw new Error (`Parameter specification must be a Function or BlueprintObject [param=${param}]`);
     }
 
     this._router.param (param.slice (1), handler);
@@ -538,7 +537,7 @@ module.exports = CoreObject.extend ({
             middleware.push (checkSchema (validate));
           }
           else {
-            throw new Error (`validate must be a f(req, res, next), [...f(req, res, next)], or CoreObject-like validation schema [path=${path}]`);
+            throw new Error (`validate must be a f(req, res, next), [...f(req, res, next)], or BlueprintObject-like validation schema [path=${path}]`);
           }
         }
 
@@ -597,7 +596,7 @@ module.exports = CoreObject.extend ({
       }
     }
     else {
-      throw new Error (`Controller action expected to return a Function, CoreObject, or an Action`);
+      throw new Error (`Controller action expected to return a Function, BlueprintObject, or an Action`);
     }
 
     return flattenDeep (middleware);
