@@ -15,11 +15,11 @@
  */
 
 const BlueprintObject = require ('./object');
-const ApplicationMessaging = require ('./application-messaging');
+const {Events} = require ('./messaging');
 
 /**
  * @class Controller
  *
  * Base class for all controllers.
  */
-module.exports = BlueprintObject.extend (ApplicationMessaging);
+module.exports = BlueprintObject.extend (Events);
