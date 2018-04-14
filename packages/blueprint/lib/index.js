@@ -1,7 +1,7 @@
 module.exports = exports = require ('./-framework');
 
 exports.Mixin = require ('./mixin');
-exports.Object = require ('./object');
+exports.BO = exports.BlueprintObject = require ('./object');
 
 const {
   Listener,
