@@ -3,7 +3,7 @@ const {expect} = require ('chai');
 const ApplicationModule = require ('../../../lib/application-module');
 const MessagingFramework = require ('../../../lib/messaging/framework');
 
-describe ('lib | ApplicationModule', function () {
+describe.skip ('lib | ApplicationModule', function () {
   describe ('constructor', function () {
     it ('should create a new ApplicationModule', function () {
       let appPath = path.resolve (__dirname, '../../fixtures/app-module');
