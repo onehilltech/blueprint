@@ -1,4 +1,5 @@
 const BlueprintObject = require ('./object');
+const {Events} = require ('./messaging');
 
 /**
  * @class Service
@@ -6,7 +7,7 @@ const BlueprintObject = require ('./object');
  * The service represents an abstraction that runs in the background while the
  * application is live.
  */
-module.exports = BlueprintObject.extend ({
+module.exports = BlueprintObject.extend (Events, {
   /**
    * Instruct the service to configure itself. We have the configure() method
    * because the init() method is synchronous. It is therefore hard for the service

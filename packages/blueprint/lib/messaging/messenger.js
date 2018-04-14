@@ -15,7 +15,6 @@
  */
 
 const Object = require ('../object');
-const assert = require ('assert');
 const EventListeners = require ('./event-listeners');
 
 /**
@@ -27,9 +26,6 @@ const EventListeners = require ('./event-listeners');
 module.exports = Object.extend ({
   init () {
     this._super.call (this, ...arguments);
-
-    assert (!!this.key, 'Missing key property');
-
     this._eventListeners = {};
   },
 
@@ -79,12 +75,6 @@ module.exports = Object.extend ({
     let [name, ...args] = arguments;
     let listeners = this._eventListeners[name];
 
-    if (!listeners)
-      return Promise.resolve ();
-
-    return new Promise ((resolve,reject) => {
-      let p = listeners.emit (...args);
-      return Promise.resolve (p).then (resolve).catch (reject);
-    });
+    return listeners ? listeners.emit (...args) : Promise.resolve ();
   }
 });
