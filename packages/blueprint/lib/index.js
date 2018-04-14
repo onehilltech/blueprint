@@ -3,7 +3,13 @@ module.exports = exports = require ('./-framework');
 exports.Mixin = require ('./mixin');
 exports.Object = require ('./object');
 
-exports.messaging = require ('./messaging');
+const {
+  Listener,
+  Events
+} = require ('./messaging');
+
+exports.Listener = Listener;
+exports.Events = Events;
 
 exports.Controller = require ('./controller');
 exports.ResourceController = require ('./resource-controller');
