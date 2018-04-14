@@ -1,15 +1,12 @@
+const Mixin = require ('./mixin');
+
 /**
  * @mixin ApplicationMessaging
  *
- * Mixin for adding application messaging support to an object. The mixin
- * assumes the target object as an Application instance stored in the `app`
- * property.
- *
- * Usage:
- *
- *   BlueprintObject.mixin (target, ApplicationMessaging);
+ * Mixin for adding application messaging support to an object. The mixin assumes the
+ * target object as an Application instance stored in the `app` property.
  */
-module.exports = {
+module.exports = Mixin.create ({
   on (name, handler) {
     this.app.messaging.on (name, handler);
   },
@@ -21,4 +18,4 @@ module.exports = {
   emit () {
     this.app.messaging.emit (...arguments);
   }
-};
+});

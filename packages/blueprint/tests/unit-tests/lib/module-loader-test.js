@@ -1,6 +1,5 @@
 const {expect} = require ('chai');
 const path     = require ('path');
-const Object   = require ('core-object');
 const ModuleLoader = require ('../../../lib/module-loader');
 const messaging = require ('../../../lib/messaging');
 
