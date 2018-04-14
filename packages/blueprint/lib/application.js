@@ -3,7 +3,6 @@ const path  = require ('path');
 const {ensureDir} = require ('fs-extra');
 const debug  = require ('debug')('blueprint:app');
 const assert = require ('assert');
-const messaging = require ('./messaging');
 
 const {
   forOwn
@@ -19,6 +18,10 @@ const RouterBuilder     = require ('./router-builder');
 const Server            = require ('./server');
 const Loader            = require ('./loader');
 
+const {
+  Events
+} = require ('./messaging');
+
 const DEFAULT_APPLICATION_NAME = '<unnamed>';
 const APPLICATION_MODULE_NAME = '$';
 
@@ -27,7 +30,7 @@ const APPLICATION_MODULE_NAME = '$';
  *
  * The main application.
  */
-module.exports = BlueprintObject.extend ({
+module.exports = BlueprintObject.extend (Events, {
   /// The started state of the application.
   started: false,
 

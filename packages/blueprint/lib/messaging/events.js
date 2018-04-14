@@ -28,8 +28,7 @@ module.exports = Mixin.create ({
 
   init () {
     this._super.call (this, ...arguments);
-
-    this._messenger = Messenger.create ();
+    this._messenger = new Messenger ();
   },
 
   on () {
@@ -42,5 +41,13 @@ module.exports = Mixin.create ({
 
   emit () {
     return this._messenger.emit (...arguments);
+  },
+
+  getListeners (ev) {
+    return this._messenger.getListeners (ev);
+  },
+
+  hasListeners (ev) {
+    return this._messenger.hasListeners (ev);
   }
 });

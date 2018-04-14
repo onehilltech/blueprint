@@ -76,5 +76,25 @@ module.exports = Object.extend ({
     let listeners = this._eventListeners[name];
 
     return listeners ? listeners.emit (...args) : Promise.resolve ();
+  },
+
+  /**
+   * Get the listeners for an event.
+   *
+   * @param ev
+   * @returns {*}
+   */
+  getListeners (ev) {
+    return this._eventListeners[ev].listeners;
+  },
+
+  /**
+   * Test if the event has listeners.
+   *
+   * @param ev
+   * @returns {boolean}
+   */
+  hasListeners (ev) {
+    return (ev in this._eventListeners);
   }
 });

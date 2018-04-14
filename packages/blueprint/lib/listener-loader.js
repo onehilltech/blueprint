@@ -35,10 +35,19 @@ const LegacyListener = require ('./messaging/legacy-listener');
  * Loader class designed for loading application listeners.
  */
 module.exports = Loader.extend ({
+  /// The target messenger where the listeners are loaded. The messenger
+  /// must support the following interface/methods:
+  ///
+  /// * emit
+  /// * on
+  /// * once
+  ///
+  messenger: null,
+
   init () {
     this._super.call (this, ...arguments);
 
-    assert (!!this.app, "You must define the 'app' property");
+    assert (!!this.messenger, "You must define the 'messenger' property");
   },
 
   load (opts) {
@@ -71,7 +80,8 @@ module.exports = Loader.extend ({
 
           forOwn (loaded, (listener, name) => {
             listener.name = name;
-            this.app.messaging.on (eventName, listener);
+
+            this.messenger.on (eventName, listener);
           })
         });
 
