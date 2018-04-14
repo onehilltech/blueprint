@@ -1,5 +1,20 @@
-const Object = require ('./object');
-const HttpError = require ('./http-error');
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const BlueprintObject = require ('./object');
 
 /**
  * @class Policy
@@ -7,7 +22,7 @@ const HttpError = require ('./http-error');
  * Base class for all policies. All policies must override the runCheck()
  * method, which is used to evaluate the policy.
  */
-const Policy = Object.extend ({
+module.exports = BlueprintObject.extend ({
   /// The default code for a policy failure.
   failureCode: 'policy_failed',
 
@@ -30,6 +45,4 @@ const Policy = Object.extend ({
    */
   runCheck: null
 });
-
-module.exports = Policy;
 
