@@ -8,12 +8,9 @@
 module.exports = function (action) {
   return function __blueprint_execute_action (req, res, next) {
     try {
-      let p = action.execute (req, res);
-
-      if (p)
-        p.then (() => next ()).catch (next);
-      else
-        next ();
+      Promise.resolve (action.execute (req, res))
+        .then (() => next ())
+        .catch (next);
     }
     catch (ex) {
       next (ex);
