@@ -17,7 +17,6 @@
 const path     = require ('path');
 const {expect} = require ('chai');
 const ApplicationModule = require ('../../../lib/application-module');
-const MessagingFramework = require ('../../../lib/messaging/framework');
 
 describe.skip ('lib | ApplicationModule', function () {
   describe ('constructor', function () {

@@ -26,7 +26,6 @@ const {
 } = require ('cluster');
 
 const BlueprintObject = require ('../object');
-const messaging = require ('../messaging');
 
 /**
  * @class ClusterApplication
@@ -62,7 +61,7 @@ module.exports = BlueprintObject.extend ({
     // Create the application, ignoring the messaging framework. We do not want
     // the workers and masters sharing the same messaging framework.
 
-    let app = new Application ({appPath: this.appPath, messaging: messaging ()});
+    let app = new Application ({appPath: this.appPath});
     return app.configure ();
   }
 });

@@ -6,7 +6,6 @@ const {version} = require ('../package.json');
 const ClusterApplication = require ('./cluster');
 const Application = require ('./application');
 const BlueprintObject  = require ('./object');
-const messaging = require ('./messaging');
 
 /**
  * @class Framework
@@ -59,7 +58,7 @@ module.exports = BlueprintObject.extend ({
     if (this.cluster)
       this._app = new ClusterApplication ({appPath, cluster: this.cluster});
     else
-      this._app = new Application ({appPath, messaging: messaging () });
+      this._app = new Application ({appPath});
 
     return this._app.configure ();
   },
