@@ -24,8 +24,8 @@ const {
 /**
  * @mixin ApplicationMessaging
  *
- * Mixin for adding application messaging support to an object. The mixin assumes the
- * target object as an Application instance stored in the `app` property.
+ * Mixin for adding Event support to a class where the target messenger
+ * is the Blueprint application.
  */
 module.exports = Mixin.create (Events, {
   init () {
