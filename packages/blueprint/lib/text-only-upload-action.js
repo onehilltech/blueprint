@@ -7,7 +7,7 @@ const UploadAction = require ('./upload-action');
  */
 module.exports = UploadAction.extend ({
   init () {
-    this._super.apply (this, arguments);
+    this._super.call (this, ...arguments);
     this._middleware = this._upload.none ();
   }
 });

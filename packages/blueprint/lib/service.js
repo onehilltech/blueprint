@@ -1,5 +1,4 @@
 const BlueprintObject = require ('./object');
-const ApplicationMessaging = require ('./application-messaging');
 
 /**
  * @class Service
@@ -8,12 +7,6 @@ const ApplicationMessaging = require ('./application-messaging');
  * application is live.
  */
 module.exports = BlueprintObject.extend ({
-  init () {
-    this._super.init.apply (this, arguments);
-
-    BlueprintObject.mixin (this, ApplicationMessaging);
-  },
-
   /**
    * Instruct the service to configure itself. We have the configure() method
    * because the init() method is synchronous. It is therefore hard for the service
