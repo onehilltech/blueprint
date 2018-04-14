@@ -14,7 +14,18 @@
  * limitations under the License.
  */
 
-const SUPER_REGEXP = /\.(_super|call\(this|apply\(this)/;
+// This regular expression is designed to check if a function calls
+// the _super method. We are checking for the following line of code
+// in a function:
+//
+// = this._super.call (this
+// = this._super.apply (this
+//
+// We have designed the regular expression to take into account that
+// different developers may have different coding styles. So, we have
+// whitespace definitions between each token of interest.
+
+const CALLS_SUPER_REGEXP = /this\s*\.\s*_super\s*\.\s*(\s*call|apply)\s*\(\s*this/;
 
 const {
   forOwn,
@@ -33,7 +44,9 @@ function setupEmulateDynamicDispatch (baseFn, overrideFn) {
   // If the override function does not call _super, then we need to return
   // the override function. If the base function does not exist, then we need
   // to return the override function.
-  if (!SUPER_REGEXP.test (overrideFn))
+  const callsBaseMethod = CALLS_SUPER_REGEXP.test (overrideFn);
+
+  if (!callsBaseMethod)
     return overrideFn;
 
   // Make sure the base method exists, even if it is a no-op method.
