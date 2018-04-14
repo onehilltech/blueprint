@@ -28,7 +28,9 @@ module.exports = Mixin.create ({
 
   init () {
     this._super.call (this, ...arguments);
-    this._messenger = new Messenger ();
+
+    if (!this._messenger)
+      this._messenger = new Messenger ();
   },
 
   on () {

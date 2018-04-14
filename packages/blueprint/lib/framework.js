@@ -130,20 +130,30 @@ module.exports = BlueprintObject.extend ({
     return this._app.mount (routerName);
   },
 
-  /// Events
+  // Events
 
   on () {
     assert (this._app, 'The application has not been created.');
-    this._app.on (...arguments);
+    return this._app.on (...arguments);
   },
 
   once () {
     assert (this._app, 'The application has not been created.');
-    this._app.once (...arguments);
+    return this._app.once (...arguments);
   },
 
   emit () {
     assert (this._app, 'The application has not been created.');
-    this._app.emit (...arguments);
+    return this._app.emit (...arguments);
+  },
+
+  getListeners (ev) {
+    assert (this._app, 'The application has not been created.');
+    return this._app.getListeners (ev);
+  },
+
+  hasListeners (ev) {
+    assert (this._app, 'The application has not been created.');
+    return this._app.hasListeners (ev);
   }
 });
