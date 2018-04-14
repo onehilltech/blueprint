@@ -1,10 +1,27 @@
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const assert = require ('assert');
+const Action  = require ('./action');
 const Controller = require ('./controller');
 const HttpError  = require ('./http-error');
+
 const {
   merge
 } = require ('lodash');
-const assert     = require ('assert');
-const Action     = require ('./action')
 
 const BUILTIN_ACTIONS = {
   // CRUD operations
@@ -24,7 +41,18 @@ const NotFound = Action.extend ({
   }
 });
 
-const ResourceController = Controller.extend ({
+/**
+ * @class ResourceController
+ *
+ * The base class for all resource controllers. The resource controller provide a
+ * common interface that defines the expected CRUD operations for a resource:
+ *
+ * = create
+ * = retrieve: getOne, getAll
+ * = update
+ * = delete
+ */
+module.exports = Controller.extend ({
   /// Name of the resource managed by the resource controller.
   name: null,
 
@@ -38,7 +66,7 @@ const ResourceController = Controller.extend ({
   id: null,
 
   init () {
-    this._super.apply (this, arguments);
+    this._super.call (this, ...arguments);
 
     assert (!!this.name, 'You must provide a \'name\' property.');
 
@@ -46,6 +74,14 @@ const ResourceController = Controller.extend ({
       this.id = `${this.name}Id`;
 
     this._actions = merge ({}, BUILTIN_ACTIONS, this.actions);
+
+    Object.defineProperty (this, 'resourceId', {
+      get () { return this.id; }
+    });
+
+    Object.defineProperty (this, 'actions', {
+      get () { return this._actions; }
+    });
   },
 
   create () {
@@ -72,19 +108,3 @@ const ResourceController = Controller.extend ({
     return NotFound;
   }
 });
-
-/**
- * Get the resource identifier.
- */
-ResourceController.prototype.__defineGetter__ ('resourceId', function () {
-  return this.id;
-});
-
-/**
- * Get the actions supported by the resource controller.
- */
-ResourceController.prototype.__defineGetter__ ('actions', function (){
-  return this._actions;
-});
-
-module.exports = ResourceController;
