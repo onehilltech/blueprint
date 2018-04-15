@@ -8,6 +8,7 @@ describe ('lib | UploadAction', function () {
 
       expect (action).to.have.property ('uploadPath', './temp');
       expect (action).to.have.property ('_upload');
+      expect (action.storageType).to.equal ('disk');
     });
   });
 });
