@@ -2,7 +2,7 @@ const Action    = require ('./action');
 const {resolve} = require ('path');
 const {merge}   = require ('lodash');
 const framework = require ('./-framework');
-const get       = require ('object-path');
+const {get}     = require ('object-path');
 const multer    = require ('multer');
 
 /**
