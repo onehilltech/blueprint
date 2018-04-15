@@ -38,20 +38,28 @@ describe ('lib | BlueprintObject', function () {
       expect (a.name).to.be.a ('string');
     });
 
-    it ('should call base method', function () {
-      const Base = BlueprintObject.extend ({
+    it ('should support multiple levels of inheritance', function () {
+      const C1 = BlueprintObject.extend ({
         a () {
           return 1;
         }
       });
 
-      const A = Base.extend ({
-
+      const C2 = C1.extend ({
+        a () {
+          return this._super.call (this, ...arguments) + 2;
+        }
       });
 
-      const a = new A ();
+      const C3 = C2.extend ({
+        a () {
+          return this._super.call (this, ...arguments) + 3;
+        }
+      });
 
-      expect (a.a ()).to.equal (1);
+      const c = new C3 ();
+
+      expect (c.a ()).to.equal (6);
     });
 
     it ('should override base methods', function () {
