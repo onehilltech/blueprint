@@ -5,7 +5,8 @@ const debug  = require ('debug')('blueprint:app');
 const assert = require ('assert');
 
 const {
-  forOwn
+  forOwn,
+  pick
 } = require ('lodash');
 
 const lookup = require ('./-lookup');
@@ -109,8 +110,9 @@ module.exports = BlueprintObject.extend (Events, {
       .then (() => this._appModule.hasViews ? this._server.importViews (this._appModule.viewsPath) : null)
       .then (() => {
         const {routers} = this.resources;
+        const resources = pick (this.resources, ['controllers','policies','validators','sanitizers']);
+        const builder = new RouterBuilder (resources);
 
-        const builder = new RouterBuilder (this.resources);
         return builder.addRouter ('/', routers).build ();
       })
       .then (router => {
@@ -233,12 +235,11 @@ module.exports = BlueprintObject.extend (Events, {
   mount (routerName) {
     const router = this.lookup (`router:${routerName}`);
 
-    const controllers = get (this.resources, 'controllers');
-    const policies = get (this.resources, 'policies');
+    assert (!!router, `The router {${routerName}} does not exist.`);
 
-    assert (!!router, `The router "${routerName}" does not exist.`);
+    const resources = pick (this.resources, ['controllers','policies','validators','sanitizers']);
+    const builder = new RouterBuilder (resources);
 
-    const builder = new RouterBuilder ({controllers, policies});
     return builder.addRouter ('/', router).build ();
   },
 

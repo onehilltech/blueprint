@@ -26,7 +26,8 @@ describe ('lib | Router', function () {
       };
 
       const policies = {};
-      const router = new Router ({specification: r1}).build (controllers, policies);
+      const router = new Router ({specification: r1}).build ({controllers, policies});
+
 
       let app = express ();
       app.use (router);
