@@ -5,7 +5,6 @@ const {
 
 const {
   forOwn,
-  merge
 } = require ('lodash');
 
 const mongoose = require ('mongoose');
@@ -41,7 +40,7 @@ module.exports = Service.extend ({
     });
 
     // setup the messaging.
-    this.on ('blueprint.app.starting', this.openConnections.bind (this));
+    this.app.on ('blueprint.app.starting', this.openConnections.bind (this));
 
     this._loadConfiguration ();
   },
@@ -105,18 +104,18 @@ module.exports = Service.extend ({
     forOwn (connections, (opts, name) => {
       debug (`opening connection ${name}`);
 
-      let connection = this._connections[name];
+      let conn = this._connections[name];
 
-      connecting.push (connection.openUri (opts.connstr, opts.options));
+      connecting.push (conn.openUri (opts.connstr, opts.options));
+      this.emit ('connecting', conn);
     });
 
     return Promise.all (connecting).then (() => {
-      this.emit ('mongodb.connections.open');
+      this.emit ('open');
+      this.app.emit ('mongodb.connections.open');
 
       return this._appStart.signal ();
-    }).catch (err => {
-      console.log (err.message);
-    }) ;
+    });
   },
 
   /**

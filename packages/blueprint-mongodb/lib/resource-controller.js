@@ -32,16 +32,12 @@ const {
 const validation = require ('./validation');
 const populate = require ('./populate');
 
-const toMongoId = require ('../app/sanitizers/toMongoId');
-
 const LAST_MODIFIED = 'Last-Modified';
 
 const RESOURCE_ID_PARAMS_SCHEMA = {
   in: 'params',
   isMongoId: {errorMessage: 'The id is not valid.'},
-  customSanitizer: {
-    options: toMongoId
-  }
+  toMongoId: true
 };
 
 /**
@@ -66,6 +62,13 @@ const DatabaseAction = Action.extend ({
     else {
       return Promise.reject (err);
     }
+  },
+
+  /**
+   * Emit a event to the application.
+   */
+  emit () {
+    this.controller.app.emit (...arguments);
   }
 });
 
@@ -78,15 +81,14 @@ module.exports = ResourceController.extend ({
   /**
    * Initialize the resource controller.
    */
-  init () {
-    let [opts, ...params] = arguments;
+  init (opts = {}) {
     const {modelName} = this.model;
 
     if (!opts.name)
       opts.name = modelName;
 
     // Pass control to the base class.
-    this._super.init.call (this, opts, ...params);
+    this._super.call (this, opts);
 
     // Prepare the options for the base class.
     assert (!!this.model, "You must define the 'model' property.");
@@ -109,7 +111,7 @@ module.exports = ResourceController.extend ({
       schema: validation (this.model.schema, extend ({}, this._defaultValidationOptions, {validators, sanitizers})),
 
       /// Name of event for completion of action.
-      eventName: null,
+      eventName,
 
       execute (req, res) {
         const name = this.controller.name;
@@ -380,6 +382,8 @@ module.exports = ResourceController.extend ({
         validation (this.model.schema, extend ({}, this._defaultValidationOptions, {allOptional:true, validators, sanitizers})),
         {[this.resourceId]: RESOURCE_ID_PARAMS_SCHEMA}),
 
+      eventName,
+
       /**
        * Execute the action.
        *
@@ -408,7 +412,7 @@ module.exports = ResourceController.extend ({
                 if (!model)
                   return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
 
-                this.emit (eventName, model);
+                this.emit (this.eventName, model);
 
                 // Set the headers for the response.
                 res.set (LAST_MODIFIED, model.getLastModified ().toUTCString ());
@@ -492,6 +496,8 @@ module.exports = ResourceController.extend ({
         [this.resourceId]: RESOURCE_ID_PARAMS_SCHEMA
       },
 
+      eventName,
+
       execute (req, res) {
         const id = req.params[this.controller.id];
 
@@ -504,7 +510,7 @@ module.exports = ResourceController.extend ({
 
             // Notify all that are listening that we just deleted an resource
             // from the collection.
-            this.emit (eventName, model);
+            this.emit (this.eventName, model);
 
             return this.postDeleteModel (req, model);
           })

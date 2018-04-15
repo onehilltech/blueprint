@@ -40,6 +40,7 @@ describe ('lib | ResourceController', function () {
       return testing.request ()
         .post ('/callbacks')
         .send ({author})
+        .expect (200)
         .then (() => {
           let controller = blueprint.lookup ('controller:callbacks');
           expect (controller.createCallbacks).to.eql ([

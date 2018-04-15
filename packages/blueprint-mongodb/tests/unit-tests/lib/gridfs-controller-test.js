@@ -1,79 +1,131 @@
-const testing  = require ('@onehilltech/blueprint-testing');
-const path     = require ('path');
-const {expect} = require ('chai');
+const {request} = require ('@onehilltech/blueprint-testing');
+const blueprint = require ('@onehilltech/blueprint');
+const path      = require ('path');
+const {expect}  = require ('chai');
+
+const {
+  Types: {
+    ObjectId
+  }
+} = require ('mongoose');
 
 describe ('lib | GridFSController', function () {
-  let imageId;
+  beforeEach (function (done) {
+    let imageController = blueprint.lookup ('controller:image');
+    let mongodb = blueprint.lookup ('service:mongodb');
 
-  describe ('/images', function () {
-    describe ('POST', function () {
-      it ('should upload file, and store in database', function () {
-        let imageFile = path.resolve ('./tests/data/avatar1.png');
-
-        return testing.request ()
-          .post ('/images')
-          .attach ('image', imageFile)
-          .expect (200)
-          .then (res => {
-            expect (res.body).to.have.keys (['image']);
-            expect (res.body.image).to.have.keys ('_id');
-
-            imageId = res.body.image._id;
-          });
+    mongodb.once ('open', () => {
+      imageController.drop ().then (() => done ()).catch (err => {
+        if (err.code === 26)
+          return done (null);
+        else
+          return done (err);
       });
     });
   });
 
-  describe.skip ('/images/:imageId', function () {
-    describe ('GET', function () {
-      it ('should get the image from the database', function (done) {
-        blueprint.testing.request ()
-          .get ('/images/' + imageId)
-          .expect (200, function (err, res) {
-            if (err) return done (err);
+  describe ('create', function () {
+    it ('should upload file, and store in database', function () {
+      let imageFile = path.resolve ('./tests/data/avatar1.png');
 
-            expect (res.type).to.equal ('image/png');
+      return request ()
+        .post ('/images')
+        .attach ('image', imageFile)
+        .expect (200)
+        .then (res => {
+          expect (res.body).to.have.keys (['image']);
+          expect (res.body.image).to.have.keys ('_id');
+        });
+    });
+  });
 
-            return done ();
-          });
-      });
+  describe ('getOne', function () {
+    it ('should get the image from the database', function () {
+      let imageFile = path.resolve ('./tests/data/avatar1.png');
 
-      it ('should not find the image', function (done) {
-        blueprint.testing.request ()
-          .get ('/images/5')
-          .expect (400, done);
-      });
+      return request ()
+        .post ('/images')
+        .attach ('image', imageFile)
+        .expect (200).then (res => {
+          const imageId = res.body.image._id;
 
-      it ('does not support querying for resource', function (done) {
-        blueprint.testing.request ()
-          .get ('/images?filename=avatar1.png')
-          .expect (404, done);
-      })
+          return request ()
+            .get (`/images/${imageId}`)
+            .expect (200).then (res => {
+              expect (res.type).to.equal ('image/png');
+            });
+        });
     });
 
-    describe ('PUT', function () {
-      it ('should not update the image', function (done) {
-        let imageFile = path.resolve (__dirname, '../../data/avatar2.png');
+    it ('should not find the image', function () {
+      const id = new ObjectId ();
 
-        blueprint.testing.request ()
-          .put ('/images/' + imageId)
-          .attach ('image', imageFile)
-          .expect (404, done);
-      });
+      return request ()
+        .get (`/images/${id}`)
+        .expect (404, { errors:
+            [ { code: 'not_found',
+              detail: 'The resource does not exist.',
+              status: '404' } ] });
+    });
+  });
+
+  describe ('getAll', function () {
+    it ('does not support querying for resource', function (done) {
+      request ()
+        .get ('/images?filename=avatar1.png')
+        .expect (404, done);
+    })
+  });
+
+  describe ('update', function () {
+    it ('should not update the image', function (done) {
+      const id = new ObjectId ();
+      const imageFile = path.resolve ('./tests/data/avatar2.png');
+
+      request ()
+        .put (`/images/${id}`)
+        .attach ('image', imageFile)
+        .expect (404, done);
+    });
+  });
+
+  describe ('delete', function () {
+    it ('should delete the image from the database', function () {
+      let imageFile = path.resolve ('./tests/data/avatar1.png');
+
+      return request ()
+        .post ('/images')
+        .attach ('image', imageFile)
+        .then ((res) => {
+          const imageId = res.body.image._id;
+
+          return request ()
+            .delete (`/images/${imageId}`)
+            .expect (200, 'true');
+        });
     });
 
-    describe ('DELETE', function () {
-      it ('should delete the image from the database', function (done) {
-        blueprint.testing.request ()
-          .delete ('/images/' + imageId)
-          .expect (200, 'true', done);
-      });
+    it ('should not delete the image again', function () {
+      let imageFile = path.resolve ('./tests/data/avatar1.png');
 
-      it ('should not delete the image again', function (done) {
-        blueprint.testing.request ()
-          .delete ('/images/' + imageId)
-          .expect (500, done);
-      });
+      return request ()
+        .post ('/images')
+        .attach ('image', imageFile)
+        .expect (200)
+        .then ((res) => {
+          const imageId = res.body.image._id;
+
+          return request ()
+            .delete (`/images/${imageId}`)
+            .then (() => {
+              return request ()
+                .delete (`/images/${imageId}`)
+                .expect (404, { errors:
+                    [ { code: 'not_found',
+                      detail: 'The resource does not exist.',
+                      status: '404' } ] });
+            });
+        });
     });
   });
 });

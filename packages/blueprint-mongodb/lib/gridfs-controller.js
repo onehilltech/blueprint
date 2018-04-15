@@ -23,12 +23,16 @@ const {
   Action,
   SingleFileUploadAction,
   HttpError,
-  barrier
+  Mixin,
 } = blueprint;
 
 const {
   GridFSBucket
 } = require ('mongodb');
+
+const {
+  get
+} = require ('object-path');
 
 const fs = require ('fs-extra');
 
@@ -43,6 +47,17 @@ function makeResourceIdSchema (location) {
     }
   }
 }
+
+const GridFSActionMixin = Mixin.create ({
+  _translateError (err) {
+    if (err.message.startsWith ('FileNotFound:')) {
+      return Promise.reject (new HttpError (404, 'not_found', 'The resource does not exist.'));
+    }
+    else {
+      return Promise.reject (err);
+    }
+  }
+});
 
 /**
  * @class GridFSController
@@ -79,17 +94,49 @@ module.exports = ResourceController.extend ({
     assert (!!this._connection, `The connection named ${this.connection} does not exist.`);
 
     // Listen for the connection open event.
-    this._connection.once ('open', this._onConnectionOpen.bind (this));
-    this._appStart = barrier ('blueprint.app.start', this);
+    this._connection.once ('close', this._onConnectionClose.bind (this));
+
+    Object.defineProperty (this, 'connection', {
+      get () { return this._connection; }
+    });
 
     Object.defineProperty (this, 'bucket', {
       get () {
         if (this._bucket)
           return this._bucket;
 
-        console.error ('The target bucket does not exist.');
-        throw new Error ('The target bucket does not exist.');
+        if (!this._connection)
+          throw new Error ('There is no connection to the database.');
+
+        if (this._connection.readyState !== 1)
+          throw new Error ('The connection to the database is not open.');
+
+        let opts = {
+          bucketName: this.name,
+          chunkSizeBytes: this.chunkSizeBytes
+        };
+
+        if (this.writeConcern)
+          opts.writeConcern = this.writeConcern;
+
+        if (this.readPreference)
+          opts.readPreference = this.readPreference;
+
+        this._bucket = new GridFSBucket (this._connection.db, opts);
+
+        return this._bucket;
       }
+    });
+  },
+
+  /**
+   * Drop all the files and chucks for the bucket.
+   *
+   * @returns {*}
+   */
+  drop () {
+    return BluebirdPromise.fromCallback ((callback) => {
+      this.bucket.drop (callback);
     });
   },
 
@@ -97,8 +144,16 @@ module.exports = ResourceController.extend ({
    * Create a single resource in GridFS.
    */
   create () {
-    return SingleFileUploadAction.extend ({
+    return SingleFileUploadAction.extend (GridFSActionMixin, {
       name: this.name,
+
+      init () {
+        this._super.call (this, ...arguments);
+
+        // Determine how to get the upload from the request based on the options
+        // used to create the upload property.
+        this._write = this.storageType === 'memory' ? this._writeBuffer : this._writeFile;
+      },
 
       onUploadComplete (req, res) {
         let options = { contentType: req.file.mimetype};
@@ -116,22 +171,9 @@ module.exports = ResourceController.extend ({
                 if (Object.keys (metadata).length !== 0)
                   options.metadata = metadata;
 
-                return this.controller.bucket.openUploadStream (req.file.originalname, options);
-              })
-              .then (upload => {
-                let promise;
+                let upload = this.controller.bucket.openUploadStream (req.file.originalname, options);
 
-                if (req.file.path) {
-                  promise = this._writeFile (req, upload);
-                }
-                else if (req.file.buffer) {
-                  promise = this._writeBuffer (req, upload);
-                }
-                else {
-                  return Promise.reject (new HttpError (500, 'bad_upload', 'Failed to upload and save file.'));
-                }
-
-                return promise
+                return this._write (req, upload)
                   .then (() => this.postWriteUpload (req))
                   .then (() => this.prepareResponse (res, {[this.controller.name]: {_id: upload.id}}))
                   .then (response => res.status (200).json (response));
@@ -171,11 +213,77 @@ module.exports = ResourceController.extend ({
         return new Promise ((resolve,reject) => {
           fs.createReadStream (req.file.path)
             .pipe (upload)
-            .on ('error', reject)
-            .on ('finish', resolve);
+            .once ('error', reject)
+            .once ('finish', resolve);
         });
       }
     })
+  },
+
+  /**
+   * Get a single resource from the GridFS.
+   */
+  getOne () {
+    return Action.extend ({
+      schema: {
+        [this.id]: {
+          in: 'params',
+          isMongoId: { errorMessage: 'The resource id is invalid.' },
+          toMongoId: true
+        }
+      },
+
+      execute (req, res) {
+        return Promise.resolve (this.preGetItem (req))
+          .then (() => this.getItem (req))
+          .then (item => this.postGetItem (req, item))
+          .then (item => this._downloadItem (req, res, item));
+      },
+
+      preGetItem (req) {
+
+      },
+
+      getItem (req) {
+        const id = req.params[this.controller.id];
+
+        return new Promise ((resolve, reject) => {
+          let cursor = this.controller.bucket.find ({_id: id}, {limit: 1});
+
+          cursor.next (function (err, item) {
+            // Make sure we close the cursor.
+            cursor.close ();
+
+            if (err)
+              return reject (err);
+
+            if (!item)
+              return reject (new HttpError (404, 'not_found', 'The resource does not exist.'));
+
+            return resolve (item);
+          });
+        });
+      },
+
+      postGetItem (req, item) {
+        return item;
+      },
+
+      _downloadItem (req, res, item) {
+        const id = req.params[this.controller.id];
+
+        return new Promise ((resolve,reject) => {
+          let download = this.controller.bucket.openDownloadStream (id);
+
+          res.type (item.contentType);
+
+          download
+            .pipe (res)
+            .once ('error', reject)
+            .once ('finish', resolve);
+        });
+      }
+    });
   },
 
   /**
@@ -184,7 +292,7 @@ module.exports = ResourceController.extend ({
    * @returns {*}
    */
   delete () {
-    return Action.extend ({
+    return Action.extend (GridFSActionMixin, {
       schema: {
         [this.id]: makeResourceIdSchema ('params')
       },
@@ -196,95 +304,22 @@ module.exports = ResourceController.extend ({
           this.controller.bucket.delete (id, callback);
         }).then (() => {
           res.status (200).json (true);
-        });
+        }).catch (this._translateError.bind (this));
       }
     });
   },
 
-  _onConnectionOpen () {
-    let opts = {
-      bucketName: this.name,
-      chunkSizeBytes: this.chunkSizeBytes
-    };
-
-    if (this.writeConcern)
-      opts.writeConcern = this.writeConcern;
-
-    if (this.readPreference)
-      opts.readPreference = this.readPreference;
-
-    this._bucket = new GridFSBucket (this._connection.db, opts);
-
-    this._appStart.signal ();
+  _onConnectionClose () {
+    this._bucket = null;
   }
 });
 
 /*
-function GridFSController (conn, opts) {
-  ResourceController.call (this, opts);
-
-  this._resolveUser = opts.resolveUser;
-  this._uploadPath = opts.uploadPath || path.resolve (blueprint.app.appPath, 'temp/uploads');
-  this._upload = multer ({dest: this._uploadPath});
-
-  let self = this;
-
-  conn.on ('open', function () {
-    let opts = { bucketName: self.name };
-    self._bucket = new mongodb.GridFSBucket (conn.db, opts);
-  });
-}
-
-GridFSController.prototype.create = function () {
-  let self = this;
-
-  return [
-    this._upload.single (this.name),
-    function (req, res) {
-      // Store the content type.
-      let opts = { contentType: req.file.mimetype};
-
-      // Include the user that uploaded the file.
-      let metadata = {};
-
-      if (self._resolveUser)
-        metadata.user = self._resolveUser (req);
-
-      if (metadata.length !== 0)
-        opts.metadata = metadata;
-
-      // Create a new upload stream for the file.
-      let uploadStream = self._bucket.openUploadStream (req.file.originalname, opts);
-
-      fs.createReadStream (req.file.path)
-        .pipe (uploadStream)
-        .once ('error', function (err) {
-          winston.log ('error', util.inspect (err));
-          res.status (500).json ({error: 'Upload failed'});
-        })
-        .once ('finish', function () {
-          res.status (200).json ({_id: uploadStream.id});
-        });
-    }
-  ];
-};
 
 GridFSController.prototype.get = function () {
   let self = this;
 
   return {
-    validate: {
-      [this.id]: {
-        in: 'params',
-        isMongoId: { errorMessage: 'Invalid resource id' }
-      }
-    },
-
-    sanitize: function (req, callback) {
-      req.sanitizeParams (self.id).toMongoId ();
-      return callback (null);
-    },
-
     execute: function (req, res, callback) {
       let id = req.params[self.id];
 

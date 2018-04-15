@@ -20,9 +20,8 @@
     "url": "https://github.com/onehilltech/blueprint-mongodb.git"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.0.0-24",
+    "@onehilltech/blueprint": "^4.0.0-33",
     "@onehilltech/dab": "^0.11.0",
-    "express-validator": "^5.1.1",
     "moment": "^2.19.1"
   },
   "devDependencies": {

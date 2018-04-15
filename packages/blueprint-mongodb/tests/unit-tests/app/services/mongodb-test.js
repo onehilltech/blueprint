@@ -1,16 +1,14 @@
 const {expect} = require ('chai');
 const Service  = require ('../../../../app/services/mongodb');
 const mongoose = require ('mongoose');
-const { messaging } = require ('@onehilltech/blueprint');
+const {BO,Events} = require ('@onehilltech/blueprint');
 
 const {
   forOwn
 } = require ('lodash');
 
 function makeService () {
-  const app = {
-    messaging: messaging (),
-
+  let app = BO.create (Events, {
     configs: {
       mongodb: {
         connections: {
@@ -26,7 +24,7 @@ function makeService () {
         }
       }
     }
-  };
+  });
 
   return new Service ({app});
 }
