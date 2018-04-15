@@ -108,9 +108,9 @@ module.exports = BlueprintObject.extend (Events, {
       // an application module.
       .then (() => this._appModule.hasViews ? this._server.importViews (this._appModule.viewsPath) : null)
       .then (() => {
-        const {controllers, policies, routers} = this.resources;
+        const {routers} = this.resources;
 
-        const builder = new RouterBuilder ({controllers, policies});
+        const builder = new RouterBuilder (this.resources);
         return builder.addRouter ('/', routers).build ();
       })
       .then (router => {

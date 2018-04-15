@@ -18,7 +18,9 @@ const {
   isString,
   flattenDeep,
   isArray,
-  extend
+  extend,
+  mapValues,
+  transform
 } = require ('lodash');
 
 const {
@@ -68,6 +70,10 @@ module.exports = BlueprintObject.extend ({
   basePath: '/',
 
   _router: null,
+
+  validators: null,
+
+  sanitizers: null,
 
   init () {
     this._super.call (this, ...arguments);
@@ -499,6 +505,7 @@ module.exports = BlueprintObject.extend ({
       if (schema) {
         // We have an express-validator schema. The validator and sanitizer should
         // be built into the schema.
+        schema = this._normalizeSchema (schema);
         middleware.push (checkSchema (schema));
       }
 
@@ -534,7 +541,8 @@ module.exports = BlueprintObject.extend ({
             console.warn (`*** deprecated: ${action}: Validation schema must be declared on the 'schema' property`);
 
             // We have an express-validator schema.
-            middleware.push (checkSchema (validate));
+            let schema = this._normalizeSchema (validate);
+            middleware.push (checkSchema (schema));
           }
           else {
             throw new Error (`validate must be a f(req, res, next), [...f(req, res, next)], or BlueprintObject-like validation schema [path=${path}]`);
@@ -560,8 +568,11 @@ module.exports = BlueprintObject.extend ({
             middleware.push (sanitize);
           }
           else if (isObjectLike (sanitize)) {
+            console.warn (`*** deprecated: ${action}: Sanitizing schema must be declared on the 'schema' property`);
+
             // We have an express-validator schema.
-            middleware.push (checkSchema (validate));
+            let schema = this._normalizeSchema (sanitize);
+            middleware.push (checkSchema (schema));
           }
         }
       }
@@ -650,4 +661,27 @@ module.exports = BlueprintObject.extend ({
 
     return middleware;
   },
+
+  _normalizeSchema (schema) {
+    const validatorNames = Object.keys (this.validators || {});
+    const sanitizerNames = Object.keys (this.sanitizers || {});
+
+    return mapValues (schema, (definition) => {
+      return transform (definition, (result, value, key) => {
+        if (validatorNames.includes (key)) {
+          result.custom = {
+            options: this.validators[key]
+          };
+        }
+        else if (sanitizerNames.includes (key)) {
+          result.customSanitizer = {
+            options: this.sanitizers[key]
+          }
+        }
+        else {
+          result[key] = value;
+        }
+      }, {});
+    });
+  }
 });

@@ -20,7 +20,7 @@ describe ('lib | BlueprintObject', function () {
       expect (Object.keys (A.prototype)).to.have.length (0);
 
       let a = new A ();
-      expect (Object.keys (a)).to.eql ([]);
+      expect (Object.keys (a)).to.eql (['__boid__']);
     });
 
     it ('should extend base object with properties', function () {

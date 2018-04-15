@@ -20,10 +20,12 @@ module.exports = BlueprintObject.extend ({
    * @param controllers
    * @param policies
    */
-  build (controllers, policies) {
+  build (controllers, policies, validators, sanitizers) {
     const resources = {
       controllers,
-      policies
+      policies,
+      validators,
+      sanitizers
     };
 
     return new RouterBuilder (resources)
