@@ -1,0 +1,16 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "examples/01_helloworld/package.json",
+        "examples/02_policies/package.json",
+        "examples/03_upload/package.json",
+        "examples/04_resources/package.json",
+        "examples/05_cluster/package.json",
+        "package.json",
+        "tests/dummy/package.json",
+        "tutorials/login-tutorial/package.json"
+      ]
+    }
+  }
+}
