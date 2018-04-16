@@ -1,6 +1,8 @@
 Blueprint
 ================
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/onehilltech/blueprint.svg)](https://greenkeeper.io/)
+
 A lightweight, simple, elegant framework for building mean applications
 
 ![npm version](https://img.shields.io/npm/v/@onehilltech/blueprint.svg)
