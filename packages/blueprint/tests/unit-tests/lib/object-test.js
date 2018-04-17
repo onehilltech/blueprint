@@ -287,5 +287,19 @@ describe ('lib | BlueprintObject', function () {
 
       expect (found).to.be.true;
     });
+
+    it ('should create a constant property', function () {
+      let A = BlueprintObject.extend ({
+        DEFAULT_VALUE: computed.constant (5)
+      });
+      
+      let a = new A ();
+      
+      expect (a.DEFAULT_VALUE).to.equal (5);
+
+      a.DEFAULT_VALUE = 10;
+
+      expect (a.DEFAULT_VALUE).to.equal (5);
+    });
   });
 });
