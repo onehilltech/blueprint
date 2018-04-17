@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-const {BO} = require ('@onehilltech/blueprint');
+const {
+  BO,
+  computed,
+} = require ('@onehilltech/blueprint');
+
 const debug = require ('debug') ('blueprint-mongodb:populate:registry');
 
 const PopulateElement = require ('./populate-element');
@@ -35,19 +39,18 @@ const {
  * Collection of registered models that we can populate.
  */
 const ModelRegistry = BO.extend ({
+  models: computed ({
+    get () { return this._models; }
+  }),
+
+  modelTypes: computed ({
+    get () { return Object.keys (this._models).map (key => key.split (':')[1]); }
+
+  }),
+
   init () {
     this._super.call (this, ...arguments);
     this._models = {};
-
-    Object.defineProperty (this, 'models', {
-      get () { return this._models; }
-    });
-
-    Object.defineProperty (this, 'modelTypes', {
-      get () {
-        return Object.keys (this._models).map (key => key.split (':')[1]);
-      }
-    })
   },
 
   /**

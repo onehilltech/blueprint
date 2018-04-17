@@ -1,6 +1,23 @@
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const {
   Service,
-  barrier
+  barrier,
+  computed
 } = require ('@onehilltech/blueprint');
 
 const {
@@ -25,19 +42,19 @@ module.exports = Service.extend ({
   /// The application start barrier.
   _appStart: null,
 
+  defaultConnection: computed ({
+    get () { return this._connections[this._defaultName]; }
+  }),
+
+  connections: computed ({
+    get () { return this._connections; }
+  }),
+
   init () {
     this._super.apply (this, arguments);
 
     this._connections = {};
-    this._appStart = barrier ('blueprint.app.start', this);
-
-    Object.defineProperty (this, 'defaultConnection', {
-      get () { return this._connections[this._defaultName]; }
-    });
-
-    Object.defineProperty (this, 'connections', {
-      get () { return this._connections; }
-    });
+    //this._appStart = barrier ('blueprint.app.start', this);
 
     // setup the messaging.
     this.app.on ('blueprint.app.starting', this.openConnections.bind (this));
@@ -114,7 +131,7 @@ module.exports = Service.extend ({
       this.emit ('open');
       this.app.emit ('mongodb.connections.open');
 
-      return this._appStart.signal ();
+      //return this._appStart.signal ();
     });
   },
 

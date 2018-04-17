@@ -17,13 +17,8 @@ function ConstSchema (schema) {
 
   properties.forEach (name => {
     Object.defineProperty (this, name, {
-      set: function (val) {
-        this._schema[name] = val;
-      },
-
-      get: function () {
-        return this._schema[name];
-      }
+      set: function (val) { this._schema[name] = val; },
+      get: function () { return this._schema[name]; }
     });
   });
 }

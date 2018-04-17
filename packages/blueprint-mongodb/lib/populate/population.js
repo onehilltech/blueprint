@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-const {BO} = require ('@onehilltech/blueprint');
+const {
+  BO,
+  computed
+} = require ('@onehilltech/blueprint');
+
 const pluralize  = require ('pluralize');
 const PopulateVisitor = require ('./populate-visitor');
-const lean = require ('../../lib/lean');
 
 const {
   differenceWith,
@@ -26,27 +29,25 @@ const {
   values
 } = require ('lodash');
 
-const util = require ('util');
-
 /**
  * @class Population
  *
  * Wrapper class for managing the population of expanded objects.
  */
 module.exports = BO.extend ({
+  models: computed ({
+    get () { return mapValues (this._models, flattenDeep); }
+  }),
+
+  ids: computed ({
+    get () { return mapValues (this._ids, flattenDeep); }
+  }),
+
   init () {
     this._super.call (this, ...arguments);
 
     this._ids = {};
     this._models = {};
-
-    Object.defineProperty (this, 'models', {
-      get () { return mapValues (this._models, flattenDeep); }
-    });
-
-    Object.defineProperty (this, 'ids', {
-      get () { return mapValues (this._ids, flattenDeep); }
-    });
 
     // Lastly, initialize an empty set of the entire population.
     const modelTypes = this.registry.modelTypes;

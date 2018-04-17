@@ -24,6 +24,7 @@ const {
   SingleFileUploadAction,
   HttpError,
   Mixin,
+  computed,
 } = blueprint;
 
 const {
@@ -84,6 +85,34 @@ module.exports = ResourceController.extend ({
   /// The GridFS bucket.
   _bucket: null,
 
+  bucket: computed ({
+    get () {
+      if (this._bucket)
+        return this._bucket;
+
+      if (!this._connection)
+        throw new Error ('There is no connection to the database.');
+
+      if (this._connection.readyState !== 1)
+        throw new Error ('The connection to the database is not open.');
+
+      let opts = {
+        bucketName: this.name,
+        chunkSizeBytes: this.chunkSizeBytes
+      };
+
+      if (this.writeConcern)
+        opts.writeConcern = this.writeConcern;
+
+      if (this.readPreference)
+        opts.readPreference = this.readPreference;
+
+      this._bucket = new GridFSBucket (this._connection.db, opts);
+
+      return this._bucket;
+    }
+  }),
+
   init () {
     this._super.call (this, ...arguments);
 
@@ -95,38 +124,6 @@ module.exports = ResourceController.extend ({
 
     // Listen for the connection open event.
     this._connection.once ('close', this._onConnectionClose.bind (this));
-
-    Object.defineProperty (this, 'connection', {
-      get () { return this._connection; }
-    });
-
-    Object.defineProperty (this, 'bucket', {
-      get () {
-        if (this._bucket)
-          return this._bucket;
-
-        if (!this._connection)
-          throw new Error ('There is no connection to the database.');
-
-        if (this._connection.readyState !== 1)
-          throw new Error ('The connection to the database is not open.');
-
-        let opts = {
-          bucketName: this.name,
-          chunkSizeBytes: this.chunkSizeBytes
-        };
-
-        if (this.writeConcern)
-          opts.writeConcern = this.writeConcern;
-
-        if (this.readPreference)
-          opts.readPreference = this.readPreference;
-
-        this._bucket = new GridFSBucket (this._connection.db, opts);
-
-        return this._bucket;
-      }
-    });
   },
 
   /**

@@ -62,9 +62,7 @@ function modelOn (connName, name, schema, collection) {
  * @param collection      Name of collection
  */
 function createResource (conn, name, schema, collection) {
-  Object.defineProperty (schema.options, 'resource', {
-    get: function () { return true; }
-  });
+  Object.defineProperty (schema.options, 'resource', { enumerable: true, writable: false, value: true });
 
   // Install the default
   schema.plugin (HiddenPlugin);
