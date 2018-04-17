@@ -37,3 +37,11 @@ exports.Service = require ('./service');
 
 // policy builders
 exports.policies = require ('./policies');
+
+// computed properties
+
+const {
+  computed
+} = require ('./properties');
+
+exports.computed = computed;
