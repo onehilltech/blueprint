@@ -1,7 +1,7 @@
 module.exports = {
   connections: {
     $default: {
-      connstr: 'mongodb://localhost/blueprint_mongodb',
+      uri: 'mongodb://localhost/blueprint_mongodb',
       options : {
         readPreference: "primary",
         forceServerObjectId: false,
@@ -13,7 +13,7 @@ module.exports = {
     },
 
     secondary : {
-      connstr: 'mongodb://localhost/blueprint_mongodb',
+      uri: 'mongodb://localhost/blueprint_mongodb',
       options : {
         readPreference: "primary",
         forceServerObjectId: false,

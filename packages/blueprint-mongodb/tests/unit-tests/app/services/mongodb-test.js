@@ -13,12 +13,12 @@ function makeService () {
       mongodb: {
         connections: {
           $default: {
-            connstr: 'mongodb://localhost/blueprint-mongodb',
+            uri: 'mongodb://localhost/blueprint-mongodb',
             options: {}
           },
 
           priority: {
-            connstr: 'mongodb://localhost/blueprint-mongodb',
+            uri: 'mongodb://localhost/blueprint-mongodb',
             options: {}
           }
         }

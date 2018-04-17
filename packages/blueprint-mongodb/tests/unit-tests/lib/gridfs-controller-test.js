@@ -14,7 +14,10 @@ describe ('lib | GridFSController', function () {
     let imageController = blueprint.lookup ('controller:image');
     let mongodb = blueprint.lookup ('service:mongodb');
 
-    mongodb.once ('open', () => {
+    mongodb.once ('open', (name) => {
+      if (name !== '$default')
+        return;
+
       imageController.drop ().then (() => done ()).catch (err => {
         if (err.code === 26)
           return done (null);

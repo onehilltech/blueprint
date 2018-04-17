@@ -21,13 +21,13 @@ const {
 
 const {
   forOwn,
-  mapValues
+  mapValues,
+  get
 } = require ('lodash');
 
 const BluebirdPromise = require ('bluebird');
 
 const mongoose = require ('mongoose');
-const {get} = require ('object-path');
 const debug = require ('debug')('blueprint-mongodb:mongodb');
 
 const DEFAULT_CONNECTION_NAME = '$default';
@@ -116,21 +116,34 @@ module.exports = Service.extend ({
     debug ('opening all connections to the database');
 
     const {connections} = this.config;
+    const connecting = mapValues (connections, ({uri, options}, name) => this.openConnection (name, uri, options));
 
-    const connecting = mapValues (connections, (opts, name) => {
-      debug (`opening connection ${name}`);
+    return BluebirdPromise.props (connecting);
+  },
 
-      let conn = this._connections[name];
+  /**
+   * Open a single connection.
+   *
+   * @param name
+   * @param uri
+   * @param options
+   * @returns {*}
+   */
+  openConnection (name, uri, options) {
+    debug (`opening connection ${name}`);
 
-      if (!conn)
-        return null;
+    let conn = this._connections[name];
 
-      this.emit ('connecting', name, conn);
-      return conn.openUri (opts.connstr, opts.options);
-    });
+    if (!conn)
+      throw new Error (`Connection ${name} does not exist.`);
 
-    return BluebirdPromise.props (connecting).then (connected => {
-      forOwn (connected, (conn, name) => this.emit ('open', name, conn))
+    if (conn.readyState === 1)
+      return Promise.resolve (conn);
+
+    this.emit ('connecting', name, conn);
+
+    return conn.openUri (uri, options).then (conn => {
+      return this.emit ('open', name, conn).then (() => conn);
     });
   },
 
