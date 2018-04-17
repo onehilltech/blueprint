@@ -16,13 +16,15 @@
 
 const {
   Service,
-  barrier,
   computed
 } = require ('@onehilltech/blueprint');
 
 const {
   forOwn,
+  mapValues
 } = require ('lodash');
+
+const BluebirdPromise = require ('bluebird');
 
 const mongoose = require ('mongoose');
 const {get} = require ('object-path');
@@ -52,9 +54,7 @@ module.exports = Service.extend ({
 
   init () {
     this._super.apply (this, arguments);
-
     this._connections = {};
-    //this._appStart = barrier ('blueprint.app.start', this);
 
     // setup the messaging.
     this.app.on ('blueprint.app.starting', this.openConnections.bind (this));
@@ -115,23 +115,22 @@ module.exports = Service.extend ({
   openConnections () {
     debug ('opening all connections to the database');
 
-    let {connections} = this.config;
-    let connecting = [];
+    const {connections} = this.config;
 
-    forOwn (connections, (opts, name) => {
+    const connecting = mapValues (connections, (opts, name) => {
       debug (`opening connection ${name}`);
 
       let conn = this._connections[name];
 
-      connecting.push (conn.openUri (opts.connstr, opts.options));
-      this.emit ('connecting', conn);
+      if (!conn)
+        return null;
+
+      this.emit ('connecting', name, conn);
+      return conn.openUri (opts.connstr, opts.options);
     });
 
-    return Promise.all (connecting).then (() => {
-      this.emit ('open');
-      this.app.emit ('mongodb.connections.open');
-
-      //return this._appStart.signal ();
+    return BluebirdPromise.props (connecting).then (connected => {
+      forOwn (connected, (conn, name) => this.emit ('open', name, conn))
     });
   },
 
@@ -139,13 +138,8 @@ module.exports = Service.extend ({
    * Close all open connections.
    */
   closeConnections () {
-    let pending = [];
+    const pending = mapValues (this._connections, (conn) => conn.readyState !== 0 ? conn.close () : null);
 
-    forOwn (this._connections, conn => {
-      if (conn.readyState !== 0)
-        pending.push (conn.close ());
-    });
-
-    return Promise.all (pending);
+    return BluebirdPromise.props (pending);
   }
 });
