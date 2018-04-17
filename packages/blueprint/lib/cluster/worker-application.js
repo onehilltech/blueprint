@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-const Application = require ('../application');
 const path = require ('path');
+const Application = require ('../application');
+const {computed} = require ('../properties');
 
 /**
  * @class WorkerApplication
@@ -24,16 +25,9 @@ const path = require ('path');
  * work when processing requests.
  */
 module.exports = Application.extend ({
-  init () {
-    this._super.call (this, ...arguments);
-
-    // Let's override the tempPath to include the process id. Otherwise, we run the risk
-    // of running into issues when storing data into the temp directory.
-
-    Object.defineProperty (this, 'tempPath', {
-      get () {
-        return path.resolve (this.appPath, `.blueprint/${process.pid}`);
-      }
-    });
-  }
+  tempPath: computed ({
+    get () {
+      return path.resolve (this.appPath, `.blueprint/${process.pid}`);
+    }
+  })
 });

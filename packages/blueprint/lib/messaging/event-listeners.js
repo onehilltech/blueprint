@@ -15,6 +15,7 @@
  */
 
 const BlueprintObject = require ('../object');
+const {computed} = require ('../properties');
 const assert = require ('assert');
 const ListenerHandle = require ('./listener-handle');
 const Listener = require ('./listener');
@@ -31,6 +32,10 @@ module.exports = BlueprintObject.extend ({
   /// Name of the event the listeners handle.
   name: null,
 
+  listeners: computed ({
+    get () { return concat (this._once, this._on); }
+  }),
+
   init () {
     this._super.call (this, ...arguments);
 
@@ -38,10 +43,6 @@ module.exports = BlueprintObject.extend ({
 
     this._on = [];
     this._once = [];
-
-    Object.defineProperty (this, 'listeners', {
-      get () { return concat (this._once, this._on); }
-    });
   },
 
   /**

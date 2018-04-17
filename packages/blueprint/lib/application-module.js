@@ -9,6 +9,10 @@ const {
   merge
 } = require ('lodash');
 
+const {
+  computed
+} = require ('./properties');
+
 const fs     = require ('fs-extra');
 const Loader = require ('./loader');
 const ListenerLoader = require ('./listener-loader');
@@ -31,6 +35,27 @@ module.exports = CoreObject.extend ({
 
   /// Collection of resources loaded by the application module.
   _resources: null,
+
+  viewsPath: computed ({
+    get () {
+      return path.join (this.modulePath, 'views');
+    }
+  }),
+
+  hasViews: computed ({
+    get () {
+      try {
+        return fs.statSync (this.viewsPath).isDirectory ();
+      }
+      catch (ex) {
+        return false;
+      }
+    }
+  }),
+
+  resources: computed ({
+    get () { return this._resources; }
+  }),
 
   init () {
     this._super.call (this, ...arguments);
@@ -69,47 +94,10 @@ module.exports = CoreObject.extend ({
         }
       }
     ];
-
-    // Define the setters/getters for the object.
-
-    Object.defineProperty (this, 'viewsPath', {
-      get () {
-        return path.join (this.modulePath, 'views');
-      }
-    });
-
-    Object.defineProperty (this, 'hasViews', {
-      get () {
-        try {
-          return fs.statSync (this.viewsPath).isDirectory ();
-        }
-        catch (ex) {
-          return false;
-        }
-      }
-    });
-
-    Object.defineProperty (this, 'resources', {
-      get () { return this._resources; }
-    });
   },
 
   _instantiateComponent (Component) {
     return new Component ({app: this.app});
-  },
-
-  /**
-   * Test of the application module has views.
-   *
-   * @returns {boolean}
-   */
-  get hasViews () {
-    try {
-      return fs.statSync (this.viewsPath).isDirectory ();
-    }
-    catch (ex) {
-      return false;
-    }
   },
 
   /**

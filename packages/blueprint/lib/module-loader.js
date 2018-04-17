@@ -27,6 +27,10 @@ const {
   forEach
 } = require ('lodash');
 
+const {
+  computed
+} = require ('./properties');
+
 function isBlueprintModule (packageObj) {
   return packageObj.keywords && packageObj.keywords.indexOf (KEYWORD_BLUEPRINT_MODULE) !== -1;
 }
@@ -38,15 +42,15 @@ module.exports = CoreObject.extend ({
   /// Collection of loaded modules.
   _modules: null,
 
+  modulePath: computed ({
+    get () { return path.resolve (this.app.appPath, '..', 'node_modules'); }
+  }),
+
   init () {
     this._super.call (this, ...arguments);
     this._modules = {};
 
     assert (!!this.app, 'You must define the app property');
-
-    Object.defineProperty (this, 'modulePath', {
-      get () { return path.resolve (this.app.appPath, '..', 'node_modules'); }
-    });
   },
 
   load () {

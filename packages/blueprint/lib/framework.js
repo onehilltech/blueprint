@@ -6,6 +6,7 @@ const {version} = require ('../package.json');
 const ClusterApplication = require ('./cluster');
 const Application = require ('./application');
 const BlueprintObject  = require ('./object');
+const {computed} = require ('./properties');
 
 /**
  * @class Framework
@@ -21,17 +22,17 @@ module.exports = BlueprintObject.extend ({
   /// The execution environment for the framework.
   env,
 
+  app: computed ({
+    get () { return this._app; }
+  }),
+
+  hasApplication: computed ({
+    get () { return !!this._app; }
+  }),
+
   init () {
     this._super.call (this, ...arguments);
     this._parseCommandLineOptions ();
-
-    Object.defineProperty (this, 'app', {
-      get () { return this._app; }
-    });
-
-    Object.defineProperty (this, 'hasApplication', {
-      get () { return !!this._app; }
-    });
   },
 
   /**
