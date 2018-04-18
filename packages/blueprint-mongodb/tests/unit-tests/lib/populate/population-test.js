@@ -112,7 +112,7 @@ describe ('lib | populate | Population', function () {
           expect (models).to.have.keys (['authors','users']);
 
           expect (lean (models.users)).to.have.deep.members (lean (users));
-          expect (lean (models.authors)).to.include.deep.members (lean([authors[0], authors[1], authors[3]]));
+          expect (lean (models.authors)).to.have.deep.members (lean([authors[0], authors[3], authors[1]]));
         });
       });
     });
