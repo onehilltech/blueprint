@@ -10,20 +10,14 @@ const {
 } = require ('mongoose');
 
 describe ('lib | GridFSController', function () {
-  beforeEach (function (done) {
+  beforeEach (function () {
     let imageController = blueprint.lookup ('controller:image');
-    let mongodb = blueprint.lookup ('service:mongodb');
 
-    mongodb.once ('open', (name) => {
-      if (name !== '$default')
-        return;
+    return imageController.drop ().catch (err => {
+      if (err.code === 26)
+        return null;
 
-      imageController.drop ().then (() => done ()).catch (err => {
-        if (err.code === 26)
-          return done (null);
-        else
-          return done (err);
-      });
+      return Promise.reject (err);
     });
   });
 

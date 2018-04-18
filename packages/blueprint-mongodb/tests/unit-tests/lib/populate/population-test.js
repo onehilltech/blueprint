@@ -122,17 +122,16 @@ describe ('lib | populate | Population', function () {
       ];
 
       return Promise.all (promises).then (([users,authors]) => {
-        return population.addModels (users)
-          .then (population => {
-            const ids = population.ids;
-            const models = population.models;
+        return population.addModels (users).then (population => {
+          const ids = population.ids;
+          const models = population.models;
 
-            expect (ids).to.have.keys (['authors','users']);
-            expect (models).to.have.keys (['authors','users']);
+          expect (ids).to.have.keys (['authors','users']);
+          expect (models).to.have.keys (['authors','users']);
 
-            expect (lean (models.users)).to.have.deep.members (lean (users));
-            expect (lean (models.authors)).to.have.deep.members ([authors[0].lean (), authors[1].lean ()]);
-          });
+          expect (lean (models.users)).to.have.deep.members (lean (users));
+          expect (lean (models.authors)).to.have.deep.members ([authors[0].lean (), authors[1].lean ()]);
+        });
       });
     });
   });

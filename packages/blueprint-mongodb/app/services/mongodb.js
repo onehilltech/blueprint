@@ -14,30 +14,43 @@
  * limitations under the License.
  */
 
+const util = require ('util');
+
 const {
   Service,
-  computed
+  computed,
+  Loader
 } = require ('@onehilltech/blueprint');
 
 const {
   forOwn,
   mapValues,
-  get
+  get,
 } = require ('lodash');
 
 const BluebirdPromise = require ('bluebird');
 
 const mongoose = require ('mongoose');
 const debug = require ('debug')('blueprint-mongodb:mongodb');
+const path = require ('path');
 
 const DEFAULT_CONNECTION_NAME = '$default';
+const SEEDS_RELATIVE_PATH = 'seeds/mongodb';
 
 mongoose.Promise = Promise;
+
+const {
+  build,
+  seed,
+  clear
+} = require ('@onehilltech/dab');
 
 /**
  * @class MongoDbService
  */
 module.exports = Service.extend ({
+  _loader: new Loader (),
+
   /// Named connections managed by the service.
   _connections: null,
 
@@ -55,10 +68,10 @@ module.exports = Service.extend ({
   init () {
     this._super.apply (this, arguments);
     this._connections = {};
+    this._seeds = {};
+    this._seedDefs = null;
 
     // setup the messaging.
-    this.app.on ('blueprint.app.starting', this.openConnections.bind (this));
-
     this._loadConfiguration ();
   },
 
@@ -89,8 +102,23 @@ module.exports = Service.extend ({
     forOwn (connections, (opts, name) => this.createConnection (name));
   },
 
+  start () {
+    debug ('starting service');
+
+    return this.openConnections ();
+  },
+
   destroy () {
+    debug ('destroying service');
+
     return this.closeConnections ();
+  },
+
+  seedConnections () {
+    debug ('seeding all database connections');
+
+    const seeding = mapValues (this._connections, (conn, name) => this._seedConnection (name, conn));
+    return BluebirdPromise.props (seeding);
   },
 
   /**
@@ -143,15 +171,92 @@ module.exports = Service.extend ({
     this.emit ('connecting', name, conn);
 
     return conn.openUri (uri, options).then (conn => {
-      return this.emit ('open', name, conn).then (() => conn);
+      return this.emit ('open', name, conn)
+        .then (() => this._seedConnection (name, conn))
+        .then (() => conn);
+    });
+  },
+
+  /**
+   * Seed a connection.
+   *
+   * @private
+   */
+  _seedConnection (name, conn) {
+    // When seeding a connection, we always build a new data model. This
+    // is because we need to generate new ids for all model elements.
+
+    return this._buildSeed (name).then (data => {
+      // First, clear the connection. The seed the connection with the models. Last,
+      // store the models in the seeds.
+      debug (`clearing models on connection ${name}`);
+
+      try {
+        return clear (conn).then (() => {
+          debug (`seeding database connection ${name}`);
+          return data ? seed (conn, data) : null;
+        }).then (models => {
+          debug (`database connection ${name} has been seeded`);
+
+          this._seeds[name] = models;
+
+          debug (`sending notification that ${name} has been seeded`);
+
+          this.emit ('seeded', name, conn, models);
+          return models;
+        }).catch (err => {
+          console.log (err);
+        });
+      }
+      catch (err) {
+        console.error (err);
+      }
+    });
+  },
+
+  /**
+   * Build the seeds for a connection.
+   *
+   * @param name
+   * @param conn
+   * @returns {*}
+   * @private
+   */
+  _buildSeed (name) {
+    return this._loadSeedDefinitions ().then (definitions => {
+      debug (`building seed definition for connection ${name}`);
+      let definition = definitions[name];
+
+      return definition ? build (definitions[name]) : null;
+    });
+  },
+
+  /**
+   * Load all the seed definitions into memory.
+   *
+   * @returns {*}
+   * @private
+   */
+  _loadSeedDefinitions () {
+    if (this._seedDefs)
+      return Promise.resolve (this._seedDefs);
+
+    debug ('loading seed definitions');
+
+    const dirname = path.resolve (this.app.appPath, SEEDS_RELATIVE_PATH);
+    return this._loader.load ({dirname}).then (values => {
+      this._seedDefs = values;
+      return values;
     });
   },
 
   /**
    * Close all open connections.
    */
-  closeConnections () {
-    const pending = mapValues (this._connections, (conn) => conn.readyState !== 0 ? conn.close () : null);
+  closeConnections (force) {
+    const pending = mapValues (this._connections, (conn) => {
+      conn.readyState !== 0 ? conn.close (force) : null
+    });
 
     return BluebirdPromise.props (pending);
   }

@@ -1,7 +1,29 @@
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const {expect} = require ('chai');
 const Service  = require ('../../../../app/services/mongodb');
 const mongoose = require ('mongoose');
-const {BO,Events} = require ('@onehilltech/blueprint');
+
+const path = require ('path');
+
+const {
+  BO,
+  Events
+} = require ('@onehilltech/blueprint');
 
 const {
   forOwn
@@ -23,7 +45,9 @@ function makeService () {
           }
         }
       }
-    }
+    },
+
+    appPath: path.resolve ('./tests/noop/app')
   });
 
   return new Service ({app});
@@ -60,23 +84,20 @@ describe ('app | services | mongodb', function () {
           forOwn (service.connections, (conn) => {
             expect (conn.readyState).to.equal (1);
           });
-        })
-        .then (() => service.destroy ());
+        });
     });
   });
 
-  describe ('closeConnection', function () {
+  describe.skip ('closeConnections', function () {
     it ('should close all open connections', function () {
       let service = makeService ();
       service.configure ();
 
-      return service.openConnections ()
-        .then (() => service.closeConnections ())
-        .then (() => {
-          forOwn (service.connections, (conn) => {
-            expect (conn.readyState).to.equal (0);
-          });
+      return service.closeConnections ().then (() => {
+        forOwn (service.connections, (conn) => {
+          expect (conn.readyState).to.equal (0);
         });
+      });
     })
   });
 });
