@@ -20,15 +20,14 @@ const {
 } = require ('@onehilltech/blueprint');
 
 const pluralize  = require ('pluralize');
-const PopulateVisitor = require ('./populate-visitor');
 const AddModelVisitor = require ('./add-model-visitor');
+const UnseenIdVisitor = require ('./unseen-id-visitor');
 
 const {
   differenceWith,
   flattenDeep,
   mapValues,
   values,
-  transform,
   isEmpty,
 } = require ('lodash');
 
@@ -199,35 +198,6 @@ module.exports = BO.extend ({
 
       // Determine the ids that we need to populate at this point in time. If we
       // have seen all the ids, then there is no need to populate the value(s).
-      const UnseenIdVisitor = PopulateVisitor.extend ({
-        unseen: null,
-        population: null,
-        value: null,
-
-        visitPopulateElement ({plural}) {
-          this.unseen = this.population._saveUnseenIds (plural, [this.value]);
-        },
-
-        visitPopulateArray ({plural}) {
-          this.unseen = this.population._saveUnseenIds (plural, this.value);
-        },
-
-        visitPopulateEmbedded (item) {
-          this.unseen = transform (item.populators, (result, populator, name) => {
-            let value = this.value[name];
-            let v = new UnseenIdVisitor ({population: this.population, value});
-
-            populator.accept (v);
-
-            let {plural} = populator;
-
-            if (result[plural])
-              result[plural].push (v.unseen);
-            else
-              result[plural] = [v.unseen];
-          }, {});
-        }
-      });
 
       let saveUnseenIds = new UnseenIdVisitor ({population: this, value});
       populator.accept (saveUnseenIds);
