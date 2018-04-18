@@ -21,12 +21,15 @@ const {
 
 const pluralize  = require ('pluralize');
 const PopulateVisitor = require ('./populate-visitor');
+const AddModelVisitor = require ('./add-model-visitor');
 
 const {
   differenceWith,
   flattenDeep,
   mapValues,
-  values
+  values,
+  transform,
+  isEmpty,
 } = require ('lodash');
 
 /**
@@ -196,57 +199,48 @@ module.exports = BO.extend ({
 
       // Determine the ids that we need to populate at this point in time. If we
       // have seen all the ids, then there is no need to populate the value(s).
-      const saveUnseenIds = new PopulateVisitor ({
+      const UnseenIdVisitor = PopulateVisitor.extend ({
         unseen: null,
-        population: this,
+        population: null,
+        value: null,
 
-        visitPopulateElement (item) {
-          this.unseen = this.population._saveUnseenIds (item.plural, [value]);
+        visitPopulateElement ({plural}) {
+          this.unseen = this.population._saveUnseenIds (plural, [this.value]);
         },
 
-        visitPopulateArray (item) {
-          this.unseen = this.population._saveUnseenIds (item.plural, value);
+        visitPopulateArray ({plural}) {
+          this.unseen = this.population._saveUnseenIds (plural, this.value);
+        },
+
+        visitPopulateEmbedded (item) {
+          this.unseen = transform (item.populators, (result, populator, name) => {
+            let value = this.value[name];
+            let v = new UnseenIdVisitor ({population: this.population, value});
+
+            populator.accept (v);
+
+            let {plural} = populator;
+
+            if (result[plural])
+              result[plural].push (v.unseen);
+            else
+              result[plural] = [v.unseen];
+          }, {});
         }
       });
 
+      let saveUnseenIds = new UnseenIdVisitor ({population: this, value});
       populator.accept (saveUnseenIds);
 
       const {unseen} = saveUnseenIds;
 
-      if (!unseen || (unseen.length !== undefined && unseen.length === 0))
+      if (isEmpty (unseen))
         return null;
 
       return populator.populate (unseen).then (populated => {
         // Add the populated models to our population.
-        const v = new PopulateVisitor ({
-          promise: null,
-          population: this,
 
-          visitPopulateElement (item) {
-            this.population._addModels (item.plural, [populated]);
-
-            if (Object.keys (populator).length === 0)
-              return;
-
-            this.promise = this.population._populateElement (populator, populated);
-          },
-
-          visitPopulateArray (item) {
-            // Add the array of model to our population.
-            this.population._addModels (item.plural, populated);
-
-            const populator = this.population.registry.models [item.key];
-
-            if (populator) {
-              if (Object.keys (populator).length !== 0)
-                this.promise = this.population._populateArray (populator, populated);
-            }
-            else {
-              this.promise = Promise.reject (new Error (`Populator for ${item.key} does not exist.`));
-            }
-          }
-        });
-
+        const v = new AddModelVisitor ({population: this, populated});
         populator.accept (v);
 
         return v.promise;

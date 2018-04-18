@@ -25,6 +25,10 @@ module.exports = BO.extend ({
 
   },
 
+  visitPopulateEmbedded () {
+
+  },
+
   visitPopulateEmbedArray () {
 
   }

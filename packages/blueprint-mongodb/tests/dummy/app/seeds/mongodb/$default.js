@@ -22,11 +22,12 @@ module.exports = {
   authors: [
     {name: 'John Doe'},
     {name: 'Robert Young'},
-    {name: 'Tom Smith'}
+    {name: 'Tom Smith'},
+    {name: 'Tom Sawyer'}
   ],
 
   users: [
     {first_name: 'Paul', last_name: 'Black', favorite_author: ref ('authors[0]'), blacklist: [ref ('authors[0]'), ref ('authors[1]')]},
-    {first_name: 'John', last_name: 'Smith', favorite_author: ref ('authors[0]')}
+    {first_name: 'John', last_name: 'Smith', favorite_author: ref ('authors[0]'), bookstore: {name: 'Borders', authors: [ref ('authors[3]')]}}
   ]
 };

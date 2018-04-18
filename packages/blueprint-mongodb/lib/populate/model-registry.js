@@ -22,8 +22,9 @@ const {
 const debug = require ('debug') ('blueprint-mongodb:populate:registry');
 
 const PopulateElement = require ('./populate-element');
-const PopulateEmbeddedArray = require ('./populate-embedded-array');
 const PopulateArray = require ('./populate-array');
+const PopulateEmbedded = require ('./populate-embedded');
+const PopulateEmbeddedArray = require ('./populate-embedded-array');
 
 const {
   Schema
@@ -130,6 +131,10 @@ const ModelRegistry = BO.extend ({
 
           this.addModel (Model);
         }
+      }
+      else if (instance === 'Embedded') {
+        let result = this._makePopulate (db, path.schema);
+        populate[pathName] = new PopulateEmbedded ({populators: result});
       }
     });
 

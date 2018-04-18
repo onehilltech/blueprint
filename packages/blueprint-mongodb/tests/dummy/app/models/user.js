@@ -23,7 +23,6 @@ const bookstore = new mongodb.Schema ({
   authors: [{type: mongodb.Schema.Types.ObjectId, ref: 'author'}]
 });
 
-
 const schema = new mongodb.Schema ({
   first_name: {type: String},
 

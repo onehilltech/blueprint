@@ -15,24 +15,6 @@ function createTestPopulation () {
 }
 
 describe ('lib | populate | Population', function () {
-  beforeEach (function () {
-    return Promise.all ([
-      blueprint.lookup ('model:author').remove (),
-      blueprint.lookup ('model:user').remove ()
-    ]).then (() => blueprint.lookup ('model:author').create (
-      [
-        {name: 'John Doe'},
-        {name: 'Robert Young'},
-        {name: 'Tom Smith'}
-      ])
-    ).then ((authors) => blueprint.lookup ('model:user').create (
-      [
-        {first_name: 'Paul', last_name: 'Black', favorite_author: authors[0]._id, blacklist: [authors[0]._id, authors[1]._id]},
-        {first_name: 'John', last_name: 'Smith', favorite_author: authors[0]._id}
-      ])
-    );
-  });
-
   describe ('constructor', function () {
     it ('should create population with no types', function () {
       const registry = new ModelRegistry ();
@@ -130,7 +112,7 @@ describe ('lib | populate | Population', function () {
           expect (models).to.have.keys (['authors','users']);
 
           expect (lean (models.users)).to.have.deep.members (lean (users));
-          expect (lean (models.authors)).to.have.deep.members ([authors[0].lean (), authors[1].lean ()]);
+          expect (lean (models.authors)).to.include.deep.members (lean([authors[0], authors[1], authors[3]]));
         });
       });
     });

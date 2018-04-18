@@ -6,18 +6,6 @@ const PopulateElement = require ('../../../../lib/populate/populate-element');
 const PopulateArray = require ('../../../../lib/populate/populate-array');
 
 describe ('lib | populate | ModelRegistry', function () {
-  beforeEach (function () {
-    return Promise.all ([
-      blueprint.lookup ('model:author').remove (),
-      blueprint.lookup ('model:user').remove ()
-    ]).then (() => blueprint.lookup ('model:author').create ({name: 'John Doe'}))
-      .then ((author) => blueprint.lookup ('model:user').create ([
-        {first_name: 'Paul', last_name: 'Black', favorite_author: author._id},
-        {first_name: 'John', last_name: 'Smith', favorite_author: author._id}
-        ])
-      );
-  });
-
   describe ('addModel', function () {
     context ('no populate fields', function () {
       it ('should add a model to the model registry', function () {
@@ -52,7 +40,7 @@ describe ('lib | populate | ModelRegistry', function () {
         expect (registry.models).to.have.deep.property (aKey, {});
 
         // blacklist
-        expect (registry.models).to.have.property (uKey).to.have.keys (['favorite_author', 'blacklist']);
+        expect (registry.models).to.have.property (uKey).to.have.keys (['favorite_author', 'blacklist', 'bookstore']);
         expect (registry.models).to.have.property (uKey).to.have.property ('favorite_author').that.is.instanceof (PopulateElement);
         expect (registry.models).to.have.property (uKey).to.have.property ('blacklist').that.is.instanceof (PopulateArray);
       });

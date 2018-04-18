@@ -16,19 +16,41 @@
 
 const Populate  = require ('./populate');
 
+const {
+  mapValues,
+  flattenDeep,
+  isEmpty
+} = require ('lodash');
+
+const BluebirdPromise = require ('bluebird');
+
+/**
+ * @class PopulateEmbedded
+ */
 module.exports = Populate.extend ({
+  populators: null,
 
   accept (v) {
     v.visitPopulateEmbedded (this);
+  },
+
+  populate (unseen) {
+    let pending = mapValues (this.populators, (populator, name) => {
+      const values = unseen[name];
+
+      if (isEmpty (values))
+        return null;
+
+      const ids = flattenDeep (values);
+
+      return populator.populate (ids).exec ();
+    });
+
+    return BluebirdPromise.props (pending);
   }
 });
 
-function PopulateEmbedArray (populate) {
-  this._populate = populate;
-}
-
-module.exports = PopulateEmbedArray;
-
+/*
 PopulateEmbedArray.prototype.populate = function (ids, callback) {
   async.mapValues (ids, function (values, path, callback) {
     var populate = this._populate[path];
@@ -37,10 +59,6 @@ PopulateEmbedArray.prototype.populate = function (ids, callback) {
       populate.populate (value, callback);
     }, callback);
   }.bind (this), callback);
-};
-
-PopulateEmbedArray.prototype.accept = function (visitor) {
-  visitor.visitPopulateEmbedArray (this);
 };
 
 PopulateEmbedArray.prototype.getUnseenIds = function (values, ids, callback) {
@@ -77,16 +95,4 @@ PopulateEmbedArray.prototype.getUnseenIds = function (values, ids, callback) {
     }, callback);
   }, complete);
 };
-
-PopulateEmbedArray.prototype.merge = function (values, population, callback) {
-  async.eachOf (values, function (value, key, callback) {
-    const plural = this._populate[key].plural;
-
-    if (population[plural])
-      population[plural].push (value);
-    else
-      population[plural] = value;
-
-    return callback (null);
-  }.bind (this), callback);
-};
+*/

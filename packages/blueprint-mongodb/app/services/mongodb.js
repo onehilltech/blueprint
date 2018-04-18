@@ -191,26 +191,19 @@ module.exports = Service.extend ({
       // store the models in the seeds.
       debug (`clearing models on connection ${name}`);
 
-      try {
-        return clear (conn).then (() => {
-          debug (`seeding database connection ${name}`);
-          return data ? seed (conn, data) : null;
-        }).then (models => {
-          debug (`database connection ${name} has been seeded`);
+      return clear (conn).then (() => {
+        debug (`seeding database connection ${name}`);
+        return data ? seed (conn, data) : null;
+      }).then (models => {
+        debug (`database connection ${name} has been seeded`);
 
-          this._seeds[name] = models;
+        this._seeds[name] = models;
 
-          debug (`sending notification that ${name} has been seeded`);
+        debug (`sending notification that ${name} has been seeded`);
 
-          this.emit ('seeded', name, conn, models);
-          return models;
-        }).catch (err => {
-          console.log (err);
-        });
-      }
-      catch (err) {
-        console.error (err);
-      }
+        this.emit ('seeded', name, conn, models);
+        return models;
+      });
     });
   },
 
