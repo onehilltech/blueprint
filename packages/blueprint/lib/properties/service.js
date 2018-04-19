@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-describe ('lib | Service', function () {
+const ResourceDescriptor = require ('./resource-descriptor');
 
-});
+/**
+ * Bind a service to a property. The name parameter is the name of the
+ * service. If the name is not provided, then the name of the property
+ * is the name of the service.
+ *
+ * @param   name      Optional name of service.
+ */
+function service (name) {
+  return new ResourceDescriptor ({type: 'service', name});
+}
+
+module.exports = service;

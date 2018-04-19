@@ -6,7 +6,8 @@ const assert = require ('assert');
 const lookup = require ('./-lookup');
 
 const {
-  merge
+  merge,
+  reduce,
 } = require ('lodash');
 
 const {
@@ -107,30 +108,25 @@ module.exports = CoreObject.extend ({
    * @returns {Promise<ApplicationModule>}
    */
   configure () {
-    let promises = [];
+    let promise = reduce (this._entities, (promise, entity) => {
+      return promise.then (() => {
+        // Compute the location of the resources we are loading. Then load the resources
+        // into memory and save the resources to our application module
+        let {name} = entity;
+        let location = entity.location || name;
+        let rcPath = path.resolve (this.modulePath, location);
+        let opts = merge ({dirname: rcPath}, entity.opts);
 
-    this._entities.forEach (entity => {
-      // Compute the location of the resources we are loading. Then load the resources
-      // into memory and save the resources to our application module
-      let location = entity.location || entity.name;
-      let rcPath = path.resolve (this.modulePath, location);
-      let opts = merge ({dirname: rcPath}, entity.opts);
+        debug (`loading ${name} in ${rcPath}`);
+        let loader = entity.loader || this._defaultLoader;
 
-      debug (`loading ${entity.name} in ${rcPath}`);
-      let loader = entity.loader || this._defaultLoader;
-
-      promises.push (loader.load (opts));
-    });
-
-    return Promise.all (promises).then (results => {
-      this._entities.forEach ((entity, i) => {
-        const {name} = entity;
-
-        this._resources[name] = merge (this._resources[name] || {}, results[i]);
+        return loader.load (opts).then (resources => {
+          this._resources[name] = resources;
+        });
       });
+    }, Promise.resolve ());
 
-      return Promise.resolve (this);
-    });
+    return promise.then (() => this);
   },
 
   /**

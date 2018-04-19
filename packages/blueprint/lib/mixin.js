@@ -32,9 +32,7 @@ const {
   isFunction
 } = require ('lodash');
 
-const {
-  PropertyDescriptor
-} = require ('./properties');
+const PropertyDescriptor = require ('./properties/property-descriptor');
 
 /**
  * Emulate the polymorphic behavior between the base function and the

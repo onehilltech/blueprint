@@ -1,12 +1,17 @@
 const assert    = require ('assert');
 const program   = require ('commander');
-const {env}     = require ('./environment');
+
+const {
+  env
+} = require ('./environment');
+
 const {version} = require ('../package.json');
 
 const ClusterApplication = require ('./cluster');
 const Application = require ('./application');
 const BlueprintObject  = require ('./object');
-const {computed} = require ('./properties');
+
+const computed = require ('./properties/computed');
 
 /**
  * @class Framework

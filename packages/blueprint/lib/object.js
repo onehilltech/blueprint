@@ -25,6 +25,7 @@ const {
 } = require ('lodash');
 
 const Mixin = require ('./mixin');
+const PropertyDescriptor = require ('./properties/property-descriptor');
 
 const PrototypeMixin = Mixin.create ({
   /**
@@ -120,10 +121,6 @@ const ClassMixin = Mixin.create ({
 });
 
 let __nextId = 0;
-
-const {
-  PropertyDescriptor
-} = require ('./properties');
 
 /**
  * @class BlueprintObject
