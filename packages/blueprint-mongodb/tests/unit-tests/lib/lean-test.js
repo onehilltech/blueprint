@@ -1,6 +1,5 @@
 const {expect}  = require ('chai');
 const blueprint = require ('@onehilltech/blueprint');
-const testing   = require ('@onehilltech/blueprint-testing');
 const lean      = require ('../../../lib/lean');
 
 describe ('lib | lean', function () {

@@ -1,5 +1,4 @@
 const blueprint = require ('@onehilltech/blueprint');
-const testing   = require ('@onehilltech/blueprint-testing');
 
 const { expect }  = require ('chai');
 
