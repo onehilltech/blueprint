@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+const {
+  model
+} = require ('@onehilltech/blueprint');
+
 const ResourceController = require ('../../../../lib/resource-controller');
-const Author = require ('../models/author');
 
 module.exports = ResourceController.extend ({
-  model: Author
+  model: model ('author')
 });
