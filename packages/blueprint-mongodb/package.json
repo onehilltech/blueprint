@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
-    "cover": "env NODE_ENV=test istanbul cover _mocha --recursive tests/unit-tests",
+    "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
