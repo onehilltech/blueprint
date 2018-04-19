@@ -59,19 +59,14 @@ const AddModelVisitor = PopulateVisitor.extend ({
   },
 
   visitPopulateEmbedded (item) {
-    let promises = mapValues (item.populators, (populator, name) => {
-      let models = this.populated[name];
-
-      let v = new AddModelVisitor ({population: this.population, populated: models});
-      populator.accept (v);
-
-      return v.promise;
-    });
-
-    this.promise = BluebirdPromise.props (promises);
+    this._addEmbeddedModels (item);
   },
 
   visitPopulateEmbeddedArray (item) {
+    this._addEmbeddedModels (item);
+  },
+
+  _addEmbeddedModels (item) {
     let promises = mapValues (item.populators, (populator, name) => {
       let models = this.populated[name];
 
