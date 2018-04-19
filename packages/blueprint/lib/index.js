@@ -54,12 +54,14 @@ exports.Service = require ('./service');
 // policy builders
 exports.policies = require ('./policies');
 
-// computed properties
+// computed/bound attributes
 
 const {
   computed,
-  service
+  service,
+  model
 } = require ('./properties');
 
 exports.computed = computed;
 exports.service = service;
+exports.model = model;

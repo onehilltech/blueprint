@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-exports.computed = require ('./computed');
-exports.service = require ('./service');
-exports.model = require ('./model');
+const blueprint = require ('../../../../lib');
 
-exports.PropertyDescriptor = require ('./property-descriptor');
+const {
+  expect
+} = require ('chai');
+
+describe ('lib | properties | model', function () {
+  it ('should bind a property to a model', function () {
+    let app = blueprint.app;
+    let person = app.lookup ('model:person');
+
+    let main = app.lookup ('controller:main');
+
+    expect (main.person).to.equal (person);
+    expect (main.model).to.equal (person);
+  });
+});

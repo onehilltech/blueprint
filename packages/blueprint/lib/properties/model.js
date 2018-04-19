@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-exports.computed = require ('./computed');
-exports.service = require ('./service');
-exports.model = require ('./model');
+const ResourceDescriptor = require ('./resource-descriptor');
 
-exports.PropertyDescriptor = require ('./property-descriptor');
+/**
+ * Bind a service to a property. The name parameter is the name of the
+ * service. If the name is not provided, then the name of the property
+ * is the name of the service.
+ *
+ * @param   name      Optional name of service.
+ */
+function model (name) {
+  return new ResourceDescriptor ({type: 'model', name});
+}
+
+module.exports = model;
