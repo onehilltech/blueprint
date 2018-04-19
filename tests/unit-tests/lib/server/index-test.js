@@ -33,7 +33,6 @@ describe ('lib | server | Server', function () {
 
   describe ('configure', function () {
     it ('should configure the server using default configurations', function () {
-      const tempPath = path.resolve ('../../../dummy/app/.temp');
       const config = {
         protocols: {
           http: {},
@@ -55,18 +54,13 @@ describe ('lib | server | Server', function () {
 
   describe ('importViews', function () {
     it ('should import view for use by the server', function () {
-      const viewsPath = path.resolve (__dirname, '../../../dummy/app/views');
-      const tempPath = path.resolve (__dirname, '../../../dummy/app/.temp');
+      let server = new Server ({app: blueprint.app});
 
-      const app = { tempPath, resources: {} };
-
-      let server = new Server ({app});
-
-      return server.configure ({}).then (() => {
-        return server.importViews (viewsPath);
-      }).then (() => {
-        expect (server._engines).to.eql (['handlebars']);
-      });
+      return server.configure ({})
+        .then (() => server.importViews (blueprint.app.viewsPath))
+        .then (() => {
+          expect (server._engines).to.eql (['handlebars']);
+        });
     });
   });
 });
