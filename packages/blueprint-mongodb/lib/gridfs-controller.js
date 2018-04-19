@@ -133,7 +133,7 @@ module.exports = ResourceController.extend ({
    * @returns {*}
    */
   drop () {
-    return BluebirdPromise.fromCallback (this.bucket.drop.bind (this.bucket));
+    return this.bucket.drop ();
   },
 
   /**
@@ -296,11 +296,19 @@ module.exports = ResourceController.extend ({
       execute (req, res) {
         const id = req.params[this.controller.id];
 
-        return BluebirdPromise.fromCallback (callback => {
-          this.controller.bucket.delete (id, callback);
-        }).then (() => {
-          res.status (200).json (true);
-        }).catch (this._translateError.bind (this));
+        return Promise.resolve (this.preDelete (req))
+          .then (() => this.controller.bucket.delete (id))
+          .then (result => {
+            res.status (200).json (true);
+          }).catch (this._translateError.bind (this));
+      },
+
+      preDelete (req) {
+
+      },
+
+      postDelete (result) {
+
       }
     });
   },
@@ -309,86 +317,3 @@ module.exports = ResourceController.extend ({
     this._bucket = null;
   }
 });
-
-/*
-
-GridFSController.prototype.get = function () {
-  let self = this;
-
-  return {
-    execute: function (req, res, callback) {
-      let id = req.params[self.id];
-
-      async.waterfall ([
-        function (callback) {
-          // Find information about the file.
-          let cursor = self._bucket.find ({_id: id}, {limit: 1});
-
-          cursor.next (function (err, item) {
-            // Make sure we close the cursor.
-            cursor.close ();
-
-            if (err)
-              return callback (err);
-
-            if (!item)
-              return callback (new HttpError (404, 'not_found', 'Resource does not exist'));
-
-            return callback (null, item)
-          });
-        },
-
-        function (file, callback) {
-          // Download the file.
-          let downloadStream = self._bucket.openDownloadStream (id);
-
-          res.type (file.contentType);
-
-          downloadStream
-            .pipe (res)
-            .once ('error', callback)
-            .once ('finish', callback);
-        }
-      ], function (err) {
-        if (err && !(err instanceof HttpError))
-          err = new HttpError (500, 'Failed to retrieve file');
-
-        if (err)
-          return callback (err);
-
-        return callback (null);
-      });
-    }
-  };
-};
-
-GridFSController.prototype.delete = function () {
-  let self = this;
-
-  return {
-    sanitize: function (req, callback) {
-      try {
-        let rcid = req.params[self.id];
-        req.params[self.id] = new mongodb.ObjectId (rcid);
-
-        return callback (null);
-      }
-      catch (e) {
-        return callback (new HttpError (404));
-      }
-    },
-
-    execute: function (req, res, callback) {
-      let id = req.params[self.id];
-
-      self._bucket.delete (id, function (err) {
-        if (err) return res.status (500).json ({errors: 'Delete operation failed'});
-
-        res.status (200).json (true);
-        return callback (null);
-      });
-    }
-  };
-};
-
-*/
