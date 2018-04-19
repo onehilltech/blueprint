@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
-describe ('lib | Service', function () {
+const blueprint = require ('../../lib');
+const path = require ('path');
 
+before (function () {
+  const appPath = path.resolve ('./tests/dummy/app');
+  return blueprint.createApplication (appPath);
 });
+

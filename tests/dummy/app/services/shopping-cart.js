@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-describe ('lib | Service', function () {
+const Service = require ('../../../../lib/service');
 
+module.exports = Service.extend ({
+  init () {
+    this._super.call (this, ...arguments);
+
+    this.items = [];
+  }
 });
