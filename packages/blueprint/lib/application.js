@@ -162,12 +162,19 @@ module.exports = BlueprintObject.extend (Events, {
     if (this._modules.hasOwnProperty (name))
       throw new Error (`duplicate module ${name}`);
 
-    this._modules[name] = appModule;
+    return this._importViewsFromModule (appModule)
+      .then (() => { this._appModule.merge (appModule) })
+      .then (() => {
+        this._modules[name] = appModule;
+        return this;
+      });
+  },
 
-    const firstTask = appModule.hasViews ? this._server.importViews (appModule.viewsPath) : Promise.resolve ();
-    return firstTask.then (() => {
-      this._appModule.merge (appModule)
-    });
+  _importViewsFromModule (appModule) {
+    if (!appModule.hasViews)
+      return Promise.resolve ();
+
+    return this._server.importViews (appModule.viewsPath);
   },
 
   /**
