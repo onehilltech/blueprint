@@ -11,7 +11,7 @@
     "mongoose"
   ],
   "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive tests/unit-tests",
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
     "cover": "env NODE_ENV=test istanbul cover _mocha --recursive tests/unit-tests",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
