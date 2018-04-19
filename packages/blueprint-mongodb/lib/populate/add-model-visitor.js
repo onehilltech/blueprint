@@ -15,7 +15,8 @@
  */
 
 const {
-  mapValues
+  mapValues,
+  isEmpty
 } = require ('lodash');
 
 const PopulateVisitor = require ('./populate-visitor');
@@ -36,23 +37,21 @@ const AddModelVisitor = PopulateVisitor.extend ({
 
   visitPopulateElement (item) {
     this.population._addModels (item.plural, [this.populated]);
-    const populator = this.population.registry.models [item.key];
+    const populators = this.population.registry.models [item.key];
 
-    if (Object.keys (populator).length === 0)
-      return;
-
-    this.promise = this.population._populateElement (populator, this.populated);
+    if (!isEmpty (populators))
+      this.promise = this.population._populateElement (populators, this.populated);
   },
 
   visitPopulateArray (item) {
     // Add the array of model to our population.
     this.population._addModels (item.plural, this.populated);
 
-    const populator = this.population.registry.models [item.key];
+    const populators = this.population.registry.models [item.key];
 
-    if (populator) {
-      if (Object.keys (populator).length !== 0)
-        this.promise = this.population._populateArray (populator, this.populated);
+    if (populators) {
+      if (!isEmpty (populators))
+        this.promise = this.population._populateArray (populators, this.populated);
     }
     else {
       this.promise = Promise.reject (new Error (`Populator for ${item.key} does not exist.`));

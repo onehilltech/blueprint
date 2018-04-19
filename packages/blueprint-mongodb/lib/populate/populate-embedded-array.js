@@ -16,19 +16,26 @@
 
 const Populate  = require ('./populate');
 
+/**
+ * @class PopulateEmbeddedArray
+ *
+ * Populate the models of an embedded array of documents.
+ */
 module.exports = Populate.extend ({
+  population: null,
+
+  populated: null,
 
   accept (v) {
     v.visitPopulateEmbedded (this);
+  },
+
+  populate (unseen) {
+
   }
 });
 
-function PopulateEmbedArray (populate) {
-  this._populate = populate;
-}
-
-module.exports = PopulateEmbedArray;
-
+/*
 PopulateEmbedArray.prototype.populate = function (ids, callback) {
   async.mapValues (ids, function (values, path, callback) {
     var populate = this._populate[path];
@@ -90,3 +97,4 @@ PopulateEmbedArray.prototype.merge = function (values, population, callback) {
     return callback (null);
   }.bind (this), callback);
 };
+*/
