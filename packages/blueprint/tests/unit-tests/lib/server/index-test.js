@@ -46,7 +46,7 @@ describe ('lib | server | Server', function () {
       server.configure (config).then (s => {
         expect (server).to.equal (s);
 
-        expect (s._express).to.not.be.null;
+        expect (s.express).to.not.be.null;
         expect (s._mainRouter).to.not.be.null;
         expect (s._uploader).to.not.be.null;
         expect (s.viewCachePath).to.equal (path.join (blueprint.app.tempPath, 'views'));
