@@ -298,17 +298,24 @@ module.exports = ResourceController.extend ({
 
         return Promise.resolve (this.preDelete (req))
           .then (() => this.controller.bucket.delete (id))
+          .then (() => this.postDelete ())
+          .then (() => this.prepareResponse (res, true))
           .then (result => {
-            res.status (200).json (true);
-          }).catch (this._translateError.bind (this));
+            res.status (200).json (result);
+          })
+          .catch (this._translateError.bind (this));
       },
 
       preDelete (req) {
 
       },
 
-      postDelete (result) {
+      postDelete () {
 
+      },
+
+      prepareResponse (res, result) {
+        return result;
       }
     });
   },
