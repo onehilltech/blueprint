@@ -20,37 +20,19 @@ const mongoose = require ('mongoose');
 
 const path = require ('path');
 
+const blueprint = require ('@onehilltech/blueprint');
+
 const {
   BO,
   Events
-} = require ('@onehilltech/blueprint');
+} = blueprint;
 
 const {
   forOwn
 } = require ('lodash');
 
 function makeService () {
-  let app = BO.create (Events, {
-    configs: {
-      mongodb: {
-        connections: {
-          $default: {
-            uri: 'mongodb://localhost/blueprint-mongodb',
-            options: {}
-          },
-
-          priority: {
-            uri: 'mongodb://localhost/blueprint-mongodb',
-            options: {}
-          }
-        }
-      }
-    },
-
-    appPath: path.resolve ('./tests/noop/app')
-  });
-
-  return new Service ({app});
+  return new Service ({app: blueprint.app});
 }
 
 describe ('app | services | mongodb', function () {
@@ -59,7 +41,7 @@ describe ('app | services | mongodb', function () {
       let service = makeService ();
       service.configure ();
 
-      expect (service.connections).to.have.keys (['$default', 'priority']);
+      expect (service.connections).to.have.keys (['$default', 'secondary']);
       expect (service.defaultConnection).to.equal (mongoose.connections[0]);
     });
   });
@@ -69,7 +51,7 @@ describe ('app | services | mongodb', function () {
       let service = makeService ();
       service.createConnection ('$default');
 
-      expect (service.connections).to.have.keys (['$default', 'priority']);
+      expect (service.connections).to.have.keys (['$default', 'secondary']);
     })
   });
 
