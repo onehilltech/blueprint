@@ -1,12 +1,16 @@
 const {
   Controller,
   Action,
-  service
+  service,
+  model
 } = require ('../../../../lib');
 
 module.exports = Controller.extend ({
   cart: service (),
   shoppingCart: service ('shopping-cart'),
+
+  person: model (),
+  model: model ('person'),
 
   __invoke () {
     return Action.extend ({

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-exports.computed = require ('./computed');
-exports.service = require ('./service');
-exports.model = require ('./model');
+const BO = require ('../../../../lib/object');
 
-exports.PropertyDescriptor = require ('./property-descriptor');
+module.exports = BO.extend ({
+  firstName: null,
+
+  lastName: null
+});
