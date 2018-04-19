@@ -30,6 +30,10 @@ const {
 const DEFAULT_APPLICATION_NAME = '<unnamed>';
 const APPLICATION_MODULE_NAME = '$';
 
+const {
+  transform
+} = require ('lodash');
+
 /**
  * @class Application
  *
@@ -100,14 +104,12 @@ module.exports = BlueprintObject.extend (Events, {
       .then (() => {
         // Allow the loaded services to configure themselves.
         let {services} = this.resources;
-        let promises = [];
 
-        forOwn (services, (service, name) => {
+        return transform (services, (promise, service, name) => {
           debug (`configuring service ${name}`);
-          promises.push (service.configure ());
-        });
 
-        return Promise.all (promises);
+          return promise.then (() => service.configure ());
+        }, Promise.resolve ());
       })
       .then (() => this._server.configure (this.configs.server))
       // Import the views of the application into the server. The views of the
@@ -159,7 +161,9 @@ module.exports = BlueprintObject.extend (Events, {
     this._modules[name] = appModule;
 
     const firstTask = appModule.hasViews ? this._server.importViews (appModule.viewsPath) : Promise.resolve ();
-    firstTask.then (() => this._appModule.merge (appModule));
+    return firstTask.then (() => {
+      this._appModule.merge (appModule)
+    });
   },
 
   /**
@@ -171,18 +175,16 @@ module.exports = BlueprintObject.extend (Events, {
     // will allow them to do any preparations.
     this.emit ('blueprint.app.starting', this);
 
-    // Start all services, then start the server.
-
-    // Allow the loaded services to configure themselves.
+    // Start all the services.
     let {services} = this.resources;
-    let promises = [];
 
-    forOwn (services, (service, name) => {
+    let promise = transform (services, (promise, service, name) => {
       debug (`starting service ${name}`);
-      promises.push (service.start ());
-    });
 
-    return Promise.all (promises)
+      return promise.then (() => service.start ());
+    }, Promise.resolve ());
+
+    promise
       .then (() => this._server.listen ())
       .then (() => {
         // Notify all listeners that the application has started.

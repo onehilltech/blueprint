@@ -24,7 +24,9 @@ const path    = require ('path');
 const klaw    = require ('klaw');
 const handleError = require ('./handle-error');
 
-const {computed} = require ('../properties');
+const {
+  computed
+} = require ('../properties');
 
 const {
   merge,
@@ -61,6 +63,12 @@ module.exports = BlueprintObject.extend ({
 
   /// List of engines loaded by the server.
   _engines: null,
+
+  viewCachePath: computed ({
+    get () {
+      return path.resolve (this.app.tempPath, VIEW_CACHE_PATH);
+    }
+  }),
 
   express: computed ({
     get () { return this._express; }
@@ -280,7 +288,7 @@ module.exports = BlueprintObject.extend ({
     // both tasks in parallel.
     let promises = [];
 
-    promises.push (copy (srcPath, this._viewCachePath, options));
+    promises.push (copy (srcPath, this.viewCachePath, options));
     
     promises.push (new Promise ((resolve, reject) => {
       // Walk the path. For each view we find, we need to copy the file and
@@ -329,10 +337,7 @@ module.exports = BlueprintObject.extend ({
     this._express.use (handleError);
 
     // Set the location of the views, and configure the view engine.
-    let {tempPath} = this.app;
-
-    this._viewCachePath = path.resolve (tempPath, VIEW_CACHE_PATH);
-    this._express.set ('views', this._viewCachePath);
+    this._express.set ('views', this.viewCachePath);
 
     const {
       viewEngine,
@@ -354,11 +359,9 @@ module.exports = BlueprintObject.extend ({
     forEach (engines, (engine, ext) => { this._express.engine (ext, engine) });
 
     // Make sure the view cache path exists.
-    const uploadPath = path.resolve (tempPath, UPLOAD_PATH);
-
     let ensurePaths = [
-      ensureDir (this._viewCachePath),
-      ensureDir (uploadPath)
+      ensureDir (this.viewCachePath),
+      ensureDir (path.resolve (this.app.tempPath, UPLOAD_PATH))
     ];
 
     return Promise.all (ensurePaths);
