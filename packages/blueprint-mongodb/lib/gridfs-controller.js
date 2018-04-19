@@ -31,10 +31,6 @@ const {
   GridFSBucket
 } = require ('mongodb');
 
-const {
-  get
-} = require ('object-path');
-
 const fs = require ('fs-extra');
 
 const toMongoId = require ('../app/sanitizers/toMongoId');
@@ -49,7 +45,12 @@ function makeResourceIdSchema (location) {
   }
 }
 
-const GridFSActionMixin = Mixin.create ({
+/**
+ * @mixin TranslateErrorMixin
+ *
+ * Mixin for translating error responses.
+ */
+const TranslateErrorMixin = Mixin.create ({
   _translateError (err) {
     if (err.message.startsWith ('FileNotFound:')) {
       return Promise.reject (new HttpError (404, 'not_found', 'The resource does not exist.'));
@@ -132,16 +133,14 @@ module.exports = ResourceController.extend ({
    * @returns {*}
    */
   drop () {
-    return BluebirdPromise.fromCallback ((callback) => {
-      this.bucket.drop (callback);
-    });
+    return BluebirdPromise.fromCallback (this.bucket.drop.bind (this.bucket));
   },
 
   /**
    * Create a single resource in GridFS.
    */
   create () {
-    return SingleFileUploadAction.extend (GridFSActionMixin, {
+    return SingleFileUploadAction.extend (TranslateErrorMixin, {
       name: this.name,
 
       init () {
@@ -289,7 +288,7 @@ module.exports = ResourceController.extend ({
    * @returns {*}
    */
   delete () {
-    return Action.extend (GridFSActionMixin, {
+    return Action.extend (TranslateErrorMixin, {
       schema: {
         [this.id]: makeResourceIdSchema ('params')
       },
