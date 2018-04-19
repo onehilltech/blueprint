@@ -32,7 +32,7 @@ describe ('lib | server | Server', function () {
   });
 
   describe ('configure', function () {
-    it ('should configure the server using default configurations', function (done) {
+    it ('should configure the server using default configurations', function () {
       const tempPath = path.resolve ('../../../dummy/app/.temp');
       const config = {
         protocols: {
@@ -43,21 +43,18 @@ describe ('lib | server | Server', function () {
 
       let server = new Server ({app: blueprint.app});
 
-      server.configure (config).then (s => {
+      return server.configure (config).then (s => {
         expect (server).to.equal (s);
 
         expect (s.express).to.not.be.null;
         expect (s._mainRouter).to.not.be.null;
-        expect (s._uploader).to.not.be.null;
         expect (s.viewCachePath).to.equal (path.join (blueprint.app.tempPath, 'views'));
-
-        done (null);
-      }).catch (err => done (err));
+      });
     });
   });
 
   describe ('importViews', function () {
-    it ('should import view for use by the server', function (done) {
+    it ('should import view for use by the server', function () {
       const viewsPath = path.resolve (__dirname, '../../../dummy/app/views');
       const tempPath = path.resolve (__dirname, '../../../dummy/app/.temp');
 
@@ -65,13 +62,11 @@ describe ('lib | server | Server', function () {
 
       let server = new Server ({app});
 
-      server.configure ({}).then (() => {
+      return server.configure ({}).then (() => {
         return server.importViews (viewsPath);
       }).then (() => {
         expect (server._engines).to.eql (['handlebars']);
-
-        done (null);
-      }).catch (done);
+      });
     });
   });
 });
