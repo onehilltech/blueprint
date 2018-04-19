@@ -11,8 +11,8 @@
     "mongoose"
   ],
   "scripts": {
-    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
-    "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive --exit",
+    "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive --exit",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
@@ -20,7 +20,7 @@
     "url": "https://github.com/onehilltech/blueprint-mongodb.git"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.0.0-39",
+    "@onehilltech/blueprint": "^4.0.0-41",
     "@onehilltech/dab": "^1.0.2",
     "moment": "^2.19.1"
   },
