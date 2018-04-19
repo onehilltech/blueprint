@@ -55,6 +55,10 @@ module.exports = BlueprintObject.extend (Events, {
     get () { return path.resolve (this.appPath, '.blueprint'); }
   }),
 
+  viewsPath: computed ({
+    get () { return this._appModule.viewsPath; }
+  }),
+
   /// Resource loaded by the application.
   resources: computed ({
     get () { return this._appModule.resources; }
