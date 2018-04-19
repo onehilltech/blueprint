@@ -39,7 +39,9 @@ const schema = new mongodb.Schema ({
   // Array of ObjectIds that can be populated.
   blacklist: [{type: mongodb.Schema.Types.ObjectId, ref: Author.modelName}],
 
-  bookstore: bookstore
+  bookstore: bookstore,
+
+  bookstores: [bookstore]
 });
 
 module.exports = mongodb.resource ('user', schema, 'blueprint_users');

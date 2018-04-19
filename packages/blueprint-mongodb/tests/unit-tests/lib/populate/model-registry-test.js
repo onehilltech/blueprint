@@ -40,7 +40,7 @@ describe ('lib | populate | ModelRegistry', function () {
         expect (registry.models).to.have.deep.property (aKey, {});
 
         // blacklist
-        expect (registry.models).to.have.property (uKey).to.have.keys (['favorite_author', 'blacklist', 'bookstore']);
+        expect (registry.models).to.have.property (uKey).to.have.keys (['favorite_author', 'blacklist', 'bookstore', 'bookstores']);
         expect (registry.models).to.have.property (uKey).to.have.property ('favorite_author').that.is.instanceof (PopulateElement);
         expect (registry.models).to.have.property (uKey).to.have.property ('blacklist').that.is.instanceof (PopulateArray);
       });

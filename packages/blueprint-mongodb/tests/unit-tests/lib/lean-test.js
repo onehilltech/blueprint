@@ -15,7 +15,8 @@ describe ('lib | lean', function () {
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email,
-      blacklist: []
+      blacklist: [],
+      bookstores: []
     });
   });
 });

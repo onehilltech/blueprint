@@ -143,7 +143,7 @@ describe ('lib | ResourceController', function () {
                   ],
                 users:
                   [
-                    {__v: 0, _id: user.id, first_name: 'John', last_name: 'Doe', favorite_author: author.id, blacklist: []}
+                    {__v: 0, _id: user.id, first_name: 'John', last_name: 'Doe', favorite_author: author.id, blacklist: [], bookstores: []}
                   ]
               }));
         });
@@ -212,7 +212,7 @@ describe ('lib | ResourceController', function () {
           return testing.request ()
             .put (`/users/${user._id}`)
             .send ({user: {last_name: null}})
-            .expect (200, {user: Object.assign ({__v: 0, _id: user._id}, {first_name: 'John', blacklist: []})});
+            .expect (200, {user: Object.assign ({__v: 0, _id: user._id}, {first_name: 'John', blacklist: [], bookstores: []})});
         });
 
     });

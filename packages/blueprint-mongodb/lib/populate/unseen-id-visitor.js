@@ -15,11 +15,17 @@
  */
 
 const {
-  transform
+  transform,
+  isEmpty
 } = require ('lodash');
 
 const PopulateVisitor = require ('./populate-visitor');
 
+/**
+ * @class UnseenIdVisitor
+ *
+ * Visitor that collects the unseen ids for references in the model.
+ */
 const UnseenIdVisitor = PopulateVisitor.extend ({
   unseen: null,
   population: null,
@@ -46,6 +52,40 @@ const UnseenIdVisitor = PopulateVisitor.extend ({
         result[plural].push (v.unseen);
       else
         result[plural] = [v.unseen];
+    }, {});
+  },
+
+  visitPopulateEmbeddedArray (item) {
+    this.unseen = transform (item.populators, (result, populator, name) => {
+      // The value is an array of embedded documents. We need to iterate over the
+      // array and determine what what ids for this property (name) does not appear
+      // in the current population.
+
+      let ids = this.value.reduce ((result, doc) => {
+        let value = doc[name];
+
+        if (value === null)
+          return;
+
+        // Lookup the ids that have not been seen.
+        let v = new UnseenIdVisitor ({population: this.population, value});
+        populator.accept (v);
+
+        // Push the unseen ids to the result.
+        if (!isEmpty (v.unseen))
+          result.push (v.unseen);
+
+        return result;
+      }, []);
+
+      // Add the unseen ids to the results set under the models for the
+      // current populator.
+      let {plural} = populator;
+
+      if (result[plural])
+        result[plural].push (ids);
+      else
+        result[plural] = [ids];
     }, {});
   }
 });

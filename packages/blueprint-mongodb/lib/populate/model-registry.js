@@ -31,7 +31,8 @@ const {
 } = require ('mongoose');
 
 const {
-  forOwn
+  forOwn,
+  isEmpty
 } = require ('lodash');
 
 /**
@@ -117,10 +118,10 @@ const ModelRegistry = BO.extend ({
           // one field that can be populated, then we need to add this path to
           // the populate object.
 
-          let result = this._makePopulate (db, type);
+          let populators = this._makePopulate (db, type);
 
-          if (Object.keys (result).length)
-            populate[pathName] = new PopulateEmbeddedArray (result);
+          if (!isEmpty (populators))
+            populate[pathName] = new PopulateEmbeddedArray ({populators});
         }
         else if (type.ref) {
           // We have an array of document references.
@@ -133,8 +134,10 @@ const ModelRegistry = BO.extend ({
         }
       }
       else if (instance === 'Embedded') {
-        let result = this._makePopulate (db, path.schema);
-        populate[pathName] = new PopulateEmbedded ({populators: result});
+        let populators = this._makePopulate (db, path.schema);
+
+        if (!isEmpty (populators))
+          populate[pathName] = new PopulateEmbedded ({populators});
       }
     });
 

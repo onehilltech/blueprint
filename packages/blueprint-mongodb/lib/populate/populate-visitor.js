@@ -29,7 +29,7 @@ module.exports = BO.extend ({
 
   },
 
-  visitPopulateEmbedArray () {
+  visitPopulateEmbeddedArray () {
 
   }
 });
