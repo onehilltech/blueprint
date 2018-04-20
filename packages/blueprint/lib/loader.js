@@ -37,10 +37,12 @@ module.exports = Object.extend ({
   load (opts) {
     assert (!!opts.dirname, 'Your options must have a `dirname` property');
 
+    // By default, we only want files that end in .js, and do not
+    // start with dash (-).
     let defaults = {
       excludeDirs: /^(env|\.(git|svn))$/,
       recursive: true,
-      filter: /(.+)\.js$/
+      filter: /^(?!-)(.+)\.js$/
     };
 
     // Load the assets from the directory and from the environment directory,
