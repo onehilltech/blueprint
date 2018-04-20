@@ -111,8 +111,8 @@ describe ('lib | populate | Population', function () {
           expect (ids).to.have.keys (['authors','users']);
           expect (models).to.have.keys (['authors','users']);
 
-          expect (lean (models.users)).to.have.deep.members (lean (users));
-          expect (lean (models.authors)).to.have.deep.members (lean([authors[0], authors[3], authors[1], authors[6]]));
+          expect (lean (models.users)).to.include.deep.members (lean (users));
+          expect (lean (models.authors)).to.include.deep.members (lean([authors[0], authors[3], authors[1], authors[6]]));
         });
       });
     });
