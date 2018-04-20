@@ -4,6 +4,6 @@
   "version": "1.0.0",
   "main": "./app",
   "dependencies": {
-    "@onehilltech/blueprint-mongodb": "file:../../"
+    "@onehilltech/blueprint-mongodb": "file:../../../"
   }
 }
