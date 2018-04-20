@@ -1,7 +1,24 @@
-const blueprint   = require ('@onehilltech/blueprint');
-const { expect }  = require ('chai');
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const blueprint  = require ('@onehilltech/blueprint');
+const { expect } = require ('chai');
 
 const lean = require ('../../../../lib/lean');
+const seed = require ('../../../../lib/seed');
 
 const {
   populateModel,
@@ -9,69 +26,29 @@ const {
 } = require ('../../../../lib/populate');
 
 describe ('lib | populate', function () {
-  beforeEach (function () {
-    return Promise.all (
-      [
-        blueprint.lookup ('model:author').remove (),
-        blueprint.lookup ('model:user').remove ()
-      ]
-    ).then (() => blueprint.lookup ('model:author').create (
-      [
-        {name: 'John Doe'},
-        {name: 'Robert Young'},
-        {name: 'Tom Smith'}
-        ]
-      )
-    ).then ((authors) => blueprint.lookup ('model:user').create ([
-      {first_name: 'Paul', last_name: 'Black', favorite_author: authors[0]._id, blacklist: [authors[0]._id, authors[1]._id]},
-      {first_name: 'John', last_name: 'Smith', favorite_author: authors[0]._id}
-      ])
-      );
-  });
-
   describe ('populateModel', function () {
     it ('should populate a model', function () {
-      const User = blueprint.lookup ('model:user');
-      const Author = blueprint.lookup ('model:author');
+      let {users,authors} = seed ('$default');
 
-      const promises = [
-        User.find ({first_name: 'Paul', last_name: 'Black'}),
-        Author.find ()
-      ];
+      return populateModel (users[0]).then (models => {
+        expect (models).to.have.keys (['authors','users']);
 
-      return Promise.all (promises)
-        .then (([users,authors]) => {
-          return populateModel (users[0])
-            .then (models => {
-              expect (models).to.have.keys (['authors','users']);
-
-              expect (lean (models.authors)).to.have.deep.members ([authors[0].lean (), authors[1].lean ()]);
-              expect (lean (models.users)).to.have.deep.members ([users[0].lean ()]);
-            });
-        });
+        expect (lean (models.authors)).to.have.deep.members (lean ([authors[0], authors[1]]));
+        expect (lean (models.users)).to.have.deep.members ([users[0].lean ()]);
+      });
     });
   });
 
   describe ('populateModels', function () {
     it ('should populate a group models', function () {
-      const User = blueprint.lookup ('model:user');
-      const Author = blueprint.lookup ('model:author');
+      let {users,authors} = seed ('$default');
 
-      const promises = [
-        User.find (),
-        Author.find ()
-      ];
+      return populateModels (users).then (models => {
+        expect (models).to.have.keys (['authors','users']);
 
-      return Promise.all (promises)
-        .then (([users,authors]) => {
-          return populateModels (users)
-            .then (models => {
-              expect (models).to.have.keys (['authors','users']);
-
-              expect (lean (models.authors)).to.have.deep.members ([authors[0].lean (), authors[1].lean ()]);
-              expect (lean (models.users)).to.have.deep.members ([users[0].lean (), users[1].lean ()]);
-            });
-        });
+        expect (lean (models.users)).to.have.deep.members (lean ([users[0], users[1]]));
+        expect (lean (models.authors)).to.have.deep.members (lean ([authors[0], authors[1], authors[3], authors[6]]));
+      });
     });
   });
 });

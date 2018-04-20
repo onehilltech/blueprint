@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const util = require ('util');
-
 const {
   Service,
   computed,
@@ -63,6 +61,10 @@ module.exports = Service.extend ({
 
   connections: computed ({
     get () { return this._connections; }
+  }),
+
+  seeds: computed ({
+    get () { return this._seeds; }
   }),
 
   init () {

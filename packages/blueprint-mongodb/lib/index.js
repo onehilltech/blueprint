@@ -25,4 +25,4 @@ exports.ResourceController = require ('./resource-controller');
 exports.GridFSController = require ('./gridfs-controller');
 exports.populate = require ('./populate');
 exports.lean = require ('./lean');
-
+exports.seed = require ('./seed');

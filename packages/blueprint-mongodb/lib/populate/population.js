@@ -31,6 +31,10 @@ const {
   isEmpty,
 } = require ('lodash');
 
+const {
+  props
+} = require ('bluebird');
+
 /**
  * @class Population
  *
@@ -151,7 +155,7 @@ module.exports = BO.extend ({
   /**
    * Populate a single element.
    *
-   * @param key
+   * @param populator
    * @param model
    * @return {Promise|null}
    */
@@ -217,6 +221,6 @@ module.exports = BO.extend ({
       });
     });
 
-    return Promise.all (values (mapping));
+    return props (mapping);
   }
 });
