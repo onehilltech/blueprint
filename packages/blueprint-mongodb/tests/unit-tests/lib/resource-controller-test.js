@@ -1,6 +1,24 @@
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const {expect}  = require ('chai');
 const blueprint = require ('@onehilltech/blueprint');
-const testing   = require ('@onehilltech/blueprint-testing');
+const {request} = require ('@onehilltech/blueprint-testing');
+
+const {seed,lean} = require ('../../../lib');
 
 const {
   Types: {
@@ -8,11 +26,11 @@ const {
   }
 } = require ('mongoose');
 
-describe ('lib | ResourceController', function () {
-  beforeEach (function () {
-    return blueprint.lookup ('model:author').remove ();
-  });
+const {
+  omit
+} = require ('lodash');
 
+describe ('lib | ResourceController', function () {
   describe ('constructor', function () {
     it ('should create a resource controller', function () {
       const Author = blueprint.lookup ('model:author');
@@ -28,7 +46,7 @@ describe ('lib | ResourceController', function () {
     it ('should create a resource', function () {
       const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
 
-      return testing.request ()
+      return request ()
         .post ('/authors')
         .send ({author})
         .expect (200, {author: Object.assign ({}, {__v: 0}, author)});
@@ -37,7 +55,7 @@ describe ('lib | ResourceController', function () {
     it ('should call each subclass method', function () {
       const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
 
-      return testing.request ()
+      return request ()
         .post ('/callbacks')
         .send ({author})
         .expect (200)
@@ -54,26 +72,21 @@ describe ('lib | ResourceController', function () {
     });
 
     it ('should not create duplicate resources', function () {
-      const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
+      const {authors} = seed ('$default');
+      const author = authors[0];
 
-      return testing.request ()
+      return request ()
         .post ('/authors')
         .send ({author})
-        .then (() => {
-          return testing.request ()
-            .post ('/authors')
-            .send ({author})
-            .expect (400, { errors:
-                [ { code: 'already_exists',
-                  detail: 'The resource you are creating already exists.',
-                  status: '400' } ] });
-        });
-
+        .expect (400, { errors:
+            [ { code: 'already_exists',
+              detail: 'The resource you are creating already exists.',
+              status: '400' } ] });
     });
 
     context ('validation', function () {
       it ('should fail because of missing required parameters', function () {
-        return testing.request ()
+        return request ()
           .post ('/authors')
           .send ({author: {}})
           .expect (400, {
@@ -98,68 +111,46 @@ describe ('lib | ResourceController', function () {
 
   describe ('getAll', function () {
     it ('should get all resources', function () {
-      const Author = blueprint.lookup ('model:author');
-      const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
-      const result = {authors: [Object.assign ({}, {__v: 0}, author)]};
+      const {authors} = seed ('$default');
 
-      return Author.create (author)
-        .then (() => {
-          return testing.request ()
-            .get ('/authors')
-            .expect (200, result);
-        });
+      return request ()
+        .get ('/authors')
+        .expect (200, {authors: lean (authors)});
     });
   });
 
   describe ('getOne', function () {
     it ('should get one single resource', function () {
-      const Author = blueprint.lookup ('model:author');
-      const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
-      const result = {author: Object.assign ({}, {__v: 0}, author)};
+      let {authors} = seed ('$default');
+      let author = authors[0];
 
-      return Author.create (author)
-        .then (() => {
-          return testing.request ()
-            .get (`/authors/${author._id}`)
-            .expect (200, result);
-        });
+      return request ()
+        .get (`/authors/${author.id}`)
+        .expect (200, {author: author.lean ()});
     });
 
     it ('should populate the results', function () {
-      const Author = blueprint.lookup ('model:author');
-      const User = blueprint.lookup ('model:user');
+      const {users,authors} = seed ('$default');
 
-      const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
-
-      return Author.create (author)
-        .then (author => {
-          return User.create ({first_name: 'John', last_name: 'Doe', favorite_author: author._id})
-            .then (user => testing.request ()
-              .get (`/users/${user.id}?_populate=true`)
-              .expect (200, {
-                authors:
-                  [
-                    {__v: 0, _id: author.id, name: 'James H. Hill'}
-                  ],
-                users:
-                  [
-                    {__v: 0, _id: user.id, first_name: 'John', last_name: 'Doe', favorite_author: author.id, blacklist: [], bookstores: []}
-                  ]
-              }));
+      request ()
+        .get (`/users/${users[0].id}?_populate=true`)
+        .expect (200, {
+          users: [users[0].lean ()],
+          authors: [authors[0].lean (), authors[1].lean ()]
         });
     });
 
     it ('should not find the resource', function () {
       const id = new ObjectId ().toString ();
 
-      return testing.request ()
+      return request ()
         .get (`/authors/${id}`)
         .query ({populate: true})
         .expect (404, { errors: [ { code: 'not_found', detail: 'Not found', status: '404' } ] });
     });
 
     it ('should return bad request because of bad id', function () {
-      return testing.request ()
+      return request ()
         .get ('/authors/12')
         .expect (400, {errors: [
           {
@@ -182,71 +173,51 @@ describe ('lib | ResourceController', function () {
 
   describe ('update', function () {
     it ('should update a single resource', function () {
-      const Author = blueprint.lookup ('model:author');
-      const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
+      const {authors} = seed ('$default');
+      const author = authors[0];
 
-      return Author.create (author)
-        .then (() => {
-          return testing.request ()
-            .put (`/authors/${author._id}`)
-            .send ({author: {name: 'John Doe'}})
-            .expect (200, {author: Object.assign ({__v: 0}, author, {name: 'John Doe'})});
-        });
+      return request ()
+        .put (`/authors/${author.id}`)
+        .send ({author: {name: 'John Doe'}})
+        .expect (200, {author: Object.assign (author.lean (), {name: 'John Doe'})});
     });
 
     it ('should not find resource to update', function () {
       const id = new ObjectId ().toString ();
 
-      return testing.request ()
+      return request ()
         .put (`/authors/${id}`)
         .send ({author: {name: 'John Doe'}})
         .expect (404, { errors: [ { code: 'not_found', detail: 'Not found', status: '404' } ] });
     });
 
     it ('should delete a field on the resource', function () {
-      const User = blueprint.lookup ('model:user');
-      const user = {_id: new ObjectId ().toString (), first_name: 'John', last_name: 'Doe'};
+      const {users} = seed ('$default');
+      const user = users[0];
 
-      return User.create (user)
-        .then (() => {
-          return testing.request ()
-            .put (`/users/${user._id}`)
-            .send ({user: {last_name: null}})
-            .expect (200, {user: Object.assign ({__v: 0, _id: user._id}, {first_name: 'John', blacklist: [], bookstores: []})});
-        });
-
+      return request ()
+        .put (`/users/${user.id}`)
+        .send ({user: {last_name: null}})
+        .expect (200, {user: omit (user.lean (), 'last_name')});
     });
   });
 
   describe ('delete', function () {
     it ('should delete a single resource', function () {
-      const Author = blueprint.lookup ('model:author');
-      const author = {_id: new ObjectId ().toString (), name: 'James H. Hill'};
+      const {authors} = seed ('$default');
+      const author = authors[0];
 
-      return Author.create (author)
-        .then (() => {
-          return testing.request ()
-            .delete (`/authors/${author._id}`)
-            .expect (200, 'true');
-        });
+      return request ()
+        .delete (`/authors/${author.id}`)
+        .expect (200, 'true');
     });
   });
 
   describe ('count', function () {
     it ('should count the number of resources', function () {
-      const Author = blueprint.lookup ('model:author');
-      const authors =
-        [
-          {_id: new ObjectId (), name: 'Jack Doe'},
-          {_id: new ObjectId (), name: 'John Doe'}
-        ];
-
-      return Author.create (authors)
-        .then (() => {
-          return testing.request ()
-            .get ('/authors/count')
-            .expect (200, {count: 2});
-        });
+      return request ()
+        .get ('/authors/count')
+        .expect (200, {count: 7});
     });
   });
 });
