@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.0.0-46",
-    "@onehilltech/dab": "^1.0.2",
+    "@onehilltech/dab": "^1.0.7",
     "moment": "^2.19.1"
   },
   "devDependencies": {
