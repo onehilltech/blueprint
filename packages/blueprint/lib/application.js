@@ -237,8 +237,12 @@ module.exports = BlueprintObject.extend (Events, {
    * @param callback
    * @returns {*}
    */
-  asset (filename, opts, callback) {
-    return this._appModule.asset (filename, opts, callback);
+  asset (filename, opts) {
+    return this._appModule.asset (filename, opts);
+  },
+
+  assetSync (filename, opts) {
+    return this._appModule.assetSync (filename, opts);
   },
 
   /**

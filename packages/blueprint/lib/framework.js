@@ -124,6 +124,11 @@ module.exports = BlueprintObject.extend ({
     return this._app.asset (filename, opts, callback);
   },
 
+  assetSync (filename, opts) {
+    assert (this._app, 'The application has not been created.');
+    return this._app.assetSync (filename, opts);
+  },
+
   /**
    * Mount a router. The returned router is an Express router that can be
    * bound to any path in the router specification via the `use` property.
