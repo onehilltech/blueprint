@@ -48,6 +48,8 @@ describe ('lib | ApplicationModule', function () {
         expect (result.resources).to.have.nested.property ('listeners.blueprint\\.app\\.init');
 
         expect (result.resources).to.have.nested.property ('models.person');
+        expect (result.resources).to.not.have.nested.property ('models.-options');
+        expect (result.resources).to.not.have.nested.property ('models.options');
 
         expect (result.resources).to.have.nested.property ('policies.identity');
 
