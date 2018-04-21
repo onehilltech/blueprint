@@ -20,8 +20,12 @@ const {
   Listener,
 } = require ('@onehilltech/blueprint');
 
+const debug = require ('debug') ('blueprint-mongodb:listeners:seed');
+
 module.exports = Listener.extend ({
   handleEvent () {
+    debug ('seeding database connections');
+
     let mongodb = blueprint.lookup ('service:mongodb');
     return mongodb.seedConnections ();
   }

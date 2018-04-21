@@ -18,6 +18,7 @@ module.exports = {
   connections: {
     $default: {
       uri: 'mongodb://localhost/blueprint_mongodb',
+      seed: false,
       options : {
         readPreference: "primary",
         forceServerObjectId: false,
@@ -30,6 +31,7 @@ module.exports = {
 
     secondary : {
       uri: 'mongodb://localhost/blueprint_mongodb',
+      seed: false,
       options : {
         readPreference: "primary",
         forceServerObjectId: false,

@@ -146,7 +146,7 @@ module.exports = Service.extend ({
     debug ('opening all connections to the database');
 
     const {connections} = this.config;
-    const connecting = mapValues (connections, ({uri, options}, name) => this.openConnection (name, uri, options));
+    const connecting = mapValues (connections, (config, name) => this.openConnection (name, config));
 
     return BluebirdPromise.props (connecting);
   },
@@ -154,12 +154,12 @@ module.exports = Service.extend ({
   /**
    * Open a single connection.
    *
-   * @param name
-   * @param uri
-   * @param options
+   * @param name      Name of connection
+   * @param opts      Open options
    * @returns {*}
    */
-  openConnection (name, uri, options) {
+  openConnection (name, opts) {
+    let {uri,seed,options} = opts;
     debug (`opening connection ${name}`);
 
     let conn = this._connections[name];
@@ -174,7 +174,7 @@ module.exports = Service.extend ({
 
     return conn.openUri (uri, options).then (conn => {
       return this.emit ('open', name, conn)
-        .then (() => this._seedConnection (name, conn))
+        .then (() => seed ? this._seedConnection (name, conn) : null)
         .then (() => conn);
     });
   },
