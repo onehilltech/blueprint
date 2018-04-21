@@ -20,13 +20,13 @@ const {
 
 module.exports = {
   authors: [
-    {name: 'John Doe'}, //
-    {name: 'Robert Young'}, //
-    {name: 'Tom Smith'},
-    {name: 'Tom Sawyer'}, //
     {name: 'Jack Black'},
+    {name: 'John Doe'},
     {name: 'Lisa Wilson'},
-    {name: 'Todd Hill'} //
+    {name: 'Robert Young'},
+    {name: 'Todd Hill'},
+    {name: 'Tom Sawyer'},
+    {name: 'Tom Smith'},
   ],
 
   users: [

@@ -115,6 +115,7 @@ describe ('lib | ResourceController', function () {
 
       return request ()
         .get ('/authors')
+        .query ({_sort: {name: 1}})
         .expect (200, {authors: lean (authors)});
     });
   });
@@ -134,6 +135,7 @@ describe ('lib | ResourceController', function () {
 
       request ()
         .get (`/users/${users[0].id}?_populate=true`)
+        .query ({_populate: true})
         .expect (200, {
           users: [users[0].lean ()],
           authors: [authors[0].lean (), authors[1].lean ()]
@@ -145,7 +147,6 @@ describe ('lib | ResourceController', function () {
 
       return request ()
         .get (`/authors/${id}`)
-        .query ({populate: true})
         .expect (404, { errors: [ { code: 'not_found', detail: 'Not found', status: '404' } ] });
     });
 
@@ -175,11 +176,12 @@ describe ('lib | ResourceController', function () {
     it ('should update a single resource', function () {
       const {authors} = seed ('$default');
       const author = authors[0];
+      const update = {name: 'Adam Douglas'};
 
       return request ()
         .put (`/authors/${author.id}`)
-        .send ({author: {name: 'John Doe'}})
-        .expect (200, {author: Object.assign (author.lean (), {name: 'John Doe'})});
+        .send ({author: update})
+        .expect (200, {author: Object.assign (author.lean (), update)});
     });
 
     it ('should not find resource to update', function () {
