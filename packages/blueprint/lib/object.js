@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const assert = require ('assert');
+
 const {
   get,
   has,
@@ -21,13 +23,21 @@ const {
   unset,
   pick,
   forOwn,
-  isObject
+  concat
 } = require ('lodash');
 
 const Mixin = require ('./mixin');
 const PropertyDescriptor = require ('./properties/property-descriptor');
 
 const PrototypeMixin = Mixin.create ({
+  /// Collection of properties that should be merged with the
+  /// base class instead of overwritten.
+  mergedProperties: [],
+
+  /// Collection of properties that should be concatenated with the
+  /// base class instead of overwritten.
+  concatProperties: [],
+
   /**
    * Gets the value at path of object. If the resolved value is undefined, the
    * defaultValue is returned in its place.
@@ -97,12 +107,12 @@ const ClassMixin = Mixin.create ({
       }
     };
 
-    const PrototypeMixin = Mixin.create (...args);
     Class.ClassMixin = Mixin.create (this.ClassMixin);
-    Class.PrototypeMixin = Mixin.create (this.PrototypeMixin, PrototypeMixin);
+    Class.PrototypeMixin = Mixin.create (this.PrototypeMixin, ...args);
 
     // Apply the different mixins to the Class. This will setup the type inheritance
     // relationships for the Class.
+    const PrototypeMixin = Mixin.create (...args);
     Class.ClassMixin.apply (Class);
     PrototypeMixin.apply (Class.prototype);
 
@@ -131,12 +141,17 @@ let __nextId = 0;
  * from being extending by ES6 classes.
  */
 class BlueprintObject {
-  constructor () {
+  constructor (props = {}) {
     this.__boid__ = `bo${__nextId ++}`;
-    this.init.call (this, ...arguments);
+    this.init.call (this, props);
   }
 
   init (props) {
+    // First, define the merged and concatenated attributes. This way,
+    // we do not overwrite them when we are defining them on the target.
+    let {concatProperties} = props;
+    assert (!concatProperties, 'concatProperties must be defined in extend()');
+
     forOwn (props, (value, key) => {
       // In an ideal world, we could check if the value is an instance of the
       // PropertyDescriptor class. Unfortunately, this is not possible since
@@ -146,7 +161,10 @@ class BlueprintObject {
       //
       // So, we just check for the existence of the {descriptor} property.
 
-      if ((value instanceof PropertyDescriptor)) {
+      if (this.concatProperties && this.concatProperties.includes (key)) {
+        this[key] = concat (this[key] || [], value);
+      }
+      else if ((value instanceof PropertyDescriptor)) {
         value.defineProperty (this, key);
       }
       else {

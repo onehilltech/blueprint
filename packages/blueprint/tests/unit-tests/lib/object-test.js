@@ -3,6 +3,7 @@ const computed = require ('../../../lib/properties/computed');
 const Mixin = require ('../../../lib/mixin');
 
 const { expect } = require ('chai');
+const {AssertionError} = require ('assert');
 
 describe ('lib | BlueprintObject', function () {
   describe ('class', function () {
@@ -301,5 +302,92 @@ describe ('lib | BlueprintObject', function () {
 
       expect (a.DEFAULT_VALUE).to.equal (5);
     });
+  });
+
+  describe ('concatProperties', function () {
+    it ('should concat listed properties', function () {
+      const A = BlueprintObject.extend ({
+        concatProperties: ['names'],
+
+        names: ['James','Sue']
+      });
+
+      const B = A.extend ({
+        names: ['Jennifer', 'Alan']
+      });
+
+      let b = new B ();
+
+      expect (b.concatProperties).to.eql (['names']);
+      expect (B.prototype.names).to.eql (['James','Sue','Jennifer','Alan']);
+      expect (b.names).to.eql (['James','Sue','Jennifer','Alan']);
+    });
+
+    it ('should allow extend type to add to concatProperties', function () {
+      const A = BlueprintObject.extend ({
+        concatProperties: ['names'],
+
+        names: ['James','Sue']
+      });
+
+      const B = A.extend ({
+        concatProperties: ['words'],
+
+        names: ['Jennifer', 'Alan'],
+        words: 'good morning'.split (' ')
+      });
+
+      const C = B.extend ({
+        words: 'good night'.split (' ')
+      });
+
+      let a = new A ();
+      let b = new B ();
+      let c = new C ();
+
+      // check the prototypes of each
+      expect (A.prototype.concatProperties).to.eql (['names']);
+      expect (B.prototype.concatProperties).to.eql (['names','words']);
+      expect (C.prototype.concatProperties).to.eql (['names','words']);
+
+      // check the instances of each
+      expect (a.concatProperties).to.eql (['names']);
+      expect (a.names).to.eql (['James','Sue']);
+
+      expect (b.concatProperties).to.eql (['names','words']);
+      expect (b.names).to.eql (['James','Sue','Jennifer','Alan']);
+
+      expect (c.concatProperties).to.eql (['names','words']);
+      expect (c.names).to.eql (['James','Sue','Jennifer','Alan']);
+      expect (c.words).to.eql (['good','morning','good','night']);
+    });
+
+    it ('should allow instance to concat properties', function () {
+      const A = BlueprintObject.extend ({
+        concatProperties: ['names'],
+
+        names: ['James','Sue']
+      });
+
+      let a = new A ({
+        names: ['Adam','Will']
+      });
+
+      expect (A.prototype.names).to.eql (['James','Sue']);
+      expect (a.names).to.eql (['James','Sue','Adam','Will']);
+    });
+
+    it ('should not allow instance to update concatProperties', function () {
+      const A = BlueprintObject.extend ({
+        concatProperties: ['names'],
+
+        names: ['James','Sue']
+      });
+
+      expect (() => new A ({
+          concatProperties: ['words']
+        })
+      ).to.throw (AssertionError);
+    })
   });
 });

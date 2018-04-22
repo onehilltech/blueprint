@@ -29,7 +29,9 @@ const METHOD_CALLS_SUPER_REGEXP = /this\s*\.\s*_super\s*\.\s*(\s*call|apply)\s*\
 
 const {
   forOwn,
-  isFunction
+  isFunction,
+  concat,
+  isEmpty
 } = require ('lodash');
 
 const PropertyDescriptor = require ('./properties/property-descriptor');
@@ -80,7 +82,14 @@ function defineProperty (target, key, value) {
     // new value from the mixin further down the chain. The approach for
     // replacing the current value depends on its type.
 
-    if ((value instanceof PropertyDescriptor)) {
+    if (key === 'concatProperties' || key === 'mergedProperties') {
+      // do nothing...
+    }
+    else if (target.concatProperties && target.concatProperties.includes (key)) {
+      // Let's concat this value with the target value.
+      target[key] = concat (currentValue, value);
+    }
+    else if ((value instanceof PropertyDescriptor)) {
       value.defineProperty (target, key);
     }
     else if (isFunction (currentValue)) {
@@ -97,7 +106,10 @@ function defineProperty (target, key, value) {
     // add the value to the target. If we are working with a function, then we
     // need to add a root function to prevent the system from crashing.
 
-    if ((value instanceof PropertyDescriptor)) {
+    if (key === 'concatProperties' || key === 'mergedProperties') {
+      // do nothing...
+    }
+    else if ((value instanceof PropertyDescriptor)) {
       value.defineProperty (target, key);
     }
     else if (isFunction (value)) {
@@ -114,6 +126,11 @@ function applyMixin (target, mixin) {
     mixin.mixins.forEach (mixin => applyMixin (target, mixin));
 
   if (mixin.properties) {
+    // First, define the merged and concatenated attributes. This way,
+    // we do not overwrite them when we are defining them on the target.
+    if (!isEmpty (mixin.properties.concatProperties))
+      target.concatProperties = concat (target.concatProperties || [], mixin.properties.concatProperties);
+
     forOwn (mixin.properties, (value, key) => defineProperty (target, key, value))
   }
 }
