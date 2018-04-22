@@ -31,17 +31,19 @@ const BlueprintObject = require ('./object');
  * access to the application object via the `controller` property.
  */
 module.exports = BlueprintObject.extend ({
-  /**
-   * Optional middleware function(s) for validating the request that triggered
-   * the action.
-   */
-  validate: null,
+  mergedProperties: ['schema'],
 
   /**
    * Optional express-validator schema for validating the request that
    * trigger the action.
    */
   schema: null,
+
+  /**
+   * Optional middleware function(s) for validating the request that triggered
+   * the action.
+   */
+  validate: null,
 
   /**
    * Execute the request.
