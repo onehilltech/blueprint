@@ -19,24 +19,13 @@ const Action  = require ('./action');
 const Controller = require ('./controller');
 const HttpError  = require ('./http-error');
 
-const {computed} = require ('./properties');
-
 const {
-  merge
-} = require ('lodash');
+  computed
+} = require ('./properties');
 
-const BUILTIN_ACTIONS = {
-  // CRUD operations
-  create: {verb: 'post', method: 'create'},
-  getAll: {verb: 'get', method: 'getAll'},
-  getOne: {verb: 'get', path: '/:rcId', method: 'getOne'},
-  update: {verb: 'put', path: '/:rcId', method: 'update'},
-  delete: {verb: 'delete', path: '/:rcId', method: 'delete'},
-
-  // support operations
-  count: {verb: 'get', path: '/count', method: 'count'}
-};
-
+/**
+ * @class NotFound
+ */
 const NotFound = Action.extend ({
   execute () {
     return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
@@ -67,6 +56,20 @@ module.exports = Controller.extend ({
   /// the name of the resource.
   id: null,
 
+  mergedProperties: ['_actions'],
+
+  _actions: {
+    // CRUD operations
+    create: {verb: 'post', method: 'create'},
+    getAll: {verb: 'get', method: 'getAll'},
+    getOne: {verb: 'get', path: '/:rcId', method: 'getOne'},
+    update: {verb: 'put', path: '/:rcId', method: 'update'},
+    delete: {verb: 'delete', path: '/:rcId', method: 'delete'},
+
+    // support operations
+    count: {verb: 'get', path: '/count', method: 'count'}
+  },
+
   resourceId: computed ({
     get () { return this.id; }
   }),
@@ -82,8 +85,6 @@ module.exports = Controller.extend ({
 
     if (!this.id)
       this.id = `${this.name}Id`;
-
-    this._actions = merge ({}, BUILTIN_ACTIONS, this.actions);
   },
 
   create () {
