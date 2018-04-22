@@ -305,7 +305,7 @@ describe ('lib | BlueprintObject', function () {
   });
 
   describe ('concatProperties', function () {
-    it ('should concat listed properties', function () {
+    it ('should concat properties', function () {
       const A = BlueprintObject.extend ({
         concatProperties: ['names'],
 
@@ -389,5 +389,107 @@ describe ('lib | BlueprintObject', function () {
         })
       ).to.throw (AssertionError);
     })
+  });
+
+  describe ('mergedProperties', function () {
+    it ('should merge properties', function () {
+      const A = BlueprintObject.extend ({
+        mergedProperties: ['options'],
+
+        options: {
+          open: true
+        }
+      });
+
+      const B = A.extend ({
+        options: {
+          debug: false
+        }
+      });
+
+      const b = new B ();
+
+      expect (B.prototype.options).to.eql ({
+        open: true,
+        debug: false
+      });
+
+      expect (b.options).to.eql ({
+        open: true,
+        debug: false
+      });
+    });
+
+    it ('should update the mergedProperties in extend classes', function () {
+      const A = BlueprintObject.extend ({
+        mergedProperties: ['options'],
+
+        options: {
+          open: true
+        }
+      });
+
+      const B = A.extend ({
+        mergedProperties: ['actions'],
+
+        options: {
+          debug: false
+        },
+
+        actions: {
+          post: '/post'
+        }
+      });
+
+      const C = B.extend ({
+        actions: {
+          get: '/get',
+          post: '/post2'
+        }
+      });
+
+      expect (A.prototype.mergedProperties).to.eql (['options']);
+      expect (A.prototype.options).to.eql ({open: true});
+
+      expect (B.prototype.mergedProperties).to.eql (['options','actions']);
+      expect (B.prototype.options).to.eql ({open: true, debug: false});
+      expect (B.prototype.actions).to.eql ({ post: '/post' });
+
+      expect (C.prototype.mergedProperties).to.eql (['options','actions']);
+      expect (C.prototype.options).to.eql ({open: true, debug: false});
+      expect (C.prototype.actions).to.eql ({ get: '/get', post: '/post2' });
+    });
+
+    it ('should allow instance of merge properties', function () {
+      const A = BlueprintObject.extend ({
+        mergedProperties: ['options'],
+
+        options: {
+          open: true
+        }
+      });
+
+      const a = new A ({
+        options: {
+          debug: false
+        }
+      });
+
+      expect (A.prototype.mergedProperties).to.eql (['options']);
+      expect (A.prototype.options).to.eql ({open: true});
+      expect (a.options).to.eql ({open: true, debug: false});
+
+    });
+
+    it ('should not allow instance of update mergedProperties', function () {
+      const A = BlueprintObject.extend ({
+        mergedProperties: ['options'],
+      });
+
+      expect (() => new A ({
+          mergedProperties: ['actions']
+        })
+      ).to.throw (AssertionError);
+    });
   });
 });
