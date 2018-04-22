@@ -26,7 +26,8 @@ const {
 const {
   Action,
   ResourceController,
-  HttpError
+  HttpError,
+  computed
 } = require ('@onehilltech/blueprint');
 
 const validation = require ('./validation');
@@ -78,6 +79,10 @@ const DatabaseAction = Action.extend ({
  * Resource controller designed to operate on a Mongoose model.
  */
 module.exports = ResourceController.extend ({
+  plural: computed ({
+    get () { return pluralize (this.name); }
+  }),
+
   /**
    * Initialize the resource controller.
    */
@@ -93,8 +98,6 @@ module.exports = ResourceController.extend ({
     // Prepare the options for the base class.
     assert (!!this.model, "You must define the 'model' property.");
     assert (this.model.schema.options.resource, `${modelName} is not a resource; model must be created using resource() method.`);
-
-    this.plural = pluralize (this.name);
 
     // Build the validation schema for create and update.
     this._defaultValidationOptions = {scope: this.name};
