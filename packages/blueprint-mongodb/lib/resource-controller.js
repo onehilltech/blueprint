@@ -148,7 +148,7 @@ module.exports = ResourceController.extend ({
           })
           // Initialize the result with the data. We are now going to give the
           // subclass a chance to add more content to the response.
-          .then (data => this.prepareResponse (res, { [name]: data }))
+          .then (data => this.prepareResponse (req, res, { [name]: data }))
           .then (result => res.status (200).json (result));
       },
 
@@ -169,7 +169,7 @@ module.exports = ResourceController.extend ({
         return result;
       },
 
-      prepareResponse (res, result) {
+      prepareResponse (req, res, result) {
         return result;
       }
     });
@@ -246,7 +246,7 @@ module.exports = ResourceController.extend ({
                   return {[this.controller.plural]: data};
                 }
               })
-              .then (result => this.prepareResponse (res, result))
+              .then (result => this.prepareResponse (req, res, result))
               .then (result => res.status (200).json (result));
           });
       },
@@ -275,7 +275,7 @@ module.exports = ResourceController.extend ({
         return models;
       },
 
-      prepareResponse (res, result) {
+      prepareResponse (req, res, result) {
         return result;
       }
     });
@@ -338,7 +338,7 @@ module.exports = ResourceController.extend ({
                   return {[this.controller.name]: data};
                 }
               })
-              .then (result => this.prepareResponse (res, result))
+              .then (result => this.prepareResponse (req, res, result))
               .then (result => res.status (200).json (result));
           });
       },
@@ -363,7 +363,7 @@ module.exports = ResourceController.extend ({
         return models;
       },
 
-      prepareResponse (res, result) {
+      prepareResponse (req, res, result) {
         return result;
       }
     });
@@ -422,7 +422,7 @@ module.exports = ResourceController.extend ({
 
                 return this.postUpdateModel (req, model);
               })
-              .then (model => this.prepareResponse (res, {[this.controller.name]: model}))
+              .then (model => this.prepareResponse (req, res, {[this.controller.name]: model}))
               .then (result => res.status (200).json (result));
           });
       },
@@ -481,7 +481,7 @@ module.exports = ResourceController.extend ({
        * @param data
        * @returns {data|Promise}
        */
-      prepareResponse (res, data) {
+      prepareResponse (req, res, data) {
         return data;
       }
     });
@@ -517,7 +517,7 @@ module.exports = ResourceController.extend ({
 
             return this.postDeleteModel (req, model);
           })
-          .then (model => this.prepareResponse (res, model, true))
+          .then (model => this.prepareResponse (req, res, model, true))
           .then (result => res.status (200).json (result));
       },
 
@@ -533,8 +533,8 @@ module.exports = ResourceController.extend ({
         return result;
       },
 
-      prepareResponse (res, model, response) {
-        return response;
+      prepareResponse (req, res, model, result) {
+        return result;
       }
     });
   },
@@ -557,7 +557,7 @@ module.exports = ResourceController.extend ({
                 this.emit (eventName, count);
                 return this.postCountModels (req, count)
               })
-              .then (count => this.prepareResponse (res, {count: count}))
+              .then (count => this.prepareResponse (req, res, {count: count}))
               .then (response => res.status (200).json (response));
           });
       },
@@ -578,7 +578,7 @@ module.exports = ResourceController.extend ({
         return count;
       },
 
-      prepareResponse (res, response) {
+      prepareResponse (req, res, response) {
         return response;
       }
     });
