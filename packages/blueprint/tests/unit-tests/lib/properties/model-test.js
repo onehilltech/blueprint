@@ -22,10 +22,8 @@ const {
 
 describe ('lib | properties | model', function () {
   it ('should bind a property to a model', function () {
-    let app = blueprint.app;
-    let person = app.lookup ('model:person');
-
-    let main = app.lookup ('controller:main');
+    let person = blueprint.lookup ('model:person');
+    let main = blueprint.lookup ('controller:main');
 
     expect (main.person).to.equal (person);
     expect (main.model).to.equal (person);

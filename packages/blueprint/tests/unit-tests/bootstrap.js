@@ -22,3 +22,4 @@ before (function () {
   return blueprint.createApplication (appPath);
 });
 
+

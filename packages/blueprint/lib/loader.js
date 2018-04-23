@@ -4,7 +4,6 @@ const _      = require ('lodash');
 const path   = require ('path');
 const fs     = require ('fs');
 const assert = require ('assert');
-const debug  = require ('debug') ('blueprint:require');
 const {env}    = require ('./environment');
 
 function load (opts) {
@@ -14,7 +13,6 @@ function load (opts) {
         return resolve ({});
 
       // Load all the objects in the directory.
-      debug ('loading ' + opts.dirname);
       let objects = all (opts);
 
       resolve (objects);

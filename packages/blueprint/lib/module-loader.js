@@ -23,6 +23,7 @@ const path   = require ('path');
 const assert = require ('assert');
 const CoreObject = require ('./object');
 const ApplicationModule = require ('./application-module');
+const Events = require ('./messaging/events');
 
 const KEYWORD_BLUEPRINT_MODULE = 'blueprint-module';
 const FILE_PACKAGE_JSON = 'package.json';
@@ -32,15 +33,13 @@ const {
   find,
 } = require ('lodash');
 
-const {
-  computed
-} = require ('./properties');
+const debug = require ('debug') ('blueprint:module-loader');
 
 function isBlueprintModule (packageObj) {
   return packageObj.keywords && packageObj.keywords.indexOf (KEYWORD_BLUEPRINT_MODULE) !== -1;
 }
 
-module.exports = CoreObject.extend ({
+module.exports = CoreObject.extend (Events, {
   /// The target application for the loader.
   app: null,
 
@@ -72,6 +71,10 @@ module.exports = CoreObject.extend ({
   },
 
   _handleNodeModule (name, version) {
+    // Do not process the module more than once.
+    if (this._modules[name])
+      return;
+
     // Open the package.json file for this node module, and determine
     // if the module is a Blueprint.js module.
     let modulePath;
@@ -90,16 +93,14 @@ module.exports = CoreObject.extend ({
     return readJson (packageFile).then (packageObj => {
       // Do not continue if the module is not a Blueprint module, or we have
       // already loaded this module into memory.
-      if (!isBlueprintModule (packageObj) || this._modules[name])
+      if (!isBlueprintModule (packageObj))
         return;
+
+      debug (`loading module ${name}`);
 
       // Create a new application module.
       const moduleAppPath = path.resolve (modulePath, 'app');
-
-      const module = new ApplicationModule ({
-        app: this.app,
-        modulePath: moduleAppPath
-      });
+      const module = new ApplicationModule ({name, app: this.app, modulePath: moduleAppPath});
 
       this._modules[name] = module;
 
@@ -107,11 +108,10 @@ module.exports = CoreObject.extend ({
       // then add this module to the application.
       const {dependencies} = packageObj;
 
-      return this._handleDependencies (dependencies).then (() => {
-        return module.configure ();
-      }).then (module => {
-        return this.app.addModule (name, module);
-      });
+      return this._handleDependencies (dependencies)
+        .then (() => this.emit ('loading', module))
+        .then (() => module.configure ())
+        .then (module => this.emit ('loaded', module))
     });
   },
 

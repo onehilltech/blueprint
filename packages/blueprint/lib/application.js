@@ -14,7 +14,6 @@ const lookup = require ('./-lookup');
 const BlueprintObject   = require ('./object');
 const ApplicationModule = require ('./application-module');
 const ModuleLoader      = require ('./module-loader');
-const barrier           = require ('./barrier');
 const RouterBuilder     = require ('./router-builder');
 const Server            = require ('./server');
 const Loader            = require ('./loader');
@@ -69,17 +68,22 @@ module.exports = BlueprintObject.extend (Events, {
     get () { return this._server; }
   }),
 
+  module: computed ({
+    get () { return this._appModule; }
+  }),
+
   init () {
     this._super.call (this, ...arguments);
     this._modules = {};
 
-    // barriers
-    this._appInit = barrier ('blueprint.app.init', this);
-    this._appStart = barrier ('blueprint.app.start', this);
-
     // First, make sure the temp directory for the application exist. Afterwards,
     // we can progress with configuring the application.
-    this._appModule = new ApplicationModule ({app: this, modulePath: this.appPath});
+    this._appModule = new ApplicationModule ({
+      name: APPLICATION_MODULE_NAME,
+      app: this,
+      modulePath: this.appPath
+    });
+
     this._server = new Server ({app: this});
   },
 
@@ -99,12 +103,13 @@ module.exports = BlueprintObject.extend (Events, {
         // We handle these before the modules that are explicitly loaded by the application.
 
         let moduleLoader = new ModuleLoader ({app: this});
+        moduleLoader.on ('loading', module => this._modules[module.name] = module);
+
         return moduleLoader.load ();
       })
       // Now, we can configure the module portion of the application since we know all
       // dependent artifacts needed by the application will be loaded.
       .then (() => this._appModule.configure ())
-      .then (appModule => this.addModule (APPLICATION_MODULE_NAME, appModule))
       .then (() => {
         // Allow the loaded services to configure themselves.
         let {services} = this.resources;
@@ -130,8 +135,7 @@ module.exports = BlueprintObject.extend (Events, {
       .then (router => {
         // Install the built router into the server.
         this._server.setMainRouter (router);
-        this.emit ('blueprint.app.initialized', this);
-        return this._appInit.signal ();
+        return this.emit ('blueprint.app.initialized', this);
       })
       .then (() => this);
   },
@@ -200,9 +204,7 @@ module.exports = BlueprintObject.extend (Events, {
       .then (() => {
         // Notify all listeners that the application has started.
         this.started = true;
-        this.emit ('blueprint.app.started', this);
-
-        return this._appStart.signal ();
+        return this.emit ('blueprint.app.started', this);
       });
   },
 

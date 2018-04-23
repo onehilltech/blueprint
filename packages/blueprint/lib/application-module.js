@@ -41,6 +41,9 @@ const ListenerLoader = require ('./listener-loader');
 const Router = require ('./router');
 
 module.exports = CoreObject.extend ({
+  /// Name of the application module.
+  name: null,
+
   /// Application hosting the module.
   app: null,
 
@@ -133,6 +136,8 @@ module.exports = CoreObject.extend ({
    * @returns {Promise<ApplicationModule>}
    */
   configure () {
+    debug (`configuring the application module ${this.modulePath}`);
+
     let promise = reduce (this._entities, (promise, entity) => {
       return promise.then (() => {
         // Compute the location of the resources we are loading. Then load the resources
@@ -146,7 +151,13 @@ module.exports = CoreObject.extend ({
         let loader = entity.loader || this._defaultLoader;
 
         return loader.load (opts).then (resources => {
+          // Merge the resources into the application module, and then merge them
+          // into the parent application. This means we will have two copies of the
+          // resources, but that is fine. We need the ability to load a resource from
+          // its parent module, if necessary.
+          debug (`merging ${name} into both application module and application`);
           this._resources[name] = merge (this._resources[name] || {}, resources);
+          this.app.resources[name] = merge (this.app.resources[name] || {}, resources);
         });
       });
     }, Promise.resolve ());
