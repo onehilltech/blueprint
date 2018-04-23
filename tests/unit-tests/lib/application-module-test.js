@@ -24,73 +24,51 @@ const ApplicationModule = require ('../../../lib/application-module');
 const blueprint = require ('../../../lib');
 
 describe ('lib | ApplicationModule', function () {
-  describe ('constructor', function () {
-    it ('should create a new ApplicationModule', function () {
-      let app = blueprint.app;
-      let appModule = new ApplicationModule ({modulePath: app.appPath, app});
-
-      expect (appModule).to.deep.include ({modulePath: app.appPath});
-    });
-  });
-
   describe ('configure', function () {
     it ('should load an application module into memory', function () {
-      let app = blueprint.app;
-      let appModule = new ApplicationModule ({app, modulePath: app.appPath});
+      const app = blueprint.app;
 
-      return appModule.configure ().then (result => {
-        expect (appModule).to.equal (result);
+      expect (app.module.resources).to.have.nested.property ('controllers.main');
+      expect (app.module.resources).to.have.nested.property ('controllers.namespace-user');
+      expect (app.module.resources).to.have.nested.property ('controllers.user');
 
-        expect (result.resources).to.have.nested.property ('controllers.main');
-        expect (result.resources).to.have.nested.property ('controllers.namespace-user');
-        expect (result.resources).to.have.nested.property ('controllers.user');
+      expect (app.module.resources).to.have.nested.property ('listeners.blueprint\\.app\\.init');
 
-        expect (result.resources).to.have.nested.property ('listeners.blueprint\\.app\\.init');
+      expect (app.module.resources).to.have.nested.property ('models.person');
+      expect (app.module.resources).to.not.have.nested.property ('models.-options');
+      expect (app.module.resources).to.not.have.nested.property ('models.options');
 
-        expect (result.resources).to.have.nested.property ('models.person');
-        expect (result.resources).to.not.have.nested.property ('models.-options');
-        expect (result.resources).to.not.have.nested.property ('models.options');
+      expect (app.module.resources).to.have.nested.property ('policies.identity');
 
-        expect (result.resources).to.have.nested.property ('policies.identity');
+      expect (app.module.resources).to.have.nested.property ('services.cart');
+      expect (app.module.resources).to.have.nested.property ('services.shopping-cart');
 
-        expect (result.resources).to.have.nested.property ('services.cart');
-        expect (result.resources).to.have.nested.property ('services.shopping-cart');
-
-        expect (result.resources).to.have.nested.property ('routers.main');
-        expect (result.resources).to.have.nested.property ('routers.users');
-        expect (result.resources).to.have.nested.property ('routers.inner.main');
-      });
+      expect (app.module.resources).to.have.nested.property ('routers.main');
+      expect (app.module.resources).to.have.nested.property ('routers.users');
+      expect (app.module.resources).to.have.nested.property ('routers.inner.main');
     });
   });
 
   describe ('viewsPath', function () {
     it ('should get the viewPaths property', function () {
       let app = blueprint.app;
-      let appModule = new ApplicationModule ({app, modulePath: app.appPath});
-
-      expect (appModule.viewsPath).to.equal (path.join (app.appPath, 'views'));
+      expect (app.module.viewsPath).to.equal (path.join (app.appPath, 'views'));
     });
   });
 
   describe ('hasViews', function () {
     it ('should test if the module has views', function () {
       let app = blueprint.app;
-      let appModule = new ApplicationModule ({app, modulePath: app.appPath});
-
-      expect (appModule.hasViews).to.be.true;
+      expect (app.module.hasViews).to.be.true;
     });
   });
 
   describe ('lookup', function () {
     it ('should lookup an entity', function () {
       let app = blueprint.app;
-      let appModule = new ApplicationModule ({app, modulePath: app.appPath});
+      let controller = app.module.lookup ('controller:main');
 
-      return appModule.configure ()
-        .then (() => {
-          let controller = appModule.lookup ('controller:main');
-          expect (controller).to.equal (appModule.resources.controllers.main);
-        });
+      expect (controller).to.equal (app.module.resources.controllers.main);
     });
   });
 });

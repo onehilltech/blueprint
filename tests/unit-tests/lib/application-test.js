@@ -15,8 +15,7 @@
  */
 
 const { expect } = require ('chai');
-const path = require ('path')
-const blueprint = require ('../../../lib');
+  const blueprint = require ('../../../lib');
 
 const express = require ('express');
 const request = require ('supertest');

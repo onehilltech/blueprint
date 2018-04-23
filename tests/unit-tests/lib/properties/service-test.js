@@ -22,12 +22,9 @@ const {
 
 describe ('lib | properties | service', function () {
   it ('should bind a property to a service', function () {
-    let app = blueprint.app;
-
-    let cart = app.lookup ('service:cart');
-    let shoppingCart = app.lookup ('service:shopping-cart');
-
-    let main = app.lookup ('controller:main');
+    let cart = blueprint.lookup ('service:cart');
+    let shoppingCart = blueprint.lookup ('service:shopping-cart');
+    let main = blueprint.lookup ('controller:main');
 
     expect (main.cart).to.equal (cart);
     expect (main.shoppingCart).to.equal (shoppingCart);
