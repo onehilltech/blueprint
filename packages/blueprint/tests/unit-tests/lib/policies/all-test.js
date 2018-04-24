@@ -4,55 +4,39 @@ const {
 
 const all = require ('../../../../lib/policies/all');
 const check = require ('../../../../lib/policies/check');
-const Policy = require ('../../../../lib/policy');
 
 describe ('lib | policies | all', function () {
-  let policies = {
-    identity : Policy.extend ({
-      setParameters (value) {
-        this.value = value;
-      },
-
-      runCheck () { return this.value; }
-    })
-  };
-
-
-  it ('should pass all policies', function (done) {
-    let a = all ([
+  it ('should pass all policies', function () {
+    const Policy = all ([
       check ('identity', true),
       check ('identity', true)
     ]);
 
-    let policy = a.resolvePolicyFrom (policies);
+    const policy = new Policy ();
 
-    policy.runCheck ().then (result => {
+    return policy.runCheck ().then (result => {
       expect (result).to.be.true;
-      return done (null);
-    }).catch (done);
+    });
   });
 
-  it ('should fail since one policy fails', function (done) {
-    let a = all ([
+  it ('should fail since one policy fails', function () {
+    let Policy = all ([
       check ('identity', true),
       check ('identity', false)
-    ]);
+    ], 'second_failed', 'The second policy failed.');
 
-    let policy = a.resolvePolicyFrom (policies);
+    let policy = new Policy ();
 
-    policy.runCheck ()
-      .then (result => {
-        expect (result).to.deep.equal ({
-          failureCode: "policy_failed",
-          failureMessage: "The request did not satisfy a required policy."
-        });
-
-        done (null);
-      }).catch (done);
+    return policy.runCheck ().then (result => {
+      expect (result).to.deep.equal ({
+        failureCode: 'second_failed',
+        failureMessage: 'The second policy failed.'
+      });
+    });
   });
 
-  it ('should support nested policies', function (done) {
-    let a = all ([
+  it ('should support nested policies', function () {
+    let Policy = all ([
       check ('identity', true),
       check ('identity', true),
 
@@ -62,11 +46,10 @@ describe ('lib | policies | all', function () {
       ])
     ]);
 
-    let policy = a.resolvePolicyFrom (policies);
+    let policy = new Policy ();
 
-    policy.runCheck ().then (result => {
+    return policy.runCheck ().then (result => {
       expect (result).to.be.true;
-      return done (null);
-    }).catch (done);
+    });
   });
 });
