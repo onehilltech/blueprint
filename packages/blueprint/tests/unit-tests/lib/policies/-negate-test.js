@@ -18,7 +18,6 @@ const {
   expect
 } = require ('chai');
 
-const negage = require ('../../../../lib/policies/negate');
 const check = require ('../../../../lib/policies/check');
 const Policy = require ('../../../../lib/policy');
 
@@ -34,7 +33,7 @@ describe ('lib | policies | -negate', function () {
   };
 
   it ('should negate a true to false', function (done) {
-    let policy = check ('!identity', true);
+    let policy = check ('!identity', true).createPolicy (policies);
 
     policy.runCheck ().then (result => {
       expect (result).to.be.false;
@@ -43,7 +42,7 @@ describe ('lib | policies | -negate', function () {
   });
 
   it ('should negate a false to true', function (done) {
-    let policy = check ('!identity', false);
+    let policy = check ('!identity', false).createPolicy (policies);
 
     policy.runCheck ().then (result => {
       expect (result).to.be.true;
@@ -52,7 +51,7 @@ describe ('lib | policies | -negate', function () {
   });
 
   it ('should negate a failure object to true', function (done) {
-    let policy = check ('!identity', {failureCode: 'failed', failureMessage: 'The message'});
+    let policy = check ('!identity', {failureCode: 'failed', failureMessage: 'The message'}).createPolicy (policies);
 
     policy.runCheck ().then (result => {
       expect (result).to.be.true;

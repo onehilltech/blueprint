@@ -8,10 +8,6 @@ const {
 } = require ('express-validator/check');
 
 const {
-  get
-} = require ('object-path');
-
-const {
   forOwn,
   isFunction,
   isObjectLike,
@@ -20,7 +16,8 @@ const {
   isArray,
   extend,
   mapValues,
-  transform
+  transform,
+  get
 } = require ('lodash');
 
 const {
@@ -33,10 +30,9 @@ const {
 } = require ('./middleware');
 
 const {
-  check
+  check,
+  policyMaker,
 } = require ('./policies');
-
-const Policy = require ('./policy');
 
 const SINGLE_ACTION_CONTROLLER_METHOD = '__invoke';
 const SINGLE_RESOURCE_BASE_PATH = '/:rcId';
@@ -660,20 +656,9 @@ module.exports = BlueprintObject.extend ({
    * @param policy      Policy object
    * @private
    */
-  _makePolicyMiddleware (policy) {
-    if (policy === null)
-      return [];
-
-    if ((policy instanceof Policy))
-      return [checkPolicy (policy)];
-
-    // In both cases, we recursively call ourselves just in case we need to
-    // add logic around creating the policy middleware when using an instance
-    // of the policy, which is expected.
-    if (isString (policy))
-      return this._makePolicyMiddleware (check (policy));
-
-    return this._makePolicyMiddleware (new policy ());
+  _makePolicyMiddleware (definition) {
+    let policy = policyMaker (definition, this.policies);
+    return policy !== null ? [checkPolicy (policy)] : [];
   },
 
   /**

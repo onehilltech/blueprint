@@ -1,25 +1,51 @@
-const CoreObject = require ('../object');
-const {get} = require ('object-path');
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-module.exports = CoreObject.extend ({
-  name: null,
+const assert = require ('assert');
+const BO = require ('../object');
+const NegatePolicy = require ('./negate');
 
-  params: [],
+const {
+  get
+} = require ('lodash');
+
+module.exports = BO.extend ({
+  policyName: null,
+
+  params: null,
 
   optional: false,
 
-  resolvePolicyFrom (policies) {
-    let Policy = get (policies, this.name);
+  negate: false,
+
+  createPolicy (policies) {
+    let Policy = get (policies, this.policyName);
 
     if (!Policy) {
       if (this.optional)
         return null;
 
-      throw new Error (`We cannot locate the policy named ${this.name}.`);
+      assert (false, `We could not locate the policy ${this.policyName}.`);
     }
 
     let policy = new Policy ();
     policy.setParameters (...this.params);
+
+    if (this.negate)
+      policy = new NegatePolicy ({policy});
 
     return policy;
   }

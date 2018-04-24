@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-const NegatePolicy = require ('./negate');
-const framework = require ('../-framework');
-
-const {
-  get
-} = require ('lodash');
+const Check = require ('./-check');
 
 /**
  * The check policy builder will lookup an existing policy by name. The first
@@ -35,24 +30,8 @@ const {
 module.exports = function () {
   const [name, ...params] = arguments;
   const optional = name[0] === '?';
-  const not = name[0] === '!';
-  const policyName = (optional || not) ? name.slice (1) : name;
+  const negate = name[0] === '!';
+  const policyName = (optional || negate) ? name.slice (1) : name;
 
-  try {
-    const Policy = require ('../-framework').lookup (`policy:${policyName}`);
-
-    let policy = new Policy ();
-    policy.setParameters (...params);
-
-    if (not)
-      policy = new NegatePolicy ({policy});
-
-    return policy;
-  }
-  catch (err) {
-    if (optional)
-      return null;
-
-    assert (false, `We cannot locate policy ${policyName}.`);
-  }
+  return new Check ({policyName, params, optional, negate});
 };

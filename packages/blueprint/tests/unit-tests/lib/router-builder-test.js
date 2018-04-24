@@ -400,22 +400,24 @@ describe ('lib | RouterBuilder', function () {
           .expect (200, {result: 'getActionWithValidate'});
       });
 
-      it ('should build router with missing policy', function () {
-        const r1 = {
-          '/r1': {
-            policy: policies.check ('missing'),
-            get: {action: 'MainController@getActionWithValidate'},
-          }
-        };
+      it ('should not build router with missing policy', function () {
+        expect (() => {
+          const r1 = {
+            '/r1': {
+              policy: policies.check ('missing'),
+              get: {action: 'MainController@getActionWithValidate'},
+            }
+          };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            MainController: new MainController ()
-          },
-          policies: { }
-        });
+          let builder = new RouterBuilder ({
+            controllers: {
+              MainController: new MainController ()
+            },
+            policies: { }
+          });
 
-        expect (() => builder.addSpecification (r1).build ()).to.throw ('We cannot locate the policy named missing.');
+          builder.addSpecification (r1).build ();
+        }).to.throw ('We could not locate the policy missing.');
       });
     });
 
@@ -518,14 +520,14 @@ describe ('lib | RouterBuilder', function () {
         const users = {
           '/users': {
             resource: {
-              controller: 'UserController'
+              controller: 'user'
             }
           }
         };
 
         let builder = new RouterBuilder ({
           controllers: {
-            UserController: new UserController ()
+            user: new UserController ()
           },
           policies: {
             user: {
@@ -543,6 +545,7 @@ describe ('lib | RouterBuilder', function () {
 
         let router = builder.addSpecification (users).build ();
         let app = express ();
+
         app.use (router);
         app.use ((err, req, res, next) => {
           expect (err).to.be.instanceof (HttpError);

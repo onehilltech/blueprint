@@ -22,18 +22,28 @@ const Policy = require ('../../../../lib/policy');
 const check = require ('../../../../lib/policies/check');
 
 describe ('lib | policies | check', function () {
+  let policies = {
+    identity : Policy.extend ({
+      setParameters (value) {
+        this.value = value;
+      },
+
+      runCheck () { return this.value; }
+    })
+  };
+
   it ('should create a policy check', function () {
-    let policy = check ('identity', true);
+    let policy = check ('identity', true).createPolicy (policies);
 
     expect (policy).to.be.instanceof (Policy);
     expect (policy.runCheck ()).to.be.true;
   });
 
   it ('should error because policy is not found', function () {
-    expect (() => { check ('does-not-exist', true); }).to.throw (Error);
+    expect (() => { check ('does-not-exist', true).createPolicy (policies); }).to.throw (Error);
   });
 
   it ('should not error on optional policy not found', function () {
-    expect (check ('?does-not-exist', true)).to.be.null;
+    expect (check ('?does-not-exist', true).createPolicy (policies)).to.be.null;
   });
 });
