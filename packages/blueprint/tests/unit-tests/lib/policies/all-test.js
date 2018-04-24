@@ -28,10 +28,7 @@ describe ('lib | policies | all', function () {
     let policy = new Policy ();
 
     return policy.runCheck ().then (result => {
-      expect (result).to.deep.equal ({
-        failureCode: 'second_failed',
-        failureMessage: 'The second policy failed.'
-      });
+      expect (result).to.be.false;
     });
   });
 

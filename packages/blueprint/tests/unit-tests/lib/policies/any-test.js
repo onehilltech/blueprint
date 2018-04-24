@@ -1,67 +1,68 @@
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const {
   expect
 } = require ('chai');
 
 const any = require ('../../../../lib/policies/any');
 const check = require ('../../../../lib/policies/check');
-const Policy = require ('../../../../lib/policy');
 
 describe ('lib | policies | any', function () {
-  let policies = {
-    identity : Policy.extend ({
-      setParameters (value) {
-        this.value = value;
-      },
-
-      runCheck () { return this.value; }
-    })
-  };
-
-  it ('should pass any policies', function (done) {
-    let a = any ([
+  it ('should pass any policies', function () {
+    let Policy = any ([
       check ('identity', true),
       check ('identity', true)
     ]);
 
-    let policy = a.resolvePolicyFrom (policies);
+    let policy = new Policy ();
 
-    policy.runCheck ().then (result => {
+    return policy.runCheck ().then (result => {
       expect (result).to.be.true;
-      return done (null);
-    }).catch (done);
+    });
   });
 
-  it ('should fail since one policy fails', function (done) {
-    let a = any ([
+  it ('should fail since one policy fails', function () {
+    let Policy = any ([
       check ('identity', true),
       check ('identity', false)
     ]);
 
-    let policy = a.resolvePolicyFrom (policies);
+    let policy = new Policy ();
 
-    policy.runCheck ().then (result => {
+    return policy.runCheck ().then (result => {
       expect (result).to.be.true;
-      return done (null);
-    }).catch (done);
+    });
   });
 
-  it ('should fail since all policies fail', function (done) {
-    let a = any ([
+  it ('should fail since all policies fail', function () {
+    let Policy = any ([
       check ('identity', false),
       check ('identity', false)
     ]);
 
-    let policy = a.resolvePolicyFrom (policies);
+    let policy = new Policy ();
 
-    policy.runCheck ()
-      .then (result => {
-        expect (result).to.be.false;
-        done ();
-      }).catch (done);
+    return policy.runCheck ().then (result => {
+      expect (result).to.be.false;
+    });
   });
 
-  it ('should support nested policies', function (done) {
-    let a = any ([
+  it ('should support nested policies', function () {
+    let Policy = any ([
       check ('identity', false),
       check ('identity', false),
 
@@ -71,11 +72,10 @@ describe ('lib | policies | any', function () {
       ])
     ]);
 
-    let policy = a.resolvePolicyFrom (policies);
+    let policy = new Policy ();
 
-    policy.runCheck ().then (result => {
+    return policy.runCheck ().then (result => {
       expect (result).to.be.true;
-      return done ();
-    }).catch (done);
+    });
   });
 });
