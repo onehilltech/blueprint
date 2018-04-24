@@ -8,11 +8,13 @@ const Policy = require ('../../../../lib/policy');
 
 describe ('lib | policies | any', function () {
   let policies = {
-    identity (value) {
-      return new Policy ({
-        runCheck () { return value; }
-      });
-    }
+    identity : Policy.extend ({
+      setParameters (value) {
+        this.value = value;
+      },
+
+      runCheck () { return this.value; }
+    })
   };
 
   it ('should pass any policies', function (done) {

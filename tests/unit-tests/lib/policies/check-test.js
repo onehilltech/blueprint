@@ -16,13 +16,13 @@ describe ('lib | policies | check', function () {
     });
 
     let policy = policyCheck.resolvePolicyFrom ({
-      identity (value) {
-        return new Policy ({
-          runCheck () {
-            return value;
-          }
-        });
-      }
+      identity : Policy.extend ({
+        setParameters (value) {
+          this.value = value;
+        },
+
+        runCheck () { return this.value; }
+      })
     });
 
     expect (policy).to.be.instanceof (Policy);

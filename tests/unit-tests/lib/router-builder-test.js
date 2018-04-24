@@ -355,13 +355,15 @@ describe ('lib | RouterBuilder', function () {
             MainController: new MainController ()
           },
           policies: {
-            identity (value) {
-              return new Policy ({
-                runCheck () { return value; }
-              })
-            }
+            identity : Policy.extend ({
+              setParameters (value) {
+                this.value = value;
+              },
+
+              runCheck () { return this.value; }
+            })
           }
-        });
+      });
 
         const router = builder.addSpecification (r1).build ();
         const app = express ();
@@ -527,16 +529,14 @@ describe ('lib | RouterBuilder', function () {
           },
           policies: {
             user: {
-              create () {
-                return new Policy ({
-                  failureCode: 'create_failed',
-                  failureMessage: 'The create policy failed.',
+              create: Policy.extend ({
+                failureCode: 'create_failed',
+                failureMessage: 'The create policy failed.',
 
-                  runCheck () {
-                    return false;
-                  }
-                });
-              }
+                runCheck () {
+                  return false;
+                }
+              })
             }
           }
         });
@@ -574,16 +574,14 @@ describe ('lib | RouterBuilder', function () {
           policies: {
             test: {
               user: {
-                create () {
-                  return new Policy ({
-                    failureCode: 'create_failed',
-                    failureMessage: 'The create policy failed.',
+                create: Policy.extend ({
+                  failureCode: 'create_failed',
+                  failureMessage: 'The create policy failed.',
 
-                    runCheck () {
-                      return false;
-                    }
-                  });
-                }
+                  runCheck () {
+                    return false;
+                  }
+                })
               }
             }
           }
