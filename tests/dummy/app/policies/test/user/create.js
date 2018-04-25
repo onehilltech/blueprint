@@ -14,27 +14,14 @@
  * limitations under the License.
  */
 
-const {
-  isString
-} = require ('lodash');
+const Policy = require ('../../../../../../lib/policy');
 
-const Policy = require ('../policy');
-const check = require ('./check');
-const Check = require ('./-check');
+module.exports = Policy.extend ({
+  failureCode: 'create_failed',
+  failureMessage: 'The create policy failed.',
 
-module.exports = function (policy, app) {
-  if ((policy instanceof Policy))
-    return policy;
-
-  if ((policy instanceof Check))
-    return policy.createPolicy (app);
-
-  // In both cases, we recursively call ourselves just in case we need to
-  // add logic around creating the policy middleware when using an instance
-  // of the policy, which is expected.
-
-  if (isString (policy))
-    return this (check (policy));
-
-  return new policy ({app});
-};
+  runCheck () {
+    this.app.emit ('test.user.create', true);
+    return true;
+  }
+});

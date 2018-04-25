@@ -19,21 +19,11 @@ const {
 } = require ('chai');
 
 const check = require ('../../../../lib/policies/check');
-const Policy = require ('../../../../lib/policy');
+const blueprint = require ('../../../../lib');
 
 describe ('lib | policies | -negate', function () {
-  let policies = {
-    identity : Policy.extend ({
-      setParameters (value) {
-        this.value = value;
-      },
-
-      runCheck () { return this.value; }
-    })
-  };
-
   it ('should negate a true to false', function (done) {
-    let policy = check ('!identity', true).createPolicy (policies);
+    let policy = check ('!identity', true).createPolicy (blueprint.app);
 
     policy.runCheck ().then (result => {
       expect (result).to.be.false;
@@ -42,7 +32,7 @@ describe ('lib | policies | -negate', function () {
   });
 
   it ('should negate a false to true', function (done) {
-    let policy = check ('!identity', false).createPolicy (policies);
+    let policy = check ('!identity', false).createPolicy (blueprint.app);
 
     policy.runCheck ().then (result => {
       expect (result).to.be.true;
@@ -51,7 +41,8 @@ describe ('lib | policies | -negate', function () {
   });
 
   it ('should negate a failure object to true', function (done) {
-    let policy = check ('!identity', {failureCode: 'failed', failureMessage: 'The message'}).createPolicy (policies);
+    let ck = check ('!identity', {failureCode: 'failed', failureMessage: 'The message'});
+    let policy = ck.createPolicy (blueprint.app);
 
     policy.runCheck ().then (result => {
       expect (result).to.be.true;

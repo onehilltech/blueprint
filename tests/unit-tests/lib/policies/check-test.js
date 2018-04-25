@@ -20,30 +20,21 @@ const {
 
 const Policy = require ('../../../../lib/policy');
 const check = require ('../../../../lib/policies/check');
+const blueprint = require ('../../../../lib');
 
 describe ('lib | policies | check', function () {
-  let policies = {
-    identity : Policy.extend ({
-      setParameters (value) {
-        this.value = value;
-      },
-
-      runCheck () { return this.value; }
-    })
-  };
-
   it ('should create a policy check', function () {
-    let policy = check ('identity', true).createPolicy (policies);
+    let policy = check ('identity', true).createPolicy (blueprint.app);
 
     expect (policy).to.be.instanceof (Policy);
     expect (policy.runCheck ()).to.be.true;
   });
 
   it ('should error because policy is not found', function () {
-    expect (() => { check ('does-not-exist', true).createPolicy (policies); }).to.throw (Error);
+    expect (() => { check ('does-not-exist', true).createPolicy (blueprint.app); }).to.throw (Error);
   });
 
   it ('should not error on optional policy not found', function () {
-    expect (check ('?does-not-exist', true).createPolicy (policies)).to.be.null;
+    expect (check ('?does-not-exist', true).createPolicy (blueprint.app)).to.be.null;
   });
 });
