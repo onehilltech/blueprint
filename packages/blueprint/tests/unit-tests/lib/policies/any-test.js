@@ -20,6 +20,7 @@ const {
 
 const any = require ('../../../../lib/policies/any');
 const check = require ('../../../../lib/policies/check');
+const blueprint = require ('../../../../lib');
 
 describe ('lib | policies | any', function () {
   it ('should pass any policies', function () {
@@ -28,7 +29,7 @@ describe ('lib | policies | any', function () {
       check ('identity', true)
     ]);
 
-    let policy = new Policy ();
+    let policy = new Policy ({app: blueprint.app});
 
     return policy.runCheck ().then (result => {
       expect (result).to.be.true;
@@ -41,7 +42,7 @@ describe ('lib | policies | any', function () {
       check ('identity', false)
     ]);
 
-    let policy = new Policy ();
+    let policy = new Policy ({app: blueprint.app});
 
     return policy.runCheck ().then (result => {
       expect (result).to.be.true;
@@ -54,7 +55,7 @@ describe ('lib | policies | any', function () {
       check ('identity', false)
     ]);
 
-    let policy = new Policy ();
+    let policy = new Policy ({app: blueprint.app});
 
     return policy.runCheck ().then (result => {
       expect (result).to.be.false;
@@ -72,7 +73,7 @@ describe ('lib | policies | any', function () {
       ])
     ]);
 
-    let policy = new Policy ();
+    let policy = new Policy ({app: blueprint.app});
 
     return policy.runCheck ().then (result => {
       expect (result).to.be.true;

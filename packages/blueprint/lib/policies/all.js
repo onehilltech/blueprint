@@ -29,15 +29,7 @@ const {
  * @param       failureMessage    Failure message
  * @param       resources
  */
-module.exports = function (definitions,
-                           failureCode = 'policy_failed',
-                           failureMessage = 'The request did not satisfy a required policy.',
-                           resources = null) {
-  if (!resources)
-    resources = require ('../-framework').app.resources.policies;
-
-  let policies = definitions.map (policy => policyMaker (policy, resources));
-
+module.exports = function (definitions, failureCode, failureMessage) {
   function isTrue (value) {
     return value === true;
   }
@@ -47,8 +39,17 @@ module.exports = function (definitions,
 
     failureMessage,
 
+    /// Collection of policies to check.
+    policies: null,
+
+    init () {
+      this._super.call (this, ...arguments);
+
+      this.policies = definitions.map (policy => policyMaker (policy,  this.app));
+    },
+
     runCheck (req) {
-      return Promise.all (policies.map (policy => policy.runCheck (req)))
+      return Promise.all (this.policies.map (policy => policy.runCheck (req)))
         .then (results => every (results, isTrue));
     }
   });

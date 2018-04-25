@@ -15,7 +15,7 @@
  */
 
 const { expect } = require ('chai');
-  const blueprint = require ('../../../lib');
+const blueprint = require ('../../../lib');
 
 const express = require ('express');
 const request = require ('supertest');
@@ -25,7 +25,7 @@ describe ('lib | Application', function () {
     it ('should configure the application', function () {
       expect (blueprint.app).to.have.nested.property ('resources.controllers').to.have.keys (['main','namespace-user','user']);
       expect (blueprint.app).to.have.nested.property ('resources.listeners').to.have.property ('blueprint\\.app\\.init').to.have.keys (['echo','legacy']);
-      expect (blueprint.app).to.have.nested.property ('resources.policies').to.have.keys (['identity']);
+      expect (blueprint.app).to.have.nested.property ('resources.policies').to.have.keys (['identity','test','user']);
       expect (blueprint.app).to.have.nested.property ('resources.routers').to.have.keys (['main','users','inner']);
     });
   });

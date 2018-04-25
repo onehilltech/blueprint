@@ -19,8 +19,8 @@ module.exports = BlueprintObject.extend ({
    *
    * @param resources
    */
-  build (resources) {
-    return new RouterBuilder (resources)
+  build (app) {
+    return new RouterBuilder ({app})
       .addSpecification (this.specification)
       .build ();
   }

@@ -31,8 +31,8 @@ module.exports = BO.extend ({
 
   negate: false,
 
-  createPolicy (policies) {
-    let Policy = get (policies, this.policyName);
+  createPolicy (app) {
+    let Policy = get (app.resources.policies, this.policyName);
 
     if (!Policy) {
       if (this.optional)
@@ -41,7 +41,7 @@ module.exports = BO.extend ({
       assert (false, `We could not locate the policy ${this.policyName}.`);
     }
 
-    let policy = new Policy ();
+    let policy = new Policy ({app});
     policy.setParameters (...this.params);
 
     if (this.negate)

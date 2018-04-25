@@ -1,136 +1,14 @@
 const {expect} = require ('chai');
 const request  = require ('supertest');
 const express  = require ('express');
-const {check} = require ('express-validator/check');
 
 const RouterBuilder = require ('../../../lib/router-builder');
-const Controller = require ('../../../lib/controller');
-const Action = require ('../../../lib/action');
 const HttpError = require ('../../../lib/http-error');
 const Policy = require ('../../../lib/policy');
-const ResourceController = require ('../../../lib/resource-controller');
 
 const policies = require ('../../../lib/policies');
+const blueprint = require ('../../../lib');
 
-const MainController = Controller.extend ({
-  getFunction () {
-    return function (req, res, next) {
-      res.status (200).json ({result: 'getFunction'});
-      next ();
-    };
-  },
-
-  getFunctionArray () {
-    return [
-      (req, res, next) => { next () },
-      (req, res, next) => {
-        res.status (200).json ({result: 'getFunctionArray'});
-        next ();
-      }
-    ]
-  },
-
-  getLegacyObjectWithValidateFunction () {
-    return {
-      validate (req, callback) { callback (null); },
-      sanitize (req, callback) { callback (null); },
-      execute (req, res, next) {
-        res.status (200).json ({result: 'getLegacyObjectWithValidateFunction'});
-        next ();
-      }
-    }
-  },
-
-  getLegacyObjectWithValidateSchema () {
-    return {
-      validate: {},
-      execute (req, res, next) {
-        res.status (200).json ({result: 'getLegacyObjectWithValidateSchema'});
-        next ();
-      }
-    }
-  },
-
-  getActionWithSchema () {
-    return Action.extend ({
-      schema: {
-        id: {
-          // The location of the field, can be one or more of body, cookies, headers, params or query.
-          // If omitted, all request locations will be checked
-          in: ['params', 'query'],
-          errorMessage: 'ID is wrong',
-          optional: true,
-          isInt: true,
-          // Sanitizers can go here as well
-          toInt: true
-        },
-      },
-
-      execute (req, res, next) {
-        res.status (200).json ({result: 'getActionWithSchema'});
-        next ();
-      }
-    });
-  },
-
-  getActionWithValidate () {
-    return Action.extend ({
-      validate: [
-        check ('username')
-          .isEmail().withMessage('must be an email')
-          .optional ()
-          .trim()
-          .normalizeEmail()
-      ],
-
-      execute (req, res, next) {
-        res.status (200).json ({result: 'getActionWithValidate'});
-        next ();
-      }
-    });
-  },
-
-  postActionWithValidateFail ( ) {
-    return Action.extend ({
-      validate: [
-        check ('username')
-          .isEmail ().withMessage('The username must be an email')
-          .trim()
-          .normalizeEmail()
-      ],
-
-      execute (req, res, next) {
-        res.status (200).json ({result: 'postActionWithValidateFail'});
-        next ();
-      }
-    });
-  }
-});
-
-function simpleHandler (method) {
-  return (req, res, next) => {
-    res.status (200).json ({method});
-    next ();
-  }
-}
-
-function singleEntityHandler (method, param) {
-  return (req, res, next) => {
-    res.status (200).json ({method, id: req.params[param]});
-    next ();
-  }
-}
-
-const UserController = ResourceController.extend ({
-  name: 'user',
-
-  create () { return simpleHandler ('create'); },
-  getAll () { return simpleHandler ('getAll'); },
-  getOne () { return singleEntityHandler ('getOne', 'userId') },
-  update () { return singleEntityHandler ('update', 'userId') },
-  delete () { return singleEntityHandler ('delete', 'userId') },
-  count () { return simpleHandler ('count'); }
-});
 
 describe ('lib | RouterBuilder', function () {
   describe ('build', function () {
@@ -138,17 +16,11 @@ describe ('lib | RouterBuilder', function () {
       it ('should build router containing legacy object with validate function', function () {
         const r1 = {
           '/r1': {
-            get: {action: 'MainController@getLegacyObjectWithValidateFunction'},
+            get: {action: 'main@getLegacyObjectWithValidateFunction'},
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            MainController: new MainController ()
-          },
-          policies: {}
-        });
-
+        let builder = new RouterBuilder ({app: blueprint.app});
         let router = builder.addSpecification (r1).build ();
         let app = express ();
 
@@ -162,17 +34,11 @@ describe ('lib | RouterBuilder', function () {
       it ('should build router containing legacy object with validate schema', function () {
         const r1 = {
           '/r1': {
-            get: {action: 'MainController@getLegacyObjectWithValidateSchema'},
+            get: {action: 'main@getLegacyObjectWithValidateSchema'},
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            MainController: new MainController ()
-          },
-          policies: {}
-        });
-
+        const builder = new RouterBuilder ({app: blueprint.app});
         const router = builder.addSpecification (r1).build ();
         const app = express ();
 
@@ -188,17 +54,11 @@ describe ('lib | RouterBuilder', function () {
       it ('should build router containing action with single function', function () {
         const r1 = {
           '/r1': {
-            get: {action: 'MainController@getFunction'},
+            get: {action: 'main@getFunction'},
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            MainController: new MainController ()
-          },
-          policies: {}
-        });
-
+        const builder = new RouterBuilder ({app: blueprint.app});
         const router = builder.addSpecification (r1).build ();
         const app = express ();
 
@@ -212,17 +72,11 @@ describe ('lib | RouterBuilder', function () {
       it ('should build router containing action with function array', function () {
         const r1 = {
           '/r1': {
-            get: {action: 'MainController@getFunctionArray'},
+            get: {action: 'main@getFunctionArray'},
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            MainController: new MainController ()
-          },
-          policies: {}
-        });
-
+        const builder = new RouterBuilder ({app: blueprint.app});
         const router = builder.addSpecification (r1).build ();
         const app = express ();
 
@@ -237,18 +91,12 @@ describe ('lib | RouterBuilder', function () {
         const r1 = {
           '/s1': {
             '/r1': {
-              get: {action: 'MainController@getFunctionArray'},
+              get: {action: 'main@getFunctionArray'},
             }
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            MainController: new MainController ()
-          },
-          policies: {}
-        });
-
+        const builder = new RouterBuilder ({app: blueprint.app});
         const router = builder.addSpecification (r1).build ();
         const app = express ();
 
@@ -264,17 +112,11 @@ describe ('lib | RouterBuilder', function () {
       it ('should build router containing controller action with schema', function () {
         const r1 = {
           '/r1': {
-            get: {action: 'MainController@getActionWithSchema'},
+            get: {action: 'main@getActionWithSchema'},
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            MainController: new MainController ()
-          },
-          policies: {}
-        });
-
+        const builder = new RouterBuilder ({app: blueprint.app});
         const router = builder.addSpecification (r1).build ();
         const app = express ();
 
@@ -288,17 +130,11 @@ describe ('lib | RouterBuilder', function () {
       it ('should build router containing controller action with validate', function () {
         const r1 = {
           '/r1': {
-            get: {action: 'MainController@getActionWithValidate'},
+            get: {action: 'main@getActionWithValidate'},
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            MainController: new MainController ()
-          },
-          policies: {}
-        });
-
+        const builder = new RouterBuilder ({app: blueprint.app});
         const router = builder.addSpecification (r1).build ();
 
         let app = express ();
@@ -312,17 +148,11 @@ describe ('lib | RouterBuilder', function () {
       it ('should build router that fails its validation phase', function () {
         const r1 = {
           '/r1': {
-            post: {action: 'MainController@postActionWithValidateFail'},
+            post: {action: 'main@postActionWithValidateFail'},
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            MainController: new MainController ()
-          },
-          policies: {}
-        });
-
+        const builder = new RouterBuilder ({app: blueprint.app});
         const router = builder.addSpecification (r1).build ();
         const app = express ();
 
@@ -346,25 +176,11 @@ describe ('lib | RouterBuilder', function () {
         const r1 = {
           '/r1': {
             policy: policies.check ('identity', true),
-            get: {action: 'MainController@getActionWithValidate'},
+            get: {action: 'main@getActionWithValidate'},
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            MainController: new MainController ()
-          },
-          policies: {
-            identity : Policy.extend ({
-              setParameters (value) {
-                this.value = value;
-              },
-
-              runCheck () { return this.value; }
-            })
-          }
-      });
-
+        const builder = new RouterBuilder ({app: blueprint.app});
         const router = builder.addSpecification (r1).build ();
         const app = express ();
 
@@ -379,17 +195,11 @@ describe ('lib | RouterBuilder', function () {
         const r1 = {
           '/r1': {
             policy: policies.check ('?optional'),
-            get: {action: 'MainController@getActionWithValidate'},
+            get: {action: 'main@getActionWithValidate'},
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            MainController: new MainController ()
-          },
-          policies: { }
-        });
-
+        let builder = new RouterBuilder ({app: blueprint.app});
         let router = builder.addSpecification (r1).build ();
         let app = express ();
 
@@ -405,17 +215,11 @@ describe ('lib | RouterBuilder', function () {
           const r1 = {
             '/r1': {
               policy: policies.check ('missing'),
-              get: {action: 'MainController@getActionWithValidate'},
+              get: {action: 'main@getActionWithValidate'},
             }
           };
 
-          let builder = new RouterBuilder ({
-            controllers: {
-              MainController: new MainController ()
-            },
-            policies: { }
-          });
-
+          let builder = new RouterBuilder ({app: blueprint.app});
           builder.addSpecification (r1).build ();
         }).to.throw ('We could not locate the policy missing.');
       });
@@ -427,18 +231,12 @@ describe ('lib | RouterBuilder', function () {
         const users = {
           '/users': {
             resource: {
-              controller: 'UserController'
+              controller: 'user'
             }
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            UserController: new UserController ()
-          },
-          policies: {}
-        });
-
+        let builder = new RouterBuilder ({app: blueprint.app});
         let router = builder.addSpecification (users).build ();
 
         let app = express ();
@@ -459,19 +257,13 @@ describe ('lib | RouterBuilder', function () {
         const users = {
           '/users': {
             resource: {
-              controller: 'UserController',
+              controller: 'user',
               allow: ['getOne']
             }
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            UserController: new UserController ()
-          },
-          policies: {}
-        });
-
+        let builder = new RouterBuilder ({app: blueprint.app});
         let router = builder.addSpecification (users).build ();
         let app = express ();
 
@@ -486,23 +278,16 @@ describe ('lib | RouterBuilder', function () {
       });
 
       it ('should deny a subset of actions', function () {
-
         const users = {
           '/users': {
             resource: {
-              controller: 'UserController',
+              controller: 'user',
               deny: ['getOne']
             }
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            UserController: new UserController ()
-          },
-          policies: {}
-        });
-
+        let builder = new RouterBuilder ({app: blueprint.app});
         let router = builder.addSpecification (users).build ();
 
         let app = express ();
@@ -525,85 +310,51 @@ describe ('lib | RouterBuilder', function () {
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            user: new UserController ()
-          },
-          policies: {
-            user: {
-              create: Policy.extend ({
-                failureCode: 'create_failed',
-                failureMessage: 'The create policy failed.',
-
-                runCheck () {
-                  return false;
-                }
-              })
-            }
-          }
-        });
-
+        let builder = new RouterBuilder ({app: blueprint.app});
         let router = builder.addSpecification (users).build ();
         let app = express ();
 
         app.use (router);
-        app.use ((err, req, res, next) => {
-          expect (err).to.be.instanceof (HttpError);
-          res.status (403).json ({code: err.code, message: err.message});
+
+        let called = false;
+
+        blueprint.once ('user.create', (value) => {
+          called = value;
         });
 
         return request (app)
           .post ('/users')
-          .expect (403, {code: 'create_failed', message: 'The create policy failed.'});
+          .expect (200, { method: 'create' }).then (() => {
+            expect (called).to.be.true;
+          });
       });
 
       it ('should build router with namespace resource and policy', function () {
-        const NamespaceUserController = UserController.extend ({
-          namespace: 'test'
-        });
-
         const users = {
           '/users': {
             resource: {
-              controller: 'NamespaceUserController'
+              controller: 'namespace-user'
             }
           }
         };
 
-        let builder = new RouterBuilder ({
-          controllers: {
-            NamespaceUserController: new NamespaceUserController ()
-          },
-          policies: {
-            test: {
-              user: {
-                create: Policy.extend ({
-                  failureCode: 'create_failed',
-                  failureMessage: 'The create policy failed.',
-
-                  runCheck () {
-                    return false;
-                  }
-                })
-              }
-            }
-          }
-        });
-
+        let builder = new RouterBuilder ({app: blueprint.app});
         let router = builder.addSpecification (users).build ();
-
         let app = express ();
+        let called = false;
 
         app.use (router);
 
-        app.use ((err, req, res, next) => {
-          expect (err).to.be.instanceof (HttpError);
-          res.status (403).json ({code: err.code, message: err.message});
+        blueprint.once ('test.user.create', (value) => {
+          called = value;
         });
 
         return request (app)
           .post ('/users')
-          .expect (403, {code: 'create_failed', message: 'The create policy failed.'});
+          .expect (200, { method: 'create' })
+          .then (() => {
+            expect (called).to.be.true;
+          });
       });
     });
   });

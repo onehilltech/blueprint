@@ -4,6 +4,7 @@ const {
 
 const all = require ('../../../../lib/policies/all');
 const check = require ('../../../../lib/policies/check');
+const blueprint = require ('../../../../lib');
 
 describe ('lib | policies | all', function () {
   it ('should pass all policies', function () {
@@ -12,7 +13,7 @@ describe ('lib | policies | all', function () {
       check ('identity', true)
     ]);
 
-    const policy = new Policy ();
+    const policy = new Policy ({app: blueprint.app});
 
     return policy.runCheck ().then (result => {
       expect (result).to.be.true;
@@ -25,7 +26,7 @@ describe ('lib | policies | all', function () {
       check ('identity', false)
     ], 'second_failed', 'The second policy failed.');
 
-    let policy = new Policy ();
+    let policy = new Policy ({app: blueprint.app});
 
     return policy.runCheck ().then (result => {
       expect (result).to.be.false;
@@ -43,7 +44,7 @@ describe ('lib | policies | all', function () {
       ])
     ]);
 
-    let policy = new Policy ();
+    let policy = new Policy ({app: blueprint.app});
 
     return policy.runCheck ().then (result => {
       expect (result).to.be.true;
