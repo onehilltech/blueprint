@@ -22,7 +22,7 @@ const {
   get
 } = require ('lodash');
 
-module.exports = BO.extend ({
+const Check = BO.extend ({
   policyName: null,
 
   params: null,
@@ -41,8 +41,7 @@ module.exports = BO.extend ({
       assert (false, `We could not locate the policy ${this.policyName}.`);
     }
 
-    let policy = new Policy ({app});
-    policy.setParameters (...this.params);
+    let policy = (Policy instanceof Check) ? Policy.createPolicy (app) : new Policy ({app});
 
     if (this.negate)
       policy = new NegatePolicy ({policy});
@@ -50,3 +49,5 @@ module.exports = BO.extend ({
     return policy;
   }
 });
+
+module.exports = Check;
