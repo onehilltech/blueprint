@@ -45,6 +45,12 @@ function makeResourceIdSchema (location) {
   }
 }
 
+const {
+  Types: {
+    ObjectId
+  }
+} = require ('mongoose');
+
 /**
  * @mixin TranslateErrorMixin
  *
