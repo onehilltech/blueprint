@@ -43,6 +43,9 @@ const Check = BO.extend ({
 
     let policy = (Policy instanceof Check) ? Policy.createPolicy (app) : new Policy ({app});
 
+    if (this.params)
+      policy.setParameters (...this.params);
+
     if (this.negate)
       policy = new NegatePolicy ({policy});
 

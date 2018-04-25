@@ -37,6 +37,6 @@ function policyMaker (policy, app) {
     return policyMaker (check (policy), app);
 
   return new policy ({app});
-};
+}
 
 module.exports = policyMaker;
