@@ -307,14 +307,15 @@ module.exports = ResourceController.extend ({
         query = delete query._populate;
 
         const preparations = [
+          this.getId (req, id),
           this.getProjection (req),
           this.getOptions (req, {})
         ];
 
         return Promise.all (preparations)
-          .then (results => {
+          .then (([id, projection, options]) => {
             return Promise.resolve (this.preGetModel (req))
-              .then (() => this.getModel (id, ...results))
+              .then (() => this.getModel (id, projection, options))
               .then (model => {
                 // There was nothing found. This is not the same as having an empty
                 // model set returned from the query.
@@ -343,6 +344,10 @@ module.exports = ResourceController.extend ({
           });
       },
 
+      getId (req, id) {
+        return id;
+      },
+
       getProjection () {
         return {};
       },
@@ -355,8 +360,8 @@ module.exports = ResourceController.extend ({
         return null;
       },
 
-      getModel (rcId, projection, options) {
-        return this.controller.model.findById (rcId, projection, options);
+      getModel (id, projection, options) {
+        return this.controller.model.findById (id, projection, options);
       },
 
       postGetModel (req, models) {
@@ -403,28 +408,32 @@ module.exports = ResourceController.extend ({
         // Allow the subclass to override the contents in both the update and
         // options variable.
         const preparations = [
+          this.getId (req, id),
           this.getUpdate (req, update),
           this.getOptions (req, defaultOptions)
         ];
 
-        return Promise.all (preparations)
-          .then (([update, options]) => {
-            return Promise.resolve (this.preUpdateModel (req))
-              .then (() => this.updateModel (id, update, options))
-              .then (model => {
-                if (!model)
-                  return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
+        return Promise.all (preparations).then (([id, update, options]) => {
+          return Promise.resolve (this.preUpdateModel (req))
+            .then (() => this.updateModel (id, update, options))
+            .then (model => {
+              if (!model)
+                return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
 
-                this.emit (this.eventName, model);
+              this.emit (this.eventName, model);
 
-                // Set the headers for the response.
-                res.set (LAST_MODIFIED, model.getLastModified ().toUTCString ());
+              // Set the headers for the response.
+              res.set (LAST_MODIFIED, model.getLastModified ().toUTCString ());
 
-                return this.postUpdateModel (req, model);
-              })
-              .then (model => this.prepareResponse (req, res, {[this.controller.name]: model}))
-              .then (result => res.status (200).json (result));
-          });
+              return this.postUpdateModel (req, model);
+            })
+            .then (model => this.prepareResponse (req, res, {[this.controller.name]: model}))
+            .then (result => res.status (200).json (result));
+        });
+      },
+
+      getId (req, id) {
+        return id;
       },
 
       /**
@@ -504,21 +513,27 @@ module.exports = ResourceController.extend ({
       execute (req, res) {
         const id = req.params[this.controller.id];
 
-        return Promise.resolve (this.preDeleteModel (req))
-          .then (() => this.deleteModel (id))
-          .then (model => {
-            // If there is no model, then we need to let the client know.
-            if (!model)
-              return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
+        return Promise.resolve (this.getId (req, id)).then (id => {
+          return Promise.resolve (this.preDeleteModel (req))
+            .then (() => this.deleteModel (id))
+            .then (model => {
+              // If there is no model, then we need to let the client know.
+              if (!model)
+                return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
 
-            // Notify all that are listening that we just deleted an resource
-            // from the collection.
-            this.emit (this.eventName, model);
+              // Notify all that are listening that we just deleted an resource
+              // from the collection.
+              this.emit (this.eventName, model);
 
-            return this.postDeleteModel (req, model);
-          })
-          .then (model => this.prepareResponse (req, res, model, true))
-          .then (result => res.status (200).json (result));
+              return this.postDeleteModel (req, model);
+            })
+            .then (model => this.prepareResponse (req, res, model, true))
+            .then (result => res.status (200).json (result));
+        });
+      },
+
+      getId (req, id) {
+        return id;
       },
 
       preDeleteModel (req) {
