@@ -51,6 +51,6 @@ module.exports = function (policy) {
         console.error (`Policy ${policy.name} returned a bad result.`);
         return next (new InternalServerError ('bad_result', 'The policy returned a bad result.'));
       }
-    });
+    }).catch (next);
   };
 };
