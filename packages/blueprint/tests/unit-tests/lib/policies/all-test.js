@@ -29,7 +29,10 @@ describe ('lib | policies | all', function () {
     let policy = new Policy ({app: blueprint.app});
 
     return policy.runCheck ().then (result => {
-      expect (result).to.be.false;
+      expect (result).to.eql ({
+        failureCode: 'policy_failed',
+        failureMessage: 'The request did not satisfy a required policy.'
+      })
     });
   });
 
