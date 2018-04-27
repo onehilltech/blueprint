@@ -37,7 +37,8 @@ const LAST_MODIFIED = 'Last-Modified';
 
 const RESOURCE_ID_PARAMS_SCHEMA = {
   in: 'params',
-  isMongoId: {errorMessage: 'The id is not valid.'},
+  errorMessage: 'The id is not valid.',
+  isMongoId: true,
   toMongoId: true
 };
 
