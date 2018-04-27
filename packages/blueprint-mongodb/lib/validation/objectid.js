@@ -16,7 +16,8 @@
 
 module.exports = function () {
   return {
-    isMongoId: {errorMessage: 'The id is not valid.'},
+    errorMessage: 'The id is not valid.',
+    isMongoId: true,
     toMongoId: true
   };
 };
