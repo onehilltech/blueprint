@@ -150,7 +150,7 @@ describe ('lib | ResourceController', function () {
         .expect (404, { errors: [ { code: 'not_found', detail: 'Not found', status: '404' } ] });
     });
 
-    it.only ('should return bad request because of bad id', function () {
+    it ('should return bad request because of bad id', function () {
       return request ()
         .get ('/authors/12')
         .expect (400, {errors: [

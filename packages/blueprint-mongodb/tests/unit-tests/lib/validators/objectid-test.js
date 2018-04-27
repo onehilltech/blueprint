@@ -22,7 +22,8 @@ describe ('lib | validators | objectId', function () {
     let schema = validator ({});
 
     expect (schema).to.deep.equal ({
-      isMongoId: {errorMessage: 'The id is not valid.'},
+      errorMessage: 'The id is not valid.',
+      isMongoId: true,
       toMongoId: true
     });
   })
