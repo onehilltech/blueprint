@@ -501,14 +501,13 @@ module.exports = BlueprintObject.extend ({
         // We have an express-validator schema. The validator and sanitizer should
         // be built into the schema.
         schema = this._normalizeSchema (schema);
-        middleware.push (checkSchema (schema));
+        middleware.push ([checkSchema (schema), handleValidationResult]);
       }
 
       // The controller method has the option of validating and sanitizing the
       // input data dynamically. We need to check for either one and add middleware
       // functions if it exists.
       if (validate || sanitize) {
-
         if (validate) {
           // The validator can be a f(req) middleware function, an object-like
           // schema, or a array of validator middleware functions.
@@ -546,6 +545,10 @@ module.exports = BlueprintObject.extend ({
           else {
             throw new Error (`validate must be a f(req, res, next), [...f(req, res, next)], or object-like validation schema [path=${path}]`);
           }
+
+          // Push the middleware that will evaluate the validation result. If the
+          // validation fails, then this middleware will stop the request's progress.
+          middleware.push (handleValidationResult);
         }
 
         // The optional sanitize must be a middleware f(req,res,next). Let's add this
@@ -573,13 +576,12 @@ module.exports = BlueprintObject.extend ({
             let schema = this._normalizeSchema (sanitize);
             middleware.push (checkSchema (schema));
           }
+
+          // Push the middleware that will evaluate the validation result. If the
+          // validation fails, then this middleware will stop the request's progress.
+          middleware.push (handleValidationResult);
         }
       }
-
-      // Push the middleware that will evaluate the validation result. If the
-      // validation fails, then this middleware will stop the request's progress.
-      if (validate || sanitize || schema)
-        middleware.push (handleValidationResult);
 
       // The request is validated and the data has been sanitized. We can now work
       // on the actual data in the request. Let's check the policies for the request
