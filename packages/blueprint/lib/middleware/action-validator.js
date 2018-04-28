@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-module.exports = {
-  actionValidator: require ('./action-validator'),
-  checkPolicy: require ('./check-policy'),
-  executeAction: require ('./execute-action'),
-  handleValidationResult: require ('./handle-validation-result'),
-  render: require ('./render'),
-  legacySanitizer: require ('./legacy-sanitizer'),
-  legacyValidator: require ('./legacy-validator'),
+module.exports = function (action) {
+  return function __blueprint_action_validate (req, res, next) {
+    Promise.resolve (action.validate (req))
+      .then (() => next ())
+      .catch (next);
+  }
 };

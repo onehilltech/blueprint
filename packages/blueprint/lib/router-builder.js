@@ -11,6 +11,7 @@ const {
   forOwn,
   isFunction,
   isObjectLike,
+  isPlainObject,
   isString,
   flattenDeep,
   isArray,
@@ -26,7 +27,8 @@ const {
   handleValidationResult,
   render,
   legacySanitizer,
-  legacyValidator
+  legacyValidator,
+  actionValidator
 } = require ('./middleware');
 
 const {
@@ -462,12 +464,10 @@ module.exports = BlueprintObject.extend ({
     let result = controllerAction.invoke (params);
 
     if (isFunction (result) && (result.length === 2 || result.length === 3)) {
-      // Let the user know they should migrate the using actions.
-      console.warn (`*** deprecated: ${action}: Controller actions should return an Action class, not a function`);
-
       // Push the function/array onto the middleware stack. If there is a policy,
       // then we need to push that before we push the function onto the middleware
       // stack.
+
       if (opts.policy)
         middleware.push (this._makePolicyMiddleware (opts.policy));
 
@@ -476,18 +476,17 @@ module.exports = BlueprintObject.extend ({
     else if (isArray (result)) {
       // Push the function/array onto the middleware stack. If there is a policy,
       // then we need to push that before any of the functions.
-      console.warn (`*** deprecated: ${action}: Controller actions should return an Action class, not an array of functions`);
 
       if (opts.policy)
         middleware.push (this._makePolicyMiddleware (opts.policy));
 
       middleware.push (result);
     }
-    else if (isObjectLike (result) || result.length === 0) {
-      if (result.length === 0)
+    else if (isPlainObject (result) || (result.prototype && result.prototype.execute)) {
+      let plainObject = !(result.prototype && result.prototype.execute);
+
+      if (!plainObject)
         result = new result ({controller: controllerAction.obj});
-      else
-        console.warn (`*** deprecated: ${action}: Controller actions should return an Action class, not an object-like action`);
 
       // The user elects to have separate validation, sanitize, and execution
       // section for the controller method. There must be a execution function.
@@ -509,31 +508,35 @@ module.exports = BlueprintObject.extend ({
       // input data dynamically. We need to check for either one and add middleware
       // functions if it exists.
       if (validate || sanitize) {
-        // The validator can be a f(req) middleware function, an object-like
-        // schema, or a array of validator middleware functions.
 
         if (validate) {
+          // The validator can be a f(req) middleware function, an object-like
+          // schema, or a array of validator middleware functions.
+
           if (isFunction (validate)) {
-            // We either have an legacy validation function, or a middleware function.
-            switch (validate.length) {
-              case 2:
-                console.warn (`*** deprecated: ${action}: validate function must have the signature f(req,res,next)`);
-                middleware.push (legacyValidator (validate));
-                break;
+            if (plainObject) {
+              switch (validate.length) {
+                case 2:
+                  middleware.push (legacyValidator (validate));
+                  break;
 
-              case 3:
-                middleware.push (validate);
-                break;
-
-              default:
-                throw new Error (`Validate function must have the signature f(req,res,next)`);
+                case 3:
+                  // This is a Express middleware function
+                  middleware.push (validate);
+                  break;
+              }
+            }
+            else {
+              // The validate method is on the action object. We need to pass it
+              // to the action validator middleware.
+              middleware.push (actionValidator (result))
             }
           }
           else if (isArray (validate)) {
             // We have a middleware function, or an array of middleware functions.
             middleware.push (validate);
           }
-          else if (isObjectLike (validate)) {
+          else if (isPlainObject (validate)) {
             console.warn (`*** deprecated: ${action}: Validation schema must be declared on the 'schema' property`);
 
             // We have an express-validator schema.
@@ -541,7 +544,7 @@ module.exports = BlueprintObject.extend ({
             middleware.push (checkSchema (schema));
           }
           else {
-            throw new Error (`validate must be a f(req, res, next), [...f(req, res, next)], or BlueprintObject-like validation schema [path=${path}]`);
+            throw new Error (`validate must be a f(req, res, next), [...f(req, res, next)], or object-like validation schema [path=${path}]`);
           }
         }
 
