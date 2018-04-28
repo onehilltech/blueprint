@@ -40,6 +40,10 @@ module.exports = Controller.extend ({
 
   performGet () {
     return Action.extend ({
+      validate (req) {
+
+      },
+
       execute (req, res) {
         return res.status (200).json (true);
       }
