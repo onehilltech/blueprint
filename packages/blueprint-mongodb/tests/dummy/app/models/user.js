@@ -17,10 +17,12 @@
 const mongodb = require ('../../../../lib/');
 const Author  = require ('./author');
 
+const {Schema: {Types: {ref}}} = mongodb;
+
 const bookstore = new mongodb.Schema ({
   name: {type: String},
 
-  authors: [{type: mongodb.Schema.Types.ObjectId, ref: 'author'}]
+  authors: [ref (Author)]
 });
 
 const schema = new mongodb.Schema ({
@@ -31,13 +33,13 @@ const schema = new mongodb.Schema ({
   email: {type: String},
 
   // ObjectId that can be populated because there is a ref.
-  favorite_author: {type: mongodb.Schema.Types.ObjectId, ref: Author.modelName},
+  favorite_author: ref (Author),
 
   // ObjectId that cannot be populated because there is no ref.
   random_id: {type: mongodb.Schema.Types.ObjectId},
 
   // Array of ObjectIds that can be populated.
-  blacklist: [{type: mongodb.Schema.Types.ObjectId, ref: Author.modelName}],
+  blacklist: [ref (Author)],
 
   bookstore: bookstore,
 

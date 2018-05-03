@@ -14,33 +14,30 @@
  * limitations under the License.
  */
 
-const {
-  model,
-  modelOn,
-  resource,
-  resourceOn
-} = require ('./models');
+const assert = require ('assert');
+const blueprint = require ('@onehilltech/blueprint');
+const { isString} = require ('lodash');
 
 const {
-  Types,
-  Schema
+  Model,
+  Schema: {
+    Types: {
+      ObjectId
+    }
+  }
 } = require ('mongoose');
 
-Schema.Types.ref = require ('./schema/types/ref');
+/**
+ * Define a model ref type.
+ *
+ * @param model
+ * @param opts
+ */
+module.exports = function (model, opts = {}) {
+  const M = isString (model) ? blueprint.lookup (`model:${model}`) : model;
 
-exports.Types = Types;
-exports.Schema = Schema;
+  assert ((M.prototype instanceof Model), 'The model is not an instance of a mongoose Model.');
 
-exports.plugins = require ('./plugins');
-
-// model definitions
-exports.model = model;
-exports.modelOn = modelOn;
-exports.resource = resource;
-exports.resourceOn = resourceOn;
-
-exports.ResourceController = require ('./resource-controller');
-exports.GridFSController = require ('./gridfs-controller');
-exports.populate = require ('./populate');
-exports.lean = require ('./lean');
-exports.seed = require ('./seed');
+  const {modelName} = M;
+  return Object.assign ({}, opts, {type: ObjectId, ref: modelName});
+};
