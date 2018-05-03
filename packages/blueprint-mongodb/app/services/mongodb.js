@@ -59,6 +59,10 @@ module.exports = Service.extend ({
     get () { return this._connections[this._defaultName]; }
   }),
 
+  defaultConnectionName: computed ({
+    get () { return this._defaultName; }
+  }),
+
   connections: computed ({
     get () { return this._connections; }
   }),
