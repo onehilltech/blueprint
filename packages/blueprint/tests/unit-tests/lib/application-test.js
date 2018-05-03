@@ -23,7 +23,7 @@ const request = require ('supertest');
 describe ('lib | Application', function () {
   describe ('configure', function () {
     it ('should configure the application', function () {
-      expect (blueprint.app).to.have.nested.property ('resources.controllers').to.have.keys (['main','namespace-user','user']);
+      expect (blueprint.app).to.have.nested.property ('resources.controllers').to.have.keys (['empty','main','namespace-user','user']);
       expect (blueprint.app).to.have.nested.property ('resources.listeners').to.have.property ('blueprint\\.app\\.init').to.have.keys (['echo','legacy']);
       expect (blueprint.app).to.have.nested.property ('resources.policies').to.have.keys (['identity','test','user']);
       expect (blueprint.app).to.have.nested.property ('resources.routers').to.have.keys (['main','users','inner']);
@@ -40,6 +40,19 @@ describe ('lib | Application', function () {
     it ('should lookup a loaded configuration', function () {
       let appConfig = blueprint.app.lookup ('config:app');
       expect (appConfig).to.equal (blueprint.app.configs.app);
+    });
+
+    it ('should lookup a duplicate resource', function () {
+      let controller = blueprint.app.lookup ('controller:empty');
+      expect (controller.name).to.equal ('mod_a');
+    });
+
+    it ('should lookup a resource in a module', function () {
+      let controllerA = blueprint.app.lookup ('controller:mod_a:empty');
+      expect (controllerA.name).to.equal ('mod_a');
+
+      let controllerB = blueprint.app.lookup ('controller:mod_b:empty');
+      expect (controllerB.name).to.equal ('mod_b');
     });
   });
 

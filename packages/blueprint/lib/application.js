@@ -215,18 +215,54 @@ module.exports = BlueprintObject.extend (Events, {
   },
 
   /**
-   * Lookup a component, including configurations, in the application.
+   * Lookup a component, including configurations, in the application. The component can
+   * also be located in a module. This allows the client to search for a specific component
+   * if another module overwrites it. The expected pattern for the component is:
+   *
+   *   type:name
+   *   type:module:name
+   *
+   * Here are a few examples:
+   *
+   *   config:app
+   *   controller:hello
+   *   model:a.b.user
+   *   model:personal:a.b.user
    *
    * @param component
    * @returns {*}
    */
   lookup (component) {
     if (component.startsWith ('config:')) {
-      let configProperty = component.slice (7);
-      return get (this.configs, configProperty);
+      // The configuration components are a special case because we do not
+      // lump them with the other resources that can be defined in a module.
+      const name = component.slice (7);
+      return get (this.configs, name);
     }
     else {
-      return lookup (this.resources, component);
+      // Split the component name into its parts. If there are 2 parts, then we
+      // can search the merged resources for the application. If there are 3 parts,
+      // then we need to locate the target module, and search its resources.
+
+      const parts = component.split (':');
+
+      if (parts.length === 2) {
+        return lookup (this.resources, component);
+      }
+      else if (parts.length === 3) {
+        // Look for the module.
+        const targetModule = this._modules[parts[1]];
+        assert (!!targetModule, `The module named ${targetModule} does not exist.`);
+
+        // Construct the name of the target component by discarding the module
+        // name from the original component name.
+
+        const name = `${parts[0]}:${parts[2]}`;
+        return targetModule.lookup (name);
+      }
+      else {
+        throw new Error ('The component name is invalid.');
+      }
     }
   },
 
