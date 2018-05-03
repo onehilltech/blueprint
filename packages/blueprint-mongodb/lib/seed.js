@@ -18,8 +18,9 @@ const blueprint = require ('@onehilltech/blueprint');
 
 function seed (name) {
   let mongodb = blueprint.lookup ('service:mongodb');
-  let connName = name || mongodb.
-  return mongodb.seeds[name];
+  let connName = name || mongodb.defaultConnectionName;
+
+  return mongodb.seeds[connName];
 }
 
 module.exports = seed;
