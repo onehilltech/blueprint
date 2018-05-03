@@ -184,7 +184,7 @@ module.exports = Service.extend ({
    *
    * @private
    */
-  _seedConnection (name, conn) {
+  _seedConnection (name, conn, rebuild = false) {
     // When seeding a connection, we always build a new data model. This
     // is because we need to generate new ids for all model elements.
 

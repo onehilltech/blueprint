@@ -13,14 +13,16 @@
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive --exit",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
-    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+    "postversion": "npm publish",
+    "postpublish": "git push origin master & git push origin --tags"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/onehilltech/blueprint-mongodb.git"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.0.0-62",
+    "@onehilltech/blueprint": "^4.0.0-63",
     "@onehilltech/dab": "^1.0.7",
     "moment": "^2.19.1"
   },
