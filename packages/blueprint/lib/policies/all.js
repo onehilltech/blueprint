@@ -26,7 +26,7 @@ const { findIndex, compact } = require ('lodash');
  * @param       failureMessage    Failure message
  * @param       resources
  */
-function all (definitions, failureCode, failureMessage) {
+function all (definitions, failureCode = 'policy_failed', failureMessage = 'All of the policies failed.') {
   return Policy.extend ({
     failureCode,
 
@@ -69,7 +69,7 @@ function all (definitions, failureCode, failureMessage) {
  * @param failureMessage
  * @return {*}
  */
-all.ordered = function (definitions, failureCode = null, failureMessage = null) {
+all.ordered = function (definitions, failureCode = 'failed_policy', failureMessage = 'All of the policies failed.') {
   return Policy.extend ({
     /// The failure code.
     failureCode,
