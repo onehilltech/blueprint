@@ -74,9 +74,11 @@ describe ('lib | policies | all', function () {
     const SimplePolicy = Policy.extend ({
       value: null,
 
+      result: true,
+
       runCheck (req) {
         req.values.push (this.value);
-        return true;
+        return this.result;
       }
     });
 
@@ -88,16 +90,37 @@ describe ('lib | policies | all', function () {
         new SimplePolicy ({value: 4})
       ];
 
+      const Policy = all.ordered (policies);
+      const policy = new Policy ();
+
       let req = {
         values: []
       };
 
-      const Policy = all.ordered (policies);
-      const policy = new Policy ();
-
       return policy.runCheck (req).then (result => {
         expect (result).to.be.true;
         expect (req.values).to.eql ([1, 2, 3, 4]);
+      })
+    });
+
+    it ('should fail', function () {
+      let policies = [
+        new SimplePolicy ({value: 1}),
+        new SimplePolicy ({value: 2}),
+        new SimplePolicy ({value: 3, result: false}),
+        new SimplePolicy ({value: 4})
+      ];
+
+      const Policy = all.ordered (policies);
+      const policy = new Policy ();
+
+      let req = {
+        values: []
+      };
+
+      return policy.runCheck (req).then (result => {
+        expect (result).to.be.false;
+        expect (req.values).to.eql ([1, 2, 3]);
       })
     });
   });
