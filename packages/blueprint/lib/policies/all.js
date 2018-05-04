@@ -87,7 +87,7 @@ all.ordered = function (definitions, failureCode = 'failed_policy', failureMessa
     },
 
     runCheck (req) {
-      return new Promise ((resolve, reject) =>  this._runCheck (req, 0).then (resolve).catch (reject));
+      return new Promise ((resolve, reject) => this._runCheck (req, 0).then (resolve).catch (reject));
     },
 
     _runCheck (req, i) {
