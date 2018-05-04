@@ -20,8 +20,6 @@
   },
   "homepage": "https://github.com/onehilltech/blueprint-testing#readme",
   "dependencies": {
-    "path": "^0.12.7",
-    "mocha": "^5.0.5",
-    "supertest": "^3.0.0"
+    "path": "^0.12.7"
   }
 }
