@@ -2,11 +2,15 @@
 
 const program = require ('commander');
 const path    = require ('path');
-const fs      = require ('fs-extra');
-const TemplatePath = require ('../lib/template-path');
+
+const { ensureDir } = require ('fs-extra');
+const { kebabCase } = require ('lodash');
 const { execFile } = require ('child_process');
 const { fromCallback } = require ('bluebird');
 const ora = require ('ora');
+
+const TemplatePath = require ('../lib/template-path');
+const Generator = require ('../lib/generator');
 
 program
   .arguments ('<name>')
@@ -19,9 +23,12 @@ program.parse (process.argv);
 
 function generate (name) {
   let srcPath = path.resolve (__dirname, '../templates/blueprint-new');
-  let dstPath = path.resolve (program.outputPath, name);
+  let dstPath = path.resolve (program.outputPath, kebabCase (name));
 
-  return fs.ensureDir (dstPath).then (() => {
+  let generator = new Generator ();
+  generator.registerHelpers ();
+
+  return ensureDir (dstPath).then (() => {
     console.log ('blueprint: generating the application; please be patient...');
 
     // Define the view used to render the templates, then render the templates with

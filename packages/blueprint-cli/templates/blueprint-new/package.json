@@ -1,5 +1,5 @@
 {
-  "name": "{{project.name}}",
+  "name": "{{kebabCase project.name}}",
   "description": "{{project.description}}",
   "version": "{{project.version}}",
   "private": true,
@@ -10,8 +10,8 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "start-server": "env NODE_ENV=production forever -o ./app/.blueprint/logs/output.log -e ./app/.blueprint/logs/error.log start ./app/index.js",
     "stop-server": "env NODE_ENV=production forever stop app/index.js",
-    "install-service": "sudo -s forever-service install {{project.name}}_d --script ./app/index.js",
-    "uninstall-service": "sudo -s forever-service delete {{project.name}}_d"
+    "install-service": "sudo -s forever-service install {{kebabCase project.name}}_d --script ./app/index.js",
+    "uninstall-service": "sudo -s forever-service delete {{kebabCase project.name}}_d"
   },
 
   "dependencies": {

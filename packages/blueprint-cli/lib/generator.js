@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const BO = require ('base-object');
+const { BO } = require ('base-object');
 
 const {
   capitalize,
@@ -39,6 +39,8 @@ const {
   words
 } = require ('lodash');
 
+const handlebars = require ('handlebars');
+
 /**
  * @class Generator
  *
@@ -46,6 +48,13 @@ const {
  */
 module.exports = BO.extend ({
   mergedProperties: ['helpers'],
+
+  /**
+   * Register all the helpers for the generator.
+   */
+  registerHelpers () {
+    handlebars.registerHelper (this.helpers);
+  },
 
   /**
    * Helpers are functions that are registered with the handlebars framework, and
