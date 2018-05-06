@@ -5,7 +5,9 @@
   "private": true,
 
   "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive tests/tests",
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive --exit",
+    "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "start-server": "env NODE_ENV=production forever -o ./app/.blueprint/logs/output.log -e ./app/.blueprint/logs/error.log start ./app/index.js",
     "stop-server": "env NODE_ENV=production forever stop app/index.js",
     "install-service": "sudo -s forever-service install {{project.name}}_d --script ./app/index.js",
@@ -23,7 +25,7 @@
   "license": "{{project.license}}",
 
   "engines": {
-    "node": ">=4.0.0",
+    "node": ">=6.0.0",
     "npm": ">=3.0.0"
   },
 
