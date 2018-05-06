@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-const BlueprintObject = require ('../object');
-const {computed} = require ('../properties');
+const { BO, computed } = require ('base-object');
 const path = require ('path');
 
 /**
@@ -27,7 +26,7 @@ const path = require ('path');
  * Right now, we do not coordinate the startup sequence. This allows each worker
  * to run at its own pace.
  */
-module.exports = BlueprintObject.extend ({
+module.exports = BO.extend ({
   appPath: null,
 
   messaging: null,

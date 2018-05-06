@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+const { computed } = require ('base-object');
 const path = require ('path');
 const Application = require ('../application');
-const {computed} = require ('../properties');
 
 /**
  * @class WorkerApplication
