@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const BO = require ('../../../../lib/object');
+const { BO } = require ('base-object');
 
 module.exports = BO.extend ({
   firstName: null,
