@@ -1,26 +1,14 @@
 #!/usr/bin/env node
-'use strict';
 
-var program = require ('commander')
-  , util = require ('util')
-  , async = require ('async')
-  ;
+const program = require ('commander');
+const { forOwn } = require ('lodash');
 
-var commands = {
-  controller: 'manage application controllers',
-  model: 'manage application models',
-  module: 'module support',
+const commands = {
   new: 'create a new Blueprint application'
 };
 
-function execute (err) {
-  if (err)
-    return winston.log ('error', util.inspect (err));
+// Apply each of the commands.
+forOwn (commands, (description, name) => program.command (name, description));
 
-  program.parse (process.argv);
-}
-
-async.eachOf (commands, function (value, key, callback) {
-  program.command (key, value);
-  return callback (null);
-}, execute);
+// Parse the command-line options.
+program.parse (process.argv);
