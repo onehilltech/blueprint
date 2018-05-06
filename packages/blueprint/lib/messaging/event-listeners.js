@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-const BlueprintObject = require ('../object');
-const {computed} = require ('../properties');
+const { BO, computed } = require ('base-object');
 const assert = require ('assert');
+const { concat } = require ('lodash');
+
 const ListenerHandle = require ('./listener-handle');
 const Listener = require ('./listener');
 const LegacyListener = require ('./legacy-listener');
 
-const {
-  concat
-} = require ('lodash');
-
 /**
  * Wrapper class for a set of listeners for an event.
  */
-module.exports = BlueprintObject.extend ({
+module.exports = BO.extend ({
   /// Name of the event the listeners handle.
   name: null,
 

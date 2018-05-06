@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-exports.computed = require ('./computed');
-exports.service = require ('./service');
+exports.ResourceDescriptor = require ('./resource-descriptor');
 exports.model = require ('./model');
-
-exports.PropertyDescriptor = require ('./property-descriptor');
+exports.service = require ('./service');

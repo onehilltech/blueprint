@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const BlueprintObject = require ('./object');
+const { BO } = require ('base-object');
 
 /**
  * @class Policy
@@ -22,7 +22,7 @@ const BlueprintObject = require ('./object');
  * Base class for all policies. All policies must override the runCheck()
  * method, which is used to evaluate the policy.
  */
-module.exports = BlueprintObject.extend ({
+module.exports = BO.extend ({
   /// The default code for a policy failure.
   failureCode: 'policy_failed',
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const BlueprintObject = require ('./object');
+const { BO }  = require ('base-object');
 const assert  = require ('assert');
 const debug   = require ('debug')('blueprint:RouterBuilder');
 const express = require ('express');
@@ -44,10 +44,7 @@ const {
   actionValidator
 } = require ('./middleware');
 
-const {
-  check,
-  policyMaker,
-} = require ('./policies');
+const { check, policyMaker } = require ('./policies');
 
 const SINGLE_ACTION_CONTROLLER_METHOD = '__invoke';
 const SINGLE_RESOURCE_BASE_PATH = '/:rcId';
@@ -73,13 +70,13 @@ function makeAction (controller, method, opts) {
  * @param method
  * @constructor
  */
-const MethodCall = BlueprintObject.extend ({
+const MethodCall = BO.extend ({
   invoke () {
     return this.method.apply (this.obj, arguments);
   }
 });
 
-module.exports = BlueprintObject.extend ({
+module.exports = BO.extend ({
   basePath: '/',
 
   _router: null,
@@ -323,7 +320,7 @@ module.exports = BlueprintObject.extend ({
       }
     }
     else {
-      throw new Error (`Parameter specification must be a Function or BlueprintObject [param=${param}]`);
+      throw new Error (`Parameter specification must be a Function or BO [param=${param}]`);
     }
 
     this._router.param (param.slice (1), handler);
@@ -628,7 +625,7 @@ module.exports = BlueprintObject.extend ({
       }
     }
     else {
-      throw new Error (`Controller action expected to return a Function, BlueprintObject, or an Action`);
+      throw new Error (`Controller action expected to return a Function, BO, or an Action`);
     }
 
     return flattenDeep (middleware);

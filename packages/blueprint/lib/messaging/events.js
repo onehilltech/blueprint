@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const Mixin = require ('../mixin');
+const { Mixin } = require ('base-object');
 const Messenger = require ('./messenger');
 
 /**

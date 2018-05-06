@@ -16,13 +16,14 @@
 
 module.exports = exports = require ('./-framework');
 
-exports.Mixin = require ('./mixin');
-exports.BO = exports.BlueprintObject = require ('./object');
+const {BO, computed, Mixin, PropertyDescriptor } = require ('base-object');
 
-const {
-  Listener,
-  Events
-} = require ('./messaging');
+exports.computed = computed;
+exports.Mixin = Mixin;
+exports.BO = exports.BlueprintObject = BO;
+exports.PropertyDescriptor = PropertyDescriptor;
+
+const { Listener, Events } = require ('./messaging');
 
 exports.Loader = require ('./loader');
 
@@ -63,12 +64,7 @@ exports.policies = require ('./policies');
 
 // computed/bound attributes
 
-const {
-  computed,
-  service,
-  model
-} = require ('./properties');
+const { service, model } = require ('./properties');
 
-exports.computed = computed;
 exports.service = service;
 exports.model = model;

@@ -1,24 +1,35 @@
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const assert    = require ('assert');
 const program   = require ('commander');
 
-const {
-  env
-} = require ('./environment');
+const { BO, computed} = require ('base-object');
 
+const { env } = require ('./environment');
 const {version} = require ('../package.json');
-
 const ClusterApplication = require ('./cluster');
 const Application = require ('./application');
-const BlueprintObject  = require ('./object');
-
-const computed = require ('./properties/computed');
 
 /**
  * @class Framework
  *
  * Wrapper class for the Blueprint framework that hosts the application.
  */
-module.exports = BlueprintObject.extend ({
+module.exports = BO.extend ({
   version,
 
   /// The application installed in the framework.

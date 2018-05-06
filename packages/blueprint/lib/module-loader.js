@@ -14,32 +14,24 @@
  * limitations under the License.
  */
 
-const {
-  readJson,
-  statSync
-} = require ('fs-extra');
-
+const { readJson, statSync } = require ('fs-extra');
 const path   = require ('path');
 const assert = require ('assert');
-const CoreObject = require ('./object');
+const { BO } = require ('base-object');
 const ApplicationModule = require ('./application-module');
 const Events = require ('./messaging/events');
 
+const { forEach, find } = require ('lodash');
+const debug = require ('debug') ('blueprint:module-loader');
+
 const KEYWORD_BLUEPRINT_MODULE = 'blueprint-module';
 const FILE_PACKAGE_JSON = 'package.json';
-
-const {
-  forEach,
-  find,
-} = require ('lodash');
-
-const debug = require ('debug') ('blueprint:module-loader');
 
 function isBlueprintModule (packageObj) {
   return packageObj.keywords && packageObj.keywords.indexOf (KEYWORD_BLUEPRINT_MODULE) !== -1;
 }
 
-module.exports = CoreObject.extend (Events, {
+module.exports = BO.extend (Events, {
   /// The target application for the loader.
   app: null,
 

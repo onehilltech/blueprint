@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-const BlueprintObject = require ('./object');
-const {Events} = require ('./messaging');
+const { BO } = require ('base-object');
+const { Events } = require ('./messaging');
 
 /**
  * @class Controller
  *
  * Base class for all controllers.
  */
-module.exports = BlueprintObject.extend (Events, {
+module.exports = BO.extend (Events, {
   /// The hosting application for the controller.
   app: null
 });

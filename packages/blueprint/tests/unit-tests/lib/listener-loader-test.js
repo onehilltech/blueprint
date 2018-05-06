@@ -15,9 +15,9 @@
  */
 
 const {expect} = require ('chai');
-const ListenerLoader = require ('../../../lib/listener-loader');
-const BlueprintObject = require ('../../../lib/object');
+const { BO }   = require ('base-object');
 
+const ListenerLoader = require ('../../../lib/listener-loader');
 const {Events} = require ('../../../lib/messaging');
 const path = require ('path');
 
@@ -25,7 +25,7 @@ describe ('lib | ListenerLoader', function () {
   describe ('load', function () {
     it ('should load listeners', function () {
       const dirname = path.resolve (__dirname, '../../dummy/app/listeners');
-      let messenger = BlueprintObject.create (Events);
+      let messenger = BO.create (Events);
       let loader = new ListenerLoader ({messenger});
 
       return loader.load ({dirname}).then (results => {

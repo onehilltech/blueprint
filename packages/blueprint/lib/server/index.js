@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const BlueprintObject = require ('../object');
+const { BO, computed } = require ('base-object');
 const debug  = require ('debug') ('blueprint:server');
 const assert = require ('assert');
 const bodyParser  = require ('body-parser');
@@ -25,24 +25,14 @@ const klaw    = require ('klaw');
 const handleError = require ('./handle-error');
 
 const {
-  computed
-} = require ('../properties');
-
-const {
   merge,
   forOwn,
   forEach,
   difference
 } = require ('lodash');
 
-const {
-  ensureDir,
-  copy
-} = require ('fs-extra');
-
-const {
-  env
-} = require ('../environment');
+const { ensureDir, copy } = require ('fs-extra');
+const { env } = require ('../environment');
 
 const protocols  = require ('./protocols');
 
@@ -53,7 +43,7 @@ const VIEW_CACHE_PATH = 'views';
  *
  * The main abstraction representing the server managed by the application.
  */
-module.exports = BlueprintObject.extend ({
+module.exports = BO.extend ({
   /// The hosting application.
   app: null,
 

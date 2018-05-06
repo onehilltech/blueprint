@@ -19,8 +19,7 @@ const path = require ('path');
 const ModuleLoader = require ('../../../lib/module-loader');
 const Application = require ('../../../lib/application');
 const appPath = path.resolve ('./tests/dummy/app');
-const BlueprintObject = require ('../../../lib/object');
-const Events = require ('../../../lib/messaging/events');
+const { BO } = require ('base-object');
 
 describe.skip ('lib | ModuleLoader', function () {
   describe ('constructor', function () {
@@ -35,7 +34,7 @@ describe.skip ('lib | ModuleLoader', function () {
   describe ('load', function () {
     it ('should the application modules', function () {
       // Make a mock application for the loader.
-      let app = BlueprintObject.create ({
+      let app = BO.create ({
         appPath,
         resources: {},
         modules: {}

@@ -17,26 +17,10 @@
 const multer = require ('multer');
 const Action = require ('./action');
 const framework = require ('./-framework');
-
-const {
-  resolve
-} = require ('path');
-
-const {
-  merge
-} = require ('lodash');
-
-const {
-  get
-} = require ('object-path');
-
-const {
-  computed
-} = require ('./properties');
-
-const {
-  ensureDirSync
-} = require ('fs-extra');
+const { resolve } = require ('path');
+const { merge, get } = require ('lodash');
+const { computed } = require ('base-object');
+const { ensureDirSync } = require ('fs-extra');
 
 /**
  * @class UploadAction

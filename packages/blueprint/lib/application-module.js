@@ -14,33 +14,21 @@
  * limitations under the License.
  */
 
-const CoreObject = require ('./object');
+const { BO, computed } = require ('base-object');
 const debug  = require ('debug') ('blueprint:application-module');
 const path   = require ('path');
 const assert = require ('assert');
 
 const lookup = require ('./-lookup');
 
-const {
-  merge,
-  reduce,
-} = require ('lodash');
-
-const {
-  computed
-} = require ('./properties');
-
-const {
-  readFile,
-  readFileSync,
-  statSync
-} = require ('fs-extra');
+const { merge, reduce, } = require ('lodash');
+const { readFile, readFileSync, statSync } = require ('fs-extra');
 
 const Loader = require ('./loader');
 const ListenerLoader = require ('./listener-loader');
 const Router = require ('./router');
 
-module.exports = CoreObject.extend ({
+module.exports = BO.extend ({
   /// Name of the application module.
   name: null,
 
