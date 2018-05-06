@@ -49,10 +49,15 @@ const handlebars = require ('handlebars');
 module.exports = BO.extend ({
   mergedProperties: ['helpers'],
 
+  init () {
+    this._super.call (this, ...arguments);
+    this._registerHelpers ();
+  },
+
   /**
    * Register all the helpers for the generator.
    */
-  registerHelpers () {
+  _registerHelpers () {
     handlebars.registerHelper (this.helpers);
   },
 

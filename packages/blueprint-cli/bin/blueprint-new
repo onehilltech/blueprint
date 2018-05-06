@@ -12,6 +12,14 @@ const ora = require ('ora');
 const TemplatePath = require ('../lib/template-path');
 const Generator = require ('../lib/generator');
 
+const NewGenerator = Generator.extend ({
+  helpers: {
+    normalizedProjectName () {
+      return kebabCase (this.project.name);
+    }
+  }
+});
+
 program
   .arguments ('<name>')
   .option ('-o, --output-path [path]', 'output path [./]', './')
@@ -25,8 +33,7 @@ function generate (name) {
   let srcPath = path.resolve (__dirname, '../templates/blueprint-new');
   let dstPath = path.resolve (program.outputPath, kebabCase (name));
 
-  let generator = new Generator ();
-  generator.registerHelpers ();
+  let generator = new NewGenerator ();
 
   return ensureDir (dstPath).then (() => {
     console.log ('blueprint: generating the application; please be patient...');
