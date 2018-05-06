@@ -38,22 +38,14 @@ function generate (name) {
     return templates.render (dstPath, context);
   }).then (() => {
     const commands = [
-      [ 'install', '--save', '@onehilltech/blueprint', 'pug' ],
-      [ 'install', '--save-dev', '@onehilltech/blueprint-testing', 'chai', 'mocha', 'superagent', 'supertest' ],
+      [ 'install'],
       [ 'bin' ]
     ];
 
-    let spinner = ora ('installing node modules...');
-    spinner.start ();
+    let promises = Promise.all (commands.map (command => fromCallback (callback => execFile ('npm', command, {cwd: dstPath}, callback))));
+    ora.promise (promises, 'installing node modules...');
 
-    return Promise.all (commands.map (command => fromCallback (callback => execFile ('npm', command, {cwd: dstPath}, callback))))
-      .then (() => {
-        spinner.stop ()
-      })
-      .catch (err => {
-        spinner.fail (err.message);
-        return Promise.reject (err);
-      });
+    return promises;
   }).then (() => {
     console.log ('Happy Coding!')
   }).catch (err => console.error (err.message))
