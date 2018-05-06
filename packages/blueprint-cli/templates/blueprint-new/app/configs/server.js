@@ -1,4 +1,4 @@
-module.exports = exports = {
+module.exports = {
   protocols : {
     http : {
       port: 5000

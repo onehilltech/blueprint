@@ -1,3 +1,3 @@
 exports.TemplateDir = require ('./TemplateDir');
-exports.Installer = require ('./Installer');
+exports.Installer = require ('./index');
 exports.ModulesFile = require ('./ModulesFile');

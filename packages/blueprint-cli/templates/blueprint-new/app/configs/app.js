@@ -1,3 +1,3 @@
-module.exports = exports = {
+module.exports = {
   name : '{{project.name}}'
 };

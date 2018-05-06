@@ -1,88 +1,51 @@
 #!/usr/bin/env node
 
-'use strict';
-
-var program  = require ('commander')
-  , path     = require ('path')
-  , async    = require ('async')
-  , fse      = require ('fs-extra')
-  , lib      = require ('../lib')
-  , execFile = require('child_process').execFile
-  ;
-
-var TemplateDir = lib.TemplateDir
-  ;
+const program = require ('commander');
+const path    = require ('path');
+const fs      = require ('fs-extra');
+const TemplatePath = require ('../lib/template-path');
+const { execFile } = require ('child_process');
+const { fromCallback } = require ('bluebird');
 
 program
-  .arguments('<name>')
+  .arguments ('<name>')
   .option ('-o, --output-path [path]', 'output path [./]', './')
   .option ('--version [version]', 'version number [0.0.1]', '0.0.1')
   .option ('--license [license]', 'distribution license [Apache-2.0]', 'Apache-2.0')
-  .option ('--debug', 'enable debug messages')
-  .action (generateApplication);
+  .action (generate);
 
 program.parse (process.argv);
 
-function generateApplication (name) {
-  if (program.debug)
-    winston.level = 'debug';
+function generate (name) {
+  let srcPath = path.resolve (__dirname, '../templates/blueprint-new');
+  let dstPath = path.resolve (program.outputPath, name);
 
-  var templatePath = path.resolve (__dirname, '../templates/blueprint-new');
-  var dstPath = path.resolve (program.outputPath, name);
+  return fs.ensureDir (dstPath).then (() => {
+    console.log ('blueprint: generating the application; please be patient...');
 
-  async.waterfall ([
-    function (callback) {
-      fse.ensureDir (dstPath, callback);
-    },
+    // Define the view used to render the templates, then render the templates with
+    // this view of the system.
+    const context = {
+      project: {
+        name: name,
+        version: program.version,
+        license: program.license
+      }
+    };
 
-    function (made, callback) {
-      console.log ('Generating Blueprint.js application; please be patient...');
+    let templates = new TemplatePath ({basePath: srcPath, srcPath});
+    return templates.render (dstPath, context);
+  }).then (() => {
+    console.log ('npm: installing node modules...');
 
-      // Define the view used to render the templates, then render the templates with
-      // this view of the system.
-      var view = {
-        project : {
-          name: name,
-          version: program.version,
-          license: program.license
-        }
-      };
+    const commands = [
+      [ 'install', '--save', '@onehilltech/blueprint', 'pug' ],
+      [ 'install', '--save-dev', '@onehilltech/blueprint-testing', 'chai', 'mocha', 'superagent', 'supertest' ],
+      [ 'bin' ]
+    ];
 
-      var templates = new TemplateDir (templatePath);
-      templates.render (dstPath, view, callback);
-    },
-
-    function (callback) {
-      const commands = [
-        [
-          'install',
-          '--save',
-          '@onehilltech/blueprint'
-        ],
-        [
-          'install',
-          '--save-dev',
-          'chai',
-          'mocha',
-          'superagent',
-          'supertest'
-        ],
-        [
-          'bin'
-        ]
-      ];
-
-      async.eachSeries (commands, function (command, callback) {
-        execFile ('npm', command, {cwd: dstPath}, callback);
-      }, callback);
-    }
-  ], onComplete);
+    return Promise.all (commands.map (command => fromCallback (callback => execFile ('npm', command, {cwd: dstPath}, callback))));
+  }).then (() => {
+    console.log ('Happy Coding!')
+  }).catch (err => console.error (err.message))
 }
-
-function onComplete (err) {
-  if (err)
-    return console.log (err);
-
-  console.log ('Blueprint.js application project is ready!')
-}
-
