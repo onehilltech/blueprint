@@ -6,6 +6,7 @@ const fs      = require ('fs-extra');
 const TemplatePath = require ('../lib/template-path');
 const { execFile } = require ('child_process');
 const { fromCallback } = require ('bluebird');
+const ora = require ('ora');
 
 program
   .arguments ('<name>')
@@ -36,15 +37,23 @@ function generate (name) {
     let templates = new TemplatePath ({basePath: srcPath, srcPath});
     return templates.render (dstPath, context);
   }).then (() => {
-    console.log ('npm: installing node modules...');
-
     const commands = [
       [ 'install', '--save', '@onehilltech/blueprint', 'pug' ],
       [ 'install', '--save-dev', '@onehilltech/blueprint-testing', 'chai', 'mocha', 'superagent', 'supertest' ],
       [ 'bin' ]
     ];
 
-    return Promise.all (commands.map (command => fromCallback (callback => execFile ('npm', command, {cwd: dstPath}, callback))));
+    let spinner = ora ('installing node modules...');
+    spinner.start ();
+
+    return Promise.all (commands.map (command => fromCallback (callback => execFile ('npm', command, {cwd: dstPath}, callback))))
+      .then (() => {
+        spinner.stop ()
+      })
+      .catch (err => {
+        spinner.fail (err.message);
+        return Promise.reject (err);
+      });
   }).then (() => {
     console.log ('Happy Coding!')
   }).catch (err => console.error (err.message))
