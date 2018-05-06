@@ -6,8 +6,10 @@
 
   "scripts": {
     "test": "env NODE_ENV=test mocha --recursive tests/tests",
-    "start-server": "env NODE_ENV=production forever -o ./app/temp/logs/output.log -e ./app/temp/logs/error.log start ./app/index.js",
-    "stop-server": "env NODE_ENV=production forever stop app/index.js"
+    "start-server": "env NODE_ENV=production forever -o ./app/.blueprint/logs/output.log -e ./app/.blueprint/logs/error.log start ./app/index.js",
+    "stop-server": "env NODE_ENV=production forever stop app/index.js",
+    "install-service": "sudo -s forever-service install {{project.name}}_d --script ./app/index.js",
+    "uninstall-service": "sudo -s forever-service delete {{project.name}}_d"
   },
 
   "dependencies": {
