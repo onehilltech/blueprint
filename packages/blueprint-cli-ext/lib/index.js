@@ -15,3 +15,4 @@
  */
 
 exports.Generator = require ('./generator');
+exports.EntityGenerator = require ('./entity-generator');

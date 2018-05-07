@@ -39,8 +39,6 @@ const {
   words
 } = require ('lodash');
 
-const handlebars = require ('handlebars');
-
 /**
  * @class Generator
  *
@@ -57,9 +55,11 @@ module.exports = BO.extend ({
 
   /**
    * Register all the helpers for the generator.
+   *
+   * @param         env       The Handlebars environment
    */
-  registerHelpers () {
-    handlebars.registerHelper (this.helpers);
+  registerHelpers (env) {
+    env.registerHelper (this.helpers);
   },
 
   /**
