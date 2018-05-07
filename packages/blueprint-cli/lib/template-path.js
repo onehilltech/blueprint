@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const handlebars = require ('handlebars');
 const path   = require ('path');
 const { BO } = require ('base-object');
 const chalk =  require ('chalk');
@@ -23,6 +22,7 @@ const {
   readFile,
   writeFile,
   ensureDir,
+  ensureFile,
   readdir,
   stat
 } = require ('fs-extra');
@@ -31,6 +31,9 @@ const {
  * @class TemplatePath
  */
 const TemplatePath = BO.extend ({
+  /// The Handlebars environment to use for generation.
+  handlebars: null,
+
   basePath: null,
 
   srcPath: null,
@@ -65,31 +68,49 @@ const TemplatePath = BO.extend ({
    */
   _renderFile (outPath, file, context) {
     let srcPath = path.resolve (this.srcPath, file);
-    let dstPath = path.resolve (outPath, file);
 
     return stat (srcPath).then (stat => {
-      if (stat.isDirectory ()) {
-        // We need to create the target directory, and recurse into the directory
-        // looking for more templates.
-        return ensureDir (dstPath).then (() => {
-          let templatePath = new TemplatePath ({basePath: this.basePath, srcPath});
-          return templatePath.render (dstPath, context);
-        });
-      }
-      else {
-        // This is a file. Let's run it through the template generator. Read the file
-        // into member, then apply the current context to the template to create the
-        // target concrete file.
-        console.log (`  creating ${chalk.yellow (srcPath.slice (this.basePath.length + 1))}`);
-
-        return readFile (srcPath, 'utf8').then (templateFile => {
-          const compiled = handlebars.compile (templateFile);
-          const content = compiled (context);
-
-          return writeFile (dstPath, content);
-        });
-      }
+      if (stat.isDirectory ())
+        return this._processDirectory (srcPath, outPath, file, context);
+      else
+        return this._processFile (srcPath, outPath, file, context);
     });
+  },
+
+  _processDirectory (srcPath, outPath, file, context) {
+    let dstPath = path.resolve (outPath, file);
+
+    // We need to create the target directory, and recurse into the directory
+    // looking for more templates.
+    return ensureDir (dstPath).then (() => {
+      let templatePath = new TemplatePath ({handlebars: this.handlebars, basePath: this.basePath, srcPath});
+      return templatePath.render (dstPath, context);
+    });
+  },
+
+  _processFile (srcFile, outPath, file, context) {
+    return this._ensureFile (outPath, file, context).then ((dstFile) => {
+      // This is a file. Let's run it through the template generator. Read the file
+      // into member, then apply the current context to the template to create the
+      // target concrete file.
+      console.log (`  creating ${chalk.yellow (dstFile.slice (process.cwd ().length + 1))}`);
+
+      return readFile (srcFile, 'utf8').then (templateFile => {
+        const compiled = this.handlebars.compile (templateFile);
+        const content = compiled (context);
+
+        return writeFile (dstFile, content);
+      });
+    });
+  },
+
+  _ensureFile (outPath, file, context) {
+    const compiled = this.handlebars.compile (file);
+    const content = compiled (context);
+
+    let dstFile = path.resolve (outPath, content);
+
+    return ensureFile (dstFile).then (() => dstFile);
   }
 });
 

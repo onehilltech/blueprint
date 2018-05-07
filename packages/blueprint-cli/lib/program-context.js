@@ -23,7 +23,6 @@ const { BO, computed } = require ('base-object');
  * to the templates.
  */
 module.exports = BO.extend ({
-  arguments: computed ({
-    get () { return this.args.slice (0, this.args.length - 1)}
-  })
+  /// The arguments from the program context.
+  args: null,
 });

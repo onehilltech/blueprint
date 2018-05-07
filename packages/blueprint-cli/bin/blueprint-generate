@@ -20,8 +20,9 @@ const program = require ('commander');
 const path = require ('path');
 const { readdir } = require ('fs-extra');
 const { forOwn } = require ('lodash');
-const { BO, computed } = require ('base-object');
+const handlebars = require ('handlebars');
 
+const ProgramContext = require ('../lib/program-context');
 const ModuleFinder = require ('../lib/module-finder');
 const TemplatePath = require ('../lib/template-path');
 
@@ -38,9 +39,7 @@ const moduleFinder = new ModuleFinder ({
     return readdir (basePath).then (files => {
       files.forEach (filename => {
         const generatorPath = path.resolve (basePath, filename);
-        const Generator = require (generatorPath);
-
-        const generator = new Generator ();
+        const generator = require (generatorPath).create ();
 
         // Create a new command for the generator. We are going to add the
         // description, options, and action to execute.
@@ -78,15 +77,20 @@ moduleFinder.load ()
  */
 function runGenerator (generatorPath, generator) {
   return function () {
+    const args = [...arguments];
+    const cmd = args.pop ();
+
     // Allow the generator to register its helpers.
-    generator.registerHelpers ();
+    handlebars.registerHelper (generator.helpers);
 
     // Locate the files directory, and treat it as a template path. The
     // target directory for the files in the current working directory.
     const srcPath = path.resolve (generatorPath, 'files');
-    let templates = new TemplatePath ({srcPath});
+    let templates = new TemplatePath ({srcPath, handlebars});
 
-    const context = new ProgramContext (program);
-    templates.render (process.cwd ());
+    const context = new ProgramContext (Object.assign ({}, {args}, cmd));
+
+    templates.render (process.cwd (), context)
+      .catch (err => console.log (err));
   }
 }
