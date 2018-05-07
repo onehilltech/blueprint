@@ -1,6 +1,6 @@
 {
   "name": "@onehilltech/blueprint-cli-exts",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "\"Extension classes for Blueprint CLI\"",
   "main": "lib/index.js",
   "author": "One Hill Technologies, LLC",
