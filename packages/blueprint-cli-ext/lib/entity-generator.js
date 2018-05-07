@@ -17,7 +17,7 @@
 const Generator = require ('./generator');
 
 module.exports = Generator.extend ({
-  args: '<name>',
+  args: ['<name>'],
 
   helpers: {
     /**

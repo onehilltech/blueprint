@@ -45,7 +45,11 @@ const {
  * Base class for all generators used by the cli.
  */
 module.exports = BO.extend ({
+  concatProperties: ['args'],
   mergedProperties: ['helpers', 'options'],
+
+  /// Free-range arguments for the command.
+  args: null,
 
   /// Description of the generation.
   description: null,
