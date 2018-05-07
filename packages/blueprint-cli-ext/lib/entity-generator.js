@@ -20,8 +20,23 @@ module.exports = Generator.extend ({
   args: '<name>',
 
   helpers: {
+    /**
+     * Get the name of the entity.
+     *
+     * @return {*}
+     */
     entityName () {
       return this.args[0];
+    },
+
+    /**
+     * Get the base name of the entity, if the name includes a path.
+     *
+     * @return {*}
+     */
+    entityBaseName () {
+      let parts = this.args[0].split (path.sep);
+      return parts[parts.length - 1];
     }
   }
 });
