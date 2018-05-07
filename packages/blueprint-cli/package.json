@@ -8,7 +8,7 @@
     "test": "env NODE_ENV=test mocha --recursive tests/tests"
   },
   "dependencies": {
-    "@onehilltech/blueprint-cli-exts": "^1.1.2",
+    "@onehilltech/blueprint-cli-exts": "^1.2.0",
     "bluebird": "^3.5.1",
     "chalk": "^2.4.1",
     "commander": "^2.15.1",

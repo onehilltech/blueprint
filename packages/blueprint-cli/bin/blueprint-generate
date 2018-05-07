@@ -45,8 +45,8 @@ const moduleFinder = new ModuleFinder ({
         // description, options, and action to execute.
         let command = filename;
 
-        if (generator.args)
-          command += ` ${generator.args}`;
+        if (generator.args && generator.args.length > 0)
+          command += ` ${generator.args.join (' ')}`;
 
         let cmd = program.command (command);
 
