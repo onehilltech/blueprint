@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Copyright (c) 2018 One Hill Technologies, LLC
  *
@@ -16,16 +14,16 @@
  * limitations under the License.
  */
 
-const program = require ('commander');
-const { forOwn } = require ('lodash');
+const { BO, computed } = require ('base-object');
 
-const commands = {
-  new: 'create a new Blueprint application',
-  generate: 'run a code generator'
-};
-
-// Apply each of the commands.
-forOwn (commands, (description, name) => program.command (name, description));
-
-// Parse the command-line options.
-program.parse (process.argv);
+/**
+ * @class ProgramContext
+ *
+ * Wrapper facade for the commander program class that adds helper methods useful
+ * to the templates.
+ */
+module.exports = BO.extend ({
+  arguments: computed ({
+    get () { return this.args.slice (0, this.args.length - 1)}
+  })
+});

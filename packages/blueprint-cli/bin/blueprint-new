@@ -1,21 +1,38 @@
 #!/usr/bin/env node
 
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const program = require ('commander');
 const path    = require ('path');
+const ora     = require ('ora');
 
 const { ensureDir } = require ('fs-extra');
 const { kebabCase } = require ('lodash');
 const { execFile } = require ('child_process');
 const { fromCallback } = require ('bluebird');
-const ora = require ('ora');
+const { Generator } = require ('@onehilltech/blueprint-cli-exts');
 
 const TemplatePath = require ('../lib/template-path');
-const Generator = require ('../lib/generator');
+const ProgramContext = require ('../lib/program-context');
 
 const NewGenerator = Generator.extend ({
   helpers: {
     normalizedProjectName () {
-      return kebabCase (this.project.name);
+      return kebabCase (this.arguments[0]);
     }
   }
 });
@@ -34,21 +51,16 @@ function generate (name) {
   let dstPath = path.resolve (program.outputPath, kebabCase (name));
 
   let generator = new NewGenerator ();
+  generator.registerHelpers ();
 
   return ensureDir (dstPath).then (() => {
     console.log ('blueprint: generating the application; please be patient...');
 
     // Define the view used to render the templates, then render the templates with
     // this view of the system.
-    const context = {
-      project: {
-        name: name,
-        version: program.version,
-        license: program.license
-      }
-    };
+    let context = new ProgramContext (program);
+    let templates = new TemplatePath ({srcPath});
 
-    let templates = new TemplatePath ({basePath: srcPath, srcPath});
     return templates.render (dstPath, context);
   }).then (() => {
     const commands = [

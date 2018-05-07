@@ -8,13 +8,11 @@
     "test": "env NODE_ENV=test mocha --recursive tests/tests"
   },
   "dependencies": {
-    "async": "^2.6.0",
-    "base-object": "^1.0.5",
+    "@onehilltech/blueprint-cli-exts": "^1.0.0",
     "bluebird": "^3.5.1",
     "chalk": "^2.4.1",
     "commander": "^2.15.1",
     "fs-extra": "^6.0.0",
-    "handlebars": "^4.0.11",
     "npm": "^3.10.7",
     "ora": "^2.1.0",
     "winston": "^2.4.2"

@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-exports.Generator = require ('./generator');
+exports.ModuleFinder = require ('./module-finder');

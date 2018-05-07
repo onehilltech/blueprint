@@ -35,6 +35,13 @@ const TemplatePath = BO.extend ({
 
   srcPath: null,
 
+  init () {
+    this._super.call (this, ...arguments);
+
+    if (!this.basePath)
+      this.basePath = this.srcPath;
+  },
+
   /**
    *  Generate files from the templates into the target directory.
    *
