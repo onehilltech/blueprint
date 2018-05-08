@@ -19,6 +19,7 @@
 const program = require ('commander');
 const path    = require ('path');
 const ora     = require ('ora');
+const handlebars = require ('handlebars');
 
 const { ensureDir } = require ('fs-extra');
 const { kebabCase } = require ('lodash');
@@ -51,7 +52,7 @@ function generate (name) {
   let dstPath = path.resolve (program.outputPath, kebabCase (name));
 
   let generator = new NewGenerator ();
-  generator.registerHelpers ();
+  generator.registerHelpers (handlebars);
 
   return ensureDir (dstPath).then (() => {
     console.log ('blueprint: generating the application; please be patient...');
@@ -59,7 +60,7 @@ function generate (name) {
     // Define the view used to render the templates, then render the templates with
     // this view of the system.
     let context = new ProgramContext (program);
-    let templates = new TemplatePath ({srcPath});
+    let templates = new TemplatePath ({handlebars, srcPath});
 
     return templates.render (dstPath, context);
   }).then (() => {
