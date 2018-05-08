@@ -4,9 +4,6 @@
   "version": "1.0.2",
   "private": false,
   "author": "One Hill Technologies, LLC",
-  "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive tests/tests"
-  },
   "dependencies": {
     "@onehilltech/blueprint-cli-exts": "^1.2.2",
     "bluebird": "^3.5.1",
