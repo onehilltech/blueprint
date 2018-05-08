@@ -78,11 +78,9 @@ const TemplatePath = BO.extend ({
   },
 
   _processDirectory (srcPath, outPath, file, context) {
-    let dstPath = path.resolve (outPath, file);
-
     // We need to create the target directory, and recurse into the directory
     // looking for more templates.
-    return ensureDir (dstPath).then (() => {
+    return this._ensureDir (outPath, file, context).then ((dstPath) => {
       let templatePath = new TemplatePath ({handlebars: this.handlebars, basePath: this.basePath, srcPath});
       return templatePath.render (dstPath, context);
     });
@@ -102,6 +100,15 @@ const TemplatePath = BO.extend ({
         return writeFile (dstFile, content);
       });
     });
+  },
+
+  _ensureDir (outPath, file, context) {
+    const compiled = this.handlebars.compile (file);
+    const content = compiled (context);
+
+    let dstPath = path.resolve (outPath, content);
+
+    return ensureDir (dstPath).then (() => dstPath);
   },
 
   _ensureFile (outPath, file, context) {
