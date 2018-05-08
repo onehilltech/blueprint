@@ -15,7 +15,14 @@
  */
 
 const Generator = require ('./generator');
+const path = require ('path');
 
+/**
+ * @class EntityGenerator
+ *
+ * Base class for all entity generators. An entity generator takes a required
+ * command line argument, which is the name of the entity.
+ */
 module.exports = Generator.extend ({
   args: ['<name>'],
 
