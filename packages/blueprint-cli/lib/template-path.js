@@ -34,27 +34,28 @@ const TemplatePath = BO.extend ({
   /// The Handlebars environment to use for generation.
   handlebars: null,
 
+  /// Base path removed from filename when generating progress.
   basePath: null,
 
+  /// The path where the template files are located.
   srcPath: null,
+
+  /// The path where the files will be generated.
+  outputPath: null,
 
   init () {
     this._super.call (this, ...arguments);
-
-    if (!this.basePath)
-      this.basePath = this.srcPath;
   },
 
   /**
    *  Generate files from the templates into the target directory.
    *
-   * @param outPath
    * @param context
    * @return {*}
    */
-  render (outPath, context) {
+  render (context) {
     return readdir (this.srcPath)
-      .then (files => Promise.all (files.map (file => this._renderFile (outPath, file, context))));
+      .then (files => Promise.all (files.map (file => this._renderFile (file, context))));
   },
 
   /**
@@ -66,32 +67,38 @@ const TemplatePath = BO.extend ({
    * @return {*}
    * @private
    */
-  _renderFile (outPath, file, context) {
+  _renderFile (file, context) {
     let srcPath = path.resolve (this.srcPath, file);
 
     return stat (srcPath).then (stat => {
       if (stat.isDirectory ())
-        return this._processDirectory (srcPath, outPath, file, context);
+        return this._processDirectory (srcPath, file, context);
       else
-        return this._processFile (srcPath, outPath, file, context);
+        return this._processFile (srcPath, file, context);
     });
   },
 
-  _processDirectory (srcPath, outPath, file, context) {
+  _processDirectory (srcPath, file, context) {
     // We need to create the target directory, and recurse into the directory
     // looking for more templates.
-    return this._ensureDir (outPath, file, context).then ((dstPath) => {
-      let templatePath = new TemplatePath ({handlebars: this.handlebars, basePath: this.basePath, srcPath});
-      return templatePath.render (dstPath, context);
+    return this._ensureDir (file, context).then ((dstPath) => {
+      let templatePath = new TemplatePath ({
+        handlebars: this.handlebars,
+        basePath: this.basePath,
+        srcPath,
+        outputPath: dstPath
+      });
+
+      return templatePath.render (context);
     });
   },
 
-  _processFile (srcFile, outPath, file, context) {
-    return this._ensureFile (outPath, file, context).then ((dstFile) => {
+  _processFile (srcFile, file, context) {
+    return this._ensureFile (file, context).then ((dstFile) => {
       // This is a file. Let's run it through the template generator. Read the file
       // into member, then apply the current context to the template to create the
       // target concrete file.
-      console.log (`  creating ${chalk.yellow (dstFile.slice (process.cwd ().length + 1))}`);
+      console.log (`  creating ${chalk.yellow (dstFile.slice (this.basePath.length + 1))}`);
 
       return readFile (srcFile, 'utf8').then (templateFile => {
         const compiled = this.handlebars.compile (templateFile);
@@ -102,20 +109,20 @@ const TemplatePath = BO.extend ({
     });
   },
 
-  _ensureDir (outPath, file, context) {
+  _ensureDir (file, context) {
     const compiled = this.handlebars.compile (file);
     const content = compiled (context);
 
-    let dstPath = path.resolve (outPath, content);
+    let dstPath = path.resolve (this.outputPath, content);
 
     return ensureDir (dstPath).then (() => dstPath);
   },
 
-  _ensureFile (outPath, file, context) {
+  _ensureFile (file, context) {
     const compiled = this.handlebars.compile (file);
     const content = compiled (context);
 
-    let dstFile = path.resolve (outPath, content);
+    let dstFile = path.resolve (this.outputPath, content);
 
     return ensureFile (dstFile).then (() => dstFile);
   }
