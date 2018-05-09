@@ -20,24 +20,14 @@ Features
 * Encapsulate application logic into reusable components
 * Compose Blueprint applications from other Blueprint applications
 
-Important Notice
------------------
-
-We are in the final stages of implementing and testing `v4`. If you are
-looking for the most stable release, we recommend you use `v3.3.1`.
 
 Getting Started
-----------------
+------------------
 
-See [blueprint-cli](https://github.com/onehilltech/blueprint-cli) for using
-the command-line interface to start a new project.
+See our [Developer Guide](https://onehilltech.gitbook.io/blueprint/) to get started
+using Blueprint.
 
 Next Steps
 -----------------
     
-See our [Wiki](https://github.com/onehilltech/blueprint/wiki) for more details 
-on using Blueprint.
-
 Interested in training classes? [Contact us](mailto:training@onehilltech.com)
-
-
