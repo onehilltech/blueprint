@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@onehilltech/blueprint-cli-exts": "^1.2.2",
-    "base-object": "^1.0.5",
+    "base-object": "^1.0.6",
     "body-parser": "^1.17.2",
     "commander": "^2.11.0",
     "consolidate": "^0.15.0",
