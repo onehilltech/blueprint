@@ -178,15 +178,15 @@ module.exports = BO.extend ({
     // are provided for it.
     const optional = {
       cookies : function (app, opts) {
-        debug ('cookie parser: ' + opts.cookies);
-        const {secret, options} = opts;
-
         let middleware = require ('cookie-parser');
+        debug ('configuring support for cookie-parser middleware');
+
+        const {secret, options} = opts;
         app.use (middleware (secret, options));
       },
 
       session : function (app, opts) {
-        debug ('express session: ' + opts);
+        debug ('configuring support for express-session middleware');
 
         let middleware = require ('express-session');
         app.use (middleware (opts));
