@@ -179,9 +179,10 @@ module.exports = BO.extend ({
     const optional = {
       cookies : function (app, opts) {
         debug ('cookie parser: ' + opts.cookies);
+        const {secret, options} = opts;
 
         let middleware = require ('cookie-parser');
-        app.use (middleware (opts.cookies));
+        app.use (middleware (secret, options));
       },
 
       session : function (app, opts) {
