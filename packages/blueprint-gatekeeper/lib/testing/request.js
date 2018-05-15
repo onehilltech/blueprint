@@ -1,7 +1,28 @@
-const blueprint = require ('@onehilltech/blueprint')
-  , Test        = require ('supertest').Test
-  , assert      = require ('assert')
-  ;
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const assert = require ('assert');
+
+const {
+  seed
+} = require ('@onehilltech/blueprint-mongodb');
+
+const {
+  Test
+} = require ('supertest');
 
 /**
  * Creates a Blueprint testing request that has already be initialized to a user.
@@ -9,13 +30,16 @@ const blueprint = require ('@onehilltech/blueprint')
  * @param i       Index of user from dab file
  * @param conn    Name of database connection
  */
-Test.prototype.withUserToken = Test.prototype.fromUser = function (i, conn = '$default') {
-  let accessToken = blueprint.app.seeds[conn].user_tokens[i].serializeSync ();
+Test.prototype.withUserToken = function (i, conn = '$default') {
+  const {user_tokens} = seed (conn);
+  const accessToken = user_tokens[i].serializeSync ();
 
-  assert (!!accessToken, `Your dab file does not have a user_tokens.[${i}]`);
+  assert (!!accessToken, `The seed for ${conn} does not have a user_tokens.[${i}]`);
 
   return this.set ('Authorization', `Bearer ${accessToken.access_token}`);
 };
+
+Test.prototype.fromUser = Test.prototype.withUserToken;
 
 /**
  * Creates a Blueprint testing request that has already be initialized to a client.
@@ -23,10 +47,19 @@ Test.prototype.withUserToken = Test.prototype.fromUser = function (i, conn = '$d
  * @param i     Index of client from dab file
  * @param conn    Name of database connection
  */
-Test.prototype.withClientToken = Test.prototype.fromClient = function (i, conn = '$default') {
-  let accessToken = blueprint.app.seeds[conn].client_tokens[i].serializeSync ();
+Test.prototype.withClientToken = function (i, conn = '$default') {
+  const {client_tokens} = seed (conn);
+  const accessToken = client_tokens[i].serializeSync ();
 
-  assert (!!accessToken, `Your dab file does not have a client_tokens.[${i}]`);
+  assert (!!accessToken, `The seed for ${conn} does not have a client_tokens.[${i}]`);
 
   return this.set ('Authorization', `Bearer ${accessToken.access_token}`);
 };
+
+Test.prototype.fromClient = Test.prototype.withClientToken;
+
+const {
+  request
+} = require ('@onehilltech/blueprint-testing');
+
+module.exports = request;

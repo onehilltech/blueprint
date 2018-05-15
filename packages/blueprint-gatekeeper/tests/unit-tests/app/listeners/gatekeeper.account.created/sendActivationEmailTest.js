@@ -1,12 +1,12 @@
 'use strict';
 
-let blueprint = require ('@onehilltech/blueprint')
-  , expect    = require ('chai').expect
-  , listener  = require ('../../../../../app/listeners/gatekeeper.account.created/sendActivationEmail')
-  ;
+
+const blueprint = require ('@onehilltech/blueprint');
+const {expect}  = require ('chai');
 
 describe.skip ('listeners:gatekeeper.account.created:sendActivationEmail', function () {
   it ('should send a mock activate email', function (done) {
+    blueprint.lookup ('listener:gatekeeper\\.account\\.created:sendActivationEmail');
     let account = blueprint.app.seeds.$default.accounts[0];
     let received = false;
 

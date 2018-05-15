@@ -1,0 +1,9 @@
+{
+  "name": "dummy",
+  "author": "One Hill Technologies, LLC",
+  "version": "1.0.0",
+  "main": "./app",
+  "dependencies": {
+    "@onehilltech/blueprint-gatekeeper": "file:../../"
+  }
+}

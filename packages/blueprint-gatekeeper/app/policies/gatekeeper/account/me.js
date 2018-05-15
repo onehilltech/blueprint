@@ -1,6 +1,30 @@
-module.exports = function (req, callback) {
-  let accountId = req.params.accountId;
-  let result = accountId.equals (req.user._id);
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-  return callback (null, result, {reason: 'invalid_account', message: 'You are not the account owner.'});
-};
+const {
+  Policy
+} = require ('@onehilltech/blueprint');
+
+module.exports = Policy.extend ({
+  failureCode: 'invalid_account',
+
+  failureMessage: 'You are not the account owner.',
+
+  runCheck (req) {
+    let {accountId} = req.params;
+    return accountId === 'me' || accountId.equals (req.user._id);
+  }
+});

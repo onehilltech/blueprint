@@ -1,7 +1,7 @@
 const request = require ('request')
   , async     = require ('async')
   , blueprint = require ('@onehilltech/blueprint')
-  , HttpError = blueprint.errors.HttpError
+  , HttpError = blueprint.HttpError
   ;
 
 const VERIFY_METHOD = 'GET';

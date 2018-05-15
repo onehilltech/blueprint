@@ -5,7 +5,6 @@ const blueprint  = require ('@onehilltech/blueprint')
   , path         = require ('path')
   , async        = require ('async')
   , Email        = require ('email-templates')
-  , verification = require ('../../utils/account-verification')
   , _            = require ('lodash')
   ;
 
@@ -23,7 +22,7 @@ let gatekeeperConfig;
 /**
  * app.init
  */
-messaging.on ('app.init', function (app) {
+blueprint.on ('app.init', function (app) {
   if (!app.configs.app)
     throw new Error ('app.config not defined');
 

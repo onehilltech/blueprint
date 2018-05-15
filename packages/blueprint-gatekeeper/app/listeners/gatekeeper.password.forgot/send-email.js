@@ -3,7 +3,6 @@ const messaging = blueprint.messaging;
 const path  = require ('path');
 const async = require ('async');
 const Email = require ('email-templates');
-const ResetPasswordTokenGenerator = require ('../../utils/reset-password-token-generator');
 const _ = require ('lodash');
 
 // TODO Construct the real location of the template directory.
@@ -21,7 +20,7 @@ let tokenGenerator;
 /**
  * app.init
  */
-messaging.on ('app.init', function (app) {
+blueprint.on ('app.init', function (app) {
   if (!app.configs.app)
     throw new Error ('app.config not defined');
 
