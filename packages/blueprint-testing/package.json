@@ -21,6 +21,7 @@
   "homepage": "https://github.com/onehilltech/blueprint-testing#readme",
   "dependencies": {
     "chai": "^4.1.2",
+    "chai-datetime": "^1.5.0",
     "mocha": "^5.1.1",
     "path": "^0.12.7",
     "supertest": "^3.1.0"
