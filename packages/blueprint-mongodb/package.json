@@ -27,12 +27,8 @@
     "moment": "^2.19.1"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^0.5.2",
-    "chai": "^4.1.2",
-    "chai-datetime": "^1.5.0",
-    "istanbul": "^0.4.5",
-    "mocha": "^5.1.1",
-    "supertest": "^3.0.0"
+    "@onehilltech/blueprint-testing": "^0.7.0",
+    "istanbul": "^0.4.5"
   },
   "license": "Apache-2.0",
   "engines": {
