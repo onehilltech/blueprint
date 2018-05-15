@@ -43,12 +43,12 @@ module.exports = Loader.extend ({
   /// * on
   /// * once
   ///
-  messenger: null,
+  app: null,
 
   init () {
     this._super.call (this, ...arguments);
 
-    assert (!!this.messenger, "You must define the 'messenger' property");
+    assert (!!this.app, "You must define the 'app' property");
   },
 
   load (opts) {
@@ -82,7 +82,7 @@ module.exports = Loader.extend ({
           forOwn (loaded, (listener, name) => {
             listener.name = name;
 
-            this.messenger.on (eventName, listener);
+            this.app.on (eventName, listener);
           })
         });
 
