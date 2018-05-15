@@ -20,24 +20,13 @@ const {
   BadRequestError
 } = require ('@onehilltech/blueprint');
 
-const {
-  get
-} = require ('lodash');
-
-const {
-  Action
-} = require ('@onehilltech/blueprint');
+const { get } = require ('lodash');
+const { Action } = require ('@onehilltech/blueprint');
 
 const {
   ResourceController,
-  Types: {
-    ObjectId
-  }
+  Types: { ObjectId }
 } = require ('@onehilltech/blueprint-mongodb');
-
-const {
-  fromCallback
-} = require ('bluebird');
 
 /**
  * Default account id generator. This generator will just produce a new
@@ -55,11 +44,13 @@ module.exports = ResourceController.extend ({
   namespace: 'gatekeeper',
 
   _generateAccountId: null,
+  _tokenGenerator: null,
 
   init () {
     this._super.call (this, ...arguments);
 
     this._generateAccountId = get (this.app.configs, 'gatekeeper.generatorsAccountId', __generateAccountId);
+    this._tokenGenerator = this.app.lookup ('service:gatekeeper').getTokenGenerator ('gatekeeper:access_token');
   },
 
   create () {
@@ -92,7 +83,7 @@ module.exports = ResourceController.extend ({
         const password = get (tokenController, 'granters.password');
 
         return password.createToken (req)
-          .then (accessToken => accessToken.serialize ())
+          .then (accessToken => accessToken.serialize (this.controller._tokenGenerator))
           .then (accessToken => {
             result.token = Object.assign ({token_type: 'Bearer'}, accessToken);
             return result;

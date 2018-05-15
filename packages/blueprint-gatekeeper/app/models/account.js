@@ -19,18 +19,16 @@ const mongodb = require ('@onehilltech/blueprint-mongodb');
 
 const {
   Schema: {
-    Types: {ObjectId}
+    Types: {ref}
   }
 } = mongodb;
 
 const options = require ('./-common-options') ();
-const Client = require ('./client');
+const Client  = require ('./client');
 
 const SALT_WORK_FACTOR = 10;
 
-let Schema = mongodb.Schema;
-
-let schema = new Schema ({
+let schema = new mongodb.Schema ({
   /// Username for the account.
   username: { type: String, required: true, unique: true, index: true },
 
@@ -41,7 +39,7 @@ let schema = new Schema ({
   email: { type: String, required: true, unique: true, trim: true},
 
   /// The client that created the account.
-  created_by: {type: ObjectId, required: true, ref: Client.modelName, index: true, validation: {optional: true}, const: true},
+  created_by: ref (Client, {required: true, index: true, validation: {optional: true}, const: true}),
 
   /// Enabled state for the account.
   enabled: { type: Boolean, required: true, default: true },
@@ -78,12 +76,11 @@ schema.pre ('save', function () {
 });
 
 /**
- * Verify the password provided by the user. The \@ password should
- * not be encrpyted. This method will perform the hash of the password
- * to verify its correctness.
+ * Verify the password provided by the user. The \@ password should not be
+ * encrypted. This method will perform the hash of the password to verify its
+ * correctness.
  *
- * @param[in]           password          The user's password
- * @param[in]           callback          Callback function
+ * @param           password          The user's password
  */
 schema.methods.verifyPassword = function (password) {
   return bcrypt.compare (password, this.password);
@@ -105,7 +102,6 @@ schema.virtual ('client_id').get (function () {
  *
  * @param username
  * @param password
- * @param done
  */
 schema.statics.authenticate = function (username, password) {
   return this.findOne ({ username: username }).then (account => {

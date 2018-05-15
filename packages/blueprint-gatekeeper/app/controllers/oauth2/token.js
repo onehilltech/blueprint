@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const blueprint = require ('@onehilltech/blueprint');
 const { checkSchema } = require('express-validator/check');
 
 const {
@@ -25,6 +24,7 @@ const {
   model,
   service,
   env,
+  computed
 } = require ('@onehilltech/blueprint');
 
 const Granters = require ('../../-internal/granters');
@@ -116,8 +116,10 @@ const ValidateClientVisitor = ModelVisitor.extend ({
  * @constructor
  */
 module.exports = Controller.extend ({
+  _tokenGenerator: null,
+
   /// Listing of the supported grant types.
-  grantTypes: blueprint.computed ({
+  grantTypes: computed ({
     get () { return Object.keys (this.granters); }
   }),
 
@@ -130,10 +132,10 @@ module.exports = Controller.extend ({
   init () {
     this._super.call (this, ...arguments);
 
-    let tokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:access_token');
+    this._tokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:access_token');
 
     this.granters = transform (Granters, (results, Granter) => {
-      let granter = new Granter ({tokenGenerator});
+      let granter = new Granter ({tokenGenerator: this._tokenGenerator});
       results[granter.name] = granter;
     }, {});
   },
@@ -226,7 +228,7 @@ module.exports = Controller.extend ({
         const granter = this.granterFor (req);
 
         return granter.createToken (req)
-          .then (accessToken => accessToken.serialize ())
+          .then (accessToken => accessToken.serialize (this.controller._tokenGenerator))
           .then (accessToken => {
             const ret = Object.assign ({token_type: 'Bearer'}, accessToken);
             res.status (200).json (ret);

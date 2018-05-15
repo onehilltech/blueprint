@@ -15,8 +15,7 @@
  */
 
 const { props } = require ('bluebird');
-const blueprint = require ('@onehilltech/blueprint');
-const {Schema}  = require ('@onehilltech/blueprint-mongodb');
+const { Schema }  = require ('@onehilltech/blueprint-mongodb');
 const AccessToken = require ('./access-token');
 
 const {
@@ -29,14 +28,11 @@ const {
 
 const options = require ('./-common-options') ({discriminatorKey});
 
-const gatekeeper = blueprint.lookup ('service:gatekeeper');
-const accessTokenGenerator = gatekeeper.getTokenGenerator ('gatekeeper:access_token');
-
 // Define the schema for the client token.
 
 const schema = new Schema ({ }, options);
 
-schema.methods.serialize = function () {
+schema.methods.serialize = function (tokenGenerator) {
   return props ({
     access_token: (() => {
       const payload = { scope: this.scope };
@@ -45,12 +41,12 @@ schema.methods.serialize = function () {
       if (this.origin)
         options.audience = this.origin;
 
-      return accessTokenGenerator.generateTokenSync (payload, options);
+      return tokenGenerator.generateTokenSync (payload, options);
     })()
   });
 };
 
-schema.methods.serializeSync = function () {
+schema.methods.serializeSync = function (tokenGenerator) {
   return {
     access_token: (() => {
       const payload = { scope: this.scope };
@@ -59,7 +55,7 @@ schema.methods.serializeSync = function () {
       if (this.origin)
         options.audience = this.origin;
 
-      return accessTokenGenerator.generateTokenSync (payload, options);
+      return tokenGenerator.generateTokenSync (payload, options);
 
     }) ()
   };

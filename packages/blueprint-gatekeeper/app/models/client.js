@@ -17,7 +17,6 @@
 const discriminatorKey = 'type';
 const options = require ('./-common-options') ({discriminatorKey});
 const mongodb = require ('@onehilltech/blueprint-mongodb');
-const Account = require ('./account');
 
 const {
   Schema: {
@@ -49,10 +48,10 @@ let schema = new mongodb.Schema ({
 
   /// Accounts allowed to use the client. This list is used when the client
   /// is marked private.
-  allow: {type: [ObjectId], ref: Account.modelName},
+  allow: {type: [ObjectId], ref: 'account'},
 
   /// Accounts not allowed to use the client. This list is always used.
-  deny: {type: [ObjectId], ref: Account.modelName}
+  deny: {type: [ObjectId], ref: 'account'}
 }, options);
 
 

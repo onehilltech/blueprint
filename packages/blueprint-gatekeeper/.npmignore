@@ -32,6 +32,7 @@ node_modules/
 data/
 jade/
 tests/
+examples/
 
 # Do not install the application configurations as a library.
 app/configs

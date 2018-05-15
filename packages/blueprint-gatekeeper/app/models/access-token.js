@@ -17,14 +17,15 @@
 const discriminatorKey = 'type';
 
 const mongodb  = require ('@onehilltech/blueprint-mongodb');
-const Client   = require ('./client');
 const Schema   = mongodb.Schema;
-const ObjectId = mongodb.Schema.Types.ObjectId;
+const ref = mongodb.Schema.Types.ref;
+
+const Client   = require ('./client');
 const options  = require ('./-common-options') ({discriminatorKey});
 
 let schema = new Schema ({
   /// Client the token was created with.
-  client: {type: ObjectId, required: true, ref: Client.modelName, index: true},
+  client: ref (Client, {required: true, index: true}),
 
   /// Enabled state for the token.
   enabled: {type: Boolean, required: true, default : true},

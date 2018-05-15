@@ -17,7 +17,7 @@
 const blueprint = require ('@onehilltech/blueprint');
 const {expect} = require ('chai');
 
-describe.only ('app | services | gatekeeper', function () {
+describe ('app | services | gatekeeper', function () {
   function getService () {
     return blueprint.lookup ('service:gatekeeper');
   }

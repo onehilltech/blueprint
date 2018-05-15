@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-const assert = require ('assert');
-
-const {
-  seed
-} = require ('@onehilltech/blueprint-mongodb');
-
-const {
-  Test
-} = require ('supertest');
+const assert    = require ('assert');
+const { seed }  = require ('@onehilltech/blueprint-mongodb');
+const { Test }  = require ('supertest');
+const blueprint = require ('@onehilltech/blueprint');
 
 /**
  * Creates a Blueprint testing request that has already be initialized to a user.
  *
  * @param i       Index of user from dab file
- * @param conn    Name of database connection
+ * @param conn    Name of database connection, or default if no name provided
  */
-Test.prototype.withUserToken = function (i, conn = '$default') {
+Test.prototype.withUserToken = function (i, conn) {
   const {user_tokens} = seed (conn);
-  const accessToken = user_tokens[i].serializeSync ();
+  const gatekeeper = blueprint.lookup ('service:gatekeeper');
+  const tokenGenerator = gatekeeper.getTokenGenerator ('gatekeeper:access_token');
+
+  const accessToken = user_tokens[i].serializeSync (tokenGenerator);
 
   assert (!!accessToken, `The seed for ${conn} does not have a user_tokens.[${i}]`);
 
@@ -47,9 +45,12 @@ Test.prototype.fromUser = Test.prototype.withUserToken;
  * @param i     Index of client from dab file
  * @param conn    Name of database connection
  */
-Test.prototype.withClientToken = function (i, conn = '$default') {
+Test.prototype.withClientToken = function (i, conn) {
   const {client_tokens} = seed (conn);
-  const accessToken = client_tokens[i].serializeSync ();
+  const gatekeeper = blueprint.lookup ('service:gatekeeper');
+  const tokenGenerator = gatekeeper.getTokenGenerator ('gatekeeper:access_token');
+
+  const accessToken = client_tokens[i].serializeSync (tokenGenerator);
 
   assert (!!accessToken, `The seed for ${conn} does not have a client_tokens.[${i}]`);
 
