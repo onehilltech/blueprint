@@ -17,11 +17,10 @@
 const { Listener, computed, service } = require ('@onehilltech/blueprint');
 const path  = require ('path');
 const Email = require ('email-templates');
-const {omit, merge} = require ('lodash');
+const {omit, merge, get} = require ('lodash');
 
 // TODO Construct the real location of the template directory.
 let templateDir = path.resolve (__dirname, '../../resources/email');
-let email = null;
 
 const DEFAULT_STYLE = {
   primaryColor: '#2196F3'
