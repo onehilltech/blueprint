@@ -10,14 +10,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/onehilltech/gatekeeper.git"
+    "url": "https://github.com/onehilltech/blueprint-gatekeeper.git"
   },
   "dependencies": {
     "@onehilltech/blueprint-mongodb": "^1.0.0-37",
-    "async": "^2.5.0",
-    "bcrypt": "^2.0.0",
+    "bcrypt": "^2.0.1",
     "commander": "^2.11.0",
-    "core-object": "^3.1.5",
     "cors": "^2.8.4",
     "ejs": "^2.6.1",
     "email-templates": "^3.1.5",
@@ -32,7 +30,6 @@
     "pug": "^2.0.0-rc.4",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
-    "supertest": "^3.1.0",
     "uid-safe": "^2.1.5",
     "yargs": "^10.0.3"
   },
