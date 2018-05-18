@@ -28,7 +28,6 @@
     "mustache": "^2.3.0",
     "node-homedir": "^1.1.0",
     "node-mime": "^1.0.0",
-    "object-path": "^0.11.4",
     "passport": "^0.3.2",
     "pluralize": "^7.0.0",
     "require-all": "^2.2.0",
