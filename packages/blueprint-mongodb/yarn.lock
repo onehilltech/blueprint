@@ -20,9 +20,9 @@
     path "^0.12.7"
     supertest "^3.1.0"
 
-"@onehilltech/blueprint@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.0.1.tgz#93003c33c9841193c4e7cc033c0a287203598d43"
+"@onehilltech/blueprint@^4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.0.2.tgz#683a0de3b1c44aa9334a9aef07c6b4f0e9fe3747"
   dependencies:
     "@onehilltech/blueprint-cli-exts" "^1.2.2"
     base-object "^1.0.6"
@@ -42,7 +42,6 @@
     mustache "^2.3.0"
     node-homedir "^1.1.0"
     node-mime "^1.0.0"
-    object-path "^0.11.4"
     passport "^0.3.2"
     pluralize "^7.0.0"
     require-all "^2.2.0"
@@ -901,10 +900,6 @@ nopt@3.x:
 object-assign@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-3.0.0.tgz#9bedd5ca0897949bca47e7ff408062d549f587f2"
-
-object-path@^0.11.4:
-  version "0.11.4"
-  resolved "https://registry.yarnpkg.com/object-path/-/object-path-0.11.4.tgz#370ae752fbf37de3ea70a861c23bba8915691949"
 
 on-finished@^2.3.0, on-finished@~2.3.0:
   version "2.3.0"
