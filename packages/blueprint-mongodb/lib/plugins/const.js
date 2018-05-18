@@ -1,8 +1,20 @@
-const objectPath = require ('object-path');
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-const {
-  isEmpty
-} = require ('lodash');
+const { isEmpty, omit } = require ('lodash');
 
 /**
  * Schema type for a const field. The ConstSchema is a proxy for the real schema
@@ -86,30 +98,28 @@ function ConstPlugin (schema) {
 
   function onUpdate () {
     // Remove all const properties from the update object.
-    removeConst (this._update);
+    this._update = removeConst (this._update);
 
     // Remove all const properties from the $set action. If $set is
     // empty, then we need to remove its operation from the update.
     if (this._update.$set) {
-      removeConst (this._update.$set);
+      this._update.$set = removeConst (this._update.$set);
 
-      if (this._update.$set && isEmpty (this._update.$set))
+      if (isEmpty (this._update.$set))
         delete this._update.$set;
     }
 
     // Remove all const properties from the $unset action. If $unset is
     // empty, then we need to remove its operation from the update.
     if (this._update.$unset) {
-      removeConst (this._update.$unset);
+      this._update.$unset = removeConst (this._update.$unset);
 
-      if (this._update.$unset && isEmpty (this._update.$unset))
+      if (isEmpty (this._update.$unset))
         delete this._update.$unset;
     }
 
     function removeConst (obj) {
-      paths.forEach (function (path) {
-        objectPath.del (obj, path);
-      });
+      return omit (obj, paths);
     }
   }
 

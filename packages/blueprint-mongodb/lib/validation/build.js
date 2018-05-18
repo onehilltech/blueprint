@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-const {
-  extend,
-  transform,
-  mapValues
-} = require ('lodash');
-
-const {get, has} = require ('object-path');
+const { extend, transform, mapValues, get, has } = require ('lodash');
 
 const validators = {
   ObjectID: require ('./objectid'),

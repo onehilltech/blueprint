@@ -21,7 +21,7 @@ const ConstPlugin = require ('../../../../lib/plugins/const')
 describe ('lib | plugins | ConstPlugin', function () {
   let Person;
 
-  it ('should create a schema with the const fields', function () {
+  before (function () {
     let schema = new mongodb.Schema ({
       first_name: String,
       last_name: String,
@@ -33,6 +33,10 @@ describe ('lib | plugins | ConstPlugin', function () {
     schema.plugin (ConstPlugin);
 
     Person = mongodb.model ('person', schema, 'blueprint_persons');
+  });
+
+
+  it ('should create a schema with the const fields', function () {
     expect (Person.const ()).to.eql (['creator']);
   });
 
@@ -82,7 +86,7 @@ describe ('lib | plugins | ConstPlugin', function () {
       return Person.create ({first_name: 'Jack', last_name: 'Black', creator: 'me'})
         .then (person => {
           return Person.update ({id: person._id}, {creator: 'you'}, {new: true})
-            .then (({n,nModified,ok}) => {
+            .then (({n, nModified, ok}) => {
               expect (n).to.equal (0);
               expect (nModified).to.equal (0);
               expect (ok).to.equal (0);
