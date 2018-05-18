@@ -60,11 +60,22 @@ describe ('lib | ApplicationModule', function () {
   });
 
   describe ('lookup', function () {
-    it ('should lookup an entity', function () {
-      let app = blueprint.app;
-      let controller = app.module.lookup ('controller:main');
+    context ('string', function () {
+      it ('should lookup an entity', function () {
+        let app = blueprint.app;
+        let controller = app.module.lookup ('controller:main');
 
-      expect (controller).to.equal (app.module.resources.controllers.main);
+        expect (controller).to.equal (app.module.resources.controllers.main);
+      });
+    });
+
+    context ('array', function () {
+      it ('should lookup an entity', function () {
+        let app = blueprint.app;
+        let controller = app.module.lookup (['controller', 'main']);
+
+        expect (controller).to.equal (app.module.resources.controllers.main);
+      });
     });
   });
 });
