@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-const {get} = require ('object-path');
 const path  = require ('path');
 const {ensureDir} = require ('fs-extra');
 const debug  = require ('debug')('blueprint:app');
 const assert = require ('assert');
-const { forOwn, transform } = require ('lodash');
+const { forOwn, transform, get } = require ('lodash');
 
 const lookup = require ('./-lookup');
 const { BO, computed } = require ('base-object');
