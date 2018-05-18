@@ -18,7 +18,7 @@ const path  = require ('path');
 const {ensureDir} = require ('fs-extra');
 const debug  = require ('debug')('blueprint:app');
 const assert = require ('assert');
-const { forOwn, transform, get } = require ('lodash');
+const { forOwn, transform, get, isArray } = require ('lodash');
 
 const lookup = require ('./-lookup');
 const { BO, computed } = require ('base-object');
@@ -234,7 +234,17 @@ module.exports = BO.extend (Events, {
    * @returns {*}
    */
   lookup (component) {
-    if (component.startsWith ('config:')) {
+    // The component can be an array, or a string. We allow for an array because
+    // the name at any given level could have a period. This would be treated as a
+    // a nested name, and cause the search to go down one level.
+
+    if (isArray (component)) {
+      if (component[0] === 'config')
+        return get (this.configs, component.slice (1));
+      else
+        return lookup (this.resources, component);
+    }
+    else if (component.startsWith ('config:')) {
       // The configuration components are a special case because we do not
       // lump them with the other resources that can be defined in a module.
       const name = component.slice (7);
