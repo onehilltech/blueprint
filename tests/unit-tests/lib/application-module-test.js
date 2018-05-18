@@ -15,12 +15,8 @@
  */
 
 const path = require ('path');
+const { expect } = require ('chai');
 
-const {
-  expect
-} = require ('chai');
-
-const ApplicationModule = require ('../../../lib/application-module');
 const blueprint = require ('../../../lib');
 
 describe ('lib | ApplicationModule', function () {
