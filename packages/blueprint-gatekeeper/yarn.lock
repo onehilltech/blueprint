@@ -26,10 +26,10 @@
     lodash "^4.17.10"
 
 "@onehilltech/blueprint-mongodb@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.0.0.tgz#ecef2a94ed566cb6d4315480519ef2389ee61dac"
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.0.3.tgz#a4b2facbc84edf4341c847466e65e5c068da5779"
   dependencies:
-    "@onehilltech/blueprint" "^4.0.1"
+    "@onehilltech/blueprint" "^4.0.2"
     "@onehilltech/dab" "^1.0.7"
     moment "^2.19.1"
 
@@ -43,9 +43,9 @@
     path "^0.12.7"
     supertest "^3.1.0"
 
-"@onehilltech/blueprint@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.0.1.tgz#93003c33c9841193c4e7cc033c0a287203598d43"
+"@onehilltech/blueprint@^4.0.2":
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.0.3.tgz#58ad2f1885b5f7cd855f7022d943e6494fcaa2dc"
   dependencies:
     "@onehilltech/blueprint-cli-exts" "^1.2.2"
     base-object "^1.0.6"
@@ -65,7 +65,6 @@
     mustache "^2.3.0"
     node-homedir "^1.1.0"
     node-mime "^1.0.0"
-    object-path "^0.11.4"
     passport "^0.3.2"
     pluralize "^7.0.0"
     require-all "^2.2.0"
@@ -2485,10 +2484,6 @@ object-copy@^0.1.0:
     copy-descriptor "^0.1.0"
     define-property "^0.2.5"
     kind-of "^3.0.3"
-
-object-path@^0.11.4:
-  version "0.11.4"
-  resolved "https://registry.yarnpkg.com/object-path/-/object-path-0.11.4.tgz#370ae752fbf37de3ea70a861c23bba8915691949"
 
 object-visit@^1.0.0:
   version "1.0.1"

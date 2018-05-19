@@ -20,7 +20,8 @@ let blueprint = require ('@onehilltech/blueprint');
 
 module.exports = {
   baseUrl : 'http://localhost:5000/gatekeeper',
-  activationRequired: true,
+
+  activation: true,
 
   email : {
     transport: {

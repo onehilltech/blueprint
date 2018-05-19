@@ -17,7 +17,7 @@
 const { Listener, computed, service } = require ('@onehilltech/blueprint');
 const path  = require ('path');
 const Email = require ('email-templates');
-const {omit, merge, get} = require ('lodash');
+const {omit, merge, get, defaultsDeep} = require ('lodash');
 
 // TODO Construct the real location of the template directory.
 let templateDir = path.resolve (__dirname, '../../resources/email');
@@ -88,7 +88,7 @@ module.exports = Listener.extend ({
           message: {
             to: account.email
           },
-          locals: _.defaultsDeep ({
+          locals: defaultsDeep ({
             appName: this._appConfig.name,
             gatekeeperBaseUri: this._gatekeeperConfig.baseUrl,
             account: {
