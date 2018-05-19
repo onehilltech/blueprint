@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-const { policies: {check, all} } = require ('@onehilltech/blueprint');
-
-module.exports = all.ordered ([
-  check ('gatekeeper.auth.bearer'),
-  check ('gatekeeper.request.client')
-]);
+module.exports = {
+  apiKey: 'AIzaSyDuhZ8sT_ziDTm3SWAaunU2rRnR951eRDE',
+  dryRun: true
+};

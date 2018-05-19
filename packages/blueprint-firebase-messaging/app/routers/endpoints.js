@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-const { policies: {check, all} } = require ('@onehilltech/blueprint');
+const blueprint = require ('@onehilltech/blueprint');
 
-module.exports = all.ordered ([
-  check ('gatekeeper.auth.bearer'),
-  check ('gatekeeper.request.client')
-]);
+module.exports = {
+  '/gatekeeper': blueprint.mount ('@onehilltech/blueprint-gatekeeper:v1')
+};

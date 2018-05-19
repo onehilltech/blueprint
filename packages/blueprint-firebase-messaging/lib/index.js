@@ -1,1 +1,0 @@
-exports.Sender = require ('./Sender');

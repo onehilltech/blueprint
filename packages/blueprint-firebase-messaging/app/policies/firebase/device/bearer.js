@@ -1,37 +1,56 @@
-const {waterfall} = require ('async');
-const FirebaseDevice = require ('../../../models/firebase-device');
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 const {
-  errors: { HttpError }
+  Policy,
+  BadRequestError,
+  model,
+  service
 } = require ('@onehilltech/blueprint');
 
-module.exports = function (req, callback) {
-  waterfall ([
-    function (callback) {
-      let authorization = req.get ('authorization');
+/**
+ * @class BearerPolicy
+ *
+ * Bearer policy for the device token.
+ */
+module.exports = Policy.extend ({
+  fcm: service (),
 
-      if (!authorization)
-        return callback (new HttpError (400, 'missing_token', 'The request is missing the device token.'));
+  FirebaseDevice: model ('firebase-device'),
 
-      let [protocol,token] = authorization.split (' ');
+  runCheck (req) {
+    let authorization = req.get ('authorization');
 
-      if (protocol !== 'Bearer')
-        return callback (new HttpError (400, 'bad_protocol', 'The request has an unsupported authorization protocol.'));
+    if (!authorization)
+      return Promise.reject (new BadRequestError ('missing_token', 'The request is missing the device token.'));
 
-      FirebaseDevice.verifyDeviceToken (token, callback);
-    },
+    let [scheme,token] = authorization.split (' ');
 
-    function (payload, callback) {
-      FirebaseDevice.findById (payload.jti, callback);
-    },
+    if (scheme !== 'Bearer')
+      return Promise.reject (new BadRequestError ('bad_protocol', 'The request has an unsupported authorization protocol.'));
 
-    function (device, callback) {
-      if (!device)
-        return callback (null, false, 'The device for the request does not exist.');
+    return this.fcm.verifyToken (token)
+      .then (payload => this.FirebaseDevice.findById (payload.jti))
+      .then (device => {
+        if (!device)
+          return {failureCode: 'invalid_device', failureMessage: 'The device for the request does not exist.'};
 
-      req.device = device;
+        req.device = device;
 
-      return callback (null, true);
-    }
-  ], callback);
-};
+        return true;
+      });
+  }
+});

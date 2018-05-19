@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-const { policies: {check, all} } = require ('@onehilltech/blueprint');
-
-module.exports = all.ordered ([
-  check ('gatekeeper.auth.bearer'),
-  check ('gatekeeper.request.client')
-]);
+module.exports = {
+  connections: {
+    $default: {
+      uri: 'mongodb://localhost/blueprint_firebase_messaging',
+      seed: false,
+      options : {
+        readPreference: "primary",
+        forceServerObjectId: false,
+        w: 1,
+        autoReconnect: true,
+        keepAlive: 1,
+        poolSize: 5,
+      }
+    }
+  }
+};

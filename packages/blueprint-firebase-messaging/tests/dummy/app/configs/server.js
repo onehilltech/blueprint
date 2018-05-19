@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-const { policies: {check, all} } = require ('@onehilltech/blueprint');
+module.exports = {
+  protocols: {
+    http: {
+      port: 8080
+    }
+  },
 
-module.exports = all.ordered ([
-  check ('gatekeeper.auth.bearer'),
-  check ('gatekeeper.request.client')
-]);
+  middleware : {
+    validator  : { },
+    bodyParser : { json : { } },
+
+    morgan: {
+      format: 'dev',
+      immediate: true
+    }
+  }
+};

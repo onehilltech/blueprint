@@ -1,6 +1,6 @@
 {
   "name": "@onehilltech/blueprint-firebase-messaging",
-  "version": "0.48.4",
+  "version": "0.49.1",
   "description": "Google Firebase messaging module for Blueprint.js",
   "main": "lib/index.js",
   "keywords": [
@@ -9,7 +9,7 @@
     "messaging"
   ],
   "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive tests/unit-tests --reporter spec",
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive --reporter spec",
     "postversion": "npm publish",
     "postpublish": "git push origin master & git push origin --tags"
   },
@@ -24,12 +24,13 @@
   },
   "homepage": "https://github.com/onehilltech/blueprint-cloud-messaging#readme",
   "dependencies": {
-    "@onehilltech/blueprint-gatekeeper": "^0.73.3",
-    "node-gcm": "^0.14.6"
+    "@onehilltech/blueprint-gatekeeper": "^0.75.0",
+    "node-gcm": "^0.14.10"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^3.5.3",
-    "supertest": "^2.0.1"
+    "@onehilltech/blueprint-testing": "^0.7.0",
+    "coveralls": "^3.0.0",
+    "istanbul": "^0.4.5",
+    "mocha-lcov-reporter": "^1.3.0"
   }
 }

@@ -14,9 +14,24 @@
  * limitations under the License.
  */
 
-const { policies: {check, all} } = require ('@onehilltech/blueprint');
+const {
+  Listener,
+  model
+} = require ('@onehilltech/blueprint');
 
-module.exports = all.ordered ([
-  check ('gatekeeper.auth.bearer'),
-  check ('gatekeeper.request.client')
-]);
+const debug = require ('debug') ('blueprint:firebase:remove-tokens-for-account');
+
+/**
+ * @class RemoveTokensForAccount
+ *
+ * A listener that removes all device tokens for an account when the correspond
+ * account is deleted from the database.
+ */
+module.exports = Listener.extend ({
+  FirebaseDevice: model ('firebase-device'),
+
+  handleEvent (account) {
+    debug (`remove all devices tokens for account ${account.id}`);
+    return this.FirebaseDevice.remove ({user: account._id}).exec ();
+  }
+});

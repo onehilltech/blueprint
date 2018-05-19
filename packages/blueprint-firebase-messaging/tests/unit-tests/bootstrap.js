@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2018 One Hill Technologies, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +14,22 @@
  * limitations under the License.
  */
 
-const { policies: {check, all} } = require ('@onehilltech/blueprint');
+const path = require ('path');
+const blueprint = require ('@onehilltech/blueprint');
 
-module.exports = all.ordered ([
-  check ('gatekeeper.auth.bearer'),
-  check ('gatekeeper.request.client')
-]);
+before (function () {
+  const appPath = path.resolve ('./tests/dummy/app');
+  return blueprint.createApplicationAndStart (appPath);
+});
+
+beforeEach (function () {
+  return blueprint.emit ('blueprint.test.start')
+});
+
+afterEach (function () {
+  return blueprint.emit ('blueprint.test.complete');
+});
+
+after (function () {
+  return blueprint.destroyApplication ();
+});

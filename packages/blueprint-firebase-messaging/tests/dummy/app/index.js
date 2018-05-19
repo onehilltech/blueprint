@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*
  * Copyright (c) 2018 One Hill Technologies, LLC
  *
@@ -14,9 +16,7 @@
  * limitations under the License.
  */
 
-const { policies: {check, all} } = require ('@onehilltech/blueprint');
+const blueprint = require ('@onehilltech/blueprint');
 
-module.exports = all.ordered ([
-  check ('gatekeeper.auth.bearer'),
-  check ('gatekeeper.request.client')
-]);
+blueprint.createApplicationAndStart (__dirname)
+  .then (() => console.log ('The application is started.'));

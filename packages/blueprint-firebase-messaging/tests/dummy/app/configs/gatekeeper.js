@@ -14,9 +14,35 @@
  * limitations under the License.
  */
 
-const { policies: {check, all} } = require ('@onehilltech/blueprint');
+module.exports = {
+  baseUrl : 'http://localhost:5000/gatekeeper',
+  activationRequired: true,
 
-module.exports = all.ordered ([
-  check ('gatekeeper.auth.bearer'),
-  check ('gatekeeper.request.client')
-]);
+  email : {
+    transport: {
+      jsonTransport: true
+    },
+
+    views: {
+      options: {
+        extension: 'ejs'
+      }
+    },
+    message: {
+      from : 'no-reply@onehilltech.com',
+    },
+    locals: {
+      twitterHandle: 'onehilltech'
+    },
+  },
+
+  tokens: {
+    // This is the base options for all token generators.
+    $: {
+      algorithm: 'HS256',
+      secret: 'ssshhh',
+      issuer: 'firebase-messaging',
+      expiresIn: '1h'
+    }
+  }
+};
