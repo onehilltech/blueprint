@@ -18,7 +18,7 @@ const blueprint  = require ('@onehilltech/blueprint');
 const { seed }   = require ('@onehilltech/blueprint-mongodb');
 const { expect } = require ('chai');
 
-describe.only ('app | listeners | gatekeeper.account.created | send-activation-email', function () {
+describe ('app | listeners | gatekeeper.account.created | send-activation-email', function () {
   it ('should send a mock activate email', function () {
     const listener = blueprint.lookup (['listener', 'gatekeeper.account.created', 'send-activation-email']);
     const {accounts} = seed ();
