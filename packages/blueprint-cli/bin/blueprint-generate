@@ -90,7 +90,7 @@ function runGenerator (generatorPath, generator) {
 
     const context = new ProgramContext (Object.assign ({}, {args}, cmd));
 
-    templates.render (process.cwd (), context)
+    templates.render (context)
       .catch (err => console.log (err));
   }
 }

@@ -45,6 +45,12 @@ const TemplatePath = BO.extend ({
 
   init () {
     this._super.call (this, ...arguments);
+
+    if (!this.outputPath)
+      this.outputPath = process.cwd ();
+
+    if (!this.basePath)
+      this.basePath = this.outputPath;
   },
 
   /**
