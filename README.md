@@ -24,8 +24,15 @@ Features
 Getting Started
 ------------------
 
-See our [Developer Guide](https://onehilltech.gitbook.io/blueprint/) to get started
-using Blueprint.
+### New Developer
+
+Your first time using Blueprint? See our 
+[Getting Started](https://blueprint.onehilltech.com/quick-start/getting-started) guide.
+
+### Returning Developer
+
+Are you a returning developer? Jump right to our 
+[Developer's Guide](https://blueprint.onehilltech.com/developer-guide).
 
 Next Steps
 -----------------
