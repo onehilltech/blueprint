@@ -1,7 +1,7 @@
 Blueprint
 ================
 
-A lightweight, simple, elegant framework for building mean applications
+a solid framework for building APIs and backend services
 
 ![npm version](https://img.shields.io/npm/v/@onehilltech/blueprint.svg)
 ![node version](https://img.shields.io/node/v/@onehilltech/blueprint.svg)
