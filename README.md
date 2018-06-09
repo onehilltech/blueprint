@@ -20,9 +20,8 @@ Features
 * Encapsulate application logic into reusable components
 * Compose Blueprint applications from other Blueprint applications
 
-
-Getting Started
-------------------
+Developer Resources
+----------------------
 
 ### New Developer
 
