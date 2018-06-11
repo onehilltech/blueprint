@@ -152,7 +152,7 @@ module.exports = ResourceController.extend ({
             // insert the document, allow the client to make any modifications to the
             // the inserted document.
             return Promise.resolve (this.preCreateModel (req))
-              .then (() => this.createModel (document))
+              .then (() => this.createModel (req, document))
               .catch (this.translateErrorToHttpError.bind (this))
               .then (result => {
                 // Emit that the resource has been created. We do it after the post create
@@ -181,7 +181,7 @@ module.exports = ResourceController.extend ({
         return null;
       },
 
-      createModel (doc) {
+      createModel (req, doc) {
         const Model = this.controller.getModelForDocument (doc);
         return Model.create (doc);
       },
@@ -233,7 +233,7 @@ module.exports = ResourceController.extend ({
         return Promise.all (preparations)
           .then (results => {
             return Promise.resolve (this.preGetModels (req))
-              .then (() => this.getModels (...results))
+              .then (() => this.getModels (req, ...results))
               .then (models => {
                 // There was nothing found. This is not the same as having an empty
                 // model set returned from the query.
@@ -288,7 +288,7 @@ module.exports = ResourceController.extend ({
         return null;
       },
 
-      getModels (filter, projection, options) {
+      getModels (req, filter, projection, options) {
         return this.controller.model.find (filter, projection, options);
       },
 
@@ -336,7 +336,7 @@ module.exports = ResourceController.extend ({
         return Promise.all (preparations)
           .then (([id, projection, options]) => {
             return Promise.resolve (this.preGetModel (req))
-              .then (() => this.getModel (id, projection, options))
+              .then (() => this.getModel (req, id, projection, options))
               .then (model => {
                 // There was nothing found. This is not the same as having an empty
                 // model set returned from the query.
@@ -381,7 +381,7 @@ module.exports = ResourceController.extend ({
         return null;
       },
 
-      getModel (id, projection, options) {
+      getModel (req, id, projection, options) {
         return this.controller.model.findById (id, projection, options);
       },
 
@@ -436,7 +436,7 @@ module.exports = ResourceController.extend ({
 
         return Promise.all (preparations).then (([id, update, options]) => {
           return Promise.resolve (this.preUpdateModel (req))
-            .then (() => this.updateModel (id, update, options))
+            .then (() => this.updateModel (req, id, update, options))
             .then (model => {
               if (!model)
                 return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
@@ -488,7 +488,7 @@ module.exports = ResourceController.extend ({
         return null;
       },
 
-      updateModel (id, update, options) {
+      updateModel (req, id, update, options) {
         return this.controller.model.findByIdAndUpdate (id, update, options);
       },
 
@@ -536,7 +536,7 @@ module.exports = ResourceController.extend ({
 
         return Promise.resolve (this.getId (req, id)).then (id => {
           return Promise.resolve (this.preDeleteModel (req))
-            .then (() => this.deleteModel (id))
+            .then (() => this.deleteModel (req, id))
             .then (model => {
               // If there is no model, then we need to let the client know.
               if (!model)
@@ -561,7 +561,7 @@ module.exports = ResourceController.extend ({
 
       },
 
-      deleteModel (id) {
+      deleteModel (req, id) {
         return this.controller.model.findByIdAndRemove (id);
       },
 
@@ -588,7 +588,7 @@ module.exports = ResourceController.extend ({
         return Promise.resolve (this.getFilter (req, query))
           .then (filter => {
             return Promise.resolve (this.preCountModels (req))
-              .then (() => this.getCount (filter))
+              .then (() => this.getCount (req, filter))
               .then (count => {
                 this.emit (eventName, count);
                 return this.postCountModels (req, count)
@@ -602,7 +602,7 @@ module.exports = ResourceController.extend ({
         return query;
       },
 
-      getCount (filter) {
+      getCount (req, filter) {
         return this.controller.model.count (filter);
       },
 
