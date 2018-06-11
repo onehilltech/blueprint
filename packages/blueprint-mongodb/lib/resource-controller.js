@@ -85,6 +85,26 @@ module.exports = ResourceController.extend ({
   }),
 
   /**
+   * @class SingleResourceAction
+   *
+   * Base class for an action that applies to a single resource. The resource id
+   * is expected to be located at req.params[id].
+   */
+  SingleResourceAction: computed ({
+    get () {
+      return Action.extend ({
+        schema: {
+          [this.id]: {
+            in: 'params',
+            isMongoId: true,
+            toMongoId: true
+          }
+        },
+      })
+    }
+  }),
+
+  /**
    * Initialize the resource controller.
    */
   init (opts = {}) {
