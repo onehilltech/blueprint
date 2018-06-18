@@ -70,7 +70,7 @@ const DatabaseAction = Action.extend ({
    * Emit a event to the application.
    */
   emit () {
-    this.controller.app.emit (...arguments);
+    return this.controller.app.emit (...arguments);
   }
 });
 
