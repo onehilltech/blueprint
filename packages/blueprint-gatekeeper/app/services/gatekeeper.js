@@ -19,6 +19,10 @@ const { get, forOwn, merge } = require ('lodash');
 
 const TokenGenerator = require ('../../lib/token-generator');
 
+const {
+  Types: {ObjectId}
+} = require ('@onehilltech/blueprint-mongodb');
+
 const DEFAULT_BASE_OPTIONS = {
   issuer: 'gatekeeper',
 };
@@ -36,6 +40,10 @@ const BUILTIN_TOKEN_GENERATORS = {
     expiresIn: '10 minutes'
   }
 };
+
+function accountIdGenerator (account) {
+  return Promise.resolve (account._id || new ObjectId ())
+}
 
 /**
  * @class GatekeeperService
@@ -67,6 +75,8 @@ module.exports = Service.extend ({
       get () { return this._tokenGenerators; }
     });
   },
+
+  accountIdGenerator,
 
   /**
    * Parse the configuration, and initialize the service.
@@ -149,5 +159,14 @@ module.exports = Service.extend ({
    */
   verifyToken (token, opts = {}) {
     return this._tokenGenerator.verifyToken (token, opts);
-  }
+  },
+
+  /**
+   * Generate the id for an account.
+   *
+   * @param account
+   */
+  generateIdForAccount (account) {
+    return this.accountIdGenerator.call (null, account);
+  },
 });

@@ -17,7 +17,8 @@
 const {
   model,
   NotFoundError,
-  BadRequestError
+  BadRequestError,
+  service,
 } = require ('@onehilltech/blueprint');
 
 const { get } = require ('lodash');
@@ -29,27 +30,18 @@ const {
 } = require ('@onehilltech/blueprint-mongodb');
 
 /**
- * Default account id generator. This generator will just produce a new
- * ObjectId for each account.
- */
-function __generateAccountId (account) {
-  return Promise.resolve (account._id || new ObjectId ());
-}
-
-/**
  * @class AccountController
  */
 module.exports = ResourceController.extend ({
   model: model ('account'),
   namespace: 'gatekeeper',
 
-  _generateAccountId: null,
+  gatekeeper: service (),
+
   _tokenGenerator: null,
 
   init () {
     this._super.call (this, ...arguments);
-
-    this._generateAccountId = get (this.app.configs, 'gatekeeper.generatorsAccountId', __generateAccountId);
     this._tokenGenerator = this.app.lookup ('service:gatekeeper').getTokenGenerator ('gatekeeper:access_token');
   },
 
@@ -58,7 +50,7 @@ module.exports = ResourceController.extend ({
       prepareDocument (req, doc) {
         doc.created_by = req.user.client_id;
 
-        return this.controller._generateAccountId (doc).then (id => {
+        return this.controller.gatekeeper.generateIdForAccount (doc).then (id => {
           if (id)
             doc._id = id;
 
