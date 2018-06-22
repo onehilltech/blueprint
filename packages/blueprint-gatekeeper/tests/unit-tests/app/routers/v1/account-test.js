@@ -42,7 +42,7 @@ describe ('app | routers | account', function () {
         return request ()
           .get ('/v1/accounts')
           .withUserToken (0)
-          .query ({_sort: {username: 1}})
+          .query ({_: {sort: {username: 1}}})
           .expect (200, {'accounts': lean (accounts)});
       });
 
@@ -51,7 +51,7 @@ describe ('app | routers | account', function () {
 
         return request ()
           .get ('/v1/accounts')
-          .query ({_sort: {username: 1}})
+          .query ({_: {sort: {username: 1}}})
           .withUserToken (1)
           .expect (200, {'accounts': lean (accounts)});
       });
