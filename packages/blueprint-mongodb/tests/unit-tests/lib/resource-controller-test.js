@@ -30,7 +30,7 @@ const {
   omit
 } = require ('lodash');
 
-describe ('lib | ResourceController', function () {
+describe.only ('lib | ResourceController', function () {
   describe ('constructor', function () {
     it ('should create a resource controller', function () {
       const Author = blueprint.lookup ('model:author');
@@ -115,7 +115,7 @@ describe ('lib | ResourceController', function () {
 
       return request ()
         .get ('/authors')
-        .query ({_sort: {name: 1}})
+        .query ({_: {sort: {name: 1}}})
         .expect (200, {authors: lean (authors)});
     });
   });
@@ -133,9 +133,9 @@ describe ('lib | ResourceController', function () {
     it ('should populate the results', function () {
       const {users,authors} = seed ('$default');
 
-      request ()
-        .get (`/users/${users[0].id}?_populate=true`)
-        .query ({_populate: true})
+      return request ()
+        .get (`/users/${users[0].id}`)
+        .query ({_: {populate: true}})
         .expect (200, {
           users: [users[0].lean ()],
           authors: [authors[0].lean (), authors[1].lean ()]

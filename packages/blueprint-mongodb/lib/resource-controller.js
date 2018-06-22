@@ -31,7 +31,7 @@ const {
 } = require ('@onehilltech/blueprint');
 
 const validation = require ('./validation');
-const populate = require ('./populate');
+const populateHelper = require ('./populate');
 
 const LAST_MODIFIED = 'Last-Modified';
 
@@ -210,16 +210,10 @@ module.exports = ResourceController.extend ({
       execute (req, res) {
         // Update the options with those from the query string.
         let {query} = req;
+        let options = query._ || {};
 
-        // Copy the directives from the query, and then delete them.
-        const {_populate, _limit, _skip, _sort} = query;
-        query = omit (query, ['_populate','_limit','_skip','_sort']);
-
-        let options = { };
-
-        if (_limit) options.limit = _limit;
-        if (_skip) options.skip = _skip;
-        if (_sort) options.sort = _sort;
+        if (query._)
+          delete query._;
 
         // Prepare the filter, projection, and options for the request
         // against the database.
@@ -231,9 +225,9 @@ module.exports = ResourceController.extend ({
         ];
 
         return Promise.all (preparations)
-          .then (results => {
+          .then (([filter, projection, options]) => {
             return Promise.resolve (this.preGetModels (req))
-              .then (() => this.getModels (req, ...results))
+              .then (() => this.getModels (req, filter, projection, options))
               .then (models => {
                 // There was nothing found. This is not the same as having an empty
                 // model set returned from the query.
@@ -260,8 +254,8 @@ module.exports = ResourceController.extend ({
                 return this.postGetModels (req, models);
               })
               .then (data => {
-                if (_populate) {
-                  return populate.populateModels (data);
+                if (options.populate) {
+                  return populateHelper.populateModels (data);
                 }
                 else {
                   return {[this.controller.plural]: data};
@@ -319,18 +313,16 @@ module.exports = ResourceController.extend ({
       execute (req, res) {
         // Update the options with those from the query string.
         const id = req.params[this.controller.resourceId];
+        const query = req.query || {};
+        const options = query._ || {};
 
-        // Update the options with those from the query string.
-        let {query} = req;
-
-        // Copy the directives from the query, and then delete them.
-        const {_populate} = query;
-        query = delete query._populate;
+        if (query._)
+          delete query._;
 
         const preparations = [
           this.getId (req, id),
           this.getProjection (req),
-          this.getOptions (req, {})
+          this.getOptions (req, options)
         ];
 
         return Promise.all (preparations)
@@ -353,8 +345,8 @@ module.exports = ResourceController.extend ({
                 return this.postGetModel (req, model);
               })
               .then (data => {
-                if (_populate) {
-                  return populate.populateModel (data);
+                if (options.populate) {
+                  return populateHelper.populateModel (data);
                 }
                 else {
                   return {[this.controller.name]: data};
