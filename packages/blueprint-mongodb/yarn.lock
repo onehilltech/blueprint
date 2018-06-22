@@ -20,9 +20,9 @@
     path "^0.12.7"
     supertest "^3.1.0"
 
-"@onehilltech/blueprint@^4.0.4":
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.0.4.tgz#b50f04aa556f12b280e98083934fee0cf32e3768"
+"@onehilltech/blueprint@^4.0.5":
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.0.5.tgz#c8538d59a475dd60c928fe7ac11869870ae14476"
   dependencies:
     "@onehilltech/blueprint-cli-exts" "^1.2.2"
     base-object "^1.0.6"
