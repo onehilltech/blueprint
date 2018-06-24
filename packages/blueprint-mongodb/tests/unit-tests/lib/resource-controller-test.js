@@ -136,9 +136,11 @@ describe.only ('lib | ResourceController', function () {
       return request ()
         .get (`/users/${users[0].id}`)
         .query ({_: {populate: true}})
-        .expect (200, {
-          users: [users[0].lean ()],
-          authors: [authors[0].lean (), authors[1].lean ()]
+        .expect (200)
+        .then (res => {
+          expect (res.body).to.have.keys (['authors', 'users']);
+          expect (res.body.users).to.eql ([users[0].lean ()]);
+          expect (res.body.authors).to.have.deep.members ([authors[1].lean (), authors[0].lean ()]);
         });
     });
 

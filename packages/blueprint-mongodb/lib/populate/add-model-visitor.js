@@ -19,9 +19,11 @@ const {
   isEmpty
 } = require ('lodash');
 
+const BluebirdPromise = require ('bluebird');
+const debug = require ('debug')('blueprint-mongodb:populate:add-model-visitor');
+
 const PopulateVisitor = require ('./populate-visitor');
 
-const BluebirdPromise = require ('bluebird');
 
 /**
  * @class AddModelVisitor
@@ -39,8 +41,13 @@ const AddModelVisitor = PopulateVisitor.extend ({
     this.population._addModels (item.plural, [this.populated]);
     const populators = this.population.registry.models [item.key];
 
-    if (!isEmpty (populators))
-      this.promise = this.population._populateElement (populators, this.populated);
+    if (isEmpty (populators))
+      return;
+
+    this.promise = BluebirdPromise.props (mapValues (populators, (populator, key) => {
+      debug (`populating ${key}`);
+      return this.population._populateElement (populator, this.populated);
+    }))
   },
 
   visitPopulateArray (item) {
@@ -49,13 +56,13 @@ const AddModelVisitor = PopulateVisitor.extend ({
 
     const populators = this.population.registry.models [item.key];
 
-    if (populators) {
-      if (!isEmpty (populators))
-        this.promise = this.population._populateArray (populators, this.populated);
-    }
-    else {
-      this.promise = Promise.reject (new Error (`Populator for ${item.key} does not exist.`));
-    }
+    if (isEmpty (populators))
+      return;
+
+    this.promise = BluebirdPromise.props (mapValues (populators, (populator, key) => {
+      debug (`populating ${key}`);
+      this.promise = this.population._populateArray (populator, this.populated);
+    }));
   },
 
   visitPopulateEmbedded (item) {
