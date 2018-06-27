@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/onehilltech/blueprint-cloud-messaging#readme",
   "dependencies": {
-    "@onehilltech/blueprint-gatekeeper": "^0.78.1",
+    "@onehilltech/blueprint-gatekeeper": "^0.78.2",
     "node-gcm": "^0.14.10"
   },
   "devDependencies": {
