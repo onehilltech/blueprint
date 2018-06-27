@@ -18,8 +18,8 @@ const ModelRegistry = require ('./model-registry');
 const Population = require ('./population');
 
 function getModel (model) {
-  let name = model.constructor.modelName;
-  return model.db.models[name];
+  let modelName = model.constructor.modelName;
+  return model.db.models[modelName];
 }
 
 /**

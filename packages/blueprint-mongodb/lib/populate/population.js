@@ -56,14 +56,10 @@ module.exports = BO.extend ({
     this._models = {};
 
     // Lastly, initialize an empty set of the entire population.
-    const modelTypes = this.registry.modelTypes;
-
-    for (let i = 0, len = modelTypes.length; i < len; ++ i) {
-      const plural = pluralize (modelTypes[i]);
-
-      this._models[plural] = [];
-      this._ids[plural] = [];
-    }
+    this.registry.collectionNames.forEach (collectionName => {
+      this._models[collectionName] = [];
+      this._ids[collectionName] = [];
+    });
   },
 
   /**
@@ -72,26 +68,19 @@ module.exports = BO.extend ({
    * @param model
    */
   addModel (model) {
-    const modelName = model.constructor.modelName;
-    const type = pluralize (modelName);
-
-    let unseen = this._saveUnseenId (type, model);
+    const { collectionName, populators } = this.registry.lookup (model.constructor);
+    const unseen = this._saveUnseenId (collectionName, model);
 
     if (!unseen)
       return Promise.resolve (this);
 
     // Add the single model to the target collection.
-    this._addModels (type, [model]);
+    this._addModels (collectionName, [model]);
 
-    let populator = this.registry.lookup (model.constructor);
-
-    if (!populator)
-      return Promise.reject (`Populator for ${model.constructor} does not exist.`);
-
-    if (Object.keys (populator).length === 0)
+    if (isEmpty (populators))
       return Promise.resolve (this);
 
-    return this._populate (populator, model).then (() => this);
+    return this._populate (populators, model).then (() => this);
   },
 
   /**

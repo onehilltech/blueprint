@@ -32,8 +32,34 @@ const {
 
 const {
   forOwn,
-  isEmpty
+  isEmpty,
+  uniq,
+  transform
 } = require ('lodash');
+
+const pluralize = require ('pluralize');
+
+/**
+ * @class RegistryItem
+ *
+ * A single entry in the registry.
+ */
+const RegistryItem = BO.extend ({
+  populators: null,
+
+  Model: null,
+
+  collectionName: computed ({
+    get () {
+      let Model = this.Model;
+
+      while (!!Model.baseModelName)
+        Model = Model.db.models[Model.baseModelName];
+
+      return pluralize (Model.modelName);
+    }
+  }),
+});
 
 /**
  * @class ModelRegistry
@@ -45,9 +71,14 @@ const ModelRegistry = BO.extend ({
     get () { return this._models; }
   }),
 
-  modelTypes: computed ({
-    get () { return Object.keys (this._models).map (key => key.split (':')[1]); }
+  collectionNames: computed ({
+    get () {
+      let collectionNames = transform (this._models, (result, value, key) => {
+        result.push (value.collectionName);
+      }, []);
 
+      return uniq (collectionNames);
+    }
   }),
 
   init () {
@@ -63,15 +94,15 @@ const ModelRegistry = BO.extend ({
   addModel (Model) {
     const key = ModelRegistry.getKeyFromModel (Model);
 
-    if (this._models[key] !== undefined)
+    if (!!this._models[key])
       return;
 
     // Put in a placeholder for the time being. This will prevent a model from
     // being processed multiple times.
     debug (`creating populator for ${key}`);
 
-    this._models[key] = null;
-    this._models[key] = this._makePopulate (Model.db, Model.schema);
+    this._models[key] = new RegistryItem ({Model});
+    this._models[key].populators = this._makePopulate (Model.db, Model.schema);
   },
 
   lookup (Model) {

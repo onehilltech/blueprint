@@ -31,7 +31,9 @@ module.exports = Populate.extend ({
   Model: null,
 
   plural: computed ({
-    get () { return pluralize (this.Model.modelName) }
+    get () {
+      return pluralize (this.Model.modelName);
+    }
   }),
 
   /**

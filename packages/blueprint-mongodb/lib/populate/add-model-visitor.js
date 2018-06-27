@@ -39,7 +39,7 @@ const AddModelVisitor = PopulateVisitor.extend ({
 
   visitPopulateElement (item) {
     this.population._addModels (item.plural, [this.populated]);
-    const populators = this.population.registry.models [item.key];
+    const { populators } = this.population.registry.models [item.key];
 
     if (isEmpty (populators))
       return;
@@ -54,7 +54,7 @@ const AddModelVisitor = PopulateVisitor.extend ({
     // Add the array of model to our population.
     this.population._addModels (item.plural, this.populated);
 
-    const populators = this.population.registry.models [item.key];
+    const { populators } = this.population.registry.models [item.key];
 
     if (isEmpty (populators))
       return;
