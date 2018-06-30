@@ -38,9 +38,6 @@ let schema = new mongodb.Schema ({
   /// Contact email address for the account.
   email: { type: String, required: true, unique: true, trim: true},
 
-  /// The client that created the account.
-  created_by: ref (Client, {required: true, index: true, validation: {optional: true}, const: true}),
-
   /// Enabled state for the account.
   enabled: { type: Boolean, required: true, default: true },
 

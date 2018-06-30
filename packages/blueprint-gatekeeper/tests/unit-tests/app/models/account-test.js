@@ -40,7 +40,6 @@ describe ('app | models | account', function () {
           username: account.username,
           email: account.email,
           enabled: true,
-          created_by: native[0].id,
           scope: [],
           verification: {
             required: false

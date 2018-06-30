@@ -87,7 +87,6 @@ describe ('app | routers | account', function () {
                 scope: [],
                 username: data.username,
                 email: data.email,
-                created_by: native[0].id,
                 verification: {
                   required: false
                 }
@@ -111,7 +110,6 @@ describe ('app | routers | account', function () {
               scope: [],
               username: data.username,
               email: data.email,
-              created_by: native[0].id,
               verification: {
                 required: false
               }
@@ -131,7 +129,6 @@ describe ('app | routers | account', function () {
 
         let expected = Object.assign ({
           _id: autoLogin._id.toString (),
-          created_by: native[0].id,
           scope: [],
           enabled: true,
           verification: {
