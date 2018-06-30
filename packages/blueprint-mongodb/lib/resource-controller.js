@@ -594,9 +594,14 @@ module.exports = ResourceController.extend ({
 
     return DatabaseAction.extend ({
       execute (req, res) {
-        const query = req.query;
+        // Make a copy of the original query since we are going to make changes to it
+        // before passing it to the subclass.
+        const filter = Object.assign ({}, req.query);
 
-        return Promise.resolve (this.getFilter (req, query))
+        if (filter._)
+          delete filter._;
+
+        return Promise.resolve (this.getFilter (req, filter))
           .then (filter => {
             return Promise.resolve (this.preCountModels (req))
               .then (() => this.getCount (req, filter))
@@ -609,11 +614,19 @@ module.exports = ResourceController.extend ({
           });
       },
 
-      getFilter (req, query) {
-        return query;
+      getFilter (req, filter) {
+        return filter;
       },
 
       getCount (req, filter) {
+        // Get the directives from the request, and delete them from the filter
+        // if they exist.
+        const options = req.query._ || {};
+        const { deleted = false } = options;
+
+        if (!deleted && this.controller._softDelete)
+          filter['_stat.deleted_at'] = {$exists: false};
+
         return this.controller.model.count (filter);
       },
 

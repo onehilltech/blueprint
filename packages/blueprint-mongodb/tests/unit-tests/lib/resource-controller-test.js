@@ -290,5 +290,33 @@ describe.only ('lib | ResourceController', function () {
         .get ('/authors/count')
         .expect (200, {count: 7});
     });
+
+    it ('should not count deleted resources', function () {
+      const {books: [book]} = seed ('$default');
+
+      return request ()
+        .delete (`/books/${book.id}`)
+        .expect (200, 'true')
+        .then (() => {
+          return request ()
+            .get ('/books/count')
+            .expect ({ count: 3 });
+        });
+    });
+
+    it ('should include deleted resource upon request', function () {
+      const {books: [book]} = seed ('$default');
+
+      return request ()
+        .delete (`/books/${book.id}`)
+        .expect (200, 'true')
+        .then (() => {
+          return request ()
+            .get ('/books/count')
+            .query ({_: {deleted: true}})
+            .expect ({ count: 4 });
+        });
+
+    });
   });
 });
