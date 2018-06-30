@@ -135,6 +135,24 @@ describe.only ('lib | ResourceController', function () {
             });
         });
     });
+
+    it ('should get deleted resources upon request', function () {
+      const { books } = seed ();
+
+      return request ()
+        .delete (`/books/${books[0].id}`)
+        .expect (200, 'true')
+        .then (() => {
+          return request ()
+            .get ('/books')
+            .query ({_: {deleted: true}})
+            .expect (200)
+            .then (res => {
+              expect (res.body).to.have.keys (['books']);
+              expect (res.body.books).to.have.deep.members (lean (books));
+            });
+        });
+    });
   });
 
   describe ('getOne', function () {

@@ -17,11 +17,7 @@
 const pluralize = require ('pluralize');
 const assert = require ('assert');
 
-const {
-  extend,
-  omit,
-  forOwn
-} = require ('lodash');
+const { extend, forOwn} = require ('lodash');
 
 const {
   Action,
@@ -210,8 +206,7 @@ module.exports = ResourceController.extend ({
   getAll () {
     return DatabaseAction.extend ({
       execute (req, res) {
-        // Update the options with those from the query string.
-        let {query} = req;
+        let query = Object.assign ({}, req.query || {});
         let options = query._ || {};
 
         if (query._)
@@ -285,7 +280,10 @@ module.exports = ResourceController.extend ({
       },
 
       getModels (req, filter, projection, options) {
-        if (this.controller._softDelete)
+        const directives = req.query._ || {};
+        const { deleted } = directives;
+
+        if (!deleted && this.controller._softDelete)
           filter['_stat.deleted_at'] = {$exists: false};
 
         return this.controller.model.find (filter, projection, options);
