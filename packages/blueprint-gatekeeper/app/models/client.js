@@ -24,6 +24,8 @@ const {
   }
 } = mongodb;
 
+options.softDelete = true;
+
 let schema = new mongodb.Schema ({
   /// The type of client.
   type: {type: String, required: true},

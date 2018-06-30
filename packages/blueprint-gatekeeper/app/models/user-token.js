@@ -36,6 +36,7 @@ const {
 } = AccessToken;
 
 const options = require ('./-common-options') ({discriminatorKey});
+options.softDelete = true;
 
 // Define the schema for the user token.
 

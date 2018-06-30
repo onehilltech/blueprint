@@ -22,6 +22,7 @@ const ref = mongodb.Schema.Types.ref;
 
 const Client   = require ('./client');
 const options  = require ('./-common-options') ({discriminatorKey});
+options.softDelete = true;
 
 let schema = new Schema ({
   /// Client the token was created with.

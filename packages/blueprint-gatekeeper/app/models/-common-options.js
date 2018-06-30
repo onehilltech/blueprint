@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-const {env} = require ('@onehilltech/blueprint');
-const {
-  merge
-} = require ('lodash');
+const { env } = require ('@onehilltech/blueprint');
+const { merge } = require ('lodash');
 
 module.exports = function (opts) {
   const stats = env !== 'test';
