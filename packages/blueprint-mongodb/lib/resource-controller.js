@@ -162,7 +162,7 @@ module.exports = ResourceController.extend ({
 
                 // Set the headers for the response. We want to make sure that we support
                 // the caching headers even if they are not being used.
-                res.set (LAST_MODIFIED, result.getLastModified ().toUTCString ());
+                res.set (LAST_MODIFIED, result.last_modified.toUTCString ());
 
                 return this.postCreateModel (req, result);
               });
@@ -243,9 +243,9 @@ module.exports = ResourceController.extend ({
                 // last changed.
 
                 const lastModifiedTime = models.reduce ((acc, next) => {
-                  let time = next.getLastModified ().getTime ();
+                  let time = next.last_modified.getTime ();
                   return time > acc ? time : acc;
-                }, models[0].getLastModified ().getTime ());
+                }, models[0].last_modified.getTime ());
 
                 res.set ({
                   [LAST_MODIFIED]: new Date (lastModifiedTime).toUTCString ()
@@ -339,7 +339,7 @@ module.exports = ResourceController.extend ({
                 // response since it represents when this collection of models was last changed.
 
                 res.set ({
-                  [LAST_MODIFIED]: model.getLastModified ().toUTCString ()
+                  [LAST_MODIFIED]: model.last_modified.toUTCString ()
                 });
 
                 return this.postGetModel (req, model);
@@ -436,7 +436,7 @@ module.exports = ResourceController.extend ({
               this.emit (this.eventName, model);
 
               // Set the headers for the response.
-              res.set (LAST_MODIFIED, model.getLastModified ().toUTCString ());
+              res.set (LAST_MODIFIED, model.last_modified.toUTCString ());
 
               return this.postUpdateModel (req, model);
             })

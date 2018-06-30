@@ -18,19 +18,15 @@ const {expect}  = require ('chai');
 const blueprint = require ('@onehilltech/blueprint');
 const {request} = require ('@onehilltech/blueprint-testing');
 
-const {seed,lean} = require ('../../../lib');
+const { seed, lean } = require ('../../../lib');
 
 const {
-  Types: {
-    ObjectId
-  }
+  Types: { ObjectId }
 } = require ('mongoose');
 
-const {
-  omit
-} = require ('lodash');
+const { omit } = require ('lodash');
 
-describe ('lib | ResourceController', function () {
+describe.only ('lib | ResourceController', function () {
   describe ('constructor', function () {
     it ('should create a resource controller', function () {
       const Author = blueprint.lookup ('model:author');
