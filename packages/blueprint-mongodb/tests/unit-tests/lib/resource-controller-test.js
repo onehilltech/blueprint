@@ -240,6 +240,20 @@ describe.only ('lib | ResourceController', function () {
           });
       });
 
+      it ('should purge a soft deleted resource', function () {
+        const Book = blueprint.lookup ('model:book');
+        const {books: [book]} = seed ('$default');
+
+        return request ()
+          .delete (`/books/${book.id}`)
+          .query ({purge: true})
+          .expect (200, 'true')
+          .then (() => Book.findById (book.id))
+          .then (book => {
+            expect (book).to.equal (null);
+          });
+      });
+
       it ('should not double delete the resource', function () {
         const {books: [book]} = seed ('$default');
 

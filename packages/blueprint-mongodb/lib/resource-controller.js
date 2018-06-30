@@ -562,7 +562,9 @@ module.exports = ResourceController.extend ({
       },
 
       deleteModel (req, id) {
-        if (this.controller._softDelete) {
+        const { purge } = req.query;
+
+        if (!purge && this.controller._softDelete) {
           const selection = {_id: id, '_stat.deleted_at': { $exists: false}};
           const update = {$set: {'_stat.deleted_at': new Date ()}};
           const options = { new: true };
