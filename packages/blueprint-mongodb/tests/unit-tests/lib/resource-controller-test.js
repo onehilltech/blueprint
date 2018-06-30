@@ -246,6 +246,20 @@ describe.only ('lib | ResourceController', function () {
 
         return request ()
           .delete (`/books/${book.id}`)
+          .query ({purge: true})
+          .expect (200, 'true')
+          .then (() => Book.findById (book.id))
+          .then (book => {
+            expect (book).to.equal (null);
+          });
+      });
+
+      it ('should purge a deleted resource', function () {
+        const Book = blueprint.lookup ('model:book');
+        const {books: [book]} = seed ('$default');
+
+        return request ()
+          .delete (`/books/${book.id}`)
           .expect (200, 'true')
           .then (() => {
             return request ()
@@ -257,10 +271,6 @@ describe.only ('lib | ResourceController', function () {
           .then (book => {
             expect (book).to.equal (null);
           });
-      });
-
-      it ('should purge a deleted resource', function () {
-
       });
 
       it ('should not double delete the resource', function () {
