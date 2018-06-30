@@ -114,6 +114,27 @@ describe.only ('lib | ResourceController', function () {
         .query ({_: {sort: {name: 1}}})
         .expect (200, {authors: lean (authors)});
     });
+
+    it ('should not get deleted resources', function () {
+      const { books } = seed ();
+
+      return request ()
+        .delete (`/books/${books[0].id}`)
+        .expect (200, 'true')
+        .then (() => {
+          return request ()
+            .get ('/books')
+            .expect (200)
+            .then (res => {
+              expect (res.body).to.have.keys (['books']);
+              expect (res.body.books).to.have.deep.members ([
+                books[1].lean (),
+                books[2].lean (),
+                books[3].lean (),
+              ])
+            });
+        });
+    });
   });
 
   describe ('getOne', function () {

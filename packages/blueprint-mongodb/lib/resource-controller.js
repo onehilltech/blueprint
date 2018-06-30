@@ -285,6 +285,9 @@ module.exports = ResourceController.extend ({
       },
 
       getModels (req, filter, projection, options) {
+        if (this.controller._softDelete)
+          filter['_stat.deleted_at'] = {$exists: false};
+
         return this.controller.model.find (filter, projection, options);
       },
 
