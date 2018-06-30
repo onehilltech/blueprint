@@ -120,6 +120,8 @@ module.exports = ResourceController.extend ({
     assert (!!this.model, "You must define the 'model' property.");
     assert (this.model.schema.options.resource, `${modelName} is not a resource; model must be created using resource() method.`);
 
+    this._softDelete = this.model.schema.options.softDelete;
+
     // Build the validation schema for create and update.
     this._defaultValidationOptions = {scope: this.name};
   },
@@ -554,7 +556,16 @@ module.exports = ResourceController.extend ({
       },
 
       deleteModel (req, id) {
-        return this.controller.model.findByIdAndRemove (id);
+        if (this.controller._softDelete) {
+          const selection = {_id: id, '_stat.deleted_at': { $exists: false}};
+          const update = {$set: {'_stat.deleted_at': new Date ()}};
+          const options = { new: true };
+
+          return this.controller.model.findOneAndUpdate (selection, update, options);
+        }
+        else {
+          return this.controller.model.findByIdAndRemove (id);
+        }
       },
 
       postDeleteModel (req, result) {
@@ -679,35 +690,3 @@ module.exports = ResourceController.extend ({
     return update;
   }
 });
-
-/*
-
-ResourceController.prototype._getIdValidationSchema = function (opts) {
-  let defaults = objectPath (this._idOpts);
-
-  let id = objectPath (opts.id);
-  let validator = id.get ('validator', defaults.get ('validator', 'isMongoId'));
-  let validatorOptions = id.get ('validatorOptions', defaults.get ('validatorOptions'));
-  let errorMessage = id.get ('errorMessage', defaults.get ('errorMessage', 'Invalid resource id'));
-
-  let schema = {};
-  schema[this.id] = {
-    in: 'params'
-  };
-
-  schema[this.id][validator] = {errorMessage: errorMessage};
-
-  if (validatorOptions)
-    schema[this.id][validator].options = validatorOptions;
-
-  return schema;
-};
-
-ResourceController.prototype._getIdSanitizer = function (opts) {
-  let defaults = objectPath (this._idOpts);
-
-  let id = objectPath (opts.id);
-  return id.get ('sanitizer', defaults.get ('sanitizer', 'toMongoId'));
-};
-
-*/

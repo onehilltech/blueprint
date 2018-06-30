@@ -204,12 +204,35 @@ describe.only ('lib | ResourceController', function () {
 
   describe ('delete', function () {
     it ('should delete a single resource', function () {
-      const {authors} = seed ('$default');
-      const author = authors[0];
+      const {authors: [author]} = seed ('$default');
 
       return request ()
         .delete (`/authors/${author.id}`)
         .expect (200, 'true');
+    });
+
+    context ('soft delete', function () {
+      it ('should delete the resource', function () {
+        const Book = blueprint.lookup ('model:book');
+        const {books: [book]} = seed ('$default');
+
+        return request ()
+          .delete (`/books/${book.id}`)
+          .expect (200, 'true')
+          .then (() => Book.findById (book.id))
+          .then (book => {
+            expect (book._stat.deleted_at).to.be.a ('date');
+          });
+      });
+
+      it ('should not double delete the resource', function () {
+        const {books: [book]} = seed ('$default');
+
+        return request ()
+          .delete (`/books/${book.id}`)
+          .expect (200, 'true')
+          .then (() => request ().delete (`/books/${book.id}`).expect (404));
+      });
     });
   });
 

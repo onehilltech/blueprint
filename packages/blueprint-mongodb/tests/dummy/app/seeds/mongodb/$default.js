@@ -43,5 +43,12 @@ module.exports = {
       bookstore: {name: 'Borders', authors: [ref ('authors[3]')]},
       bookstores: [{name: 'Books-a-Million', authors: [ref ('authors[6]')]}]
     }
+  ],
+
+  books: [
+    { name: 'To Kill A Mockingbird' },
+    { name: 'The Great Gatsby' },
+    { name: 'Their Eyes Were Watching God' },
+    { name: 'Fences' }
   ]
 };
