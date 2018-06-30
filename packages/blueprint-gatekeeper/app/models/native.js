@@ -25,6 +25,7 @@ const {
 
 
 options.discriminatorKey = Client.schema.options.discriminatorKey;
+options.softDelete = true;
 
 const DEFAULT_SECRET_LENGTH = 128;
 

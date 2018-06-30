@@ -19,6 +19,7 @@ const Client  = require ('./client');
 const options = require ('./-common-options') ();
 
 options.discriminatorKey = Client.schema.options.discriminatorKey;
+options.softDelete = true;
 
 let schema = new mongodb.Schema ({
   /// The client secret, which can be auto-generated.
