@@ -15,9 +15,11 @@ describe ('lib | populate | ModelRegistry', function () {
         registry.addModel (Author);
 
         const aKey = ModelRegistry.getKeyFromModel (Author);
+        const models = registry.models;
 
-        expect (registry.models).to.have.keys ([aKey]);
-        expect (registry.models).to.have.deep.property (ModelRegistry.getKeyFromModel (Author), {});
+        expect (models).to.have.keys ([aKey]);
+        expect (models).to.have.nested.property (`${aKey}.Model`).to.equal (Author);
+        expect (models).to.have.nested.property (`${aKey}.populators`).to.eql ({});
       });
     });
 
@@ -32,29 +34,32 @@ describe ('lib | populate | ModelRegistry', function () {
 
         const aKey = ModelRegistry.getKeyFromModel (Author);
         const uKey = ModelRegistry.getKeyFromModel (User);
+        const models = registry.models;
 
         // favorite_author, blacklist
-        expect (registry.models).to.have.keys ([aKey, uKey]);
+        expect (models).to.have.keys ([aKey, uKey]);
 
         // favorite_author
-        expect (registry.models).to.have.deep.property (aKey, {});
+        expect (models).to.have.nested.property (aKey);
+        expect (models).to.have.nested.property (`${aKey}.Model`).to.equal (Author);
+        expect (models).to.have.nested.property (`${aKey}.populators`).to.eql ({});
 
         // blacklist
-        expect (registry.models).to.have.property (uKey).to.have.keys (['favorite_author', 'blacklist', 'bookstore', 'bookstores']);
-        expect (registry.models).to.have.property (uKey).to.have.property ('favorite_author').that.is.instanceof (PopulateElement);
-        expect (registry.models).to.have.property (uKey).to.have.property ('blacklist').that.is.instanceof (PopulateArray);
+        expect (models).to.have.nested.property (`${uKey}.populators`).to.have.keys (['favorite_author', 'blacklist', 'bookstore', 'bookstores']);
+        expect (models).to.have.nested.property (`${uKey}.populators`).to.have.property ('favorite_author').that.is.instanceof (PopulateElement);
+        expect (models).to.have.nested.property (`${uKey}.populators`).to.have.property ('blacklist').that.is.instanceof (PopulateArray);
       });
     });
   });
 
-  describe ('modelTypes', function () {
+  describe ('collectionNames', function () {
     it ('should return a list of model types', function () {
       const User = blueprint.lookup ('model:user');
       const registry = new ModelRegistry ();
 
       registry.addModel (User);
 
-      expect (registry.modelTypes).to.eql (['user','author']);
+      expect (registry.collectionNames).to.have.members (['users','authors']);
     });
   });
 });

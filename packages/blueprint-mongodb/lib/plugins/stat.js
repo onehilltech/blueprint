@@ -20,7 +20,17 @@ function transform (orig) {
  * @constructor
  */
 module.exports = function (schema) {
-  schema.add ({
+  // You cannot support soft delete and have a field marked as unique.
+  const { options: { softDelete = false }} = schema;
+
+  if (softDelete) {
+    schema.eachPath ((path, schema) => {
+      if (schema.options.unique)
+        throw new Error (`${path} cannot be unique and support soft delete`);
+    });
+  }
+
+  let fields = {
     _stat: {
       /// The time/date the resource was created.
       created_at: {type: Date, required: true, default: Date.now},
@@ -28,7 +38,17 @@ module.exports = function (schema) {
       /// The time/date the resource was modified.
       updated_at: {type: Date}
     }
-  });
+  };
+
+  // Update the scheme with the deleted_at field if the schema supports
+  // soft delete. This will be used to signify a document is deleted without
+  // actually deleting the document.
+
+
+  if (softDelete)
+    fields._stat.deleted_at = {type: Date};
+
+  schema.add (fields);
 
   // By default, the _stats property is not included in the transformed document. It
   // should be included if you want to ensure updated documents have different ETags.
@@ -52,6 +72,11 @@ module.exports = function (schema) {
    * Ensure the created_at field aways appears in the document.
    */
   schema.pre ('save', function (next) {
+    // You cannot save a document if it has been marked as deleted. Throw an
+    // error preventing the save from occurring.
+    if (softDelete && !!this._stat.deleted_at)
+      throw new Error ('You cannot save a deleted document.');
+
     if (this.isNew) {
       // The document is newly created. Make sure we have the created_at
       // field in the document.
@@ -81,23 +106,31 @@ module.exports = function (schema) {
 
   // Define helper methods for accessing the stats.
 
-  schema.methods.getCreatedAt = function () {
+  schema.virtual ('created_at').get (function () {
     return this._stat.created_at;
-  };
+  });
 
-  schema.methods.getUpdatedAt = function () {
+  schema.virtual ('updated_at').get (function () {
     return this._stat.updated_at;
-  };
+  });
 
-  schema.methods.getLastModified = function () {
+  schema.virtual ('deleted_at').get (function () {
+    return this._stat.deleted_at;
+  });
+
+  schema.virtual ('is_deleted').get (function () {
+    return !!this._stat.deleted_at;
+  });
+
+  schema.virtual ('last_modified').get (function () {
     return this._stat.updated_at || this._stat.created_at;
-  };
+  });
 
-  schema.methods.isOriginal = function () {
-    return this._stat.updated_at === undefined;
-  };
+  schema.virtual ('is_original').get (function () {
+    return !this._stat.updated_at && !this._stat.deleted_at;
+  });
 
-  schema.methods.isOutdated = function (lastUpdateTime) {
+  schema.methods.outdated = function (lastUpdateTime) {
     return this._stat.updated_at && moment (this._stat.updated_at).isAfter (lastUpdateTime);
   };
   
@@ -105,4 +138,7 @@ module.exports = function (schema) {
   // based on the corresponding timestamps.
   schema.path ('_stat.created_at').index (true);
   schema.path ('_stat.updated_at').index (true);
-}
+
+  if (softDelete)
+    schema.path ('_stat.deleted_at').index (true);
+};

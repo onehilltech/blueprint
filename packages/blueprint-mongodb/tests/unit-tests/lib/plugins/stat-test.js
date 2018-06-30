@@ -4,99 +4,120 @@ const StatPlugin = require ('../../../../lib/plugins/stat');
 
 describe ('lib | plugins | StatPlugin', function () {
   let Person;
+  let PersonSoftDelete;
 
-  it ('should create a schema with the StatPlugin', function () {
-    let schema = new mongodb.Schema ({first_name: String, last_name: String});
-    schema.plugin (StatPlugin);
+  describe ('plugin', function () {
+    it ('should add plugin to schema', function () {
+      let schema = new mongodb.Schema ({first_name: String, last_name: String});
+      schema.plugin (StatPlugin);
 
-    expect (schema.paths).to.have.property ('_stat.created_at');
-    expect (schema.paths).to.have.property ('_stat.updated_at');
+      expect (schema.paths).to.have.property ('_stat.created_at');
+      expect (schema.paths).to.have.property ('_stat.updated_at');
 
-    Person = mongodb.model ('person', schema, 'blueprint_persons');
+      Person = mongodb.model ('person', schema, 'blueprint_persons');
+    });
+
+    context ('soft delete', function () {
+      it ('should add plugin to schema with delete property', function () {
+        let schema = new mongodb.Schema ({first_name: String, last_name: String}, {softDelete: true});
+        schema.plugin (StatPlugin);
+
+        expect (schema.paths).to.have.property ('_stat.created_at');
+        expect (schema.paths).to.have.property ('_stat.updated_at');
+        expect (schema.paths).to.have.property ('_stat.deleted_at');
+
+        PersonSoftDelete = mongodb.model ('person', schema, 'blueprint_persons');
+      });
+
+      it ('should not allow unique fields', function () {
+        let schema = new mongodb.Schema ({
+          first_name: {type: String, unique: true},
+          last_name: String,
+        }, {softDelete: true});
+
+        expect (() => { schema.plugin (StatPlugin) }).to.throw ('first_name cannot be unique and support soft delete');
+      })
+    });
   });
 
-  let person;
-
-  describe ('saving a new document', function () {
-    describe ('#getCreatedAt', function () {
+  describe ('save', function () {
+    describe ('new document', function ()  {
       it ('should get the date/time the document was created', function () {
-        person = new Person ({first_name: 'James', last_name: 'Hill'});
+        let person = new Person ({first_name: 'James', last_name: 'Hill'});
 
         return person.save ().then (model => {
-          expect (model.getCreatedAt ()).to.eql (person._stat.created_at);
-          person = model;
+          expect (model.created_at).to.eql (person._stat.created_at);
+          expect (person.updated_at).to.equal (undefined);
+          expect (person.is_original).to.equal (true);
+        });
+      });
+
+      context ('soft delete', function () {
+        it ('should not update the deleted_at property', function () {
+          let person = new PersonSoftDelete ({first_name: 'James', last_name: 'Hill'});
+
+          return person.save ().then (model => {
+            expect (model._stat.deleted_at).to.equal (undefined);
+          });
         });
       });
     });
 
-    describe ('#getUpdatedAt', function () {
-      it ('should not have an updated date/time', function () {
-        expect (person.getUpdatedAt ()).to.be.undefined;
-      });
-    });
-
-    describe ('#isOriginal', function () {
-      it ('should see the new document as original', function () {
-        expect (person.isOriginal ()).to.be.true;
-      });
-    });
-  });
-
-  describe ('saving an existing document', function () {
-    describe ('#getCreatedAt', function () {
-      it ('should not change the created_at date/time', function () {
+    describe ('existing document', function () {
+      it ('should not change the created_at', function () {
+        let person = new Person ({first_name: 'James', last_name: 'Hill'});
         person.first_name = 'John';
 
-        return person.save ().then (model => {
-          expect (model.getCreatedAt ()).to.eql (person.getCreatedAt ());
-          person = model;
+        return person.save ().then (person => {
+          // Update the person, and save it again.
+          person.first_name = 'John';
+
+          return person.save ().then (model => {
+            expect (model.created_at).to.eql (person.created_at);
+            expect (person.updated_at).be.a ('date');
+            expect (person.updated_at).to.not.eq (person.created_at);
+
+            expect (person.outdated (Date.now () - (5 * 24 * 60 * 60))).to.equal (true);
+            expect (person.is_original).to.equal (false);
+          });
         });
       });
-    });
 
-    describe ('#getUpdatedAt', function () {
-      it ('should have an updated date/time', function () {
-        expect (person.getUpdatedAt ()).to.not.be.undefined;
-      });
+      context ('soft delete', function () {
+        it ('should not change the created_at', function () {
+          let person = new PersonSoftDelete ({first_name: 'James', last_name: 'Hill'});
+          person.first_name = 'John';
 
-      it ('should not be the same as created_at', function () {
-        expect (person.getUpdatedAt ()).to.not.eq (person.getCreatedAt ());
-      });
-    });
+          return person.save ().then (person => {
+            // Update the person, and save it again.
+            person.first_name = 'John';
 
-    describe ('#isOutdated', function () {
-      it ('should see the resource as outdated', function () {
-        expect (person.isOutdated (Date.now () - (5 * 24 * 60 * 60))).to.be.true;
-      });
-    });
+            return person.save ().then (model => {
+              expect (model.created_at).to.eql (person.created_at);
+              expect (person.updated_at).be.a ('date');
+              expect (person.updated_at).to.not.eq (person.created_at);
 
-    describe ('#isOriginal', function () {
-      it ('should see updated document as not original', function () {
-        expect (person.isOriginal ()).to.be.false;
+              expect (person.outdated (Date.now () - (5 * 24 * 60 * 60))).to.equal (true);
+              expect (person.is_original).to.equal (false);
+            });
+          });
+        });
       });
     });
   });
 
-  describe ('updating an existing document', function () {
-    let updated;
+  describe ('update', function () {
+    it ('should update an existing document', function () {
+      let person = new Person ({first_name: 'James', last_name: 'Hill'});
+      person.first_name = 'John';
 
-    describe ('#getUpdatedAt', function () {
-      it ('should have an updated date/time', function () {
-        let person2 = new Person ({first_name: 'John', last_name: 'Doe'});
+      return person.save ()
+        .then (model => Person.findByIdAndUpdate (model._id, {$set: {first_name: 'Jack'}}, {new: true}))
+        .then (model => {
+          expect (model.updated_at).to.a ('date');
+          expect (model.outdated (Date.now () - (5 * 24 * 60 * 60))).to.be.true;
 
-        return person2.save ()
-          .then (model => Person.findByIdAndUpdate (model._id, {$set: {first_name: 'Jack'}}, {new: true}))
-          .then (model => {
-            expect (model.getUpdatedAt ()).to.not.be.undefined;
-            updated = model;
-          });
-      });
-    });
-
-    describe ('#isOutdated', function () {
-      it ('should see the resource as outdated', function () {
-        expect (updated.isOutdated (Date.now () - (5 * 24 * 60 * 60))).to.be.true;
-      });
+        });
     });
   });
 });

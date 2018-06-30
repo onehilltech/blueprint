@@ -30,7 +30,7 @@ const {
   omit
 } = require ('lodash');
 
-describe.only ('lib | ResourceController', function () {
+describe ('lib | ResourceController', function () {
   describe ('constructor', function () {
     it ('should create a resource controller', function () {
       const Author = blueprint.lookup ('model:author');
