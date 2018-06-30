@@ -23,13 +23,6 @@ module.exports = function (schema) {
   // You cannot support soft delete and have a field marked as unique.
   const { options: { softDelete = false }} = schema;
 
-  if (softDelete) {
-    schema.eachPath ((path, schema) => {
-      if (schema.options.unique)
-        throw new Error (`${path} cannot be unique and support soft delete`);
-    });
-  }
-
   let fields = {
     _stat: {
       /// The time/date the resource was created.
