@@ -168,6 +168,19 @@ describe.only ('lib | ResourceController', function () {
             }
           }]});
     });
+
+    it ('should not get a deleted resource', function () {
+      const { books: [book]} = seed ();
+
+      return request ()
+        .delete (`/books/${book.id}`)
+        .expect (200, 'true')
+        .then (() => {
+          return request ()
+            .get (`/books/${book.id}`)
+            .expect (404, { errors: [ { code: 'not_found', detail: 'Not found', status: '404' } ] });
+        });
+    });
   });
 
   describe ('update', function () {

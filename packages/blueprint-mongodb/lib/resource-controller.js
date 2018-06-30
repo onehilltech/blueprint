@@ -376,7 +376,13 @@ module.exports = ResourceController.extend ({
       },
 
       getModel (req, id, projection, options) {
-        return this.controller.model.findById (id, projection, options);
+        if (this.controller._softDelete) {
+          const selection = { _id: id, '_stat.deleted_at': { $exists: false }};
+          return this.controller.model.findOne (selection, projection, options);
+        }
+        else {
+          return this.controller.model.findById (id, projection, options);
+        }
       },
 
       postGetModel (req, models) {
