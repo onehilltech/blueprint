@@ -40,11 +40,11 @@ describe ('lib | models', function () {
   describe ('resource', function () {
     it ('should create resource on default connection', function () {
       const schema = new Schema ({ title: String, author: String });
-      const Book = resource ('book', schema);
-      expect (Book).to.have.nested.property ('schema.options.resource', true);
+      const Novel = resource ('novel', schema);
+      expect (Novel).to.have.nested.property ('schema.options.resource', true);
 
       const connection = blueprint.lookup ('service:mongodb').defaultConnection;
-      expect (connection).to.have.nested.property ('models.book', Book);
+      expect (connection).to.have.nested.property ('models.novel', Novel);
     });
   });
 
