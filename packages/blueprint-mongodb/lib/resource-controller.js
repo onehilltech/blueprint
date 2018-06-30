@@ -483,7 +483,13 @@ module.exports = ResourceController.extend ({
       },
 
       updateModel (req, id, update, options) {
-        return this.controller.model.findByIdAndUpdate (id, update, options);
+        if (this.controller._softDelete) {
+          const selection = { _id: id, '_stat.deleted_at': {$exists: false}};
+          return this.controller.model.findOneAndUpdate (selection, update, options);
+        }
+        else {
+          return this.controller.model.findByIdAndUpdate (id, update, options);
+        }
       },
 
       /**

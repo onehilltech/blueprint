@@ -49,6 +49,6 @@ module.exports = {
     { name: 'To Kill A Mockingbird' },
     { name: 'The Great Gatsby' },
     { name: 'Their Eyes Were Watching God' },
-    { name: 'Fences' }
+    { name: 'Fences'}
   ]
 };

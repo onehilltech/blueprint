@@ -200,6 +200,21 @@ describe.only ('lib | ResourceController', function () {
         .send ({user: {last_name: null}})
         .expect (200, {user: omit (user.lean (), 'last_name')});
     });
+
+    it ('should not update a deleted resource', function () {
+      const {books: [,,,deleted]} = seed ('$default');
+      const update = {name: 'Adam Douglas'};
+
+      return request ()
+        .delete (`/books/${deleted.id}`)
+        .expect (200, 'true')
+        .then (() => {
+          return request ()
+            .put (`/authors/${deleted.id}`)
+            .send ({author: update})
+            .expect (404);
+        });
+    });
   });
 
   describe ('delete', function () {
