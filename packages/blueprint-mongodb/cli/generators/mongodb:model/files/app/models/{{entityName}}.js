@@ -7,4 +7,4 @@ const schema = Schema ({
   // add your schema definition here
 });
 
-module.exports = mongodb.resource ('{{entityName}}', schema{{#if collectionName}}, '{{collectionName}}'{{/if}});
+module.exports = mongodb.resource ('{{entityBaseName}}', schema{{#if collectionName}}, '{{collectionName}}'{{/if}});
