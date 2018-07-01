@@ -205,13 +205,48 @@ their order of execution.
   * **preCreateModel (req)**
   * **createModel (req, doc)**
   * **postCreateModel (req, model)**
-  * **prepareResponse (req, res, response)**
+  * **prepareResponse (req, res, result)**
   
 * **`getOne`**
+  * **getId (req, id)**
+  * **getProjection(req)**
+  * **getOptions (req, options)**
+  * **preGetModel (req)**
+  * **getModel (req, id, projection, options)**
+  * **postGetModel (req, model)**
+  * **prepareResponse (req, res, result)**
+  
 * **`getAll`**
+  * **getFilter (req, query)**
+  * **getProjection (req)**
+  * **getOptions (req, options)**
+  * **preGetModels (req)**
+  * **getModels (req, filter, projection, options)**
+  * **postGetModels (req, models)**
+  * **.prepareResponse (req, res, result)**
+  
 * **`update`**
+  * **getId (req, id)**
+  * **getUpdate (req, update)**
+  * **getOptions (req, options)**
+  * **preUpdateModel (req)**
+  * **updateModel (req, id, update, options)**
+  * **postUpdateModel (req, model)**
+  * **prepareResponse (req, res, result)**
+  
 * **`delete`**
+  * **getId (req, id)**
+  * **preDeleteModel (req)**
+  * **deleteModel (req, id)**
+  * **postDeleteModel (req, model)**
+  * **prepareResponse (req, res, model, result)**
+  
 * **`count`**
+  * **getFilter (req, filter)**
+  * **preCountModels (req)**
+  * **getCount (req, filter)**
+  * **postCountModels (req, count)**
+  * **prepareResponse (req, res, result)**
 
 You can return a `Promise` the overloaded method if you need to perform
 asynchronous execution.
