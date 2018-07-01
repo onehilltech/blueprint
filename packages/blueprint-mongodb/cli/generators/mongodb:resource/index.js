@@ -23,6 +23,7 @@ module.exports = EntityGenerator.extend ({
 
   options: {
     '--collection <name>': 'name of the collection',
+    '--route <path>': 'access route for the resource (default=/[plural-name])',
     '--soft-delete': 'enable support for soft deleting resource'
   },
 
@@ -36,7 +37,10 @@ module.exports = EntityGenerator.extend ({
       return this.args[0].replace (path.sep, '.');
     },
 
-    route () {
+    resourcePath () {
+      if (this.route)
+        return this.route;
+
       let parts = this.args[0].split (path.sep);
       let baseName = parts[parts.length - 1];
 
