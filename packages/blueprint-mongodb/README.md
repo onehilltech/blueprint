@@ -10,14 +10,14 @@ A Blueprint.js module for MongoDB
 
 
 Installation
-------------
+=============
 
     npm install @onehilltech/blueprint-mongodb --save
 
 Usage
------
+========
 
-### Configuration
+## Configuration
 
 Define the `mongodb.js` configuration file in your Blueprint.js application.
 
@@ -41,7 +41,7 @@ module.exports = {
 };
 ```
 
-### Models
+## Models
 
 Models represent the different collections stored in the [MongoDB](https://www.mongodb.com) 
 database. The models are defined using [Mongoose schemas](http://mongoosejs.com/docs/guide.html).
@@ -168,7 +168,7 @@ framework.
 The prefix in the event name is optional. It is defined by the `eventPrefix` property
 passed to the `ResourceController` constructor.
  
-### GridFSController
+## GridFSController
 
 The `GridFSController` is a [Blueprint.js](https://github.com/onehilltech/blueprint) 
 resource controller designed for [GridFS](https://docs.mongodb.com/manual/core/gridfs/) 
@@ -183,23 +183,20 @@ parameter used for the upload, and what connection on the database to use for Gr
 Below is an example `GridFSController` for storing images that use the default connection.
 
 ```javascript
-'use strict';
+const { GridFSController } = require ('@onehilltech/blueprint-mongodb');
 
-var blueprint        = require ('@onehilltech/blueprint')
-  , mongodb          = require ('@onehilltech/blueprint-mongodb')
-  , GridFSController = mongodb.GridFSController
-  ;
-
-function ImageController () {
-  GridFSController.call (this, mongodb.getConnectionManager ().defaultConnection, {name: 'image'});
-}
-
-blueprint.controller (ImageController, GridFSController);
-
-module.exports = ImageController;
+/**
+ * @class ImageController
+ */
+module.exports = GridFSController.extend ({
+  // name of the resource
+  name: 'image',       
+});
 ```
 
 This controller will extract the uploaded file from the `image` parameter.
 In addition, it will create collections named `image.files` and `image.chunks`
-in the database associated with the connection. If you want to use a different 
-connection, then use the `getConnection(name)` method on the `ConnectionManager`.
+in the database associated with the connection. See 
+[`GridFSController`](https://github.com/onehilltech/blueprint-mongodb/blob/master/lib/gridfs-controller.js) 
+for the optional properties to configure the controller's behavior.
+
