@@ -71,8 +71,6 @@ describe ('app | routers | account', function () {
       const data = { username: 'tester1', password: 'tester1', email: 'james@onehilltech.com' };
 
       it ('should create a new account with new id', function () {
-        const {native} = seed ('$default');
-
         return request ()
           .post ('/v1/accounts')
           .send ({account: data})
@@ -95,40 +93,29 @@ describe ('app | routers | account', function () {
           });
       });
 
-      it ('should create a new account with existing id', function () {
-        const {native} = seed ('$default');
+      it ('should not allow client to set account id', function () {
         const _id = new ObjectId ();
 
         return request ()
           .post ('/v1/accounts')
           .send ({account: Object.assign ({_id}, data)})
           .withClientToken (0)
-          .expect (200, {
-            account: {
-              _id: _id.toString (),
-              enabled: true,
-              scope: [],
-              username: data.username,
-              email: data.email,
-              verification: {
-                required: false
-              }
-            }
+          .expect (200)
+          .then (res => {
+            expect (res.body).to.have.nested.property ('account._id').to.not.equal (_id.toString ());
           });
       });
 
-      it ('should create a new account, and login the user', function () {
-        const {native} = seed ('$default');
+      // NEED TEST FOR CREATING PREVIOUSLY DELETED ACCOUNT.
 
+      it ('should create a new account, and login the user', function () {
         const autoLogin = {
-          _id: new ObjectId (),
           username: 'auto-login',
           password: 'auto-login',
           email: 'auto-login@onehilltech.com'
         };
 
         let expected = Object.assign ({
-          _id: autoLogin._id.toString (),
           scope: [],
           enabled: true,
           verification: {
@@ -142,6 +129,9 @@ describe ('app | routers | account', function () {
           .send ({account: autoLogin})
           .withClientToken (0)
           .expect (200).then (res => {
+            const { account: {_id}} = res.body;
+            expected._id = _id.toString ();
+
             expect (res.body.account).to.eql (expected);
             expect (res.body).to.have.property ('token');
 
@@ -325,12 +315,19 @@ describe ('app | routers | account', function () {
 
     context ('DELETE', function () {
       it ('should allow account owner to delete account', function () {
-        const {accounts} = seed ('$default');
+        const {accounts: [account]} = seed ('$default');
 
         return request ()
-          .delete (`/v1/accounts/${accounts[0].id}`)
+          .delete (`/v1/accounts/${account.id}`)
           .withUserToken (0)
-          .expect (200, 'true');
+          .expect (200, 'true')
+          .then (() => {
+            const Account = blueprint.lookup ('model:account');
+
+            return Account.findById (account.id).then (account => {
+              expect (account.is_deleted).to.equal (true);
+            });
+          });
       });
 
       it ('should not allow user to delete account of another user', function () {

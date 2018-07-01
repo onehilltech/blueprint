@@ -25,13 +25,13 @@
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-mongodb@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.4.0.tgz#24bb3f9fea45559b7da9b662f7274d5f5db9c4ec"
+"@onehilltech/blueprint-mongodb@^1.5.2":
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.5.2.tgz#449bed959c5296cabb508e2a21a373bc4e97d4a9"
   dependencies:
     "@onehilltech/blueprint" "^4.0.5"
     "@onehilltech/dab" "^1.0.9"
-    moment "^2.19.1"
+    moment "^2.22.2"
 
 "@onehilltech/blueprint-testing@^0.7.0":
   version "0.7.0"
@@ -2240,9 +2240,13 @@ mocha@^5.1.1:
     mkdirp "0.5.1"
     supports-color "4.4.0"
 
-moment@^2.18.1, moment@^2.19.1:
+moment@^2.18.1:
   version "2.22.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.1.tgz#529a2e9bf973f259c9643d237fda84de3a26e8ad"
+
+moment@^2.22.2:
+  version "2.22.2"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
 
 mongodb-core@3.0.8:
   version "3.0.8"

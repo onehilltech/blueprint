@@ -19,22 +19,19 @@ const {
   NotFoundError,
   BadRequestError,
   service,
+  Action
 } = require ('@onehilltech/blueprint');
 
 const { get } = require ('lodash');
-const { Action } = require ('@onehilltech/blueprint');
-
-const {
-  ResourceController,
-  Types: { ObjectId }
-} = require ('@onehilltech/blueprint-mongodb');
+const { ResourceController } = require ('@onehilltech/blueprint-mongodb');
 
 /**
  * @class AccountController
  */
 module.exports = ResourceController.extend ({
-  model: model ('account'),
   namespace: 'gatekeeper',
+
+  model: model ('account'),
 
   gatekeeper: service (),
 
@@ -49,6 +46,10 @@ module.exports = ResourceController.extend ({
     return this._super.call (this, ...arguments).extend ({
       prepareDocument (req, doc) {
         doc.created_by = req.user.client_id;
+
+        // Prevent the client from setting the id.
+        if (doc._id)
+          delete doc._id;
 
         return this.controller.gatekeeper.generateIdForAccount (doc).then (id => {
           if (id)

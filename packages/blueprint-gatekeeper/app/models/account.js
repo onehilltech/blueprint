@@ -17,14 +17,8 @@
 const bcrypt  = require ('bcrypt');
 const mongodb = require ('@onehilltech/blueprint-mongodb');
 
-const {
-  Schema: {
-    Types: {ref}
-  }
-} = mongodb;
-
 const options = require ('./-common-options') ();
-const Client  = require ('./client');
+options.softDelete = true;
 
 const SALT_WORK_FACTOR = 10;
 
