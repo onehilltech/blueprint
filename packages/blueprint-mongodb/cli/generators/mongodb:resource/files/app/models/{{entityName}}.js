@@ -4,9 +4,9 @@ const { Schema } = mongodb;
 // use mongodb.Types to access mongoose.Types
 
 const options = {
-{{#if collectionName}}
+{{#if collection}}
   // Name of the model collection.
-  collection: '{{collectionName}}',
+  collection: '{{collection}}',
 {{/if}}
 
 {{#if softDelete}}

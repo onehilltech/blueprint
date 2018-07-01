@@ -22,7 +22,7 @@ module.exports = EntityGenerator.extend ({
   description: 'generate a mongodb resource',
 
   options: {
-    '--collection-name <name>': 'name of the collection',
+    '--collection <name>': 'name of the collection',
     '--soft-delete': 'enable support for soft deleting resource'
   },
 
