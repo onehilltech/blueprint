@@ -15,7 +15,31 @@
  */
 
 const { EntityGenerator } = require ('@onehilltech/blueprint-cli-exts');
+const pluralize = require ('pluralize');
+const path = require ('path');
 
 module.exports = EntityGenerator.extend ({
   description: 'generate a mongodb resource',
+
+  options: {
+    '--collection-name <name>': 'name of the collection'
+  },
+
+  helpers: {
+    entityBaseName () {
+      let parts = this.args[0].split (path.sep);
+      return parts[parts.length - 1];
+    },
+
+    referenceName () {
+      return this.args[0].replace (path.sep, '.');
+    },
+
+    route () {
+      let parts = this.args[0].split (path.sep);
+      let baseName = parts[parts.length - 1];
+
+      return `/${pluralize (baseName)}`;
+    }
+  }
 });
