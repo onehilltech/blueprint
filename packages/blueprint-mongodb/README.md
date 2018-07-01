@@ -195,14 +195,15 @@ const { GridFSController } = require ('@onehilltech/blueprint-mongodb');
  * @class ImageController
  */
 module.exports = GridFSController.extend ({
-  // name of the resource
+  // name of resource
   name: 'image',       
 });
 ```
 
 This controller will extract the uploaded file from the `image` parameter.
 In addition, it will create collections named `image.files` and `image.chunks`
-in the database associated with the connection. See 
-[`GridFSController`](https://github.com/onehilltech/blueprint-mongodb/blob/master/lib/gridfs-controller.js) 
+in the database associated with the connection. 
+
+See [`GridFSController`](https://github.com/onehilltech/blueprint-mongodb/blob/master/lib/gridfs-controller.js) 
 for the optional properties to configure the controller's behavior.
 
