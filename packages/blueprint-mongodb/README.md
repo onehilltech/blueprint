@@ -111,7 +111,7 @@ module.exports = mongodb.resource ('person', schema, 'blueprint_people');
 Now, when the `person` resource model is created, the `_stat` property will contain a 
 `deleted_at` property. This property will be managed internally by the resource controller.
 
-### ResourceController
+### Resource Controller
 
 The `ResourceController` is a default implementation of a resource controller that integrates 
 with the Blueprint.js architecture. The 
@@ -137,23 +137,22 @@ The resource controller exposes the following actions:
 | Action       | HTTP method | Path            | Body                       | Response
 |--------------|-------------|-----------------|----------------------------|-----------------------------------|
 | create       | POST        | /resource       | {\<resource\>: { values }} | {\<resource\>: { values }}        |
-| retrieve one | GET         | /resource/:rcId | N/A                        | {\<resource\>: { values }}        |
-| retrieve all | GET         | /resource       | N/A                        | {\<plural-resource\>: { values }} |   
+| getOne       | GET         | /resource/:rcId | N/A                        | {\<resource\>: { values }}        |
+| getAll       | GET         | /resource       | N/A                        | {\<plural-resource\>: { values }} |   
 | count        | GET         | /resource/count | N/A                        | {count: n}                        |   
 | update       | PUT         | /resource/:rcId | {\<resource\>: { values }} | {\<resource\>: { values }}        |
 | delete       | DELETE      | /resource/:rcId | N/A                        | `true` or `false`                 |
 
 For example, the `PersonController` exposes the following actions:
 
-| Action       | HTTP method | Path | Body                       | Response
-|--------------|-------------|------| ----------------------------|-----------------------------------|
-| create | POST | /person | `{person: { first_name: 'James', last_name: 'Hill }}` | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}` |
-| retrieve one | GET | /person/id | N/A  | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}`  |
-| retrieve all | GET | /person | N/A  | `{persons: [{_id: 'id', first_name: 'James', last_name: 'Hill' }]}` |   
-| count   | GET   | /person/count | N/A                        | {count: n} |   
-| update  | PUT | /person/id | `{person: { first_name: 'John' }}` | `{person: {_id: 'id', first_name: 'John', last_name: 'Hill }}`        |
-| delete       | DELETE    | /person/id   | N/A                        | `true` or `false`                 |
-
+| Action  | HTTP method | Path          | Body                        | Response
+|---------|-------------|---------------| ----------------------------|-----------------------------------|
+| create  | POST        | /person       | `{person: { first_name: 'James', last_name: 'Hill }}` | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}` |
+| getOne  | GET         | /person/id    | N/A                         | `{person: {_id: 'id', first_name: 'James', last_name: 'Hill' }}`  |
+| getAll  | GET         | /person       | N/A  | `{persons: [{_id: 'id', first_name: 'James', last_name: 'Hill' }]}` |   
+| count   | GET         | /person/count | N/A                         | {count: n} |   
+| update  | PUT         | /person/id    | `{person: { first_name: 'John' }}` | `{person: {_id: 'id', first_name: 'John', last_name: 'Hill }}`        |
+| delete  | DELETE      | /person/id    | N/A                         | `true` or `false`                 |
 
 **Messaging Framework.** All actions on the default implementation of the
 `ResourceController` will generate the following events on Blueprint.js messaging 
@@ -167,7 +166,56 @@ framework.
 
 The prefix in the event name is optional. It is defined by the `eventPrefix` property
 passed to the `ResourceController` constructor.
- 
+
+### Adding Domain-specific Behavior
+
+Each method in the `ResourceController` returns an action that can be extended to add
+domain-specific behavior. For example, you may want to do pre and post processing before
+and after the model is created, respectively. It is as simple as extending the action
+in your subclass of the `ResourceController`, and overloading the appropriate methods.
+
+```javascript
+const { ResourceController } = require ('@onehilltech/blueprint-mongodb');
+const { model } = require ('@onehilltech/blueprint');
+
+/**
+ * @class PersonController 
+ * 
+ * Resource controller for the person resource model.
+ */
+module.exports = ResourceController.extend ({
+  model: model ('person'),
+  
+  create () {
+    return this._super.call (this, ...arguments).extend ({
+      prepareDocument (req, doc) {
+        doc.user = req.user._id;
+        return doc;
+      }
+    });
+  }
+});
+```
+
+The following is a list of the actions, and the method that can be overloaded in
+their order of execution.
+
+* **`create`**
+  * **prepareDocument (req, doc)**
+  * **preCreateModel (req)**
+  * **createModel (req, doc)**
+  * **postCreateModel (req, model)**
+  * **prepareResponse (req, res, response)**
+  
+* **`getOne`**
+* **`getAll`**
+* **`update`**
+* **`delete`**
+* **`count`**
+
+You can return a `Promise` the overloaded method if you need to perform
+asynchronous execution.
+
 ## GridFSController
 
 The `GridFSController` is a [Blueprint.js](https://github.com/onehilltech/blueprint) 
