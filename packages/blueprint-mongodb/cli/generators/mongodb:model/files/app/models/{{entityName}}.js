@@ -3,8 +3,14 @@ const { Schema } = mongodb;
 
 // use mongodb.Types to access mongoose.Types
 
-const schema = Schema ({
-  // add your schema definition here
-});
+const options = {
+{{#if collection}}
+  collection: '{{collection}}',
+{{/if}}
+};
 
-module.exports = mongodb.resource ('{{entityBaseName}}', schema{{#if collectionName}}, '{{collectionName}}'{{/if}});
+const schema = new Schema ({
+  // add your schema definition here
+}, options);
+
+module.exports = mongodb.resource ('{{entityBaseName}}', schema);

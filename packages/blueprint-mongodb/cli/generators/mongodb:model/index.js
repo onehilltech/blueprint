@@ -20,6 +20,6 @@ module.exports = EntityGenerator.extend ({
   description: 'generate a mongodb model',
 
   options: {
-    '--collection-name <name>': 'name of the collection'
+    '--collection <name>': 'name of the collection'
   }
 });
