@@ -172,8 +172,14 @@ passed to the `ResourceController` constructor.
 
 The `GridFSController` is a [Blueprint.js](https://github.com/onehilltech/blueprint) 
 resource controller designed for [GridFS](https://docs.mongodb.com/manual/core/gridfs/) 
-in [MongoDB](https://www.mongodb.com). The `GridFSController` support the following
-operations out-of-the-box: create, get, and delete. Currently, it does not
+in [MongoDB](https://www.mongodb.com). The `GridFSController` supports the following
+operations out-of-the-box: 
+
+* `create`
+* `getOne`
+* `delete` 
+
+Currently, it does not
 support getting multiple resources and updating an existing resource. 
 
 Because `GridFS` is designed to store large files, the `GridFSController` assumes the 
