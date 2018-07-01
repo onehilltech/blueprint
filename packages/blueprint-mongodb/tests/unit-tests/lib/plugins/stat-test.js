@@ -28,15 +28,6 @@ describe ('lib | plugins | StatPlugin', function () {
 
         PersonSoftDelete = mongodb.model ('person', schema, 'blueprint_persons');
       });
-
-      it ('should not allow unique fields', function () {
-        let schema = new mongodb.Schema ({
-          first_name: {type: String, unique: true},
-          last_name: String,
-        }, {softDelete: true});
-
-        expect (() => { schema.plugin (StatPlugin) }).to.throw ('first_name cannot be unique and support soft delete');
-      })
     });
   });
 
