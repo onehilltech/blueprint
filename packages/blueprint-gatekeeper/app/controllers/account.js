@@ -45,18 +45,11 @@ module.exports = ResourceController.extend ({
   create () {
     return this._super.call (this, ...arguments).extend ({
       prepareDocument (req, doc) {
-        doc.created_by = req.user.client_id;
-
         // Prevent the client from setting the id.
         if (doc._id)
           delete doc._id;
 
-        return this.controller.gatekeeper.generateIdForAccount (doc).then (id => {
-          if (id)
-            doc._id = id;
-
-          return doc;
-        });
+        return doc;
       },
 
       createModel (req, doc) {
