@@ -106,8 +106,6 @@ describe ('app | routers | account', function () {
           });
       });
 
-      // NEED TEST FOR CREATING PREVIOUSLY DELETED ACCOUNT.
-
       it ('should create a new account, and login the user', function () {
         const autoLogin = {
           username: 'auto-login',
@@ -140,6 +138,43 @@ describe ('app | routers | account', function () {
           });
       });
 
+      it ('should create a previously deleted account', function () {
+        const { accounts: [account]} = seed ();
+
+        return request ()
+          .delete (`/v1/accounts/${account.id}`)
+          .withUserToken (0)
+          .expect (200, 'true')
+          .then (() => {
+            const data = { username: account.username, password: account.username, email: account.email };
+
+            return request ()
+              .post ('/v1/accounts')
+              .withClientToken (0)
+              .send ({account: data})
+              .expect (200, {
+                account: {
+                  _id: account.id,
+                  email: account.email,
+                  username: account.username,
+                  enabled: true,
+                  scope: [],
+                  verification: {
+                    required: true
+                  }
+                }
+              })
+              .then (() => {
+                const Account = blueprint.lookup ('model:account');
+
+                return Account.findById (account.id).then (expected => {
+                  expect (expected._stat.deleted_at).to.equal (undefined);
+                  expect (expected.password).to.not.equal (account.username);
+                });
+              })
+          });
+      });
+
       it ('should not create an account [duplicate]', function () {
         const {accounts} = seed ('$default');
         const account = accounts[0];
@@ -152,7 +187,7 @@ describe ('app | routers | account', function () {
           .withClientToken (0)
           .expect (400, { errors:
               [ { code: 'already_exists',
-                detail: 'The resource you are creating already exists.',
+                detail: 'The account already exists.',
                 status: '400' } ] });
       });
 
@@ -322,6 +357,8 @@ describe ('app | routers | account', function () {
           .withUserToken (0)
           .expect (200, 'true')
           .then (() => {
+            // There should still be an account model in the database. It should just
+            // be marked as deleted.
             const Account = blueprint.lookup ('model:account');
 
             return Account.findById (account.id).then (account => {

@@ -59,6 +59,41 @@ module.exports = ResourceController.extend ({
         });
       },
 
+      createModel (req, doc) {
+        // Allow the controller to create the model. If the creation fails because of a
+        // duplicate email address, then we need to check if the account has been deleted.
+        // If the account has been deleted, then we need to restore the account.
+
+        return this._super.call (this, ...arguments)
+          .catch (err => {
+            switch (err.code) {
+              case 11000:
+                // The email address for the account is a duplicate. If the account is marked
+                // as deleted, then we need to restore the account.
+                return this._restoreIfDeleted (req, doc);
+
+              default:
+                return Promise.reject (err);
+            }
+          });
+      },
+
+      _restoreIfDeleted (req, doc) {
+        const selection = {email: doc.email, '_stat.deleted_at': {$exists: true}};
+        const update = {
+          $set: {
+            'verification.required': true
+          },
+          $unset: {
+            '_stat.deleted_at': ''
+          }
+        };
+
+        return this.controller.model.findOneAndUpdate (selection, update, {new: true}).then (account => {
+          return !!account ? account : Promise.reject (new BadRequestError ('already_exists', 'The account already exists.'));
+        });
+      },
+
       prepareResponse (req, res, result) {
         // If the origin request wanted to login the user, then we need to
         // return to login the user for the account and return the access
