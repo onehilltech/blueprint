@@ -85,12 +85,18 @@ module.exports = Granter.extend ({
         if (!accessToken.client.enabled)
           return Promise.reject (new ForbiddenError ('client_disabled', 'The client is disabled.'));
 
+        if (accessToken.client.is_deleted)
+          return Promise.reject (new ForbiddenError ('client_deleted', 'The client no longer exists.'));
+
         if (accessToken.account) {
           // The access token is for a user account. There are more checks that
           // we need to execute, such as checking if the account is enabled.
 
           if (!accessToken.account.enabled)
             return Promise.reject (new ForbiddenError ('account_disabled', 'The account is disabled.'));
+
+          if (accessToken.account.is_deleted)
+            return Promise.reject (new ForbiddenError ('account_deleted', 'The account no longer exists.'));
         }
 
         return accessToken.remove ().then (accessToken => {

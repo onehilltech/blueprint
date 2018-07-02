@@ -33,7 +33,7 @@ const ModelVisitor = require ('../../models/-visitor');
 const mm = require ('micromatch');
 
 const { fromCallback } = require ('bluebird');
-const { get, transform } = require ('lodash');
+const { transform } = require ('lodash');
 const { validationResult } = require ('express-validator/check');
 
 /**
@@ -187,6 +187,9 @@ module.exports = Controller.extend ({
 
           if (!client.enabled)
             return Promise.reject (new ForbiddenError ('client_disabled', 'The client is disabled.'));
+
+          if (client.is_deleted)
+            return Promise.reject (new BadRequestError ('client_deleted', 'The client has been deleted.'));
 
           req.gatekeeperClient = client;
 

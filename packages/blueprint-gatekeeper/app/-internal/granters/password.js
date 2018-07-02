@@ -91,6 +91,9 @@ module.exports = Granter.extend ({
       if (account.enabled !== true)
         return Promise.reject (new BadRequestError ('account_disabled', 'The account is disabled.'));
 
+      if (account.is_deleted)
+        return Promise.reject (new BadRequestError ('account_deleted', 'The account no longer exists.'));
+
       return account.verifyPassword (password).then (match => {
         if (!match)
           return Promise.reject (new BadRequestError ('invalid_password', 'The password for the account is incorrect.'));
