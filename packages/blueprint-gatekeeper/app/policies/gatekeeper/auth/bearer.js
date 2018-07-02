@@ -108,6 +108,9 @@ module.exports = Policy.extend ({
       if (!accessToken.client.enabled)
         return {failureCode: 'client_disabled', failureMessage: 'The client is disabled.'};
 
+      if (accessToken.client.is_deleted)
+        return {failureCode: 'client_deleted', failureMessage: 'The client has been deleted.'};
+
       // Let's make sure the request is originate from the same address that was
       // used to create the request.
       const origin = req.get ('origin');
@@ -126,6 +129,9 @@ module.exports = Policy.extend ({
 
         if (!accessToken.account.enabled)
           return {failureCode: 'account_disabled', failureMessage: 'The account is disabled.'};
+
+        if (accessToken.account.is_deleted)
+          return {failureCode: 'account_deleted', failureMessage: 'The account has been deleted.'};
 
         // Update the user to the account id.
         req.user = accessToken.account;
