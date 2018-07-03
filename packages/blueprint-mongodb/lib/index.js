@@ -31,7 +31,7 @@ const {
   lean
 } = require ('./utils');
 
-Schema.Types.ref = require ('./schema/types/ref');
+Schema.Types.refersTo = Schema.Types.ref = require ('./schema/types/ref');
 
 exports.Types = Types;
 exports.Schema = Schema;
