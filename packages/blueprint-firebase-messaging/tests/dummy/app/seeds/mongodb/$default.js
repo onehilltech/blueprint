@@ -14,38 +14,46 @@
  * limitations under the License.
  */
 
+const { Seed } = require ('@onehilltech/blueprint-mongodb');
 const dab = require ('@onehilltech/dab');
 
-module.exports = {
-  native: [
-    { name: 'client1', email: 'contact@client1.com', client_secret: 'client1', scope: ['gatekeeper.account.create'] },
-    { name: 'client2', email: 'contact@client2.com', client_secret: 'client2'},
-    { name: 'client3', email: 'contact@client3.com', client_secret: 'client3', enabled: false }
-  ],
-
-  accounts: dab.times (5, function (i) {
-    const username = `account${i}`;
-    return { username: username, password: username, email: `${username}@.no-reply.com`};
-  }),
-
-  client_tokens: dab.map (dab.get ('native'), function (client) {
-    return { client: dab.get ('native.0'), account: client._id };
-  }),
-
-  user_tokens: dab.map (dab.get ('accounts'), function (account) {
+/**
+ * @class
+ */
+module.exports = Seed.extend ({
+  model () {
     return {
-      client: dab.get ('native.0'),
-      account: account._id,
-      refresh_token: dab.id ()
-    };
-  }),
+      native: [
+        { name: 'client1', email: 'contact@client1.com', client_secret: 'client1', scope: ['gatekeeper.account.create'] },
+        { name: 'client2', email: 'contact@client2.com', client_secret: 'client2'},
+        { name: 'client3', email: 'contact@client3.com', client_secret: 'client3', enabled: false }
+      ],
 
-  devices: [
-    { device: 'device_123', client: dab.ref ('native.0'), token: '123' },
-    { device: 'device_456', client: dab.ref ('native.0'), token: '456' },
-    { device: 'device_789', client: dab.ref ('native.0'), token: '789' },
-    { device: 'device_abc', client: dab.ref ('native.0')},
-    { device: dab.id (), client: dab.ref ('native.0'), user: dab.ref ('accounts.0'), token: 'abc' },
-    { device: dab.id (), client: dab.ref ('native.0'), user: dab.ref ('accounts.1'), token: 'def' }
-  ]
-};
+      accounts: dab.times (5, function (i) {
+        const username = `account${i}`;
+        return { username: username, password: username, email: `${username}@.no-reply.com`};
+      }),
+
+      client_tokens: dab.map (dab.get ('native'), function (client) {
+        return { client: dab.get ('native.0'), account: client._id };
+      }),
+
+      user_tokens: dab.map (dab.get ('accounts'), function (account) {
+        return {
+          client: dab.get ('native.0'),
+          account: account._id,
+          refresh_token: dab.id ()
+        };
+      }),
+
+      devices: [
+        { device: 'device_123', client: dab.ref ('native.0'), token: '123' },
+        { device: 'device_456', client: dab.ref ('native.0'), token: '456' },
+        { device: 'device_789', client: dab.ref ('native.0'), token: '789' },
+        { device: 'device_abc', client: dab.ref ('native.0')},
+        { device: dab.id (), client: dab.ref ('native.0'), user: dab.ref ('accounts.0'), token: 'abc' },
+        { device: dab.id (), client: dab.ref ('native.0'), user: dab.ref ('accounts.1'), token: 'def' }
+      ]
+    };
+  }
+});

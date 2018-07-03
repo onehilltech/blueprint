@@ -33,8 +33,7 @@ const {
  */
 module.exports = ResourceController.extend ({
   namespace: 'firebase',
-
-  model: model ('firebase-device'),
+  Model: model ('firebase-device'),
 
   create () {
     return this._super.call (this, ...arguments).extend ({
@@ -114,7 +113,7 @@ module.exports = ResourceController.extend ({
         return this.fcm.verifyToken (deviceToken)
           .then (payload => {
             const update = {user: req.user._id};
-            return this.controller.model.findByIdAndUpdate (payload.jti, update, {new: true});
+            return this.controller.Model.findByIdAndUpdate (payload.jti, update, {new: true});
           })
           .then (device => {
             if (!device)
@@ -153,7 +152,7 @@ module.exports = ResourceController.extend ({
             const selection = {_id: new ObjectId (payload.jti), user: req.user._id};
             const update = {$unset: {user: ''}};
 
-            return this.controller.model.findOneAndUpdate (selection, update, {new: true});
+            return this.controller.Model.findOneAndUpdate (selection, update, {new: true});
           })
           .then (device => {
             if (!device)
