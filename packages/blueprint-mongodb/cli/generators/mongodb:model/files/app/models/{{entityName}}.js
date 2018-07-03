@@ -1,7 +1,6 @@
 const mongodb = require ('@onehilltech/blueprint-mongodb');
 const { Schema } = mongodb;
-
-// use mongodb.Types to access mongoose.Types
+const { Types: { refersTo }} = Schema;
 
 const options = {
 {{#if collection}}
