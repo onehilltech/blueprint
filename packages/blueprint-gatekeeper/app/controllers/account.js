@@ -82,7 +82,7 @@ module.exports = ResourceController.extend ({
           }
         };
 
-        return this.controller.model.findOneAndUpdate (selection, update, {new: true}).then (account => {
+        return this.controller.Model.findOneAndUpdate (selection, update, {new: true}).then (account => {
           return !!account ? account : Promise.reject (new BadRequestError ('already_exists', 'The account already exists.'));
         });
       },
@@ -158,7 +158,7 @@ module.exports = ResourceController.extend ({
         const newPassword = req.body.password.new;
         const {accountId} = req.params;
 
-        return this.controller.model.findById (accountId)
+        return this.controller.Model.findById (accountId)
           .then (account => {
             if (!account)
               return Promise.reject (new NotFoundError ('unknown_account', 'The account does not exist.'));
