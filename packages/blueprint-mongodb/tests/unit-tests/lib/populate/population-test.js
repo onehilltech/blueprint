@@ -17,8 +17,8 @@
 const blueprint   = require ('@onehilltech/blueprint');
 const { expect }  = require ('chai');
 
-const lean = require ('../../../../lib/lean');
-const seed = require ('../../../../lib/seed');
+const { lean, seed } = require ('../../../../lib/utils');
+
 const Population = require ('../../../../lib/populate/population');
 const ModelRegistry = require ('../../../../lib/populate/model-registry');
 

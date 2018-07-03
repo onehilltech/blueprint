@@ -26,6 +26,11 @@ const {
   Schema
 } = require ('mongoose');
 
+const {
+  seed,
+  lean
+} = require ('./utils');
+
 Schema.Types.ref = require ('./schema/types/ref');
 
 exports.Types = Types;
@@ -42,5 +47,7 @@ exports.resourceOn = resourceOn;
 exports.ResourceController = require ('./resource-controller');
 exports.GridFSController = require ('./gridfs-controller');
 exports.populate = require ('./populate');
-exports.lean = require ('./lean');
-exports.seed = require ('./seed');
+exports.lean = lean;
+exports.seed = seed;
+
+exports.Seed = require ('./seed');

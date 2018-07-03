@@ -1,6 +1,6 @@
 const {expect}  = require ('chai');
 const blueprint = require ('@onehilltech/blueprint');
-const lean      = require ('../../../lib/lean');
+const lean      = require ('../../../lib/utils/lean');
 
 describe ('lib | lean', function () {
   it ('should convert model to raw object', function () {

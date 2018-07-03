@@ -1,4 +1,4 @@
-const lean = require ('../lean');
+const lean = require ('../utils/lean');
 
 /**
  * Plugin that adds lean() method to all model instances. The lean() method

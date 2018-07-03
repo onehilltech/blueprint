@@ -14,41 +14,44 @@
  * limitations under the License.
  */
 
-const {
-  ref
-} = require ('@onehilltech/dab');
+const { ref } = require ('@onehilltech/dab');
+const Seed = require ('../../../../../lib/seed');
 
-module.exports = {
-  authors: [
-    {name: 'Jack Black'},
-    {name: 'John Doe'},
-    {name: 'Lisa Wilson'},
-    {name: 'Robert Young'},
-    {name: 'Todd Hill'},
-    {name: 'Tom Sawyer'},
-    {name: 'Tom Smith'},
-  ],
+module.exports = Seed.extend ({
+  model () {
+    return {
+      authors: [
+        {name: 'Jack Black'},
+        {name: 'John Doe'},
+        {name: 'Lisa Wilson'},
+        {name: 'Robert Young'},
+        {name: 'Todd Hill'},
+        {name: 'Tom Sawyer'},
+        {name: 'Tom Smith'},
+      ],
 
-  users: [
-    {
-      first_name: 'Paul',
-      last_name: 'Black',
-      favorite_author: ref ('authors[0]'),
-      blacklist: [ref ('authors[0]'), ref ('authors[1]')]
-    },
-    {
-      first_name: 'John',
-      last_name: 'Smith',
-      favorite_author: ref ('authors[0]'),
-      bookstore: {name: 'Borders', authors: [ref ('authors[3]')]},
-      bookstores: [{name: 'Books-a-Million', authors: [ref ('authors[6]')]}]
+      users: [
+        {
+          first_name: 'Paul',
+          last_name: 'Black',
+          favorite_author: ref ('authors[0]'),
+          blacklist: [ref ('authors[0]'), ref ('authors[1]')]
+        },
+        {
+          first_name: 'John',
+          last_name: 'Smith',
+          favorite_author: ref ('authors[0]'),
+          bookstore: {name: 'Borders', authors: [ref ('authors[3]')]},
+          bookstores: [{name: 'Books-a-Million', authors: [ref ('authors[6]')]}]
+        }
+      ],
+
+      books: [
+        { name: 'To Kill A Mockingbird' },
+        { name: 'The Great Gatsby' },
+        { name: 'Their Eyes Were Watching God' },
+        { name: 'Fences'}
+      ]
     }
-  ],
-
-  books: [
-    { name: 'To Kill A Mockingbird' },
-    { name: 'The Great Gatsby' },
-    { name: 'Their Eyes Were Watching God' },
-    { name: 'Fences'}
-  ]
-};
+  }
+});

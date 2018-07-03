@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-const blueprint  = require ('@onehilltech/blueprint');
 const { expect } = require ('chai');
-
-const lean = require ('../../../../lib/lean');
-const seed = require ('../../../../lib/seed');
+const { lean, seed } = require ('../../../../lib/utils');
 
 const {
   populateModel,

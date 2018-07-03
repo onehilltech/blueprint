@@ -15,22 +15,14 @@
  */
 
 const blueprint = require ('@onehilltech/blueprint');
-const { expect }  = require ('chai');
-const PopulateElement = require ('../../../../lib/populate/populate-element');
-const { seed } = require ('../../../../lib/utils');
 
-describe ('lib | populate | PopulateElement', function () {
-  describe ('populate', function () {
-    it ('should populate an element', function () {
-      const User = blueprint.lookup ('model:user');
-      const populate = new PopulateElement ({Model: User});
-      const {users} = seed ('$default');
+function seed (name) {
+  let mongodb = blueprint.lookup ('service:mongodb');
+  let connName = name || mongodb.defaultConnectionName;
 
-      let user = users[0];
+  return mongodb.seeds[connName];
+}
 
-      return populate.populate (user._id).then (u => {
-        expect (u.lean ()).to.eql (user.lean ());
-      });
-    });
-  });
-});
+module.exports = seed;
+
+

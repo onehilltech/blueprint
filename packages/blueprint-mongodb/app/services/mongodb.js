@@ -24,16 +24,19 @@ const {
   forOwn,
   mapValues,
   get,
+  isPlainObject,
 } = require ('lodash');
 
 const BluebirdPromise = require ('bluebird');
 
+const assert = require ('assert');
 const mongoose = require ('mongoose');
 const debug = require ('debug')('blueprint-mongodb:mongodb');
 const path = require ('path');
 
 const DEFAULT_CONNECTION_NAME = '$default';
 const SEEDS_RELATIVE_PATH = 'seeds/mongodb';
+
 
 mongoose.Promise = Promise;
 
@@ -222,11 +225,18 @@ module.exports = Service.extend ({
    * @private
    */
   _buildSeed (name) {
-    return this._loadSeedDefinitions ().then (definitions => {
+    return this._loadSeedDefinitions ().then (seeds => {
       debug (`building seed definition for connection ${name}`);
-      let definition = definitions[name];
+      let seed = seeds[name];
 
-      return definition ? build (definitions[name]) : null;
+      if (!seed)
+        return null;
+
+      return Promise.resolve (seed.reset ())
+        .then (() => seed.beforeModel ())
+        .then (() => seed.model ())
+        .then (model => build (model))
+        .then (result => Promise.resolve (seed.afterModel (result)).then (() => result));
     });
   },
 
@@ -243,10 +253,20 @@ module.exports = Service.extend ({
     debug ('loading seed definitions');
 
     const dirname = path.resolve (this.app.appPath, SEEDS_RELATIVE_PATH);
-    return this._loader.load ({dirname}).then (values => {
-      this._seedDefs = values;
-      return values;
-    });
+    const opts = {
+      dirname,
+      resolve (Seed) {
+        assert (!isPlainObject (Seed), 'The seed must extend the Seed class');
+        return new Seed ();
+      }
+    };
+
+    return this._loader.load (opts)
+      .then (result => {
+        this._seedDefs = result;
+
+        return this._seedDefs;
+      });
   },
 
   /**

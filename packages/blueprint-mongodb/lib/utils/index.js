@@ -14,39 +14,5 @@
  * limitations under the License.
  */
 
-const { BO } = require ('@onehilltech/blueprint');
-
-/**
- * @class Seed
- *
- * Base class for all seeds in mongodb.
- */
-module.exports = BO.extend ({
-  /**
-   * Reset the seed definition.
-   */
-  reset () {
-
-  },
-
-  /**
-   * Method call before the seed is generated.
-   */
-  beforeModel () {
-    return null;
-  },
-
-  /**
-   * Get the model for the seed.
-   */
-  model () {
-    return null;
-  },
-
-  /**
-   * The models for the seed has been generated.
-   */
-  afterModel (models) {
-    return null;
-  }
-});
+exports.lean = require ('./lean');
+exports.seed = require ('./seed');
