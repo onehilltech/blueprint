@@ -4,6 +4,7 @@ const { Types: { refersTo }} = Schema;
 
 const options = {
 {{#if collection}}
+  // Name of the resource collection
   collection: '{{collection}}',
 {{/if}}
 };
