@@ -118,10 +118,13 @@ module.exports = ResourceController.extend ({
     this._super.call (this, opts);
 
     // Prepare the options for the base class.
-    assert (!!this.Model, "You must define the 'model' property.");
-    assert (this.Model.schema.options.resource, `${modelName} is not a resource; model must be created using resource() method.`);
+    assert (!!this.Model, "You must define the {Model} property.");
 
-    this._softDelete = this.Model.schema.options.softDelete;
+    const { schema: { options: { resource, softDelete}}} = this.Model;
+
+    assert (resource, `${modelName} is not a resource; model must be created using resource() method.`);
+
+    this._softDelete = softDelete;
 
     // Build the validation schema for create and update.
     this._defaultValidationOptions = {scope: this.name};
