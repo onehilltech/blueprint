@@ -48,9 +48,9 @@
     semver "^5.4.1"
     winston "^2.4.1"
 
-"@onehilltech/dab@^1.0.9":
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/@onehilltech/dab/-/dab-1.0.9.tgz#78de24cf36f2ccce3cb36b5ea56951f57bf5de13"
+"@onehilltech/dab@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@onehilltech/dab/-/dab-1.1.0.tgz#3d6701f6922ce439d042b9c8955e12914981d029"
   dependencies:
     async "^2.6.0"
     commander "^2.15.1"
