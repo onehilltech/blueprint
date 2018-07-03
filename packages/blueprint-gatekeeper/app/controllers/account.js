@@ -31,7 +31,7 @@ const { ResourceController } = require ('@onehilltech/blueprint-mongodb');
 module.exports = ResourceController.extend ({
   namespace: 'gatekeeper',
 
-  model: model ('account'),
+  Model: model ('account'),
 
   gatekeeper: service (),
 

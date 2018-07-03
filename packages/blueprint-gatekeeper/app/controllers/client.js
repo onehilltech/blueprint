@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-const {
-  ResourceController
-} = require ('@onehilltech/blueprint-mongodb');
-
-const {
-  model
-} = require ('@onehilltech/blueprint');
+const { ResourceController } = require ('@onehilltech/blueprint-mongodb');
+const { model } = require ('@onehilltech/blueprint');
 
 module.exports = ResourceController.extend ({
-  model: model ('client')
+  Model: model ('client')
 });
