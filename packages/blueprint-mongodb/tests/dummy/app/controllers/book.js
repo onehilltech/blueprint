@@ -18,5 +18,5 @@ const { model } = require ('@onehilltech/blueprint');
 const ResourceController = require ('../../../../lib/resource-controller');
 
 module.exports = ResourceController.extend ({
-  model: model ('book')
+  Model: model ('book')
 });

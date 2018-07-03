@@ -21,5 +21,5 @@ const {
 const ResourceController = require ('../../../../lib/resource-controller');
 
 module.exports = ResourceController.extend ({
-  model: model ('user')
+  Model: model ('user')
 });

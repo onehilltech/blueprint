@@ -32,7 +32,7 @@ describe ('lib | ResourceController', function () {
       const Author = blueprint.lookup ('model:author');
       const controller = blueprint.lookup ('controller:author');
 
-      expect (controller).to.have.property ('model', Author);
+      expect (controller).to.have.property ('Model', Author);
       expect (controller).to.have.property ('name', 'author');
       expect (controller).to.have.property ('resourceId', 'authorId');
     });

@@ -21,7 +21,7 @@ const {
 const ResourceController = require ('../../../../lib/resource-controller');
 
 module.exports = ResourceController.extend ({
-  model: model ('author'),
+  Model: model ('author'),
 
   createCallbacks: [],
 
