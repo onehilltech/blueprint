@@ -104,7 +104,12 @@ module.exports = ResourceController.extend ({
    * Initialize the resource controller.
    */
   init (opts = {}) {
-    const {modelName} = this.model;
+    if (this.model) {
+      console.warn (`*** deprecated: use {Model} property instead of {model} property when defining ${this.name} resource controller`);
+      this.Model = this.model;
+    }
+
+    const {modelName} = this.Model;
 
     if (!opts.name)
       opts.name = modelName;
@@ -113,10 +118,10 @@ module.exports = ResourceController.extend ({
     this._super.call (this, opts);
 
     // Prepare the options for the base class.
-    assert (!!this.model, "You must define the 'model' property.");
-    assert (this.model.schema.options.resource, `${modelName} is not a resource; model must be created using resource() method.`);
+    assert (!!this.Model, "You must define the 'model' property.");
+    assert (this.Model.schema.options.resource, `${modelName} is not a resource; model must be created using resource() method.`);
 
-    this._softDelete = this.model.schema.options.softDelete;
+    this._softDelete = this.Model.schema.options.softDelete;
 
     // Build the validation schema for create and update.
     this._defaultValidationOptions = {scope: this.name};
@@ -130,7 +135,7 @@ module.exports = ResourceController.extend ({
     const {validators,sanitizers} = this.app.resources;
 
     return DatabaseAction.extend ({
-      schema: validation (this.model.schema, extend ({}, this._defaultValidationOptions, {validators, sanitizers})),
+      schema: validation (this.Model.schema, extend ({}, this._defaultValidationOptions, {validators, sanitizers})),
 
       /// Name of event for completion of action.
       eventName,
@@ -286,7 +291,7 @@ module.exports = ResourceController.extend ({
         if (!deleted && this.controller._softDelete)
           filter['_stat.deleted_at'] = {$exists: false};
 
-        return this.controller.model.find (filter, projection, options);
+        return this.controller.Model.find (filter, projection, options);
       },
 
       postGetModels (req, models) {
@@ -379,10 +384,10 @@ module.exports = ResourceController.extend ({
       getModel (req, id, projection, options) {
         if (this.controller._softDelete) {
           const selection = { _id: id, '_stat.deleted_at': { $exists: false }};
-          return this.controller.model.findOne (selection, projection, options);
+          return this.controller.Model.findOne (selection, projection, options);
         }
         else {
-          return this.controller.model.findById (id, projection, options);
+          return this.controller.Model.findById (id, projection, options);
         }
       },
 
@@ -409,7 +414,7 @@ module.exports = ResourceController.extend ({
 
     return DatabaseAction.extend ({
       schema: extend (
-        validation (this.model.schema, extend ({}, this._defaultValidationOptions, {allOptional:true, validators, sanitizers})),
+        validation (this.Model.schema, extend ({}, this._defaultValidationOptions, {allOptional:true, validators, sanitizers})),
         {[this.resourceId]: RESOURCE_ID_PARAMS_SCHEMA}),
 
       eventName,
@@ -492,10 +497,10 @@ module.exports = ResourceController.extend ({
       updateModel (req, id, update, options) {
         if (this.controller._softDelete) {
           const selection = { _id: id, '_stat.deleted_at': {$exists: false}};
-          return this.controller.model.findOneAndUpdate (selection, update, options);
+          return this.controller.Model.findOneAndUpdate (selection, update, options);
         }
         else {
-          return this.controller.model.findByIdAndUpdate (id, update, options);
+          return this.controller.Model.findByIdAndUpdate (id, update, options);
         }
       },
 
@@ -576,10 +581,10 @@ module.exports = ResourceController.extend ({
           const update = {$set: {'_stat.deleted_at': new Date ()}};
           const options = { new: true };
 
-          return this.controller.model.findOneAndUpdate (selection, update, options);
+          return this.controller.Model.findOneAndUpdate (selection, update, options);
         }
         else {
-          return this.controller.model.findByIdAndRemove (id);
+          return this.controller.Model.findByIdAndRemove (id);
         }
       },
 
@@ -634,7 +639,7 @@ module.exports = ResourceController.extend ({
         if (!deleted && this.controller._softDelete)
           filter['_stat.deleted_at'] = {$exists: false};
 
-        return this.controller.model.count (filter);
+        return this.controller.Model.count (filter);
       },
 
       preCountModels () {
@@ -660,15 +665,15 @@ module.exports = ResourceController.extend ({
    * @private
    */
   getModelForDocument (doc) {
-    const {discriminators,schema} = this.model;
+    const {discriminators,schema} = this.Model;
 
     if (!discriminators)
-      return this.model;
+      return this.Model;
 
     let discriminatorKey = schema.discriminatorMapping.key;
     let discriminator = doc[discriminatorKey];
 
-    return discriminator ? discriminators[discriminator] : this.model;
+    return discriminator ? discriminators[discriminator] : this.Model;
   },
 
   /**
