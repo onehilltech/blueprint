@@ -22,7 +22,7 @@ module.exports = function (path) {
   if (path.options.enum) {
     // The path is an enumeration. We can convert this to a isIn() check
     // to constrain the set of accepted strings.
-    const {enums} = path.options;
+    const {enum:enums} = path.options;
 
     schema.isIn = {
       options: [enums],
