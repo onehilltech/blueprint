@@ -25,11 +25,11 @@
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-gatekeeper@^0.80.3":
-  version "0.80.3"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-gatekeeper/-/blueprint-gatekeeper-0.80.3.tgz#20d277134f0fe49c54063b7fbfd81d3a5f09944b"
+"@onehilltech/blueprint-gatekeeper@^0.80.4":
+  version "0.80.4"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-gatekeeper/-/blueprint-gatekeeper-0.80.4.tgz#5b359d5603e1db668383e68186c15c640cfad83f"
   dependencies:
-    "@onehilltech/blueprint-mongodb" "^1.6.4"
+    "@onehilltech/blueprint-mongodb" "^1.6.5"
     bcrypt "^2.0.1"
     commander "^2.11.0"
     cors "^2.8.4"
@@ -49,9 +49,9 @@
     uid-safe "^2.1.5"
     yargs "^10.0.3"
 
-"@onehilltech/blueprint-mongodb@^1.6.4":
-  version "1.6.4"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.6.4.tgz#3092c293205f55310b1c8536eafaa1e08196ff8e"
+"@onehilltech/blueprint-mongodb@^1.6.5":
+  version "1.6.5"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.6.5.tgz#ae0fad709c68ad0e6e2f417745838ca5a1ee9b18"
   dependencies:
     "@onehilltech/blueprint" "^4.0.5"
     "@onehilltech/dab" "^1.1.1"
