@@ -19,15 +19,22 @@ const util = require ('util');
 module.exports = function (path) {
   let schema = { };
 
-  if (path.options.enum) {
+  const {enum:enums, match} = path.options;
+
+  if (!!enums) {
     // The path is an enumeration. We can convert this to a isIn() check
     // to constrain the set of accepted strings.
-    const {enum:enums} = path.options;
-
     schema.isIn = {
       options: [enums],
       errorMessage: `${path} must be in ${util.inspect (enums)}`
     }
+  }
+
+  if (!!match) {
+    schema.matches = {
+      options: [match],
+      errorMessage: `${path} must match ${match}`
+    };
   }
 
   return schema;
