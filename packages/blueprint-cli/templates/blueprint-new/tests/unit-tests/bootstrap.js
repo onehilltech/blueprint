@@ -2,7 +2,7 @@ const path  = require ('path');
 const blueprint = require ('@onehilltech/blueprint');
 
 before (function () {
-  const appPath = path.resolve (__dirname, '../dummy/app');
+  const appPath = path.resolve (__dirname, '../../app');
   return blueprint.createApplicationAndStart (appPath);
 });
 
