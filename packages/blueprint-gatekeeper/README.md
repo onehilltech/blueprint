@@ -47,8 +47,7 @@ Define a route (or router) to import the Gatekeeper routes into the application:
 
 ```javascript
 // app/routers/EndpointRouter.js
-const blueprint = require ('@onehilltech/blueprint')
-  ;
+const blueprint = require ('@onehilltech/blueprint');
 
 module.exports = exports = {
   '/gatekeeper': blueprint.mount ('@onehilltech/blueprint-gatekeeper:v1')
