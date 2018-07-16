@@ -24,31 +24,22 @@ Getting Started
 
 ### Defining the configuration
 
-Define the configuration file `gatekeeper.config.js` to configure the module
-for your application:
+Define the configuration file `gatekeeper.js` to configure the module for
+your application:
 
 ```javascript
 module.exports = {
-  token: {
-    kind: 'jwt',
-    options: {
-      issuer: 'name-of-the-application',
-      algorithm : 'RS256',
-      secret: 'ssshhh'   // can replace with publicKey, privateKey properties
-    }
-  }
+ tokens: {
+     // This is the base options for all token generators.
+     $: {
+       issuer: '[your-issuer-name-here]',
+       expiresIn: '1h',
+       algorithm: 'HS256',
+       secret: 'ssshhh'
+     }
+ },
 };
 ```
-
-### Initial setup
-
-Run the setup script from the project directory:
-
-    ./bin/gatekeeper-setup
-    
-This will register the [gatekeeper-cli](https://github.com/onehilltech/gatekeeper-cli) 
-client, and other clients, with the server. The client registrations will be placed in 
-`.gatekeeper` under the project directory.
 
 ### Mount Gatekeeper router endpoint
 
@@ -60,7 +51,7 @@ const blueprint = require ('@onehilltech/blueprint')
   ;
 
 module.exports = exports = {
-  '/gatekeeper': blueprint ('router://@onehilltech/blueprint-gatekeeper:v1')
+  '/gatekeeper': blueprint.mount ('@onehilltech/blueprint-gatekeeper:v1')
 };
 ```
 
@@ -83,6 +74,16 @@ module.exports = {
 The router above will protect all routes under the `/v1` path, which
 includes all routers located in `app/routers/v1` directory. The client will
 need to define the `Authorization` header and include a generated token.
+
+### Initial setup (for production only)
+
+Run the setup script from the project directory:
+
+    ./bin/gatekeeper-setup
+    
+This will register the [gatekeeper-cli](https://github.com/onehilltech/gatekeeper-cli) 
+client, and other clients, with the server. The client registrations will be placed in 
+`.gatekeeper` under the project directory.
 
 Next Steps
 -----------
