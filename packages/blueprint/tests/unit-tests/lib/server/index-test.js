@@ -33,22 +33,11 @@ describe ('lib | server | Server', function () {
 
   describe ('configure', function () {
     it ('should configure the server using default configurations', function () {
-      const config = {
-        protocols: {
-          http: {},
-          https: {}
-        }
-      };
+      const { server } = blueprint.app;
 
-      let server = new Server ({app: blueprint.app});
-
-      return server.configure (config).then (s => {
-        expect (server).to.equal (s);
-
-        expect (s.express).to.not.be.null;
-        expect (s._mainRouter).to.not.be.null;
-        expect (s.viewCachePath).to.equal (path.join (blueprint.app.tempPath, 'views'));
-      });
+        expect (server.express).to.not.be.null;
+        expect (server._mainRouter).to.not.be.null;
+        expect (server.viewCachePath).to.equal (path.join (blueprint.app.tempPath, 'views'));
     });
   });
 

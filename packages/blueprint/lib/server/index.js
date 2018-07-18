@@ -24,12 +24,15 @@ const path    = require ('path');
 const klaw    = require ('klaw');
 const handleError = require ('./handle-error');
 const util = require ('util');
+const BluebirdPromise = require ('bluebird');
 
 const {
   merge,
   forOwn,
   forEach,
-  difference
+  difference,
+  mapValues,
+  omit
 } = require ('lodash');
 
 const { ensureDir, copy } = require ('fs-extra');
@@ -48,11 +51,11 @@ const Server = BO.extend ({
   /// The hosting application.
   app: null,
 
-  /// Collection of protocols loaded into server.
-  _protocols: null,
-
   /// List of engines loaded by the server.
   _engines: null,
+
+  /// Name connections for the server.
+  _connections: null,
 
   viewCachePath: computed ({
     get () {
@@ -64,6 +67,10 @@ const Server = BO.extend ({
     get () { return this._express; }
   }),
 
+  connections: computed ({
+    get () { return this._connections; }
+  }),
+
   init () {
     this._super.call (this, ...arguments);
 
@@ -72,7 +79,7 @@ const Server = BO.extend ({
     this._express = express ();
     this._mainRouter = express.Router ();
     this._engines = [];
-    this._protocols = {};
+    this._connections = {};
   },
 
   /**
@@ -103,26 +110,20 @@ const Server = BO.extend ({
    * Allow the server to start listening for connections.
    */
   listen () {
-    let promises = [];
-
-    forOwn (this._protocols, (protocol, key) => {
-      debug (`${key}: listening...`);
-      promises.push (protocol.listen ());
-    });
-
-    return Promise.all (promises);
+    return BluebirdPromise.props (mapValues (this._connections, (connection, name) => {
+      debug (`${name}: listening...`);
+      return connection.listen ();
+    }));
   },
 
   /**
    * Close the server and all its connections.
    */
   close () {
-    let promises = [];
-
-    for (let i = 0, len = this._protocols.length; i < len; ++ i)
-      promises.push (this._protocols[i].close ());
-
-    return Promise.all (promises);
+    return BluebirdPromise.props (mapValues (this._connections, (connection, name) => {
+      debug (`${name}: closing connection`);
+      return connection.close ();
+    }));
   },
 
   /**
@@ -147,7 +148,8 @@ const Server = BO.extend ({
       options: {}
     }, config);
 
-    let {format,options} = morganConfig;
+    let {format, options} = morganConfig;
+
     const morgan = require ('morgan');
     const middleware = morgan (format, options);
 
@@ -250,13 +252,13 @@ const Server = BO.extend ({
    * @private
    */
   _configureProtocols (config) {
-    forOwn (config, (value, key) => {
+    this._connections = mapValues (config, (value, key) => {
       const Protocol = protocols[key];
 
       assert (Protocol, `${key} is an invalid protocol`);
       assert (Protocol.createProtocol, `${key} must define createProtocol() static method`);
 
-      this._protocols[key] = Protocol.createProtocol (this._express, value);
+      return Protocol.createProtocol (this._express, value);
     });
   },
 
@@ -267,7 +269,20 @@ const Server = BO.extend ({
    * @private
    */
   _configureConnections (config) {
+    this._connections = mapValues (config, (connection, name) => {
+      debug (`configuring ${name} connection`);
 
+      // ECMAScript 2018: const { protocol, ...options } = connection;
+      const { protocol } = connection;
+      const options = omit (connection, ['protocol']);
+
+      const Protocol = protocols[protocol];
+
+      assert (!!Protocol, `${protocol} is an invalid protocol`);
+      assert (!!Protocol.createProtocol, `${protocol} must define createProtocol() static method`);
+
+      return Protocol.createProtocol (this._express, options);
+    });
   },
 
   _configureStaticPaths (config) {
@@ -377,11 +392,9 @@ const Server = BO.extend ({
   }
 });
 
-/*
 Server.prototype._configureProtocols = util.deprecate (
   Server.prototype._configureProtocols,
   'app/configs/ server.js: protocols configuration property has been replaced by connections configuration property',
   'DEP0001');
-*/
 
 module.exports = Server;
