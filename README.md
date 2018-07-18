@@ -1,7 +1,7 @@
 Blueprint
 ================
 
-A lightweight, simple, elegant framework for building mean applications
+a solid framework for building APIs and backend services
 
 ![npm version](https://img.shields.io/npm/v/@onehilltech/blueprint.svg)
 ![node version](https://img.shields.io/node/v/@onehilltech/blueprint.svg)
@@ -20,12 +20,18 @@ Features
 * Encapsulate application logic into reusable components
 * Compose Blueprint applications from other Blueprint applications
 
+Developer Resources
+----------------------
 
-Getting Started
-------------------
+### New Developer
 
-See our [Developer Guide](https://onehilltech.gitbook.io/blueprint/) to get started
-using Blueprint.
+Your first time using Blueprint? See our 
+[Getting Started](https://blueprint.onehilltech.com/quick-start/getting-started) guide.
+
+### Returning Developer
+
+Are you a returning developer? Jump right to our 
+[Developer's Guide](https://blueprint.onehilltech.com/developer-guide).
 
 Next Steps
 -----------------
