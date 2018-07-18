@@ -10,9 +10,9 @@
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-testing@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-testing/-/blueprint-testing-0.7.0.tgz#3ce54406796893a5bdf2bec43963dcbca2df5a70"
+"@onehilltech/blueprint-testing@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-testing/-/blueprint-testing-0.8.0.tgz#285815a3524d7e6a6cbf23217b87703fcf2f5a8b"
   dependencies:
     chai "^4.1.2"
     chai-datetime "^1.5.0"
