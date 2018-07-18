@@ -146,15 +146,12 @@ module.exports = BO.extend (Events, {
    */
   destroy () {
     // Instruct each service to destroy itself.
-    let {services} = this.resources;
-    let promises = [];
+    let { services } = this.resources;
 
-    forOwn (services, (service, name) => {
+    return BPromise.props (mapValues (services, (service, name) => {
       debug (`destroying service ${name}`);
-      promises.push (service.destroy ());
-    });
-
-    return Promise.all (promises);
+      return service.destroy ();
+    }));
   },
 
   /**
