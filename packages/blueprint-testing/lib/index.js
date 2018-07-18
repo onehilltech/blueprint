@@ -15,3 +15,4 @@
  */
 
 exports.request = require ('./request');
+exports.bootstrap = require ('./bootstrap');
