@@ -15,10 +15,7 @@
  */
 
 const blueprint = require ('@onehilltech/blueprint');
-
-const {
-  Listener,
-} = require ('@onehilltech/blueprint');
+const { Listener } = blueprint;
 
 const debug = require ('debug') ('blueprint-mongodb:listeners:seed');
 

@@ -120,7 +120,7 @@ module.exports = Service.extend ({
   destroy () {
     debug ('destroying service');
 
-    return this.closeConnections ();
+    return this.closeConnections (true);
   },
 
   seedConnections () {
@@ -273,10 +273,9 @@ module.exports = Service.extend ({
    * Close all open connections.
    */
   closeConnections (force) {
-    const pending = mapValues (this._connections, (conn) => {
-      conn.readyState !== 0 ? conn.close (force) : null
-    });
-
-    return BluebirdPromise.props (pending);
+    return BluebirdPromise.props (mapValues (this._connections, (conn) => {
+      if (conn.readyState !== 0)
+        return conn.close (force);
+    }));
   }
 });

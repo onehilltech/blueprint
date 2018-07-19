@@ -15,71 +15,14 @@
  */
 
 const {expect} = require ('chai');
-const Service  = require ('../../../../app/services/mongodb');
 const mongoose = require ('mongoose');
-
-const path = require ('path');
 
 const blueprint = require ('@onehilltech/blueprint');
 
-const {
-  BO,
-  Events
-} = blueprint;
-
-const {
-  forOwn
-} = require ('lodash');
-
-function makeService () {
-  return new Service ({app: blueprint.app});
-}
-
 describe ('app | services | mongodb', function () {
-  describe ('configure', function () {
-    it ('should configure the service', function () {
-      let service = makeService ();
-      service.configure ();
-
-      expect (service.connections).to.have.keys (['$default', 'secondary']);
-      expect (service.defaultConnection).to.equal (mongoose.connections[0]);
-    });
-  });
-
-  describe ('createConnection', function () {
-    it ('should not create duplicate connections', function () {
-      let service = makeService ();
-      service.createConnection ('$default');
-
-      expect (service.connections).to.have.keys (['$default', 'secondary']);
-    })
-  });
-
-  describe ('openConnections', function () {
-    it ('should open all connection to the database', function () {
-      let service = makeService ();
-      service.configure ();
-
-      return service.openConnections ()
-        .then (() => {
-          // Let's make sure all connections are listed as open.
-          forOwn (service.connections, (conn) => {
-            expect (conn.readyState).to.equal (1);
-          });
-        });
-    });
-  });
-
-  describe.skip ('closeConnections', function () {
-    it ('should close all open connections', function () {
-      let service = makeService ();
-      service.configure ();
-
-      return service.closeConnections ().then (() => {
-        forOwn (service.connections, (conn) => {
-          expect (conn.readyState).to.equal (0);
-        });
-      });
-    })
+  it ('bootstrapping should configure the service', function () {
+    const service = blueprint.lookup ('service:mongodb');
+    expect (service.connections).to.have.keys (['$default', 'secondary']);
+    expect (service.defaultConnection).to.equal (mongoose.connections[0]);
   });
 });
