@@ -22,6 +22,8 @@ const RECAPTCHA_SECRET = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe';
 
 describe ('app | services | recaptcha', function () {
   describe ('verifyResponse', function () {
+    this.timeout (5000);
+
     it ('should verify the response', function () {
       let recaptcha = blueprint.lookup ('service:recaptcha');
 

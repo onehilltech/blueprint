@@ -196,6 +196,8 @@ describe ('app | routers | oauth2 | token', function () {
       });
 
       context ('recaptcha', function () {
+        this.timeout (5000);
+
         it ('should grant token', function () {
           const {recaptcha,accounts} = seed ('$default');
           const client = recaptcha[0];
