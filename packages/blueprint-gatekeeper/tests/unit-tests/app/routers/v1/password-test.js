@@ -17,7 +17,7 @@
 const {expect} = require ('chai');
 const blueprint = require ('@onehilltech/blueprint');
 const { seed, Types: { ObjectId } } = require ('@onehilltech/blueprint-mongodb');
-const { request } = require ('../../../../../lib/testing');
+const { request } = require ('@onehilltech/blueprint-testing');
 
 describe ('app | routers | password', function () {
   function getTokenGenerator () {

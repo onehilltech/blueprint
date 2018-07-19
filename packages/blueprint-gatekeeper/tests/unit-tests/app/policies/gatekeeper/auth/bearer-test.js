@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-const { seed } = require ('@onehilltech/blueprint-mongodb');
-const { request } = require ('../../../../../../lib/testing');
-const blueprint = require ('@onehilltech/blueprint');
+const blueprint   = require ('@onehilltech/blueprint');
+const { seed }    = require ('@onehilltech/blueprint-mongodb');
+const { request } = require ('@onehilltech/blueprint-testing');
 
 describe ('app | policies | gatekeeper | auth | bearer', function () {
   function getTokenGenerator () {

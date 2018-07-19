@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 
-const {
-  expect
-} = require ('chai');
-
-const {
-  request
-} = require ('../../../../../lib/testing');
-
-const {
-  lean,
-  seed,
-
-  Types: {
-    ObjectId
-  }
-} = require ('@onehilltech/blueprint-mongodb');
-
+const { expect } = require ('chai');
+const { lean, seed, Types: { ObjectId } } = require ('@onehilltech/blueprint-mongodb');
 const blueprint = require ('@onehilltech/blueprint');
+const { request } = require ('@onehilltech/blueprint-testing');
 
 describe ('app | routers | account', function () {
   describe ('/v1/accounts', function () {

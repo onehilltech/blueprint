@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-exports.testing = require ('./testing');
+exports.TokenGenerator = require ('./token-generator');

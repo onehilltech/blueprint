@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-const { request } = require ('../../../../../../lib/testing');
 const { seed }    = require ('@onehilltech/blueprint-mongodb');
 const { expect }  = require ('chai');
 const blueprint   = require ('@onehilltech/blueprint');
+const { request } = require ('@onehilltech/blueprint-testing');
 
 const TOKEN_URL = '/v1/oauth2/token';
 

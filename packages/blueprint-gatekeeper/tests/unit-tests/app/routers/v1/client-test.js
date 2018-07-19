@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-const {
-  request
-} = require ('../../../../../lib/testing');
-
-const {
-  lean,
-  seed,
-
-  Types: {
-    ObjectId
-  }
-} = require ('@onehilltech/blueprint-mongodb');
+const { lean, seed, Types: { ObjectId } } = require ('@onehilltech/blueprint-mongodb');
+const { request } = require ('@onehilltech/blueprint-testing');
 
 describe ('app | routers | client', function () {
   describe ('/v1/clients', function () {

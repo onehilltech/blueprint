@@ -18,6 +18,7 @@ const assert    = require ('assert');
 const { seed }  = require ('@onehilltech/blueprint-mongodb');
 const { Test }  = require ('supertest');
 const blueprint = require ('@onehilltech/blueprint');
+const { Service } = blueprint;
 
 /**
  * Creates a Blueprint testing request that has already be initialized to a user.
@@ -59,8 +60,10 @@ Test.prototype.withClientToken = function (i, conn) {
 
 Test.prototype.fromClient = Test.prototype.withClientToken;
 
-const {
-  request
-} = require ('@onehilltech/blueprint-testing');
+/**
+ * Testing service for Gatekeeper
+ */
+module.exports = Service.extend ({
 
-module.exports = request;
+});
+

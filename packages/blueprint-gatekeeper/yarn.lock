@@ -25,17 +25,17 @@
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-mongodb@^1.6.5":
-  version "1.6.6"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.6.6.tgz#2ee52f96ceda2d7094b5917755ec85e54b128870"
+"@onehilltech/blueprint-mongodb@^1.6.8":
+  version "1.6.8"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.6.8.tgz#08f0a5a4d15852a74faa7a5fc73b2b8a29c10972"
   dependencies:
-    "@onehilltech/blueprint" "^4.0.5"
+    "@onehilltech/blueprint" "^4.3.1"
     "@onehilltech/dab" "^1.1.1"
     moment "^2.22.2"
 
-"@onehilltech/blueprint-testing@^0.7.0":
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-testing/-/blueprint-testing-0.7.0.tgz#3ce54406796893a5bdf2bec43963dcbca2df5a70"
+"@onehilltech/blueprint-testing@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-testing/-/blueprint-testing-0.8.0.tgz#285815a3524d7e6a6cbf23217b87703fcf2f5a8b"
   dependencies:
     chai "^4.1.2"
     chai-datetime "^1.5.0"
@@ -43,9 +43,9 @@
     path "^0.12.7"
     supertest "^3.1.0"
 
-"@onehilltech/blueprint@^4.0.5":
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.0.5.tgz#c8538d59a475dd60c928fe7ac11869870ae14476"
+"@onehilltech/blueprint@^4.3.1":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.3.1.tgz#b9cd29952307761110120ab052e5f7061daab4a9"
   dependencies:
     "@onehilltech/blueprint-cli-exts" "^1.2.2"
     base-object "^1.0.6"
