@@ -9,7 +9,7 @@
     "messaging"
   ],
   "scripts": {
-    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive --reporter spec",
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive --exit --reporter spec",
     "postversion": "npm publish",
     "postpublish": "git push origin master & git push origin --tags"
   },
