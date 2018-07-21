@@ -96,9 +96,15 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
 
-base-object@^1.0.5, base-object@^1.0.6:
+base-object@^1.0.5:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/base-object/-/base-object-1.0.6.tgz#eaf2304dc71f9b9976351fcda26f1617fc81d612"
+  dependencies:
+    lodash "^4.17.10"
+
+base-object@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/base-object/-/base-object-1.1.1.tgz#71e80c1dfa48e8fe89928034fbd1c4357ca89ca4"
   dependencies:
     lodash "^4.17.10"
 
