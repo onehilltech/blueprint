@@ -25,11 +25,11 @@
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-gatekeeper@^0.80.5":
-  version "0.80.5"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-gatekeeper/-/blueprint-gatekeeper-0.80.5.tgz#ed4ab45474e63e0c65ef71cd50701bb259c9495b"
+"@onehilltech/blueprint-gatekeeper@^0.80.7":
+  version "0.80.7"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-gatekeeper/-/blueprint-gatekeeper-0.80.7.tgz#ce267d18ee2dc6b1a2c1adb6e82adc853f0d02d5"
   dependencies:
-    "@onehilltech/blueprint-mongodb" "^1.6.5"
+    "@onehilltech/blueprint-mongodb" "^1.6.9"
     bcrypt "^2.0.1"
     commander "^2.11.0"
     cors "^2.8.4"
@@ -49,11 +49,11 @@
     uid-safe "^2.1.5"
     yargs "^10.0.3"
 
-"@onehilltech/blueprint-mongodb@^1.6.5":
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.6.5.tgz#ae0fad709c68ad0e6e2f417745838ca5a1ee9b18"
+"@onehilltech/blueprint-mongodb@^1.6.9":
+  version "1.6.9"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.6.9.tgz#3c30770fe8c5b6b129250256fac491c9c8f60cea"
   dependencies:
-    "@onehilltech/blueprint" "^4.0.5"
+    "@onehilltech/blueprint" "^4.4.0"
     "@onehilltech/dab" "^1.1.1"
     moment "^2.22.2"
 
@@ -67,12 +67,12 @@
     path "^0.12.7"
     supertest "^3.1.0"
 
-"@onehilltech/blueprint@^4.0.5":
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.0.5.tgz#c8538d59a475dd60c928fe7ac11869870ae14476"
+"@onehilltech/blueprint@^4.4.0":
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.4.0.tgz#3ccfb313774344bf16216d529aaa6e257fc110f0"
   dependencies:
     "@onehilltech/blueprint-cli-exts" "^1.2.2"
-    base-object "^1.0.6"
+    base-object "^1.1.1"
     body-parser "^1.17.2"
     commander "^2.11.0"
     consolidate "^0.15.0"
@@ -351,9 +351,15 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
 
-base-object@^1.0.5, base-object@^1.0.6:
+base-object@^1.0.5:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/base-object/-/base-object-1.0.6.tgz#eaf2304dc71f9b9976351fcda26f1617fc81d612"
+  dependencies:
+    lodash "^4.17.10"
+
+base-object@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/base-object/-/base-object-1.1.1.tgz#71e80c1dfa48e8fe89928034fbd1c4357ca89ca4"
   dependencies:
     lodash "^4.17.10"
 
