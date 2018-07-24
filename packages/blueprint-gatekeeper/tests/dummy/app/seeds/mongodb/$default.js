@@ -118,12 +118,17 @@ module.exports = Seed.extend ({
         { client: dab.ref ('native.2'), account: dab.ref ('accounts.0'), refresh_token: dab.id ()},
         { client: dab.ref ('native.0'), account: dab.ref ('accounts.4'), refresh_token: dab.id ()},
         { client: dab.ref ('recaptcha.0'), account: dab.ref ('accounts.0'), refresh_token: dab.id ()},
-        { client: dab.ref ('android.0'), account: dab.ref ('accounts.0'), refresh_token: dab.id ()}
+        { client: dab.ref ('android.0'), account: dab.ref ('accounts.0'), refresh_token: dab.id ()},
+        { client: dab.ref ('android.0'), account: dab.ref ('accounts.1'), refresh_token: dab.id ()}
       ],
 
       client_tokens: [
         { client: dab.ref ('native.0'), scope: ['gatekeeper.account.create']},
         { client: dab.ref ('native.0'), scope: ['dummy']}
+      ],
+
+      books: [
+        { title: 'The Great Gatsby', owner: dab.ref ('accounts.0') }
       ]
     };
   }
