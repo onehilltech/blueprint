@@ -17,17 +17,23 @@ OAuth 2.0 token server and module for Blueprint.js
 Installation
 --------------
 
+    yarn add @onehilltech/blueprint-gatekeeper
+    
+or
+ 
     npm install @onehilltech/blueprint-gatekeeper --save
+
     
 Getting Started
 ----------------
 
 ### Defining the configuration
 
-Define the configuration file `gatekeeper.js` to configure the module for
-your application:
+Define the configuration file to configure the module for your application:
 
 ```javascript
+// app/configs/gatekeeper.js
+
 module.exports = {
  tokens: {
      // This is the base options for all token generators.
@@ -46,12 +52,16 @@ module.exports = {
 Define a route (or router) to import the Gatekeeper routes into the application:
 
 ```javascript
-// app/routers/EndpointRouter.js
-const blueprint = require ('@onehilltech/blueprint');
+// app/routers/endpoint.js
 
-module.exports = exports = {
-  '/gatekeeper': blueprint.mount ('@onehilltech/blueprint-gatekeeper:v1')
-};
+const blueprint = require ('@onehilltech/blueprint');
+const { Router } = blueprint;
+
+module.exports = Router.extend ({
+  specification: {
+    '/gatekeeper': blueprint.mount ('@onehilltech/blueprint-gatekeeper:v1')    
+  }
+});
 ```
 
 ### Protecting routes
@@ -61,18 +71,26 @@ Lastly, define the routes you want to protect using the ```gatekeeper.auth.beare
 Blueprint policy. For example, you can protect all routes on a given path:
 
 ```javascript
-// EndpointRouters.js
+// app/routers/endpoint.js
 
-module.exports = {
-  '/v1': {
-    policy: 'gatekeeper.auth.bearer'
+const blueprint = require ('@onehilltech/blueprint');
+const { Router } = blueprint;
+
+module.exports = Router.extend ({
+  specification: {
+    '/gatekeeper': blueprint.mount ('@onehilltech/blueprint-gatekeeper:v1'),
+    
+    // Let's protect the /v1 routes.
+    '/v1': {
+      policy: 'gatekeeper.auth.bearer'
+    }  
   }
-};
+});
 ```
 
-The router above will protect all routes under the `/v1` path, which
-includes all routers located in `app/routers/v1` directory. The client will
-need to define the `Authorization` header and include a generated token.
+The router above will protect all routes under the `/v1` path, which includes all routers located
+in `app/routers/v1` directory. The client will need to define the `Authorization` header and include 
+a generated token.
 
 ### Initial setup (for production only)
 
