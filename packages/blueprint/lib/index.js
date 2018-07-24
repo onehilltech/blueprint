@@ -23,10 +23,12 @@ exports.Mixin = Mixin;
 exports.BO = exports.BlueprintObject = BO;
 exports.PropertyDescriptor = PropertyDescriptor;
 
-const { Listener, Events } = require ('./messaging');
+const { AsyncListener, Listener, Events } = require ('./messaging');
 
 exports.Loader = require ('./loader');
 
+// message framework classes
+exports.AsyncListener = AsyncListener;
 exports.Listener = Listener;
 exports.Events = Events;
 

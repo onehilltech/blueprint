@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
-exports.Listener = require ('./listener');
 exports.Events = require ('./events');
+
+exports.Listener = require ('./listener');
+exports.AsyncListener = require ('./async-listener');
