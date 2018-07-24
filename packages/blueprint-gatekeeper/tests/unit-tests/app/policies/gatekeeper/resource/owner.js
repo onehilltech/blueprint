@@ -17,7 +17,7 @@
 const { request } = require ('@onehilltech/blueprint-testing');
 const { seed } = require ('@onehilltech/blueprint-mongodb');
 
-describe.only ('app | policies | gatekeeper | resource | owner', function () {
+describe ('app | policies | gatekeeper | resource | owner', function () {
   it ('should allow the owner to delete the resource', function () {
     const { books: [book] } = seed ();
 
