@@ -16,14 +16,10 @@
  */
 
 const blueprint = require ('@onehilltech/blueprint');
+const { request } = require ('@onehilltech/blueprint-testing');
+
 const {expect}  = require ('chai');
 const {seed, Types: {ObjectId}} = require ('@onehilltech/blueprint-mongodb');
-
-const {
-  testing: {
-    request
-  }
-} = require ('@onehilltech/blueprint-gatekeeper');
 
 describe.only ('app | routers | v1 | firebase-messaging', function () {
   function generateDeviceToken (device) {
