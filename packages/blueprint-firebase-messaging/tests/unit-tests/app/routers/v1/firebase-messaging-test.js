@@ -52,7 +52,7 @@ describe.only ('app | routers | v1 | firebase-messaging', function () {
           .then (res => {
             return FirebaseDevice.findOne ({device: device.device}).then (model => {
               expect (res.body.device).to.eql (model.lean ());
-            })
+            });
           });
       });
     });
