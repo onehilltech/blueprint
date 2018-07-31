@@ -115,7 +115,7 @@ describe ('lib | ResourceController', function () {
         .expect (200, {authors: lean (authors)});
     });
 
-    it.only ('should get an empty list when populating empty result', function () {
+    it ('should get an empty list when populating empty result', function () {
       return request ()
         .get ('/books')
         .query ({name: 'The Cat In The Hat', _:{populate: true}})
