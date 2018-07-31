@@ -17,7 +17,7 @@
 const pluralize = require ('pluralize');
 const assert = require ('assert');
 
-const { extend, forOwn} = require ('lodash');
+const { extend, forOwn, isEmpty } = require ('lodash');
 
 const {
   Action,
@@ -266,7 +266,15 @@ module.exports = ResourceController.extend ({
                   return {[this.controller.plural]: data};
                 }
               })
-              .then (result => this.prepareResponse (req, res, result))
+              .then (result => {
+                // We cannot have an empty result. Let's make sure that we have an
+                // empty list for this collection of models.
+
+                if (isEmpty (result))
+                  result[this.controller.plural] = [];
+
+                return this.prepareResponse (req, res, result)
+              })
               .then (result => res.status (200).json (result));
           });
       },
