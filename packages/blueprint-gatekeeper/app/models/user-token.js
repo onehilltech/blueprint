@@ -48,7 +48,10 @@ const schema = new mongodb.Schema ({
   refresh_token: {type: ObjectId, index: true, unique: true, sparse: true}
 }, options);
 
-schema.methods.serialize = function (tokenGenerator) {
+schema.methods.serialize = function (tokenGenerator, refreshTokenGenerator) {
+  if (!refreshTokenGenerator)
+    return Promise.reject (new Error ('You must provide a refresh token generator.'));
+
   return props ({
     access_token: (() => {
       const payload = { scope: this.scope };
@@ -62,20 +65,25 @@ schema.methods.serialize = function (tokenGenerator) {
 
     refresh_token: (() => {
       if (!this.refresh_token)
-        return callback (null);
+        return Promise.resolve (null);
+
+      // Refresh tokens never expire.
 
       const payload = {  };
-      const options = { jwtid: this.refresh_token.toString () };
+      const options = { jwtid: this.refresh_token.toString ()};
 
       if (this.origin)
         options.audience = this.origin;
 
-      return tokenGenerator.generateToken (payload, options);
+      return refreshTokenGenerator.generateToken (payload, options);
     })()
   });
 };
 
-schema.methods.serializeSync = function (tokenGenerator) {
+schema.methods.serializeSync = function (tokenGenerator, refreshTokenGenerator) {
+  if (!refreshTokenGenerator)
+    throw Error ('You must provide a refresh token generator.');
+
   return  {
     access_token: (() => {
       let options = {jwtid: this.id};
@@ -90,12 +98,12 @@ schema.methods.serializeSync = function (tokenGenerator) {
       if (!this.refresh_token)
         return undefined;
 
-      let options = {jwtid: this.refresh_token.toString ()};
+      let options = { jwtid: this.refresh_token.toString () };
 
       if (this.origin)
         option.audience = this.origin;
 
-      return tokenGenerator.generateTokenSync ({}, options);
+      return refreshTokenGenerator.generateTokenSync ({}, options);
     }) ()
   };
 };

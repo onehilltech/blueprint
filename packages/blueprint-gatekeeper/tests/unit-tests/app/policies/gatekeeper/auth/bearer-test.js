@@ -19,8 +19,13 @@ const { seed }    = require ('@onehilltech/blueprint-mongodb');
 const { request } = require ('@onehilltech/blueprint-testing');
 
 describe ('app | policies | gatekeeper | auth | bearer', function () {
-  function getTokenGenerator () {
-    return blueprint.lookup ('service:gatekeeper').getTokenGenerator ('gatekeeper:access_token');
+  function getTokenGenerators () {
+    const gatekeeper = blueprint.lookup ('service:gatekeeper');
+
+    return [
+      gatekeeper.getTokenGenerator ('gatekeeper:access_token'),
+      gatekeeper.getTokenGenerator ('gatekeeper:refresh_token')
+    ];
   }
 
   it ('should fail because of missing access token', function () {
@@ -62,7 +67,7 @@ describe ('app | policies | gatekeeper | auth | bearer', function () {
   it ('should fail because of unknown access token', function () {
     const {user_tokens} = seed ('$default');
     const userToken = user_tokens[0];
-    const accessToken = userToken.serializeSync (getTokenGenerator ());
+    const accessToken = userToken.serializeSync (...getTokenGenerators ());
 
     return userToken.remove ().then (() => {
       return request ()
@@ -84,7 +89,7 @@ describe ('app | policies | gatekeeper | auth | bearer', function () {
 
   it ('should fail because of unknown client', function () {
     const {user_tokens,native} = seed ('$default');
-    const accessToken = user_tokens[0].serializeSync (getTokenGenerator ());
+    const accessToken = user_tokens[0].serializeSync (...getTokenGenerators ());
     const client = native[0];
 
     return client.remove ().then (() => {

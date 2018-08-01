@@ -32,6 +32,10 @@ const BUILTIN_TOKEN_GENERATORS = {
     expiresIn: '12 hours'
   },
 
+  'gatekeeper:refresh_token': {
+
+  },
+
   'gatekeeper:account_verification': {
     expiresIn: '14 days',
   },

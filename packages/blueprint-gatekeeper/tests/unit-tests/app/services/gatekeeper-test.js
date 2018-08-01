@@ -28,19 +28,29 @@ describe ('app | services | gatekeeper', function () {
 
       expect (gatekeeper.tokenGenerator).to.have.deep.property ('options', {
         algorithm: 'HS256',
-        expiresIn: '1h',
         issuer: 'gatekeeper',
         secret: 'ssshhh',
       });
 
       const generators = gatekeeper.tokenGenerators;
 
-      expect (generators).to.have.keys (['gatekeeper:access_token', 'gatekeeper:account_verification', 'gatekeeper:password_reset']);
+      expect (generators).to.have.keys ([
+        'gatekeeper:access_token',
+        'gatekeeper:refresh_token',
+        'gatekeeper:account_verification',
+        'gatekeeper:password_reset']);
 
       expect (generators).to.have.property ('gatekeeper:access_token').to.have.deep.property ('options', {
         algorithm: 'HS256',
         expiresIn: '12 hours',
         subject: 'gatekeeper:access_token',
+        issuer: 'gatekeeper',
+        secret: 'ssshhh',
+      });
+
+      expect (generators).to.have.property ('gatekeeper:refresh_token').to.have.deep.property ('options', {
+        algorithm: 'HS256',
+        subject: 'gatekeeper:refresh_token',
         issuer: 'gatekeeper',
         secret: 'ssshhh',
       });

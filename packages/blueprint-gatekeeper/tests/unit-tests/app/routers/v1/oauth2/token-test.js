@@ -33,8 +33,13 @@ function getToken (data) {
 }
 
 describe ('app | routers | oauth2 | token', function () {
-  function getTokenGenerator () {
-    return blueprint.lookup ('service:gatekeeper').getTokenGenerator ('gatekeeper:access_token');
+  function getTokenGenerators () {
+    const gatekeeper = blueprint.lookup ('service:gatekeeper');
+
+    return [
+      gatekeeper.getTokenGenerator ('gatekeeper:access_token'),
+      gatekeeper.getTokenGenerator ('gatekeeper:refresh_token')
+    ]
   }
 
   describe ('/token', function () {
@@ -541,7 +546,7 @@ describe ('app | routers | oauth2 | token', function () {
       it ('should fail because refresh token does not match client', function () {
         const {native, user_tokens} = seed ('$default');
         const client = native[0];
-        const {refresh_token} = user_tokens[4].serializeSync (getTokenGenerator ());
+        const {refresh_token} = user_tokens[4].serializeSync (...getTokenGenerators ());
 
         const data = {
           grant_type: 'refresh_token',
@@ -560,7 +565,7 @@ describe ('app | routers | oauth2 | token', function () {
       it ('should fail because client is disabled', function () {
         const {native, user_tokens} = seed ('$default');
         const client = native[2];
-        const {refresh_token} = user_tokens[4].serializeSync (getTokenGenerator ());
+        const {refresh_token} = user_tokens[4].serializeSync (...getTokenGenerators ());
 
         const data = {
           grant_type: 'refresh_token',
@@ -579,7 +584,7 @@ describe ('app | routers | oauth2 | token', function () {
       it ('should fail because refresh token is disabled', function () {
         const {native, user_tokens} = seed ('$default');
         const client = native[1];
-        const {refresh_token} = user_tokens[3].serializeSync (getTokenGenerator ());
+        const {refresh_token} = user_tokens[3].serializeSync (...getTokenGenerators ());
 
         const data = {
           grant_type: 'refresh_token',
@@ -598,7 +603,7 @@ describe ('app | routers | oauth2 | token', function () {
       it ('should fail because account is disabled', function () {
         const {native, user_tokens} = seed ('$default');
         const client = native[0];
-        const {refresh_token} = user_tokens[5].serializeSync (getTokenGenerator ());
+        const {refresh_token} = user_tokens[5].serializeSync (...getTokenGenerators ());
 
         const data = {
           grant_type: 'refresh_token',
@@ -620,7 +625,7 @@ describe ('app | routers | oauth2 | token', function () {
           const user_token = user_tokens[0];
           const client = native[0];
 
-          const {access_token, refresh_token} = user_token.serializeSync (getTokenGenerator ());
+          const {access_token, refresh_token} = user_token.serializeSync (...getTokenGenerators ());
 
           const data = {
             grant_type: 'refresh_token',
@@ -674,7 +679,7 @@ describe ('app | routers | oauth2 | token', function () {
         it ('should fail because of invalid client secret', function () {
           const {native, user_tokens} = seed ('$default');
           const client = native[0];
-          const {refresh_token} = user_tokens[0].serializeSync (getTokenGenerator ());
+          const {refresh_token} = user_tokens[0].serializeSync (...getTokenGenerators ());
 
           const data = {
             grant_type: 'refresh_token',
@@ -697,7 +702,7 @@ describe ('app | routers | oauth2 | token', function () {
           const user_token = user_tokens[7];
           const client = android[0];
 
-          const {access_token, refresh_token} = user_token.serializeSync (getTokenGenerator ());
+          const {access_token, refresh_token} = user_token.serializeSync (...getTokenGenerators ());
 
           const data = {
             grant_type: 'refresh_token',
@@ -757,7 +762,7 @@ describe ('app | routers | oauth2 | token', function () {
         it ('should fail because of invalid client secret', function () {
           const {android, user_tokens} = seed ('$default');
           const client = android[0];
-          const {refresh_token} = user_tokens[0].serializeSync (getTokenGenerator ());
+          const {refresh_token} = user_tokens[0].serializeSync (...getTokenGenerators ());
 
           const data = {
             grant_type: 'refresh_token',
@@ -776,7 +781,7 @@ describe ('app | routers | oauth2 | token', function () {
 
         it ('should fail because of invalid package', function () {
           const {android, user_tokens} = seed ('$default');
-          const accessToken = user_tokens[1].serializeSync (getTokenGenerator ());
+          const accessToken = user_tokens[1].serializeSync (...getTokenGenerators ());
           const client = android[0];
 
           const data = {
@@ -802,7 +807,7 @@ describe ('app | routers | oauth2 | token', function () {
           const user_token = user_tokens[6];
           const client = recaptcha[0];
 
-          const {access_token, refresh_token} = user_token.serializeSync (getTokenGenerator ());
+          const {access_token, refresh_token} = user_token.serializeSync (...getTokenGenerators ());
 
           const data = {
             grant_type: 'refresh_token',
@@ -822,7 +827,7 @@ describe ('app | routers | oauth2 | token', function () {
         it ('should fail because of missing fields', function () {
           const {user_tokens} = seed ('$default');
           const user_token = user_tokens[6];
-          const {refresh_token} = user_token.serializeSync (getTokenGenerator ());
+          const {refresh_token} = user_token.serializeSync (...getTokenGenerators ());
 
           const data = {
             grant_type: 'refresh_token',

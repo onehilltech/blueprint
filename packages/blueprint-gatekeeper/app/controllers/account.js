@@ -33,17 +33,20 @@ module.exports = ResourceController.extend ({
 
   Model: model ('account'),
 
-  gatekeeper: service (),
-
-  _tokenGenerator: null,
-
-  init () {
-    this._super.call (this, ...arguments);
-    this._tokenGenerator = this.app.lookup ('service:gatekeeper').getTokenGenerator ('gatekeeper:access_token');
-  },
-
   create () {
     return this._super.call (this, ...arguments).extend ({
+      gatekeeper: service (),
+
+      _tokenGenerator: null,
+      _refreshTokenGenerator: null,
+
+      init () {
+        this._super.call (this, ...arguments);
+
+        this._tokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:access_token');
+        this._refreshTokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:refresh_token');
+      },
+
       prepareDocument (req, doc) {
         // Prevent the client from setting the id.
         if (doc._id)
@@ -104,7 +107,7 @@ module.exports = ResourceController.extend ({
         const password = get (tokenController, 'granters.password');
 
         return password.createToken (req)
-          .then (accessToken => accessToken.serialize (this.controller._tokenGenerator))
+          .then (accessToken => accessToken.serialize (this._tokenGenerator, this._refreshTokenGenerator))
           .then (accessToken => {
             result.token = Object.assign ({token_type: 'Bearer'}, accessToken);
             return result;

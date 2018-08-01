@@ -30,8 +30,9 @@ Test.prototype.withUserToken = function (i, conn) {
   const {user_tokens} = seed (conn);
   const gatekeeper = blueprint.lookup ('service:gatekeeper');
   const tokenGenerator = gatekeeper.getTokenGenerator ('gatekeeper:access_token');
+  const refreshTokenGenerator = gatekeeper.getTokenGenerator ('gatekeeper:refresh_token');
 
-  const accessToken = user_tokens[i].serializeSync (tokenGenerator);
+  const accessToken = user_tokens[i].serializeSync (tokenGenerator, refreshTokenGenerator);
 
   assert (!!accessToken, `The seed for ${conn} does not have a user_tokens.[${i}]`);
 

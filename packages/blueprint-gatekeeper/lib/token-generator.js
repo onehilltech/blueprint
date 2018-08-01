@@ -35,7 +35,7 @@ const TokenGenerator = BO.extend ({
     algorithm: DEFAULT_ALGORITHM
   },
 
-  init (opts = {}) {
+  init () {
     this._super.call (this, ...arguments);
 
     assert (!!this.options.secret || (!!this.options.publicKey && !!this.options.privateKey), 'You must define options.secret or options.{publicKey, privateKey}');

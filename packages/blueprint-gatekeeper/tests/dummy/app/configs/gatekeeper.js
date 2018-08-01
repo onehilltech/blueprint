@@ -46,8 +46,7 @@ module.exports = {
     $: {
       algorithm: 'HS256',
       secret: 'ssshhh',
-      issuer: 'gatekeeper',
-      expiresIn: '1h'
+      issuer: 'gatekeeper'
     }
   }
 };

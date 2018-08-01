@@ -35,6 +35,7 @@ const mm = require ('micromatch');
 const { fromCallback } = require ('bluebird');
 const { transform } = require ('lodash');
 const { validationResult } = require ('express-validator/check');
+const { omit } = require ('lodash');
 
 /**
  * @class ValidateClientVisitor
@@ -117,6 +118,7 @@ const ValidateClientVisitor = ModelVisitor.extend ({
  */
 module.exports = Controller.extend ({
   _tokenGenerator: null,
+  _refreshTokenGenerator: null,
 
   /// Listing of the supported grant types.
   grantTypes: computed ({
@@ -133,6 +135,7 @@ module.exports = Controller.extend ({
     this._super.call (this, ...arguments);
 
     this._tokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:access_token');
+    this._refreshTokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:refresh_token');
 
     this.granters = transform (Granters, (results, Granter) => {
       let granter = new Granter ({tokenGenerator: this._tokenGenerator});
@@ -231,7 +234,7 @@ module.exports = Controller.extend ({
         const granter = this.granterFor (req);
 
         return granter.createToken (req)
-          .then (accessToken => accessToken.serialize (this.controller._tokenGenerator))
+          .then (accessToken => accessToken.serialize (this.controller._tokenGenerator, this.controller._refreshTokenGenerator))
           .then (accessToken => {
             const ret = Object.assign ({token_type: 'Bearer'}, accessToken);
             res.status (200).json (ret);

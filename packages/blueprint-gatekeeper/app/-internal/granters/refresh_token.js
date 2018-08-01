@@ -15,7 +15,7 @@
  */
 
 const Granter = require ('../granter');
-const { model, ForbiddenError, BadRequestError } = require ('@onehilltech/blueprint');
+const { service, model, ForbiddenError } = require ('@onehilltech/blueprint');
 
 const {
   Types: { ObjectId }
@@ -33,6 +33,16 @@ module.exports = Granter.extend ({
   name: 'refresh_token',
 
   UserToken: model ('user-token'),
+
+  gatekeeper: service (),
+
+  init () {
+    this._super.call (this, ...arguments);
+
+    // Replace the default token generator with the token generator
+    // for the refresh token.
+    this.tokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:refresh_token');
+  },
 
   schemaFor (client) {
     let schema = merge ({
