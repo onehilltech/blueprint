@@ -640,6 +640,14 @@ describe ('app | routers | oauth2 | token', function () {
 
             expect (access_token).to.not.equal (token.access_token);
             expect (refresh_token).to.not.equal (token.refresh_token);
+
+            const [, refreshTokenGenerator] = getTokenGenerators ();
+
+            // The refresh token should never expire.
+
+            return refreshTokenGenerator.verifyToken (token.refresh_token).then (payload => {
+              expect (payload.exp).to.equal (undefined);
+            });
           });
         });
 
