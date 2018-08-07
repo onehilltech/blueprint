@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-gatekeeper-client",
   "description": "Blueprint module for gatekeeper clients",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
