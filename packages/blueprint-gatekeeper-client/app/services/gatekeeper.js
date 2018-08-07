@@ -96,13 +96,16 @@ module.exports = Service.extend ({
     return this._request (options).catch (err => {
       // If the token has expired, then we are going to request a new access token
       // and then make the request again.
-      const {
-        errors: [
-          {code, status}
-        ]
-      } = err;
 
-      if (status !== '403' || code !== 'token_expired')
+      if (err.statusCode !== 403)
+        return Promise.reject (err);
+
+      const {
+        errors: [{code}]
+      } = err.errors;
+
+
+      if (code !== 'token_expired' && code !== 'unknown_token' && code !== 'invalid_token')
         return Promise.reject (err);
 
       return this._refreshToken ().then (() => this._request (options));
