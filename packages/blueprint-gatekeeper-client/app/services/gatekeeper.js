@@ -102,7 +102,7 @@ module.exports = Service.extend ({
 
       const {
         errors: [{code}]
-      } = err.errors;
+      } = err.error;
 
 
       if (code !== 'token_expired' && code !== 'unknown_token' && code !== 'invalid_token')
