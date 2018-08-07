@@ -1,0 +1,39 @@
+{
+  "name": "blueprint-gatekeeper-client",
+  "description": "",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
+    "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+    "start-server": "env NODE_ENV=production forever -o ./app/.blueprint/logs/output.log -e ./app/.blueprint/logs/error.log start ./app/index.js",
+    "stop-server": "env NODE_ENV=production forever stop app/index.js",
+    "install-service": "sudo -s forever-service install blueprint-gatekeeper-client_d --script ./app/index.js",
+    "uninstall-service": "sudo -s forever-service delete blueprint-gatekeeper-client_d"
+  },
+  "dependencies": {
+    "@onehilltech/blueprint": "^4.5.0",
+    "jsonfile": "^4.0.0",
+    "pug": "^2.0.3",
+    "request": "^2.87.0",
+    "request-promise-native": "^1.0.5"
+  },
+  "devDependencies": {
+    "@onehilltech/blueprint-testing": "^0.8.0",
+    "chai": "^4.1.2",
+    "mocha": "^5.1.1",
+    "nock": "^9.4.4",
+    "superagent": "^3.8.3",
+    "supertest": "^3.0.0"
+  },
+  "license": "",
+  "engines": {
+    "node": ">=6.0.0",
+    "npm": ">=3.0.0"
+  },
+  "keywords": [
+    "blueprint",
+    "blueprint-module"
+  ]
+}
