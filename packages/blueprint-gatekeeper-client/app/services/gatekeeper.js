@@ -46,6 +46,8 @@ module.exports = Service.extend ({
   /// The request wrapper for this service.
   _request: null,
 
+  _refreshTokenPromise: null,
+
   /**
    * Configure the service.
    *
@@ -103,10 +105,22 @@ module.exports = Service.extend ({
       if (status !== '403' || code !== 'token_expired')
         return Promise.reject (err);
 
-      return this._requestToken ()
-        .then (this._useToken.bind (this))
-        .then (() => this._request (options));
+      return this._refreshToken ().then (() => this._request (options));
     });
+  },
+
+  _refreshToken () {
+    if (!!this._refreshTokenPromise)
+      return this._refreshTokenPromise;
+
+    this._refreshTokenPromise = new Promise ((resolve, reject) => {
+      this._requestToken ()
+        .then (this._useToken.bind (this))
+        .then (() => this._refreshTokenPromise = null)
+        .then (resolve).catch (reject);
+    });
+
+    return this._refreshTokenPromise;
   },
 
   /**
