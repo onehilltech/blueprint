@@ -1,8 +1,8 @@
 {
-  "name": "blueprint-gatekeeper-client",
-  "description": "",
+  "name": "@onehilltech/blueprint-gatekeeper-client",
+  "description": "Blueprint module for gatekeeper clients",
   "version": "0.0.0",
-  "private": true,
+  "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
@@ -27,7 +27,7 @@
     "superagent": "^3.8.3",
     "supertest": "^3.0.0"
   },
-  "license": "",
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=6.0.0",
     "npm": ">=3.0.0"
