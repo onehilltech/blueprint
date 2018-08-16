@@ -104,7 +104,6 @@ module.exports = Service.extend ({
         errors: [{code}]
       } = err.error;
 
-
       if (code !== 'token_expired' && code !== 'unknown_token' && code !== 'invalid_token')
         return Promise.reject (err);
 
