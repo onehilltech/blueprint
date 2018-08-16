@@ -17,7 +17,7 @@
 const AsyncListener = require ('../../../../lib/messaging/async-listener');
 const { expect } = require ('chai');
 
-describe.only ('lib | messaging | AsyncListener', function () {
+describe ('lib | messaging | AsyncListener', function () {
   it ('should create an async event listener', function () {
     const listener = AsyncListener.create ({
       asyncHandleEvent (ev) {
