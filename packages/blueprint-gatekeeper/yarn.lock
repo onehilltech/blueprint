@@ -25,11 +25,11 @@
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-mongodb@^1.7.2":
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.7.2.tgz#ff35094d594616ea92b34ac2c8ec6bdb81c556c4"
+"@onehilltech/blueprint-mongodb@^1.7.3":
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.7.3.tgz#5b0873883b4e0aefcc637f0236a02d4a1d24cf0a"
   dependencies:
-    "@onehilltech/blueprint" "^4.5.0"
+    "@onehilltech/blueprint" "^4.5.2"
     "@onehilltech/dab" "^1.1.1"
     moment "^2.22.2"
 
@@ -43,9 +43,9 @@
     path "^0.12.7"
     supertest "^3.1.0"
 
-"@onehilltech/blueprint@^4.5.0":
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.5.0.tgz#d54a77281df55ab194ab43995edebcb7f835d001"
+"@onehilltech/blueprint@^4.5.2":
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.5.2.tgz#7cf53491a014b4b39c008d154db2f091a9438f9f"
   dependencies:
     "@onehilltech/blueprint-cli-exts" "^1.2.2"
     base-object "^1.1.1"

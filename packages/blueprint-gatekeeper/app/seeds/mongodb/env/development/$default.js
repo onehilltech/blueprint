@@ -50,7 +50,8 @@ module.exports = Seed.extend ({
           name: 'gatekeeper-recaptcha',
           recaptcha_secret: '6LdcLDcUAAAAAL8U9Im2z-kebfr9M1oqL1lLS0C7',
           email: 'james@onehilltech.com',
-          scope: ['gatekeeper.account.create']
+          scope: ['gatekeeper.account.create'],
+          origin: 'http://localhost:4200'
         }
       ],
 

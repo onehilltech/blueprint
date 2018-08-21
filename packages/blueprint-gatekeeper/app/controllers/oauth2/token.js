@@ -51,6 +51,10 @@ const ValidateClientVisitor = ModelVisitor.extend ({
 
   recaptcha: service (),
 
+  grantType: computed ({
+    get () { return this.req.body.grant_type  }
+  }),
+
   visitNativeClient (client) {
     // For a native client, we always need to authenticate the client secret.
     const {client_secret} = this.req.body;
@@ -74,6 +78,10 @@ const ValidateClientVisitor = ModelVisitor.extend ({
   },
 
   visitRecaptchaClient (client) {
+    // The refresh token does not have recaptcha property.
+    if (this.grantType === 'refresh_token')
+      return;
+
     // For all reCAPTCHA clients requesting a token, the origin of the request
     // must match the origin of the client on record. This only applies when we
     // are not in the test environment.
@@ -97,6 +105,7 @@ const ValidateClientVisitor = ModelVisitor.extend ({
 
     if (!!this.promise)
       return;
+
 
     // The request can from the correct client. Now, let's verify the response
     // with the server.
