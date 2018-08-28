@@ -7,6 +7,7 @@
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+    "postversion": "npm publish",
     "postpublish": "git push origin master ; git push origin --tags"
   },
   "dependencies": {
