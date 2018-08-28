@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-compression",
   "description": "Blueprint add-on for adding compression support to a Blueprint application.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
