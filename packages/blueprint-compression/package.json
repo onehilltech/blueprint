@@ -2,7 +2,7 @@
   "name": "blueprint-compression",
   "description": "Blueprint add-on for adding compression support to a Blueprint application.",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
