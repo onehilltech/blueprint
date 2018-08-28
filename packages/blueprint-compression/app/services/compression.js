@@ -23,6 +23,10 @@ module.exports = Service.extend ({
     // Load the compression configuration, and configure the expression
     // application according to the configuration.
     const config = this.app.lookup ('config:compression');
+
+    if (!config)
+      return;
+
     const express = this.app.server.express;
 
     if (config.app) {
