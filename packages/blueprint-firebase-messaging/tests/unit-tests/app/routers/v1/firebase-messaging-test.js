@@ -21,7 +21,7 @@ const { request } = require ('@onehilltech/blueprint-testing');
 const {expect}  = require ('chai');
 const {seed, Types: {ObjectId}} = require ('@onehilltech/blueprint-mongodb');
 
-describe.only ('app | routers | v1 | firebase-messaging', function () {
+describe ('app | routers | v1 | firebase-messaging', function () {
   function generateDeviceToken (device) {
     return blueprint.lookup ('service:fcm').generateToken (device);
   }

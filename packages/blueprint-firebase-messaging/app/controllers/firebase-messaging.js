@@ -15,7 +15,6 @@
  */
 
 const {
-  ResourceController,
   Types: {ObjectId}
 } = require ('@onehilltech/blueprint-mongodb');
 
@@ -25,6 +24,8 @@ const {
   model,
   service
 } = require ('@onehilltech/blueprint');
+
+const { ResourceController } = require ('@onehilltech/blueprint-gatekeeper');
 
 /**
  * @class FirebaseMessaging
