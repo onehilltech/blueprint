@@ -15,3 +15,4 @@
  */
 
 exports.TokenGenerator = require ('./token-generator');
+exports.UserResourceController = require ('./user-resource-controller');
