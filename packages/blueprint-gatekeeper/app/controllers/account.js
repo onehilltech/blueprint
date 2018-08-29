@@ -23,7 +23,7 @@ const {
 } = require ('@onehilltech/blueprint');
 
 const { get } = require ('lodash');
-const { ResourceController } = require ('@onehilltech/blueprint-mongodb');
+const ResourceController = require ('../../lib/resource-controller');
 
 /**
  * @class AccountController

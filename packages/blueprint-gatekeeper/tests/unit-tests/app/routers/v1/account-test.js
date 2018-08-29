@@ -61,7 +61,8 @@ describe ('app | routers | account', function () {
           .post ('/v1/accounts')
           .send ({account: data})
           .withClientToken (0)
-          .expect (200).then (res => {
+          .expect (200)
+          .then (res => {
             let _id = res.body.account._id;
 
             expect (res.body).to.eql ({

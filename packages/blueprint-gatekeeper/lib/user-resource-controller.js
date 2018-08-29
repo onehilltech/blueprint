@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { ResourceController } = require ('@onehilltech/blueprint-mongodb');
+const ResourceController = require ('./resource-controller');
 const { set } = require ('lodash');
 
 /**
