@@ -46,7 +46,7 @@
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/tests --recursive --exit",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "postversion": "npm publish",
-    "postpublish": "git push origin master & git push origin --tags"
+    "postpublish": "git push origin master ; git push origin --tags"
   },
   "bin": {
     "gatekeeper-setup": "./bin/gatekeeper-setup"
