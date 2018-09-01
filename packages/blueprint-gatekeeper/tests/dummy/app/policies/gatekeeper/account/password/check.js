@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const CheckPasswordPolicy = require ('../../../../../../../lib/check-password-policy');
+const PasswordPolicy = require ('../../../../../../../lib/password-policy');
 
 /**
  * Example password check policy. The password must contain the following:
@@ -24,7 +24,7 @@ const CheckPasswordPolicy = require ('../../../../../../../lib/check-password-po
  *  * 1 uppercase letter
  *  * min length of 8
  */
-module.exports = CheckPasswordPolicy.extend ({
+module.exports = PasswordPolicy.extend ({
   rules: /^(.{0,7}|[^0-9]*|[^A-Z]*|[^a-z]*)$/,
 
   checkPassword (password) {
