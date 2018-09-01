@@ -85,7 +85,7 @@ module.exports = ResourceController.extend ({
             };
 
             return this.controller.Model.findOneAndUpdate (selection, update, {new: true})
-              .then (account => !!account ? account : Promise.reject (new BadRequestError (`${field}_exists`, `An account with the ${field} already exists.`)));
+              .then (account => !!account ? account : Promise.reject (new BadRequestError (`${field}_exists`, `An account with this ${field} already exists.`)));
           });
       },
 
