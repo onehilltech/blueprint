@@ -15,24 +15,19 @@
  */
 
 const {
-  policies: {
-    check
-  }
+  policies: { check, all }
 } = require ('@onehilltech/blueprint');
 
-module.exports = {
-  '/accounts' : {
-    policy: check ('gatekeeper.auth.bearer'),
+module.exports = all ([
+  // Make sure the user making the request is the owner of the account.
+  check ('gatekeeper.account.me'),
 
-    resource: {
-      controller: 'account',
-      deny: ['count'],
-    },
+  /*
+   * Check the password policy. The password policy is optional. If an application
+   * wants to enable password policies, then they just need to overload this policy
+   * in their application.
+   */
+  check ('?gatekeeper.account.password.check', 'body.password.new')
+]);
 
-    '/:accountId': {
-      '/password': {
-        post: {action: 'account@changePassword', policy: 'gatekeeper.account.password.change' }
-      }
-    }
-  }
-};
+

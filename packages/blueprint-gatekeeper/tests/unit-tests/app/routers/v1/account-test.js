@@ -54,7 +54,7 @@ describe ('app | routers | account', function () {
     });
 
     context ('POST', function () {
-      const data = { username: 'tester1', password: 'tester1', email: 'james@onehilltech.com' };
+      const data = { username: 'tester1', password: '1aBcDeFg', email: 'james@onehilltech.com' };
 
       it ('should create a new account with new id', function () {
         return request ()
@@ -96,7 +96,7 @@ describe ('app | routers | account', function () {
       it ('should create a new account, and login the user', function () {
         const autoLogin = {
           username: 'auto-login',
-          password: 'auto-login',
+          password: '1aBcDeFg',
           email: 'auto-login@onehilltech.com'
         };
 
@@ -113,7 +113,8 @@ describe ('app | routers | account', function () {
           .query ({login: true})
           .send ({account: autoLogin})
           .withClientToken (0)
-          .expect (200).then (res => {
+          .expect (200)
+          .then (res => {
             const { account: {_id}} = res.body;
             expected._id = _id.toString ();
 
@@ -133,7 +134,7 @@ describe ('app | routers | account', function () {
           .withUserToken (0)
           .expect (200, 'true')
           .then (() => {
-            const data = { username: account.username, password: account.username, email: account.email };
+            const data = { username: account.username, password: '1aBcDeFg', email: account.email };
 
             return request ()
               .post ('/v1/accounts')
@@ -162,6 +163,22 @@ describe ('app | routers | account', function () {
           });
       });
 
+      it ('should not create an account [invalid password]', function () {
+        const {accounts} = seed ('$default');
+        const account = accounts[0];
+
+        const dup = {username: 'tester1', password: 'tester1', email: 'dummy@me.com', created_by: account.created_by};
+
+        return request ()
+          .post ('/v1/accounts')
+          .send ({account: dup})
+          .withClientToken (0)
+          .expect (403, { errors:
+              [ { code: 'invalid_password',
+                detail: 'The password is invalid.',
+                status: '403' } ] });
+      });
+
       it ('should not create an account [duplicate username]', function () {
         const {accounts} = seed ('$default');
         const account = accounts[0];
@@ -174,7 +191,7 @@ describe ('app | routers | account', function () {
           .withClientToken (0)
           .expect (400, { errors:
               [ { code: 'username_exists',
-                detail: 'An account with the username already exists.',
+                detail: 'An account with this username already exists.',
                 status: '400' } ] });
       });
 
@@ -190,7 +207,7 @@ describe ('app | routers | account', function () {
           .withClientToken (0)
           .expect (400, { errors:
               [ { code: 'email_exists',
-                detail: 'An account with the email already exists.',
+                detail: 'An account with this email already exists.',
                 status: '400' } ] });
       });
 
@@ -392,7 +409,7 @@ describe ('app | routers | account', function () {
         return request ()
           .post (`/v1/accounts/${account.id}/password`)
           .withUserToken (0)
-          .send ({password: { current: account.username, new: 'new-password'}})
+          .send ({password: { current: account.username, new: '1aBcDeFg'}})
           .expect (200, 'true').then (() => {
             const Account = blueprint.lookup ('model:account');
 
@@ -403,6 +420,20 @@ describe ('app | routers | account', function () {
           });
       });
 
+      it ('should change the password because new is invalid', function () {
+        const {accounts} = seed ('$default');
+        const account = accounts[0];
+
+        return request ()
+          .post (`/v1/accounts/${account.id}/password`)
+          .withUserToken (0)
+          .send ({password: { current: account.username, new: 'new'}})
+          .expect (403, { errors:
+              [ { code: 'invalid_password',
+                detail: 'The password is invalid.',
+                status: '403' } ] });
+      });
+
       it ('should not change the password because current is wrong', function () {
         const {accounts} = seed ('$default');
         const account = accounts[0];
@@ -410,7 +441,7 @@ describe ('app | routers | account', function () {
         return request ()
           .post (`/v1/accounts/${account.id}/password`)
           .withUserToken (0)
-          .send ({password: { current: 'bad-password', new: 'new-password'}})
+          .send ({password: { current: 'bad-password', new: '1aBcDeFg'}})
           .expect (400, { errors:
               [ { code: 'invalid_password',
                 detail: 'The current password is invalid.',

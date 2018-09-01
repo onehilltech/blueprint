@@ -26,7 +26,7 @@ module.exports = all ([
    * wants to enable password policies, then they just need to overload this policy
    * in their application.
    */
-  check ('?gatekeeper.account.password')
+  check ('?gatekeeper.account.password.check', 'body.account.password')
 ]);
 
 

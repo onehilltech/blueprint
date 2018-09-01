@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-const {
-  policies: {
-    check
+const { Policy } = require ('@onehilltech/blueprint');
+const { get } = require ('lodash');
+
+/**
+ * @class CheckPasswordPolicy
+ *
+ * Base policy that provides common behavior for checking a password.
+ */
+module.exports = Policy.extend ({
+  failureCode: 'invalid_password',
+
+  failureMessage: 'The password is invalid.',
+
+  location: null,
+
+  setParameters (location) {
+    this.location = location;
+  },
+
+  runCheck (req) {
+    const password = get (req, this.location);
+    return this.checkPassword (password);
+  },
+
+  checkPassword (/* password */) {
+    return true;
   }
-} = require ('@onehilltech/blueprint');
-
-module.exports = {
-  '/accounts' : {
-    policy: check ('gatekeeper.auth.bearer'),
-
-    resource: {
-      controller: 'account',
-      deny: ['count'],
-    },
-
-    '/:accountId': {
-      '/password': {
-        post: {action: 'account@changePassword', policy: 'gatekeeper.account.password.change' }
-      }
-    }
-  }
-};
+});

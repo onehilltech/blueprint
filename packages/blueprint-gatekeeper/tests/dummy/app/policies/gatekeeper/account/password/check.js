@@ -14,25 +14,20 @@
  * limitations under the License.
  */
 
-const {
-  policies: {
-    check
+const CheckPasswordPolicy = require ('../../../../../../../lib/check-password-policy');
+
+/**
+ * Example password check policy. The password must contain the following:
+ *
+ *  * 1 number
+ *  * 1 lowercase letter
+ *  * 1 uppercase letter
+ *  * min length of 8
+ */
+module.exports = CheckPasswordPolicy.extend ({
+  rules: /^(.{0,7}|[^0-9]*|[^A-Z]*|[^a-z]*)$/,
+
+  checkPassword (password) {
+    return password.match (this.rules) === null;
   }
-} = require ('@onehilltech/blueprint');
-
-module.exports = {
-  '/accounts' : {
-    policy: check ('gatekeeper.auth.bearer'),
-
-    resource: {
-      controller: 'account',
-      deny: ['count'],
-    },
-
-    '/:accountId': {
-      '/password': {
-        post: {action: 'account@changePassword', policy: 'gatekeeper.account.password.change' }
-      }
-    }
-  }
-};
+});

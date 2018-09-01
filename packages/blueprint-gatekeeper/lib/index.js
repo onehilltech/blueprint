@@ -17,3 +17,4 @@
 exports.TokenGenerator = require ('./token-generator');
 exports.ResourceController = require ('./resource-controller');
 exports.UserResourceController = require ('./user-resource-controller');
+exports.CheckPasswordPolicy = require ('./check-password-policy');
