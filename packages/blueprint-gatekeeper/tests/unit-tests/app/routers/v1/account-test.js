@@ -125,7 +125,7 @@ describe ('app | routers | account', function () {
           });
       });
 
-      it ('should create a previously deleted account', function () {
+      it ('should restore a deleted account', function () {
         const { accounts: [account]} = seed ();
 
         return request ()
