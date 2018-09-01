@@ -62,32 +62,31 @@ module.exports = ResourceController.extend ({
 
         return this._super.call (this, ...arguments)
           .catch (err => {
-            switch (err.code) {
-              case 11000:
-                // The email address for the account is a duplicate. If the account is marked
-                // as deleted, then we need to restore the account.
-                return this._restoreIfDeleted (req, doc);
+            if (err.code !== 11000)
+              return Promise.reject (err);
 
-              default:
-                return Promise.reject (err);
-            }
+            // Extract the index that caused the duplicate key error. This will determine
+            // the best course of action for correcting the problem.
+
+            const [, field] = err.message.match (/\$(\w+)_\d+/);
+
+            // Since we got a duplicate exception, this means an account with either the
+            // username or email address already exists. Let's attempt to restore the
+            // account if the account is deleted.
+
+            const selection = {email: doc.email, username: doc.username, '_stat.deleted_at': {$exists: true}};
+            const update = {
+              $set: {
+                'verification.required': true
+              },
+              $unset: {
+                '_stat.deleted_at': ''
+              }
+            };
+
+            return this.controller.Model.findOneAndUpdate (selection, update, {new: true})
+              .then (account => !!account ? account : Promise.reject (new BadRequestError (`${field}_exists`, `An account with the ${field} already exists.`)));
           });
-      },
-
-      _restoreIfDeleted (req, doc) {
-        const selection = {email: doc.email, '_stat.deleted_at': {$exists: true}};
-        const update = {
-          $set: {
-            'verification.required': true
-          },
-          $unset: {
-            '_stat.deleted_at': ''
-          }
-        };
-
-        return this.controller.Model.findOneAndUpdate (selection, update, {new: true}).then (account => {
-          return !!account ? account : Promise.reject (new BadRequestError ('already_exists', 'The account already exists.'));
-        });
       },
 
       prepareResponse (req, res, result) {

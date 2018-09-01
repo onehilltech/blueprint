@@ -30,7 +30,6 @@ const schema = new Schema ({
   /// The type of event.
   type: { type: String, required: true, index: true },
 
-
   /// The client making the request.
   client: ref (Client, { required: true, index: true }),
 

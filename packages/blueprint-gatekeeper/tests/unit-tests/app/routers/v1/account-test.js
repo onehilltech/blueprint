@@ -162,19 +162,35 @@ describe ('app | routers | account', function () {
           });
       });
 
-      it ('should not create an account [duplicate]', function () {
+      it ('should not create an account [duplicate username]', function () {
         const {accounts} = seed ('$default');
         const account = accounts[0];
 
-        const dup = {username: account.username, password: account.password, email: account.email, created_by: account.created_by};
+        const dup = {username: account.username, password: account.password, email: 'dummy@me.com', created_by: account.created_by};
 
         return request ()
           .post ('/v1/accounts')
           .send ({account: dup})
           .withClientToken (0)
           .expect (400, { errors:
-              [ { code: 'already_exists',
-                detail: 'The account already exists.',
+              [ { code: 'username_exists',
+                detail: 'An account with the username already exists.',
+                status: '400' } ] });
+      });
+
+      it ('should not create an account [duplicate email]', function () {
+        const {accounts} = seed ('$default');
+        const account = accounts[0];
+
+        const dup = {username: 'me', password: account.password, email: account.email, created_by: account.created_by};
+
+        return request ()
+          .post ('/v1/accounts')
+          .send ({account: dup})
+          .withClientToken (0)
+          .expect (400, { errors:
+              [ { code: 'email_exists',
+                detail: 'An account with the email already exists.',
                 status: '400' } ] });
       });
 

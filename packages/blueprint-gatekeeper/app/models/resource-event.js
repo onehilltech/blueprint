@@ -40,10 +40,6 @@ const schema = new Schema ({
 
     /// Name of the resource.
     name: { type: String, required: true, index: true }
-  },
-
-  resources: {
-
   }
 }, options);
 
