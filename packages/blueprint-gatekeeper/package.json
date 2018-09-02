@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-gatekeeper",
   "description": "Authentication framework for Web application programming interfaces (APIs)",
-  "version": "0.83.2",
+  "version": "0.84.0",
   "private": false,
   "main": "./lib",
   "license": "Apache-2.0",
