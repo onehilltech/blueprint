@@ -68,7 +68,7 @@ module.exports = ResourceController.extend ({
             // Extract the index that caused the duplicate key error. This will determine
             // the best course of action for correcting the problem.
 
-            const [, field] = err.message.match (/\$(\w+)_\d+/);
+            const [, field] = err.message.match (/index:\s+(\w+)_\d+/);
 
             // Since we got a duplicate exception, this means an account with either the
             // username or email address already exists. Let's attempt to restore the
