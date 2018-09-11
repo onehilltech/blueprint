@@ -90,10 +90,12 @@ module.exports = ResourceController.extend ({
    * @param req
    * @param action
    * @param model
-   * @return {event}
    * @private
    */
   _logModelEvent (req, action, model) {
+    if (!this.logging)
+      return Promise.resolve ();
+
     return this._logEvent (req, action, [model._id]);
   },
 
@@ -103,10 +105,12 @@ module.exports = ResourceController.extend ({
    * @param req
    * @param action
    * @param models
-   * @return {event}
    * @private
    */
   _logModelArrayEvent (req, action, models) {
+    if (!this.logging)
+      return Promise.resolve ();
+
     return this._logEvent (req, action, models.map (model => model._id));
   },
 
