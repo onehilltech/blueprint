@@ -25,6 +25,8 @@ const { model } = require ('@onehilltech/blueprint');
 module.exports = ResourceController.extend ({
   ResourceEvent: model ('resource-event'),
 
+  logging: false,
+
   create () {
     return this._super.call (this, ...arguments).extend ({
       postCreateModel (req, model) {
@@ -114,10 +116,12 @@ module.exports = ResourceController.extend ({
    * @param req
    * @param action
    * @param id
-   * @return {event}
    * @private
    */
   _logEvent (req, action, id) {
+    if (!this.logging)
+      return Promise.resolve ();
+
     const event = {
       client: req.accessToken.client,
       user: req.accessToken.account,
