@@ -1,6 +1,6 @@
 {
   "name": "@onehilltech/blueprint-firebase-messaging",
-  "version": "0.56.1",
+  "version": "0.56.2",
   "description": "Google Firebase messaging module for Blueprint.js",
   "main": "lib/index.js",
   "keywords": [
