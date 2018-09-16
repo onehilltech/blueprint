@@ -23,6 +23,14 @@ const { BO } = require ('@onehilltech/blueprint');
  */
 module.exports = BO.extend ({
   /**
+   * Configure the seed. This is called only one during the lifetime of the seed
+   * when it is first loaded into memory.
+   */
+  configure () {
+
+  },
+
+  /**
    * Reset the seed definition.
    */
   reset () {

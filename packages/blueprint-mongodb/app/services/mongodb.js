@@ -25,9 +25,10 @@ const {
   mapValues,
   get,
   isPlainObject,
+  map
 } = require ('lodash');
 
-const BluebirdPromise = require ('bluebird');
+const Bluebird = require ('bluebird');
 
 const assert = require ('assert');
 const mongoose = require ('mongoose');
@@ -127,7 +128,7 @@ module.exports = Service.extend ({
     debug ('seeding all database connections');
 
     const seeding = mapValues (this._connections, (conn, name) => this._seedConnection (name, conn));
-    return BluebirdPromise.props (seeding);
+    return Bluebird.props (seeding);
   },
 
   /**
@@ -155,7 +156,7 @@ module.exports = Service.extend ({
     const {connections} = this.config;
     const connecting = mapValues (connections, (config, name) => this.openConnection (name, config));
 
-    return BluebirdPromise.props (connecting);
+    return Bluebird.props (connecting);
   },
 
   /**
@@ -263,9 +264,11 @@ module.exports = Service.extend ({
 
     return this._loader.load (opts)
       .then (result => {
+        // Store the seed definitions.
         this._seedDefs = result;
 
-        return this._seedDefs;
+        // Allow each seed to perform a one-time configuration.
+        return Bluebird.props (map (result, seed => seed.configure ())).then (() => result);
       });
   },
 
@@ -273,7 +276,7 @@ module.exports = Service.extend ({
    * Close all open connections.
    */
   closeConnections (force) {
-    return BluebirdPromise.props (mapValues (this._connections, (conn) => {
+    return Bluebird.props (mapValues (this._connections, (conn) => {
       if (conn.readyState !== 0)
         return conn.close (force);
     }));
