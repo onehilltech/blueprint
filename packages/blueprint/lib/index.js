@@ -48,6 +48,8 @@ exports.InternalServerError = require ('./internal-server-error');
 exports.Policy = require ('./policy');
 exports.Router = require ('./router');
 
+exports.Protocol = require ('./server/protocol');
+
 // built-in actions
 exports.Action = require ('./action');
 
