@@ -15,6 +15,6 @@
  */
 
 module.exports = {
-  domains: ['dev.onehilltech.com'],
+  domains: ['greenlock.onehilltech.com'],
   email: 'contact@onehilltech.com'
 };
