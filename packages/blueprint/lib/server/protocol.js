@@ -15,6 +15,7 @@
  */
 
 const { BO } = require ('base-object');
+const { fromCallback } = require ('bluebird');
 
 /**
  * @class Protocol
@@ -34,11 +35,8 @@ module.exports = BO.extend ({
    * @returns {Promise<any>}
    */
   listen () {
-    return new Promise ((resolve, reject) => {
-      this.server.listen (this.options, (err) => {
-        if (err) return reject (err);
-        return resolve (null);
-      })
+    return fromCallback (callback => {
+      this.server.listen (this.options, callback);
     });
   },
 
@@ -48,11 +46,8 @@ module.exports = BO.extend ({
    * @returns {Promise<any>}
    */
   close () {
-    return new Promise ((resolve, reject) => {
-      this.server.close (err => {
-        if (err) return reject (err);
-        return resolve (null);
-      });
+    return fromCallback (callback => {
+      this.server.close (callback);
     });
   }
 });
