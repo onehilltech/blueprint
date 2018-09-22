@@ -35,7 +35,14 @@ Update the server configuration to use the Greenlock<sup>TM</sup> protocol.
 
 module.exports = {
   connections : {
-    greenlock : { protocol: 'greenlock' },
+    greenlock : { 
+      protocol: 'greenlock',
+      
+      // optional configuration for redirect-https
+      redirect: {
+        
+      }
+    },
   }
 };
 ```
