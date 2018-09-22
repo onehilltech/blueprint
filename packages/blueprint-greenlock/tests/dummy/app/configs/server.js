@@ -1,6 +1,8 @@
 module.exports = {
   connections : {
-    greenlock : { protocol: 'greenlock' },
+    greenlock : {
+      protocol: 'greenlock'
+    },
   },
 
   middleware : {

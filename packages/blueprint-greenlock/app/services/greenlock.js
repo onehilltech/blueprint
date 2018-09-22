@@ -246,7 +246,7 @@ function GreenlockProtocol (greenlock) {
   });
 
   GP.createProtocol = function (app, options) {
-    const redirectHttps = require ('redirect-https')();
+    const redirectHttps = require ('redirect-https')(options.redirect);
     const http = require ('http').createServer (greenlock.middleware (redirectHttps));
     const https = require ('https').createServer (greenlock.tlsOptions, app);
 
