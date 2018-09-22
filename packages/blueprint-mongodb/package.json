@@ -22,7 +22,7 @@
     "url": "https://github.com/onehilltech/blueprint-mongodb.git"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.5.2",
+    "@onehilltech/blueprint": "^4.5.4",
     "@onehilltech/dab": "^1.1.1",
     "moment": "^2.22.2"
   },
