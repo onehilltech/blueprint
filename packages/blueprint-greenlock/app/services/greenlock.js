@@ -22,8 +22,6 @@ const {
   Protocol
 } = require ('@onehilltech/blueprint');
 
-const { merge } = require ('lodash');
-
 const path = require ('path');
 const assert = require ('assert');
 
@@ -43,22 +41,26 @@ module.exports = Service.extend ({
     this._super.call (this, ...arguments);
 
     const config = this.app.lookup ('config:greenlock');
-    assert (!!config, 'The application must define a greenlock configuration.');
 
     if (config) {
+      // Save the configuration. This lets us know that we have enabled support
+      // for Greenlock.
+      this._config = config;
+
       if (config.debug)
         this.debug = config.debug;
+
+      // Create our instance of the greenlock agent. After creating the greenlock agent,
+      // we can register the custom protocols with the server.
+      this._createGreenlock (config);
+      this.app.server.registerProtocol ('greenlock', GreenlockProtocol (this));
     }
-
-    this._config = config;
-
-    // Create our instance of the greenlock agent. After creating the greenlock agent,
-    // we can register the custom protocols with the server.
-    this._createGreenlock (config);
-    this.app.server.registerProtocol ('greenlock', GreenlockProtocol (this));
   },
 
   configure () {
+    if (!this._config)
+      return;
+
     return Promise.all ([
       this._configureApproveDomains ()
     ]);
@@ -225,7 +227,6 @@ function GreenlockProtocol (greenlock) {
 
     /// The secure connection server.
     https: null,
-    httpsOptions: null,
 
     /**
      * Listen on the insecure port. This is needed for the callback response. After
@@ -234,7 +235,7 @@ function GreenlockProtocol (greenlock) {
     listen () {
       return Promise.all ([
         this._super.call (this, ...arguments),
-        this.https.listen (this.httpsOptions)
+        this.https.listen ({ port: DEFAULT_HTTPS_PORT })
       ]);
     },
 
@@ -244,25 +245,20 @@ function GreenlockProtocol (greenlock) {
      * @return {*}
      */
     close () {
-      return Promise.all ([
-        this._super.call (this, ...arguments),
-        this.https.close ()
-      ]);
+      return this._super.call (this, ...arguments).then (() => this.https.close ());
     }
   });
 
   GP.createProtocol = function (app, options) {
-    const redirectHttps = require ('redirect-https')(options.redirect);
+    const redirectHttps = require ('redirect-https')();
     const http = require ('http').createServer (greenlock.middleware (redirectHttps));
-
-    const tlsOptions = merge ({}, greenlock.tlsOptions, options.tls);
-    const https = require ('https').createServer (tlsOptions, app);
+    const https = require ('https').createServer (greenlock.tlsOptions, app);
 
     // We must always listen on port 80 for the http server. This allows Let's Encrypt
     // to communicate with the application.
-    const httpOptions = merge ({}, options.http, {port: DEFAULT_HTTP_PORT});
+    options.port = DEFAULT_HTTP_PORT;
 
-    return new GP ({server: http, options: httpOptions, https, httpsOptions: options.https});
+    return new GP ({server: http, options, https});
   };
 
   return GP;
