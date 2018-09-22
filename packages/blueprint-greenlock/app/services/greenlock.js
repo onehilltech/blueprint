@@ -22,14 +22,10 @@ const {
   Protocol
 } = require ('@onehilltech/blueprint');
 
-const { fromCallback } = require ('bluebird');
-const { merge } = require ('lodash');
-
 const path = require ('path');
 const assert = require ('assert');
 
 const Greenlock = require ('greenlock');
-//const SniChallenge = require ('le-challenge-sni');
 
 const DEFAULT_VERSION = 'draft-12';
 const SERVER_PRODUCTION = 'https://acme-v02.api.letsencrypt.org/directory';
@@ -37,13 +33,10 @@ const SERVER_STAGING = 'https://acme-staging-v02.api.letsencrypt.org/directory';
 
 const DEFAULT_RSA_KEY_SIZE = 2048;
 
+const DEFAULT_HTTP_PORT = 80;
+const DEFAULT_HTTPS_PORT = 443;
+
 module.exports = Service.extend ({
-  debug: false,
-
-  agreeTos: undefined,
-
-  staging: false,
-
   init () {
     this._super.call (this, ...arguments);
 
@@ -53,9 +46,6 @@ module.exports = Service.extend ({
     if (config) {
       if (config.debug)
         this.debug = config.debug;
-
-      if (config.agreeTos)
-        this.agreeTos = config.agreeTos;
     }
 
     this._config = config;
@@ -66,15 +56,51 @@ module.exports = Service.extend ({
     this.app.server.registerProtocol ('greenlock', GreenlockProtocol (this));
   },
 
-  agreeToTerms (args, agreeCb) {
-    console.log ('agree to terms...');
+  configure () {
+    return Promise.all ([
+      this._configureApproveDomains ()
+    ]);
   },
 
-  approveDomains (opts, certs, cb) {
-    console.log ('approveDomains');
+  /**
+   * Configure the approve domains strategy.
+   *
+   * @private
+   */
+  _configureApproveDomains () {
+    let strategy = this._config.approveDomains || 'basic';
+    let ApproveDomains;
+
+    switch (strategy) {
+      case 'basic':
+        const { BasicApproveDomains } = require ('../../lib');
+        ApproveDomains = BasicApproveDomains;
+        break;
+
+      case 'custom':
+        const fileName = path.resolve (this.app.appPath, 'greenlock/approve-domains');
+        ApproveDomains = require (fileName);
+        break;
+
+      default:
+        return Promise.reject (`${this._config.approveDomains} is not a valid approve domains enumeration.`);
+    }
+
+    this._approveDomains = new ApproveDomains ({config: this._config});
   },
 
-  _greenlock: null,
+  /**
+   * Approve the domain connecting to the application.
+   *
+   * @param options
+   * @param certs
+   * @param callback
+   */
+  approveDomains (options, certs, callback) {
+    Promise.resolve (this._approveDomains.approveDomains (options, certs))
+      .then (result => callback (null, result))
+      .catch (callback);
+  },
 
   tempPath: computed ({
     get () { return path.resolve (this.app.tempPath, 'greenlock'); }
@@ -100,6 +126,10 @@ module.exports = Service.extend ({
     return this._greenlock.middleware (f);
   },
 
+  tlsOptions: computed ({
+    get () { return this._greenlock.tlsOptions; }
+  }),
+
   /**
    * Create the Greenlock class.
    *
@@ -115,15 +145,8 @@ module.exports = Service.extend ({
     this._greenlock = Greenlock.create ({
       version,
       server: this.server,
-      //configDir: this.configDir,
       store,
-      //email: config.email,
-      agreeToTerms: this.agreeToTerms.bind (this),
-      //rsaKeySize: config.rsaKeySize || 2048,
-      challengeType: config.challengeType || 'http-01',
-      //communityMember: config.communityMember || true,
-      //securityUpdates: config.securityUpdates || true,
-      //approveDomains: this.approveDomains.bind (this),
+      approveDomains: this.approveDomains.bind (this),
       debug: this.debug
     });
   },
@@ -175,7 +198,15 @@ module.exports = Service.extend ({
     };
 
     return this._greenlock.register (options);
-  }
+  },
+
+  _greenlock: null,
+
+  _approveDomains: null,
+
+  debug: false,
+
+  staging: false
 });
 
 /**
@@ -187,8 +218,10 @@ module.exports = Service.extend ({
  */
 function GreenlockProtocol (greenlock) {
   const GP = Protocol.extend ({
+    /// Reference to the greenlock service.
     greenlock,
 
+    /// The secure connection server.
     https: null,
 
     /**
@@ -196,9 +229,10 @@ function GreenlockProtocol (greenlock) {
      * we start listening, we can initiate the registration process with Let's Encrpyt.
      */
     listen () {
-      return this._super.call (this, ...arguments)
-        .then (() => this.greenlock.check ())
-        .then (certs => certs ? this.listenHttps (certs) : this.greenlock.register ().then (certs => this.listenHttps (certs)))
+      return Promise.all ([
+        this._super.call (this, ...arguments),
+        this.https.listen ({ port: DEFAULT_HTTPS_PORT })
+      ]);
     },
 
     /**
@@ -208,40 +242,19 @@ function GreenlockProtocol (greenlock) {
      */
     close () {
       return this._super.call (this, ...arguments).then (() => this.https.close ());
-    },
-
-    /**
-     * Listen for connection on the https.
-     *
-     * @param certs
-     * @return {*}
-     */
-    listenHttps ({privkey:key, cert, chain}) {
-      debug ('creating https connection and listening');
-
-      const tlsOptions = {
-        key,
-        cert: cert + '\r\n' + chain
-      };
-
-      const server = require ('https').createServer (tlsOptions, this.app);
-      const options = { port: 443 };
-
-      this.https = Protocol.create ({server, options});
-
-      return this.https.listen ();
     }
   });
 
-  GP.createProtocol = function (app, opts) {
+  GP.createProtocol = function (app, options) {
     const redirectHttps = require ('redirect-https')();
     const http = require ('http').createServer (greenlock.middleware (redirectHttps));
+    const https = require ('https').createServer (greenlock.tlsOptions, app);
 
-    // We must always listen on port 80. Otherwise, the Let's Encrypt servers will
-    // not be able to communicate with the application.
-    opts.port = 80;
+    // We must always listen on port 80 for the http server. This allows Let's Encrypt
+    // to communicate with the application.
+    options.port = DEFAULT_HTTP_PORT;
 
-    return new GP ({server: http, options: opts, app});
+    return new GP ({server: http, options, https});
   };
 
   return GP;

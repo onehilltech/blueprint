@@ -14,9 +14,5 @@
  * limitations under the License.
  */
 
-module.exports = {
-  domains: ['pi.onehilltech.com'],
-  email: 'contact@onehilltech.com',
-
-  approveDomains: 'basic'  // [basic, custom]
-};
+exports.ApproveDomains = require ('./approve-domains');
+exports.BasicApproveDomains = require ('./basic-approve-domains');

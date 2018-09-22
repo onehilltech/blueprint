@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-module.exports = {
-  domains: ['pi.onehilltech.com'],
-  email: 'contact@onehilltech.com',
+const { BO } = require ('@onehilltech/blueprint');
 
-  approveDomains: 'basic'  // [basic, custom]
-};
+module.exports = BO.extend ({
+  approveDomains (/*options, cert*/) {
+
+  }
+});
