@@ -22,6 +22,8 @@ const {
   Protocol
 } = require ('@onehilltech/blueprint');
 
+const { merge } = require ('lodash');
+
 const path = require ('path');
 const assert = require ('assert');
 
@@ -223,6 +225,7 @@ function GreenlockProtocol (greenlock) {
 
     /// The secure connection server.
     https: null,
+    httpsOptions: null,
 
     /**
      * Listen on the insecure port. This is needed for the callback response. After
@@ -231,7 +234,7 @@ function GreenlockProtocol (greenlock) {
     listen () {
       return Promise.all ([
         this._super.call (this, ...arguments),
-        this.https.listen ({ port: DEFAULT_HTTPS_PORT })
+        this.https.listen (this.httpsOptions)
       ]);
     },
 
@@ -241,20 +244,25 @@ function GreenlockProtocol (greenlock) {
      * @return {*}
      */
     close () {
-      return this._super.call (this, ...arguments).then (() => this.https.close ());
+      return Promise.all ([
+        this._super.call (this, ...arguments),
+        this.https.close ()
+      ]);
     }
   });
 
   GP.createProtocol = function (app, options) {
     const redirectHttps = require ('redirect-https')(options.redirect);
     const http = require ('http').createServer (greenlock.middleware (redirectHttps));
-    const https = require ('https').createServer (greenlock.tlsOptions, app);
+
+    const tlsOptions = merge ({}, greenlock.tlsOptions, options.tls);
+    const https = require ('https').createServer (tlsOptions, app);
 
     // We must always listen on port 80 for the http server. This allows Let's Encrypt
     // to communicate with the application.
-    options.port = DEFAULT_HTTP_PORT;
+    const httpOptions = merge ({}, options.http, {port: DEFAULT_HTTP_PORT});
 
-    return new GP ({server: http, options, https});
+    return new GP ({server: http, options: httpOptions, https, httpsOptions: options.https});
   };
 
   return GP;

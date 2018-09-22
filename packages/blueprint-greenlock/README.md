@@ -41,6 +41,16 @@ module.exports = {
       // optional configuration for redirect-https
       redirect: {
         
+      },
+      
+      // optional configuration for tls
+      tls: { 
+        
+      },
+      
+      // optional configuration for https connection
+      https: {
+        
       }
     },
   }
