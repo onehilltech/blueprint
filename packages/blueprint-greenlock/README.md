@@ -81,9 +81,22 @@ module.exports = ApproveDomains.extend ({
 });
 ```
 
+> The custom configuration must be located in `app/greenlock/approve-domains`. Otherwise
+> the module will not be able to locate it.
+
 The custom domain approval class must implement `approveDomains`. This method must 
 return `{ options, certs }`, or a `Promise` that resolves `{ options, certs }`. If
 the domain is not approved, then this method must return `Promise.reject (new Error (...))`.
 
+Next, update the greenlock configuration to use custom domain approvals.
+
+```javascript
+// app/configs/greenlock.js
+
+module.exports = {
+  /// Use custom strategy for approving domains.
+  approveDomains: 'custom'
+};
+```
 
 Happy Coding!
