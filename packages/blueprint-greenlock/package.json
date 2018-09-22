@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-greenlock",
   "description": "A blueprint module for Greenlock (TM).",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "repository": "github:onehilltech/blueprint-greenlock",
   "private": false,
   "main": "./lib",
