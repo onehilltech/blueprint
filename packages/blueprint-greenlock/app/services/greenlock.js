@@ -207,8 +207,7 @@ function GreenlockProtocol (greenlock) {
      * @return {*}
      */
     close () {
-      return this._super.call (this, ...arguments)
-        .then (() => fromCallback (callback => this.https.close (callback)));
+      return this._super.call (this, ...arguments).then (() => this.https.close ());
     },
 
     /**
@@ -218,25 +217,31 @@ function GreenlockProtocol (greenlock) {
      * @return {*}
      */
     listenHttps ({privkey:key, cert, chain}) {
-      debug ('listening on port 443');
+      debug ('creating https connection and listening');
 
       const tlsOptions = {
         key,
-        cert: cert + '\r\n' + chain,
-        port: 443
+        cert: cert + '\r\n' + chain
       };
 
-      this.https = require ('https').createServer (tlsOptions, this.app);
-      return fromCallback (callback => this.https.listen (callback));
+      const server = require ('https').createServer (tlsOptions, this.app);
+      const options = { port: 443 };
+
+      this.https = Protocol.create ({server, options});
+
+      return this.https.listen ();
     }
   });
 
   GP.createProtocol = function (app, opts) {
     const redirectHttps = require ('redirect-https')();
-    const server = require ('http').createServer (greenlock.middleware (redirectHttps));
-    const options = merge ({port: 80}, opts);
+    const http = require ('http').createServer (greenlock.middleware (redirectHttps));
 
-    return new GP ({server, options, app});
+    // We must always listen on port 80. Otherwise, the Let's Encrypt servers will
+    // not be able to communicate with the application.
+    opts.port = 80;
+
+    return new GP ({server: http, options: opts, app});
   };
 
   return GP;
