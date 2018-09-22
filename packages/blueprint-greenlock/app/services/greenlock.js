@@ -73,7 +73,7 @@ module.exports = Service.extend ({
 
     switch (strategy) {
       case 'basic':
-        const { BasicApproveDomains } = require ('../../lib');
+        const BasicApproveDomains = require ('../../lib/basic-approve-domains');
         ApproveDomains = BasicApproveDomains;
         break;
 
