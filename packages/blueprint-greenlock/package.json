@@ -2,15 +2,14 @@
   "name": "@onehilltech/blueprint-greenlock",
   "description": "A blueprint module for Greenlock (TM).",
   "version": "0.1.0",
+  "repository": "github:onehilltech/blueprint-greenlock",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "start-server": "env NODE_ENV=production forever -o ./app/.blueprint/logs/output.log -e ./app/.blueprint/logs/error.log start ./app/index.js",
-    "stop-server": "env NODE_ENV=production forever stop app/index.js",
-    "install-service": "sudo -s forever-service install blueprint-greenlock_d --script ./app/index.js",
-    "uninstall-service": "sudo -s forever-service delete blueprint-greenlock_d"
+    "postversion": "npm publish",
+    "postpublish": "git push origin master ; git push origin --tags"
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.5.4",
