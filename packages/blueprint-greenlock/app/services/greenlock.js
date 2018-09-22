@@ -58,13 +58,17 @@ module.exports = Service.extend ({
   },
 
   configure () {
-    if (!this._config)
+    if (!this.enabled)
       return;
 
     return Promise.all ([
       this._configureApproveDomains ()
     ]);
   },
+
+  enabled: computed ({
+    get () { return !!this._config; }
+  }),
 
   /**
    * Configure the approve domains strategy.
