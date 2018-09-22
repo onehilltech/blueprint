@@ -40,7 +40,7 @@ module.exports = {
 };
 ```
 
-## Basic Configuration
+## Basic Approvals
 
 Create the Greenlock<sup>TM</sup> configuration file.
 
