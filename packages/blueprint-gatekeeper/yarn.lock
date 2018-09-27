@@ -25,12 +25,12 @@
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-mongodb@^1.8.1":
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.8.1.tgz#9f21df7844dadbeec36a80af668ed9d698678f9c"
+"@onehilltech/blueprint-mongodb@^1.8.2":
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.8.2.tgz#3a5e1d7eb3b3ab2a4eb362e2bb556a4aa518a04f"
   dependencies:
     "@onehilltech/blueprint" "^4.5.4"
-    "@onehilltech/dab" "^1.1.1"
+    "@onehilltech/dab" "^1.2.0"
     moment "^2.22.2"
 
 "@onehilltech/blueprint-testing@^0.8.0":
@@ -71,9 +71,9 @@
     semver "^5.4.1"
     winston "^2.4.1"
 
-"@onehilltech/dab@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@onehilltech/dab/-/dab-1.1.1.tgz#cc36920e9da0f0dabd15d871feff61b220d6bec4"
+"@onehilltech/dab@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@onehilltech/dab/-/dab-1.2.0.tgz#ecbe3d851b7edeeafcf0e2530c1bf39c39a03b0c"
   dependencies:
     async "^2.6.0"
     commander "^2.15.1"
