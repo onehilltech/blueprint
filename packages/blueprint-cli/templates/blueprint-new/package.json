@@ -15,16 +15,10 @@
   },
 
   "dependencies": {
-    "@onehilltech/blueprint": "^4.3.1",
     "pug": "^2.0.3"
   },
 
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^0.8.0",
-    "chai": "^4.1.2",
-    "mocha": "^5.1.1",
-    "superagent": "^3.8.3",
-    "supertest": "^3.0.0"
   },
 
   "license": "{{project.license}}",
