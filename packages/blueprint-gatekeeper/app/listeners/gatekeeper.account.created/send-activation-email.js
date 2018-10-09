@@ -58,7 +58,7 @@ module.exports = Listener.extend ({
     this._activationConfig = get (this._gatekeeperConfig, 'activation');
 
     if (!this._gatekeeperConfig.email)
-      console.warn ('gatekeeper: no email configured; not sending activation emails');
+      return console.warn ('gatekeeper: no email configured; not sending activation emails');
 
     this._tokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:account_verification');
 
