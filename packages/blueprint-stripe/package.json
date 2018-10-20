@@ -1,7 +1,7 @@
 {
   "name": "blueprint-stripe",
   "description": "Blueprint module for Stripe.",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
