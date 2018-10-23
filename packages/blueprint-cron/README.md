@@ -1,4 +1,4 @@
-blueprint-compression
+blueprint-cron
 ===============================
 
 Blueprint module that adds cron job support to the application
