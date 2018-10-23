@@ -1,0 +1,6 @@
+{
+  "name": "dummy",
+  "dependencies": {
+    "@onehilltech/blueprint-cron": "file:../../"
+  }
+}
