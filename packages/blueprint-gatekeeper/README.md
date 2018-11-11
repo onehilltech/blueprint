@@ -23,13 +23,14 @@ or
  
     npm install @onehilltech/blueprint-gatekeeper --save
 
-    
 Getting Started
 ----------------
 
 ### Defining the configuration
 
-Define the configuration file to configure the module for your application:
+Gatekeeper uses [JSON Web Tokens](https://jwt.io/) to manage authorization of authenticated 
+users. To get started, you must first configure the options for token generation. The options
+supported are the same as those in [node-jsonwebtoken](https://github.com/auth0/node-jsonwebtoken).
 
 ```javascript
 // app/configs/gatekeeper.js
@@ -47,9 +48,13 @@ module.exports = {
 };
 ```
 
+> The `jwtid` option is not supported since Gatekeeper uses it to generate a 
+> unique id for each token.
+
 ### Mount Gatekeeper router endpoint
 
-Define a route (or router) to import the Gatekeeper routes into the application:
+Next, we need to import (or mount) the Gatekeeper router into our application. This
+will expose routes for managing and authenticating accounts and clients.
 
 ```javascript
 // app/routers/endpoint.js
@@ -64,11 +69,14 @@ module.exports = Router.extend ({
 });
 ```
 
+In the example above, we are mounting the `v1` router to the `/gatekeeper` endpoint.
+This means that all [routers](https://github.com/onehilltech/blueprint-gatekeeper/tree/master/app/routers/v1) 
+in `v1` will be accessible at `http://[hostname]/gatekeeper/`.
+
 ### Protecting routes
 
-The router definition above will expose the Gatekeeper routers at `/gatekeeper`.
-Lastly, define the routes you want to protect using the ```gatekeeper.auth.bearer```
-Blueprint policy. For example, you can protect all routes on a given path:
+The last step is to define what routes require authorization (_i.e._, are protected)
+using the `gatekeeper.auth.bearer` Blueprint policy. 
 
 ```javascript
 // app/routers/endpoint.js
@@ -88,9 +96,37 @@ module.exports = Router.extend ({
 });
 ```
 
-The router above will protect all routes under the `/v1` path, which includes all routers located
-in `app/routers/v1` directory. The client will need to define the `Authorization` header and include 
-a generated token.
+In the example above, the router will protect all routes under the `/v1` path, 
+which also includes all routers located in `app/routers/v1` directory. The client 
+will need to define the `Authorization` header and include a generated token.
+
+### Accessing the Authorized User
+
+The `req.user` property contains the account model for an authorized user making
+the request to access a protected route. For example, here is an example of setting
+the user making the request as the owner of a created resource.
+
+```javascript
+const { model } = require ('@onehilltech/blueprint');
+const { ResourceController } = require ('@onehilltech/blueprint-mongodb');
+
+module.exports = ResourceController.extend ({
+  Model: model ('tweet'),
+  
+  create () {
+    return this._super (this, ...arguments).extend ({
+      prepareDocument (req, doc) {
+        // Make the authorized user the owner of the created resource.
+        doc.user = req.user._id;
+        return doc;
+      }
+    });
+  }
+});
+```
+
+> Gatekeeper has a `UserResourceController` that automatically adds the authorized
+> user making the request as the owner of the resource being created.
 
 ### Cross-Origin Resource Sharing (CORS)
 
@@ -115,15 +151,10 @@ Now, any request for a route that begins with `/v1` will support CORS. The `gate
 middleware is a wrapper around [Express CORS](https://github.com/expressjs/cors). It will check
 if the origin in the request matches any registered client.
 
-### Initial setup (for production only)
+Gatekeeper Client Libraries
+----------------------------
 
-Run the setup script from the project directory:
-
-    ./bin/gatekeeper-setup
-    
-This will register the [gatekeeper-cli](https://github.com/onehilltech/gatekeeper-cli) 
-client, and other clients, with the server. The client registrations will be placed in 
-`.gatekeeper` under the project directory.
+* [ember-cli-gatekeeper](https://github.com/onehilltech/ember-cli-gatekeeper)
 
 Next Steps
 -----------
