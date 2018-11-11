@@ -15,11 +15,13 @@
  */
 
 const { Router } = require ('@onehilltech/blueprint');
+const gatekeeper = require ('@onehilltech/blueprint-gatekeeper');
 
 module.exports = Router.extend ({
   specification: {
     '/books': {
       policy: 'gatekeeper.auth.bearer',
+      use: [gatekeeper.cors ()],
 
       resource: {
         controller: 'book'

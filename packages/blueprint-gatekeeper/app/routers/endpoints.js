@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-const cors = require ('cors');
-const {env} = require ('@onehilltech/blueprint');
-
-const corsOptions = {
-
-};
-
-if (env === 'test') {
-  //corsOptions.origin = true;
-  corsOptions.credentials = true;
-}
+const cors = require ('../../lib/cors');
 
 module.exports = {
   '/v1': {
-    use: [cors (corsOptions)]
+    use: [cors ()]
   }
 };

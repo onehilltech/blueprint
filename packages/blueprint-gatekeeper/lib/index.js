@@ -18,3 +18,4 @@ exports.TokenGenerator = require ('./token-generator');
 exports.ResourceController = require ('./resource-controller');
 exports.UserResourceController = require ('./user-resource-controller');
 exports.PasswordPolicy = require ('./password-policy');
+exports.cors = require ('./cors');
