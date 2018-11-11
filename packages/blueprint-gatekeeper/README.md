@@ -92,6 +92,29 @@ The router above will protect all routes under the `/v1` path, which includes al
 in `app/routers/v1` directory. The client will need to define the `Authorization` header and include 
 a generated token.
 
+### Cross-Origin Resource Sharing (CORS)
+
+Cross-Origin Resource Sharing (CORS) is a mechanism that allows a client from one domain
+to access resources from another domain. This typically occurs when you have a web browser
+accessing an API protected by Gatekeeper. If you need to enable CORS support for your
+Blueprint application, then use the `gatekeeper.cors()` middleware:
+
+```javascript
+// app/routes/v1.js
+
+const { cors } = require ('@onehilltech/blueprint-gatekeeper');
+
+module.exports = {
+  '/v1': {
+    use: [cors ()]
+  }
+};
+```
+
+Now, any request for a route that begins with `/v1` will support CORS. The `gatekeeper.cors()`
+middleware is a wrapper around [Express CORS](https://github.com/expressjs/cors). It will check
+if the origin in the request matches any registered client.
+
 ### Initial setup (for production only)
 
 Run the setup script from the project directory:
