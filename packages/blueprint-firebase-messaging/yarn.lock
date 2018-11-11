@@ -25,14 +25,14 @@
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-gatekeeper@^0.84.5":
-  version "0.84.5"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-gatekeeper/-/blueprint-gatekeeper-0.84.5.tgz#2e8373ce1b9ddeb72e9254f9a6192808c5f04260"
+"@onehilltech/blueprint-gatekeeper@^0.85.2":
+  version "0.85.2"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-gatekeeper/-/blueprint-gatekeeper-0.85.2.tgz#bc6aa98b433c0124265223b707fd26458d0a6a6a"
   dependencies:
     "@onehilltech/blueprint-mongodb" "^1.8.2"
     bcrypt "^2.0.1"
     commander "^2.11.0"
-    cors "^2.8.4"
+    cors "^2.8.5"
     ejs "^2.6.1"
     email-templates "^3.1.5"
     jsonfile "^4.0.0"
@@ -753,9 +753,9 @@ core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
 
-cors@^2.8.4:
-  version "2.8.4"
-  resolved "https://registry.yarnpkg.com/cors/-/cors-2.8.4.tgz#2bd381f2eb201020105cd50ea59da63090694686"
+cors@^2.8.5:
+  version "2.8.5"
+  resolved "https://registry.yarnpkg.com/cors/-/cors-2.8.5.tgz#eac11da51592dd86b9f06f6e7ac293b3df875d29"
   dependencies:
     object-assign "^4"
     vary "^1"
