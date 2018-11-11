@@ -42,7 +42,7 @@
   },
   "scripts": {
     "start": "node ./app.js",
-    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive --reporter spec --exit",
+    "test": "npm link @onehilltech/blueprint-gatekeeper ; env NODE_ENV=test mocha tests/unit-tests --recursive --reporter spec --exit",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/tests --recursive --exit",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "postversion": "npm publish",
