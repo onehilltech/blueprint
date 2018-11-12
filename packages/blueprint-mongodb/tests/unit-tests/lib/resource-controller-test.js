@@ -378,4 +378,61 @@ describe ('lib | ResourceController', function () {
 
     });
   });
+
+  describe ('search', function () {
+    it ('should find multiple resources', function () {
+      const {authors: [a0, , , ,a4]} = seed ('$default');
+
+      return request ()
+        .post ('/authors/search')
+        .send ({
+          search: {
+            query: {
+              $or: [{name: 'Jack Black'}, {name: 'Todd Hill'} ]
+            }
+          }
+        })
+        .expect (200, {
+          authors: [a0.lean (), a4.lean ()]
+        });
+    });
+
+    it ('should not find any resources', function () {
+      return request ()
+        .post ('/authors/search')
+        .send ({
+          search: {
+            query: {
+              $and: [{name: 'Jack Black'}, {name: 'Todd Hill'} ]
+            }
+          }
+        })
+        .expect (200, { authors: [] });
+    });
+
+    it.only ('should populate found resources', function () {
+      const {
+        authors: [a0, a1],
+        users: [u0]
+      } = seed ('$default');
+
+      return request ()
+        .post ('/users/search')
+        .send ({
+          search: {
+            query: {
+              first_name: 'Paul'
+            },
+
+            _: {
+              populate: true
+            }
+          }
+        })
+        .expect (200, {
+          users: [u0.lean ()],
+          authors: [a1.lean (), a0.lean ()]
+        });
+    });
+  });
 });

@@ -76,6 +76,12 @@ const DatabaseAction = Action.extend ({
  * Resource controller designed to operate on a Mongoose model.
  */
 module.exports = ResourceController.extend ({
+  /// Custom actions available only to the MongoDB resource controller.
+  _actions: {
+    search: {verb: 'post', path: '/search', method: 'search'},
+  },
+
+  /// Compute the plural name for the resource.
   plural: computed ({
     get () { return pluralize (this.name); }
   }),
@@ -663,6 +669,131 @@ module.exports = ResourceController.extend ({
 
       prepareResponse (req, res, response) {
         return response;
+      }
+    });
+  },
+
+  /**
+   * Search for resources that match the search criteria.
+   */
+  search () {
+    return DatabaseAction.extend ({
+      schema: {
+        'search.query': {
+          in: 'body'
+        },
+
+        'search.options': {
+          in: 'body',
+          optional: true,
+        },
+
+        'search._': {
+          in: 'body',
+          optional: true
+        }
+      },
+
+      execute (req, res) {
+        // Make aa copy of the original search. This way, we can change the search
+        // object without changing it within the request.
+        const { search } = req.body;
+
+        let query = Object.assign ({}, search.query);
+        let options = Object.assign ({}, search.options);
+
+        const directives = search._;
+
+        // Prepare the filter, projection, and options for the request
+        // against the database.
+
+        const preparations = [
+          this.getQuery (req, query),
+          this.getProjection (req),
+          this.getOptions (req, options)
+        ];
+
+        return Promise.all (preparations)
+          .then (([query, projection, options]) => {
+            return Promise.resolve (this.preGetModels (req))
+              .then (() => this.getModels (req, query, projection, options, directives))
+              .then (models => {
+                // There was nothing found. This is not the same as having an empty
+                // model set returned from the query.
+                if (!models)
+                  return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
+
+                // We have any empty set.
+                if (models.length === 0)
+                  return this.postGetModels (req, models);
+
+                // Get the most recent last modified date. This value needs to be returned
+                // in the response since it represents when this collection of models was
+                // last changed.
+
+                const lastModifiedTime = models.reduce ((acc, next) => {
+                  let time = next.last_modified.getTime ();
+                  return time > acc ? time : acc;
+                }, models[0].last_modified.getTime ());
+
+                res.set ({
+                  [LAST_MODIFIED]: new Date (lastModifiedTime).toUTCString ()
+                });
+
+                return this.postGetModels (req, models);
+              })
+              .then (data => {
+                if (directives.populate) {
+                  return populateHelper.populateModels (data);
+                }
+                else {
+                  return {[this.controller.plural]: data};
+                }
+              })
+              .then (result => {
+                // We cannot have an empty result. Let's make sure that we have an
+                // empty list for this collection of models.
+
+                if (isEmpty (result))
+                  result[this.controller.plural] = [];
+
+                return this.prepareResponse (req, res, result)
+              })
+              .then (result => res.status (200).json (result));
+          });
+      },
+
+      getQuery (req, query) {
+        return query;
+      },
+
+      getProjection () {
+        return {};
+      },
+
+      getOptions (req, options) {
+        return options;
+      },
+
+      preGetModels (/* req */) {
+        return null;
+      },
+
+      getModels (req, query, projection, options, directives) {
+        const { deleted } = directives;
+
+        if (!deleted && this.controller._softDelete)
+          query['_stat.deleted_at'] = {$exists: false};
+
+        return this.controller.Model.find (query, projection, options);
+      },
+
+      postGetModels (req, models) {
+        return models;
+      },
+
+      prepareResponse (req, res, result) {
+        return result;
       }
     });
   },
