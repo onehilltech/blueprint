@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@onehilltech/blueprint-testing": "^0.8.0",
+    "cors": "^2.8.5",
     "istanbul": "^0.4.5"
   },
   "license": "Apache-2.0",

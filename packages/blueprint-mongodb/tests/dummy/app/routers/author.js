@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
+const cors = require ('cors');
+
 module.exports = {
   '/authors': {
+    use: [cors ()],
+
     resource: {
       controller: 'author'
     }
