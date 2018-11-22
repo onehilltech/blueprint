@@ -702,7 +702,7 @@ module.exports = ResourceController.extend ({
         let query = Object.assign ({}, search.query);
         let options = Object.assign ({}, search.options);
 
-        const directives = search._;
+        const directives = search._ || {};
 
         // Prepare the filter, projection, and options for the request
         // against the database.
@@ -779,7 +779,7 @@ module.exports = ResourceController.extend ({
         return null;
       },
 
-      getModels (req, query, projection, options, directives) {
+      getModels (req, query, projection, options = {}, directives = {}) {
         const { deleted } = directives;
 
         if (!deleted && this.controller._softDelete)
