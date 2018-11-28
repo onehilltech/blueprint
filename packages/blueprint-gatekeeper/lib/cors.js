@@ -18,10 +18,12 @@ const cors = require ('cors');
 const blueprint = require ('@onehilltech/blueprint');
 const { merge } = require ('lodash');
 
-function delegate (opts) {
+function delegate (defaults) {
   const Client = blueprint.lookup ('model:client');
+  const { origin: defaultOrigin } = defaults;
 
   return function (req, callback) {
+    // If there is no origin in the request, then we can disable cors.
     const origin = req.get ('origin');
 
     if (!origin)
@@ -31,7 +33,7 @@ function delegate (opts) {
     // clients. We only accept request from origins that we know about.
 
     Client.findOne ({origin})
-      .then (client => callback (null, merge ({}, opts, { origin: !!client })))
+      .then (client => callback (null, merge ({}, defaults, { origin: !!client || defaultOrigin === true })))
       .catch (err => callback (err));
   };
 }

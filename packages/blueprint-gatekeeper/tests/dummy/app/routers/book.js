@@ -15,7 +15,7 @@
  */
 
 const { Router } = require ('@onehilltech/blueprint');
-const gatekeeper = require ('@onehilltech/blueprint-gatekeeper');
+const gatekeeper = require ('../../../../lib');
 
 module.exports = Router.extend ({
   specification: {
