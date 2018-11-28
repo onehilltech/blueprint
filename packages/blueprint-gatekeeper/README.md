@@ -138,18 +138,22 @@ Blueprint application, then use the `gatekeeper.cors()` middleware:
 ```javascript
 // app/routes/v1.js
 
+const { env } = require ('@onehilltech/blueprint');
 const { cors } = require ('@onehilltech/blueprint-gatekeeper');
 
 module.exports = {
   '/v1': {
-    use: [cors ()]
+    use: [cors ({
+      origin: env !== 'production' ? true : null
+    })]
   }
 };
 ```
 
 Now, any request for a route that begins with `/v1` will support CORS. The `gatekeeper.cors()`
 middleware is a wrapper around [Express CORS](https://github.com/expressjs/cors). It will check
-if the origin in the request matches any registered client.
+if the origin in the request matches any registered client only when running in production. All
+other times, CORS is enabled by default regardless of the origin in the request.
 
 Gatekeeper Client Libraries
 ----------------------------
