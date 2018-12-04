@@ -1,4 +1,4 @@
-const dab = require ('@onehilltech/blueprint-dab')
+const dab = require ('@onehilltech/dab')
   ;
 
 const scopes = [
