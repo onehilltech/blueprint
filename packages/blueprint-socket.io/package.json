@@ -5,19 +5,18 @@
   "private": false,
   "main": "./lib",
   "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive tests/tests",
-    "start-server": "env NODE_ENV=production forever -o ./app/temp/logs/output.log -e ./app/temp/logs/error.log start ./app/index.js",
-    "stop-server": "env NODE_ENV=production forever stop app/index.js"
+    "test": "env NODE_ENV=test mocha --recursive --exit --reporter spec tests/unit-tests",
+    "cover": "env NODE_ENV=test istanbul cover _mocha -- --exit tests/unit-tests --recursive",
+    "coveralls": "env NODE_ENV=test istanbul cover _mocha --exit --report lcovonly -- tests/unit-tests --recursive && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "postversion": "npm publish",
+    "postpublish": "git push origin master & git push origin --tags"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^1.5.1",
+    "@onehilltech/blueprint": "^4.5.4",
     "socket.io": "^1.6.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^3.1.2",
-    "superagent": "^2.3.0",
-    "supertest": "^2.0.1"
+    "@onehilltech/blueprint-testing": "^0.8.0"
   },
   "license": "Apache-2.0",
   "engines": {
