@@ -29,10 +29,14 @@ module.exports = {
       deny: ['count'],
     },
 
+    '/authenticate': {
+      post: {action: 'account@authenicate'}
+    },
+
     '/:accountId': {
       '/password': {
         post: {action: 'account@changePassword', policy: 'gatekeeper.account.password.change' }
-      }
+      },
     }
   }
 };

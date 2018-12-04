@@ -258,6 +258,31 @@ describe ('app | routers | account', function () {
           .expect (403, { errors: [{ status: '403', code: 'invalid_scope', detail: 'This request does not have a valid scope.' }] });
       });
     });
+
+    describe ('/authenticate', function () {
+      context ('POST', function () {
+        it ('should authenticate logged in user', function () {
+          const { accounts: [account]} = seed ();
+
+          return request ()
+            .post ('/v1/accounts/authenticate')
+            .send ({authenticate: {password: account.username}})
+            .withUserToken (0)
+            .expect (200, 'true');
+        });
+
+        it ('should fail to authenticate logged in user', function () {
+          const { accounts: [, account]} = seed ();
+
+          return request ()
+            .post ('/v1/accounts/authenticate')
+            .send ({authenticate: {password: account.username}})
+            .withUserToken (0)
+            .expect (200, 'false');
+        });
+
+      })
+    });
   });
 
   describe ('/v1/accounts/:accountId', function () {
