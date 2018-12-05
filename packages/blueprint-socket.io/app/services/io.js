@@ -52,12 +52,12 @@ module.exports = Service.extend ({
   _connection (name, socket) {
     // Listen for the disconnect event on the socke.
     socket.on ('disconnect', () => {
-      this.app.emit (`socket.io.${name}.disconnect`, name);
+      this.app.emit (`socket.io.disconnect.${name}`);
       this.app.emit ('socket.io.disconnect', name);
     });
 
     // Notify all application level listeners that we have a connect event.
-    this.app.emit (`socket.io.${name}.connection`, name, socket);
+    this.app.emit (`socket.io.connection.${name}`, socket);
     this.app.emit ('socket.io.connection', name, socket);
   }
 });

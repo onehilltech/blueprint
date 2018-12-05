@@ -17,7 +17,7 @@
 const { Listener } = require ('@onehilltech/blueprint');
 
 module.exports = Listener.extend ({
-  handleEvent (name) {
-    console.log (`socket.io disconnect on ${name}`);
+  handleEvent () {
+    console.log (`socket.io disconnect on insecure`);
   }
 });
