@@ -16,7 +16,9 @@
     "socket.io": "^1.6.0"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^0.8.0"
+    "@onehilltech/blueprint-testing": "^0.8.0",
+    "handlebars": "^4.0.12",
+    "pug": "^2.0.3"
   },
   "license": "Apache-2.0",
   "engines": {

@@ -16,8 +16,9 @@
 
 const blueprint = require ('@onehilltech/blueprint');
 const { Service } = blueprint;
-const SocketIO = require ('socket.io');
+const { mapValues } = require ('lodash');
 
+const SocketIO = require ('socket.io');
 const debug = require ('debug')('blueprint-socketio:service:io');
 
 const DEFAULT_NAMESPACE = '/';
@@ -26,19 +27,37 @@ const DEFAULT_NAMESPACE = '/';
  * The service that manages connections for SocketIO.
  */
 module.exports = Service.extend ({
-  /// Collection of protocols used in SocketIO
-  _protocols: null,
+  _connections: {},
 
   configure () {
-    const protocols = blueprint.app.server._protocols;
 
-    this._protocols = mapValues (protocols, (protocol, name) => {
-      debug (`establishing socket.io on ${name}`);
-      return SocketIO (protocol.server);
-    });
   },
 
   start () {
+    const connections = blueprint.app.server.connections;
 
+    this._connections = mapValues (connections, ({server}, name)=> {
+      debug (`opening Socket.IO connection on ${name}`);
+
+      // Make a new Socket IO instance.
+      let io = SocketIO (server);
+
+      // Listen for connections on this instance.
+      io.on ('connection', socket => this._connection (name, socket));
+
+      return io;
+    });
+  },
+
+  _connection (name, socket) {
+    // Listen for the disconnect event on the socke.
+    socket.on ('disconnect', () => {
+      this.app.emit (`socket.io.${name}.disconnect`, name);
+      this.app.emit ('socket.io.disconnect', name);
+    });
+
+    // Notify all application level listeners that we have a connect event.
+    this.app.emit (`socket.io.${name}.connection`, name, socket);
+    this.app.emit ('socket.io.connection', name, socket);
   }
 });
