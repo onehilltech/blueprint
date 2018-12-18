@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-const { Listener } = require ('@onehilltech/blueprint');
+const { ConnectionListener } = require ('../../../../../lib');
 
-module.exports = Listener.extend ({
-  handleEvent (name /*, socket */) {
+module.exports = ConnectionListener.extend ({
+  connection (name /*, socket */) {
     console.log (`socket.io connection on ${name}`);
+  },
+
+  disconnect (name /*, socket */) {
+    console.log (`disconnect socket on ${name}`);
   }
 });

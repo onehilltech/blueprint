@@ -1,60 +1,19 @@
-var SocketIO  = require ('socket.io')
-  , blueprint = require ('@onehilltech/blueprint')
-  , _         = require ('underscore')
-  ;
+/*
+ * Copyright (c) 2018 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-var singleton = null;
+const ConnectionListener = require ('./connection-listener');
 
-const DEFAULT_NAMESPACE = '/';
-
-function SocketWrapper (io) {
-  this.io = io;
-}
-
-SocketWrapper.prototype.listen = function (nsp, callback) {
-  var self = this;
-
-  if (_.isFunction (nsp)) {
-    callback = nsp;
-    nsp = DEFAULT_NAMESPACE;
-  }
-
-  blueprint.messaging.on ('app.init', function () {
-    var channel = self.io.of (nsp);
-    channel.on ('connection', function (socket) {
-      return callback (nsp, socket);
-    });
-  });
-};
-
-function SocketManager (opts) {
-  opts = opts || {};
-
-  this._io = opts.http ? new SocketWrapper (SocketIO (opts.http)) : null;
-  this._ios = opts.https ? new SocketWrapper (SocketIO (opts.https)) : null;
-}
-
-SocketManager.prototype.__defineGetter__ ('io', function () {
-  return this._io;
-});
-
-SocketManager.prototype.__defineGetter__ ('ios', function () {
-  return this._ios;
-});
-
-var exports = module.exports = function (opts) {
-  if (singleton != null) return singleton;
-
-  singleton = new SocketManager (opts);
-  return singleton;
-};
-
-exports.SocketIO = SocketIO;
-
-Object.defineProperty (exports, 'io', {
-  get: function () { return singleton.io; }
-});
-
-Object.defineProperty (exports, 'ios', {
-  get: function () { return singleton.ios; }
-});
+exports.ConnectionListener = ConnectionListener;

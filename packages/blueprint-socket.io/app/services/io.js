@@ -49,15 +49,34 @@ module.exports = Service.extend ({
     });
   },
 
-  _connection (name, socket) {
-    // Listen for the disconnect event on the socke.
-    socket.on ('disconnect', () => {
-      this.app.emit (`socket.io.disconnect.${name}`);
-      this.app.emit ('socket.io.disconnect', name);
-    });
+  /**
+   * Emit an event on a named io socket.
+   *
+   * insecure: io ('insecure')
+   *
+   * @param name
+   * @param ev
+   * @param args
+   */
+  emit (name, ev, ...args) {
+    const io = this._connections[name];
 
+    if (!io)
+      throw new Error (`The named socket ${name} does not exist.`);
+
+    // Emit the event on the socket.
+    io.emit (ev, ...args);
+  },
+
+  /**
+   * Handle the connection events for sockets.
+   *
+   * @param name              Name of the connection
+   * @param socket            The connected socket
+   * @private
+   */
+  _connection (name, socket) {
     // Notify all application level listeners that we have a connect event.
-    this.app.emit (`socket.io.connection.${name}`, socket);
     this.app.emit ('socket.io.connection', name, socket);
   }
 });
