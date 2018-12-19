@@ -17,11 +17,11 @@
 const { ConnectionListener } = require ('../../../../../lib');
 
 module.exports = ConnectionListener.extend ({
-  connection (name /*, socket */) {
-    console.log (`socket.io connection on ${name}`);
+  connection (name, socket) {
+    console.log (`socket.io connection on ${name}: ${socket.id}`);
   },
 
-  disconnect (name /*, socket */) {
-    console.log (`disconnect socket on ${name}`);
+  disconnect (name, socket) {
+    console.log (`disconnect socket on ${name}: ${socket.id}`);
   }
 });
