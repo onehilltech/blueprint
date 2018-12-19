@@ -19,10 +19,14 @@ const debug = require ('debug') ('blueprint-socket.io:listeners:connection-liste
 
 /**
  * The base class for all Socket.IO connection listeners.
+ *
+ * This listener is notified whenever a client connects and disconnects to and
+ * from the server. The listener can optionally restrict itself to clients on
+ * a specific connection using the `connections` property.
  */
 module.exports = Listener.extend ({
-  /// The named connections the listener is bound to. This is field is optional. If
-  /// there is no name set, then the listener is bound on all connections.
+  /// List of connection names the listener is bound. If the list is empty,
+  /// then the listener is bound on all connections.
   connections: [],
 
   concatProperties: ['connections'],
