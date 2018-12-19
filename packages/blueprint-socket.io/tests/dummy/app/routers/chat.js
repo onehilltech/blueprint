@@ -16,6 +16,10 @@
 
 module.exports = {
   '/': {
-    get: { view: 'index.handlebars' }
+    get: { view: 'index.handlebars' },
+
+    '/emit': {
+      get: 'chat@emit'
+    }
   }
 };

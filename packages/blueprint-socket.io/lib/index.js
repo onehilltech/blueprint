@@ -15,5 +15,7 @@
  */
 
 const ConnectionListener = require ('./connection-listener');
+const io = require ('./properties/socket-descriptor');
 
 exports.ConnectionListener = ConnectionListener;
+exports.io = io;

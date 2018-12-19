@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-const {
-  Action,
-  Controller,
-} = require ('@onehilltech/blueprint');
-
-const path = require ('path');
+const { Action, Controller } = require ('@onehilltech/blueprint');
+const { io } = require ('../../../../lib');
 
 module.exports = Controller.extend ({
-  __invoke () {
+  insecure: io (),
+
+  /**
+   * Force emit a message to all participants.
+   */
+  emit () {
     return Action.extend ({
+
       execute (req, res) {
-        res.sendFile (__dirname + '/index.html');
+        const { message } = req.query;
+
+        this.controller.insecure.emit ('chat message', message);
+
+        res.status (200).json (true);
       }
-    });
+    })
   }
 });

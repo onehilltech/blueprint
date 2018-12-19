@@ -50,22 +50,16 @@ module.exports = Service.extend ({
   },
 
   /**
-   * Emit an event on a named io socket.
-   *
-   * insecure: io ('insecure')
+   * Get the SocketIO server for a connection.
    *
    * @param name
-   * @param ev
-   * @param args
+   * @return {*}
    */
-  emit (name, ev, ...args) {
-    const io = this._connections[name];
+  connection (name) {
+    if (!this._connections.hasOwnProperty (name))
+      throw Error (`The socket.io connection ${name} does not exist`);
 
-    if (!io)
-      throw new Error (`The named socket ${name} does not exist.`);
-
-    // Emit the event on the socket.
-    io.emit (ev, ...args);
+    return this._connections[name];
   },
 
   /**
