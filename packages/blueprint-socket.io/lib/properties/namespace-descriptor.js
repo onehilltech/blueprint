@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/**
+ * A descriptor for binding a Socket.IO namespace to a property.
+ */
 class NamespaceDescriptor extends PropertyDescriptor {
   constructor (socket, nsp) {
     super ();

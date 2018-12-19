@@ -18,11 +18,7 @@ const { PropertyDescriptor } = require ('base-object');
 const NamespaceDescriptor = require ('./namespace-descriptor');
 
 /**
- * @class ResourceDescriptor
- *
- * Define a property on an object that is bound to a resource. The object
- * is expected to define the `app` property, which is a reference to the
- * application object.
+ * A descriptor for binding a Socket.IO socket to a property.
  */
 class SocketDescriptor extends PropertyDescriptor {
   constructor (connection) {
