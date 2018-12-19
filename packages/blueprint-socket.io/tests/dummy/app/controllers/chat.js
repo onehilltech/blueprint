@@ -20,6 +20,8 @@ const { io } = require ('../../../../lib');
 module.exports = Controller.extend ({
   /// Bound to the insecure Socket.IO connection.
   insecure: io ().of ('/'),
+
+  /// Bound to the default namespace on the insecure connection.
   defaultNsp: io ('insecure').of ('/'),
 
   /**
