@@ -19,7 +19,8 @@ const { io } = require ('../../../../lib');
 
 module.exports = Controller.extend ({
   /// Bound to the insecure Socket.IO connection.
-  insecure: io (),
+  insecure: io ().of ('/'),
+  defaultNsp: io ('insecure').of ('/'),
 
   /**
    * Force emit a message to all participants.
@@ -31,7 +32,7 @@ module.exports = Controller.extend ({
         const { message } = req.query;
 
         // Emit an event to all clients on the connection.
-        this.controller.insecure.emit ('chat message', message);
+        this.controller.defaultNsp.emit ('chat message', message);
 
         res.status (200).json (true);
       }

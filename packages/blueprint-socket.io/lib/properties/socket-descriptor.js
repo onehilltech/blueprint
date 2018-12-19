@@ -16,6 +16,29 @@
 
 const { PropertyDescriptor } = require ('base-object');
 
+class NamespaceSocketDescriptor extends PropertyDescriptor {
+  constructor (socket, nsp) {
+    super ();
+
+    this.socket = socket;
+    this.nsp = nsp || '/';
+  }
+
+  defineProperty (obj, name) {
+    const connectionName = this.socket.connection || name;
+    const nsp = this.nsp;
+
+    Object.defineProperty (obj, name, {
+      get () {
+        const io = this.app.lookup ('service:io');
+        const socket = io.connection (connectionName);
+
+        return socket.of (nsp);
+      }
+    });
+  }
+}
+
 /**
  * @class ResourceDescriptor
  *
@@ -36,6 +59,10 @@ class SocketDescriptor extends PropertyDescriptor {
     Object.defineProperty (obj, name, {
       get () { return this.app.lookup ('service:io').connection (connectionName); }
     });
+  }
+
+  of (nsp) {
+    return new NamespaceSocketDescriptor (this, nsp);
   }
 }
 
