@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.5.4",
-    "socket.io": "^1.6.0"
+    "socket.io": "^2.2.0"
   },
   "devDependencies": {
     "@onehilltech/blueprint-testing": "^0.8.0",

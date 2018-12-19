@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const { PropertyDescriptor } = require ('base-object');
+
 /**
  * A descriptor for binding a Socket.IO namespace to a property.
  */
