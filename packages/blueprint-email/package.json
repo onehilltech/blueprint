@@ -23,7 +23,7 @@
   "devDependencies": {
     "@onehilltech/blueprint-testing": "^0.8.0"
   },
-  "license": "",
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=6.0.0",
     "npm": ">=3.0.0"
