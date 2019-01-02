@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-email",
   "description": "Blueprint module for sending emails via mailgun",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
