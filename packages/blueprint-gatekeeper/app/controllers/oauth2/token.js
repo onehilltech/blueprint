@@ -35,7 +35,6 @@ const mm = require ('micromatch');
 const { fromCallback } = require ('bluebird');
 const { transform } = require ('lodash');
 const { validationResult } = require ('express-validator/check');
-const { omit } = require ('lodash');
 
 /**
  * @class ValidateClientVisitor
