@@ -27,7 +27,8 @@ module.exports = Seed.extend ({
         {
           name: 'client1',
           email: 'client1@gatekeeper.com',
-          client_secret: 'client1'
+          client_secret: 'client1',
+          deny: [dab.ref ('accounts.6')]
         },
         {
           name: 'client2',
@@ -39,7 +40,13 @@ module.exports = Seed.extend ({
           email: 'client3@gatekeeper.com',
           client_secret: 'client3',
           enabled: false
-        }
+        },
+        {
+          name: 'client4',
+          email: 'client4@gatekeeper.com',
+          client_secret: 'client4',
+          allow: [dab.ref ('accounts.6')]
+        },
       ],
 
       android: [
@@ -106,8 +113,13 @@ module.exports = Seed.extend ({
             date: new Date (),
             ip_address: '127.0.0.1'
           }
-        }
+        },
 
+        {
+          email: 'account7@gatekeeper.com',
+          username: 'account7',
+          password: 'account7'
+        }
       ],
 
       user_tokens: [

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-const { model, service, BadRequestError } = require ('@onehilltech/blueprint');
-const { union } = require ('lodash');
+const { model, service, BadRequestError, UnauthorizedError } = require ('@onehilltech/blueprint');
+const { union, isEmpty, findIndex } = require ('lodash');
+
 const {
   Types: { ObjectId }
 } = require ('@onehilltech/blueprint-mongodb');
@@ -51,21 +52,35 @@ module.exports = Granter.extend ({
    * @returns {doc}
    */
   createToken (req) {
-    const {gatekeeperClient} = req;
+    const {gatekeeperClient: client} = req;
 
     // We need to locate the account for the username, and check that the
     // provided password is correct. We also need to make sure the account
     // has not been disabled before we create the token.
 
     return this.findAccount (req).then (account => {
+      // If the client has an black and white list, then we need to make sure the
+      // account is not in the black list and is in the white list.
+
+      if (!isEmpty (client.deny) && -1 !== findIndex (client.deny, id => account._id.equals (id)))
+        return Promise.reject (new UnauthorizedError ('invalid_account', 'Your account cannot access this client.'));
+
+      if (!isEmpty (client.allow) && -1 === findIndex (client.allow, id => account._id.equals (id)))
+        return Promise.reject (new UnauthorizedError ('invalid_account', 'Your account cannot access this client.'));
+
       const origin = req.get ('origin');
 
+      // Make sure the account is able to access the client.
+
       const doc = {
-        client : gatekeeperClient._id,
+        client : client._id,
         account: account._id,
-        scope  : union (gatekeeperClient.scope, account.scope),
+        scope  : union (client.scope, account.scope),
         refresh_token: new ObjectId ()
       };
+
+      // Bind the token to the origin if present. The origin is used by other parts
+      // of the framework to ensure the token is not been hijacked.
 
       if (!!origin)
         doc.origin = origin;

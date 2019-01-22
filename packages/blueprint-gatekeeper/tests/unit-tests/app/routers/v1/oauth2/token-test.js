@@ -94,28 +94,6 @@ describe ('app | routers | oauth2 | token', function () {
     });
 
     describe ('password', function () {
-      it ('should fail because account is disabled', function () {
-        const {native, accounts} = seed ('$default');
-        const account = accounts[4];
-        const client = native[0];
-
-        const data = {
-          grant_type: 'password',
-          username: account.username,
-          password: account.password,
-          client_id: client.id,
-          client_secret: client.client_secret
-        };
-
-        return request ()
-          .post (TOKEN_URL)
-          .send (data)
-          .expect (400, { errors:
-              [ { code: 'account_disabled',
-                detail: 'The account is disabled.',
-                status: '400' } ] });
-      });
-
       context ('native', function () {
         it ('should grant token', function () {
           const {native,accounts} = seed ('$default');
@@ -274,6 +252,114 @@ describe ('app | routers | oauth2 | token', function () {
                     ]
                   } } ] });
         });
+      });
+
+      it ('should fail because account is disabled', function () {
+        const {native, accounts} = seed ('$default');
+        const account = accounts[4];
+        const client = native[0];
+
+        const data = {
+          grant_type: 'password',
+          username: account.username,
+          password: account.password,
+          client_id: client.id,
+          client_secret: client.client_secret
+        };
+
+        return request ()
+          .post (TOKEN_URL)
+          .send (data)
+          .expect (400, { errors:
+              [ { code: 'account_disabled',
+                detail: 'The account is disabled.',
+                status: '400' } ] });
+      });
+
+      it ('should grant token because account allowed on client', function () {
+        const {
+          native: [,,,client],
+          accounts: [,,,,,,account]
+        } = seed ('$default');
+
+        const data = {
+          grant_type: 'password',
+          username: account.username,
+          password: account.username,
+          client_id: client.id,
+          client_secret: client.client_secret
+        };
+
+        return getToken (data).then (token => {
+          expect (token).to.have.all.keys (['token_type', 'access_token', 'refresh_token']);
+          expect (token).to.have.property ('token_type', 'Bearer');
+        });
+      });
+
+      it ('should grant token because account not denied on client', function () {
+        const {
+          native: [client],
+          accounts: [account]
+        } = seed ('$default');
+
+        const data = {
+          grant_type: 'password',
+          username: account.username,
+          password: account.username,
+          client_id: client.id,
+          client_secret: client.client_secret
+        };
+
+        return getToken (data).then (token => {
+          expect (token).to.have.all.keys (['token_type', 'access_token', 'refresh_token']);
+          expect (token).to.have.property ('token_type', 'Bearer');
+        });
+      });
+
+      it ('should fail because account is not allowed on client', function () {
+        const {
+          native: [,,,client],
+          accounts: [account]
+        } = seed ('$default');
+
+        const data = {
+          grant_type: 'password',
+          username: account.username,
+          password: account.username,
+          client_id: client.id,
+          client_secret: client.client_secret
+        };
+
+        return request ()
+          .post (TOKEN_URL)
+          .send (data)
+          .expect (401, { errors:
+              [ { code: 'invalid_account',
+                detail: 'Your account cannot access this client.',
+                status: '401' } ] });
+      });
+
+      it ('should fail because account is denied on client', function () {
+        const {
+          native: [client],
+          accounts: [,,,,,,account]
+        } = seed ('$default');
+
+        const data = {
+          grant_type: 'password',
+          username: account.username,
+          password: account.username,
+          client_id: client.id,
+          client_secret: client.client_secret
+        };
+
+        return request ()
+          .post (TOKEN_URL)
+          .send (data)
+          .expect (401, { errors:
+              [ { code: 'invalid_account',
+                detail: 'Your account cannot access this client.',
+                status: '401' } ] });
       });
     });
 
