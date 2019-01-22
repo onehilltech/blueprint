@@ -333,10 +333,10 @@ describe ('app | routers | oauth2 | token', function () {
         return request ()
           .post (TOKEN_URL)
           .send (data)
-          .expect (401, { errors:
+          .expect (403, { errors:
               [ { code: 'invalid_account',
                 detail: 'Your account cannot access this client.',
-                status: '401' } ] });
+                status: '403' } ] });
       });
 
       it ('should fail because account is denied on client', function () {
@@ -356,10 +356,10 @@ describe ('app | routers | oauth2 | token', function () {
         return request ()
           .post (TOKEN_URL)
           .send (data)
-          .expect (401, { errors:
+          .expect (403, { errors:
               [ { code: 'invalid_account',
                 detail: 'Your account cannot access this client.',
-                status: '401' } ] });
+                status: '403' } ] });
       });
     });
 

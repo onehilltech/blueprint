@@ -102,6 +102,9 @@ module.exports = Granter.extend ({
           // The access token is for a user account. There are more checks that
           // we need to execute, such as checking if the account is enabled.
 
+          if (!accessToken.client.allowed (accessToken.account))
+            return Promise.reject (new ForbiddenError ('invalid_account', 'Your account cannot access this client.'));
+
           if (!accessToken.account.enabled)
             return Promise.reject (new ForbiddenError ('account_disabled', 'The account is disabled.'));
 

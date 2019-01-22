@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { model, service, BadRequestError, UnauthorizedError } = require ('@onehilltech/blueprint');
+const { model, service, BadRequestError, ForbiddenError } = require ('@onehilltech/blueprint');
 const { union } = require ('lodash');
 
 const {
@@ -63,7 +63,7 @@ module.exports = Granter.extend ({
       // account is not in the black list and is in the white list.
 
       if (!client.allowed (account))
-        return Promise.reject (new UnauthorizedError ('invalid_account', 'Your account cannot access this client.'));
+        return Promise.reject (new ForbiddenError ('invalid_account', 'Your account cannot access this client.'));
 
       const origin = req.get ('origin');
 
