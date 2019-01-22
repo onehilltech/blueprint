@@ -15,7 +15,7 @@
  */
 
 const { model, service, BadRequestError, UnauthorizedError } = require ('@onehilltech/blueprint');
-const { union, isEmpty, findIndex } = require ('lodash');
+const { union } = require ('lodash');
 
 const {
   Types: { ObjectId }
@@ -62,10 +62,7 @@ module.exports = Granter.extend ({
       // If the client has an black and white list, then we need to make sure the
       // account is not in the black list and is in the white list.
 
-      if (!isEmpty (client.deny) && -1 !== findIndex (client.deny, id => account._id.equals (id)))
-        return Promise.reject (new UnauthorizedError ('invalid_account', 'Your account cannot access this client.'));
-
-      if (!isEmpty (client.allow) && -1 === findIndex (client.allow, id => account._id.equals (id)))
+      if (!client.allowed (account))
         return Promise.reject (new UnauthorizedError ('invalid_account', 'Your account cannot access this client.'));
 
       const origin = req.get ('origin');

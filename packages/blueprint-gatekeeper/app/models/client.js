@@ -17,6 +17,7 @@
 const discriminatorKey = 'type';
 const options = require ('./-common-options') ({discriminatorKey});
 const mongodb = require ('@onehilltech/blueprint-mongodb');
+const { isEmpty, findIndex } = require ('lodash');
 
 const {
   Schema: {
@@ -64,6 +65,11 @@ schema.virtual ('client_id').get (function () {
   return this._id;
 });
 
+schema.methods.allowed = function (account) {
+  return (isEmpty (this.allow) && isEmpty (this.deny)) ||
+    (!isEmpty (this.deny) && -1 === findIndex (this.deny, id => account._id.equals (id))) ||
+    (!isEmpty (this.allow) && -1 !== findIndex (this.allow, id => account._id.equals (id)));
+};
 
 const MODEL_NAME = 'client';
 const COLLECTION_NAME = 'gatekeeper_clients';
