@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 One Hill Technologies, LLC
+ * Copyright (c) 2019 One Hill Technologies, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 module.exports = {
   '/token': {
+    policy: '?gatekeeper.oauth2.token',
     post: { action: 'oauth2.token@issueToken' }
   },
 
