@@ -47,7 +47,6 @@ module.exports = Listener.extend ({
   gatekeeper: service (),
 
   _email: null,
-  _tokenGenerator: null,
 
   init () {
     this._super.call (this, ...arguments);
@@ -57,8 +56,6 @@ module.exports = Listener.extend ({
 
     if (!this._gatekeeperConfig.email)
       return console.warn ('gatekeeper: no email configured; cannot send password reset emails');
-
-    this._tokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:password_reset');
 
     // Create the email template for the activation email while preventing the
     // application from changing the location of the email templates.
@@ -71,31 +68,23 @@ module.exports = Listener.extend ({
     get () { return !!this._gatekeeperConfig.email }
   }),
 
-  handleEvent (account) {
+  handleEvent (account, token) {
     if (!this.hasEmail)
       return;
 
-    // Generate an activation token. This token will be added to the email.
-    let payload = {email: account.email};
-    let options = {expiresIn: '10m'};
+    let opts = {
+      template: 'gatekeeper.password.reset',
+      message: {
+        to: account.email
+      },
+      locals: defaultsDeep ({
+        appName: this._appConfig.name,
+        url: this._gatekeeperConfig['reset-password'].url,
+        email: account.email,
+        token
+      }, {style: DEFAULT_STYLE})
+    };
 
-    return this._tokenGenerator.generateToken (payload, options)
-      .then (token => {
-        let opts = {
-          template: 'gatekeeper.password.reset',
-          message: {
-            to: account.email
-          },
-          locals: defaultsDeep ({
-            appName: this._appConfig.name,
-            url: this._gatekeeperConfig['reset-password'].url,
-            email: account.email,
-            token
-          }, {style: DEFAULT_STYLE})
-        };
-
-        return this._email.send (opts);
-      })
-      .then (info => this.app.emit ('gatekeeper.email.password_reset.sent', account, info));
+    return this._email.send (opts).then (info => this.app.emit ('gatekeeper.email.password_reset.sent', account, info));
   },
 });
