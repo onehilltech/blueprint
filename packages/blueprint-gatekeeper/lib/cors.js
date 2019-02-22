@@ -20,11 +20,14 @@ const { merge } = require ('lodash');
 
 function delegate (defaults) {
   const Client = blueprint.lookup ('model:client');
-  const { origin: defaultOrigin } = defaults;
+  const { origin: defaultOrigin, allowNullOrigin = true } = defaults;
 
   return function (req, callback) {
     // If there is no origin in the request, then we can disable cors.
     const origin = req.get ('origin');
+
+    if (origin === null || origin === 'null')
+      return callback (null, {origin: allowNullOrigin});
 
     if (!origin)
       return callback (null, {origin: false});
