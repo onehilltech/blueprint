@@ -58,7 +58,7 @@ schema.methods.serialize = function (tokenGenerator, refreshTokenGenerator) {
       const options = { jwtid: this.id };
 
       if (this.expiration)
-        options.expiration = this.expiration;
+        options.expiration = this.expiration.getTime () / 1000;
 
       if (this.origin)
         options.audience = this.origin;
@@ -92,7 +92,7 @@ schema.methods.serializeSync = function (tokenGenerator, refreshTokenGenerator) 
       let options = {jwtid: this.id};
 
       if (this.expiration)
-        options.expiration = this.expiration;
+        options.expiration = this.expiration.getTime () / 1000;
 
       if (this.origin)
         options.audience = this.origin;

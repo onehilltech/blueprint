@@ -16,6 +16,7 @@
 
 const Granter = require ('../granter');
 const { model, service, } = require ('@onehilltech/blueprint');
+const moment = require ('moment');
 
 /**
  * @class ClientCredentials
@@ -35,12 +36,20 @@ module.exports = Granter.extend ({
    * @param req
    */
   createToken (req) {
-    const {gatekeeperClient} = req;
+    const {gatekeeperClient: client} = req;
 
     const doc = {
-      client: gatekeeperClient._id,
-      scope : gatekeeperClient.scope,
+      client: client._id,
+      scope : client.scope,
     };
+
+    if (!!client.expiration) {
+      // Compute the expiration date for the access token. The expiration statement
+      // in the client is a a relative time phrase (i.e., 1 day, 60 seconds, etc).
+
+      let parts = client.expiration.split (' ');
+      doc.expiration = moment ().add (...parts).toDate ();
+    }
 
     const origin = req.get ('origin');
 

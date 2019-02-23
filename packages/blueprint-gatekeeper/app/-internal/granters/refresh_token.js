@@ -16,6 +16,7 @@
 
 const Granter = require ('../granter');
 const { service, model, ForbiddenError } = require ('@onehilltech/blueprint');
+const moment = require ('moment');
 
 const {
   Types: { ObjectId }
@@ -120,6 +121,14 @@ module.exports = Granter.extend ({
             origin : accessToken.origin,
             refresh_token: new ObjectId ()
           };
+          
+          if (!!accessToken.client.expiration) {
+            // Compute the expiration date for the access token. The expiration statement
+            // in the client is a a relative time phrase (i.e., 1 day, 60 seconds, etc).
+
+            let parts = accessToken.client.expiration.split (' ');
+            doc.expiration = moment ().add (...parts).toDate ();
+          }
 
           return this.UserToken.create (doc);
         });

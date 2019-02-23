@@ -54,7 +54,10 @@ let schema = new mongodb.Schema ({
   allow: {type: [ObjectId], ref: 'account'},
 
   /// Accounts not allowed to use the client. This list is always used.
-  deny: {type: [ObjectId], ref: 'account'}
+  deny: {type: [ObjectId], ref: 'account'},
+
+  /// The expiration time for token of this client.
+  expiration: {type: String},
 }, options);
 
 

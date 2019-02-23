@@ -40,7 +40,7 @@ schema.methods.serialize = function (tokenGenerator) {
       const options = { jwtid: this.id };
 
       if (this.expiration)
-        options.expiration = this.expiration;
+        options.expiration = this.expiration.getTime () / 1000;
 
       if (this.origin)
         options.audience = this.origin;

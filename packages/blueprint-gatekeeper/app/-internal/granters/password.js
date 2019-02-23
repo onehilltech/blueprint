@@ -16,6 +16,7 @@
 
 const { model, service, BadRequestError, ForbiddenError } = require ('@onehilltech/blueprint');
 const { union } = require ('lodash');
+const moment = require ('moment');
 
 const {
   Types: { ObjectId }
@@ -75,6 +76,14 @@ module.exports = Granter.extend ({
         scope  : union (client.scope, account.scope),
         refresh_token: new ObjectId ()
       };
+
+      if (!!client.expiration) {
+        // Compute the expiration date for the access token. The expiration statement
+        // in the client is a a relative time phrase (i.e., 1 day, 60 seconds, etc).
+
+        let parts = client.expiration.split (' ');
+        doc.expiration = moment ().add (...parts).toDate ();
+      }
 
       // Bind the token to the origin if present. The origin is used by other parts
       // of the framework to ensure the token is not been hijacked.
