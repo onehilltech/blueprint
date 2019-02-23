@@ -39,6 +39,9 @@ schema.methods.serialize = function (tokenGenerator) {
       const payload = { scope: this.scope };
       const options = { jwtid: this.id };
 
+      if (this.expiration)
+        options.expiration = this.expiration;
+
       if (this.origin)
         options.audience = this.origin;
 
@@ -52,6 +55,9 @@ schema.methods.serializeSync = function (tokenGenerator) {
     access_token: (() => {
       const payload = { scope: this.scope };
       const options = { jwtid: this.id };
+
+      if (this.expiration)
+        options.expiration = this.expiration;
 
       if (this.origin)
         options.audience = this.origin;

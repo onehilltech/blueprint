@@ -36,7 +36,11 @@ let schema = new Schema ({
 
   /// Optional origin for binding the token to a host/origin. This is important
   /// with dealing with x-site scripting.
-  origin: {type: String}
+  origin: {type: String},
+
+  /// The expiration time for the token. If there is no expiration, then the token
+  /// is usable until it has been revoked.
+  expiration: {type: Date},
 }, options);
 
 const MODEL_NAME = 'access_token';
