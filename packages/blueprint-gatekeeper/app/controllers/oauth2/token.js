@@ -278,12 +278,16 @@ module.exports = Controller.extend ({
       execute (req, res) {
         let {accessToken} = req;
 
-        return accessToken.remove ().then (result => {
-          if (!result)
-            return Promise.reject (new BadRequestError ('invalid_token', 'The access token is invalid.'));
+        return accessToken.remove ()
+          .then (result => {
+            if (!result)
+              return Promise.reject (new BadRequestError ('invalid_token', 'The access token is invalid.'));
 
-          res.status (200).send (true);
-        });
+            // Notify all that we have an account logout.
+            this.emit ('gatekeeper.account.logout', accessToken.account);
+
+            res.status (200).send (true);
+          });
       }
     });
   }
