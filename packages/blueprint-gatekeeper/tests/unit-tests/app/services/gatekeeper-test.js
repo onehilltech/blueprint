@@ -42,7 +42,6 @@ describe ('app | services | gatekeeper', function () {
 
       expect (generators).to.have.property ('gatekeeper:access_token').to.have.deep.property ('options', {
         algorithm: 'HS256',
-        expiresIn: '12 hours',
         subject: 'gatekeeper:access_token',
         issuer: 'gatekeeper',
         secret: 'ssshhh',
@@ -57,7 +56,6 @@ describe ('app | services | gatekeeper', function () {
 
       expect (generators).to.have.property ('gatekeeper:account_verification').to.have.deep.property ('options', {
         algorithm: 'HS256',
-        expiresIn: '14 days',
         subject: 'gatekeeper:account_verification',
         issuer: 'gatekeeper',
         secret: 'ssshhh'
@@ -65,7 +63,6 @@ describe ('app | services | gatekeeper', function () {
 
       expect (generators).to.have.property ('gatekeeper:password_reset').to.have.deep.property ('options', {
         algorithm: 'HS256',
-        expiresIn: '10 minutes',
         issuer: 'gatekeeper',
         subject: 'gatekeeper:password_reset',
         secret: 'ssshhh'

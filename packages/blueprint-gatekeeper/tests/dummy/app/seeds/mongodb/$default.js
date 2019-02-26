@@ -47,6 +47,12 @@ module.exports = Seed.extend ({
           client_secret: 'client4',
           allow: [dab.ref ('accounts.6')]
         },
+        {
+          name: 'client5',
+          email: 'client5@gatekeeper.com',
+          client_secret: 'client5',
+          expiration: '5 seconds'
+        }
       ],
 
       android: [

@@ -29,7 +29,7 @@ const DEFAULT_BASE_OPTIONS = {
 
 const BUILTIN_TOKEN_GENERATORS = {
   'gatekeeper:access_token': {
-    expiresIn: '12 hours'
+
   },
 
   'gatekeeper:refresh_token': {
@@ -37,11 +37,11 @@ const BUILTIN_TOKEN_GENERATORS = {
   },
 
   'gatekeeper:account_verification': {
-    expiresIn: '14 days',
+
   },
 
   'gatekeeper:password_reset': {
-    expiresIn: '10 minutes'
+
   }
 };
 

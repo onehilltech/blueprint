@@ -18,6 +18,7 @@ const { seed }    = require ('@onehilltech/blueprint-mongodb');
 const { expect }  = require ('chai');
 const blueprint   = require ('@onehilltech/blueprint');
 const { request } = require ('@onehilltech/blueprint-testing');
+const { delay } = require ('bluebird');
 
 const TOKEN_URL = '/v1/oauth2/token';
 
@@ -360,6 +361,39 @@ describe ('app | routers | oauth2 | token', function () {
               [ { code: 'invalid_account',
                 detail: 'Your account cannot access this client.',
                 status: '403' } ] });
+      });
+
+      it ('should fail because access token has expired', function () {
+        this.timeout (10000);
+
+        const {
+          native: [,,,,client],
+          accounts: [account]
+        } = seed ('$default');
+
+        const data = {
+          grant_type: 'password',
+          username: account.username,
+          password: account.username,
+          client_id: client.id,
+          client_secret: client.client_secret
+        };
+
+        return getToken (data).then (({access_token}) => {
+          // get information about myself, but the token should be expired.
+          return delay (5000)
+            .then (() => request ().get ('/v1/accounts/me')
+              .set ('Authorization', `Bearer ${access_token}`)
+              .expect (403, {
+                errors:
+                  [{
+                    code: 'token_expired',
+                    detail: 'The access token has expired.',
+                    status: '403'
+                  }]
+              })
+            );
+        });
       });
     });
 

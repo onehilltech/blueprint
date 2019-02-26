@@ -46,7 +46,7 @@ module.exports = {
     },
 
     'gatekeeper:access_token': {
-      expiresIn: '10 seconds'
+
     },
   }
 };
