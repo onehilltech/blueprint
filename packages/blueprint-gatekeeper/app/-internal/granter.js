@@ -19,6 +19,7 @@ const { BO } = require ('@onehilltech/blueprint');
 const ModelVisitor = require ('../models/-visitor');
 const { merge } = require ('lodash');
 
+
 const SCHEMA_NATIVE_CLIENT = {
   client_secret: {
     in: 'body',
@@ -57,8 +58,6 @@ const SCHEMA_RECAPTCHA_CLIENT = {
 module.exports = BO.extend ({
   name: null,
 
-  createToken: null,
-
   /// The options for the token generator.
   tokenOptions: null,
 
@@ -69,6 +68,24 @@ module.exports = BO.extend ({
     this._super.call (this, ...arguments);
 
     assert (!!this.tokenGenerator, 'You must define the tokenGenerator property.');
+  },
+
+  createToken (req) {
+    return Promise.resolve (this.prepareForCreateToken (req))
+      .then (() => this.onCreateToken (req))
+      .then (token => Promise.resolve (this.onTokenCreated (req, token)).then (() => token));
+  },
+
+  prepareForCreateToken (req) {
+
+  },
+
+  onCreateToken (req) {
+
+  },
+
+  onTokenCreated (req, token) {
+
   },
 
   /**

@@ -68,7 +68,7 @@ module.exports = Granter.extend ({
     return schema;
   },
 
-  createToken (req) {
+  onCreateToken (req) {
     const refreshToken = req.body.refresh_token;
     const {gatekeeperClient} = req;
 
@@ -121,7 +121,7 @@ module.exports = Granter.extend ({
             origin : accessToken.origin,
             refresh_token: new ObjectId ()
           };
-          
+
           if (!!accessToken.client.expiration) {
             // Compute the expiration date for the access token. The expiration statement
             // in the client is a a relative time phrase (i.e., 1 day, 60 seconds, etc).

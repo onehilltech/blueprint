@@ -146,7 +146,7 @@ module.exports = Controller.extend ({
     this._refreshTokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:refresh_token');
 
     this.granters = transform (Granters, (results, Granter) => {
-      let granter = new Granter ({tokenGenerator: this._tokenGenerator});
+      let granter = new Granter ({app: this.app, tokenGenerator: this._tokenGenerator});
       results[granter.name] = granter;
     }, {});
   },
@@ -284,7 +284,7 @@ module.exports = Controller.extend ({
               return Promise.reject (new BadRequestError ('invalid_token', 'The access token is invalid.'));
 
             // Notify all that we have an account logout.
-            this.emit ('gatekeeper.account.logout', accessToken.account);
+            this.emit ('gatekeeper.account.logout', accessToken.account, accessToken.client);
 
             res.status (200).send (true);
           });

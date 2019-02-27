@@ -46,13 +46,21 @@ module.exports = Granter.extend ({
     this._super.call (this, ...arguments);
   },
 
+  prepareForCreateToken (req) {
+    // Let the users know we are creating a token. This means that we are
+    // adding a new user session to the service. The listeners have the
+    // option of preventing the login from occurring just by failing.
+
+    return this.findAccount (req).then (account => this.app.emit ('gatekeeper.user_token.create', req, account));
+  },
+
   /**
    * Create the UserToken for the request.
    *
    * @param req
    * @returns {doc}
    */
-  createToken (req) {
+  onCreateToken (req) {
     const {gatekeeperClient: client} = req;
 
     // We need to locate the account for the username, and check that the
@@ -93,6 +101,13 @@ module.exports = Granter.extend ({
 
       return this.UserToken.create (doc);
     });
+  },
+
+  onTokenCreated (req, token) {
+    // Send a notification to all listeners that we have created a new
+    // user token. This means the user is logged into the service.
+
+    return this.app.emit ('gatekeeper.user_token.created', req, token);
   },
 
   findAccount (req) {

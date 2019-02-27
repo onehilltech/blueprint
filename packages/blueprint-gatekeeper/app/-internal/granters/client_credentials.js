@@ -35,7 +35,7 @@ module.exports = Granter.extend ({
    *
    * @param req
    */
-  createToken (req) {
+  onCreateToken (req) {
     const {gatekeeperClient: client} = req;
 
     const doc = {
