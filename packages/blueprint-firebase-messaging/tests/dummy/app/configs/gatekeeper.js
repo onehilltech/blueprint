@@ -41,8 +41,7 @@ module.exports = {
     $: {
       algorithm: 'HS256',
       secret: 'ssshhh',
-      issuer: 'firebase-messaging',
-      expiresIn: '1h'
+      issuer: 'firebase-messaging'
     }
   }
 };
