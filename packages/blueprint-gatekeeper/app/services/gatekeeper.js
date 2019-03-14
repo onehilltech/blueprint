@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-const { Service } = require ('@onehilltech/blueprint');
-const { get, forOwn, merge } = require ('lodash');
+const { Service, model } = require ('@onehilltech/blueprint');
+const { get, forOwn, merge, transform } = require ('lodash');
 
 const TokenGenerator = require ('../../lib/token-generator');
 
@@ -65,6 +65,10 @@ module.exports = Service.extend ({
   /// Collection of named token generators.
   _tokenGenerators: {},
 
+  _granters: null,
+
+  Client: model ('client'),
+
   init () {
     this._super.call (this, ...arguments);
 
@@ -78,6 +82,17 @@ module.exports = Service.extend ({
     Object.defineProperty (this, 'tokenGenerators', {
       get () { return this._tokenGenerators; }
     });
+
+  },
+
+  start () {
+    const tokenGenerator = this._tokenGenerators['gatekeeper:access_token'];
+    const Granters = require ('../-internal/granters');
+
+    this._granters = transform (Granters, (results, Granter) => {
+      let granter = new Granter ({app: this.app, tokenGenerator});
+      results[granter.name] = granter;
+    }, {});
   },
 
   accountIdGenerator,
@@ -172,5 +187,5 @@ module.exports = Service.extend ({
    */
   generateIdForAccount (account) {
     return this.accountIdGenerator.call (null, account);
-  },
+  }
 });

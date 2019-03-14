@@ -74,6 +74,16 @@ schema.methods.allowed = function (account) {
     (!isEmpty (this.allow) && -1 !== findIndex (this.allow, id => account._id.equals (id)));
 };
 
+schema.methods.computeExpiration = function (from = new Date ()) {
+  if (!this.expiration)
+    return;
+
+  // Compute the expiration date for the access token. The expiration statement
+  // in the client is a a relative time phrase (i.e., 1 day, 60 seconds, etc).
+  let parts = this.expiration.split (' ');
+  return moment (from).add (...parts).toDate ();
+};
+
 const MODEL_NAME = 'client';
 const COLLECTION_NAME = 'gatekeeper_clients';
 

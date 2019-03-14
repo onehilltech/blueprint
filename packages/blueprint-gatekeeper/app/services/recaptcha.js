@@ -20,7 +20,6 @@ const rp = require ('request-promise-native');
 const VERIFY_METHOD = 'GET';
 const VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
-
 /**
  * @class RecaptchaService
  */
