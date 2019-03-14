@@ -69,11 +69,13 @@ module.exports = Service.extend ({
    *
    * @param clientId        Hosting client
    * @param account         The account model
-   * @param origin          Optional origin for the token
+   * @param opts            Additional options
    */
-  issueToken (clientId, account, origin) {
+  issueToken (clientId, account, opts = {}) {
     // If the client has an black and white list, then we need to make sure the
     // account is not in the black list and is in the white list.
+
+    const { origin, refreshToken = true } = opts;
 
     if (account.enabled !== true)
       return Promise.reject (new BadRequestError ('account_disabled', 'The account is disabled.'));
@@ -100,8 +102,10 @@ module.exports = Service.extend ({
         client : client._id,
         account: account._id,
         scope  : union (client.scope, account.scope),
-        refresh_token: new ObjectId ()
       };
+
+      if (refreshToken)
+        doc.refresh_token = new ObjectId ();
 
       if (!!client.expiration)
         doc.expiration = client.computeExpiration ();
