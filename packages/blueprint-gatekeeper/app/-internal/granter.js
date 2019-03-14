@@ -70,6 +70,10 @@ module.exports = BO.extend ({
     assert (!!this.tokenGenerator, 'You must define the tokenGenerator property.');
   },
 
+  grantToken (opts) {
+    throw new Error ('Method not supported.');
+  },
+
   createToken (req) {
     return Promise.resolve (this.prepareForCreateToken (req))
       .then (() => this.onCreateToken (req))

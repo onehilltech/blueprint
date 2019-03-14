@@ -15,7 +15,7 @@
  */
 
 const Granter = require ('../granter');
-const { model, service, } = require ('@onehilltech/blueprint');
+const { model } = require ('@onehilltech/blueprint');
 const moment = require ('moment');
 
 /**
@@ -27,8 +27,6 @@ module.exports = Granter.extend ({
   name: 'client_credentials',
 
   ClientToken: model ('client-token'),
-
-  recaptcha: service (),
 
   /**
    * Create a token for the request.

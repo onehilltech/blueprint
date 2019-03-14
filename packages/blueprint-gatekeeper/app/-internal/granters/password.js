@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { model, service, BadRequestError, ForbiddenError } = require ('@onehilltech/blueprint');
+const { model, BadRequestError, ForbiddenError } = require ('@onehilltech/blueprint');
 const { union } = require ('lodash');
 const moment = require ('moment');
 
@@ -33,17 +33,28 @@ module.exports = Granter.extend ({
   /// Name of the granter.
   name: 'password',
 
+  /// The client model definition.
+  Client: model ('client'),
+
   /// The account model definition.
   Account: model ('account'),
 
   /// The user token definition.
   UserToken: model ('user-token'),
 
-  /// The service for verifying reCAPTCHA.
-  recaptcha: service (),
-
   init () {
     this._super.call (this, ...arguments);
+  },
+
+  grantToken (opts) {
+    const { client_id, username, password, origin } = opts;
+
+    let promises = [
+      this.findClient ({body: { username, password }}),
+      this.findAccount ({body: { client_id }})
+    ];
+
+    return Promise.all (promises).then (([client, account]) => this._issueToken (client, account, origin));
   },
 
   prepareForCreateToken (req) {
@@ -61,46 +72,18 @@ module.exports = Granter.extend ({
    * @returns {doc}
    */
   onCreateToken (req) {
-    const {gatekeeperClient: client} = req;
-
     // We need to locate the account for the username, and check that the
     // provided password is correct. We also need to make sure the account
     // has not been disabled before we create the token.
 
-    return this.findAccount (req).then (account => {
-      // If the client has an black and white list, then we need to make sure the
-      // account is not in the black list and is in the white list.
+    let promises = [
+      this.findClient (req),
+      this.findAccount (req)
+    ];
 
-      if (!client.allowed (account))
-        return Promise.reject (new ForbiddenError ('invalid_account', 'Your account cannot access this client.'));
+    const origin = req.get ('origin');
 
-      const origin = req.get ('origin');
-
-      // Make sure the account is able to access the client.
-
-      const doc = {
-        client : client._id,
-        account: account._id,
-        scope  : union (client.scope, account.scope),
-        refresh_token: new ObjectId ()
-      };
-
-      if (!!client.expiration) {
-        // Compute the expiration date for the access token. The expiration statement
-        // in the client is a a relative time phrase (i.e., 1 day, 60 seconds, etc).
-
-        let parts = client.expiration.split (' ');
-        doc.expiration = moment ().add (...parts).toDate ();
-      }
-
-      // Bind the token to the origin if present. The origin is used by other parts
-      // of the framework to ensure the token is not been hijacked.
-
-      if (!!origin)
-        doc.origin = origin;
-
-      return this.UserToken.create (doc);
-    });
+    return Promise.all (promises).then (([client, account]) => this._issueToken (client, account, origin));
   },
 
   onTokenCreated (req, token) {
@@ -108,6 +91,27 @@ module.exports = Granter.extend ({
     // user token. This means the user is logged into the service.
 
     return this.app.emit ('gatekeeper.user_token.created', req, token);
+  },
+
+  findClient (req) {
+    if (req.gatekeeperClient)
+      return Promise.resolve (req.gatekeeperClient);
+
+    const { client_id } = req.body;
+
+    // We need to locate the account for the username, and check that the
+    // provided password is correct. We also need to make sure the account
+    // has not been disabled before we create the token.
+
+    return this.Client.findById (client_id).then (client => {
+      if (!client)
+        return Promise.reject (new BadRequestError ('invalid_client', 'The client does not exist.'));
+
+      if (client.enabled !== true)
+        return Promise.reject (new BadRequestError ('client_disabled', 'The client is disabled.'));
+
+      return client;
+    });
   },
 
   findAccount (req) {
@@ -137,5 +141,38 @@ module.exports = Granter.extend ({
         return account;
       });
     });
-  }
+  },
+
+  _issueToken (client, account, origin) {
+    // If the client has an black and white list, then we need to make sure the
+    // account is not in the black list and is in the white list.
+
+    if (!client.allowed (account))
+      return Promise.reject (new ForbiddenError ('invalid_account', 'Your account cannot access this client.'));
+
+    // Make sure the account is able to access the client.
+
+    const doc = {
+      client : client._id,
+      account: account._id,
+      scope  : union (client.scope, account.scope),
+      refresh_token: new ObjectId ()
+    };
+
+    if (!!client.expiration) {
+      // Compute the expiration date for the access token. The expiration statement
+      // in the client is a a relative time phrase (i.e., 1 day, 60 seconds, etc).
+
+      let parts = client.expiration.split (' ');
+      doc.expiration = moment ().add (...parts).toDate ();
+    }
+
+    // Bind the token to the origin if present. The origin is used by other parts
+    // of the framework to ensure the token is not been hijacked.
+
+    if (!!origin)
+      doc.origin = origin;
+
+    return this.UserToken.create (doc);
+  },
 });
