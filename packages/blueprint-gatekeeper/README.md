@@ -218,6 +218,10 @@ module.exports = Controller.extend ({
           .then (token => res.json (token));
       }
     });
+  },
+  
+  authenticateUsingThirdParty () {
+    // Perform the remote authentication.
   }
 })
 ```
