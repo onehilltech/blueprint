@@ -155,6 +155,74 @@ middleware is a wrapper around [Express CORS](https://github.com/expressjs/cors)
 if the origin in the request matches any registered client only when running in production. All
 other times, CORS is enabled by default regardless of the origin in the request.
 
+Third-party Authentication
+----------------------------
+
+Third-party authentication is when you use another service to authenticate the user, and then
+issues an access token for authenticated user on the host system/service. For example, you use 
+Facebook to authenticate a user and then issue an access token from the host service for the 
+authenticated user. The rationale for such capabilities is you want to use the host service 
+authorization mechanism to control access, but do not want to require users to manage authentication 
+(i.e., username and passwords) on either system.
+
+To account for this scenario, Gatekeeper provides a `session` service that can be used to issue
+access tokens for accounts/users against a client. It is the host system's responsibility to ensure
+the generated access tokens are for authenticated users. To use the service, just inject the `session`
+service into your controller. Then, define an `authenticate()` method to authenticate a user using the
+third-party service. This means the user will submit their username and password to the host service,
+and the host service will forward the information along to the third-party service.
+
+```javascript
+module.exports = Controller.extend ({
+  /// Inject the session service into the controller.
+  session: service (),
+  
+  authenticate () {
+    return Action.extend ({
+      execute (req, res) {
+        return this.authenticateUsingThirdParty ();
+          .then (result => {
+            //
+          });
+      }
+    });
+  }
+})
+```
+
+Once the user is authenticated, you then use information about the authenticated user to 
+issue an access token. As shown in the example below, you will first use `findAccountByEmail`
+or `findAccountByUsername` to lookup the corresponding account for the user.
+
+> `findAccountByEmail` and `findAccountByUsername` does not create an account if it does
+> not exist. If the account does not exist, you will have to create one.
+
+Then use `issueToken` to issue a token for the account on the corresonding client. Lastly,
+use `serializeToken` to convert the token from an object to a JSON object. The JSON object
+can then be sent as a response to the client. 
+
+```javascript
+module.exports = Controller.extend ({
+  /// Inject the session service into the controller.
+  session: service (),
+  
+  authenticate () {
+    return Action.extend ({
+      execute (req, res) {
+        const { client_id } = req.body;
+        
+        return this.authenticateUsingThirdParty (req)
+          .then (result => this.session.findAccountByEmail (result.email))
+          .then (account => this.session.issueToken (client_id, account))
+          .then (token => this.session.serializeToken (token))
+          .then (token => res.json (token));
+      }
+    });
+  }
+})
+```
+
+
 Gatekeeper Client Libraries
 ----------------------------
 
