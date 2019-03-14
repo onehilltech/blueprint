@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { Service, model, ForbiddenError } = require ('@onehilltech/blueprint');
+const { Service, model, ForbiddenError, BadRequestError } = require ('@onehilltech/blueprint');
 const { union } = require ('lodash');
 
 const {
@@ -75,7 +75,22 @@ module.exports = Service.extend ({
     // If the client has an black and white list, then we need to make sure the
     // account is not in the black list and is in the white list.
 
+    if (account.enabled !== true)
+      return Promise.reject (new BadRequestError ('account_disabled', 'The account is disabled.'));
+
+    if (account.is_deleted)
+      return Promise.reject (new BadRequestError ('account_deleted', 'The account no longer exists.'));
+
     return this._findClient (clientId).then (client => {
+      if (!client)
+        return Promise.reject (new BadRequestError ('invalid_client', 'The client does not exist.'));
+
+      if (!client.enabled)
+        return Promise.reject (new ForbiddenError ('client_disabled', 'The client is disabled.'));
+
+      if (client.is_deleted)
+        return Promise.reject (new BadRequestError ('client_deleted', 'The client has been deleted.'));
+
       if (!client.allowed (account))
         return Promise.reject (new ForbiddenError ('unauthorized_account', 'Your account cannot access this client.'));
 
