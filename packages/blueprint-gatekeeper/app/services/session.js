@@ -30,7 +30,10 @@ const moment = require ('moment');
  * authentication and authorization.
  */
 module.exports = Service.extend ({
+  Account: model ('account'),
+
   Client: model ('client'),
+
   UserToken: model ('user-token'),
 
   _tokenGenerator: null,
@@ -41,6 +44,24 @@ module.exports = Service.extend ({
     const gatekeeper = this.app.lookup ('service:gatekeeper');
     this._tokenGenerator = gatekeeper.getTokenGenerator ('gatekeeper:access_token');
     this._refreshTokenGenerator = gatekeeper.getTokenGenerator ('gatekeeper:refresh_token');
+  },
+
+  /**
+   * Find the account by its username.
+   *
+   * @param username
+   */
+  findAccountByUsername (username) {
+    return this.Account.findOne ({username});
+  },
+
+  /**
+   * Find the account by its email.
+   *
+   * @param email
+   */
+  findAccountByEmail (email) {
+    return this.Account.findOne ({email});
   },
 
   /**
