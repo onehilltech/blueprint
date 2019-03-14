@@ -46,17 +46,6 @@ module.exports = Granter.extend ({
     this._super.call (this, ...arguments);
   },
 
-  grantToken (opts) {
-    const { client_id, username, password, origin } = opts;
-
-    let promises = [
-      this.findClient ({body: { username, password }}),
-      this.findAccount ({body: { client_id }})
-    ];
-
-    return Promise.all (promises).then (([client, account]) => this._issueToken (client, account, origin));
-  },
-
   prepareForCreateToken (req) {
     // Let the users know we are creating a token. This means that we are
     // adding a new user session to the service. The listeners have the
@@ -81,9 +70,10 @@ module.exports = Granter.extend ({
       this.findAccount (req)
     ];
 
-    const origin = req.get ('origin');
+    const opts = { refreshable, temporary } = req.body;
+    opts.origin = req.get ('origin');
 
-    return Promise.all (promises).then (([client, account]) => this._issueToken (client, account, origin));
+    return Promise.all (promises).then (([client, account]) => this._issueToken (client, account, opts));
   },
 
   onTokenCreated (req, token) {
@@ -143,7 +133,9 @@ module.exports = Granter.extend ({
     });
   },
 
-  _issueToken (client, account, origin) {
+  _issueToken (client, account, opts = {}) {
+    const { origin, refreshable = true, temporary = false} = opts;
+
     // If the client has an black and white list, then we need to make sure the
     // account is not in the black list and is in the white list.
 
@@ -156,16 +148,12 @@ module.exports = Granter.extend ({
       client : client._id,
       account: account._id,
       scope  : union (client.scope, account.scope),
-      refresh_token: new ObjectId ()
     };
 
-    if (!!client.expiration) {
-      // Compute the expiration date for the access token. The expiration statement
-      // in the client is a a relative time phrase (i.e., 1 day, 60 seconds, etc).
+    if (refreshable)
+      doc.refresh_token = new ObjectId ();
 
-      let parts = client.expiration.split (' ');
-      doc.expiration = moment ().add (...parts).toDate ();
-    }
+    doc.expiration = client.computeExpiration ();
 
     // Bind the token to the origin if present. The origin is used by other parts
     // of the framework to ensure the token is not been hijacked.
@@ -173,6 +161,9 @@ module.exports = Granter.extend ({
     if (!!origin)
       doc.origin = origin;
 
-    return this.UserToken.create (doc);
+    const UserToken = this.UserToken;
+    const token = new UserToken (doc);
+
+    return temporary ? token : token.save ();
   },
 });

@@ -18,6 +18,7 @@ const discriminatorKey = 'type';
 const options = require ('./-common-options') ({discriminatorKey});
 const mongodb = require ('@onehilltech/blueprint-mongodb');
 const { isEmpty, findIndex } = require ('lodash');
+const moment = require ('moment');
 
 const {
   Schema: {
@@ -26,6 +27,7 @@ const {
 } = mongodb;
 
 options.softDelete = true;
+
 
 let schema = new mongodb.Schema ({
   /// The type of client.

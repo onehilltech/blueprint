@@ -75,7 +75,7 @@ module.exports = Service.extend ({
     // If the client has an black and white list, then we need to make sure the
     // account is not in the black list and is in the white list.
 
-    const { origin, refreshToken = true } = opts;
+    const { origin, refreshable = true, temporary = false } = opts;
 
     if (account.enabled !== true)
       return Promise.reject (new BadRequestError ('account_disabled', 'The account is disabled.'));
@@ -104,10 +104,10 @@ module.exports = Service.extend ({
         scope  : union (client.scope, account.scope),
       };
 
-      if (refreshToken)
+      if (refreshable)
         doc.refresh_token = new ObjectId ();
 
-      if (!!client.expiration)
+      if (client.expiration)
         doc.expiration = client.computeExpiration ();
 
       // Bind the token to the origin if present. The origin is used by other parts
@@ -116,7 +116,10 @@ module.exports = Service.extend ({
       if (!!origin)
         doc.origin = origin;
 
-      return this.UserToken.create (doc);
+      const UserToken = this.UserToken;
+      const token = new UserToken (doc);
+
+      return temporary ? token : token.save ();
     });
   },
 
