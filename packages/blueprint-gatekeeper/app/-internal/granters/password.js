@@ -70,7 +70,7 @@ module.exports = Granter.extend ({
       this.findAccount (req)
     ];
 
-    const opts = { refreshable, temporary } = req.body;
+    const opts = { refreshable, tags } = req.body;
     opts.origin = req.get ('origin');
 
     return Promise.all (promises).then (([client, account]) => this._issueToken (client, account, opts));
@@ -134,7 +134,7 @@ module.exports = Granter.extend ({
   },
 
   _issueToken (client, account, opts = {}) {
-    const { origin, refreshable = true, temporary = false} = opts;
+    const { origin, refreshable = true, tags } = opts;
 
     // If the client has an black and white list, then we need to make sure the
     // account is not in the black list and is in the white list.
@@ -153,6 +153,9 @@ module.exports = Granter.extend ({
     if (refreshable)
       doc.refresh_token = new ObjectId ();
 
+    if (tags)
+      doc.tags = tags;
+
     doc.expiration = client.computeExpiration ();
 
     // Bind the token to the origin if present. The origin is used by other parts
@@ -161,9 +164,6 @@ module.exports = Granter.extend ({
     if (!!origin)
       doc.origin = origin;
 
-    const UserToken = this.UserToken;
-    const token = new UserToken (doc);
-
-    return temporary ? token : token.save ();
+    return this.UserToken.create (doc);
   },
 });

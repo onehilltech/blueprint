@@ -41,6 +41,9 @@ let schema = new Schema ({
   /// The expiration time for the token. If there is no expiration, then the token
   /// is usable until it has been revoked.
   expiration: {type: Date},
+
+  /// Custom tags associated with the access token.
+  tags: { type: [String] }
 }, options);
 
 const MODEL_NAME = 'access_token';
