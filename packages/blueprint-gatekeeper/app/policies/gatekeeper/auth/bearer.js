@@ -144,7 +144,7 @@ module.exports = Policy.extend ({
       // Translate the error, if necessary. We have to check the name because the error
       // could be related to token verification.
       if (err.name === 'TokenExpiredError')
-        err = new ForbiddenError ('token_expired', 'The access token has expired.');
+        return { failureCode: 'token_expired', failureMessage: 'The access token has expired.'};
 
       if (err.name === 'JsonWebTokenError')
         err = new ForbiddenError ('invalid_token', err.message);
