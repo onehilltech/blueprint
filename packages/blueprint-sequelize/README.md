@@ -3,10 +3,10 @@ blueprint-sequelize
 
 A Blueprint module for Sequelize
 
-[![npm version](https://img.shields.io/npm/v/@onehilltech/blueprint-mongodb.svg)](https://www.npmjs.com/package/@onehilltech/blueprint-mongodb)
-[![Build Status](https://travis-ci.org/onehilltech/blueprint-mongodb.svg?branch=master)](https://travis-ci.org/onehilltech/blueprint-mongodb)
-[![Dependencies](https://david-dm.org/onehilltech/blueprint-mongodb.svg)](https://david-dm.org/onehilltech/blueprint-mongodb)
-[![Coverage Status](https://coveralls.io/repos/github/onehilltech/blueprint-mongodb/badge.svg?branch=master)](https://coveralls.io/github/onehilltech/blueprint-mongodb?branch=master)
+[![npm version](https://img.shields.io/npm/v/@onehilltech/blueprint-sequelize.svg)](https://www.npmjs.com/package/@onehilltech/blueprint-sequelize)
+[![Build Status](https://travis-ci.org/onehilltech/blueprint-sequelize.svg?branch=master)](https://travis-ci.org/onehilltech/blueprint-sequelize)
+[![Dependencies](https://david-dm.org/onehilltech/blueprint-sequelize.svg)](https://david-dm.org/onehilltech/blueprint-sequelize)
+[![Coverage Status](https://coveralls.io/repos/github/onehilltech/blueprint-sequelize/badge.svg?branch=master)](https://coveralls.io/github/onehilltech/blueprint-sequelize?branch=master)
 
 
 Installation
