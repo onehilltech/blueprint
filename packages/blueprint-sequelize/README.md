@@ -20,7 +20,6 @@ or
     
 You must also install the database driver package for the dialect you intend to use.
 
-
     npm install --save pg pg-hstore # Postgres
     npm install --save mysql2
     npm install --save mariadb
