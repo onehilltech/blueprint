@@ -22,7 +22,9 @@ function model (name, schema, options) {
   const defaultConnection = sequelize.defaultConnection;
 
   const Model = class extends Sequelize.Model { };
-  return Model.init (schema, Object.assign ({ sequelize: defaultConnection }, options));
+  const immutableOptions = { modelName: name, sequelize: defaultConnection };
+
+  return Model.init (schema, Object.assign ({}, options, immutableOptions));
 }
 
 module.exports = model;
