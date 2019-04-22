@@ -15,7 +15,7 @@
  */
 
 const blueprint = require ('@onehilltech/blueprint');
-const gatekeeper = require ('@onehilltech/blueprint-gatekeeper');
+const gatekeeper = require ('../../../../');
 
 module.exports = {
   '/v1': {

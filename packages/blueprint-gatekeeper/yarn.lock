@@ -25,9 +25,9 @@
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-mongodb@^1.9.1":
-  version "1.9.1"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.9.1.tgz#16a2e425e9595aa0f32fa6d1157b79355eb616e6"
+"@onehilltech/blueprint-mongodb@^1.9.3":
+  version "1.9.3"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.9.3.tgz#a36f00344a5a25fd966e1b9c084b5ff4e13a8003"
   dependencies:
     "@onehilltech/blueprint" "^4.5.4"
     "@onehilltech/dab" "^1.2.0"
