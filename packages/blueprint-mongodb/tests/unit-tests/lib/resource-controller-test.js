@@ -161,7 +161,7 @@ describe ('lib | ResourceController', function () {
         });
     });
 
-    it.only ('should get a single resource', function () {
+    it ('should get a single resource', function () {
       const {authors: [author]} = seed ('$default');
 
       return request ()
