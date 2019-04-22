@@ -410,7 +410,7 @@ describe ('lib | ResourceController', function () {
         .expect (200, { authors: [] });
     });
 
-    it.only ('should populate found resources', function () {
+    it ('should populate found resources', function () {
       const {
         authors: [a0, a1],
         users: [u0]

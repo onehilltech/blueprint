@@ -218,7 +218,11 @@ module.exports = ResourceController.extend ({
    * });
    */
   getAll () {
+    const {validators,sanitizers} = this.app.resources;
+
     return DatabaseAction.extend ({
+      schema: validation (this.Model.schema, extend ({}, this._defaultValidationOptions, {allOptional:true, validators, sanitizers})),
+
       execute (req, res) {
         let query = Object.assign ({}, req.query || {});
         let options = query._ || {};
