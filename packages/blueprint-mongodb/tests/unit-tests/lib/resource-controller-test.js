@@ -160,6 +160,15 @@ describe ('lib | ResourceController', function () {
             });
         });
     });
+
+    it.only ('should get a single resource', function () {
+      const {authors: [author]} = seed ('$default');
+
+      return request ()
+        .get ('/authors')
+        .query ({_id: author.id})
+        .expect (200, {authors: [author.lean ()]});
+    })
   });
 
   describe ('getOne', function () {
