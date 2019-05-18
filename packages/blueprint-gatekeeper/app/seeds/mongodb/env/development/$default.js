@@ -61,7 +61,6 @@ module.exports = Seed.extend ({
           email: 'tester@onehilltech.com',
           username: 'account1',
           password: 'account1',
-          created_by: dab.ref ('android.0')
         }
       ]
     };
