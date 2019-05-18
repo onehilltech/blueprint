@@ -33,7 +33,10 @@ describe ('app | models | access-token', function () {
           _id: accessToken.id,
           client: native[0].id,
           enabled: true,
-          scope: []
+          scope: [],
+          usage: {
+            current: 0
+          }
         })
       });
     });

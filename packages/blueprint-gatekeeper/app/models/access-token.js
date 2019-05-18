@@ -44,12 +44,16 @@ let schema = new Schema ({
 
   usage: {
     /// Current number of times the access token has been used.
-    current: { type: Number },
+    current: { type: Number, required: true, default: 0 },
 
     /// Maximum number of uses for the access token.
     max: { type: Number }
   }
 }, options);
+
+schema.methods.maxUsageLimit = function () {
+  return !!this.usage.max && this.usage.current >= this.usage.max;
+};
 
 const MODEL_NAME = 'access_token';
 const COLLECTION_NAME = 'gatekeeper_access_tokens';

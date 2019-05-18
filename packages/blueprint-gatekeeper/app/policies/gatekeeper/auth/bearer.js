@@ -111,6 +111,9 @@ module.exports = Policy.extend ({
       if (accessToken.client.is_deleted)
         return {failureCode: 'client_deleted', failureMessage: 'The client has been deleted.'};
 
+      if (accessToken.maxUsageLimit ())
+        return {failureCode: 'max_usage', failureMessage: 'The access token has reached its max usage.'};
+
       // Let's make sure the request is originate from the same address that was
       // used to create the request.
       const origin = req.get ('origin');

@@ -137,7 +137,8 @@ module.exports = Seed.extend ({
         { client: dab.ref ('native.0'), account: dab.ref ('accounts.4'), refresh_token: dab.id ()},
         { client: dab.ref ('recaptcha.0'), account: dab.ref ('accounts.0'), refresh_token: dab.id ()},
         { client: dab.ref ('android.0'), account: dab.ref ('accounts.0'), refresh_token: dab.id ()},
-        { client: dab.ref ('android.0'), account: dab.ref ('accounts.1'), refresh_token: dab.id ()}
+        { client: dab.ref ('android.0'), account: dab.ref ('accounts.1'), refresh_token: dab.id ()},
+        { client: dab.ref ('android.0'), account: dab.ref ('accounts.0'), refresh_token: dab.id (), usage: { current: 1, max: 1}}
       ],
 
       client_tokens: [
