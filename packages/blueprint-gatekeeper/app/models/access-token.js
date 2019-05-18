@@ -41,6 +41,14 @@ let schema = new Schema ({
   /// The expiration time for the token. If there is no expiration, then the token
   /// is usable until it has been revoked.
   expiration: {type: Date},
+
+  usage: {
+    /// Current number of times the access token has been used.
+    current: { type: Number },
+
+    /// Maximum number of uses for the access token.
+    max: { type: Number }
+  }
 }, options);
 
 const MODEL_NAME = 'access_token';
