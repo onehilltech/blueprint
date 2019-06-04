@@ -660,7 +660,7 @@ module.exports = ResourceController.extend ({
         if (!deleted && this.controller._softDelete)
           filter['_stat.deleted_at'] = {$exists: false};
 
-        return this.controller.Model.count (filter);
+        return this.controller.Model.countDocuments (filter);
       },
 
       preCountModels () {
