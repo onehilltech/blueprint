@@ -145,7 +145,7 @@ describe ('app | policies | gatekeeper | auth | bearer', function () {
             status: '403' } ] });
   });
 
-  it.only ('should fail because of max usage limit', function () {
+  it ('should fail because of max usage limit', function () {
     return request ()
       .get ('/v1/accounts/me')
       .withUserToken (9)
