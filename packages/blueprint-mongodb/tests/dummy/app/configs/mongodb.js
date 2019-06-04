@@ -20,6 +20,7 @@ module.exports = {
       uri: 'mongodb://localhost/blueprint_mongodb',
       seed: false,
       options : {
+        useNewUrlParser: true,
         readPreference: "primary",
         forceServerObjectId: false,
         w: 1,
@@ -33,6 +34,7 @@ module.exports = {
       uri: 'mongodb://localhost/blueprint_mongodb',
       seed: false,
       options : {
+        useNewUrlParser: true,
         readPreference: "primary",
         forceServerObjectId: false,
         w: 1,
