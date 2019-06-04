@@ -41,6 +41,10 @@ const SEEDS_RELATIVE_PATH = 'seeds/mongodb';
 
 mongoose.Promise = Promise;
 
+// Make Mongoose use `findOneAndUpdate()`. Note that this option is `true`
+// by default, you need to set it to false.
+mongoose.set ('useFindAndModify', false);
+
 const {
   build,
   seed,
