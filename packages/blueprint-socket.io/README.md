@@ -85,7 +85,7 @@ method. You can then use the computed property to emit an event.
 
 ```javascript
 const { Action, Controller } = require ('@onehilltech/blueprint');
-const { io } = require ('../../../../lib');
+const { io } = require ('@onehilltech/blueprint-socket.io');
 
 module.exports = Controller.extend ({
   /// Bound to the insecure Socket.IO connection.
