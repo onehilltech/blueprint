@@ -34,5 +34,9 @@ module.exports = BO.extend ({
 
   visitAndroidClient (android) {
 
+  },
+
+  visitHybridClient (hybrid) {
+
   }
 });

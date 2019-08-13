@@ -30,6 +30,17 @@ const SCHEMA_NATIVE_CLIENT = {
   }
 };
 
+const SCHEMA_HYBRID_CLIENT = {
+  client_secret: {
+    in: 'body',
+    isLength: {
+      options: { min: 1 },
+      errorMessage: 'This field is required.'
+    }
+  }
+};
+
+
 const SCHEMA_ANDROID_CLIENT = merge ({
   package: {
     in: 'body',
@@ -100,6 +111,10 @@ module.exports = BO.extend ({
 
       visitNativeClient () {
         this.schema = SCHEMA_NATIVE_CLIENT;
+      },
+
+      visitHybridClient () {
+        this.schema = SCHEMA_HYBRID_CLIENT;
       },
 
       visitAndroidClient () {

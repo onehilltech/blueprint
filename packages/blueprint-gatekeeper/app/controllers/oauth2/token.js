@@ -62,6 +62,10 @@ const ValidateClientVisitor = ModelVisitor.extend ({
       this.promise = Promise.reject (new BadRequestError ('invalid_secret', 'The client secret is not valid.'));
   },
 
+  visitHybridClient (client) {
+    this.visitNativeClient (client);
+  },
+
   visitAndroidClient (client) {
     // For an Android client, we need to authenticate the secret, and
     // make sure the package name matches the package of the client.
