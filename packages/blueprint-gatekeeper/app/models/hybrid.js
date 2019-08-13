@@ -52,7 +52,7 @@ schema.pre ('validate', function () {
 });
 
 schema.methods.accept = function (v) {
-  v.visitNativeClient (this);
+  v.visitHybridClient (this);
 };
 
-module.exports = Client.discriminator ('native', schema);
+module.exports = Client.discriminator ('hybrid', schema);
