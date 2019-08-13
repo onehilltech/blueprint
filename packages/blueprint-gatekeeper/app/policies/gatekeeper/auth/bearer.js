@@ -150,7 +150,7 @@ module.exports = Policy.extend ({
         return { failureCode: 'token_expired', failureMessage: 'The access token has expired.'};
 
       if (err.name === 'JsonWebTokenError')
-        err = new ForbiddenError ('invalid_token', err.message);
+        return { failureCode: 'invalid_token', failureMessage: err.message};
 
       return Promise.reject (err);
     });
