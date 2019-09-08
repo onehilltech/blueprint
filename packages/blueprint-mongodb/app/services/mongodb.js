@@ -184,19 +184,13 @@ module.exports = Service.extend ({
     });
   },
 
-  _clearConnection (name, conn) {
-    debug (`clearing the data on connection ${name}`);
-
-    return clear (conn);
-  },
-
   /**
    * Seed a connection.
    *
    * @private
    */
   seedConnection (name, conn, opts) {
-    const { clearBeforeSeeding = true } = opts;
+    const { clearBeforeSeeding = [] } = opts;
 
     // When seeding a connection, we always build a new data model. This
     // is because we need to generate new ids for all model elements.
@@ -204,7 +198,7 @@ module.exports = Service.extend ({
     debug (`seeding database connection ${name}`);
 
     return this._buildSeed (name)
-      .then (data => !!data ? (clearBeforeSeeding ? this._clearConnection (name, conn) : Promise.resolve ())
+      .then (data => !!data ? (!!clearBeforeSeeding ? this._clearConnection (name, conn, clearBeforeSeeding) : Promise.resolve ())
         .then (() => seed (conn, data)) : null)
       .then (models => {
         this._seeds[name] = models;
@@ -214,6 +208,21 @@ module.exports = Service.extend ({
 
         return models;
       });
+  },
+
+  /**
+   * Clear the data on a connection.
+   *
+   * @param name
+   * @param conn
+   * @param models
+   * @return {Promise<void>}
+   * @private
+   */
+  _clearConnection (name, conn, models = []) {
+    debug (`clearing data on connection ${name}`);
+
+    return clear (conn, models);
   },
 
   /**

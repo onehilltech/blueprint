@@ -32,7 +32,7 @@ module.exports = Listener.extend ({
     debug ('seeding all database connections');
 
     const opts = {
-      clearBeforeSeeding: true
+      clearBeforeSeeding: []
     };
 
     const seeding = mapValues (mongodb.connections, (conn, name) => mongodb.seedConnection (name, conn, opts));
