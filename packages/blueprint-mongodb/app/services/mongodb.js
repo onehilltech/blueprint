@@ -128,13 +128,6 @@ module.exports = Service.extend ({
     return this.closeConnections (true);
   },
 
-  seedConnections () {
-    debug ('seeding all database connections');
-
-    const seeding = mapValues (this._connections, (conn, name) => this._seedConnection (name, conn));
-    return Bluebird.props (seeding);
-  },
-
   /**
    * Create a new connection.
    *
@@ -171,7 +164,7 @@ module.exports = Service.extend ({
    * @returns {*}
    */
   openConnection (name, opts) {
-    let {uri,seed,options} = opts;
+    let {uri, seed: seedData, options, clear: clearBeforeSeeding = true} = opts;
     debug (`opening connection ${name}`);
 
     let conn = this._connections[name];
@@ -186,9 +179,15 @@ module.exports = Service.extend ({
 
     return conn.openUri (uri, options).then (conn => {
       return this.emit ('open', name, conn)
-        .then (() => seed ? this._seedConnection (name, conn) : null)
+        .then (() => seedData ? this.seedConnection (name, conn, clearBeforeSeeding) : null)
         .then (() => conn);
     });
+  },
+
+  _clearConnection (name, conn) {
+    debug (`clearing the data on connection ${name}`);
+
+    return clear (conn);
   },
 
   /**
@@ -196,29 +195,25 @@ module.exports = Service.extend ({
    *
    * @private
    */
-  _seedConnection (name, conn, rebuild = false) {
+  seedConnection (name, conn, opts) {
+    const { clearBeforeSeeding = true } = opts;
+
     // When seeding a connection, we always build a new data model. This
     // is because we need to generate new ids for all model elements.
 
-    return this._buildSeed (name).then (data => {
-      // First, clear the connection. The seed the connection with the models. Last,
-      // store the models in the seeds.
-      debug (`clearing models on connection ${name}`);
+    debug (`seeding database connection ${name}`);
 
-      return clear (conn).then (() => {
-        debug (`seeding database connection ${name}`);
-        return data ? seed (conn, data) : null;
-      }).then (models => {
-        debug (`database connection ${name} has been seeded`);
-
+    return this._buildSeed (name)
+      .then (data => !!data ? (clearBeforeSeeding ? this._clearConnection (name, conn) : Promise.resolve ())
+        .then (() => seed (conn, data)) : null)
+      .then (models => {
         this._seeds[name] = models;
 
-        debug (`sending notification that ${name} has been seeded`);
+        if (!!models)
+          this.emit ('seeded', name, conn, models);
 
-        this.emit ('seeded', name, conn, models);
         return models;
       });
-    });
   },
 
   /**

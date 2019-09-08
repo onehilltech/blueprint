@@ -16,14 +16,26 @@
 
 const blueprint = require ('@onehilltech/blueprint');
 const { Listener } = blueprint;
+const { mapValues } = require ('lodash');
 
-const debug = require ('debug') ('blueprint-mongodb:listeners:seed');
+const debug = require ('debug') ('blueprint-mongodb:listeners:blueprint.test.start:seed');
+
+const Bluebird = require ('bluebird');
 
 module.exports = Listener.extend ({
   handleEvent () {
-    debug ('seeding database connections');
-
     let mongodb = blueprint.lookup ('service:mongodb');
-    return mongodb.seedConnections ();
+
+    if (!mongodb)
+      return;
+
+    debug ('seeding all database connections');
+
+    const opts = {
+      clearBeforeSeeding: true
+    };
+
+    const seeding = mapValues (mongodb.connections, (conn, name) => mongodb.seedConnection (name, conn, opts));
+    return Bluebird.props (seeding);
   }
 });
