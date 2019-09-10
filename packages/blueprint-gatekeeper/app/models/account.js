@@ -17,6 +17,8 @@
 const bcrypt  = require ('bcrypt');
 const mongodb = require ('@onehilltech/blueprint-mongodb');
 
+const { isEmail } = require ('validator');
+
 const options = require ('./-common-options') ();
 options.softDelete = true;
 
@@ -30,7 +32,7 @@ let schema = new mongodb.Schema ({
   password: { type: String, required: true, hidden: true},
 
   /// Contact email address for the account.
-  email: { type: String, required: true, unique: true, trim: true},
+  email: { type: String, required: true, unique: true, trim: true, lowercase: true, validate: [isEmail, 'Not a valid email address.']},
 
   /// Enabled state for the account.
   enabled: { type: Boolean, required: true, default: true },
