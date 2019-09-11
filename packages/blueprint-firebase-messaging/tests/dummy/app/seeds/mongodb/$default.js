@@ -31,7 +31,7 @@ module.exports = Seed.extend ({
 
       accounts: dab.times (5, function (i) {
         const username = `account${i}`;
-        return { username: username, password: username, email: `${username}@.no-reply.com`};
+        return { username: username, password: username, email: `${username}@no-reply.com`};
       }),
 
       client_tokens: dab.map (dab.get ('native'), function (client) {
