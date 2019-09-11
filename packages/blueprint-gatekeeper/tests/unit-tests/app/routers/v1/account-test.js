@@ -56,7 +56,7 @@ describe ('app | routers | account', function () {
     context ('POST', function () {
       const data = { username: 'tester1', password: '1aBcDeFg', email: 'JAMES@ONEHILLTECH.COM' };
 
-      it.only ('should create a new account with new id', function () {
+      it ('should create a new account with new id', function () {
         return request ()
           .post ('/v1/accounts')
           .send ({account: data})
@@ -261,7 +261,7 @@ describe ('app | routers | account', function () {
           .expect (403, { errors: [{ status: '403', code: 'invalid_scope', detail: 'This request does not have a valid scope.' }] });
       });
 
-      it.only ('should not create an account [invalid email]', function () {
+      it ('should not create an account [invalid email]', function () {
         const account = { username: 'tester1', password: 'tester1', email: 'invalid'};
 
         return request ()
