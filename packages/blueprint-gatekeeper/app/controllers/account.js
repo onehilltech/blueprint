@@ -41,7 +41,8 @@ module.exports = ResourceController.extend ({
       'account.email': {
         in: ['body'],
         errorMessage: 'Not a valid email address.',
-        isEmail: true
+        isEmail: true,
+        normalizeEmail: true
       }
     };
 
@@ -49,7 +50,8 @@ module.exports = ResourceController.extend ({
       schema['account.username'] = {
         in: ['body'],
         errorMessage: 'Not a valid email address.',
-        isEmail: true
+        isEmail: true,
+        normalizeEmail: true
       }
     }
 

@@ -54,9 +54,9 @@ describe ('app | routers | account', function () {
     });
 
     context ('POST', function () {
-      const data = { username: 'tester1', password: '1aBcDeFg', email: 'james@onehilltech.com' };
+      const data = { username: 'tester1', password: '1aBcDeFg', email: 'JAMES@ONEHILLTECH.COM' };
 
-      it ('should create a new account with new id', function () {
+      it.only ('should create a new account with new id', function () {
         return request ()
           .post ('/v1/accounts')
           .send ({account: data})
@@ -71,7 +71,10 @@ describe ('app | routers | account', function () {
                 enabled: true,
                 scope: [],
                 username: data.username,
-                email: data.email,
+
+                // the email address should be normalized
+                email: data.email.toLowerCase (),
+
                 verification: {
                   required: false
                 }
