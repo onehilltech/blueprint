@@ -17,6 +17,7 @@
 const bcrypt  = require ('bcrypt');
 const mongodb = require ('@onehilltech/blueprint-mongodb');
 
+const { gatekeeper } = require ('@onehilltech/blueprint').app.configs;
 const { isEmail } = require ('validator');
 
 const options = require ('./-common-options') ();
@@ -24,7 +25,11 @@ options.softDelete = true;
 
 const SALT_WORK_FACTOR = 10;
 
-let schema = new mongodb.Schema ({
+const {
+  usernameIsEmail = false
+} = gatekeeper;
+
+let definition = {
   /// Username for the account.
   username: { type: String, required: true, unique: true, index: true },
 
@@ -51,7 +56,16 @@ let schema = new mongodb.Schema ({
     /// The ip-address where the verification was initiated.
     ip_address: {type: String}
   }
-}, options);
+};
+
+if (usernameIsEmail) {
+  // The username is an email address. Transform to the email address to
+  // lower case, and validate the string is an email address.
+  definition.username.lowercase = true;
+  definition.username.validate = [isEmail, 'Not a valid email address.']
+}
+
+let schema = new mongodb.Schema (definition, options);
 
 /**
  * Hash the user's password before saving it to the database. This will

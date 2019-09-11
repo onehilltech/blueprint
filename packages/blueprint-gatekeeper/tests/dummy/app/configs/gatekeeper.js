@@ -44,5 +44,7 @@ module.exports = {
       secret: 'ssshhh',
       issuer: 'gatekeeper'
     }
-  }
+  },
+
+  usernameIsEmail: false
 };
