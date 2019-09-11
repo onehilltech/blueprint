@@ -17,8 +17,10 @@
 const discriminatorKey = 'type';
 const options = require ('./-common-options') ({discriminatorKey});
 const mongodb = require ('@onehilltech/blueprint-mongodb');
-const { isEmpty, findIndex } = require ('lodash');
 const moment = require ('moment');
+
+const { isEmpty, findIndex } = require ('lodash');
+const { isEmail } = require ('validator');
 
 const {
   Schema: {
@@ -37,7 +39,7 @@ let schema = new mongodb.Schema ({
   name: {type: String, required: true, trim: true},
 
   /// Contact email address for the client.
-  email: {type: String, required: true, trim: true},
+  email: {type: String, required: true, trim: true, lowercase: true, validate: [isEmail, 'Not a valid email address.']},
 
   /// Enabled state of the client.
   enabled: {type: Boolean, default: true, required: true},
