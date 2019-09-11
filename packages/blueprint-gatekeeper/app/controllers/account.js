@@ -34,8 +34,30 @@ module.exports = ResourceController.extend ({
   Model: model ('account'),
 
   create () {
+    const { gatekeeper } = this.app.configs;
+    const { usernameIsEmail = false } = gatekeeper;
+
+    let schema = {
+      'account.email': {
+        in: ['body'],
+        errorMessage: 'Not a valid email address.',
+        isEmail: true
+      }
+    };
+
+    if (usernameIsEmail) {
+      schema['account.username'] = {
+        in: ['body'],
+        errorMessage: 'Not a valid email address.',
+        isEmail: true
+      }
+    }
+
     return this._super.call (this, ...arguments).extend ({
       session: service (),
+
+      // Extend the default schema.
+      schema,
 
       init () {
         this._super.call (this, ...arguments);

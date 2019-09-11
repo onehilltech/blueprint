@@ -257,6 +257,25 @@ describe ('app | routers | account', function () {
           .withClientToken (1)
           .expect (403, { errors: [{ status: '403', code: 'invalid_scope', detail: 'This request does not have a valid scope.' }] });
       });
+
+      it.only ('should not create an account [invalid email]', function () {
+        const account = { username: 'tester1', password: 'tester1', email: 'invalid'};
+
+        return request ()
+            .post ('/v1/accounts')
+            .send ({account: account})
+            .withClientToken (1)
+            .expect (400, { errors: [{ status: '400', code: 'validation_failed', detail: 'The request validation failed.', meta: {
+              validation: {
+                'account.email': {
+                  location: 'body',
+                  msg: 'Not a valid email address.',
+                  param: 'account.email',
+                  value: 'invalid'
+                }
+              }
+            } }] });
+      });
     });
 
     describe ('/authenticate', function () {
