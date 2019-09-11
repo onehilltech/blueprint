@@ -15,9 +15,9 @@
  */
 
 module.exports = {
-  protocols: {
-    http: {
-      port: 8080
+  connections: {
+    insecure: {
+      protocol: 'http', port: 8080
     }
   },
 
