@@ -35,16 +35,10 @@ module.exports = ResourceController.extend ({
 
   create () {
     return this._super.call (this, ...arguments).extend ({
-      gatekeeper: service (),
-
-      _tokenGenerator: null,
-      _refreshTokenGenerator: null,
+      session: service (),
 
       init () {
         this._super.call (this, ...arguments);
-
-        this._tokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:access_token');
-        this._refreshTokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:refresh_token');
       },
 
       prepareDocument (req, doc) {
@@ -99,18 +93,13 @@ module.exports = ResourceController.extend ({
         if (!login)
           return result;
 
-        req.gatekeeperClient = req.user;
-        req.account = result.account;
+        const { origin } = req;
 
-        let tokenController = this.controller.app.lookup ('controller:oauth2.token');
-        const password = get (tokenController, 'granters.password');
-
-        return password.createToken (req)
-          .then (accessToken => accessToken.serialize (this._tokenGenerator, this._refreshTokenGenerator))
-          .then (accessToken => {
-            result.token = Object.assign ({token_type: 'Bearer'}, accessToken);
-            return result;
-          });
+        // The user making the request is a client. We can just directly access the client id
+        // from the
+        return this.session.issueToken (req.user, result.account, { origin })
+            .then (token => this.session.serializeToken (token))
+            .then (token => Object.assign (result, {token}));
       }
     });
   },

@@ -15,7 +15,7 @@
  */
 
 const { Service, model, ForbiddenError, BadRequestError } = require ('@onehilltech/blueprint');
-const { union } = require ('lodash');
+const { union, get } = require ('lodash');
 
 const {
   Types: { ObjectId }
@@ -125,12 +125,17 @@ module.exports = Service.extend ({
       .then (token => Object.assign ({token_type: 'Bearer'}, token));
   },
 
-  _findClient (clientId) {
+  _findClient (client) {
     // We need to locate the account for the username, and check that the
     // provided password is correct. We also need to make sure the account
     // has not been disabled before we create the token.
 
-    return this.Client.findById (clientId).then (client => {
+    const collectionName = get (client, 'collection.name');
+
+    if (collectionName === 'gatekeeper_clients')
+      return Promise.resolve (client);
+
+    return this.Client.findById (client).then (client => {
       if (!client)
         return Promise.reject (new BadRequestError ('invalid_client', 'The client does not exist.'));
 
