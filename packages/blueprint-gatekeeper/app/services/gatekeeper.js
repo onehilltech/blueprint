@@ -45,10 +45,6 @@ const BUILTIN_TOKEN_GENERATORS = {
   }
 };
 
-function accountIdGenerator (account) {
-  return Promise.resolve (account._id || new ObjectId ())
-}
-
 /**
  * @class GatekeeperService
  *
@@ -94,8 +90,6 @@ module.exports = Service.extend ({
       results[granter.name] = granter;
     }, {});
   },
-
-  accountIdGenerator,
 
   /**
    * Parse the configuration, and initialize the service.
@@ -178,14 +172,5 @@ module.exports = Service.extend ({
    */
   verifyToken (token, opts = {}) {
     return this._tokenGenerator.verifyToken (token, opts);
-  },
-
-  /**
-   * Generate the id for an account.
-   *
-   * @param account
-   */
-  generateIdForAccount (account) {
-    return this.accountIdGenerator.call (null, account);
   }
 });

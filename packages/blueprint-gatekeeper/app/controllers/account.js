@@ -57,6 +57,7 @@ module.exports = ResourceController.extend ({
 
     return this._super.call (this, ...arguments).extend ({
       session: service (),
+      account: service (),
 
       // Extend the default schema.
       schema,
@@ -70,7 +71,14 @@ module.exports = ResourceController.extend ({
         if (doc._id)
           delete doc._id;
 
-        return doc;
+        // Allow the application to create its own id for the account. This is useful if the
+        // application needs to assign an existing id to an account. We do not have to worry
+        // about duplicate account ids.
+        return this.prepareId (doc);
+      },
+
+      prepareId (doc) {
+         return this.account.prepareId (doc);
       },
 
       createModel (req, doc) {
