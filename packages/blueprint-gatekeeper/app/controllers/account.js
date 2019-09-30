@@ -78,7 +78,7 @@ module.exports = ResourceController.extend ({
       },
 
       prepareId (doc) {
-         return this.account.prepareId (doc);
+        return this.account.prepareId (doc);
       },
 
       createModel (req, doc) {
@@ -94,17 +94,15 @@ module.exports = ResourceController.extend ({
             // Extract the index that caused the duplicate key error. This will determine
             // the best course of action for correcting the problem.
 
-            const [, field] = err.message.match (/index:\s+(\w+)_\d+/);
+            const [, field] = err.message.match (/index:\s+(\w+)_\d*/);
 
             // Since we got a duplicate exception, this means an account with either the
             // username or email address already exists. Let's attempt to restore the
             // account if the account is deleted.
 
-            const selection = {email: doc.email, username: doc.username, '_stat.deleted_at': {$exists: true}};
+            const selection = {[field]: doc[field], '_stat.deleted_at': {$exists: true}};
+
             const update = {
-              $set: {
-                'verification.required': true
-              },
               $unset: {
                 '_stat.deleted_at': ''
               }
@@ -130,8 +128,8 @@ module.exports = ResourceController.extend ({
         // The user making the request is a client. We can just directly access the client id
         // from the
         return this.session.issueToken (req.user, result.account, { origin })
-            .then (token => this.session.serializeToken (token))
-            .then (token => Object.assign (result, {token}));
+          .then (token => this.session.serializeToken (token))
+          .then (token => Object.assign (result, {token}));
       }
     });
   },
