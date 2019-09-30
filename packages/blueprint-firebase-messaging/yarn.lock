@@ -25,10 +25,10 @@
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-gatekeeper@^0.96.6":
-  version "0.96.6"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-gatekeeper/-/blueprint-gatekeeper-0.96.6.tgz#cc98edadd9372149c7d3304d9904511ee20cc3d5"
-  integrity sha512-WgH2xW3kd598mSc4xquuH2vjLhTHTF8DlWk1qsw3GTrmKyYVyyiZIwNLNxfmUtRYAsaejnKszAgERVa/FnLMSw==
+"@onehilltech/blueprint-gatekeeper@^0.97.0":
+  version "0.97.0"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-gatekeeper/-/blueprint-gatekeeper-0.97.0.tgz#0ab54142371d08152271c72c5c08b2ad12ffe6db"
+  integrity sha512-v91IQle9zkvlT19Vy9HSjfJWt4oXZfo4kcQTu3BSexA/Yq0ttFJSz7MDc+cQSRo7xxcBKegM//nTSQuhfumgYQ==
   dependencies:
     "@onehilltech/blueprint-mongodb" "^1.11.0"
     bcrypt "^2.0.1"
