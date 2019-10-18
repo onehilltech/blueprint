@@ -68,6 +68,9 @@ module.exports = Controller.extend ({
       execute (req, res) {
         const {email} = req.body;
 
+        if (!req.user.password_reset_url)
+          return Promise.reject (new ForbiddenError ('no_password_reset', 'This client is not allowed to reset passwords.'));
+
         return this.controller.Account.findOne ({email})
           .then (account => {
             if (!account)
@@ -80,7 +83,7 @@ module.exports = Controller.extend ({
 
             return this.controller.tokenGenerator.generateToken (payload)
               .then (token => {
-                this.emit ('gatekeeper.password.forgot', account, token);
+                this.emit ('gatekeeper.password.forgot', req.user, account, token);
               });
           })
           .then (() => {

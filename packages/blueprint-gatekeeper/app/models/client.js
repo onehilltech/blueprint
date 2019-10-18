@@ -62,6 +62,10 @@ let schema = new mongodb.Schema ({
 
   /// The expiration time for token of this client.
   expiration: {type: String},
+
+  /// The url for resetting the password. If this is not present, then the
+  /// client does not support resetting a user's password.
+  password_reset_url: {type: String}
 }, options);
 
 

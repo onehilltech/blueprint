@@ -68,7 +68,7 @@ module.exports = Listener.extend ({
     get () { return !!this._gatekeeperConfig.email }
   }),
 
-  handleEvent (account, token) {
+  handleEvent (client, account, token) {
     if (!this.hasEmail)
       return;
 
@@ -79,7 +79,7 @@ module.exports = Listener.extend ({
       },
       locals: defaultsDeep ({
         appName: this._appConfig.name,
-        url: this._gatekeeperConfig['reset-password'].url,
+        url: client.password_reset_url,
         email: account.email,
         token
       }, {style: DEFAULT_STYLE})

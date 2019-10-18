@@ -15,17 +15,14 @@
  */
 
 const {
-  policies: { all }
+  Policy
 } = require ('@onehilltech/blueprint');
 
-module.exports = {
-  '/password': {
-    '/forgot': {
-      policy: 'gatekeeper.auth.bearer',
-      post: 'password@forgotPassword',
-    },
-    '/reset': {
-      post: 'password@resetPassword'
-    },
+module.exports = Policy.extend ({
+  failureCode: 'no_password_reset',
+  failureMessage: 'The client cannot reset the password.',
+
+  runCheck (req) {
+    return !!req.user.password_reset_url;
   }
-};
+});

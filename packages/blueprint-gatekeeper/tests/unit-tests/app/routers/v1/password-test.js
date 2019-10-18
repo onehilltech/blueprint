@@ -19,18 +19,18 @@ const blueprint = require ('@onehilltech/blueprint');
 const { seed, Types: { ObjectId } } = require ('@onehilltech/blueprint-mongodb');
 const { request } = require ('@onehilltech/blueprint-testing');
 
-describe ('app | routers | password', function () {
+describe.only ('app | routers | password', function () {
   function getTokenGenerator () {
     const gatekeeper = blueprint.lookup ('service:gatekeeper');
     return gatekeeper.getTokenGenerator ('gatekeeper:password_reset');
   }
 
   describe ('/v1/password/forgot', function () {
-    it ('should initiate forgot password sequence', function () {
+    it.only ('should initiate forgot password sequence', function () {
       let {accounts} = seed ('$default');
       const account = accounts[0];
 
-      blueprint.app.once ('gatekeeper.password.forgot', (acc, token) => {
+      blueprint.app.once ('gatekeeper.password.forgot', (client, acc, token) => {
         expect (acc.id).to.eql (account.id);
 
         let payload = getTokenGenerator ().verifyTokenSync (token);
@@ -39,8 +39,20 @@ describe ('app | routers | password', function () {
 
       return request ()
         .post ('/v1/password/forgot')
+        .withClientToken (0)
         .send ({email: account.email})
         .expect (200, 'true');
+    });
+
+    it ('should not allow the client to reset password', function () {
+      let {accounts} = seed ('$default');
+      const account = accounts[0];
+
+      return request ()
+        .post ('/v1/password/forgot')
+        .withClientToken (1)
+        .send ({email: account.email})
+        .expect (403, {errors:[{code: "no_password_reset", detail: "This client is not allowed to reset passwords.", status: "403"}]});
     });
   });
 

@@ -29,7 +29,8 @@ module.exports = Seed.extend ({
           name: 'gatekeeper-android',
           client_secret: 'gatekeeper-android',
           email: 'james@onehilltech.com',
-          scope: ['gatekeeper.account.create']
+          scope: ['gatekeeper.account.create'],
+          password_reset_url: 'http://localhost:4200/auth/reset-password'
         }
       ],
 
