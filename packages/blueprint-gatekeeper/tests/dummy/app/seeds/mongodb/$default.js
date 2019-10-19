@@ -144,7 +144,8 @@ module.exports = Seed.extend ({
 
       client_tokens: [
         { client: dab.ref ('native.0'), scope: ['gatekeeper.account.create']},
-        { client: dab.ref ('native.0'), scope: ['dummy']}
+        { client: dab.ref ('native.0'), scope: ['dummy']},
+        { client: dab.ref ('native.1'), scope: ['dummy']}
       ],
 
       books: [

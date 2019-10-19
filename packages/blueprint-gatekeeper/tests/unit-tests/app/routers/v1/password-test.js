@@ -26,7 +26,7 @@ describe.only ('app | routers | password', function () {
   }
 
   describe ('/v1/password/forgot', function () {
-    it.only ('should initiate forgot password sequence', function () {
+    it ('should initiate forgot password sequence', function () {
       let {accounts} = seed ('$default');
       const account = accounts[0];
 
@@ -39,18 +39,18 @@ describe.only ('app | routers | password', function () {
 
       return request ()
         .post ('/v1/password/forgot')
-        .withClientToken (0)
+        .withClientToken (2)
         .send ({email: account.email})
         .expect (200, 'true');
     });
 
-    it ('should not allow the client to reset password', function () {
+    it.only ('should not allow the client to reset password', function () {
       let {accounts} = seed ('$default');
       const account = accounts[0];
 
       return request ()
         .post ('/v1/password/forgot')
-        .withClientToken (1)
+        .withClientToken (2)
         .send ({email: account.email})
         .expect (403, {errors:[{code: "no_password_reset", detail: "This client is not allowed to reset passwords.", status: "403"}]});
     });

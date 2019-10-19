@@ -25,11 +25,12 @@
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-mongodb@^1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.11.0.tgz#b2dacf3a7f19149c71c4d992d2492fbedcf9ad3a"
+"@onehilltech/blueprint-mongodb@^1.11.1":
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-1.11.1.tgz#55bb33069af57a21dbe1504a404eddc6d8ebe001"
+  integrity sha512-XL96Jl6Dle3Bn4r8OrCHFrIFI1ARHZvrj/7Kj4LTF82cYNTN98i6xhlmFiKICKdT2Y7h8Y8qIaSnivLrj8xFZg==
   dependencies:
-    "@onehilltech/blueprint" "^4.5.4"
+    "@onehilltech/blueprint" "^4.5.5"
     "@onehilltech/dab" "^1.3.1"
     moment "^2.22.2"
 
@@ -43,9 +44,10 @@
     path "^0.12.7"
     supertest "^3.1.0"
 
-"@onehilltech/blueprint@^4.5.4":
-  version "4.5.4"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.5.4.tgz#22bd51636c33e09691f714b3db62e29b0d90088b"
+"@onehilltech/blueprint@^4.5.5":
+  version "4.5.5"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.5.5.tgz#a099d089e4a657494878d237ff364c925a708bee"
+  integrity sha512-2nSLyHtakygz6eF4gkWilrUTkOceJYI0vAYBBAXKTnmG6B1+EYQdr9+K/0YNWLolvTP1b+GD+yvimEJwtZxfUA==
   dependencies:
     "@onehilltech/blueprint-cli-exts" "^1.2.2"
     base-object "^1.1.1"
