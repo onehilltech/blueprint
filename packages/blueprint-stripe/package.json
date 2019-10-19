@@ -9,7 +9,7 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.5.4",
+    "@onehilltech/blueprint": "^4.5.5",
     "@onehilltech/blueprint-cli": "^1.2.0",
     "stripe": "^6.12.1"
   },
