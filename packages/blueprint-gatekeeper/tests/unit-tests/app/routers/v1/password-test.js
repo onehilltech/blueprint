@@ -39,12 +39,12 @@ describe.only ('app | routers | password', function () {
 
       return request ()
         .post ('/v1/password/forgot')
-        .withClientToken (2)
+        .withClientToken (0)
         .send ({email: account.email})
         .expect (200, 'true');
     });
 
-    it.only ('should not allow the client to reset password', function () {
+    it ('should not allow the client to reset password', function () {
       let {accounts} = seed ('$default');
       const account = accounts[0];
 
