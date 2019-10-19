@@ -32,14 +32,12 @@ class ResourceDescriptor extends PropertyDescriptor {
   defineProperty (obj, name) {
     const framework = require ('../-framework');
     const serviceName = this.name || name;
-    const service = framework.lookup (`${this.type}:${serviceName}`);
+    const rcName = `${this.type}:${serviceName}`;
 
     Object.defineProperty (obj, name, {
-      writable: false,
-      value: service
+      get ( ) { return framework.lookup (rcName); }
     });
   }
 }
 
 module.exports = ResourceDescriptor;
-
