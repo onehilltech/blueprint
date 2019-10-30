@@ -1,7 +1,8 @@
 const { Service, computed } = require ('@onehilltech/blueprint');
 
 const Sequelize  = require ('sequelize');
-const { forOwn } = require ('lodash');
+const { forOwn, mapValues } = require ('lodash');
+const Bluebird = require ('bluebird');
 
 /**
  * @class sequelize
@@ -64,5 +65,9 @@ module.exports = Service.extend ({
 
   model (name, o) {
 
+  },
+
+  start () {
+    return Bluebird.props (mapValues (this._connections, connection => connection.authenticate ()));
   }
 });
