@@ -15,7 +15,7 @@
  */
 
 module.exports = {
-  '/project': {
+  '/projects': {
     resource: {
       controller: 'project'
     }

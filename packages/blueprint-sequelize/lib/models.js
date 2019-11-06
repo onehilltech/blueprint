@@ -24,7 +24,22 @@ function model (name, schema, options) {
   const Model = class extends Sequelize.Model { };
   const immutableOptions = { modelName: name, sequelize: defaultConnection };
 
+  const M = Model.init (schema, Object.assign ({}, options, immutableOptions));
+
+  Object.defineProperty (schema.options, 'resource', { enumerable: true, writable: false, value: true });
+
+  return M;
+}
+
+function resource (name, schema, options) {
+  const sequelize = blueprint.lookup ('service:sequelize');
+  const defaultConnection = sequelize.defaultConnection;
+
+  const Model = class extends Sequelize.Model { };
+  const immutableOptions = { modelName: name, sequelize: defaultConnection, resource: true };
+
   return Model.init (schema, Object.assign ({}, options, immutableOptions));
 }
 
-module.exports = model;
+exports.model = model;
+exports.resource = resource;

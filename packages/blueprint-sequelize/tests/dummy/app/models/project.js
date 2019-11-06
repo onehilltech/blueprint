@@ -17,11 +17,15 @@
 const Sequelize = require ('../../../../lib');
 
 const schema = {
+  id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+
   title: Sequelize.STRING,
 
   description: Sequelize.TEXT
 };
 
-module.exports = Sequelize.model ('project', schema);
+module.exports = Sequelize.resource ('project', schema, {
+  timestamps: false
+});
 
 

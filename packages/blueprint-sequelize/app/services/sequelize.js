@@ -68,6 +68,6 @@ module.exports = Service.extend ({
   },
 
   start () {
-    return Bluebird.props (mapValues (this._connections, connection => connection.authenticate ()));
+    return Bluebird.props (mapValues (this._connections, connection => connection.authenticate ().then (() => connection.sync ())));
   }
 });

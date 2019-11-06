@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-const { ResourceController, model } = require ('@onehilltech/blueprint');
+const {  model } = require ('@onehilltech/blueprint');
+const { ResourceController } = require ('../../../../lib');
 
 module.exports = ResourceController.extend ({
   name: 'project',

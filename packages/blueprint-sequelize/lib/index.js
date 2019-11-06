@@ -17,4 +17,12 @@
 const Sequelize = require ('sequelize');
 module.exports = exports = Sequelize;
 
-exports.model = require ('./model');
+const {
+  model,
+  resource
+} = require ('./models');
+
+exports.model = model;
+exports.resource = resource;
+exports.ResourceController = require ('./resource-controller');
+
