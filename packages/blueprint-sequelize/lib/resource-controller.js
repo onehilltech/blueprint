@@ -23,6 +23,7 @@ const {
   Action,
   ResourceController,
   HttpError,
+  NotFoundError,
   computed
 } = require ('@onehilltech/blueprint');
 
@@ -79,6 +80,10 @@ module.exports = ResourceController.extend ({
   /// Compute the plural name for the resource.
   plural: computed ({
     get () { return this.Model.options.name.plural; }
+  }),
+
+  primaryKey: computed ({
+    get () { return this.Model.primaryKeyField; }
   }),
 
   /**
@@ -456,7 +461,7 @@ module.exports = ResourceController.extend ({
        */
       execute (req, res) {
         const id = req.params[this.controller.resourceId];
-        let update = this.controller._getUpdateFromBody (req.body[this.controller.name]);
+        const update = Object.assign (req.body[this.controller.name]);
 
         // Allow the subclass to override the contents in both the update and
         // options variable.
@@ -474,9 +479,6 @@ module.exports = ResourceController.extend ({
                 return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
 
               this.emit (this.eventName, model);
-
-              // Set the headers for the response.
-              res.set (LAST_MODIFIED, model.last_modified.toUTCString ());
 
               return this.postUpdateModel (req, model);
             })
@@ -521,13 +523,10 @@ module.exports = ResourceController.extend ({
       },
 
       updateModel (req, id, update, options) {
-        if (this.controller._softDelete) {
-          const selection = { _id: id, '_stat.deleted_at': {$exists: false}};
-          return this.controller.Model.findOneAndUpdate (selection, update, options);
-        }
-        else {
-          return this.controller.Model.findByIdAndUpdate (id, update, options);
-        }
+        const { Model } = this.controller;
+        const where = {[this.controller.primaryKey]: id};
+
+        return Model.findOne ({where}).then (model => !!model ? model.update (update) : Promise.reject (new NotFoundError ('not_found', 'The resource does not exist.')));
       },
 
       /**
@@ -828,36 +827,5 @@ module.exports = ResourceController.extend ({
       prefix += '.';
 
     return `${prefix}${this.name}.${action}`;
-  },
-
-  /**
-   * Get the update object from the body.
-   *
-   * @param body
-   * @returns {{}}
-   * @private
-   */
-  _getUpdateFromBody (body) {
-    let update = {};
-
-    let $set = {};
-    let $unset = {};
-
-    forOwn (body, (value, name) => {
-      if (value !== null)
-        $set[name] = value;
-      else
-        $unset[name] = 1;
-    });
-
-    // Include the $set and $unset properties only if there are updates
-    // associated with either one.
-    if (Object.keys ($set).length !== 0)
-      update.$set = $set;
-
-    if (Object.keys ($unset).length !== 0)
-      update.$unset = $unset;
-
-    return update;
   }
 });
