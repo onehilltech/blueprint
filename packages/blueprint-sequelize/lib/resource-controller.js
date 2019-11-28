@@ -191,10 +191,6 @@ module.exports = ResourceController.extend ({
 
       createModel (req, doc) {
         const Model = this.controller.getModelForDocument (doc);
-
-        // Restrict the creation to only the supplied fields.
-        const fields = Object.keys (doc);
-
         return Model.create (doc, { fields } );
       },
 
