@@ -235,14 +235,15 @@ module.exports = ResourceController.extend ({
 
         const preparations = [
           this.getFilter (req, query),
+          this.getInclude (req),
           this.getProjection (req),
           this.getOptions (req, options)
         ];
 
         return Promise.all (preparations)
-          .then (([filter, projection, options]) => {
+          .then (([filter, include, projection, options]) => {
             return Promise.resolve (this.preGetModels (req))
-              .then (() => this.getModels (req, filter, projection, options))
+              .then (() => this.getModels (req, filter, include, projection, options))
               .then (models => {
                 // There was nothing found. This is not the same as having an empty
                 // model set returned from the query.
@@ -295,6 +296,10 @@ module.exports = ResourceController.extend ({
         return filter;
       },
 
+      getInclude (req) {
+        return null;
+      },
+
       getProjection () {
         return {};
       },
@@ -307,7 +312,7 @@ module.exports = ResourceController.extend ({
         return null;
       },
 
-      getModels (req, filter, projection, options) {
+      getModels (req, filter, include, projection, options) {
         const directives = req.query._ || {};
         const { deleted } = directives;
 
@@ -319,7 +324,7 @@ module.exports = ResourceController.extend ({
         if (!deleted && this.controller._softDelete)
           filter['_stat.deleted_at'] = {$exists: false};
 
-        return this.controller.Model.findAll ({ attributes, where: filter });
+        return this.controller.Model.findAll ({ include, attributes, where: filter });
       },
 
       postGetModels (req, models) {
@@ -358,13 +363,14 @@ module.exports = ResourceController.extend ({
         const preparations = [
           this.getId (req, id),
           this.getProjection (req),
+          this.getInclude (req),
           this.getOptions (req, options)
         ];
 
         return Promise.all (preparations)
-          .then (([id, projection, options]) => {
+          .then (([id, projection, include, options]) => {
             return Promise.resolve (this.preGetModel (req))
-              .then (() => this.getModel (req, id, projection, options))
+              .then (() => this.getModel (req, id, projection, include, options))
               .then (models => {
                 // There was nothing found. This is not the same as having an empty
                 // model set returned from the query.
@@ -400,6 +406,10 @@ module.exports = ResourceController.extend ({
         return id;
       },
 
+      getInclude (req) {
+        return null;
+      },
+
       getProjection () {
         return {};
       },
@@ -412,10 +422,11 @@ module.exports = ResourceController.extend ({
         return null;
       },
 
-      getModel (req, id, projection, options) {
+      getModel (req, id, projection, include, options) {
         const { primaryKeyField } = this.controller.Model;
 
         return this.controller.Model.findAll ({
+          include,
           where: {
             [primaryKeyField]: id,
           }
