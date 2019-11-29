@@ -191,7 +191,7 @@ module.exports = ResourceController.extend ({
 
       createModel (req, doc) {
         const Model = this.controller.getModelForDocument (doc);
-        return Model.create (doc, { fields } );
+        return Model.create (doc);
       },
 
       postCreateModel (req, result) {
