@@ -42,6 +42,9 @@ let schema = new Schema ({
   /// is usable until it has been revoked.
   expiration: {type: Date},
 
+  /// User-defined payload added to the access token.
+  payload: { type: Schema.Types.Mixed },
+
   usage: {
     /// Current number of times the access token has been used.
     current: { type: Number, required: true, default: 0 },

@@ -36,7 +36,7 @@ const schema = new Schema ({ }, options);
 schema.methods.serialize = function (tokenGenerator) {
   return props ({
     access_token: (() => {
-      const payload = { scope: this.scope };
+      const payload = Object.assign ({}, this.payload,{ scope: this.scope });
       const options = { jwtid: this.id };
 
       if (this.expiration)
@@ -53,7 +53,7 @@ schema.methods.serialize = function (tokenGenerator) {
 schema.methods.serializeSync = function (tokenGenerator) {
   return {
     access_token: (() => {
-      const payload = { scope: this.scope };
+      const payload = Object.assign ({}, this.payload,{ scope: this.scope });
       const options = { jwtid: this.id };
 
       if (this.expiration)

@@ -19,7 +19,7 @@ const blueprint = require ('@onehilltech/blueprint');
 const { seed } = require ('@onehilltech/blueprint-mongodb');
 
 
-describe ('app | services | session', function () {
+describe.only ('app | services | session', function () {
   describe ('issueToken', function () {
     it ('should issue an user token', function () {
       const {
@@ -27,13 +27,16 @@ describe ('app | services | session', function () {
         native: [client]
       } = seed ();
 
+      const payload = { admin: true};
+
       let session = blueprint.lookup ('service:session');
 
-      return session.issueToken (client.id, account).then (token => {
+      return session.issueToken (client.id, account, { payload }).then (token => {
         expect (token.type).to.equal ('user_token');
         expect (token.enabled).to.equal (true);
         expect (token.client).to.eql (client._id);
         expect (token.account).to.eql (account._id);
+        expect (token.payload).to.eql (payload);
       });
     });
   });
@@ -45,9 +48,11 @@ describe ('app | services | session', function () {
         native: [client]
       } = seed ();
 
+      const payload = { admin: true};
+
       let session = blueprint.lookup ('service:session');
 
-      return session.issueToken (client.id, account)
+      return session.issueToken (client.id, account, { payload })
         .then (token => session.serializeToken (token))
         .then (json => {
           expect (json).to.have.keys (['token_type', 'access_token', 'refresh_token']);

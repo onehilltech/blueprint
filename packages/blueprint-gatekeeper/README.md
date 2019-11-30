@@ -102,16 +102,16 @@ will need to define the `Authorization` header and include a generated token.
 
 ### Accessing the Authorized User
 
-The `req.user` property contains the account model for an authorized user making
+The `req.user` property contains the account models for an authorized user making
 the request to access a protected route. For example, here is an example of setting
 the user making the request as the owner of a created resource.
 
 ```javascript
-const { model } = require ('@onehilltech/blueprint');
+const { models } = require ('@onehilltech/blueprint');
 const { ResourceController } = require ('@onehilltech/blueprint-mongodb');
 
 module.exports = ResourceController.extend ({
-  Model: model ('tweet'),
+  Model: models ('tweet'),
   
   create () {
     return this._super (this, ...arguments).extend ({

@@ -54,7 +54,7 @@ schema.methods.serialize = function (tokenGenerator, refreshTokenGenerator) {
 
   return props ({
     access_token: (() => {
-      const payload = { scope: this.scope };
+      const payload = Object.assign ({}, this.payload,{ scope: this.scope });
       const options = { jwtid: this.id };
 
       if (this.expiration)
@@ -89,8 +89,8 @@ schema.methods.serializeSync = function (tokenGenerator, refreshTokenGenerator) 
 
   return  {
     access_token: (() => {
-      let payload = { scope: this.scope };
-      let options = { jwtid: this.id };
+      const payload = Object.assign ({}, this.payload,{ scope: this.scope });
+      const options = { jwtid: this.id };
 
       if (this.expiration)
         payload.exp = Math.floor (this.expiration.getTime () / 1000);
