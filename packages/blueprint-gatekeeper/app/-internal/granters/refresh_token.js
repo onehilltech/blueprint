@@ -119,6 +119,7 @@ module.exports = Granter.extend ({
             account: accessToken.account._id,
             scope  : accessToken.scope,
             origin : accessToken.origin,
+            payload: accessToken.payload,
             refresh_token: new ObjectId ()
           };
 
