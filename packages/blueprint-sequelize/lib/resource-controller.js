@@ -226,12 +226,19 @@ module.exports = ResourceController.extend ({
         if (query._)
           delete query._;
 
+        // The include query parameter is a special parameter. Let's remove it from the
+        // query so the model does not process it.
+        let { include } = query;
+
+        if (!!include)
+          delete query.include;
+
         // Prepare the filter, projection, and options for the request
         // against the database.
 
         const preparations = [
           this.getFilter (req, query),
-          this.getInclude (req),
+          this.getInclude (req, include),
           this.getProjection (req),
           this.getOptions (req, options)
         ];
@@ -292,7 +299,7 @@ module.exports = ResourceController.extend ({
         return filter;
       },
 
-      getInclude (req) {
+      getInclude (req, include) {
         return null;
       },
 
