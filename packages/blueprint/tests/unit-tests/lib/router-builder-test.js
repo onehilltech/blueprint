@@ -245,9 +245,9 @@ describe ('lib | RouterBuilder', function () {
         let requests = [
           request (app).post ('/users').expect (200, {method: 'create'}),
           request (app).get ('/users').expect (200, {method: 'getAll'}),
-          request (app).get ('/users/1').expect (200, {method: 'getOne', id: 1}),
-          request (app).put ('/users/1').expect (200, {method: 'update', id: 1}),
-          request (app).delete ('/users/1').expect (200, {method: 'delete', id: 1})
+          request (app).get ('/users/1').expect (200, {method: 'getOne', id: '1'}),
+          request (app).put ('/users/1').expect (200, {method: 'update', id: '1'}),
+          request (app).delete ('/users/1').expect (200, {method: 'delete', id: '1'})
         ];
 
         return Promise.all (requests);
@@ -271,7 +271,7 @@ describe ('lib | RouterBuilder', function () {
 
         let requests = [
           request (app).post ('/users').expect (404),
-          request (app).get ('/users/1').expect (200, {method: 'getOne', id: 1})
+          request (app).get ('/users/1').expect (200, {method: 'getOne', id: '1'})
         ];
 
         return Promise.all (requests);
