@@ -58,21 +58,21 @@ const schema = mongodb.Schema ({
   last_name : {type: String, required: true, trim: true}
 });
 
-module.exports = mongodb.model ('person', schema, 'blueprint_people');
+module.exports = mongodb.models ('person', schema, 'blueprint_people');
 ```
 
 All models are defined on the default connection unless stated otherwise. To define
-a model on a different connection, use the `modelOn()` function where the first parameter
+a models on a different connection, use the `modelOn()` function where the first parameter
 is the name of the connection as defined in `mongodb.js` followed by the same parameters for 
-the `model()` function.
+the `models()` function.
 
 ## Resources
 
 ### Resource Model
 
-A resource model is a model that includes an extra `_stats` property that details when the
+A resource models is a models that includes an extra `_stats` property that details when the
 resource is created and updated. Both fields are managed automatically. You define a resource
-model similar to how you define a regular model. Instead of using the `model()` function, you
+models similar to how you define a regular models. Instead of using the `models()` function, you
 use the `resource()` function. 
 
 ```javascript
@@ -92,8 +92,8 @@ module.exports = mongodb.resource ('person', schema, 'blueprint_people');
 
 ### Soft Deletes
 
-A soft delete is when the model is marked as deleted, but remains in the database. This is 
-important if you want to still access the model in references. Soft delete is only available
+A soft delete is when the models is marked as deleted, but remains in the database. This is 
+important if you want to still access the models in references. Soft delete is only available
 on resource models.
 
 You add soft delete to a resource by setting the `softDelete` option to `true` when you are
@@ -108,7 +108,7 @@ const schema = mongodb.Schema ({
 module.exports = mongodb.resource ('person', schema, 'blueprint_people');
 ```
 
-Now, when the `person` resource model is created, the `_stat` property will contain a 
+Now, when the `person` resource models is created, the `_stat` property will contain a 
 `deleted_at` property. This property will be managed internally by the resource controller.
 
 ### Resource Controller
@@ -120,15 +120,15 @@ can be used as-is, or extended to add domain-specific customizations.
 
 ```javascript
 const { ResourceController } = require ('@onehilltech/blueprint-mongodb');
-const { model } = require ('@onehilltech/blueprint');
+const { models } = require ('@onehilltech/blueprint');
 
 /**
  * @class PersonController 
  * 
- * Resource controller for the person resource model.
+ * Resource controller for the person resource models.
  */
 module.exports = ResourceController.extend ({
-  model: model ('person')
+  models: models ('person')
 });
 ```
 
@@ -171,20 +171,20 @@ passed to the `ResourceController` constructor.
 
 Each method in the `ResourceController` returns an action that can be extended to add
 domain-specific behavior. For example, you may want to do pre and post processing before
-and after the model is created, respectively. It is as simple as extending the action
+and after the models is created, respectively. It is as simple as extending the action
 in your subclass of the `ResourceController`, and overloading the appropriate methods.
 
 ```javascript
 const { ResourceController } = require ('@onehilltech/blueprint-mongodb');
-const { model } = require ('@onehilltech/blueprint');
+const { models } = require ('@onehilltech/blueprint');
 
 /**
  * @class PersonController 
  * 
- * Resource controller for the person resource model.
+ * Resource controller for the person resource models.
  */
 module.exports = ResourceController.extend ({
-  model: model ('person'),
+  models: models ('person'),
   
   create () {
     return this._super.call (this, ...arguments).extend ({
@@ -204,7 +204,7 @@ their order of execution.
   * **prepareDocument (req, doc)**
   * **preCreateModel (req)**
   * **createModel (req, doc)**
-  * **postCreateModel (req, model)**
+  * **postCreateModel (req, models)**
   * **prepareResponse (req, res, result)**
   
 * **`getOne`**
@@ -213,7 +213,7 @@ their order of execution.
   * **getOptions (req, options)**
   * **preGetModel (req)**
   * **getModel (req, id, projection, options)**
-  * **postGetModel (req, model)**
+  * **postGetModel (req, models)**
   * **prepareResponse (req, res, result)**
   
 * **`getAll`**
@@ -231,15 +231,15 @@ their order of execution.
   * **getOptions (req, options)**
   * **preUpdateModel (req)**
   * **updateModel (req, id, update, options)**
-  * **postUpdateModel (req, model)**
+  * **postUpdateModel (req, models)**
   * **prepareResponse (req, res, result)**
   
 * **`delete`**
   * **getId (req, id)**
   * **preDeleteModel (req)**
   * **deleteModel (req, id)**
-  * **postDeleteModel (req, model)**
-  * **prepareResponse (req, res, model, result)**
+  * **postDeleteModel (req, models)**
+  * **prepareResponse (req, res, models, result)**
   
 * **`count`**
   * **getFilter (req, filter)**
