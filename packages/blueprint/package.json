@@ -30,7 +30,7 @@
     "node-mime": "^1.0.0",
     "passport": "^0.4.1",
     "pluralize": "^8.0.0",
-    "require-all": "^2.2.0",
+    "require-all": "^3.0.0",
     "semver": "^6.3.0",
     "winston": "^3.2.1"
   },
