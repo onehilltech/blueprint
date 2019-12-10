@@ -17,11 +17,11 @@ html(lang="en")
             form.form
                 div.form-group
                     label(for="title") Title
-                    input#title.form-control(type="text", name="title", placeholder="Type title here", ng-model="message.title")
+                    input#title.form-control(type="text", name="title", placeholder="Type title here", ng-models="message.title")
 
                 div.form-group
                     label(for="content") Message
-                    textarea#message.form-control(name="content", placeholder="Type message here", ng-model="message.content")
+                    textarea#message.form-control(name="content", placeholder="Type message here", ng-models="message.content")
 
                 button.btn.btn-default(type="submit", ng-click="postMessage()") Post Message
 

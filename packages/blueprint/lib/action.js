@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { BO } = require ('base-object');
+const { BO, computed } = require ('base-object');
 
 /**
  * @class Action
@@ -60,26 +60,29 @@ module.exports = BO.extend ({
   /// The hosting controller for the action.
   controller: null,
 
+  /// Quick access to the application.
+  app: computed.alias ('controller.app'),
+
   /// @{ Events
 
   emit () {
-    return this.controller.app.emit (...arguments);
+    return this.app.emit (...arguments);
   },
 
   on () {
-    return this.controller.app.on (...arguments);
+    return this.app.on (...arguments);
   },
 
   once () {
-    return this.controller.app.once (...arguments);
+    return this.app.once (...arguments);
   },
 
   hasListeners (ev) {
-    return this.controller.app.hasListeners (ev);
+    return this.app.hasListeners (ev);
   },
 
   getListeners (ev) {
-    return this.controller.app.getListeners (ev);
+    return this.app.getListeners (ev);
   }
 
   /// @}
