@@ -25,7 +25,6 @@ const schema = {
 };
 
 module.exports = Sequelize.resource ('project', schema, {
-  timestamps: false
 });
 
 

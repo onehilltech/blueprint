@@ -34,6 +34,8 @@ const RESOURCE_ID_PARAMS_SCHEMA = {
   toInt: true
 };
 
+const LAST_MODIFIED = 'Last-Modified';
+
 /**
  * @class DatabaseAction
  *
@@ -79,7 +81,15 @@ module.exports = ResourceController.extend ({
 
   /// Compute the plural name for the resource.
   plural: computed.readonly ('Model.options.name.plural'),
+
+  /// The primary key filed.
   primaryKey: computed.readonly ('Model.primaryKeyField'),
+
+  /// Test if the resource model has timestamps.
+  _hasTimestamps: computed.readonly ('Model.options.timestamps'),
+
+  /// The timestamp fields, if present.
+  _timestampFields: computed.readonly ('Model._timestampAttributes'),
 
   /**
    * @class SingleResourceAction
@@ -376,16 +386,17 @@ module.exports = ResourceController.extend ({
                 if (models.length === 0)
                   return Promise.reject (new HttpError (404, 'not_found', 'Not found'));
 
-                // Get the last modified date. This value needs to be returned in the
-                // response since it represents when this collection of models was last changed.
+                let model = models[0];
 
-                /*
-                res.set ({
-                  [LAST_MODIFIED]: model.last_modified.toUTCString ()
-                });
-                */
+                if (this.controller._hasTimestamps) {
+                  // Get the last modified date. This value needs to be returned in the
+                  // response since it represents when this collection of models was last changed.
 
-                return this.postGetModel (req, models[0]);
+                  let lastModified = this.controller.getLastModified (model);
+                  res.set ({ [LAST_MODIFIED]: lastModified.toUTCString () });
+                }
+
+                return this.postGetModel (req, model);
               })
               .then (data => {
                 if (options.populate) {
@@ -820,6 +831,17 @@ module.exports = ResourceController.extend ({
    */
   getModelForDocument (doc) {
     return this.Model;
+  },
+
+  /**
+   * Get the last time a model was modified.
+   *
+   * @param model
+   * @returns {*}
+   */
+  getLastModified (model) {
+    const { createdAt, updatedAt } = this._timestampFields;
+    return model[updatedAt] || model[createdAt];
   },
 
   /**
