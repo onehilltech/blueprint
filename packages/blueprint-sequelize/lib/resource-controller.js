@@ -78,13 +78,8 @@ module.exports = ResourceController.extend ({
   },
 
   /// Compute the plural name for the resource.
-  plural: computed ({
-    get () { return this.Model.options.name.plural; }
-  }),
-
-  primaryKey: computed ({
-    get () { return this.Model.primaryKeyField; }
-  }),
+  plural: computed.readonly ('Model.options.name.plural'),
+  primaryKey: computed.readonly ('Model.primaryKeyField'),
 
   /**
    * @class SingleResourceAction
