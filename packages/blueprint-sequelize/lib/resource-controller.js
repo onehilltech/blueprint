@@ -265,20 +265,21 @@ module.exports = ResourceController.extend ({
                 if (models.length === 0)
                   return this.postGetModels (req, models);
 
-                // Get the most recent last modified date. This value needs to be returned
-                // in the response since it represents when this collection of models was
-                // last changed.
 
-                /*
-                const lastModifiedTime = models.reduce ((acc, next) => {
-                  let time = next.last_modified.getTime ();
-                  return time > acc ? time : acc;
-                }, models[0].last_modified.getTime ());
+                if (this.controller._hasTimestamps) {
+                  // Get the most recent last modified date. This value needs to be returned
+                  // in the response since it represents when this collection of models was
+                  // last changed.
 
-                res.set ({
-                  [LAST_MODIFIED]: new Date (lastModifiedTime).toUTCString ()
-                });
-                */
+                  const lastModifiedTime = models.reduce ((acc, next) => {
+                    let time = this.controller.getLastModified (next).getTime ();
+                    return time > acc ? time : acc;
+                  }, this.controller.getLastModified (models[0]).getTime ());
+
+                  res.set ({
+                    [LAST_MODIFIED]: new Date (lastModifiedTime).toUTCString ()
+                  });
+                }
 
                 return this.postGetModels (req, models);
               })
