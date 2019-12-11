@@ -175,7 +175,10 @@ module.exports = ResourceController.extend ({
                 // Set the headers for the response. We want to make sure that we support
                 // the caching headers even if they are not being used.
 
-                //res.set (LAST_MODIFIED, result.last_modified.toUTCString ());
+                if (this.controller._hasTimestamps) {
+                  let lastModified = this.controller.getLastModified (result);
+                  res.set (LAST_MODIFIED, lastModified.toUTCString ());
+                }
 
                 return this.postCreateModel (req, result);
               });
