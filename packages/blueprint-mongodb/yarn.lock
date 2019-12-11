@@ -20,13 +20,13 @@
     path "^0.12.7"
     supertest "^3.1.0"
 
-"@onehilltech/blueprint@^4.6.3":
-  version "4.6.3"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.6.3.tgz#4a9d2fd9d38c4a5653f1b1bdcddd8929217d03f1"
-  integrity sha512-DE3pstCdJZ7ciPr7oJvfj1Z0XY9egwmXEuhIdCNYuDGIV39S8P/tq3RNh8w051V3tMAKcFj7pohZdWQikl8v8Q==
+"@onehilltech/blueprint@^4.6.4":
+  version "4.6.4"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.6.4.tgz#6aeb4258d7bf35c12006afdae8fb77f8bf91ecd4"
+  integrity sha512-J/q65PIKTBxsqcVZStTfbblqVRIF4SOGqHQbOVxGmms7QSHySpA/zM2R9EEDY/wwM0K7Kk0ZnOCbPAO0nRi/qQ==
   dependencies:
     "@onehilltech/blueprint-cli-exts" "^1.2.2"
-    base-object "^1.3.1"
+    base-object "^1.4.0"
     body-parser "^1.17.2"
     commander "^4.0.1"
     consolidate "^0.15.0"
@@ -139,10 +139,10 @@ base-object@^1.0.5:
   dependencies:
     lodash "^4.17.10"
 
-base-object@^1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/base-object/-/base-object-1.3.1.tgz#46b29ff23ef36c4f9aa431107ac5cfb25a222ffa"
-  integrity sha512-oQNtmN6BoOtFpDzBfie512BWSEdbR3I3igBwbWJUbaFg/36xxOautMH5g5Wo0OYW+oG1xDVg5Q/DgM5prnWlrQ==
+base-object@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/base-object/-/base-object-1.4.0.tgz#0030e75955aad9cc6dbbb2edc4dd5de4b423931d"
+  integrity sha512-TY0koMB01zPI4yyUz87/UoP+VKlRxNL8McupiEMyNF/ZBloQRyWGZ/d5GO3kJ0OhOMcsZwdF1B5evLD7VVDYDA==
   dependencies:
     lodash "^4.17.10"
 
