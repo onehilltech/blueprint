@@ -1,0 +1,7 @@
+{
+  "name": "blueprint",
+  "private": false,
+  "devDependencies": {
+    "lerna": "^3.18.3"
+  }
+}
