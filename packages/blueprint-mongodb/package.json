@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-mongodb",
   "description": "Blueprint.js module for MongoDB",
-  "version": "1.11.3",
+  "version": "4.7.0",
   "private": false,
   "main": "./lib",
   "keywords": [
@@ -22,12 +22,12 @@
     "url": "https://github.com/onehilltech/blueprint-mongodb.git"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.6.4",
+    "@onehilltech/blueprint": "^4.7.0",
     "@onehilltech/dab": "^1.3.1",
     "moment": "^2.22.2"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^0.8.0",
+    "@onehilltech/blueprint-testing": "^4.7.0",
     "cors": "^2.8.5",
     "istanbul": "^0.4.5"
   },

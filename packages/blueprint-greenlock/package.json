@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-greenlock",
   "description": "A blueprint module for Greenlock (TM).",
-  "version": "0.3.1",
+  "version": "4.7.0",
   "repository": "github:onehilltech/blueprint-greenlock",
   "private": false,
   "main": "./lib",
@@ -13,13 +13,13 @@
     "postpublish": "git push origin master ; git push origin --tags"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.5.4",
+    "@onehilltech/blueprint": "^4.7.0",
     "greenlock": "^2.4.2",
     "le-challenge-dns": "^2.3.2",
     "redirect-https": "^1.1.6"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^0.8.0"
+    "@onehilltech/blueprint-testing": "^4.7.0"
   },
   "license": "Apache-2.0",
   "engines": {

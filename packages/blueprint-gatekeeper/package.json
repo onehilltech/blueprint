@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-gatekeeper",
   "description": "Authentication framework for Web application programming interfaces (APIs)",
-  "version": "0.98.2",
+  "version": "4.7.0",
   "private": false,
   "main": "./lib",
   "license": "Apache-2.0",
@@ -13,7 +13,7 @@
     "url": "https://github.com/onehilltech/blueprint-gatekeeper.git"
   },
   "dependencies": {
-    "@onehilltech/blueprint-mongodb": "^1.11.1",
+    "@onehilltech/blueprint-mongodb": "^4.7.0",
     "bcrypt": "^2.0.1",
     "commander": "^2.11.0",
     "cors": "^2.8.5",
@@ -34,7 +34,7 @@
     "yargs": "^10.0.3"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^0.8.0",
+    "@onehilltech/blueprint-testing": "^4.7.0",
     "coveralls": "^3.0.0",
     "istanbul": "^0.4.3",
     "mocha": "^6.2.0",

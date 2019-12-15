@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-email",
   "description": "Blueprint module for sending emails via mailgun",
-  "version": "0.2.0",
+  "version": "4.7.0",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
@@ -13,7 +13,7 @@
     "uninstall-service": "sudo -s forever-service delete blueprint-email_d"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.5.4",
+    "@onehilltech/blueprint": "^4.7.0",
     "@onehilltech/blueprint-cli": "^1.2.0",
     "email-templates": "^5.0.2",
     "nodemailer": "^5.0.0",
@@ -21,7 +21,7 @@
     "pug": "^2.0.3"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^0.8.0"
+    "@onehilltech/blueprint-testing": "^4.7.0"
   },
   "license": "Apache-2.0",
   "engines": {
