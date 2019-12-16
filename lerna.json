@@ -1,6 +1,6 @@
 {
   "packages": [
-    "packages/*"
+    "packages/blueprint*"
   ],
   "version": "4.10.0"
 }
