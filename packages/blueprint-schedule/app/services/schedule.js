@@ -111,11 +111,35 @@ module.exports = Service.extend ({
   },
 
   _scheduleJob (name, sched, spec) {
-    let job = schedule.scheduleJob (spec, (runAt) => sched.run (runAt));
+    let job = schedule.scheduleJob (spec, (runAt) => {
+      try {
+        // Notify all that the schedule is ready to run. Then, run the job. When the job
+        // is done running, let the application know the job is done. If there is an error,
+        // then we notify all that the job had an error.
+
+        this.app.emit ('blueprint.schedule.job.run', name, sched);
+
+        sched.run (runAt);
+
+        this.app.emit ('blueprint.schedule.job.done', name, sched);
+      }
+      catch (err) {
+        this.app.emit ('blueprint.schedule.job.error', name, sched, err);
+      }
+    });
+
+    // Save the job.
     this._jobs[name] = job;
 
-    job.on ('canceled', () => sched.onCanceled ());
-    job.on ('scheduled', () => sched.onScheduled ());
+    job.on ('canceled', () => {
+      sched.onCanceled ();
+      this.app.emit ('blueprint.schedule.job.canceled', name, sched);
+    });
+
+    job.on ('scheduled', () => {
+      sched.onScheduled ();
+      this.app.emit ('blueprint.schedule.job.scheduled', name, sched);
+    });
 
     return job;
   },

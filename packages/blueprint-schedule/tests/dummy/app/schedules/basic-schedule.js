@@ -1,9 +1,17 @@
 const { Schedule } = require ('../../../../lib');
 
 module.exports = Schedule.extend ({
-  spec: '30 * * * * *',
+  spec: '* * * * * *',
 
   run () {
-    console.log ('We are alive!!')
+    this.didRun = true;
+  },
+
+  onScheduled () {
+    this.didSchedule = true;
+  },
+
+  onCanceled () {
+    this.didCancel = true;
   }
 });
