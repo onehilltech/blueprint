@@ -21,5 +21,6 @@
   },
   "bin": {
     "blueprint": "./bin/blueprint"
-  }
+  },
+  "gitHead": "ba9ce3a4075b59f368fc24768661076f0dbaa03a"
 }

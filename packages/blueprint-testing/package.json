@@ -6,19 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/onehilltech/blueprint-testing.git"
-  },
   "keywords": [
     "blueprint"
   ],
   "author": "One Hill Technologies, LLC",
   "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/onehilltech/blueprint-testing/issues"
-  },
-  "homepage": "https://github.com/onehilltech/blueprint-testing#readme",
   "dependencies": {
     "chai": "^4.1.2",
     "chai-datetime": "^1.5.0",
@@ -26,5 +18,5 @@
     "path": "^0.12.7",
     "supertest": "^3.1.0"
   },
-  "gitHead": "0bf983eb5c7dc631e96909f3e1922fce2bd073bd"
+  "gitHead": "ba9ce3a4075b59f368fc24768661076f0dbaa03a"
 }
