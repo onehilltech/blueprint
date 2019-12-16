@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@onehilltech/blueprint-cli-exts@^4.7.0":
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-cli-exts/-/blueprint-cli-exts-4.7.0.tgz#d51fc368b8b1ae8bd1830b18df0b2cacf61afec0"
-  integrity sha512-KRLDR6X+ed+MWOUnyaIdK9NbcyhMxUBB4Zcpz7iakXzbnt/3TCEpND46n0r5xcueo3PCHkFMs6BrtmTU1X++qw==
+"@onehilltech/blueprint-cli-exts@^4.12.0":
+  version "4.12.0"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-cli-exts/-/blueprint-cli-exts-4.12.0.tgz#5b212f9408592166b209303e833f7d619ec8bbcb"
+  integrity sha512-T9Q5YIBwJPCEQjsHizIZ7OavlH3nY8gFT89yGna8J6b8aJ8Wo7y1s67B4m4KLW7FuP7MtxzH4v3cm7sg2AeBhw==
   dependencies:
     base-object "^1.0.5"
     handlebars "^4.0.11"
