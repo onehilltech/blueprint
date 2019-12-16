@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-schedule",
   "description": "Blueprint.js module for node-schedule",
-  "version": "4.15.1",
+  "version": "4.16.0",
   "main": "./lib",
   "private": false,
   "scripts": {
