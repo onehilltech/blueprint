@@ -3,6 +3,7 @@
   "description": "Blueprint module for sequelize",
   "version": "4.8.0",
   "private": false,
+  "repository": "onehilltech/blueprint",
   "main": "./lib",
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",

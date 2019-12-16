@@ -4,6 +4,7 @@
   "version": "4.8.0",
   "private": false,
   "author": "One Hill Technologies, LLC",
+  "repository": "onehilltech/blueprint",
   "dependencies": {
     "@onehilltech/blueprint-cli-exts": "^1.2.2",
     "bluebird": "^3.5.1",

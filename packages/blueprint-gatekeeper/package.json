@@ -8,10 +8,7 @@
   "keywords": [
     "blueprint-module"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/onehilltech/blueprint-gatekeeper.git"
-  },
+  "repository": "onehilltech/blueprint",
   "dependencies": {
     "@onehilltech/blueprint-mongodb": "^4.8.0",
     "bcrypt": "^2.0.1",
@@ -45,9 +42,7 @@
     "start": "node ./app.js",
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive --reporter spec --exit",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/tests --recursive --exit",
-    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "postversion": "npm publish",
-    "postpublish": "git push origin master ; git push origin --tags"
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "bin": {
     "gatekeeper-setup": "./bin/gatekeeper-setup"

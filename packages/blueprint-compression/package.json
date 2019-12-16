@@ -3,12 +3,11 @@
   "description": "Blueprint add-on for adding compression support to a Blueprint application.",
   "version": "4.8.0",
   "private": false,
+  "repository": "onehilltech/blueprint",
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
-    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "postversion": "npm publish",
-    "postpublish": "git push origin master ; git push origin --tags"
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.8.0",

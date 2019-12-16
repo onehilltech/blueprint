@@ -3,6 +3,7 @@
   "version": "4.8.0",
   "description": "Testing module for BlueprintJS applications",
   "main": "lib/index.js",
+  "repository": "onehilltech/blueprint",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
