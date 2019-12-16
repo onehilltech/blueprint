@@ -3,8 +3,5 @@
   "private": false,
   "devDependencies": {
     "lerna": "^3.19.0"
-  },
-  "scripts": {
-    "version": "lerna clean --yes && lerna exec \"npm install --ignore-scripts --package-lock-only --no-audit\" && git add packages/*/package-lock.json"
   }
 }
