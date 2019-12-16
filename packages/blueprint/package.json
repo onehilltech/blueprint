@@ -8,7 +8,7 @@
   "main": "./lib",
   "repository": "onehilltech/blueprint",
   "dependencies": {
-    "@onehilltech/blueprint-cli-exts": "^4.9.0",
+    "@onehilltech/blueprint-cli-exts": "^4.7.0",
     "base-object": "^1.4.0",
     "body-parser": "^1.17.2",
     "commander": "^4.0.1",
