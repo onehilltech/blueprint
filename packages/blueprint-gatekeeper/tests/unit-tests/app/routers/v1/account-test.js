@@ -151,7 +151,7 @@ describe ('app | routers | account', function () {
                   enabled: true,
                   scope: [],
                   verification: {
-                    required: true
+                    required: false
                   }
                 }
               })

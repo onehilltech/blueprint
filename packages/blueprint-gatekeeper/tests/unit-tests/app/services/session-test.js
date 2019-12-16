@@ -19,7 +19,7 @@ const blueprint = require ('@onehilltech/blueprint');
 const { seed } = require ('@onehilltech/blueprint-mongodb');
 
 
-describe.only ('app | services | session', function () {
+describe ('app | services | session', function () {
   describe ('issueToken', function () {
     it ('should issue an user token', function () {
       const {
