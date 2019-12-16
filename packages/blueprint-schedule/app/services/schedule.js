@@ -5,12 +5,6 @@ const path = require ('path');
 const schedule = require ('node-schedule');
 const bluebird = require ('bluebird');
 
-function scheduleRunner (schedule) {
-  return function (runAt) {
-    schedule.run (runAt);
-  }
-}
-
 /**
  * @class schedule
  */
@@ -56,20 +50,30 @@ module.exports = Service.extend ({
     let promises = mapValues (this._schedules, (sched, key) => {
       debug (`scheduling ${key}`);
 
-      return Promise.resolve (sched.spec)
-        .then (spec => schedule.scheduleJob (spec, scheduleRunner (sched)))
-        .then (job => this._jobs[key] = job);
+      return Promise.resolve (sched.spec).then (spec => this._scheduleJob (key, sched, spec));
     });
 
     return bluebird.props (promises);
   },
 
+  _scheduleJob (name, sched, spec) {
+    let job = schedule.scheduleJob (spec, (runAt) => sched.run (runAt));
+    this._jobs[name] = job;
+
+    job.on ('canceled', () => sched.onCanceled ());
+    job.on ('scheduled', () => sched.onScheduled ());
+
+    return job;
+  },
+
   destroy () {
     // Cancel the loaded schedules in no particular order.
-    forEach (this._jobs, (job, key) => {
-      debug (`canceling ${key}`);
+    forEach (this._jobs, (job, key) => this._cancelJob (key, job));
+  },
 
-      job.cancel ();
-    });
+  _cancelJob (name, job) {
+    debug (`canceling ${name}`);
+
+    job.cancel ();
   }
 });

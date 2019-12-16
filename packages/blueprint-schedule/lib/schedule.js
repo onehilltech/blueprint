@@ -15,16 +15,24 @@ module.exports = BO.extend ({
    * This method can return a Promise, if the specification is derived from something that
    * is computed asynchronously.
    */
-  getSpec () {
-
-  },
+  spec: null,
 
   /**
    * Method called when the scheduled job is run.
    *
-   * @param       timestamp        The actual time the job is run.
+   * @param       runAt        The actual time the job is run.
    */
-  run (timestamp) {
+  run (runAt) {
+
+  },
+
+  /// Notification the task has been scheduled.
+  onScheduled () {
+
+  },
+
+  /// Notification the task has been canceled.
+  onCanceled () {
 
   }
 });
