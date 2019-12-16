@@ -56,6 +56,60 @@ module.exports = Service.extend ({
     return bluebird.props (promises);
   },
 
+  destroy () {
+    // Cancel the loaded schedules in no particular order.
+    forEach (this._jobs, (job, key) => this._cancelJob (key, job));
+  },
+
+  /**
+   * Cancel a job.
+   *
+   * @param name            Name of the job.
+   * @param reschedule      Optional reschedule specification
+   */
+  cancel (name, reschedule) {
+    this._lookupJob (name).cancel (reschedule);
+  },
+
+  /**
+   * Cancel the next schedule for the job
+   *
+   * @param name            Name of the job
+   * @param reschedule      Optional reschedule specification
+   */
+  cancelNext (name, reschedule) {
+    this._lookupJob (name).cancelNext (reschedule);
+  },
+
+  /**
+   * Reschedule an existing job.
+   *
+   *
+   * @param name            Name of the job
+   * @param spec            Reschedule specification
+   */
+  reschedule (name, spec) {
+    this._lookupJob (name).reschedule (spec);
+  },
+
+  /**
+   * Get the next invocation of a job.
+   *
+   * @param name
+   */
+  nextInvocation (name) {
+    return this._lookupJob (name).nextInvocation ();
+  },
+
+  _lookupJob (name) {
+    let job = this._jobs[name];
+
+    if (!!job)
+      return job;
+
+    throw new Error (`The job ${name} does not exist.`);
+  },
+
   _scheduleJob (name, sched, spec) {
     let job = schedule.scheduleJob (spec, (runAt) => sched.run (runAt));
     this._jobs[name] = job;
@@ -64,11 +118,6 @@ module.exports = Service.extend ({
     job.on ('scheduled', () => sched.onScheduled ());
 
     return job;
-  },
-
-  destroy () {
-    // Cancel the loaded schedules in no particular order.
-    forEach (this._jobs, (job, key) => this._cancelJob (key, job));
   },
 
   _cancelJob (name, job) {
