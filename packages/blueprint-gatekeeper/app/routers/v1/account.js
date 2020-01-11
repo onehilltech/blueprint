@@ -30,7 +30,7 @@ module.exports = {
     },
 
     '/authenticate': {
-      post: {action: 'account@authenicate'}
+      post: {action: 'account@authenticate'}
     },
 
     '/:accountId': {

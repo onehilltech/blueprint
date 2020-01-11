@@ -206,7 +206,7 @@ module.exports = ResourceController.extend ({
    * Authenticate an existing account. This method is used to authenticate a
    * user who is currently logged into the system.
    */
-  authenicate () {
+  authenticate () {
     return Action.extend ({
       schema: {
         'authenticate.password': {
