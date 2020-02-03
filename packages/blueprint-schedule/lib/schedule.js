@@ -17,6 +17,10 @@ module.exports = BO.extend ({
    */
   spec: null,
 
+  /// Run the schedule when the service starts if it is the first time it has
+  /// ever been run.
+  runIfFirstTime: false,
+
   /**
    * Method called when the scheduled job is run.
    *

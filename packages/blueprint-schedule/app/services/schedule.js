@@ -4,6 +4,8 @@ const debug = require ('debug')('blueprint-schedule');
 const path = require ('path');
 const schedule = require ('node-schedule');
 const bluebird = require ('bluebird');
+const fs = require('fs-extra');
+const LastTimeRunFile = require ('../../lib/last-time-run-file');
 
 /**
  * @class schedule
@@ -111,22 +113,9 @@ module.exports = Service.extend ({
   },
 
   _scheduleJob (name, sched, spec) {
-    let job = schedule.scheduleJob (spec, (runAt) => {
-      try {
-        // Notify all that the schedule is ready to run. Then, run the job. When the job
-        // is done running, let the application know the job is done. If there is an error,
-        // then we notify all that the job had an error.
-
-        this.app.emit ('blueprint.schedule.job.run', name, sched);
-
-        sched.run (runAt);
-
-        this.app.emit ('blueprint.schedule.job.done', name, sched);
-      }
-      catch (err) {
-        this.app.emit ('blueprint.schedule.job.error', name, sched, err);
-      }
-    });
+    // Schedule the job to run.
+    let lastTimeRunFile = new LastTimeRunFile ({tempPath: this.app.tempPath, name});
+    let job = schedule.scheduleJob (spec, (runAt) => this._run (name, sched, runAt, lastTimeRunFile));
 
     // Save the job.
     this._jobs[name] = job;
@@ -141,7 +130,37 @@ module.exports = Service.extend ({
       this.app.emit ('blueprint.schedule.job.scheduled', name, sched);
     });
 
+
+    if (sched.runIfFirstTime && !lastTimeRunFile.existsSync ())
+      this._run (name, sched, new Date (), lastTimeRunFile);
+
     return job;
+  },
+
+  /**
+   * Helper method that runs a schedule job.
+   *
+   * @param name
+   * @param sched
+   * @param runAt
+   * @private
+   */
+  _run (name, sched, runAt, lastTimeRunFile) {
+    try {
+      // Notify all that the schedule is ready to run. Then, run the job. When the job
+      // is done running, let the application know the job is done. If there is an error,
+      // then we notify all that the job had an error.
+
+      this.app.emit ('blueprint.schedule.job.run', name, sched);
+
+      lastTimeRunFile.updateSync (runAt);
+      sched.run (runAt);
+
+      this.app.emit ('blueprint.schedule.job.done', name, sched);
+    }
+    catch (err) {
+      this.app.emit ('blueprint.schedule.job.error', name, sched, err);
+    }
   },
 
   _cancelJob (name, job) {
