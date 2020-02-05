@@ -61,7 +61,13 @@ schema.methods.serialize = function (tokenGenerator, refreshTokenGenerator) {
         payload.exp = Math.floor (this.expiration.getTime () / 1000);
 
       if (this.origin)
-        options.audience = this.origin;
+        payload.origin = this.origin;
+
+      if (this.audience)
+        options.audience = this.audience;
+
+      if (this.subject)
+        options.subject = this.subject;
 
       return tokenGenerator.generateToken (payload, options);
     })(),
@@ -76,7 +82,13 @@ schema.methods.serialize = function (tokenGenerator, refreshTokenGenerator) {
       const options = { jwtid: this.refresh_token.toString ()};
 
       if (this.origin)
-        options.audience = this.origin;
+        payload.origin = this.origin;
+
+      if (this.audience)
+        options.audience = this.audience;
+
+      if (this.subject)
+        options.subject = this.subject;
 
       return refreshTokenGenerator.generateToken (payload, options);
     })()
@@ -96,7 +108,13 @@ schema.methods.serializeSync = function (tokenGenerator, refreshTokenGenerator) 
         payload.exp = Math.floor (this.expiration.getTime () / 1000);
 
       if (this.origin)
-        options.audience = this.origin;
+        payload.origin = this.origin;
+
+      if (this.audience)
+        options.audience = this.audience;
+
+      if (this.subject)
+        options.subject = this.subject;
 
       return tokenGenerator.generateTokenSync ({ scope: this.scope }, options);
     }) (),
@@ -106,11 +124,18 @@ schema.methods.serializeSync = function (tokenGenerator, refreshTokenGenerator) 
         return undefined;
 
       let options = { jwtid: this.refresh_token.toString () };
+      let payload = {};
 
       if (this.origin)
-        option.audience = this.origin;
+        payload.origin = this.origin;
 
-      return refreshTokenGenerator.generateTokenSync ({}, options);
+      if (this.audience)
+        options.audience = this.audience;
+
+      if (this.subject)
+        options.subject = this.subject;
+
+      return refreshTokenGenerator.generateTokenSync (payload, options);
     }) ()
   };
 };

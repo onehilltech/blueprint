@@ -45,6 +45,12 @@ let schema = new Schema ({
   /// User-defined payload added to the access token.
   payload: { type: Schema.Types.Mixed },
 
+  /// The target audience for the access token.
+  audience: { type: String },
+
+  /// The subject of the access token.
+  subject: { type: String},
+
   usage: {
     /// Current number of times the access token has been used.
     current: { type: Number, required: true, default: 0 },

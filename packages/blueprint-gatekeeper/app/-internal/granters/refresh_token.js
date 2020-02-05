@@ -120,6 +120,8 @@ module.exports = Granter.extend ({
             scope  : accessToken.scope,
             origin : accessToken.origin,
             payload: accessToken.payload,
+            audience: accessToken.audience,
+            subject: accessToken.subject,
             refresh_token: new ObjectId ()
           };
 

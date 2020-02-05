@@ -43,7 +43,13 @@ schema.methods.serialize = function (tokenGenerator) {
         payload.exp = Math.floor (this.expiration.getTime () / 1000);
 
       if (this.origin)
-        options.audience = this.origin;
+        payload.origin = this.origin;
+
+      if (this.audience)
+        options.audience = this.audience;
+
+      if (this.subject)
+        options.subject = this.subject;
 
       return tokenGenerator.generateTokenSync (payload, options);
     })()
@@ -57,10 +63,16 @@ schema.methods.serializeSync = function (tokenGenerator) {
       const options = { jwtid: this.id };
 
       if (this.expiration)
-        payload.exp = this.expiration.getTime () / 1000;
+        payload.exp = Math.floor (this.expiration.getTime () / 1000);
 
       if (this.origin)
-        options.audience = this.origin;
+        payload.origin = this.origin;
+
+      if (this.audience)
+        options.audience = this.audience;
+
+      if (this.subject)
+        options.subject = this.subject;
 
       return tokenGenerator.generateTokenSync (payload, options);
 
