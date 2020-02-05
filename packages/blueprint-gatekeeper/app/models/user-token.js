@@ -107,9 +107,6 @@ schema.methods.serializeSync = function (tokenGenerator, refreshTokenGenerator) 
       if (this.expiration)
         payload.exp = Math.floor (this.expiration.getTime () / 1000);
 
-      if (this.origin)
-        payload.origin = this.origin;
-
       if (this.audience)
         options.audience = this.audience;
 
@@ -125,9 +122,6 @@ schema.methods.serializeSync = function (tokenGenerator, refreshTokenGenerator) 
 
       let options = { jwtid: this.refresh_token.toString () };
       let payload = {};
-
-      if (this.origin)
-        payload.origin = this.origin;
 
       if (this.audience)
         options.audience = this.audience;

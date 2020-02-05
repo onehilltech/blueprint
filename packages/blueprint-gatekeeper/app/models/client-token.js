@@ -42,9 +42,6 @@ schema.methods.serialize = function (tokenGenerator) {
       if (this.expiration)
         payload.exp = Math.floor (this.expiration.getTime () / 1000);
 
-      if (this.origin)
-        payload.origin = this.origin;
-
       if (this.audience)
         options.audience = this.audience;
 
@@ -64,9 +61,6 @@ schema.methods.serializeSync = function (tokenGenerator) {
 
       if (this.expiration)
         payload.exp = Math.floor (this.expiration.getTime () / 1000);
-
-      if (this.origin)
-        payload.origin = this.origin;
 
       if (this.audience)
         options.audience = this.audience;

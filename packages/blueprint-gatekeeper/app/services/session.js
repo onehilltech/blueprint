@@ -15,7 +15,7 @@
  */
 
 const { Service, model, ForbiddenError, BadRequestError } = require ('@onehilltech/blueprint');
-const { union, get } = require ('lodash');
+const { union, get, omit } = require ('lodash');
 
 const {
   Types: { ObjectId }
@@ -117,7 +117,7 @@ module.exports = Service.extend ({
         doc.origin = origin;
 
       if (!!payload)
-        doc.payload = payload;
+        doc.payload = omit (payload, ['origin']);
 
       return this.UserToken.create (doc);
     });
