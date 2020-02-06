@@ -46,12 +46,7 @@ let schema = new mongodb.Schema ({
 
   /// The default scope for the client. The scope is applied to the access
   /// token for the client.
-  scope: {type: [String], default: []},
-
-  /// The client is private. A private client can only be accessed by the user
-  /// associated with the email for this client, and those that appear in the
-  /// whitelist.
-  private: {type: Boolean, default: false},
+  scope: {type: [String]},
 
   /// Accounts allowed to use the client. This list is used when the client
   /// is marked private.
@@ -75,6 +70,15 @@ let schema = new mongodb.Schema ({
 schema.virtual ('client_id').get (function () {
   return this._id;
 });
+
+/**
+ * Test if the client is restricted. A restricted client is one that has an account
+ * in either the allow or deny list.
+ */
+schema.virtual ('restricted').get (function () {
+  return !isEmpty (this.allow) || !isEmpty (this.deny);
+});
+
 
 schema.methods.allowed = function (account) {
   return (isEmpty (this.allow) && isEmpty (this.deny)) ||

@@ -49,9 +49,6 @@ const schema = new mongodb.Schema ({
 }, options);
 
 schema.methods.serialize = function (tokenGenerator, refreshTokenGenerator) {
-  if (!refreshTokenGenerator)
-    return Promise.reject (new Error ('You must provide a refresh token generator.'));
-
   return props ({
     access_token: (() => {
       const payload = Object.assign ({}, this.payload,{ scope: this.scope });
@@ -74,7 +71,7 @@ schema.methods.serialize = function (tokenGenerator, refreshTokenGenerator) {
 
     refresh_token: (() => {
       if (!this.refresh_token)
-        return Promise.resolve (null);
+        return Promise.resolve (undefined);
 
       // Refresh tokens never expire.
 
@@ -84,21 +81,12 @@ schema.methods.serialize = function (tokenGenerator, refreshTokenGenerator) {
       if (this.origin)
         payload.origin = this.origin;
 
-      if (this.audience)
-        options.audience = this.audience;
-
-      if (this.subject)
-        options.subject = this.subject;
-
       return refreshTokenGenerator.generateToken (payload, options);
     })()
   });
 };
 
 schema.methods.serializeSync = function (tokenGenerator, refreshTokenGenerator) {
-  if (!refreshTokenGenerator)
-    throw Error ('You must provide a refresh token generator.');
-
   return  {
     access_token: (() => {
       const payload = Object.assign ({}, this.payload,{ scope: this.scope });
@@ -106,6 +94,9 @@ schema.methods.serializeSync = function (tokenGenerator, refreshTokenGenerator) 
 
       if (this.expiration)
         payload.exp = Math.floor (this.expiration.getTime () / 1000);
+
+      if (this.origin)
+        payload.origin = this.origin;
 
       if (this.audience)
         options.audience = this.audience;
@@ -123,11 +114,8 @@ schema.methods.serializeSync = function (tokenGenerator, refreshTokenGenerator) 
       let options = { jwtid: this.refresh_token.toString () };
       let payload = {};
 
-      if (this.audience)
-        options.audience = this.audience;
-
-      if (this.subject)
-        options.subject = this.subject;
+      if (this.origin)
+        payload.origin = this.origin;
 
       return refreshTokenGenerator.generateTokenSync (payload, options);
     }) ()

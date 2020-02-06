@@ -48,7 +48,7 @@ schema.methods.serialize = function (tokenGenerator) {
       if (this.subject)
         options.subject = this.subject;
 
-      return tokenGenerator.generateTokenSync (payload, options);
+      return tokenGenerator.generateToken (payload, options);
     })()
   });
 };
@@ -69,7 +69,6 @@ schema.methods.serializeSync = function (tokenGenerator) {
         options.subject = this.subject;
 
       return tokenGenerator.generateTokenSync (payload, options);
-
     }) ()
   };
 };

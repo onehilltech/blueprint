@@ -19,10 +19,6 @@ const { get, forOwn, merge, transform } = require ('lodash');
 
 const TokenGenerator = require ('../../lib/token-generator');
 
-const {
-  Types: {ObjectId}
-} = require ('@onehilltech/blueprint-mongodb');
-
 const DEFAULT_BASE_OPTIONS = {
   issuer: 'gatekeeper',
 };
