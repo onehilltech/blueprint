@@ -28,6 +28,9 @@ const Issuer = BlueprintObject.extend ({
     // First, make sure we are able to issue a token for the client. The client must
     // be enabled. It also must not be a private client, which requires a user.
 
+    if (client.is_deleted)
+      return Promise.reject (new Error ('The client no longer exists.'));
+
     if (!client.enabled)
       return Promise.reject (new Error ('The client is disabled.'));
 
@@ -55,8 +58,14 @@ const Issuer = BlueprintObject.extend ({
     // The client and the user must be enabled. If the client is a restricted client, then
     // the user must be allowed to use the client.
 
+    if (client.is_deleted)
+      return Promise.reject (new Error ('The client no longer exists.'));
+
     if (!client.enabled)
       return Promise.reject (new Error ('The client is disabled.'));
+
+    if (account.is_deleted)
+      return Promise.reject (new Error ('The user account no longer exists.'));
 
     if (!account.enabled)
       return Promise.reject (new Error ('The user account is disabled.'));
