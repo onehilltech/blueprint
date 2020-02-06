@@ -40,12 +40,14 @@ describe ('app | services | issuer', function () {
 
           return issuer.verifyToken (access_token);
         })
-        .then (payload => {
-          expect (payload).to.have.keys (['admin', 'scope', 'exp', 'iat', 'iss', 'sub', 'jti']);
-          expect (payload).to.have.property ('admin', true);
-          expect (payload).to.have.deep.property ('scope', []);
-          expect (payload).to.have.property ('iss', 'gatekeeper');
-          expect (payload).to.have.property ('sub', 'unit-test');
+        .then (accessToken => {
+          expect (accessToken.type).to.equal ('client_token');
+          expect (accessToken.client).to.eql (client._id);
+          expect (accessToken.scope).to.eql ([]);
+          expect (accessToken.subject).to.equal ('unit-test');
+          expect (accessToken.issuer).to.equal ('gatekeeper');
+          expect (accessToken.payload).to.eql ({admin: true});
+          expect (accessToken).to.have.property ('expiration');
         });
     });
 
@@ -110,12 +112,15 @@ describe ('app | services | issuer', function () {
             undefined
           ]);
         })
-        .then (([payload]) => {
-          expect (payload).to.have.keys (['admin', 'scope', 'exp', 'iat', 'iss', 'sub', 'jti']);
-          expect (payload).to.have.property ('admin', false);
-          expect (payload).to.have.deep.property ('scope', []);
-          expect (payload).to.have.property ('iss', 'gatekeeper');
-          expect (payload).to.have.property ('sub', 'unit-test');
+        .then (([accessToken]) => {
+          expect (accessToken.type).to.equal ('user_token');
+          expect (accessToken.client).to.eql (client._id);
+          expect (accessToken.account).to.eql (account._id);
+          expect (accessToken.scope).to.eql ([]);
+          expect (accessToken.subject).to.equal ('unit-test');
+          expect (accessToken.issuer).to.equal ('gatekeeper');
+          expect (accessToken.payload).to.eql ({admin: false});
+          expect (accessToken).to.have.property ('expiration');
         });
     });
 
@@ -141,20 +146,19 @@ describe ('app | services | issuer', function () {
 
           return Promise.all ([
             issuer.verifyToken (access_token),
-            issuer.verifyToken (refresh_token)
+            issuer.verifyRefreshToken (refresh_token)
           ]);
         })
-        .then (([access, refresh]) => {
-          expect (access).to.have.keys (['admin', 'scope', 'exp', 'iat', 'iss', 'sub', 'jti']);
-          expect (refresh).to.have.keys (['iat', 'iss', 'sub', 'jti']);
+        .then (([accessToken, refreshToken]) => {
+          expect (accessToken.client).to.eql (client._id);
+          expect (accessToken.account).to.eql (account._id);
+          expect (accessToken.scope).to.eql ([]);
+          expect (accessToken.subject).to.equal ('unit-test');
+          expect (accessToken.issuer).to.equal ('gatekeeper');
+          expect (accessToken.payload).to.eql ({admin: false});
+          expect (accessToken).to.have.property ('expiration');
 
-          expect (access).to.have.property ('admin', false);
-          expect (access).to.have.deep.property ('scope', []);
-          expect (access).to.have.property ('iss', 'gatekeeper');
-          expect (access).to.have.property ('sub', 'unit-test');
-
-          expect (refresh).to.have.property ('iss', 'gatekeeper');
-          expect (refresh).to.have.property ('sub', 'refresh');
+          expect (accessToken.lean ()).to.eql (refreshToken.lean ());
         });
     });
 
@@ -180,20 +184,19 @@ describe ('app | services | issuer', function () {
 
           return Promise.all ([
             issuer.verifyToken (access_token),
-            issuer.verifyToken (refresh_token)
+            issuer.verifyRefreshToken (refresh_token)
           ]);
         })
-        .then (([access, refresh]) => {
-          expect (access).to.have.keys (['admin', 'scope', 'iat', 'iss', 'sub', 'jti']);
-          expect (refresh).to.have.keys (['iat', 'iss', 'sub', 'jti']);
+        .then (([accessToken, refreshToken]) => {
+          expect (accessToken.client).to.eql (client._id);
+          expect (accessToken.account).to.eql (account._id);
+          expect (accessToken.scope).to.eql ([]);
+          expect (accessToken.subject).to.equal ('unit-test');
+          expect (accessToken.issuer).to.equal ('gatekeeper');
+          expect (accessToken.payload).to.eql ({admin: false});
+          expect (accessToken).to.have.property ('expiration');
 
-          expect (access).to.have.property ('admin', false);
-          expect (access).to.have.deep.property ('scope', []);
-          expect (access).to.have.property ('iss', 'gatekeeper');
-          expect (access).to.have.property ('sub', 'unit-test');
-
-          expect (refresh).to.have.property ('iss', 'gatekeeper');
-          expect (refresh).to.have.property ('sub', 'refresh');
+          expect (accessToken.lean ()).to.eql (refreshToken.lean ());
         });
     });
 

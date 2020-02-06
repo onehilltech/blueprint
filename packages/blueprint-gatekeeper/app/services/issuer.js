@@ -1,5 +1,6 @@
-const { Service, model, service, BlueprintObject } = require ('@onehilltech/blueprint');
+const { Service, BlueprintObject } = require ('@onehilltech/blueprint');
 const { Types: { ObjectId }} = require ('@onehilltech/blueprint-mongodb');
+const { union } = require ('lodash');
 const moment = require ('moment');
 
 /**
@@ -11,11 +12,8 @@ const Issuer = BlueprintObject.extend ({
   /// The token generator used for the issuer to generate/verify tokens.
   tokenGenerator: null,
 
-  /// Reference to the user token model.
-  UserToken: null,
-
-  /// Reference to the client token model.
-  ClientToken: null,
+  /// Reference to the access token model.
+  AccessToken: null,
 
   /**
    * Issue a client token.
@@ -42,7 +40,8 @@ const Issuer = BlueprintObject.extend ({
     doc = this._initTokenDocument (doc, opts || {});
     doc = this._initTokenExpiration (doc, client, opts || {});
 
-    return this.ClientToken.create (doc).then (clientToken => clientToken.serialize (this.tokenGenerator));
+    const { discriminators: { client_token: ClientToken }} = this.AccessToken;
+    return ClientToken.create (doc).then (clientToken => clientToken.serialize (this.tokenGenerator));
   },
 
   /**
@@ -74,7 +73,9 @@ const Issuer = BlueprintObject.extend ({
       return Promise.reject (new Error ('The user account is not allowed to access this client.'));
 
     // Initialize the user token document.
-    let doc = { account, client, scope : client.scope, payload };
+
+    let scope = union (client.scope, account.scope, opts.scope);
+    let doc = { account, client, scope, payload };
     doc = this._initTokenDocument (doc, opts || {});
     doc = this._initTokenExpiration (doc, client, opts || {});
 
@@ -88,7 +89,8 @@ const Issuer = BlueprintObject.extend ({
       refreshTokenGenerator = this.tokenGenerator.extend ({ options: opts.refreshable});
     }
 
-    return this.UserToken.create (doc).then (userToken => userToken.serialize (this.tokenGenerator, refreshTokenGenerator));
+    const { discriminators: { user_token: UserToken }} = this.AccessToken;
+    return UserToken.create (doc).then (userToken => userToken.serialize (this.tokenGenerator, refreshTokenGenerator));
   },
 
   /**
@@ -98,7 +100,19 @@ const Issuer = BlueprintObject.extend ({
    * @returns A promise that resolves the payload in the token.
    */
   verifyToken (token, opts) {
-    return this.tokenGenerator.verifyToken (token, opts);
+    return this.tokenGenerator.verifyToken (token, opts)
+      .then (payload => this.AccessToken.findById (payload.jti));
+  },
+
+  /**
+   * Verify a refresh token.
+   *
+   * @param token
+   * @param opts
+   */
+  verifyRefreshToken (token, opts) {
+    return this.tokenGenerator.verifyToken (token, opts)
+      .then (payload => this.AccessToken.findOne ({refresh_token: new ObjectId (payload.jti)}));
   },
 
   /**
@@ -118,6 +132,9 @@ const Issuer = BlueprintObject.extend ({
 
     if (!!opts.subject)
       doc.subject = opts.subject;
+
+    if (!!this.tokenGenerator.options.issuer)
+      doc.issuer = this.tokenGenerator.options.issuer;
 
     return doc;
   },
@@ -191,7 +208,7 @@ module.exports = Service.extend ({
   },
 
   /**
-   * Verify an JSON web token.
+   * Verify a JSON web token.
    *
    * @param token
    * @returns A promise that resolves the payload in the token.
@@ -201,15 +218,23 @@ module.exports = Service.extend ({
   },
 
   /**
+   * Verify a JSON web token used for refreshing.
+   *
+   * @param token
+   * @returns {*}
+   */
+  verifyRefreshToken (token, opts) {
+    return this._defaultIssuer.verifyRefreshToken (token, opts);
+  },
+
+  /**
    * Factory method for creating new issuer objects.
    *
    * @param tokenGenerator
    * @private
    */
   _makeIssuerForTokenGenerator (tokenGenerator) {
-    const UserToken = this.app.lookup ('model:user-token');
-    const ClientToken = this.app.lookup ('model:client-token');
-
-    return new Issuer ({tokenGenerator, UserToken, ClientToken})
+    const AccessToken = this.app.lookup ('model:access-token');
+    return new Issuer ({tokenGenerator, AccessToken })
   }
 });

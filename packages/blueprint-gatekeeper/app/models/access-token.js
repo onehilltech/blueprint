@@ -45,6 +45,9 @@ let schema = new Schema ({
   /// User-defined payload added to the access token.
   payload: { type: Schema.Types.Mixed },
 
+  /// The issuer of the token.
+  issuer: { type: String },
+
   /// The target audience for the access token.
   audience: { type: String },
 
