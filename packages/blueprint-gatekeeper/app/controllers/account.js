@@ -124,12 +124,11 @@ module.exports = ResourceController.extend ({
           return result;
 
         const { origin } = req;
+        const payload = {};
+        const options = { origin, refreshable: true };
 
-        // The user making the request is a client. We can just directly access the client id
-        // from the
-        return this.session.issueToken (req.user, result.account, { origin })
-          .then (token => this.session.serializeToken (token))
-          .then (token => Object.assign (result, {token}));
+        return this.session.issueToken (req.user, result.account, payload, options)
+          .then (token => Object.assign (result, { token: Object.assign ({}, token, { token_type: 'Bearer' }) }));
       }
     });
   },

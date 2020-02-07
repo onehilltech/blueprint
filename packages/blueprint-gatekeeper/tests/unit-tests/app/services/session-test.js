@@ -31,32 +31,14 @@ describe ('app | services | session', function () {
 
       let session = blueprint.lookup ('service:session');
 
-      return session.issueToken (client.id, account, { payload }).then (token => {
-        expect (token.type).to.equal ('user_token');
-        expect (token.enabled).to.equal (true);
-        expect (token.client).to.eql (client._id);
-        expect (token.account).to.eql (account._id);
-        expect (token.payload).to.eql (payload);
+      return session.issueToken (client.id, account, { payload }).then (result => {
+        expect (result).to.have.keys (['access_token', 'refresh_token']);
+
+        const { access_token, refresh_token } = result;
+
+        expect (access_token.split ('.').length).to.equal (3);
+        expect (refresh_token).to.be.undefined;
       });
-    });
-  });
-
-  describe ('serializeToken', function () {
-    it ('should create a json object from the token', function () {
-      const {
-        accounts: [account],
-        native: [client]
-      } = seed ();
-
-      const payload = { admin: true};
-
-      let session = blueprint.lookup ('service:session');
-
-      return session.issueToken (client.id, account, { payload })
-        .then (token => session.serializeToken (token))
-        .then (json => {
-          expect (json).to.have.keys (['token_type', 'access_token', 'refresh_token']);
-        });
     });
   });
 });

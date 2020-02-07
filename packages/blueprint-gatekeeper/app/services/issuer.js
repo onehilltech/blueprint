@@ -102,7 +102,8 @@ const Issuer = BlueprintObject.extend ({
   verifyToken (token, opts) {
     return this.tokenGenerator.verifyToken (token, opts)
       .then (payload => this.AccessToken.findById (payload.jti).populate ('client account').exec ())
-      .then (accessToken => this._checkAccessToken (accessToken, opts));
+      .then (accessToken => this._checkAccessToken (accessToken, opts))
+      .catch (this._handleTokenError.bind (this));
   },
 
   /**
@@ -114,7 +115,26 @@ const Issuer = BlueprintObject.extend ({
   verifyRefreshToken (token, opts) {
     return this.tokenGenerator.verifyToken (token, opts)
       .then (payload => this.AccessToken.findOne ({refresh_token: new ObjectId (payload.jti)}).populate ('client account').exec ())
-      .then (accessToken => this._checkAccessToken (accessToken, opts));
+      .then (accessToken => this._checkAccessToken (accessToken, opts))
+      .catch (this._handleTokenError.bind (this));
+  },
+
+  /**
+   * Handle errors generated from token verification.
+   *
+   * @param err
+   * @private
+   */
+  _handleTokenError (err) {
+    // Translate the error, if necessary. We have to check the name because the error
+    // could be related to token verification.
+    if (err.name === 'TokenExpiredError')
+      return Promise.reject (new BlueprintError ('token_expired', 'The access token has expired.'));
+
+    if (err.name === 'JsonWebTokenError')
+      return Promise.reject (new BlueprintError ('invalid_token', err.message));
+
+    return Promise.reject (err);
   },
 
   /**
@@ -153,7 +173,7 @@ const Issuer = BlueprintObject.extend ({
       // These are checks that pertain only to an user access token.
 
       if (!accessToken.account)
-        return Promise.reject (new BlueprintError ('unknown_account', 'The user account is unknown'));
+        return Promise.reject (new BlueprintError ('unknown_account', 'The user account is unknown.'));
 
       if (!accessToken.account.enabled)
         return Promise.reject (new BlueprintError ('account_disabled', 'The user account is disabled.'));

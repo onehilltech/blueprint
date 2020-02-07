@@ -20,7 +20,7 @@ const { seed } = require ('@onehilltech/blueprint-mongodb');
 
 
 describe ('app | services | issuer', function () {
-  describe.only ('issueClientToken', function () {
+  describe ('issueClientToken', function () {
     it ('should issue a client token', function () {
       const {
         native: [,,,,client]
@@ -86,7 +86,7 @@ describe ('app | services | issuer', function () {
     });
   });
 
-  describe.only ('issueUserToken', function () {
+  describe ('issueUserToken', function () {
     it ('should issue a user token', function () {
       const {
         accounts: [account],

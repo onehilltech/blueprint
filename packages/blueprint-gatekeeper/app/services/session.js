@@ -30,7 +30,11 @@ const moment = require ('moment');
  * authentication and authorization.
  */
 module.exports = Service.extend ({
+  /// Reference to the issuer service.
   issuer: service ('issuer'),
+
+  /// Reference to the client model.
+  Client: model ('client'),
 
   /**
    * Find the account by its username.

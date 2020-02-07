@@ -130,7 +130,7 @@ describe ('app | policies | gatekeeper | auth | bearer', function () {
         .withUserToken (0)
         .expect (403, { errors:
             [ { code: 'unknown_account',
-              detail: 'The account is unknown.',
+              detail: 'The user account is unknown.',
               status: '403' } ] });
     });
   });
@@ -141,7 +141,7 @@ describe ('app | policies | gatekeeper | auth | bearer', function () {
       .withUserToken (5)
       .expect (403, { errors:
           [ { code: 'account_disabled',
-            detail: 'The account is disabled.',
+            detail: 'The user account is disabled.',
             status: '403' } ] });
   });
 
@@ -150,8 +150,8 @@ describe ('app | policies | gatekeeper | auth | bearer', function () {
       .get ('/v1/accounts/me')
       .withUserToken (9)
       .expect (403, { errors:
-          [ { code: 'max_usage',
-            detail: 'The access token has reached its max usage.',
+          [ { code: 'max_usage_limit',
+            detail: 'The access token has reached its max usage limit.',
             status: '403' } ] });
   });
 });

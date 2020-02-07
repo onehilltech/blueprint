@@ -33,20 +33,8 @@ const BEARER_SCHEME_REGEXP = /^Bearer$/i;
  * The policy for evaluating the OAuth 2.0 bearer strategy.
  */
 module.exports = Policy.extend ({
-  /// The access token model.
-  AccessToken: model ('access-token'),
-
-  /// The gatekeeper service with the token generators.
-  gatekeeper: service (),
-
-  /// Token generator used to verify the tokens.
-  _tokenGenerator: null,
-
-  init () {
-    this._super.call (this, ...arguments);
-
-    this._tokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:access_token');
-  },
+  /// The issuer for the service.
+  issuer: service (),
 
   /**
    * Set the parameters of the policy.
@@ -65,8 +53,32 @@ module.exports = Policy.extend ({
     if (!!req.user)
       return this._checkScope (req);
 
+    // Let's make sure the request is originate from the same address that was
+    // used to create the request.
+    const origin = req.get ('origin');
+
+    return this._getTokenFromRequest (req)
+      .then (token => this.issuer.verifyToken (token, { origin })
+        .catch (reason => Promise.reject (new ForbiddenError (reason.code, reason.message))))
+      .then (accessToken => {
+        // Update the request with the access token, and parts of the access token.
+        req.scope = accessToken.scope || [];
+        req.accessToken = accessToken;
+        req.user = accessToken.account || accessToken.client;
+
+        // Lastly, check the scope of the request.
+        return this._checkScope (req);
+      });
+  },
+
+  /**
+   * Get the access token from the request.
+   *
+   * @param req
+   * @private
+   */
+  _getTokenFromRequest (req) {
     let authorization = req.get ('authorization');
-    let token;
 
     if (authorization) {
       let parts = authorization.split (' ');
@@ -77,83 +89,17 @@ module.exports = Policy.extend ({
       if (!BEARER_SCHEME_REGEXP.test (parts[0]))
         return Promise.reject (new BadRequestError ('invalid_scheme', 'The authorization scheme is invalid.'));
 
-      token = parts[1];
+      return Promise.resolve (parts[1]);
     }
     else if (req.body && req.body.access_token) {
-      token = req.body.access_token;
+      return Promise.resolve (req.body.access_token);
     }
     else if (req.query && req.query.access_token) {
-      token = req.query.access_token;
+      return Promise.resolve (req.query.access_token);
     }
     else {
       return Promise.reject (new BadRequestError ('missing_token', 'The access token is missing.'));
     }
-
-    return this._tokenGenerator.verifyToken (token).then (payload => {
-      const {jti,scope} = payload;
-
-      // Add the scope to the request, and find the access token.
-      req.scope = scope || [];
-      return this.AccessToken.findById (jti).populate ('client account').exec ();
-    }).then (accessToken => {
-      if (!accessToken)
-        return {failureCode: 'unknown_token', failureMessage: 'The access token is unknown.'};
-
-      if (!accessToken.enabled)
-        return {failureCode: 'token_disabled', failureMessage: 'The access token is disabled.'};
-
-      if (!accessToken.client)
-        return {failureCode: 'unknown_client', failureMessage: 'The client is unknown.'};
-
-      if (!accessToken.client.enabled)
-        return {failureCode: 'client_disabled', failureMessage: 'The client is disabled.'};
-
-      if (accessToken.client.is_deleted)
-        return {failureCode: 'client_deleted', failureMessage: 'The client has been deleted.'};
-
-      if (accessToken.maxUsageLimit ())
-        return {failureCode: 'max_usage', failureMessage: 'The access token has reached its max usage.'};
-
-      // Let's make sure the request is originate from the same address that was
-      // used to create the request.
-      const origin = req.get ('origin');
-
-      if (origin && accessToken.origin && origin !== accessToken.origin)
-        return {failureCode: 'invalid_origin', failureMessage: 'The ip address for the request does not match ' +
-          'the ip address of the request that created the access token.'};
-
-      // Set the user to the client id.
-      req.accessToken = accessToken;
-      req.user = accessToken.client;
-
-      if (accessToken.type === 'user_token') {
-        if (!accessToken.account)
-          return {failureCode: 'unknown_account', failureMessage: 'The account is unknown.'};
-
-        if (!accessToken.account.enabled)
-          return {failureCode: 'account_disabled', failureMessage: 'The account is disabled.'};
-
-        if (accessToken.account.is_deleted)
-          return {failureCode: 'account_deleted', failureMessage: 'The account has been deleted.'};
-
-        // Update the user to the account id.
-        req.user = accessToken.account;
-      }
-
-      // Lastly, check the scope of the request is exist. We only authorize requests
-      // that have a scope that matches the scope of the policy.
-      return this._checkScope (req);
-    }).catch (err => {
-      // Translate the error, if necessary. We have to check the name because the error
-      // could be related to token verification.
-      if (err.name === 'TokenExpiredError')
-        return { failureCode: 'token_expired', failureMessage: 'The access token has expired.'};
-
-      if (err.name === 'JsonWebTokenError')
-        return { failureCode: 'invalid_token', failureMessage: err.message};
-
-      return Promise.reject (err);
-    });
   },
 
   /**
