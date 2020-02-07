@@ -42,7 +42,7 @@ describe ('app | services | issuer', function () {
         })
         .then (accessToken => {
           expect (accessToken.type).to.equal ('client_token');
-          expect (accessToken.client).to.eql (client._id);
+          expect (accessToken.client._id).to.eql (client._id);
           expect (accessToken.scope).to.eql ([]);
           expect (accessToken.subject).to.equal ('unit-test');
           expect (accessToken.issuer).to.equal ('gatekeeper');
@@ -114,8 +114,8 @@ describe ('app | services | issuer', function () {
         })
         .then (([accessToken]) => {
           expect (accessToken.type).to.equal ('user_token');
-          expect (accessToken.client).to.eql (client._id);
-          expect (accessToken.account).to.eql (account._id);
+          expect (accessToken.client._id).to.eql (client._id);
+          expect (accessToken.account._id).to.eql (account._id);
           expect (accessToken.scope).to.eql ([]);
           expect (accessToken.subject).to.equal ('unit-test');
           expect (accessToken.issuer).to.equal ('gatekeeper');
@@ -150,8 +150,8 @@ describe ('app | services | issuer', function () {
           ]);
         })
         .then (([accessToken, refreshToken]) => {
-          expect (accessToken.client).to.eql (client._id);
-          expect (accessToken.account).to.eql (account._id);
+          expect (accessToken.client._id).to.eql (client._id);
+          expect (accessToken.account._id).to.eql (account._id);
           expect (accessToken.scope).to.eql ([]);
           expect (accessToken.subject).to.equal ('unit-test');
           expect (accessToken.issuer).to.equal ('gatekeeper');
@@ -188,8 +188,8 @@ describe ('app | services | issuer', function () {
           ]);
         })
         .then (([accessToken, refreshToken]) => {
-          expect (accessToken.client).to.eql (client._id);
-          expect (accessToken.account).to.eql (account._id);
+          expect (accessToken.client._id).to.eql (client._id);
+          expect (accessToken.account._id).to.eql (account._id);
           expect (accessToken.scope).to.eql ([]);
           expect (accessToken.subject).to.equal ('unit-test');
           expect (accessToken.issuer).to.equal ('gatekeeper');

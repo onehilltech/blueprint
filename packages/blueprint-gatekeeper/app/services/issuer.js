@@ -1,4 +1,4 @@
-const { Service, BlueprintObject } = require ('@onehilltech/blueprint');
+const { Service, BlueprintObject, BlueprintError } = require ('@onehilltech/blueprint');
 const { Types: { ObjectId }} = require ('@onehilltech/blueprint-mongodb');
 const { union } = require ('lodash');
 const moment = require ('moment');
@@ -27,13 +27,13 @@ const Issuer = BlueprintObject.extend ({
     // be enabled. It also must not be a private client, which requires a user.
 
     if (client.is_deleted)
-      return Promise.reject (new Error ('The client no longer exists.'));
+      return Promise.reject (new BlueprintError ('invalid_client', 'The client no longer exists.'));
 
     if (!client.enabled)
-      return Promise.reject (new Error ('The client is disabled.'));
+      return Promise.reject (new BlueprintError ('client_disabled', 'The client is disabled.'));
 
     if (client.restricted)
-      return Promise.reject (new Error ('The client cannot issue access tokens for anonymous users.'));
+      return Promise.reject (new BlueprintError ('restricted_client', 'The client cannot issue access tokens for anonymous users.'));
 
     // Initialize the client token document.
     let doc = { client, scope : client.scope, payload };
@@ -58,19 +58,19 @@ const Issuer = BlueprintObject.extend ({
     // the user must be allowed to use the client.
 
     if (client.is_deleted)
-      return Promise.reject (new Error ('The client no longer exists.'));
+      return Promise.reject (new BlueprintError ('invalid_client', 'The client no longer exists.'));
 
     if (!client.enabled)
-      return Promise.reject (new Error ('The client is disabled.'));
+      return Promise.reject (new BlueprintError ('client_disabled', 'The client is disabled.'));
 
     if (account.is_deleted)
-      return Promise.reject (new Error ('The user account no longer exists.'));
+      return Promise.reject (new BlueprintError ('invalid_account', 'The user account no longer exists.'));
 
     if (!account.enabled)
-      return Promise.reject (new Error ('The user account is disabled.'));
+      return Promise.reject (new BlueprintError ('account_disabled', 'The user account is disabled.'));
 
     if (client.restricted && !client.allowed (account))
-      return Promise.reject (new Error ('The user account is not allowed to access this client.'));
+      return Promise.reject (new BlueprintError ('unauthorized_user', 'The user account is not allowed to access this client.'));
 
     // Initialize the user token document.
 
@@ -101,7 +101,8 @@ const Issuer = BlueprintObject.extend ({
    */
   verifyToken (token, opts) {
     return this.tokenGenerator.verifyToken (token, opts)
-      .then (payload => this.AccessToken.findById (payload.jti));
+      .then (payload => this.AccessToken.findById (payload.jti).populate ('client account').exec ())
+      .then (accessToken => this._checkAccessToken (accessToken, opts));
   },
 
   /**
@@ -112,7 +113,56 @@ const Issuer = BlueprintObject.extend ({
    */
   verifyRefreshToken (token, opts) {
     return this.tokenGenerator.verifyToken (token, opts)
-      .then (payload => this.AccessToken.findOne ({refresh_token: new ObjectId (payload.jti)}));
+      .then (payload => this.AccessToken.findOne ({refresh_token: new ObjectId (payload.jti)}).populate ('client account').exec ())
+      .then (accessToken => this._checkAccessToken (accessToken, opts));
+  },
+
+  /**
+   * Check the state of the access token to make sure it is usable.
+   *
+   * @param accessToken
+   * @private
+   */
+  _checkAccessToken (accessToken, opts = {}) {
+    if (!accessToken)
+      return Promise.reject (new BlueprintError ('unknown_token', 'The access token is unknown.'));
+
+    if (!accessToken.enabled)
+      return Promise.reject (new BlueprintError ('token_disabled', 'The access token is disabled.'));
+
+    if (!accessToken.client)
+      return Promise.reject (new BlueprintError ('unknown_client', 'The client is unknown.'));
+
+    if (accessToken.client.enabled === false)
+      return Promise.reject (new BlueprintError ('client_disabled', 'The client is disabled.'));
+
+    if (accessToken.client.is_deleted)
+      return Promise.reject (new BlueprintError ('client_deleted', 'The client has been deleted.'));
+
+    if (accessToken.maxUsageLimit ())
+      return Promise.reject (new BlueprintError ('max_usage_limit', 'The access token has reached its max usage limit.'));
+
+    // Let's make sure the request is originate from the same address that was
+    // used to create the request.
+    const { origin } = opts;
+
+    if (!!accessToken.origin && accessToken.origin !== origin)
+      return Promise.reject (new BlueprintError ('invalid_origin', 'The origin for the access token is invalid.'));
+
+    if (accessToken.type === 'user_token') {
+      // These are checks that pertain only to an user access token.
+
+      if (!accessToken.account)
+        return Promise.reject (new BlueprintError ('unknown_account', 'The user account is unknown'));
+
+      if (!accessToken.account.enabled)
+        return Promise.reject (new BlueprintError ('account_disabled', 'The user account is disabled.'));
+
+      if (accessToken.account.is_deleted)
+        return Promise.reject (new BlueprintError ('account_deleted', 'The user account has been deleted.'));
+    }
+
+    return accessToken;
   },
 
   /**
