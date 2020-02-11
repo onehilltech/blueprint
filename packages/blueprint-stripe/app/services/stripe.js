@@ -8,8 +8,8 @@ module.exports = Service.extend ({
   init () {
     this._super.call (this, ...arguments);
 
-    const { secretKey } = this.app.lookup ('config:stripe');
-    this._stripe = new Stripe (secretKey);
+    const { secretKey, apiVersion } = this.app.lookup ('config:stripe');
+    this._stripe = new Stripe (secretKey, { apiVersion });
 
     // Now, map all properties on the stripe object that has a resourcePath to a
     // property definition on this class.
