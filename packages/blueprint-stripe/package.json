@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.15.1",
-    "stripe": "^6.12.1"
+    "stripe": "^8.15.0"
   },
   "devDependencies": {
     "@onehilltech/blueprint-testing": "^4.15.1"

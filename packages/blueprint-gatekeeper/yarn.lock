@@ -17,28 +17,28 @@
     qs "^6.5.1"
     underscore.string "^3.3.4"
 
-"@onehilltech/blueprint-cli-exts@^4.12.0":
-  version "4.12.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-cli-exts/-/blueprint-cli-exts-4.12.0.tgz#5b212f9408592166b209303e833f7d619ec8bbcb"
-  integrity sha512-T9Q5YIBwJPCEQjsHizIZ7OavlH3nY8gFT89yGna8J6b8aJ8Wo7y1s67B4m4KLW7FuP7MtxzH4v3cm7sg2AeBhw==
+"@onehilltech/blueprint-cli-exts@^4.15.1":
+  version "4.15.1"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-cli-exts/-/blueprint-cli-exts-4.15.1.tgz#b313ca620968c504d568f7a03482165dc0dc34f9"
+  integrity sha512-Eu7MMtaYRInWdOBm/lm0GODdnAE1hEbhXtc/5ssV99gNw7NskO8OEAlMpEItDqrMVVm4f0CY8KV/xUjg3DRwkw==
   dependencies:
     base-object "^1.0.5"
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-mongodb@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-4.14.0.tgz#58d0dccb3c5584754fa0e187ac43e711db07960d"
-  integrity sha512-IYOYaGnGoCBgiihvE1wat0q6xjV9hKGgU1iC5LILYao2QpYSX74HlnO7i2x2wVhAMG+AxYpJhDfFw49BAoBKnQ==
+"@onehilltech/blueprint-mongodb@^4.15.1":
+  version "4.15.1"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-4.15.1.tgz#e2197206544eafa78426b0696100ee3351303c13"
+  integrity sha512-yiNpuYFIf4x/F2HcjRQDuaRlSS74xNBNluTiUtwHMvo8Zszcno8IL5uA8X+su2xUJzW9r02O+bzr/3QqVfWzhg==
   dependencies:
-    "@onehilltech/blueprint" "^4.12.0"
+    "@onehilltech/blueprint" "^4.15.1"
     "@onehilltech/dab" "^1.3.1"
     moment "^2.22.2"
 
-"@onehilltech/blueprint-testing@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-testing/-/blueprint-testing-4.14.0.tgz#488d8b4105220fc46fd66f4d6b070022430a9b81"
-  integrity sha512-st1fzLQ4g3m5josy6B71C3TklMsM6kZWmlzyImcVsJijFdsfGl1qzwJZrajfy+/sCkMwco/GfFDXzAD/MQ0WZg==
+"@onehilltech/blueprint-testing@^4.15.1":
+  version "4.15.1"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-testing/-/blueprint-testing-4.15.1.tgz#ba1ad18fdb90a5eb08be2e964b1070347532c0cb"
+  integrity sha512-s73hDvlcU9O3mPNQlHJ3TM3sY527iNuHLOQWjAHPMET2WGn+NfJqsobwLzxfvbKZ43ZJHVsuMg9Uc8HbIWhsjw==
   dependencies:
     chai "^4.1.2"
     chai-datetime "^1.5.0"
@@ -46,12 +46,12 @@
     path "^0.12.7"
     supertest "^3.1.0"
 
-"@onehilltech/blueprint@^4.12.0":
-  version "4.12.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.12.0.tgz#550a52b85a7c533478c7876759846cca218f2af9"
-  integrity sha512-jF/gAzqkHm1mtIuarBZRg+kAUEA8wQ2eL9XRani6ApmB2EkYov9op0jxk6IDd43NDTP3iqHifVv6wjhh+hifCA==
+"@onehilltech/blueprint@^4.15.1":
+  version "4.15.1"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.15.1.tgz#1f63099c094fa83db96112187ec91171d5f2ca7c"
+  integrity sha512-LxR2qKCwBS+na4u+gL8XIJkXJvkNjbVVaRSxcYIwX9pbTnMW5lPNhrfinYRn/3wOQb9F3jibG5K9odifwaXewA==
   dependencies:
-    "@onehilltech/blueprint-cli-exts" "^4.12.0"
+    "@onehilltech/blueprint-cli-exts" "^4.15.1"
     base-object "^1.4.0"
     body-parser "^1.17.2"
     commander "^4.0.1"

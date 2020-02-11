@@ -2,19 +2,19 @@
 # yarn lockfile v1
 
 
-"@onehilltech/blueprint-cli-exts@^4.12.0":
-  version "4.12.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-cli-exts/-/blueprint-cli-exts-4.12.0.tgz#5b212f9408592166b209303e833f7d619ec8bbcb"
-  integrity sha512-T9Q5YIBwJPCEQjsHizIZ7OavlH3nY8gFT89yGna8J6b8aJ8Wo7y1s67B4m4KLW7FuP7MtxzH4v3cm7sg2AeBhw==
+"@onehilltech/blueprint-cli-exts@^4.15.1":
+  version "4.15.1"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-cli-exts/-/blueprint-cli-exts-4.15.1.tgz#b313ca620968c504d568f7a03482165dc0dc34f9"
+  integrity sha512-Eu7MMtaYRInWdOBm/lm0GODdnAE1hEbhXtc/5ssV99gNw7NskO8OEAlMpEItDqrMVVm4f0CY8KV/xUjg3DRwkw==
   dependencies:
     base-object "^1.0.5"
     handlebars "^4.0.11"
     lodash "^4.17.10"
 
-"@onehilltech/blueprint-testing@^4.9.0":
-  version "4.9.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-testing/-/blueprint-testing-4.9.0.tgz#5e91d546e91ac6e103922b78112099186f51b175"
-  integrity sha512-7usG7FssVAZaPt7o5+9od94r/TTYqq7lxZ4Z0Am4TLOr4vqF8ztnfelhbYM+GAQyLAMic2FdnQ5EEE6ibZUNlA==
+"@onehilltech/blueprint-testing@^4.15.1":
+  version "4.15.1"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint-testing/-/blueprint-testing-4.15.1.tgz#ba1ad18fdb90a5eb08be2e964b1070347532c0cb"
+  integrity sha512-s73hDvlcU9O3mPNQlHJ3TM3sY527iNuHLOQWjAHPMET2WGn+NfJqsobwLzxfvbKZ43ZJHVsuMg9Uc8HbIWhsjw==
   dependencies:
     chai "^4.1.2"
     chai-datetime "^1.5.0"
@@ -22,12 +22,12 @@
     path "^0.12.7"
     supertest "^3.1.0"
 
-"@onehilltech/blueprint@^4.12.0":
-  version "4.12.0"
-  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.12.0.tgz#550a52b85a7c533478c7876759846cca218f2af9"
-  integrity sha512-jF/gAzqkHm1mtIuarBZRg+kAUEA8wQ2eL9XRani6ApmB2EkYov9op0jxk6IDd43NDTP3iqHifVv6wjhh+hifCA==
+"@onehilltech/blueprint@^4.15.1":
+  version "4.15.1"
+  resolved "https://registry.yarnpkg.com/@onehilltech/blueprint/-/blueprint-4.15.1.tgz#1f63099c094fa83db96112187ec91171d5f2ca7c"
+  integrity sha512-LxR2qKCwBS+na4u+gL8XIJkXJvkNjbVVaRSxcYIwX9pbTnMW5lPNhrfinYRn/3wOQb9F3jibG5K9odifwaXewA==
   dependencies:
-    "@onehilltech/blueprint-cli-exts" "^4.12.0"
+    "@onehilltech/blueprint-cli-exts" "^4.15.1"
     base-object "^1.4.0"
     body-parser "^1.17.2"
     commander "^4.0.1"
@@ -50,6 +50,11 @@
     require-all "^3.0.0"
     semver "^6.3.0"
     winston "^3.2.1"
+
+"@types/node@>=8.1.0":
+  version "13.7.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.7.0.tgz#b417deda18cf8400f278733499ad5547ed1abec4"
+  integrity sha512-GnZbirvmqZUzMgkFn70c74OQpTTUcCzlhQliTzYjQMqg+hVKcDnxdL19Ne3UdYzdMA/+W3eb646FWn/ZaT1NfQ==
 
 accepts@~1.3.5:
   version "1.3.5"
@@ -632,10 +637,6 @@ kuler@1.0.x:
   dependencies:
     colornames "^1.1.1"
 
-lodash.isplainobject@^4.0.6:
-  version "4.0.6"
-  resolved "https://registry.yarnpkg.com/lodash.isplainobject/-/lodash.isplainobject-4.0.6.tgz#7c526a52d89b45c45cc690b88163be0497f550cb"
-
 lodash@^4.16.0, lodash@^4.17.14:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
@@ -861,9 +862,14 @@ proxy-addr@~2.0.4:
     forwarded "~0.1.2"
     ipaddr.js "1.8.0"
 
-qs@6.5.2, qs@^6.5.1, qs@~6.5.1:
+qs@6.5.2, qs@^6.5.1:
   version "6.5.2"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
+
+qs@^6.6.0:
+  version "6.9.1"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.9.1.tgz#20082c65cb78223635ab1a9eaca8875a29bf8ec9"
+  integrity sha512-Cxm7/SS/y/Z3MHWSxXb8lIFqgqBowP5JMlTUFyJN88y0SGQhVmZnqFK/PeuMX9LzUyWsqqhNxIyg0jlzq946yA==
 
 random-bytes@~1.0.0:
   version "1.0.0"
@@ -917,7 +923,7 @@ require-all@^3.0.0:
   resolved "https://registry.yarnpkg.com/require-all/-/require-all-3.0.0.tgz#473d49704be310115ce124f77383b1ebd8671312"
   integrity sha1-Rz1JcEvjEBFc4ST3c4Ox69hnExI=
 
-safe-buffer@5.1.2, safe-buffer@^5.1.1, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
+safe-buffer@5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
 
@@ -1010,13 +1016,13 @@ string_decoder@~1.1.1:
   dependencies:
     safe-buffer "~5.1.0"
 
-stripe@^6.12.1:
-  version "6.12.1"
-  resolved "https://registry.yarnpkg.com/stripe/-/stripe-6.12.1.tgz#fbe74fefd99f256f0d713c97f6ff36221add8d27"
+stripe@^8.15.0:
+  version "8.15.0"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-8.15.0.tgz#da0a585e77ee297fd3fba9dc4860398767e2ce39"
+  integrity sha512-SlLc7FHrK4U0WEvwUMRLVr/PH3gVxVbeDvOkh+eNi63Zsa+P3ELd+pIGwlzJW3QP0efWucpC2AF1sLf6+37pyA==
   dependencies:
-    lodash.isplainobject "^4.0.6"
-    qs "~6.5.1"
-    safe-buffer "^5.1.1"
+    "@types/node" ">=8.1.0"
+    qs "^6.6.0"
 
 superagent@^3.8.3:
   version "3.8.3"
