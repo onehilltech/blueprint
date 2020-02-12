@@ -16,15 +16,20 @@
 
 const {expect}  = require ('chai');
 const validator = require ('../../../../lib/validation/objectid');
+const blueprint = require ('@onehilltech/blueprint');
 
 describe ('lib | validators | objectId', function () {
   it ('should build schema for validating an ObjectID', function () {
     let schema = validator ({});
 
     expect (schema).to.deep.equal ({
-      errorMessage: 'The id is not valid.',
-      isMongoId: true,
-      toMongoId: true
+      custom: {
+        options: blueprint.lookup ('validator:isMongoId'),
+        errorMessage: 'The id is not valid.',
+      },
+      customSanitizer: {
+        options: blueprint.lookup ('sanitizer:toMongoId')
+      }
     });
   })
 });

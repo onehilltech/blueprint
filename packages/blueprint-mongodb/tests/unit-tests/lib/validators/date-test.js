@@ -16,19 +16,30 @@
 
 const {expect}  = require ('chai');
 const validator = require ('../../../../lib/validation/date');
+const blueprint = require ('@onehilltech/blueprint');
 
 describe ('lib | validators | date', function () {
   it ('should return the default schema for a Date', function () {
     let schema = validator ({options: {}});
     expect (schema).to.deep.equal ({
-      isDate: {errorMessage: 'The date is invalid.'},
-      toDate: true
+      custom: {
+        options: blueprint.lookup ('validator:isDate'),
+        errorMessage: 'The date is invalid.',
+      },
+      customSanitizer: {
+        options: blueprint.lookup ('sanitizer:toDate')
+      }
     });
 
     schema = validator ({options: {validation: {}}});
     expect (schema).to.deep.equal ({
-      isDate: {errorMessage: 'The date is invalid.'},
-      toDate: true
+      custom: {
+        options: blueprint.lookup ('validator:isDate'),
+        errorMessage: 'The date is invalid.',
+      },
+      customSanitizer: {
+        options: blueprint.lookup ('sanitizer:toDate')
+      }
     });
   });
 
@@ -37,8 +48,7 @@ describe ('lib | validators | date', function () {
     let schema = validator (options);
 
     expect (schema).to.deep.equal ({
-      isNumeric: {errorMessage: 'The numeric date is invalid.'},
-      toDate: true
+      isNumeric: {errorMessage: 'The numeric date is invalid.'}
     });
   });
 });

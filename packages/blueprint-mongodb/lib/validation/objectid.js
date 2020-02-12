@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
+const blueprint = require ('@onehilltech/blueprint');
+
 module.exports = function () {
   return {
-    errorMessage: 'The id is not valid.',
-    isMongoId: true,
-    toMongoId: true
+    custom: {
+      options: blueprint.lookup ('validator:isMongoId'),
+      errorMessage: 'The id is not valid.',
+    },
+    customSanitizer: {
+      options: blueprint.lookup ('sanitizer:toMongoId')
+    }
   };
 };

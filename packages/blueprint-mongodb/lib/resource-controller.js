@@ -19,24 +19,35 @@ const assert = require ('assert');
 
 const { extend, forOwn, isEmpty } = require ('lodash');
 
+const blueprint = require ('@onehilltech/blueprint');
+
 const {
   Action,
   ResourceController,
   HttpError,
   computed
-} = require ('@onehilltech/blueprint');
+} = blueprint;
 
 const validation = require ('./validation');
 const populateHelper = require ('./populate');
 
 const LAST_MODIFIED = 'Last-Modified';
 
-const RESOURCE_ID_PARAMS_SCHEMA = {
-  in: 'params',
-  errorMessage: 'The id is not valid.',
-  isMongoId: true,
-  toMongoId: true
-};
+/**
+ * Create the schema for validating the resource id.
+ */
+function createResourceIdParamsSchema () {
+  return {
+    in: 'params',
+    errorMessage: 'The id is not valid.',
+    custom: {
+      options: blueprint.lookup ('validator:isMongoId')
+    },
+    customSanitizer: {
+      options: blueprint.lookup ('sanitizer:toMongoId')
+    }
+  };
+}
 
 /**
  * @class DatabaseAction
@@ -98,8 +109,12 @@ module.exports = ResourceController.extend ({
         schema: {
           [this.id]: {
             in: 'params',
-            isMongoId: true,
-            toMongoId: true
+            custom: {
+              options: blueprint.lookup ('validator:isMongoId')
+            },
+            customSanitizer: {
+              options: blueprint.lookup ('sanitizer:toMongoId')
+            }
           }
         },
       })
@@ -336,7 +351,7 @@ module.exports = ResourceController.extend ({
   getOne () {
     return DatabaseAction.extend ({
       schema: {
-        [this.resourceId]: RESOURCE_ID_PARAMS_SCHEMA
+        [this.resourceId]: createResourceIdParamsSchema ()
       },
 
       execute (req, res) {
@@ -436,7 +451,7 @@ module.exports = ResourceController.extend ({
     return DatabaseAction.extend ({
       schema: extend (
         validation (this.Model.schema, extend ({}, this._defaultValidationOptions, {allOptional:true, validators, sanitizers})),
-        {[this.resourceId]: RESOURCE_ID_PARAMS_SCHEMA}),
+        {[this.resourceId]: createResourceIdParamsSchema () }),
 
       eventName,
 
@@ -559,7 +574,7 @@ module.exports = ResourceController.extend ({
 
     return DatabaseAction.extend ({
       schema: {
-        [this.resourceId]: RESOURCE_ID_PARAMS_SCHEMA
+        [this.resourceId]: createResourceIdParamsSchema ()
       },
 
       eventName,

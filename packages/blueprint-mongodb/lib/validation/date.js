@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+const blueprint = require ('@onehilltech/blueprint');
+const { extend } = require ('lodash');
+
 module.exports = function (path) {
   let schema = { };
 
@@ -26,21 +29,30 @@ module.exports = function (path) {
       }
     }
     else {
-      schema.isDate = {
-        errorMessage: 'The date is invalid.'
-      };
+      schema = extend (schema, {
+        custom: {
+          options: blueprint.lookup ('validator:isDate'),
+          errorMessage: 'The date is invalid.',
+        },
+        customSanitizer: {
+          options: blueprint.lookup ('sanitizer:toDate')
+        }
+      });
     }
   }
   else {
     // There is no defined validation. We are going to assume the client
     // is uploading a date string.
-    schema.isDate = {
-      errorMessage: 'The date is invalid.'
-    };
+    schema = extend (schema, {
+      custom: {
+        options: blueprint.lookup ('validator:isDate'),
+        errorMessage: 'The date is invalid.',
+      },
+      customSanitizer: {
+        options: blueprint.lookup ('sanitizer:toDate')
+      }
+    });
   }
-
-  // Lastly, add the sanitizer for the path.
-  schema.toDate = true;
 
   return schema;
 };
