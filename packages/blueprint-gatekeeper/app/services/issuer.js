@@ -166,7 +166,7 @@ const Issuer = BlueprintObject.extend ({
     // used to create the request.
     const { origin } = opts;
 
-    if (!!accessToken.origin && accessToken.origin !== origin)
+    if (!!accessToken.origin && !!origin && accessToken.origin !== origin)
       return Promise.reject (new BlueprintError ('invalid_origin', 'The origin for the access token is invalid.'));
 
     if (accessToken.type === 'user_token') {
