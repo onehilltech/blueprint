@@ -995,6 +995,7 @@ describe ('app | routers | oauth2 | token', function () {
             client_id: client.id,
             client_secret: client.client_secret,
             options: {
+              audience: 'temp',
               expiration: '10 minutes',
               scope: ['online']
             }
@@ -1007,6 +1008,7 @@ describe ('app | routers | oauth2 | token', function () {
             const issuer = blueprint.lookup ('service:issuer');
 
             return issuer.verifyToken (token.access_token).then (accessToken => {
+              expect (accessToken.audience).to.equal ('temp');
               expect (accessToken.scope).to.eql (['online']);
               expect (accessToken.expiration).to.exist;
             });
