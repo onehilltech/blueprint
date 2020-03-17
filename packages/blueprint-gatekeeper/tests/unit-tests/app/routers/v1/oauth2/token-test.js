@@ -979,6 +979,94 @@ describe ('app | routers | oauth2 | token', function () {
         });
       });
     });
+
+    describe ('temp', function () {
+      context ('native', function () {
+        it ('should generate a temp token', function () {
+          const {user_tokens, native} = seed ();
+          const user_token = user_tokens[0];
+          const client = native[0];
+
+          const { access_token } = user_token.serializeSync (...getTokenGenerators ());
+
+          const data = {
+            grant_type: 'temp',
+            access_token,
+            client_id: client.id,
+            client_secret: client.client_secret,
+            options: {
+              expiration: '10 minutes',
+              scope: ['online']
+            }
+          };
+
+          return getToken (data).then (token => {
+            expect (token).to.have.all.keys (['token_type', 'access_token']);
+            expect (token).to.have.property ('token_type', 'Bearer');
+
+            const issuer = blueprint.lookup ('service:issuer');
+
+            return issuer.verifyToken (token.access_token).then (accessToken => {
+              expect (accessToken.scope).to.eql (['online']);
+              expect (accessToken.expiration).to.exist;
+            });
+          });
+        });
+
+        it ('should fail because of missing fields', function () {
+          const {native} = seed ('$default');
+          const client = native[0];
+
+          const data = {
+            grant_type: 'refresh_token',
+            client_id: client.id
+          };
+
+          return requestToken (data)
+            .expect (400, {
+              errors: [{
+                status: '400',
+                code: "validation_failed",
+                detail: "The request validation failed.",
+                meta: {
+                  validation: {
+                    client_secret: {
+                      location: "body",
+                      msg: "This field is required.",
+                      param: "client_secret"
+                    },
+                    refresh_token: {
+                      location: "body",
+                      msg: "This field is required.",
+                      param: "refresh_token"
+                    }
+                  }
+                }
+              }]
+            });
+        });
+
+        it ('should fail because of invalid client secret', function () {
+          const {native, user_tokens} = seed ('$default');
+          const client = native[0];
+          const {refresh_token} = user_tokens[0].serializeSync (...getTokenGenerators ());
+
+          const data = {
+            grant_type: 'refresh_token',
+            client_id: client.id,
+            client_secret: 'bad-client-secret',
+            refresh_token
+          };
+
+          return requestToken (data)
+            .expect (400, { errors:
+                [ { code: 'invalid_secret',
+                  detail: 'The client secret is not valid.',
+                  status: '400' } ] });
+        });
+      });
+
+    });
   });
 
   describe ('/logout', function () {

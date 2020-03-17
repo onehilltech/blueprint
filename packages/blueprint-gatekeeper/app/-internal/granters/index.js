@@ -17,3 +17,4 @@
 exports.ClientCredentials = require ('./client_credentials');
 exports.Password = require ('./password');
 exports.RefreshToken = require ('./refresh_token');
+exports.Temp = require ('./temp');

@@ -52,7 +52,7 @@ const Issuer = BlueprintObject.extend ({
    * @param payload
    * @param opts
    */
-  issueUserToken (account, client, payload = {}, opts = {}) {
+  issueUserToken (account, client, payload = {}, opts = {}, serialize = true) {
     // First, make sure we are able to issue a token for the user on the target client.
     // The client and the user must be enabled. If the client is a restricted client, then
     // the user must be allowed to use the client.
@@ -90,7 +90,7 @@ const Issuer = BlueprintObject.extend ({
     }
 
     const { discriminators: { user_token: UserToken }} = this.AccessToken;
-    return UserToken.create (doc).then (userToken => userToken.serialize (this.tokenGenerator, refreshTokenGenerator));
+    return UserToken.create (doc).then (userToken => serialize ? userToken.serialize (this.tokenGenerator, refreshTokenGenerator) : userToken);
   },
 
   /**
@@ -272,9 +272,10 @@ module.exports = Service.extend ({
    * @param account
    * @param payload
    * @param opts
+   * @param serialize
    */
-  issueUserToken (account, client, payload = {}, opts = {}) {
-    return this._defaultIssuer.issueUserToken (account, client, payload, opts);
+  issueUserToken (account, client, payload = {}, opts = {}, serialize) {
+    return this._defaultIssuer.issueUserToken (account, client, payload, opts, serialize);
   },
 
   /**
