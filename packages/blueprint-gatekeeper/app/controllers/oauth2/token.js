@@ -82,7 +82,7 @@ const ValidateClientVisitor = ModelVisitor.extend ({
 
   visitRecaptchaClient (client) {
     // The refresh token does not have recaptcha property.
-    if (this.grantType === 'refresh_token')
+    if (['refresh_token', 'temp'].includes (this.grantType))
       return;
 
     // For all reCAPTCHA clients requesting a token, the origin of the request

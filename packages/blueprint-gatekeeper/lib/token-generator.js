@@ -69,16 +69,29 @@ const TokenGenerator = BO.extend ({
    * @param payload
    * @param opts
    */
-  generateToken (payload, opts = {}) {
+  generateToken (payload = {}, opts = {}) {
     let options = merge ({}, this._options, opts);
+
+    // We prioritize the payload expiration over the options expiration. This means we
+    // delete the expiresIn attribute in options.
+    if (!!payload.exp && !!options.expiresIn) {
+      delete options.expiresIn;
+    }
 
     return fromCallback (callback => {
       jwt.sign (payload, this._signingHash, options, callback);
     });
   },
 
-  generateTokenSync (payload, opts = {}) {
+  generateTokenSync (payload = {}, opts = {}) {
     let options = merge ({}, this._options, opts);
+
+    // We prioritize the payload expiration over the options expiration. This means we
+    // delete the expiresIn attribute in options.
+    if (!!payload.exp && !!options.expiresIn) {
+      delete options.expiresIn;
+    }
+
     return jwt.sign (payload, this._signingHash, options);
   },
 
