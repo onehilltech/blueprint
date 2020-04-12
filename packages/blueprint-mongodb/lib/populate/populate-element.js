@@ -48,5 +48,9 @@ module.exports = Populate.extend ({
 
   accept (v) {
     v.visitPopulateElement (this);
+  },
+
+  valueExists (value) {
+    return !!value;
   }
 });

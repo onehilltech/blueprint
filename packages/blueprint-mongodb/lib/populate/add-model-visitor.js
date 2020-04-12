@@ -42,12 +42,15 @@ const AddModelVisitor = PopulateVisitor.extend ({
     const { populators } = this.population.registry.models [item.key];
 
     if (isEmpty (populators))
-      return;
+      return null;
 
-    this.promise = BluebirdPromise.props (mapValues (populators, (populator, key) => {
-      debug (`populating ${key}`);
-      return this.population._populateElement (populator, this.populated);
-    }))
+    this.promise = BluebirdPromise.props (mapValues (populators, (populator, path) => {
+      debug (`populating ${path}`);
+
+      // Get the model at the path, and the populate it.
+      const value = this.populated[path];
+      return this.population.processId (populator, value);
+    }));
   },
 
   visitPopulateArray (item) {
@@ -57,11 +60,19 @@ const AddModelVisitor = PopulateVisitor.extend ({
     const { populators } = this.population.registry.models [item.key];
 
     if (isEmpty (populators))
-      return;
+      return null;
 
-    this.promise = BluebirdPromise.props (mapValues (populators, (populator, key) => {
-      debug (`populating ${key}`);
-      this.promise = this.population._populateArray (populator, this.populated);
+    this.promise = BluebirdPromise.props (mapValues (populators, (populator, path) => {
+      debug (`populating ${path}`);
+
+      const promises = this.populated.map (model => {
+        // Get the model at the path, and the populate it.
+        const value = model[path];
+
+        return this.population.processId (populator, value);
+      })
+
+      return Promise.all (promises);
     }));
   },
 

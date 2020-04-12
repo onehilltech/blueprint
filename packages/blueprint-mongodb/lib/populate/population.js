@@ -42,7 +42,7 @@ const {
  */
 module.exports = BO.extend ({
   models: computed ({
-    get () { return mapValues (this._models, flattenDeep); }
+    get () {  return mapValues (this._models, flattenDeep); }
   }),
 
   ids: computed ({
@@ -163,12 +163,45 @@ module.exports = BO.extend ({
    * @param populator
    * @param arr
    */
-  _populateArray (populator, arr) {
+  _populateArray (populator, arr, path) {
     // Iterate over each element in the array, and populate each one. The
     // partial result can be ignored since we are will be adding the populated
     // object directly to the result.
 
     return Promise.all (arr.map (model => this._populateElement (populator, model)));
+  },
+
+  /**
+   * Instruct the population to process the id. The id can be a single id, or an array
+   * or ids.
+   *
+   * @param propulator
+   * @param value
+   * @returns {null|*}
+   */
+  processId (populator, value) {
+    if (!value)
+      return null;
+    
+    // Determine the ids that we need to populate at this point in time. If we
+    // have seen all the ids, then there is no need to populate the value(s).
+
+    let saveUnseenIds = new UnseenIdVisitor ({population: this, value});
+    populator.accept (saveUnseenIds);
+
+    const {unseen} = saveUnseenIds;
+
+    if (isEmpty (unseen))
+      return null;
+
+    return populator.populate (unseen).then (populated => {
+      // Add the populated models to our population.
+
+      const v = new AddModelVisitor ({population: this, populated});
+      populator.accept (v);
+
+      return v.promise;
+    });
   },
 
   /**
@@ -184,30 +217,11 @@ module.exports = BO.extend ({
       return Promise.resolve (this);
 
     let mapping = mapValues (populators, (populator, path) => {
+      // Get the value at the current path. The value can be either a single element or an
+      // array of elements. We only need to continue if something exists.
+
       const value = data[path];
-
-      if (!value || value.length === 0)
-        return null;
-
-      // Determine the ids that we need to populate at this point in time. If we
-      // have seen all the ids, then there is no need to populate the value(s).
-
-      let saveUnseenIds = new UnseenIdVisitor ({population: this, value});
-      populator.accept (saveUnseenIds);
-
-      const {unseen} = saveUnseenIds;
-
-      if (isEmpty (unseen))
-        return null;
-
-      return populator.populate (unseen).then (populated => {
-        // Add the populated models to our population.
-
-        const v = new AddModelVisitor ({population: this, populated});
-        populator.accept (v);
-
-        return v.promise;
-      });
+      return populator.valueExists (value) ? this.processId (populator, value) : null;
     });
 
     return props (mapping);

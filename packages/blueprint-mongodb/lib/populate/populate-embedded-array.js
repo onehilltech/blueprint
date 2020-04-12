@@ -37,6 +37,10 @@ module.exports = Populate.extend ({
     v.visitPopulateEmbeddedArray (this);
   },
 
+  valueExists (value) {
+    return !!value && value.length > 0;
+  },
+
   populate (unseen) {
     let pending = mapValues (this.populators, (populator, name) => {
       const values = unseen[name];
