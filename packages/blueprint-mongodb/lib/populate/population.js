@@ -19,7 +19,6 @@ const {
   computed
 } = require ('@onehilltech/blueprint');
 
-const pluralize  = require ('pluralize');
 const AddModelVisitor = require ('./add-model-visitor');
 const UnseenIdVisitor = require ('./unseen-id-visitor');
 
@@ -60,6 +59,9 @@ module.exports = BO.extend ({
       this._models[collectionName] = [];
       this._ids[collectionName] = [];
     });
+
+    if (!this.options)
+      this.options = {};
   },
 
   /**
@@ -175,7 +177,7 @@ module.exports = BO.extend ({
    * Instruct the population to process the id. The id can be a single id, or an array
    * or ids.
    *
-   * @param propulator
+   * @param populator
    * @param value
    * @returns {null|*}
    */
@@ -194,6 +196,12 @@ module.exports = BO.extend ({
     if (isEmpty (unseen))
       return null;
 
+    const { ignore = [] } = this.options;
+    const modelName = populator.modelName;
+
+    if (ignore.includes (modelName))
+      return null;
+
     return populator.populate (unseen).then (populated => {
       // Add the populated models to our population.
 
@@ -207,8 +215,8 @@ module.exports = BO.extend ({
   /**
    * Use the populator to populate the data.
    *
-   * @param populators       Target populator.
-   * @param data            Data to populate
+   * @param populators        Target populator
+   * @param data              Data to populate
    * @returns {Promise|null}
    * @private
    */

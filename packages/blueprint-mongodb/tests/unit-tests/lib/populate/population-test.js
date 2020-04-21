@@ -22,12 +22,12 @@ const { lean, seed } = require ('../../../../lib/utils');
 const Population = require ('../../../../lib/populate/population');
 const ModelRegistry = require ('../../../../lib/populate/model-registry');
 
-function createTestPopulation () {
+function createTestPopulation (options) {
   const User = blueprint.lookup ('model:user');
   const registry = new ModelRegistry ();
   registry.addModel (User);
 
-  return new Population ({registry});
+  return new Population ({registry, options});
 }
 
 describe ('lib | populate | Population', function () {

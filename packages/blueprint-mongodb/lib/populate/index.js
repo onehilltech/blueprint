@@ -26,9 +26,10 @@ function getModel (model) {
  * Populate a model.
  *
  * @param   model       Model to populate.
+ * @param   options
  * @return  Promise <Population>
  */
-function populateModel (model) {
+function populateModel (model, options = {}) {
   // Get the registered model type.
   const Model = getModel (model);
 
@@ -38,7 +39,7 @@ function populateModel (model) {
 
   // Create a new population for this registry. Then, add the
   // root model to the population.
-  const population = new Population ({registry});
+  const population = new Population ({registry, options});
   return population.addModel (model).then (population => population.models);
 }
 
@@ -46,8 +47,9 @@ function populateModel (model) {
  * Populate an array of models.
  *
  * @param models
+ * @param options
  */
-function populateModels (models) {
+function populateModels (models, options = {}) {
   const registry = new ModelRegistry ();
 
   // Add the model types to the registry.
@@ -58,7 +60,7 @@ function populateModels (models) {
 
   // Create a new population for this registry. Then, add the
   // root model to the population.
-  const population = new Population ({registry});
+  const population = new Population ({registry, options});
   return population.addModels (models).then (population => population.models);
 }
 

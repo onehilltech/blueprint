@@ -20,5 +20,7 @@ const {BO} = require ('@onehilltech/blueprint');
  * @class Populate
  */
 module.exports = BO.extend ({
-  accept: null
+  accept: null,
+
+  modelName: null,
 });

@@ -30,6 +30,10 @@ module.exports = Populate.extend ({
   /// The model definition used to populate models.
   Model: null,
 
+  modelName: computed ({
+    get () { return this.Model.modelName}
+  }),
+
   plural: computed ({
     get () {
       return pluralize (this.Model.modelName);
