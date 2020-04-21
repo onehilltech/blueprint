@@ -285,7 +285,7 @@ module.exports = ResourceController.extend ({
               })
               .then (data => {
                 if (options.populate) {
-                  return populateHelper.populateModels (data);
+                  return Promise.resolve (this.getPopulateOptions (req)).then (options => populateHelper.populateModels (data, options));
                 }
                 else {
                   return {[this.controller.plural]: data};
@@ -336,6 +336,10 @@ module.exports = ResourceController.extend ({
 
       prepareResponse (req, res, result) {
         return result;
+      },
+
+      getPopulateOptions (req) {
+        return null;
       }
     });
   },
@@ -390,7 +394,7 @@ module.exports = ResourceController.extend ({
               })
               .then (data => {
                 if (options.populate) {
-                  return populateHelper.populateModel (data);
+                  return Promise.resolve (this.getPopulateOptions (req)).then (options => populateHelper.populateModel (data, options));
                 }
                 else {
                   return {[this.controller.name]: data};
@@ -433,6 +437,10 @@ module.exports = ResourceController.extend ({
 
       prepareResponse (req, res, result) {
         return result;
+      },
+
+      getPopulateOptions (req) {
+        return {};
       }
     });
   },
@@ -763,7 +771,7 @@ module.exports = ResourceController.extend ({
               })
               .then (data => {
                 if (directives.populate) {
-                  return populateHelper.populateModels (data);
+                  return Promise.resolve (this.getPopulateOptions (req)).then (options => populateHelper.populateModels (data, options));
                 }
                 else {
                   return {[this.controller.plural]: data};
@@ -813,6 +821,10 @@ module.exports = ResourceController.extend ({
 
       prepareResponse (req, res, result) {
         return result;
+      },
+
+      getPopulateOptions (req) {
+        return {};
       }
     });
   },
