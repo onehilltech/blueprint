@@ -72,7 +72,7 @@ describe ('lib | populate | Population', function () {
 
     it ('should add same model to the population', function () {
       let population = createTestPopulation ();
-      let {users,authors} = seed ('$default');
+      let {users,authors} = seed ();
 
       return population.addModel (users[0])
         .then (population => population.addModel (users[0]))
@@ -92,7 +92,7 @@ describe ('lib | populate | Population', function () {
   describe ('addModels', function () {
     it ('should add models to the population', function () {
       let population = createTestPopulation ();
-      let {users,authors} = seed ('$default');
+      let {users,authors} = seed ();
 
       return population.addModels (users).then (population => {
         const ids = population.ids;
