@@ -362,10 +362,7 @@ module.exports = ResourceController.extend ({
         // Update the options with those from the query string.
         const id = req.params[this.controller.resourceId];
         const query = req.query || {};
-        const options = query._ || {};
-
-        if (query._)
-          delete query._;
+        const options = Object.assign (query._) || {};
 
         const preparations = [
           this.getId (req, id),
