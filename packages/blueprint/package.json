@@ -29,8 +29,7 @@
     "passport": "^0.4.1",
     "pluralize": "^8.0.0",
     "require-all": "^3.0.0",
-    "semver": "^6.3.0",
-    "winston": "^3.2.1"
+    "semver": "^6.3.0"
   },
   "scripts": {
     "test": "env NODE_ENV=test mocha --recursive --reporter spec tests/unit-tests",
@@ -49,5 +48,5 @@
     "node": ">=8.0.0",
     "npm": ">=3.0.0"
   },
-  "gitHead": "ce8ef7205c2fcd7252167e1f6f58fe31bb643f33"
+  "gitHead": "6d4af417c417bad300c5208b446643f9e2b785eb"
 }
