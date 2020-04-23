@@ -47,5 +47,5 @@
   "bin": {
     "gatekeeper-setup": "./bin/gatekeeper-setup"
   },
-  "gitHead": "ce8ef7205c2fcd7252167e1f6f58fe31bb643f33"
+  "gitHead": "6d4af417c417bad300c5208b446643f9e2b785eb"
 }

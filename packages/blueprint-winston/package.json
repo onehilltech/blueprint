@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.20.0",
-    "@onehilltech/blueprint-cli": "^4.20.0"
+    "@onehilltech/blueprint-cli": "^4.20.0",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "@onehilltech/blueprint-testing": "^4.20.0"
@@ -24,5 +25,6 @@
   "keywords": [
     "blueprint",
     "blueprint-module"
-  ]
+  ],
+  "gitHead": "6d4af417c417bad300c5208b446643f9e2b785eb"
 }
