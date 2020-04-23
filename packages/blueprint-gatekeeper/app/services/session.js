@@ -33,6 +33,9 @@ module.exports = Service.extend ({
   /// Reference to the issuer service.
   issuer: service ('issuer'),
 
+  /// Reference the account mpdel.
+  Account: model ('account'),
+
   /// Reference to the client model.
   Client: model ('client'),
 
