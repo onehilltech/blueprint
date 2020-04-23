@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.21.0",
-    "@onehilltech/blueprint-cli": "^4.21.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "@onehilltech/blueprint-cli": "^4.21.0",
     "@onehilltech/blueprint-testing": "^4.21.0"
   },
   "main": "./index.js",
