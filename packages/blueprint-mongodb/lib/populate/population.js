@@ -71,7 +71,7 @@ module.exports = BO.extend ({
    */
   addModel (model) {
     const { collectionName, populators } = this.registry.lookup (model.constructor);
-    const unseen = this._saveUnseenId (collectionName, model);
+    const unseen = this._saveUnseenId (collectionName, model._id);
 
     if (!unseen)
       return Promise.resolve (this);
