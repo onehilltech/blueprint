@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-const pluralize = require ('pluralize');
 const assert = require ('assert');
+const moment = require ('moment');
 
-const { extend, forOwn, isEmpty } = require ('lodash');
+const { isEmpty } = require ('lodash');
 
 const {
   Action,
@@ -177,7 +177,7 @@ module.exports = ResourceController.extend ({
 
                 if (this.controller._hasTimestamps) {
                   let lastModified = this.controller.getLastModified (result);
-                  res.set (LAST_MODIFIED, lastModified.toUTCString ());
+                  res.set (LAST_MODIFIED, lastModified.toDate ().toUTCString ());
                 }
 
                 return this.postCreateModel (req, result);
@@ -271,13 +271,14 @@ module.exports = ResourceController.extend ({
                   // in the response since it represents when this collection of models was
                   // last changed.
 
-                  const lastModifiedTime = models.reduce ((acc, next) => {
-                    let time = this.controller.getLastModified (next).getTime ();
-                    return time > acc ? time : acc;
-                  }, this.controller.getLastModified (models[0]).getTime ());
+                  let lastModifiedTime = this.controller.getLastModified (models[0]);
+                  lastModifiedTime = models.reduce ((current, next) => {
+                    let lastModifiedTime = this.controller.getLastModified (next);
+                    return lastModifiedTime.isAfter (current) ? lastModifiedTime : current;
+                  }, lastModifiedTime);
 
                   res.set ({
-                    [LAST_MODIFIED]: new Date (lastModifiedTime).toUTCString ()
+                    [LAST_MODIFIED]: lastModifiedTime.toDate ().toUTCString ()
                   });
                 }
 
@@ -397,7 +398,7 @@ module.exports = ResourceController.extend ({
                   // response since it represents when this collection of models was last changed.
 
                   let lastModified = this.controller.getLastModified (model);
-                  res.set ({ [LAST_MODIFIED]: lastModified.toUTCString () });
+                  res.set ({ [LAST_MODIFIED]: lastModified.toDate ().toUTCString () });
                 }
 
                 return this.postGetModel (req, model);
@@ -845,7 +846,7 @@ module.exports = ResourceController.extend ({
    */
   getLastModified (model) {
     const { createdAt, updatedAt } = this._timestampFields;
-    return model[updatedAt] || model[createdAt];
+    return moment (model[updatedAt] || model[createdAt]);
   },
 
   /**
