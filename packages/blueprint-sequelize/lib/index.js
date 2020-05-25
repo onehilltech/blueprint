@@ -25,4 +25,5 @@ const {
 exports.model = model;
 exports.resource = resource;
 exports.ResourceController = require ('./resource-controller');
+exports.flatten = require ('./flatten');
 
