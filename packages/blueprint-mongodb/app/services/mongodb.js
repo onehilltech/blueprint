@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-const {
-  Service,
-  computed,
-  Loader
-} = require ('@onehilltech/blueprint');
-
-const {
-  forOwn,
-  mapValues,
-  get,
-  isPlainObject,
-  map
-} = require ('lodash');
+const { Service, computed, Loader } = require ('@onehilltech/blueprint');
+const { forOwn, mapValues, get, isPlainObject, map } = require ('lodash');
 
 const Bluebird = require ('bluebird');
 
@@ -38,18 +27,14 @@ const path = require ('path');
 const DEFAULT_CONNECTION_NAME = '$default';
 const SEEDS_RELATIVE_PATH = 'seeds/mongodb';
 
-
 mongoose.Promise = Promise;
 
 // Make Mongoose use `findOneAndUpdate()`. Note that this option is `true`
 // by default, you need to set it to false.
 mongoose.set ('useFindAndModify', false);
 
-const {
-  build,
-  seed,
-  clear
-} = require ('@onehilltech/dab');
+const { build, seed, clear } = require ('@onehilltech/dab');
+const backend = require ('@onehilltech/dab-mongodb');
 
 /**
  * @class MongoDbService
@@ -199,7 +184,7 @@ module.exports = Service.extend ({
 
     return this._buildSeed (name)
       .then (data => !!data ? (!!clearBeforeSeeding ? this._clearConnection (name, conn, clearBeforeSeeding) : Promise.resolve ())
-        .then (() => seed (conn, data)) : null)
+        .then (() => seed (conn, data, { backend })) : null)
       .then (models => {
         this._seeds[name] = models;
 
@@ -222,7 +207,7 @@ module.exports = Service.extend ({
   _clearConnection (name, conn, models = []) {
     debug (`clearing data on connection ${name}`);
 
-    return clear (conn, models);
+    return clear (conn, models, { backend });
   },
 
   /**
@@ -244,7 +229,7 @@ module.exports = Service.extend ({
       return Promise.resolve (seed.reset ())
         .then (() => seed.beforeModel ())
         .then (() => seed.model ())
-        .then (model => build (model))
+        .then (model => build (model, { backend }))
         .then (result => Promise.resolve (seed.afterModel (result)).then (() => result));
     });
   },
