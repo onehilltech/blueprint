@@ -20,5 +20,4 @@ const schema = new mongodb.Schema ({
   name: {type: String, unique: true, required: true}
 });
 
-const Author = mongodb.resource ('author', schema, 'blueprint_authors');
-module.exports = Author;
+module.exports = mongodb.resource ('author', schema, 'blueprint_authors');

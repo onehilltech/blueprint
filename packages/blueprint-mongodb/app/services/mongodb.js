@@ -15,9 +15,9 @@
  */
 
 const { Service, computed, Loader } = require ('@onehilltech/blueprint');
-const { forOwn, mapValues, get, isPlainObject, map } = require ('lodash');
+const { forOwn, mapValues, get, isPlainObject, map, pickBy } = require ('lodash');
 
-const Bluebird = require ('bluebird');
+const { props } = require ('bluebird');
 
 const assert = require ('assert');
 const mongoose = require ('mongoose');
@@ -138,7 +138,7 @@ module.exports = Service.extend ({
     const {connections} = this.config;
     const connecting = mapValues (connections, (config, name) => this.openConnection (name, config));
 
-    return Bluebird.props (connecting);
+    return props (connecting);
   },
 
   /**
@@ -182,9 +182,10 @@ module.exports = Service.extend ({
 
     debug (`seeding database connection ${name}`);
 
-    return this._buildSeed (name)
+    return this._buildSeed (name, conn)
       .then (data => !!data ? (!!clearBeforeSeeding ? this._clearConnection (name, conn, clearBeforeSeeding) : Promise.resolve ())
-        .then (() => seed (conn, data, { backend })) : null)
+        .then (() => pickBy (data, (models, name) => backend.supports (conn, name)))
+        .then (data => seed (conn, data, { backend })) : null)
       .then (models => {
         this._seeds[name] = models;
 
@@ -218,7 +219,7 @@ module.exports = Service.extend ({
    * @returns {*}
    * @private
    */
-  _buildSeed (name) {
+  _buildSeed (name, conn) {
     return this._loadSeedDefinitions ().then (seeds => {
       debug (`building seed definition for connection ${name}`);
       let seed = seeds[name];
@@ -229,7 +230,7 @@ module.exports = Service.extend ({
       return Promise.resolve (seed.reset ())
         .then (() => seed.beforeModel ())
         .then (() => seed.model ())
-        .then (model => build (model, { backend }))
+        .then (models => build (pickBy (models, (models, name) => backend.supports (conn, name)), { backend }))
         .then (result => Promise.resolve (seed.afterModel (result)).then (() => result));
     });
   },
@@ -261,7 +262,7 @@ module.exports = Service.extend ({
         this._seedDefs = result;
 
         // Allow each seed to perform a one-time configuration.
-        return Bluebird.props (map (result, seed => seed.configure ())).then (() => result);
+        return props (map (result, seed => seed.configure ())).then (() => result);
       });
   },
 
@@ -269,7 +270,7 @@ module.exports = Service.extend ({
    * Close all open connections.
    */
   closeConnections (force) {
-    return Bluebird.props (mapValues (this._connections, (conn) => {
+    return props (mapValues (this._connections, (conn) => {
       if (conn.readyState !== 0)
         return conn.close (force);
     }));
