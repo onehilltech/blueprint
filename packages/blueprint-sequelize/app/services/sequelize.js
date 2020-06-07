@@ -95,9 +95,9 @@ const SequelizeBackend = Backend.extend ({
     }, {}));
   },
 
-  clear (conn, Models, opts) {
+  clear (conn, Models) {
     let filtered = isEmpty (Models) ? conn.models : filter (conn.models, Model => Models.includes (Model.name));
-    return props (mapValues (filtered, (Model, name) => Model.destroy ({ truncate: true })));
+    return props (mapValues (filtered, Model => Model.destroy ({ truncate: true })));
   }
 });
 
