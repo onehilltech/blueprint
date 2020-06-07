@@ -174,8 +174,9 @@ module.exports = Service.extend ({
    *
    * @private
    */
-  seedConnection (name, conn, opts) {
-    const { clearBeforeSeeding = [] } = opts;
+  seedConnection (name, conn, clear) {
+    if (!!clear && clear === 'true')
+      clear = [];
 
     // When seeding a connection, we always build a new data model. This
     // is because we need to generate new ids for all model elements.
@@ -183,7 +184,7 @@ module.exports = Service.extend ({
     debug (`seeding database connection ${name}`);
 
     return this._buildSeed (name, conn)
-      .then (data => !!data ? (!!clearBeforeSeeding ? this._clearConnection (name, conn, clearBeforeSeeding) : Promise.resolve ())
+      .then (data => !!data ? (!!clear ? this._clearConnection (name, conn, clear) : Promise.resolve ())
         .then (() => pickBy (data, (models, name) => backend.supports (conn, name)))
         .then (data => seed (conn, data, { backend })) : null)
       .then (models => {
