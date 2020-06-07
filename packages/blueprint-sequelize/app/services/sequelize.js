@@ -36,9 +36,9 @@ const SequelizeBackend = Backend.extend ({
       return 'ID';
 
     let Model = this.conn.models[modelName];
-    const { primaryKeyField } = Model;
+    const { primaryKeyAttribute } = Model;
 
-    return primaryKeyField;
+    return primaryKeyAttribute;
   },
 
   generateId (value, path) {
