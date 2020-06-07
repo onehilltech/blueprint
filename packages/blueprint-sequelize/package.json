@@ -13,8 +13,8 @@
   "dependencies": {
     "@onehilltech/blueprint": "^4.21.0",
     "@onehilltech/blueprint-cli": "^4.21.0",
-    "@onehilltech/dab": "^2.1.4",
-    "@onehilltech/dab-mongodb": "^2.1.4",
+    "@onehilltech/dab": "^2.2.0",
+    "@onehilltech/dab-mongodb": "^2.2.0",
     "sequelize": "^5.2.1"
   },
   "devDependencies": {
