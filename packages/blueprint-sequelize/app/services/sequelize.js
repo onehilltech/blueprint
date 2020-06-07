@@ -72,9 +72,9 @@ const SequelizeBackend = Backend.extend ({
       }
 
       if (find (values (M1.associations), dependsOn (M2.name)))
-        return -1;
-      else if (find (values (M2.associations), dependsOn (M1.name)))
         return 1;
+      else if (find (values (M2.associations), dependsOn (M1.name)))
+        return -1;
       else
         return 0;
     });

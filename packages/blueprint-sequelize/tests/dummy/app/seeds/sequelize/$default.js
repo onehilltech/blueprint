@@ -25,7 +25,7 @@ module.exports = Seed.extend ({
         {name: 'Organization 2'}
       ],
       projects: [
-        {title: 'Project 1', description: 'This is the title for project 1.'},
+        {title: 'Project 1', description: 'This is the title for project 1.', organizationId: ref ('organizations.0')},
         {title: 'Project 2', description: 'This is the title for project 2.'},
         {title: 'Project 3', description: 'This is the title for project 3.'},
       ]
