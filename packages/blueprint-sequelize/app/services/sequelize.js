@@ -190,7 +190,8 @@ module.exports = Service.extend ({
   },
 
   seedConnection (name, conn, clear) {
-    const { clearBeforeSeeding = [] } = clear;
+    if (!!clear && clear === 'true')
+      clear = [];
 
     // When seeding a connection, we always build a new data model. This
     // is because we need to generate new ids for all model elements.
