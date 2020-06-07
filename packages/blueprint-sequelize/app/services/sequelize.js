@@ -4,7 +4,7 @@ const Sequelize  = require ('sequelize');
 const path = require ('path');
 const pluralize = require ('pluralize');
 
-const { forOwn, mapValues, pickBy, map, isPlainObject, filter, isEmpty } = require ('lodash');
+const { forOwn, mapValues, pickBy, map, isPlainObject, filter, isEmpty, values, find } = require ('lodash');
 const { props } = require ('bluebird');
 
 const debug = require ('debug') ('blueprint:sequelize');
@@ -21,7 +21,7 @@ const SequelizeBackend = Backend.extend ({
   init () {
     this._super.call (this, ...arguments);
 
-    this._nextId = mapValues (this.conn.models, (value, name) => 0);
+    this._nextId = mapValues (this.conn.models, () => 0);
   },
 
   supports (conn, name) {
@@ -52,12 +52,47 @@ const SequelizeBackend = Backend.extend ({
   },
 
   seed (conn, models) {
-    return props (mapValues (models, (records, name) => {
-      let modelName = pluralize.singular (name);
-      let Model = conn.models[modelName];
+    // First, we need to determine the order for inserting the models into the database. This
+    // is important will dealing with foreign references in SQL. If a dependency is not present
+    // in the database and references constraints are turned on, then the insertion will fail.
+    // We could temporarily turn off the constraints, but that could cause harm.
+
+    const names = Object.keys (models).map (key =>  pluralize.singular (key));
+    const topological = names.sort ((name1, name2) => {
+      const M1 = conn.models[name1];
+      const M2 = conn.models[name2];
+
+      function dependsOn (name) {
+        return function (association) {
+          if (association.associationType === 'BelongsTo')
+            return association.target.name === name;
+          else
+            return false;
+        }
+      }
+
+      if (find (values (M1.associations), dependsOn (M2.name)))
+        return -1;
+      else if (find (values (M2.associations), dependsOn (M1.name)))
+        return 1;
+      else
+        return 0;
+    });
+
+    // Use the topological ordering to insert the records into the database.
+
+    return Promise.all (topological.map (name => {
+      let plural = pluralize.plural (name);
+      let records = models[plural];
+      let Model = conn.models[name];
 
       return Model.bulkCreate (records).then (() => Model.findAll ());
-    }));
+    })).then (results => results.reduce ((acc, models, index) => {
+      let key = pluralize.plural (topological[index]);
+      acc[key] = models;
+
+      return acc;
+    }, {}));
   },
 
   clear (conn, Models, opts) {

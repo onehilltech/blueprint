@@ -20,6 +20,10 @@ const Seed = require ('../../../../../lib/seed');
 module.exports = Seed.extend ({
   model () {
     return {
+      organizations: [
+        {name: 'Organization 1'},
+        {name: 'Organization 2'}
+      ],
       projects: [
         {title: 'Project 1', description: 'This is the title for project 1.'},
         {title: 'Project 2', description: 'This is the title for project 2.'},

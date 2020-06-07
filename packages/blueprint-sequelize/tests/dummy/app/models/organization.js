@@ -15,22 +15,13 @@
  */
 
 const Sequelize = require ('../../../../lib');
-const blueprint = require ('@onehilltech/blueprint');
 
 const schema = {
   id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
 
-  title: Sequelize.STRING,
-
-  description: Sequelize.TEXT
+  name: Sequelize.STRING,
 };
 
-blueprint.app.on ('blueprint.app.initialized', function (app) {
-  Project.belongsTo (app.lookup ('model:organization'), {targetKey: 'id', as: 'organization', foreignKey: 'organizationId'});
-});
-
-const Project = Sequelize.resource ('project', schema, {
+module.exports = Sequelize.resource ('organization', schema, {
   timestamps: false
 });
-
-module.exports = Project;
