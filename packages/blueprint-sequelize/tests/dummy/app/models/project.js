@@ -24,7 +24,6 @@ const schema = {
   description: Sequelize.TEXT
 };
 
-const Project = Sequelize.resource ('project', schema, { });
-module.exports = Project;
-
-
+module.exports = Sequelize.resource ('project', schema, {
+  timestamps: false
+});

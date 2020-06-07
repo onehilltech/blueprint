@@ -1,7 +1,6 @@
-const {expect}  = require ('chai');
 
-const blueprint = require ('@onehilltech/blueprint');
 const { request } = require ('@onehilltech/blueprint-testing');
+const { seed, lean } = require ('../../../lib');
 
 describe ('lib:resource-controller', function () {
   describe ('create', function () {
@@ -11,72 +10,52 @@ describe ('lib:resource-controller', function () {
       return request ()
         .post ('/projects')
         .send ({ project })
-        .expect (200, { project: Object.assign (project, { id: 1 })});
+        .expect (200, { project: Object.assign ({}, project, { id: 3 })});
     });
   });
 
   describe ('getAll', function () {
     it ('get all the resources', function () {
-      const project = {title: 'Sequelize', description: 'Sequelize integration into blueprint'};
+      const { projects } = seed ();
 
       return request ()
-        .post ('/projects')
-        .send ({ project })
-        .then (res => {
-          return request ()
-            .get ('/projects')
-            .expect (200, {
-              projects: [ Object.assign ({}, project, { id: 1 })]
-            });
+        .get ('/projects')
+        .expect (200, {
+          projects: lean (projects)
         });
     });
   });
 
   describe ('getOne', function () {
     it ('should get a single resource', function () {
-      const project = {title: 'Sequelize', description: 'Sequelize integration into blueprint'};
+      const { projects: [ project ]} = seed ();
 
       return request ()
-        .post ('/projects')
-        .send ({ project })
-        .then (res => {
-          return request ()
-            .get ('/projects/1')
-            .expect (200, { project: Object.assign (project, { id: 1 })});
-        });
+        .get (`/projects/${project.id}`)
+        .expect (200, { project: lean (project) });
     });
   });
 
   describe ('delete', function () {
     it ('should delete a single resource', function () {
-      const project = {title: 'Sequelize', description: 'Sequelize integration into blueprint'};
+      const { projects: [ project ]} = seed ();
 
       return request ()
-        .post ('/projects')
-        .send ({ project })
-        .then (res => {
-          return request ()
-            .delete ('/projects/1')
-            .expect (200, 'true');
-        });
+        .delete (`/projects/${project.id }`)
+        .expect (200, 'true');
     });
 
     it ('should not double delete a resource', function () {
-      const project = {title: 'Sequelize', description: 'Sequelize integration into blueprint'};
+      const { projects: [ project ]} = seed ();
 
       return request ()
-        .post ('/projects')
-        .send ({ project })
+        .delete (`/projects/${project.id}`)
+        .expect (200, 'true')
         .then (res => {
           return request ()
-            .delete ('/projects/1')
-            .expect (200, 'true')
-            .then (res => {
-              return request ()
-                .delete ('/projects/1')
-                .expect (404, { errors:
-                    [ { code: 'not_found', detail: 'Not found', status: '404' } ] });
-            })
+            .delete (`/projects/${project.id}`)
+            .expect (404, { errors:
+                [ { code: 'not_found', detail: 'Not found', status: '404' } ] });
         });
     });
   });

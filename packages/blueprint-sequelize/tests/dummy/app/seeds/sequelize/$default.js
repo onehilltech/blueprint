@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 One Hill Technologies, LLC
+ * Copyright (c) 2018 One Hill Technologies, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-const Sequelize = require ('sequelize');
-module.exports = exports = Sequelize;
+const { ref } = require ('@onehilltech/dab');
+const Seed = require ('../../../../../lib/seed');
 
-const {
-  model,
-  resource
-} = require ('./models');
-
-const {
-  seed,
-  lean
-} = require ('./utils');
-
-exports.model = model;
-exports.resource = resource;
-exports.ResourceController = require ('./resource-controller');
-exports.flatten = require ('./flatten');
-exports.Seed = require ('./seed');
-exports.seed = seed;
-exports.lean = lean;
-
+module.exports = Seed.extend ({
+  model () {
+    return {
+      projects: [
+        {title: 'Project 1', description: 'This is the title for project 1.'},
+        {title: 'Project 2', description: 'This is the title for project 2.'},
+        {title: 'Project 3', description: 'This is the title for project 3.'},
+      ]
+    }
+  }
+});

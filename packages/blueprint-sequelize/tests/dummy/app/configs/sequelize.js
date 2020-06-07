@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
+const blueprint = require ('@onehilltech/blueprint');
+const path = require ('path');
+const storage = path.resolve (blueprint.app.tempPath, 'databases/database.sqlite');
+
 module.exports = {
   connections: {
     $default: {
       database: 'database',
       username: 'username',
       password: 'password',
+      storage,
+
       options: {
         dialect: 'sqlite'
-      }
+      },
+
+      seed: true
     }
   }
 };

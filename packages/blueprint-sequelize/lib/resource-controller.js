@@ -141,7 +141,6 @@ module.exports = ResourceController.extend ({
    */
   create () {
     const eventName = this._computeEventName ('created');
-    const { validators, sanitizers } = this.app.resources;
 
     return DatabaseAction.extend ({
       // schema: validation (this.Model.schema, extend ({}, this._defaultValidationOptions, {validators, sanitizers})),
