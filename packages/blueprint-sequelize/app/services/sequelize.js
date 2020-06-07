@@ -198,7 +198,7 @@ module.exports = Service.extend ({
     const backend = new SequelizeBackend ({conn});
 
     return this._buildSeed (name, conn, backend)
-      .then (data => !!data ? (!!clearBeforeSeeding ? this._clearConnection (name, conn, clearBeforeSeeding, backend) : Promise.resolve ())
+      .then (data => !!data ? (!!clear ? this._clearConnection (name, conn, clear, backend) : Promise.resolve ())
         .then (() => pickBy (data, (models, name) => backend.supports (conn, name)))
         .then (data => seed (conn, data, { backend })) : null)
       .then (models => {
