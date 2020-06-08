@@ -205,7 +205,7 @@ module.exports = Service.extend ({
         this._seeds[name] = models;
 
         if (!!models)
-          this.emit ('seeded', name, conn, models);
+          this.emit ('blueprint.sequelize.seeded', name, conn, models);
 
         return models;
       });
