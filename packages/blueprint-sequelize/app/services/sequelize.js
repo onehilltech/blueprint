@@ -182,15 +182,15 @@ module.exports = Service.extend ({
 
   openConnection (name, config) {
     let connection = this._connections[name];
-    let {seed = false, options, clear: clearBeforeSeeding = true} = config;
+    let {seed = false, clear = true} = config;
 
     return connection.authenticate ()
       .then (() => connection.sync ())
-      .then (() => seed ? this.seedConnection (name, connection, clearBeforeSeeding) : null);
+      .then (() => seed ? this.seedConnection (name, connection, clear) : null);
   },
 
   seedConnection (name, conn, clear) {
-    if (!!clear && clear === 'true')
+    if (!!clear && clear === true)
       clear = [];
 
     // When seeding a connection, we always build a new data model. This

@@ -149,7 +149,7 @@ module.exports = Service.extend ({
    * @returns {*}
    */
   openConnection (name, opts) {
-    let {uri, seed: seedData, options, clear: clearBeforeSeeding = true} = opts;
+    let {uri, seed: seedData, options, clear = true} = opts;
     debug (`opening connection ${name}`);
 
     let conn = this._connections[name];
@@ -164,7 +164,7 @@ module.exports = Service.extend ({
 
     return conn.openUri (uri, options).then (conn => {
       return this.emit ('open', name, conn)
-        .then (() => seedData ? this.seedConnection (name, conn, clearBeforeSeeding) : null)
+        .then (() => seedData ? this.seedConnection (name, conn, clear) : null)
         .then (() => conn);
     });
   },
@@ -175,7 +175,7 @@ module.exports = Service.extend ({
    * @private
    */
   seedConnection (name, conn, clear) {
-    if (!!clear && clear === 'true')
+    if (!!clear && clear === true)
       clear = [];
 
     // When seeding a connection, we always build a new data model. This

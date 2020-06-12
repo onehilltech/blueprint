@@ -31,11 +31,7 @@ module.exports = Listener.extend ({
 
     debug ('seeding all database connections');
 
-    const opts = {
-      clearBeforeSeeding: []
-    };
-
-    const seeding = mapValues (mongodb.connections, (conn, name) => mongodb.seedConnection (name, conn, opts));
+    const seeding = mapValues (mongodb.connections, (conn, name) => mongodb.seedConnection (name, conn, true));
     return Bluebird.props (seeding);
   }
 });

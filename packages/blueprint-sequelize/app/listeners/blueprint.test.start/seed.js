@@ -31,10 +31,6 @@ module.exports = Listener.extend ({
 
     debug ('seeding all database connections');
 
-    const opts = {
-      clearBeforeSeeding: []
-    };
-
-    return props (mapValues (sequelize.connections, (conn, name) => sequelize.seedConnection (name, conn, opts)));
+    return props (mapValues (sequelize.connections, (conn, name) => sequelize.seedConnection (name, conn, true)));
   }
 });
