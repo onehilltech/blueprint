@@ -132,6 +132,10 @@ module.exports = Service.extend ({
     get () { return this._seeds; }
   }),
 
+  definitions: computed ({
+    get () { return this._seedDefs; }
+  }),
+
   _loadConfiguration () {
     // Locate the module configuration in the application. If there is no
     // configuration, then we need to stop processing. This brings attention
