@@ -82,14 +82,16 @@ module.exports = ResourceController.extend ({
   /// Compute the plural name for the resource.
   plural: computed.readonly ('Model.options.name.plural'),
 
-  /// The primary key filed.
+  /// The primary key field.
   primaryKey: computed.readonly ('Model.primaryKeyField'),
+  idField: null,
 
   /// Test if the resource model has timestamps.
   _hasTimestamps: computed.readonly ('Model.options.timestamps'),
 
   /// The timestamp fields, if present.
   _timestampFields: computed.readonly ('Model._timestampAttributes'),
+
 
   /**
    * @class SingleResourceAction
@@ -443,12 +445,12 @@ module.exports = ResourceController.extend ({
       },
 
       getModel (req, id, projection, include, options) {
-        const { primaryKeyField } = this.controller.Model;
+        const { Model, primaryKey, idField } = this.controller;
 
-        return this.controller.Model.findAll ({
+        return Model.findAll ({
           include,
           where: {
-            [primaryKeyField]: id,
+            [idField || primaryKey]: id,
           }
         });
       },
@@ -472,7 +474,6 @@ module.exports = ResourceController.extend ({
   update () {
     const defaultOptions = { upsert: false, new: true };
     const eventName = this._computeEventName ('updated');
-    const {validators,sanitizers} = this.app.resources;
 
     return DatabaseAction.extend ({
       /*schema: extend (
@@ -554,8 +555,8 @@ module.exports = ResourceController.extend ({
       },
 
       updateModel (req, id, update, options) {
-        const { Model } = this.controller;
-        const where = {[this.controller.primaryKey]: id};
+        const { Model, primaryKey, idField } = this.controller;
+        const where = {[idField || primaryKey]: id};
 
         return Model.findOne ({where}).then (model => !!model ? model.update (update) : Promise.reject (new NotFoundError ('not_found', 'The resource does not exist.')));
       },
@@ -630,11 +631,11 @@ module.exports = ResourceController.extend ({
       },
 
       deleteModel (req, id) {
-        const { primaryKeyField } = this.controller.Model;
+        const { Model, primaryKey, idField } = this.controller;
 
-        return this.controller.Model.destroy ({
+        return Model.destroy ({
           where: {
-            [primaryKeyField]: id
+            [idField || primaryKey]: id
           }
         });
       },
