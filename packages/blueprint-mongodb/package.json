@@ -18,7 +18,7 @@
   "repository": "onehilltech/blueprint",
   "dependencies": {
     "@onehilltech/blueprint": "^4.21.0",
-    "@onehilltech/dab-mongodb": "^2.5.0",
+    "@onehilltech/dab-mongodb": "^2.5.1",
     "moment": "^2.22.2"
   },
   "devDependencies": {
