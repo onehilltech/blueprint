@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-mongodb",
   "description": "Blueprint.js module for MongoDB",
-  "version": "4.27.6",
+  "version": "4.27.7",
   "private": false,
   "main": "./lib",
   "keywords": [
