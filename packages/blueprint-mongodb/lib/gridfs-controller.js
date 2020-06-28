@@ -76,6 +76,10 @@ module.exports = ResourceController.extend ({
   /// Name of the resource.
   name: null,
 
+  /// The bucket name for the resources. If one is not provided, then the name
+  /// of the resource is used for the bucket name.
+  bucketName: null,
+
   /// Name of the target connection. The $default connection is the
   /// default target connection.
   connection: '$default',
@@ -104,7 +108,7 @@ module.exports = ResourceController.extend ({
         throw new Error ('The connection to the database is not open.');
 
       let opts = {
-        bucketName: this.name,
+        bucketName: this.bucketName || this.name,
         chunkSizeBytes: this.chunkSizeBytes
       };
 
