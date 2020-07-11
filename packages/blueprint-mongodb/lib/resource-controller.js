@@ -86,7 +86,7 @@ const DatabaseAction = Action.extend ({
  *
  * Resource controller designed to operate on a Mongoose model.
  */
-module.exports = ResourceController.extend ({
+exports = module.exports = ResourceController.extend ({
   /// Custom actions available only to the MongoDB resource controller.
   _actions: {
     search: {verb: 'post', path: '/search', method: 'search'},
@@ -893,3 +893,5 @@ module.exports = ResourceController.extend ({
     return update;
   }
 });
+
+exports.DatabaseAction = DatabaseAction;
