@@ -35,10 +35,12 @@ const LAST_MODIFIED = 'Last-Modified';
 
 /**
  * Create the schema for validating the resource id.
+ *
+ * @param location
  */
-function createResourceIdParamsSchema () {
+function createResourceIdParamsSchema (location = 'params') {
   return {
-    in: 'params',
+    in: location,
     errorMessage: 'The id is not valid.',
     custom: {
       options: blueprint.lookup ('validator:isMongoId')
@@ -895,3 +897,4 @@ exports = module.exports = ResourceController.extend ({
 });
 
 exports.DatabaseAction = DatabaseAction;
+exports.createResourceIdParamsSchema = createResourceIdParamsSchema;
