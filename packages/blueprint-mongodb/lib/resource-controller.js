@@ -38,7 +38,7 @@ const LAST_MODIFIED = 'Last-Modified';
  *
  * @param location
  */
-function createResourceIdParamsSchema (location = 'params') {
+function createResourceIdSchema (location = 'params') {
   return {
     in: location,
     errorMessage: 'The id is not valid.',
@@ -357,7 +357,7 @@ exports = module.exports = ResourceController.extend ({
   getOne () {
     return DatabaseAction.extend ({
       schema: {
-        [this.resourceId]: createResourceIdParamsSchema ()
+        [this.resourceId]: createResourceIdSchema ()
       },
 
       execute (req, res) {
@@ -458,7 +458,7 @@ exports = module.exports = ResourceController.extend ({
     return DatabaseAction.extend ({
       schema: extend (
         validation (this.Model.schema, extend ({}, this._defaultValidationOptions, {allOptional:true, validators, sanitizers})),
-        {[this.resourceId]: createResourceIdParamsSchema () }),
+        {[this.resourceId]: createResourceIdSchema () }),
 
       eventName,
 
@@ -581,7 +581,7 @@ exports = module.exports = ResourceController.extend ({
 
     return DatabaseAction.extend ({
       schema: {
-        [this.resourceId]: createResourceIdParamsSchema ()
+        [this.resourceId]: createResourceIdSchema ()
       },
 
       eventName,
@@ -897,4 +897,4 @@ exports = module.exports = ResourceController.extend ({
 });
 
 exports.DatabaseAction = DatabaseAction;
-exports.createResourceIdParamsSchema = createResourceIdParamsSchema;
+exports.createResourceIdSchema = createResourceIdSchema;
