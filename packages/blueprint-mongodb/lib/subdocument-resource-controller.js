@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+const { NotFoundError } = require ('@onehilltech/blueprint');
 const ResourceController = require ('./resource-controller');
-const assert = require ('assert');
 const validation = require ('./validation');
 const pluralize = require ('pluralize');
 const { extend } = require ('lodash');
@@ -77,7 +77,14 @@ exports = module.exports = ResourceController.extend ({
    * @returns {*}
    */
   getOne () {
-    return this._super.call (this, ...arguments);
+    return this._super.call (this, ...arguments).extend ({
+      getModel (req, id, projection, options) {
+        const {Model, path} = this.controller;
+        const condition = {[`${path}._id`]: id};
+
+        return Model.findOne (condition, projection, options).then (model => !!model ? model[path].id (id) : null);
+      }
+    });
   },
 
   /**
@@ -100,7 +107,7 @@ exports = module.exports = ResourceController.extend ({
         const { path, Model } = this.controller;
         const condition = { [`${path}._id`]: id};
 
-        return this.controller.Model.findOne (condition)
+        return Model.findOne (condition)
           .then (model => {
             // If there is no model, then we need to let the client know.
             if (!model)
