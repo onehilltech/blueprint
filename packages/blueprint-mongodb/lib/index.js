@@ -45,6 +45,7 @@ exports.resource = resource;
 exports.resourceOn = resourceOn;
 
 exports.ResourceController = require ('./resource-controller');
+exports.SubdocumentResourceController = require ('./subdocument-resource-controller');
 exports.GridFSController = require ('./gridfs-controller');
 exports.populate = require ('./populate');
 exports.lean = lean;
