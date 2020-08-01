@@ -10,7 +10,6 @@
   ],
   "repository": "onehilltech/blueprint",
   "dependencies": {
-    "@onehilltech/blueprint-email": "^4.21.0",
     "@onehilltech/blueprint-mongodb": "^4.28.0",
     "bcrypt": "^5.0.0",
     "commander": "^2.11.0",
