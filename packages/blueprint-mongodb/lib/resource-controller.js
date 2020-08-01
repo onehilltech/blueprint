@@ -191,8 +191,9 @@ exports = module.exports = ResourceController.extend ({
 
                 // Set the headers for the response. We want to make sure that we support
                 // the caching headers even if they are not being used.
-                if (result.last_modified)
+                if (result.last_modified) {
                   res.set (LAST_MODIFIED, result.last_modified.toUTCString ());
+                }
 
                 return this.postCreateModel (req, result);
               });
@@ -386,9 +387,8 @@ exports = module.exports = ResourceController.extend ({
                 // Get the last modified date. This value needs to be returned in the
                 // response since it represents when this collection of models was last changed.
 
-                res.set ({
-                  [LAST_MODIFIED]: model.last_modified.toUTCString ()
-                });
+                if (model.last_modified)
+                  res.set (LAST_MODIFIED, model.last_modified.toUTCString ());
 
                 return this.postGetModel (req, model);
               })
