@@ -77,12 +77,27 @@ exports = module.exports = ResourceController.extend ({
   delete () {
     return this._super.call (this, ...arguments).extend ({
       deleteModel (req, id) {
-        const { Model, path } = this.controller;
-        const criteria = { [`${path}._id`]: id};
+        const { path, Model } = this.controller;
+        const condition = { [`${path}._id`]: id};
 
-        return Model.findOneAndRemove (criteria);
+        return this.controller.Model.findOne (condition)
+          .then (model => {
+            // If there is no model, then we need to let the client know.
+            if (!model)
+              return Promise.reject (new NotFoundError ('not_found', 'Not found'));
+
+            model[path].id (id).remove ();
+            return model.save ();
+          });
       },
     });
+  },
+
+  /**
+   * Return the number of resources.
+   */
+  count () {
+    return this._super.call (this, ...arguments);
   },
 
   /**
