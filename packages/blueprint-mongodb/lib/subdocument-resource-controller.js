@@ -16,6 +16,9 @@
 
 const ResourceController = require ('./resource-controller');
 const assert = require ('assert');
+const validation = require ('./validation');
+const pluralize = require ('pluralize');
+const { extend } = require ('lodash');
 
 /**
  * @class SubdocumentResourceController
@@ -29,17 +32,34 @@ exports = module.exports = ResourceController.extend ({
    * Initialize the resource controller.
    */
   init (opts = {}) {
-    // Pass control to the base class.
-    this._super.call (this, opts);
-
-    // Prepare the options for the base class.
-    assert (!!this.path, "You must define the path property.");
+    this._super.call (this, Object.assign ({
+      name: pluralize.singular (this.path)
+    }, opts));
   },
 
   create () {
-    return this._super.call (this, ...arguments).extend ({
-      createModel (req, document) {
+    const {validators, sanitizers} = this.app.resources;
+    const schema = validation (this.Model.schema.paths[this.path].schema, extend ({}, this._defaultValidationOptions, {validators, sanitizers}))
 
+    return this._super.call (this, { schema }).extend ({
+      createModel (req, document) {
+        const { Model, path } = this.controller;
+        const { modelName } = Model;
+
+        const { [modelName]: modelId , ...subdocument } = document;
+
+        return Model.findById (modelId)
+          .then (parentModel => {
+            if (!parentModel)
+              throw new NotFoundError ('not_found', `The ${modelName} with id ${modelId} does not exist.`);
+
+            // Create the new student, and mark the subdocument as modified. We can
+            // then save the document to the database.
+            let model = parentModel[path].create (subdocument);
+            parentModel[path].push (model);
+
+            return parentModel.save ().then (() => model);
+          });
       }
     });
   },

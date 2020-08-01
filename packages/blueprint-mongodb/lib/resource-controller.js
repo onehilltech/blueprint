@@ -156,12 +156,12 @@ exports = module.exports = ResourceController.extend ({
   /**
    * Create a new resource.
    */
-  create () {
+  create (opts = {}) {
     const eventName = this._computeEventName ('created');
     const {validators,sanitizers} = this.app.resources;
 
     return DatabaseAction.extend ({
-      schema: validation (this.Model.schema, extend ({}, this._defaultValidationOptions, {validators, sanitizers})),
+      schema: opts.schema || validation (this.Model.schema, extend ({}, this._defaultValidationOptions, {validators, sanitizers})),
 
       /// Name of event for completion of action.
       eventName,
@@ -191,7 +191,8 @@ exports = module.exports = ResourceController.extend ({
 
                 // Set the headers for the response. We want to make sure that we support
                 // the caching headers even if they are not being used.
-                res.set (LAST_MODIFIED, result.last_modified.toUTCString ());
+                if (result.last_modified)
+                  res.set (LAST_MODIFIED, result.last_modified.toUTCString ());
 
                 return this.postCreateModel (req, result);
               });
