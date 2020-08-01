@@ -5,6 +5,7 @@
       <w>populator</w>
       <w>sched</w>
       <w>sequelize</w>
+      <w>subdocument</w>
     </words>
   </dictionary>
 </component>
