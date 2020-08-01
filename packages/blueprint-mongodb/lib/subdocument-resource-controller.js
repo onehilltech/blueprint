@@ -86,13 +86,6 @@ exports = module.exports = ResourceController.extend ({
   },
 
   /**
-   * Return the number of resources.
-   */
-  count () {
-    return this._super.call (this, ...arguments);
-  },
-
-  /**
    * Search for resources that match the search criteria.
    */
   search () {
