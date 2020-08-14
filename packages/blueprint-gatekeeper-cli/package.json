@@ -4,10 +4,7 @@
   "version": "4.28.4",
   "private": false,
   "main": "./lib",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/onehilltech/gatekeeper-cli.git"
-  },
+  "repository": "onehilltech/blueprint",
   "dependencies": {
     "@onehilltech/blueprint-gatekeeper": "^4.28.4",
     "async": "^2.1.2",
