@@ -60,9 +60,8 @@ function newInstance (opts, callback) {
     if (err)
       return callback (err);
 
-    if (res.statusCode !== 200) {
+    if (res.statusCode !== 200)
       return callback (new Error (body));
-    }
 
     let token = body.access_token;
     let client = new GatekeeperClient (opts, token);
@@ -155,7 +154,7 @@ GatekeeperClient.prototype.deleteAccount = function (accountId, callback) {
  * @returns {*}
  */
 GatekeeperClient.prototype.getCompleteUrl = function (relativePath) {
-  return this.baseUri + '/v1' + relativePath;
+  return `${this.baseUri}${relativePath}`;
 };
 
 /**
