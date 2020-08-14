@@ -30,6 +30,7 @@ schemas.android = _.extend (_.clone (schemas.native), {
 });
 
 program
+  .option ('-b, --base <base>', 'base url for the gatekeeper service')
   .parse (process.argv);
 
 function actionComplete (err, result) {

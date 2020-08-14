@@ -5,7 +5,6 @@ const { version } = require ('../package.json');
 
 program
   .version (version)
-  .option ('-b, --base <base>', 'base uri for the gatekeeper service')
   .command ('client', 'manage client access to resources')
   .command ('account', 'manage user access to resources')
   .parse (process.argv);

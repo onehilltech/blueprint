@@ -9,6 +9,7 @@ let program          = require ('commander')
   ;
 
 program
+  .option ('-b, --base <base>', 'base url for the gatekeeper service')
   .parse (process.argv);
 
 async.waterfall ([
