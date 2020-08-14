@@ -1,6 +1,6 @@
 {
   "name": "@onehilltech/blueprint-cli-exts",
-  "version": "4.21.0",
+  "version": "4.28.4",
   "description": "Extension classes for Blueprint cli",
   "private": false,
   "repository": "onehilltech/blueprint",

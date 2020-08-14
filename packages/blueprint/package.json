@@ -1,14 +1,14 @@
 {
   "name": "@onehilltech/blueprint",
   "author": "One Hill Technologies, LLC",
-  "version": "4.21.0",
+  "version": "4.28.4",
   "description": "lightweight, simple, elegant framework for building mean applications",
   "license": "Apache-2.0",
   "private": false,
   "main": "./lib",
   "repository": "onehilltech/blueprint",
   "dependencies": {
-    "@onehilltech/blueprint-cli-exts": "^4.21.0",
+    "@onehilltech/blueprint-cli-exts": "^4.28.4",
     "base-object": "^1.4.0",
     "body-parser": "^1.17.2",
     "commander": "^4.0.1",
