@@ -1,7 +1,6 @@
 'use strict';
 
 let request = require ('request')
-  , winston = require ('winston')
   , path    = require ('path')
   , fse     = require ('fs-extra')
   , async   = require ('async')

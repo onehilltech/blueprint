@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-'use strict';
 
-var program = require ('commander');
+const program = require ('commander');
+const { version } = require ('../package.json');
 
 program
+  .version (version)
   .command ('client', 'manage client access to resources')
   .command ('account', 'manage user access to resources')
   .parse (process.argv);
