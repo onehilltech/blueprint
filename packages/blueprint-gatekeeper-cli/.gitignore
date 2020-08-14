@@ -4,6 +4,8 @@ logs
 *.log
 npm-debug.log*
 
+.gatekeeper/
+
 # Runtime data
 pids
 *.pid

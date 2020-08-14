@@ -60,8 +60,9 @@ function newInstance (opts, callback) {
     if (err)
       return callback (err);
 
-    if (res.statusCode !== 200)
+    if (res.statusCode !== 200) {
       return callback (new Error (body));
+    }
 
     let token = body.access_token;
     let client = new GatekeeperClient (opts, token);
