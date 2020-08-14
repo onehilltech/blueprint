@@ -3,78 +3,48 @@
 const winston = require ('winston');
 const prompt  = require ('prompt');
 const blueprint = require ('@onehilltech/blueprint');
-const mongodb = require ('@onehilltech/blueprint-mongodb');
 const path = require ('path');
-const async = require ('async');
-const fse = require ('fs-extra');
+const fs = require ('fs-extra');
+const { fromCallback } = require ('bluebird');
+
 
 const appPath = path.resolve (process.cwd (), 'app');
 const rcPath  = path.resolve (process.cwd (), '.gatekeeper');
 const DEFAULT_SCOPE = ['gatekeeper.*'];
 
-let targetConnection = '$default';
+const schema = [
+  { name: 'email', required: true },
+  { name: 'connection', required: false, default: '$default'}
+];
 
-async.waterfall ([
-  function (callback) { prompt.get (['email'], callback); },
-  execute
-], setupComplete);
+// Start the command-line prompt.
+prompt.start ();
 
-function execute (args, callback) {
-  async.waterfall ([
-    function (callback) {
-      blueprint.createApplication (appPath, callback);
-    },
+// Get the email address for the command-line client.
+fromCallback (callback => prompt.get (schema, callback))
+  .then (({ email, connection: connectionName }) =>
+    blueprint.createApplication (appPath)
+      .then (app => fs.ensureDir (rcPath)
+        .then (() => {
+          let { mongodb: config } = app.configs;
+          let connOptions = config.connections[connectionName];
 
-    function (app, callback) {
-      async.waterfall ([
-        /*
-         * Make sure the output directory exists.
-         */
-        function (callback) {
-          fse.ensureDir (rcPath, callback);
-        },
+          return app.lookup ('service:mongodb').openConnection (connectionName, connOptions);
+        })
+        .then (() => app.lookup ('model:client').create ({type: 'native', name: 'gatekeeper-cli', email, scope: DEFAULT_SCOPE}))
+        .then (client => {
+          const filename = path.resolve (rcPath, client.name);
 
-        /*
-         * Open the connection to the database.
-         */
-        function (exists, callback) {
-          let mongoConfig = blueprint.app.configs.mongodb;
-          let connOptions = mongoConfig.connections[targetConnection];
+          const data = {
+            client_id: client.id,
+            client_secret: client.client_secret
+          };
 
-          mongodb.getConnectionManager ().openConnection (targetConnection, connOptions, callback);
-        },
-
-        /*
-         * Create each of the clients.
-         */
-        function (conn, callback) {
-          let data = [
-            {type: 'native', name: 'gatekeeper-cli', email: args.email, scope: DEFAULT_SCOPE}
-          ];
-
-          blueprint.app.models.Client.create (data, callback);
-        },
-
-        function (clients, callback) {
-          async.each (clients, function (client, callback) {
-            let data = {
-              client_id: client.id,
-              client_secret: client.client_secret
-            };
-
-            let filename = path.resolve (rcPath, client.name);
-            fse.writeJSON (filename, data, {spaces: 2}, callback);
-          }, callback);
-        }
-      ], callback);
-    }
-  ], callback);
-}
-
-function setupComplete (err) {
-  if (err)
-    throw err;
-
-  winston.log ('info', 'setup complete!');
-  process.exit (0);
-}
+          return fs.writeJSON (filename, data, {spaces: 2})
+        })
+      )
+      .then (() => {
+        winston.log ('info', 'setup complete!');
+        process.exit (0);
+      })
+  );
