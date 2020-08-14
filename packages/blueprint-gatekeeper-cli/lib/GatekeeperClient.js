@@ -55,7 +55,7 @@ function newInstance (opts, callback) {
     client_secret : opts.clientSecret
   };
 
-  let url = opts.baseUri + '/v1/oauth2/token';
+  let url = opts.baseUri + '/oauth2/token';
   request ({url: url, method: 'POST', json: data}, function (err, res, body) {
     if (err)
       return callback (err);
