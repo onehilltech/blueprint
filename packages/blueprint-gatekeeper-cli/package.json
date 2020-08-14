@@ -7,7 +7,7 @@
   "repository": "onehilltech/blueprint",
   "dependencies": {
     "async": "^2.1.2",
-    "commander": "^2.9.0",
+    "commander": "^6.0.0",
     "prompt": "^1.0.0",
     "request": "^2.65.0",
     "underscore": "^1.8.3",

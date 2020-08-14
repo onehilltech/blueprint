@@ -1,15 +1,13 @@
 #!/usr/bin/env node
 'use strict';
 
-var program          = require ('commander')
-  , gatekeeper       = require ('@onehilltech/blueprint-gatekeeper')
+let program          = require ('commander')
   , gatekeeperClient = require ('../lib/GatekeeperClient')
   , async            = require ('async')
   , winston          = require ('winston')
   ;
 
 program
-  .option ('-b, --base <base>', 'Base uri for the Gatekeeper service')
   .arguments ('<account-id>')
   .action (deleteClient)
   .parse (process.argv);

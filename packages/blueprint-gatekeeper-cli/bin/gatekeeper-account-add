@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-var program          = require ('commander')
-  , gatekeeper       = require ('@onehilltech/blueprint-gatekeeper')
+let program          = require ('commander')
   , gatekeeperClient = require ('../lib/GatekeeperClient')
   , async            = require ('async')
   , winston          = require ('winston')
@@ -10,7 +9,6 @@ var program          = require ('commander')
   ;
 
 program
-  .option ('-b, --base <base>', 'Base uri for the Gatekeeper service')
   .parse (process.argv);
 
 async.waterfall ([

@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-'use strict';
 
-var program    = require ('commander')
+const program    = require ('commander')
   , async      = require ('async')
   , winston    = require ('winston')
   , prompt     = require ('prompt')
@@ -16,7 +15,7 @@ const base = {
   enabled: {default: true, type: 'boolean'}
 };
 
-var schemas = { };
+let schemas = { };
 
 schemas.native = _.extend (_.clone (base), {
   client_secret: {hidden: true}
@@ -30,9 +29,7 @@ schemas.android = _.extend (_.clone (schemas.native), {
   package: {required: true}
 });
 
-
 program
-  .option ('-b, --base <base>', 'Base uri for the Gatekeeper service')
   .parse (process.argv);
 
 function actionComplete (err, result) {
