@@ -22,11 +22,17 @@ schemas.native = _.extend (_.clone (base), {
 });
 
 schemas.recaptcha = _.extend (_.clone (base), {
+  origin: {required: true},
   recaptcha_secret: {required: true, hidden: true}
 });
 
 schemas.android = _.extend (_.clone (schemas.native), {
   package: {required: true}
+});
+
+schemas.hybrid = _.extend (_.clone (schemas.native), {
+  origin: {required: true},
+  client_secret: {required: true, hidden: true}
 });
 
 program
