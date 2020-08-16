@@ -65,8 +65,8 @@ function generate (name) {
     return templates.render (context);
   }).then (() => {
     const commands = [
-      [ 'install', '@onehilltech/blueprint', '@onehilltech/blueprint-cli', 'pug'],
-      [ 'install', '@onehilltech/blueprint-testing', '--save-dev'],
+      [ 'install', '@onehilltech/blueprint', 'pug'],
+      [ 'install', '@onehilltech/blueprint-testing', '@onehilltech/blueprint-cli', '--save-dev'],
       [ 'bin' ]
     ];
 
