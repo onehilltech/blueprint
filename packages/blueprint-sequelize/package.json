@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-sequelize",
   "description": "Blueprint module for sequelize",
-  "version": "4.28.12",
+  "version": "4.28.13",
   "private": false,
   "repository": "onehilltech/blueprint",
   "main": "./lib",
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.28.4",
-    "@onehilltech/blueprint-cli": "^4.28.12",
+    "@onehilltech/blueprint-cli": "^4.28.13",
     "@onehilltech/dab": "^2.7.3",
     "sequelize": "^5.2.1"
   },
