@@ -359,10 +359,14 @@ module.exports = ResourceController.extend ({
    *
    * @returns {*}
    */
-  getOne () {
+  getOne (options = []) {
+    const {
+      resourceIdSchema
+    } = options;
+
     return DatabaseAction.extend ({
       schema: {
-        [this.resourceId]: RESOURCE_ID_PARAMS_SCHEMA
+        [this.resourceId]: resourceIdSchema || RESOURCE_ID_PARAMS_SCHEMA
       },
 
       execute (req, res) {
