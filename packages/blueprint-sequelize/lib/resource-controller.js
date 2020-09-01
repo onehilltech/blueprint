@@ -330,15 +330,10 @@ module.exports = ResourceController.extend ({
         const directives = req.query._ || {};
         const { deleted } = directives;
 
-        let attributes = Object.keys (projection);
-
-        if (attributes.length === 0)
-          attributes = undefined;
-
         if (!deleted && this.controller._softDelete)
           filter['_stat.deleted_at'] = {$exists: false};
 
-        return this.controller.Model.findAll ({ include, attributes, where: filter });
+        return this.controller.Model.findAll ({ include, attributes: projection, where: filter });
       },
 
       postGetModels (req, models) {
@@ -453,6 +448,7 @@ module.exports = ResourceController.extend ({
 
         return Model.findAll ({
           include,
+          attributes: projection,
           where: {
             [idField || primaryKey]: id,
           }
