@@ -84,7 +84,7 @@ module.exports = ResourceController.extend ({
 
   /// The primary key field.
   primaryKey: computed.readonly ('Model.primaryKeyField'),
-  idField: null,
+  customId: null,
 
   /// Test if the resource model has timestamps.
   _hasTimestamps: computed.readonly ('Model.options.timestamps'),
@@ -355,13 +355,12 @@ module.exports = ResourceController.extend ({
    * @returns {*}
    */
   getOne (options = []) {
-    const {
-      resourceIdSchema
-    } = options;
+    const { customId = {} } = this;
+    const { resourceIdSchema } = options;
 
     return DatabaseAction.extend ({
       schema: {
-        [this.resourceId]: resourceIdSchema || RESOURCE_ID_PARAMS_SCHEMA
+        [this.resourceId]: resourceIdSchema || customId.schema || RESOURCE_ID_PARAMS_SCHEMA
       },
 
       execute (req, res) {
@@ -444,13 +443,13 @@ module.exports = ResourceController.extend ({
       },
 
       getModel (req, id, projection, include, options) {
-        const { Model, primaryKey, idField } = this.controller;
+        const { Model, primaryKey, customId = {} } = this.controller;
 
         return Model.findAll ({
           include,
           attributes: projection,
           where: {
-            [idField || primaryKey]: id,
+            [customId.field || primaryKey]: id,
           }
         });
       },
@@ -555,8 +554,8 @@ module.exports = ResourceController.extend ({
       },
 
       updateModel (req, id, update, options) {
-        const { Model, primaryKey, idField } = this.controller;
-        const where = {[idField || primaryKey]: id};
+        const { Model, primaryKey, customId = {} } = this.controller;
+        const where = {[customId.field || primaryKey]: id};
 
         return Model.findOne ({where}).then (model => !!model ? model.update (update) : Promise.reject (new NotFoundError ('not_found', 'The resource does not exist.')));
       },
@@ -590,12 +589,15 @@ module.exports = ResourceController.extend ({
    * Delete a single resource from the collection. The id of the target resource
    * to delete is expected in the request parameters under `[:resourceId]`.
    */
-  delete () {
+  delete (options) {
+    const { customId = {} } = this;
+    const { resourceIdSchema } = options;
+
     const eventName = this._computeEventName ('deleted');
 
     return DatabaseAction.extend ({
       schema: {
-        [this.resourceId]: RESOURCE_ID_PARAMS_SCHEMA
+        [this.resourceId]: resourceIdSchema || customId.schema || RESOURCE_ID_PARAMS_SCHEMA
       },
 
       eventName,
@@ -631,11 +633,11 @@ module.exports = ResourceController.extend ({
       },
 
       deleteModel (req, id) {
-        const { Model, primaryKey, idField } = this.controller;
+        const { Model, primaryKey, customId = {} } = this.controller;
 
         return Model.destroy ({
           where: {
-            [idField || primaryKey]: id
+            [customId.field || primaryKey]: id
           }
         });
       },
