@@ -16,15 +16,20 @@
 
 const blueprint = require ('@onehilltech/blueprint');
 const Sequelize = require ('sequelize');
+const { isString } = require ('lodash');
 
 function model (name, schema, options) {
   const sequelize = blueprint.lookup ('service:sequelize');
   const defaultConnection = sequelize.defaultConnection;
 
   const Model = class extends Sequelize.Model { };
-  const immutableOptions = { modelName: name, sequelize: defaultConnection };
+  const immutableOptions = { modelName: name };
+  const defaultOptions = { sequelize: defaultConnection };
 
-  const M = Model.init (schema, Object.assign ({}, options, immutableOptions));
+  if (!!options.sequelize && isString (options.sequelize))
+    options.sequelize = sequelize.connections[option.sequelize];
+
+  const M = Model.init (schema, Object.assign ({}, defaultOptions, options, immutableOptions));
 
   Object.defineProperty (schema.options, 'resource', { enumerable: true, writable: false, value: true });
 
@@ -36,9 +41,13 @@ function resource (name, schema, options) {
   const defaultConnection = sequelize.defaultConnection;
 
   const Model = class extends Sequelize.Model { };
-  const immutableOptions = { modelName: name, sequelize: defaultConnection, resource: true };
+  const immutableOptions = { modelName: name, resource: true };
+  const defaultOptions = { sequelize: defaultConnection };
 
-  return Model.init (schema, Object.assign ({}, options, immutableOptions));
+  if (!!options.sequelize && isString (options.sequelize))
+    options.sequelize = sequelize.connections[options.sequelize];
+
+  return Model.init (schema, Object.assign ({}, defaultOptions, options, immutableOptions));
 }
 
 exports.model = model;
