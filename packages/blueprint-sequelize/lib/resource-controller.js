@@ -84,7 +84,10 @@ module.exports = ResourceController.extend ({
 
   /// The primary key field.
   primaryKey: computed.readonly ('Model.primaryKeyField'),
-  customId: null,
+
+  /// The custom id specification when the primary key is not the id field
+  /// in the request params.
+  customId: undefined,
 
   /// Test if the resource model has timestamps.
   _hasTimestamps: computed.readonly ('Model.options.timestamps'),
