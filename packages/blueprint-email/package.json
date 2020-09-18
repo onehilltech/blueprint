@@ -12,6 +12,7 @@
   "dependencies": {
     "@onehilltech/blueprint": "^4.28.4",
     "@onehilltech/blueprint-cli": "^4.28.13",
+    "@onehilltech/blueprint-mongodb": "^4.28.13",
     "email-templates": "^5.0.2",
     "nodemailer": "^5.0.0",
     "nodemailer-mailgun-transport": "^1.4.0",
