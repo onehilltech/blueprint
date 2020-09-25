@@ -1,6 +1,6 @@
 {
   "name": "@onehilltech/blueprint-testing",
-  "version": "4.28.4",
+  "version": "4.28.18",
   "description": "Testing module for BlueprintJS applications",
   "main": "lib/index.js",
   "repository": "onehilltech/blueprint",
