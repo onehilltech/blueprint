@@ -186,10 +186,10 @@ module.exports = Service.extend ({
 
   openConnection (name, config) {
     let connection = this._connections[name];
-    let {seed = false, clear = true} = config;
+    let {seed = false, clear = true, sync = false} = config;
 
     return connection.authenticate ()
-      .then (() => connection.sync ())
+      .then (() => sync ? connection.sync () : null)
       .then (() => seed ? this.seedConnection (name, connection, clear) : null);
   },
 
