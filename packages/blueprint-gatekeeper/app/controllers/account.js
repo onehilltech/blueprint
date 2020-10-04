@@ -246,7 +246,7 @@ module.exports = ResourceController.extend ({
               scope: ['gatekeeper.session.impersonation']
             };
 
-            return this.session.issueToken (req.gatekeeperClient._id, account, payload, options);
+            return this.session.issueToken (req.accessToken.client._id, account, payload, options);
           })
           .then (token => res.status (200).json (Object.assign ({token_type: 'Bearer'}, token)));
       }
