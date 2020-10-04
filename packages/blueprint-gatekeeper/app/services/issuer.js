@@ -51,6 +51,7 @@ const Issuer = BlueprintObject.extend ({
    * @param account
    * @param payload
    * @param opts
+   * @param serialize
    */
   issueUserToken (account, client, payload = {}, opts = {}, serialize = true) {
     // First, make sure we are able to issue a token for the user on the target client.

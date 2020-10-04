@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-const { Service, model, service, ForbiddenError, BadRequestError } = require ('@onehilltech/blueprint');
-const { union, get, omit } = require ('lodash');
-
-const {
-  Types: { ObjectId }
-} = require ('@onehilltech/blueprint-mongodb');
-
-const moment = require ('moment');
+const { Service, model, service, BadRequestError } = require ('@onehilltech/blueprint');
+const { get } = require ('lodash');
 
 /**
  * @class GatekeeperService
@@ -33,7 +27,7 @@ module.exports = Service.extend ({
   /// Reference to the issuer service.
   issuer: service ('issuer'),
 
-  /// Reference the account mpdel.
+  /// Reference the account model.
   Account: model ('account'),
 
   /// Reference to the client model.
@@ -62,6 +56,7 @@ module.exports = Service.extend ({
    *
    * @param clientId        Hosting client
    * @param account         The account model
+   * @param payload
    * @param opts            Additional options
    */
   issueToken (clientId, account, payload, opts) {

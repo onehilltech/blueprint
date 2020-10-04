@@ -219,6 +219,37 @@ module.exports = ResourceController.extend ({
 
         return user.verifyPassword (password).then (result => res.status (200).json (result));
       }
+    });
+  },
+
+  /**
+   * Allow the current user to impersonate the target account.
+   */
+  impersonate () {
+    return Action.extend ({
+      /// The session service for generating tokens.
+      session: service (),
+
+      execute (req, res) {
+        const { accountId } = req.params;
+
+        return this.controller.Model.findById (accountId)
+          .then (account => {
+            // We need to know what account/user is doing the impersonation. We also need to
+            // know that the access token (or session) is an impersonation of someone.
+
+            const payload = {
+              impersonator: req.user.id,
+            };
+
+            const options = {
+              scope: ['gatekeeper.session.impersonation']
+            };
+
+            return this.session.issueToken (req.gatekeeperClient._id, account, payload, options);
+          })
+          .then (token => res.status (200).json (Object.assign ({token_type: 'Bearer'}, token)));
+      }
     })
   }
 });
