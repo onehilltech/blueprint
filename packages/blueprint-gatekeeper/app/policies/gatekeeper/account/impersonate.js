@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 One Hill Technologies, LLC
+ * Copyright (c) 2020 One Hill Technologies, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,11 @@
  */
 
 const {
-  policies: {
-    check
-  }
+  policies: { check, all }
 } = require ('@onehilltech/blueprint');
 
-module.exports = {
-  '/accounts' : {
-    policy: check ('gatekeeper.auth.bearer'),
+module.exports = all ([
+  check ('gatekeeper.scope', 'gatekeeper.account.impersonate'),
+]);
 
-    resource: {
-      controller: 'account',
-      deny: ['count'],
-    },
 
-    '/authenticate': {
-      post: {action: 'account@authenticate'}
-    },
-
-    '/:accountId': {
-      '/password': {
-        post: { action: 'account@changePassword', policy: 'gatekeeper.account.password.change' }
-      },
-
-      '/impersonate': {
-        post: { action: 'account@impersonate', policy: 'gatekeeper.account.impersonate'}
-      }
-    }
-  }
-};
