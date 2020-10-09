@@ -1,5 +1,4 @@
 const commander = require ('commander');
-const { BaseObject } = require ('base-object');
 
 /**
  * @class Command
@@ -23,10 +22,8 @@ class Command extends commander.Command {
 
   /**
    * Method called with the command is to execute.
-   *
-   * @param command
    */
-  execute (command) {
+  execute () {
     throw new Error ('The command must overload the execute() method');
   }
 }

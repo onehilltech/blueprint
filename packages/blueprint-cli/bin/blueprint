@@ -23,7 +23,16 @@ const path = require ('path');
 const fs = require ('fs-extra');
 const { fromCallback } = require ('bluebird');
 
-const moduleFinder = new ModuleFinder ({
+const CommandFinder = ModuleFinder.extend ({
+  load () {
+    const builtinCommandPaths = path.resolve (__dirname, '../cli/commands');
+
+    return Promise.all ([
+      this._includeCommands (builtinCommandPaths),
+      this._super.call (this, ...arguments)
+    ]).then (() => this);
+  },
+
   callback (finder, modulePath) {
     // Determine if this module path has extensions for the command-line. We
     // are looking for the cli/commands path.
@@ -54,17 +63,4 @@ const moduleFinder = new ModuleFinder ({
   }
 });
 
-moduleFinder.load ().then (finder => {
-  const commands = {
-    new: 'create a new Blueprint application',
-    generate: 'run a code generator'
-  };
-
-  // Apply each of the commands.
-  forOwn (commands, (description, name) => program.command (name, description));
-
-  // Parse the command-line options.
-  program.parse (process.argv);
-});
-
-
+new CommandFinder ().load ().then (() => program.parse (process.argv));
