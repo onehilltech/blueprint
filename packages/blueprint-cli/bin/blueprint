@@ -56,10 +56,9 @@ const CommandFinder = ModuleFinder.extend ({
 
         return accum;
       }, []))
-      .then (factoryMethods => factoryMethods.forEach (factoryMethod => {
-        let command = factoryMethod.makeCommand ();
-        program.addCommand (command, command.options);
-      }));
+      .then (factoryMethods => factoryMethods.map (factoryMethod =>  factoryMethod.makeCommand ()))
+      .then (commands => Promise.all (commands.map (command => Promise.resolve (command.configure ()).then (() => command))))
+      .then (commands => commands.forEach (command => program.addCommand (command, command.options)));
   }
 });
 

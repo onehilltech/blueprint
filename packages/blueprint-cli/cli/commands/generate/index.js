@@ -1,7 +1,5 @@
-#!/usr/bin/env node
-
 /*
- * Copyright (c) 2018 One Hill Technologies, LLC
+ * Copyright (c) 2020 One Hill Technologies, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +14,24 @@
  * limitations under the License.
  */
 
-const program = require ('commander');
+const { SimpleCommandFactory, Command } = require ('../../../lib');
+
 const path = require ('path');
 const { readdir } = require ('fs-extra');
 const { forOwn } = require ('lodash');
 const handlebars = require ('handlebars');
 
-const ProgramContext = require ('../lib/program-context');
-const ModuleFinder = require ('../lib/module-finder');
-const TemplatePath = require ('../lib/template-path');
+const ProgramContext = require ('../../../lib/program-context');
+const ModuleFinder = require ('../../../lib/module-finder');
+const TemplatePath = require ('../../../lib/template-path');
 
-const moduleFinder = new ModuleFinder ({
+const GeneratorFinder = ModuleFinder.extend ({
+  program: null,
+
   /**
    * Handle the locating a blueprint module.
    *
    * @param modulePath
-   * @return {*}
    */
   onBlueprintModuleFound (modulePath) {
     let basePath = path.resolve (modulePath, 'cli/generators');
@@ -48,7 +48,7 @@ const moduleFinder = new ModuleFinder ({
         if (generator.args && generator.args.length > 0)
           command += ` ${generator.args.join (' ')}`;
 
-        let cmd = program.command (command);
+        let cmd = this.program.command (command);
 
         if (generator.description)
           cmd.description (generator.description);
@@ -63,10 +63,6 @@ const moduleFinder = new ModuleFinder ({
     });
   }
 });
-
-moduleFinder.load ()
-  .then (() => { program.parse (process.argv) })
-  .catch (err => { console.error (err); });
 
 /**
  * Run the generator on the specified path.
@@ -90,7 +86,21 @@ function runGenerator (generatorPath, generator) {
 
     const context = new ProgramContext (Object.assign ({}, {args}, cmd));
 
-    templates.render (context)
-      .catch (err => console.log (err));
+    templates.render (context).catch (err => console.log (err));
   }
 }
+
+/**
+ *
+ */
+class GenerateCommand extends Command {
+  constructor () {
+    super ('generate', 'run a code generator');
+  }
+
+  configure () {
+    return new GeneratorFinder ({ program: this }).load ();
+  }
+}
+
+module.exports = SimpleCommandFactory (GenerateCommand);

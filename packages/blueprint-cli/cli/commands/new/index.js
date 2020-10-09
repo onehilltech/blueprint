@@ -37,7 +37,6 @@ const NewGenerator = EntityGenerator.extend ({
   }
 });
 
-
 class NewCommand extends Command {
   constructor () {
     super ('new', 'create a new Blueprint application');

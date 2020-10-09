@@ -20,11 +20,15 @@ class Command extends commander.Command {
     this.action (this.execute.bind (this));
   }
 
+  configure () {
+
+  }
+
   /**
    * Method called with the command is to execute.
    */
   execute () {
-    throw new Error ('The command must overload the execute() method');
+
   }
 }
 
