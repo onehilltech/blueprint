@@ -15,3 +15,6 @@
  */
 
 exports.ModuleFinder = require ('./module-finder');
+exports.Command = require ('./command');
+exports.CommandFactory = require ('./command-factory');
+exports.SimpleCommandFactory = require ('./simple-command-factory');

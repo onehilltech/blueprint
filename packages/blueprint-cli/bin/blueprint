@@ -18,14 +18,53 @@
 
 const program = require ('commander');
 const { forOwn } = require ('lodash');
+const ModuleFinder = require ('../lib/module-finder');
+const path = require ('path');
+const fs = require ('fs-extra');
+const { fromCallback } = require ('bluebird');
 
-const commands = {
-  new: 'create a new Blueprint application',
-  generate: 'run a code generator'
-};
+const moduleFinder = new ModuleFinder ({
+  callback (finder, modulePath) {
+    // Determine if this module path has extensions for the command-line. We
+    // are looking for the cli/commands path.
+    const cliPath = path.resolve (modulePath, 'cli/commands');
 
-// Apply each of the commands.
-forOwn (commands, (description, name) => program.command (name, description));
+    return fs.pathExists (cliPath)
+      .then (exists => {
+        if (exists)
+          return this._includeCommands (cliPath);
+      });
+  },
 
-// Parse the command-line options.
-program.parse (process.argv);
+  _includeCommands (dir) {
+    return fromCallback (cb => fs.readdir (dir, cb))
+      .then (files => files.reduce ((accum, file) => {
+        const absPath = path.resolve (dir, file);
+        const stats = fs.lstatSync (absPath);
+
+        if (stats.isDirectory ())
+          accum.push (require (absPath) ());
+
+        return accum;
+      }, []))
+      .then (factoryMethods => factoryMethods.forEach (factoryMethod => {
+        let command = factoryMethod.makeCommand ();
+        program.addCommand (command, command.options);
+      }));
+  }
+});
+
+moduleFinder.load ().then (finder => {
+  const commands = {
+    new: 'create a new Blueprint application',
+    generate: 'run a code generator'
+  };
+
+  // Apply each of the commands.
+  forOwn (commands, (description, name) => program.command (name, description));
+
+  // Parse the command-line options.
+  program.parse (process.argv);
+});
+
+

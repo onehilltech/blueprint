@@ -36,15 +36,22 @@ module.exports = BO.extend ({
   /// Collection of loaded modules.
   _modules: null,
 
+  /// Callback for when a blueprint module is detected.
+  callback: null,
+
   /// Collection of modules that should always be loaded by the finder regardless of
   /// the packaging having the keyword 'blueprint-module'.
   builtinModules: [
     '@onehilltech/blueprint'
   ],
 
+  /// Collection of loaded blueprint modules.
+  blueprintModules: null,
+
   init () {
     this._super.call (this, ...arguments);
     this._modules = {};
+    this.blueprintModules = [];
   },
 
   load () {
@@ -56,7 +63,8 @@ module.exports = BO.extend ({
       .then (packageObj => {
         if (packageObj || packageObj.dependencies)
           return this._handleDependencies (packageObj.dependencies);
-      });
+      })
+      .then (() => this);
   },
 
   _handleDependencies (dependencies) {
@@ -79,6 +87,9 @@ module.exports = BO.extend ({
       if (!isBlueprintModule (packageObj) && !this.builtinModules.includes (name))
         return;
 
+      // Mark this module as a blueprint modules.
+      this.blueprintModules.push (modulePath);
+
       return Promise.resolve (this.onBlueprintModuleFound (modulePath)).then (() => {
         // Mark the module as visited.
         this._modules[name] = true;
@@ -98,7 +109,8 @@ module.exports = BO.extend ({
    * @private
    */
   onBlueprintModuleFound (modulePath) {
-
+    if (!!this.callback)
+      return Promise.resolve (this.callback (this, modulePath));
   },
 
   _resolveModulePath (name) {

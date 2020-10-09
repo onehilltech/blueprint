@@ -280,31 +280,31 @@ describe ('app | routers | account', function () {
             } }] });
       });
     });
+  });
 
-    describe ('/authenticate', function () {
-      context ('POST', function () {
-        it ('should authenticate logged in user', function () {
-          const { accounts: [account]} = seed ();
+  describe ('/v1/accounts/authenticate', function () {
+    context ('POST', function () {
+      it ('should authenticate logged in user', function () {
+        const { accounts: [account]} = seed ();
 
-          return request ()
-            .post ('/v1/accounts/authenticate')
-            .send ({authenticate: {password: account.username}})
-            .withUserToken (0)
-            .expect (200, 'true');
-        });
+        return request ()
+          .post ('/v1/accounts/authenticate')
+          .send ({authenticate: {password: account.username}})
+          .withUserToken (0)
+          .expect (200, 'true');
+      });
 
-        it ('should fail to authenticate logged in user', function () {
-          const { accounts: [, account]} = seed ();
+      it ('should fail to authenticate logged in user', function () {
+        const { accounts: [, account]} = seed ();
 
-          return request ()
-            .post ('/v1/accounts/authenticate')
-            .send ({authenticate: {password: account.username}})
-            .withUserToken (0)
-            .expect (200, 'false');
-        });
+        return request ()
+          .post ('/v1/accounts/authenticate')
+          .send ({authenticate: {password: account.username}})
+          .withUserToken (0)
+          .expect (200, 'false');
+      });
 
-      })
-    });
+    })
   });
 
   describe ('/v1/accounts/:accountId', function () {
@@ -495,5 +495,27 @@ describe ('app | routers | account', function () {
                 status: '400' } ] });
       });
     });
+  });
+
+  describe ('/v1/accounts/:accountId/impersonate', function () {
+    context ('POST', function () {
+      it ('should impersonate an account', function () {
+        const { accounts: [, account]} = seed ();
+
+        return request ()
+          .post (`/v1/accounts/${account.id}/impersonate`)
+          .withUserToken (0)
+          .expect (200, {});
+      });
+
+      it ('should fail to impersonate an account', function () {
+        const { accounts: [, account]} = seed ();
+
+        return request ()
+          .post (`/v1/accounts/${account.id}/impersonate`)
+          .withUserToken (0)
+          .expect (403, {});
+      });
+    })
   });
 });
