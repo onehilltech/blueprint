@@ -18,3 +18,7 @@ exports.ModuleFinder = require ('./module-finder');
 exports.Command = require ('./command');
 exports.CommandFactory = require ('./command-factory');
 exports.SimpleCommandFactory = require ('./simple-command-factory');
+exports.Generator = require ('./generator');
+exports.EntityGenerator = require ('./entity-generator');
+exports.TemplatePath = require ('./template-path');
+exports.ProgramContext = require ('./program-context');

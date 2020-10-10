@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { EntityGenerator } = require ('@onehilltech/blueprint-cli-exts');
+const { EntityGenerator } = require ('../../../../../lib');
 
 module.exports = EntityGenerator.extend ({
   description: 'generate a model',

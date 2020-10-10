@@ -24,10 +24,7 @@ const { ensureDir } = require ('fs-extra');
 const { kebabCase } = require ('lodash');
 const { execFile } = require ('child_process');
 const { fromCallback } = require ('bluebird');
-const { EntityGenerator } = require ('@onehilltech/blueprint-cli-exts');
-
-const TemplatePath = require ('../../../lib/template-path');
-const ProgramContext = require ('../../../lib/program-context');
+const { EntityGenerator, TemplatePath, ProgramContext } = require ('../../../lib');
 
 const NewGenerator = EntityGenerator.extend ({
   helpers: {

@@ -6,7 +6,7 @@
   "author": "One Hill Technologies, LLC",
   "repository": "onehilltech/blueprint",
   "dependencies": {
-    "@onehilltech/blueprint-cli-exts": "^1.2.2",
+    "base-object": "^1.4.0",
     "bluebird": "^3.5.1",
     "chalk": "^2.4.1",
     "commander": "^6.1.0",
