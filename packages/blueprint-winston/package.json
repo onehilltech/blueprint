@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-winston",
   "description": "The blueprint module for winston.",
-  "version": "4.28.19",
+  "version": "4.28.20",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
@@ -9,11 +9,11 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.28.18",
+    "@onehilltech/blueprint": "^4.28.20",
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-cli": "^4.28.19",
+    "@onehilltech/blueprint-cli": "^4.28.20",
     "@onehilltech/blueprint-testing": "^4.28.18"
   },
   "main": "./index.js",
