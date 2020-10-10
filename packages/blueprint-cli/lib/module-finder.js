@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { readJson } = require ('fs-extra');
+const fs = require ('fs-extra');
 const path   = require ('path');
 const { BO } = require ('base-object');
 
@@ -55,16 +55,16 @@ module.exports = BO.extend ({
   },
 
   load () {
-    return Promise.resolve (this.onBlueprintModuleFound (this.basePath))
-      .then (() => {
-        let packageFile = path.resolve (this.basePath, FILE_PACKAGE_JSON);
-        return readJson (packageFile);
-      })
+    const packageFile = path.resolve (this.basePath, FILE_PACKAGE_JSON);
+
+    return fs.stat (packageFile)
+      .then (() => fs.readJson (packageFile))
       .then (packageObj => {
         if (packageObj || packageObj.dependencies)
           return this._handleDependencies (packageObj.dependencies);
       })
-      .then (() => this);
+      .then (() => this)
+      .catch (err => err.code === 'ENOENT' ? this : Promise.reject (err))
   },
 
   _handleDependencies (dependencies) {
