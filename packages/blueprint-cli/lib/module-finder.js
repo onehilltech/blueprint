@@ -57,7 +57,8 @@ module.exports = BO.extend ({
   load () {
     const packageFile = path.resolve (this.basePath, FILE_PACKAGE_JSON);
 
-    return fs.stat (packageFile)
+    return Promise.resolve (this.onBlueprintModuleFound (this.basePath))
+      .then (() => fs.stat (packageFile))
       .then (() => fs.readJson (packageFile))
       .then (packageObj => {
         if (packageObj || packageObj.dependencies)
