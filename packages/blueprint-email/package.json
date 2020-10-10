@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-email",
   "description": "Blueprint module for sending emails via mailgun",
-  "version": "4.28.20",
+  "version": "4.28.21",
   "private": false,
   "repository": "onehilltech/blueprint",
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.28.20",
-    "@onehilltech/blueprint-cli": "^4.28.20",
+    "@onehilltech/blueprint-cli": "^4.28.21",
     "@onehilltech/blueprint-mongodb": "^4.28.20",
     "email-templates": "^5.0.2",
     "nodemailer": "^5.0.0",
