@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-winston",
   "description": "The blueprint module for winston.",
-  "version": "4.28.21",
+  "version": "4.28.22",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
@@ -13,7 +13,7 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-cli": "^4.28.21",
+    "@onehilltech/blueprint-cli": "^4.28.22",
     "@onehilltech/blueprint-testing": "^4.28.18"
   },
   "main": "./index.js",
