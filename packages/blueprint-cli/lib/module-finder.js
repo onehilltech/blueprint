@@ -81,7 +81,7 @@ module.exports = BO.extend ({
     let modulePath = this._resolveModulePath (name);
     const packageFile = path.resolve (modulePath, FILE_PACKAGE_JSON);
 
-    return readJson (packageFile).then (packageObj => {
+    return fs.readJson (packageFile).then (packageObj => {
       // Do not continue if the module is not a Blueprint module, or we have
       // already loaded this module into memory.
       if (!isBlueprintModule (packageObj) && !this.builtinModules.includes (name))

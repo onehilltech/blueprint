@@ -17,7 +17,6 @@
  */
 
 const program = require ('commander');
-const { forOwn } = require ('lodash');
 const ModuleFinder = require ('../lib/module-finder');
 const path = require ('path');
 const fs = require ('fs-extra');
