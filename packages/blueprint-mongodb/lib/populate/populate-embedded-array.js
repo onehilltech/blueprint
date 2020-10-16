@@ -42,8 +42,8 @@ module.exports = Populate.extend ({
   },
 
   populate (unseen) {
-    let pending = mapValues (this.populators, (populator, name) => {
-      const values = unseen[name];
+    let pending = mapValues (this.populators, (populator) => {
+      const values = unseen[populator.plural];
 
       if (isEmpty (values))
         return null;
