@@ -27,6 +27,9 @@ const {
   computed
 } = require ('@onehilltech/blueprint');
 
+const { uniq } = require ('lodash');
+const pluralize = require ('pluralize');
+
 const RESOURCE_ID_PARAMS_SCHEMA = {
   in: 'params',
   errorMessage: 'The id is not valid.',
@@ -336,7 +339,7 @@ module.exports = ResourceController.extend ({
         if (!deleted && this.controller._softDelete)
           filter['_stat.deleted_at'] = {$exists: false};
 
-        return this.controller.Model.findAll ({ include, attributes: projection, where: filter });
+        return this.controller.Model.findAll ({ /*include,*/ attributes: projection, where: filter });
       },
 
       postGetModels (req, models) {
@@ -344,7 +347,8 @@ module.exports = ResourceController.extend ({
       },
 
       prepareResponse (req, res, result) {
-        return result;
+        const { include } = req.query;
+        return !!include ? this.controller.populateModels (result, true, include) : result;
       }
     });
   },
@@ -462,7 +466,8 @@ module.exports = ResourceController.extend ({
       },
 
       prepareResponse (req, res, result) {
-        return result;
+        const { include } = req.query;
+        return !!include ? this.controller.populateModels (result, false, include) : result;
       }
     });
   },
@@ -875,5 +880,32 @@ module.exports = ResourceController.extend ({
       prefix += '.';
 
     return `${prefix}${this.name}.${action}`;
+  },
+
+  /**
+   * Helper method to populate the models of a result.
+   *
+   * @param result
+   * @param include
+   * @returns {Promise<unknown>}
+   */
+  populateModels (result, plural, include) {
+    let promises = include.map (include => {
+      let { associations, name } = this.Model;
+      let association = associations[include];
+      let { targetKey, foreignKey } = association.options;
+
+      let key = plural ? pluralize (name) : name;
+      let ids = uniq (result[key].map (model => model[foreignKey]));
+
+      return association.target.findAll ({where: {[targetKey]: ids}});
+    });
+
+    return Promise.all (promises).then (loaded => loaded.reduce ((accum, models, i) => {
+      let key = pluralize (include[i]);
+      accum[key] = models;
+
+      return accum;
+    }, result));
   }
 });
