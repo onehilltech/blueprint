@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-sequelize",
   "description": "Blueprint module for sequelize",
-  "version": "4.28.23",
+  "version": "4.28.25",
   "private": false,
   "repository": "onehilltech/blueprint",
   "main": "./lib",
