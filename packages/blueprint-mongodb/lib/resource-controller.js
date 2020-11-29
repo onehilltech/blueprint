@@ -25,6 +25,7 @@ const {
   Action,
   ResourceController,
   HttpError,
+  InternalServerError,
   computed
 } = blueprint;
 
@@ -158,7 +159,7 @@ exports = module.exports = ResourceController.extend ({
    */
   create (opts = {}) {
     const eventName = this._computeEventName ('created');
-    const {validators,sanitizers} = this.app.resources;
+    const { validators, sanitizers } = this.app.resources;
 
     return DatabaseAction.extend ({
       schema: opts.schema || validation (this.Model.schema, extend ({}, this._defaultValidationOptions, {validators, sanitizers})),
@@ -183,19 +184,22 @@ exports = module.exports = ResourceController.extend ({
             return Promise.resolve (this.preCreateModel (req))
               .then (() => this.createModel (req, document))
               .catch (this.translateErrorToHttpError.bind (this))
+              .then (result => this.postCreateModel (req, result))
               .then (result => {
-                // Emit that the resource has been created. We do it after the post create
-                // method just in case the subclass makes some edits to the model that was
-                // just created.
-                this.emit (eventName, result);
+                if (!result)
+                  return Promise.reject (new InternalServerError ('internal_error', 'postCreateModel() should return a result'));
+
+                let { last_modified } = result;
 
                 // Set the headers for the response. We want to make sure that we support
                 // the caching headers even if they are not being used.
-                if (result.last_modified) {
-                  res.set (LAST_MODIFIED, result.last_modified.toUTCString ());
-                }
+                if (!!last_modified)
+                  res.set (LAST_MODIFIED, last_modified.toUTCString ());
 
-                return this.postCreateModel (req, result);
+                // Emit that the resource has been created. We do it after the post create
+                // method just in case the subclass makes some edits to the model that was
+                // just created.
+                return this.emit (eventName, result).then (() => result);
               });
           })
           // Initialize the result with the data. We are now going to give the
