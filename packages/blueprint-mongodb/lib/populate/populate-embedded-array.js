@@ -50,6 +50,9 @@ module.exports = Populate.extend ({
 
       const ids = flattenDeep (values);
 
+      // TODO I think ids is an array of ids, not a single id. We should map the ids using the populator, or
+      // the element populator should be able to handle an array id ids.
+
       return populator.populate (ids).exec ();
     });
 

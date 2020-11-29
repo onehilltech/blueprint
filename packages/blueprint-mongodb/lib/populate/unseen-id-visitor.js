@@ -80,12 +80,10 @@ const UnseenIdVisitor = PopulateVisitor.extend ({
 
       // Add the unseen ids to the results set under the models for the
       // current populator.
-      let {plural} = populator;
-
-      if (result[plural])
-        result[plural].push (ids);
-      else
-        result[plural] = [ids];
+      if (!isEmpty (ids)) {
+        let { plural } = populator;
+        (result[plural] = result[plural] || []).push (ids);
+      }
     }, {});
   }
 });
