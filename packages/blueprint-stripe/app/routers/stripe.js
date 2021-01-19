@@ -1,8 +1,7 @@
 module.exports = {
   '/stripe': {
-    //policy: check ('request.ips', blueprint.lookup ('config:stripe').ips),
-
     '/webhooks': {
+      //policy: check ('request.ips', blueprint.lookup ('config:stripe').ips),
       post: { action: 'stripe@emitStripeEvent' }
     }
   }

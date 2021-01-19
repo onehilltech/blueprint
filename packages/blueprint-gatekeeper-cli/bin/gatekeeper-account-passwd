@@ -1,0 +1,60 @@
+#!/usr/bin/env node
+'use strict';
+
+let program          = require ('commander')
+  , gatekeeperClient = require ('../lib/GatekeeperClient')
+  , async            = require ('async')
+  , winston          = require ('winston')
+  , prompt           = require ('prompt')
+  ;
+
+program
+  .option ('-b, --base <base>', 'base url for the gatekeeper service')
+  .arguments ('<account-id>')
+  .action (changePassword)
+  .parse (process.argv);
+
+function changePassword (accountId) {
+  async.waterfall ([
+    function (callback) {
+      let schema = {
+        properties: {
+          password: {
+            hidden: true,
+            replace: '*'
+          },
+
+          confirm: {
+            description: 'Re-type the password',
+            hidden: true,
+            replace: '*'
+          },
+        }
+      };
+
+      prompt.start ();
+      prompt.get (schema, callback);
+    },
+
+    function (result, callback) {
+      let { password, confirm } = result;
+
+      if (password !== confirm)
+        throw new Error ('The confirmed password does not match.');
+
+      async.waterfall ([
+        function (callback) {
+          gatekeeperClient (program.base, callback)
+        },
+        function (client, callback) {
+          client.changePassword (accountId, password, callback);
+        }
+      ], callback);
+    }], actionComplete);
+}
+
+function actionComplete (err) {
+  if (err) return winston.log ('error', err.message);
+
+  winston.log ('info', 'successfully changed account password');
+}

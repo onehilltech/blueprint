@@ -5,4 +5,5 @@ const program = require ('commander');
 program
   .command ('add', 'add a new user account')
   .command ('remove', 'remove an existing user account')
+  .command ('passwd', 'change the password for an account')
   .parse (process.argv);

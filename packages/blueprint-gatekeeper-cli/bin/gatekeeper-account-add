@@ -14,7 +14,7 @@ program
 
 async.waterfall ([
   function (callback) {
-    var schema = {
+    let schema = {
       properties: {
         username: {
           required: true

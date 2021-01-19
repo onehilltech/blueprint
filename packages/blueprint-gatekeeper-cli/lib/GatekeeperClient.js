@@ -148,6 +148,27 @@ GatekeeperClient.prototype.deleteAccount = function (accountId, callback) {
 };
 
 /**
+ * Delete an existing account from the service.
+ *
+ * @param accountId
+ * @param callback
+ * @returns {*}
+ */
+GatekeeperClient.prototype.changePassword = function (accountId, password, callback) {
+  let url = this.getCompleteUrl (`/accounts/${accountId}/password`);
+  let req = this.makeRequest ({
+    url,
+    method: 'POST',
+    body: {
+
+    }
+  });
+
+  return request (req, handleResponse (callback));
+};
+
+
+/**
  * Get the complete Url for a relative path.
  *
  * @param relativePath
