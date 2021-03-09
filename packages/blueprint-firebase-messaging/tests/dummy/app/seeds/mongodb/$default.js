@@ -47,12 +47,12 @@ module.exports = Seed.extend ({
       }),
 
       devices: [
-        { device: 'device_123', client: dab.ref ('native.0'), token: '123' },
-        { device: 'device_456', client: dab.ref ('native.0'), token: '456' },
-        { device: 'device_789', client: dab.ref ('native.0'), token: '789' },
-        { device: 'device_abc', client: dab.ref ('native.0')},
-        { device: dab.id (), client: dab.ref ('native.0'), user: dab.ref ('accounts.0'), token: 'abc' },
-        { device: dab.id (), client: dab.ref ('native.0'), user: dab.ref ('accounts.1'), token: 'def' }
+        /*{ client: dab.ref ('native.0'), token: '123' },
+        { client: dab.ref ('native.0'), token: '456' },
+        { client: dab.ref ('native.0'), token: '789' },
+        { client: dab.ref ('native.0'), token: 'xyz'},*/
+        { client: dab.ref ('native.0'), account: dab.ref ('accounts.0'), token: 'abc' },
+        { client: dab.ref ('native.0'), account: dab.ref ('accounts.1'), token: 'def' }
       ]
     };
   }

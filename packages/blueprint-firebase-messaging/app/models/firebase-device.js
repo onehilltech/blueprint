@@ -14,40 +14,23 @@
  * limitations under the License.
  */
 
+const { env } = require ('@onehilltech/blueprint');
 const mongodb = require ('@onehilltech/blueprint-mongodb');
-
-const {
-  Schema: {
-    Types: { ref }
-  }
-} = mongodb;
+const { Schema: { Types: { refersTo } } } = mongodb;
 
 const options = {
-  toJSON: {
-    versionKey: false,
-    depopulate: true
-  },
-
-  toObject: {
-    versionKey: false,
-    depopulate: true
-  }
+  versionKey: env !== 'test',
 };
 
-let schema = new mongodb.Schema({
-  /// The device instance id.
-  device: {type: String, required: true, unique: true, index: true, const: true},
-
+let schema = new mongodb.Schema ({
   /// The client the device is associated with.
-  client: ref ('client', {required: true, validation: {optional: true}}),
-
-  /// Access token for the device. We use the device access token in our
-  /// request we consider the device token from Firebase to be unsafe to
-  /// authenticate our requests.
-  token: {type: String},
+  client: refersTo ('client', {required: true, validation: { optional: true }}),
 
   /// The user account associated with the account.
-  user: ref ('account', {validation: {optional: true}})
+  account: refersTo ('account', { required: true, validation: { optional: true }}),
+
+  /// The Firebase registration token for the instance.
+  token: { type: String, required: true },
 }, options);
 
 module.exports = mongodb.resource ('device', schema, 'firebase_devices');

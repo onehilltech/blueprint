@@ -67,27 +67,6 @@ module.exports = Service.extend ({
   },
 
   /**
-   * Generate the token for the device.
-   *
-   * @param device
-   * @return {*}
-   */
-  generateToken (device) {
-    assert (Object.getPrototypeOf (device) === this.FirebaseDevice.prototype, 'The device parameter is not a FirebaseDevice model.');
-    return this._tokenGenerator.generateToken ({}, {jwtid: device.id});
-  },
-
-  /**
-   * Verify the device token.
-   *
-   * @param token
-   * @return {*}
-   */
-  verifyToken (token) {
-    return this._tokenGenerator.verifyToken (token);
-  },
-
-  /**
    * Send a message to a recipient. The recipient can be a single user, or
    * a list of users.
    *

@@ -52,30 +52,4 @@ describe ('app | services | fcm', function () {
       return getService ().publish (topic, {msg: 'Hello, World!'});
     });
   });
-
-  describe ('generateToken', function () {
-    it ('should generate a token', function () {
-      const {devices} = seed ();
-      const device = devices[0];
-
-      return getService ().generateToken (device).then (token => {
-        expect (token).to.be.a ('string');
-      });
-    });
-  });
-
-  describe ('verifyToken', function () {
-    it ('should verify a token', function () {
-      const {devices} = seed ();
-      const device = devices[0];
-
-      const fcm = getService ();
-
-      return fcm.generateToken (device)
-        .then (token => fcm.verifyToken (token))
-        .then (payload => {
-          expect (payload.jti).to.equal (device.id);
-        });
-    });
-  });
 });

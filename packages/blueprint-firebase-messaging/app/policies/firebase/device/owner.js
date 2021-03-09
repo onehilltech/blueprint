@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 One Hill Technologies, LLC
+ * Copyright (c) 2021 One Hill Technologies, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-const { policies: {check, all} } = require ('@onehilltech/blueprint');
+const { Policy, model } = require ('@onehilltech/blueprint');
 
-module.exports = all.ordered ([
-  check ('gatekeeper.request.user')
-]);
+/**
+ * A policy that checks if the user making the request is the owner of the
+ * device.
+ */
+module.exports = Policy.extend ({
+  failureCode: 'invalid_owner',
+  failureMessage: 'You are not the owner of the device.',
+
+  Device: model ('firebase-device'),
+
+  runCheck (req) {
+    const { deviceId } = req.params;
+
+    return this.Device.findOne ({ _id: deviceId, account: req.user._id }).then (device => !!device);
+  }
+});

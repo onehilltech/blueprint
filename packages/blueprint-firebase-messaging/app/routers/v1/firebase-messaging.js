@@ -14,52 +14,15 @@
  * limitations under the License.
  */
 
-const {
-  policies: { all, check }
-} = require ('@onehilltech/blueprint');
-
 module.exports = {
   '/firebase': {
     '/devices': {
+      policy: 'gatekeeper.auth.bearer',
+
       resource: {
         controller: 'firebase-messaging',
-        allow: ['create'],
+        allow: ['create', 'delete', 'update'],
       },
-
-      /*
-       * Delete the registration for a device.
-       */
-      delete: {
-        policy: 'firebase.device.bearer',
-        action: 'firebase-messaging@removeDevice',
-      },
-
-      '/tokens': {
-        policy: 'firebase.device.bearer',
-
-        /*
-         * Refresh the device token. This is the token that is provided by the Firebase
-         * SDK to the client application.
-         */
-        post: {action: 'firebase-messaging@refreshToken'}
-      },
-
-      '/claims': {
-        policy: all.ordered ([
-          check ('gatekeeper.auth.bearer'),
-          check ('gatekeeper.request.user')
-        ], 'unauthorized_claim', 'The request is not authorized to manage the device claim.'),
-
-        /*
-         * Claim an existing device.
-         */
-        post: {action: 'firebase-messaging@claimDevice'},
-
-        /*
-         * Delete the claim for an existing device.
-         */
-        delete: {action: 'firebase-messaging@unclaimDevice'}
-      }
     }
   }
 };

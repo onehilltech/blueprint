@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 One Hill Technologies, LLC
+ * Copyright (c) 2021 One Hill Technologies, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const { policies: {check, all} } = require ('@onehilltech/blueprint');
+const { policies: {check } } = require ('@onehilltech/blueprint');
 
-module.exports = all.ordered ([
-  check ('gatekeeper.request.user')
-]);
+module.exports = check ('firebase.device.owner');

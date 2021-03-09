@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-const {
-  Types: {ObjectId}
-} = require ('@onehilltech/blueprint-mongodb');
-
-const {
-  Action,
-  BadRequestError,
-  model,
-  service
-} = require ('@onehilltech/blueprint');
-
+const { model } = require ('@onehilltech/blueprint');
 const { ResourceController } = require ('@onehilltech/blueprint-gatekeeper');
 
 /**
@@ -38,133 +28,27 @@ module.exports = ResourceController.extend ({
 
   create () {
     return this._super.call (this, ...arguments).extend ({
-      prepareDocument (req, doc) {
-        if (doc.token)
-          delete doc.token;
+      schema: {
+        'device.account': {
+          optional: true
+        },
 
-        doc.client = req.user._id;
+        'device.client': {
+          optional: true
+        }
+      },
+
+      prepareDocument (req, doc) {
+        const { user, accessToken } = req;
+
+        // Associated the newly created device with the user making the request, and
+        // the client application used to make the request.
+
+        doc.account = user._id;
+        doc.client = accessToken.client._id;
 
         return doc;
       }
     })
-  },
-
-  /**
-   * Remove a device from the database. Once the device has been removed, it
-   * can no longer be communicated with.
-   */
-  removeDevice () {
-    return Action.extend ({
-      execute (req, res) {
-        return req.device.remove ().then (() => {
-          res.status (200).json (true);
-        });
-      }
-    });
-  },
-
-  /**
-   * Refresh the token that allows Firebase to communicate with the device.
-   */
-  refreshToken () {
-    return Action.extend ({
-      schema: {
-        'device.token': {
-          in: 'body',
-          isLength: {
-            options: {min: 1},
-            errorMessage: 'This field is required.'
-          }
-        }
-      },
-
-      execute (req, res) {
-        let {device} = req;
-        device.token = req.body.device.token;
-
-        return device.save ().then (device => {
-          if (!device)
-            return Promise.reject (new BadRequestError ('missing_device', 'The device no longer exists.'));
-
-          res.status (200).json ({device: device});
-        });
-      }
-    });
-  },
-
-  /**
-   * Claim an existing device.
-   */
-  claimDevice () {
-    return Action.extend ({
-      fcm: service (),
-
-      schema: {
-        'device.device': {
-          isLength: {
-            options: {min: 1},
-            errorMessage: 'This field is required.'
-          }
-        }
-      },
-
-      execute (req, res) {
-        let deviceToken = req.body.device.device;
-
-        return this.fcm.verifyToken (deviceToken)
-          .then (payload => {
-            const update = {user: req.user._id};
-            return this.controller.Model.findByIdAndUpdate (payload.jti, update, {new: true});
-          })
-          .then (device => {
-            if (!device)
-              return Promise.reject (new BadRequestError ('not_found', 'The device does not exist.'));
-
-            let ret = device.toObject ();
-            delete ret.id;
-
-            res.status (200).json ({device: ret});
-          });
-      }
-    });
-  },
-
-  /**
-   * Unclaim an previously claimed device.
-   */
-  unclaimDevice () {
-    return Action.extend ({
-      fcm: service (),
-
-      schema: {
-        'device.device': {
-          isLength: {
-            options: {min: 1},
-            errorMessage: 'This field is required.'
-          }
-        }
-      },
-
-      execute (req, res) {
-        let deviceToken = req.body.device.device;
-
-        return this.fcm.verifyToken (deviceToken)
-          .then (payload => {
-            const selection = {_id: new ObjectId (payload.jti), user: req.user._id};
-            const update = {$unset: {user: ''}};
-
-            return this.controller.Model.findOneAndUpdate (selection, update, {new: true});
-          })
-          .then (device => {
-            if (!device)
-              return Promise.reject (new BadRequestError ('not_found', 'The device does not exist, or the user does not own the device.'));
-
-            let ret = device.toObject ();
-            delete ret.id;
-
-            res.status (200).json ({device: ret});
-          });
-      }
-    });
   }
 });
