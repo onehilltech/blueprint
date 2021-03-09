@@ -17,11 +17,11 @@
 module.exports = {
   '/token': {
     policy: '?gatekeeper.oauth2.token',
-    post: { action: 'oauth2.token@issueToken' }
+    post: { action: 'gatekeeper.oauth2.token@issueToken' }
   },
 
   '/logout' : {
     policy: 'gatekeeper.auth.bearer',
-    post: { action : 'oauth2.token@logout' }
+    post: { action : 'gatekeeper.oauth2.token@logout' }
   }
 };

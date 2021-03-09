@@ -27,8 +27,8 @@ const {
   computed
 } = require ('@onehilltech/blueprint');
 
-const Granters = require ('../../-internal/granters');
-const ModelVisitor = require ('../../models/-visitor');
+const Granters = require ('../../../-internal/granters');
+const ModelVisitor = require ('../../../models/-visitor');
 
 const mm = require ('micromatch');
 

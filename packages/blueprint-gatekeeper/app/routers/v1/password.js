@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-const {
-  policies: { all }
-} = require ('@onehilltech/blueprint');
-
 module.exports = {
   '/password': {
     '/forgot': {
       policy: 'gatekeeper.auth.bearer',
-      post: 'password@forgotPassword',
+      post: 'gatekeeper.password@forgotPassword',
     },
     '/reset': {
-      post: 'password@resetPassword'
+      post: 'gatekeeper.password@resetPassword'
     },
   }
 };

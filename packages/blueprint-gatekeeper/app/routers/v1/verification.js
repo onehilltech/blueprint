@@ -16,6 +16,6 @@
 
 module.exports = {
   '/verify': {
-    get: 'verification'
+    get: 'gatekeeper.verification'
   }
 };

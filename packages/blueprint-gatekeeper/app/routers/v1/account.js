@@ -25,21 +25,21 @@ module.exports = {
     policy: check ('gatekeeper.auth.bearer'),
 
     resource: {
-      controller: 'account',
+      controller: 'gatekeeper.account',
       deny: ['count'],
     },
 
     '/authenticate': {
-      post: {action: 'account@authenticate'}
+      post: {action: 'gatekeeper.account@authenticate'}
     },
 
     '/:accountId': {
       '/password': {
-        post: { action: 'account@changePassword', policy: 'gatekeeper.account.password.change' }
+        post: { action: 'gatekeeper.account@changePassword', policy: 'gatekeeper.account.password.change' }
       },
 
       '/impersonate': {
-        post: { action: 'account@impersonate', policy: 'gatekeeper.account.impersonate'}
+        post: { action: 'gatekeeper.account@impersonate', policy: 'gatekeeper.account.impersonate'}
       }
     }
   }

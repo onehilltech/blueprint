@@ -18,7 +18,7 @@ module.exports = {
   '/clients': {
     policy: 'gatekeeper.auth.bearer',
     resource: {
-      controller: 'client',
+      controller: 'gatekeeper.client',
       allow: ['create', 'update', 'delete']
     }
   }
