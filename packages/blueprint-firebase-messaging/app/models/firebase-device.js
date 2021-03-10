@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-const { env } = require ('@onehilltech/blueprint');
 const mongodb = require ('@onehilltech/blueprint-mongodb');
-const { Schema: { Types: { refersTo } } } = mongodb;
+const { Schema: { Types: { refersTo, ObjectId } } } = mongodb;
 
 const options = {
-  versionKey: env !== 'test',
+
 };
 
 let schema = new mongodb.Schema ({
   /// The client the device is associated with.
-  client: refersTo ('client', {required: true, validation: { optional: true }}),
+  client: refersTo ('client', { required: true, validation: { optional: true }}),
 
   /// The user account associated with the account.
-  account: refersTo ('account', { required: true, validation: { optional: true }}),
+  account: refersTo ('account', { validation: { optional: true }}),
+
+  /// The authentication session for the device token. This field is never serialized
+  /// to the client.
+  session: { type: ObjectId, hidden: true },
 
   /// The Firebase registration token for the instance.
   token: { type: String, required: true },
+
 }, options);
 
 module.exports = mongodb.resource ('device', schema, 'firebase_devices');

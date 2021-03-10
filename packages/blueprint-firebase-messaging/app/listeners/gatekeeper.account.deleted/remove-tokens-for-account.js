@@ -31,7 +31,7 @@ module.exports = Listener.extend ({
   FirebaseDevice: model ('firebase-device'),
 
   handleEvent (account) {
-    debug (`remove all devices tokens for account ${account.id}`);
-    return this.FirebaseDevice.remove ({user: account._id}).exec ();
+    debug (`Deleting device tokens for account ${account.id}`);
+    return this.FirebaseDevice.deleteMany ({user: account._id});
   }
 });

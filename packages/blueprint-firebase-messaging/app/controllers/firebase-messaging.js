@@ -41,11 +41,9 @@ module.exports = ResourceController.extend ({
       prepareDocument (req, doc) {
         const { user, accessToken } = req;
 
-        // Associated the newly created device with the user making the request, and
-        // the client application used to make the request.
-
-        doc.account = user._id;
         doc.client = accessToken.client._id;
+        doc.account = user._id;
+        doc.session = accessToken._id;
 
         return doc;
       }

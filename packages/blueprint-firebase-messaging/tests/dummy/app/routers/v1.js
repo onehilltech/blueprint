@@ -15,7 +15,13 @@
  */
 
 const blueprint = require ('@onehilltech/blueprint');
+const { cors } = require ('@onehilltech/blueprint-gatekeeper');
 
 module.exports = {
+  '/': {
+    use: [ cors () ]
+  },
+
+  '/gatekeeper': blueprint.mount ('@onehilltech/blueprint-gatekeeper:v1'),
   '/v1': blueprint.mount ('@onehilltech/blueprint-firebase-messaging:v1')
 };

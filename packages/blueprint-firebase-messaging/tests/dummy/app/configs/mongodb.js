@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
+const { env } = require ('@onehilltech/blueprint');
+
 module.exports = {
   connections: {
     $default: {
-      uri: 'mongodb://localhost/blueprint_firebase_messaging',
-      seed: false,
+      uri: `mongodb://localhost/blueprint_firebase_messaging_${env}`,
+      seed: true,
       options : {
         readPreference: "primary",
         forceServerObjectId: false,
-        autoReconnect: true,
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useFindAndModify: false,
+        useCreateIndex: true,
         keepAlive: 1,
         poolSize: 5,
       }

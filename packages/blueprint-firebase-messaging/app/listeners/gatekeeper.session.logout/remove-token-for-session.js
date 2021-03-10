@@ -30,7 +30,8 @@ const debug = require ('debug') ('blueprint:firebase:remove-tokens-for-account')
 module.exports = Listener.extend ({
   FirebaseDevice: model ('firebase-device'),
 
-  handleEvent (account) {
-    return this.FirebaseDevice.deleteMany ({user: account._id});
+  handleEvent (accessToken) {
+    debug (`Deleting device token for with session ${accessToken.id}`);
+    return this.FirebaseDevice.deleteOne ({session: accessToken._id});
   }
 });

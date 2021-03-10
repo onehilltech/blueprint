@@ -21,8 +21,6 @@ const dab = require ('@onehilltech/dab');
  * @class
  */
 module.exports = Seed.extend ({
-  name: 'foo',
-
   model () {
     return {
       native: [
@@ -45,24 +43,7 @@ module.exports = Seed.extend ({
       accounts: dab.times (5, function (i) {
         const username = `account${i}`;
         return { username: username, password: username, email: `${username}@no-reply.com`};
-      }),
-
-      client_tokens: dab.map (dab.get ('native'), function (client) {
-        return { client: dab.get ('native.0'), account: client._id };
-      }),
-
-      user_tokens: dab.map (dab.get ('accounts'), function (account) {
-        return {
-          client: dab.get ('native.0'),
-          account: account._id,
-          refresh_token: dab.id ()
-        };
-      }),
-
-      devices: [
-        { client: dab.ref ('native.0'), account: dab.ref ('accounts.0'), token: 'abc' },
-        { client: dab.ref ('native.0'), account: dab.ref ('accounts.1'), token: 'def' }
-      ]
+      })
     };
   }
 });
