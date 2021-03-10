@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { Seed } = require ('@onehilltech/blueprint-mongodb');
+const { Seed, Types: { ObjectId } } = require ('@onehilltech/blueprint-mongodb');
 const dab = require ('@onehilltech/dab');
 
 /**
@@ -27,6 +27,17 @@ module.exports = Seed.extend ({
         { name: 'client1', email: 'contact@client1.com', client_secret: 'client1', scope: ['gatekeeper.account.create'] },
         { name: 'client2', email: 'contact@client2.com', client_secret: 'client2'},
         { name: 'client3', email: 'contact@client3.com', client_secret: 'client3', enabled: false }
+      ],
+
+      hybrid: [
+        {
+          _id: ObjectId ('6047eef2cee540ea6b274a94'),
+          name: 'hybrid',
+          email: 'contact@client1.com',
+          client_secret: 'hybrid',
+          scope: ['gatekeeper.account.create'],
+          origin: 'http://localhost:4200'
+        },
       ],
 
       accounts: dab.times (5, function (i) {
@@ -47,10 +58,6 @@ module.exports = Seed.extend ({
       }),
 
       devices: [
-        /*{ client: dab.ref ('native.0'), token: '123' },
-        { client: dab.ref ('native.0'), token: '456' },
-        { client: dab.ref ('native.0'), token: '789' },
-        { client: dab.ref ('native.0'), token: 'xyz'},*/
         { client: dab.ref ('native.0'), account: dab.ref ('accounts.0'), token: 'abc' },
         { client: dab.ref ('native.0'), account: dab.ref ('accounts.1'), token: 'def' }
       ]

@@ -14,7 +14,23 @@
  * limitations under the License.
  */
 
-module.exports = {
-  apiKey: 'AIzaSyDuhZ8sT_ziDTm3SWAaunU2rRnR951eRDE',
-  dryRun: true
-};
+const {
+  Listener,
+  model
+} = require ('@onehilltech/blueprint');
+
+const debug = require ('debug') ('blueprint:firebase:remove-tokens-for-account');
+
+/**
+ * @class RemoveTokensForAccount
+ *
+ * A listener that removes all device tokens for an account when the correspond
+ * account is deleted from the database.
+ */
+module.exports = Listener.extend ({
+  FirebaseDevice: model ('firebase-device'),
+
+  handleEvent (account) {
+    return this.FirebaseDevice.deleteMany ({user: account._id});
+  }
+});
