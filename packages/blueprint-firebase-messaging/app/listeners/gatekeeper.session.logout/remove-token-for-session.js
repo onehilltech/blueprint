@@ -31,7 +31,7 @@ module.exports = Listener.extend ({
   FirebaseDevice: model ('firebase-device'),
 
   handleEvent (accessToken) {
-    debug (`Deleting device token for with session ${accessToken.id}`);
+    debug (`deleting device token for with session ${accessToken.id}`);
     return this.FirebaseDevice.deleteOne ({session: accessToken._id});
   }
 });
