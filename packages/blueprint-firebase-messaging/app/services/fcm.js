@@ -71,9 +71,9 @@ module.exports = Service.extend ({
    * a list of users.
    *
    * @param       recipient     Id, or an array of ids.
-   * @param       data          Data for message
+   * @param       msg           The message the send.
    */
-  send (recipient, data) {
+  send (recipient, msg) {
     debug (`sending message to ${recipient}`);
 
     if (!isArray (recipient))
@@ -82,11 +82,11 @@ module.exports = Service.extend ({
     // First, get all the tokens for the recipients. We have to remember that
     // a recipient can have more than one token since each device owned by the
     // user has its own token/registration.
-    const selection = { user: {$in: recipient} };
+    const selection = { account: {$in: recipient} };
 
     return this.FirebaseDevice
       .find (selection)
-      .populate ('user', 'enabled')
+      .populate ('account', 'enabled')
       .populate ('client', 'enabled').exec ()
       .then (devices => {
         // There is no need to continue if we do not have any users that match
@@ -97,7 +97,8 @@ module.exports = Service.extend ({
         // Create a new Firebase message, and only select the models where the client
         // is enabled, and the user is enabled, if applicable. We want to filter the
         // list before we start.
-        let message = new gcm.Message ({ dryRun : this.dryRun, data });
+
+        let message = new gcm.Message (Object.assign ({ dryRun : this.dryRun }, msg));
 
         let enabled = devices.filter (device => {
           return device.client.enabled && (!device.user || device.user.enabled);
@@ -123,12 +124,12 @@ module.exports = Service.extend ({
    * Publish a message to a topic.
    *
    * @param     topic     Target topic or condition.
-   * @param     data      Data for message
+   * @param     msg       The message to send.
    */
-  publish (topic, data) {
+  publish (topic, msg) {
     debug (`publishing message to ${topic}`);
 
-    let message = new gcm.Message ({ dryRun : this.dryRun, data });
+    let message = new gcm.Message (Object.assign ({ dryRun : this.dryRun }, msg));
     let recipient = {};
 
     // If the topic begins with a slash, then set the topic on the recipient
@@ -175,7 +176,7 @@ module.exports = Service.extend ({
         }, []);
 
         if (badTokens.length > 0) {
-          tasks.push (this.FirebaseDevice.remove ({token: {$in: badTokens}}).exec ());
+          tasks.push (this.FirebaseDevice.deleteMany ({token: {$in: badTokens}}));
         }
       }
 

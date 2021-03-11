@@ -23,5 +23,10 @@ module.exports = {
   },
 
   '/gatekeeper': blueprint.mount ('@onehilltech/blueprint-gatekeeper:v1'),
-  '/v1': blueprint.mount ('@onehilltech/blueprint-firebase-messaging:v1')
+  '/v1': blueprint.mount ('@onehilltech/blueprint-firebase-messaging:v1'),
+
+  '/push': {
+    policy: 'gatekeeper.auth.bearer',
+    post: 'push'
+  }
 };
