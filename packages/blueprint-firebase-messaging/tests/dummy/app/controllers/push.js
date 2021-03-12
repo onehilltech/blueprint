@@ -7,7 +7,7 @@ module.exports = Controller.extend ({
       fcm: service (),
 
       execute (req, res) {
-        const data = { message: 'Hello, World!' };
+        const data = { type: 'greeting', message: 'Hello, World!' };
 
         this.fcm.send (req.user._id, { data }).catch (reason => console.log (reason));
 
