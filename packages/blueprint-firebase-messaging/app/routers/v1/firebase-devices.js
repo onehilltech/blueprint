@@ -15,14 +15,12 @@
  */
 
 module.exports = {
-  '/firebase': {
-    '/devices': {
-      policy: 'gatekeeper.auth.bearer',
+  '/devices': {
+    policy: 'gatekeeper.auth.bearer',
 
-      resource: {
-        controller: 'firebase-messaging',
-        allow: ['create', 'delete', 'update'],
-      },
-    }
+    resource: {
+      controller: 'firebase-device',
+      allow: ['create', 'delete', 'update'],
+    },
   }
 };

@@ -18,29 +18,29 @@
 const { request } = require ('@onehilltech/blueprint-testing');
 const { seed, Types: { ObjectId } } = require ('@onehilltech/blueprint-mongodb');
 
-describe ('app | routers | v1 | firebase-messaging', function () {
-  describe ('/v1/firebase/devices', function () {
+describe ('app | routers | v1 | firebase-device', function () {
+  describe ('/v1/devices', function () {
     describe ('POST', function () {
       it ('should register a device', function () {
         const {accounts: [account], native: [client]} = seed ();
         const device = {_id: new ObjectId ().toString (), token: 'abcdefgh'};
 
         return request ()
-          .post ('/v1/firebase/devices')
+          .post ('/v1/devices')
           .withUserToken (0)
           .send ({device})
-          .expect (200, {device: Object.assign ({}, device, {account: account.id, client: client.id})});
+          .expect (200, { device: Object.assign ({}, device, {__v: 0, account: account.id, client: client.id})});
       });
     });
   });
 
-  describe ('/v1/firebase/devices/:deviceId', function () {
+  describe ('/v1/firebase/:deviceId', function () {
     describe ('DELETE', function () {
       it ('should remove a device', function () {
         const { devices: [device] } = seed ();
 
         return request ()
-          .delete (`/v1/firebase/devices/${device.id}`)
+          .delete (`/v1/devices/${device.id}`)
           .withUserToken (0)
           .expect (200, 'true');
       });
@@ -49,7 +49,7 @@ describe ('app | routers | v1 | firebase-messaging', function () {
         const { devices: [device] } = seed ();
 
         return request ()
-          .delete (`/v1/firebase/devices/${device.id}`)
+          .delete (`/v1/devices/${device.id}`)
           .withUserToken (1)
           .expect (403, {
             "errors": [
