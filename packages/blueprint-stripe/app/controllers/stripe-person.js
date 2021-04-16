@@ -15,9 +15,9 @@ module.exports = ResourceController.extend ({
 
       execute (req, res) {
         const { accountId } = req.params;
-        const { [this.controller.name]: { external_account } } = req.body;
+        const { [this.controller.name]: data } = req.body;
 
-        return this.stripe.accounts.createExternalAccount (accountId, { external_account })
+        return this.stripe.accounts.createPerson (accountId, data)
           .then (result => res.status (200).json ({[this.controller.name]: result}));
       }
     });
@@ -28,9 +28,9 @@ module.exports = ResourceController.extend ({
       stripe: service (),
 
       execute (req, res) {
-        const { accountId, externalAccountId } = req.params;
+        const { accountId, personId } = req.params;
 
-        return this.stripe.accounts.retrieveExternalAccount (accountId, externalAccountId)
+        return this.stripe.accounts.retrievePerson (accountId, personId)
           .then (result => res.status (200).json ({[this.controller.name]: result}));
       }
     });
@@ -38,22 +38,12 @@ module.exports = ResourceController.extend ({
 
   getAll () {
     return Action.extend ({
-      schema: {
-        type: {
-          in: 'query',
-          options: ['card', 'bank_account'],
-          errorMessage: 'You must provide either card or bank_account in your query.'
-        }
-      },
-
       stripe: service (),
 
       execute (req, res) {
         const { accountId } = req.params;
-        const { type } = req.query;
-        const params = { object: type };
 
-        return this.stripe.accounts.listExternalAccounts (accountId, params)
+        return this.stripe.accounts.listPersons (accountId)
           .then (result => res.status (200).json ({[`${this.controller.name}s`]: result.data}));
       }
     });
@@ -64,10 +54,10 @@ module.exports = ResourceController.extend ({
       stripe: service (),
 
       execute (req, res) {
-        const { accountId, externalAccountId } = req.params;
-        const { 'stripe-external-account': update } = req.body;
+        const { accountId, personId } = req.params;
+        const { 'stripe-person': update } = req.body;
 
-        return this.stripe.accounts.updateExternalAccount (accountId, externalAccountId, update)
+        return this.stripe.accounts.updatePerson (accountId, personId, update)
           .then (result => res.status (200).json ({ [this.controller.name]: result }));
       }
     });
@@ -78,9 +68,9 @@ module.exports = ResourceController.extend ({
       stripe: service (),
 
       execute (req, res) {
-        const { accountId, externalAccountId } = req.params;
+        const { accountId, personId } = req.params;
 
-        return this.stripe.accounts.deleteExternalAccount (accountId, externalAccountId)
+        return this.stripe.accounts.deletePerson (accountId, personId)
           .then (result => res.status (200).json (result.deleted));
       }
     });
