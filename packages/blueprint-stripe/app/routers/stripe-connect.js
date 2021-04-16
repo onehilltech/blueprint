@@ -1,5 +1,10 @@
 module.exports = {
   '/accounts': {
+    resource: {
+      controller: 'stripe-account',
+      deny: ['count', 'getAll'],
+    },
+
     '/:accountId': {
       '/external-accounts': {
         resource: {
