@@ -1,13 +1,10 @@
-const { ResourceController, Action, service } = require ('@onehilltech/blueprint');
-const { StripeAction } = require ('../../lib');
+const { StripeResourceController, StripeAction } = require ('../../lib');
 
 /**
  * The resource controller for managing Stripe accounts.
  */
-module.exports = ResourceController.extend ({
-  name: 'stripe-account',
-
-  id: 'accountId',
+module.exports = StripeResourceController.extend ({
+  name: 'account',
 
   /**
    * Create a new account.
@@ -27,7 +24,7 @@ module.exports = ResourceController.extend ({
         const { [this.controller.name]: data } = req.body;
 
         return this.stripe.accounts.create (data)
-          .then (result => res.status (200).json ({[this.controller.name]: result}));
+          .then (result => res.status (200).json ({[this.controller.resourceName]: result}));
       }
     });
   },
@@ -41,7 +38,7 @@ module.exports = ResourceController.extend ({
         const { accountId } = req.params;
 
         return this.stripe.accounts.retrieve (accountId)
-          .then (result => res.status (200).json ({[this.controller.name]: result}));
+          .then (result => res.status (200).json ({[this.controller.resourceName]: result}));
       }
     });
   },
@@ -56,7 +53,7 @@ module.exports = ResourceController.extend ({
         const { 'stripe-account': update } = req.body;
 
         return this.stripe.accounts.update (accountId, update)
-          .then (result => res.status (200).json ({ [this.controller.name]: result }));
+          .then (result => res.status (200).json ({ [this.controller.resourceName]: result }));
       }
     });
   },

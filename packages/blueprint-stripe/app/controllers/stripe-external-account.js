@@ -1,18 +1,14 @@
-const { ResourceController, Action, service } = require ('@onehilltech/blueprint');
+const { StripeAction, StripeResourceController } = require ('../../lib');
 
 /**
  * The resource controller for managing Stripe external accounts objects on a Stripe
  * Connect account.
  */
-module.exports = ResourceController.extend ({
-  name: 'stripe-external-account',
-
-  id: 'externalAccountId',
-
+module.exports = StripeResourceController.extend ({
+  name: 'external-account',
+  
   create () {
-    return Action.extend ({
-      stripe: service (),
-
+    return StripeAction.extend ({
       execute (req, res) {
         const { accountId } = req.params;
         const { [this.controller.name]: { external_account } } = req.body;
@@ -24,9 +20,7 @@ module.exports = ResourceController.extend ({
   },
 
   getOne () {
-    return Action.extend ({
-      stripe: service (),
-
+    return StripeAction.extend ({
       execute (req, res) {
         const { accountId, externalAccountId } = req.params;
 
@@ -37,7 +31,7 @@ module.exports = ResourceController.extend ({
   },
 
   getAll () {
-    return Action.extend ({
+    return StripeAction.extend ({
       schema: {
         type: {
           in: 'query',
@@ -45,8 +39,6 @@ module.exports = ResourceController.extend ({
           errorMessage: 'You must provide either card or bank_account in your query.'
         }
       },
-
-      stripe: service (),
 
       execute (req, res) {
         const { accountId } = req.params;
@@ -60,9 +52,7 @@ module.exports = ResourceController.extend ({
   },
 
   update () {
-    return Action.extend ({
-      stripe: service (),
-
+    return StripeAction.extend ({
       execute (req, res) {
         const { accountId, externalAccountId } = req.params;
         const { 'stripe-external-account': update } = req.body;
@@ -74,9 +64,7 @@ module.exports = ResourceController.extend ({
   },
 
   delete () {
-    return Action.extend ({
-      stripe: service (),
-
+    return StripeAction.extend ({
       execute (req, res) {
         const { accountId, externalAccountId } = req.params;
 
