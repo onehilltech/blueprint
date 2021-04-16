@@ -1,10 +1,22 @@
 const { ResourceController, Action, service } = require ('@onehilltech/blueprint');
 
 module.exports = ResourceController.extend ({
-  name: 'externalAccount',
+  name: 'stripe-external-account',
+
+  id: 'externalAccountId',
 
   create () {
+    return Action.extend ({
+      stripe: service (),
 
+      execute (req, res) {
+        const { accountId } = req.params;
+        const { [this.controller.name]: { external_account } } = req.body;
+
+        return this.stripe.accounts.createExternalAccount (accountId, { external_account })
+          .then (result => res.status (200).json ({[this.controller.name]: result}));
+      }
+    });
   },
 
   getOne () {
@@ -15,9 +27,9 @@ module.exports = ResourceController.extend ({
         const { accountId, externalAccountId } = req.params;
 
         return this.stripe.accounts.retrieveExternalAccount (accountId, externalAccountId)
-          .then (result => res.status (200).json ({'stripe-external-account': result}));
+          .then (result => res.status (200).json ({[this.controller.name]: result}));
       }
-    })
+    });
   },
 
   getAll () {
@@ -38,14 +50,22 @@ module.exports = ResourceController.extend ({
         const params = { object: type };
 
         return this.stripe.accounts.listExternalAccounts (accountId, params)
-          .then (result => res.status (200).json ({'stripe-external-accounts': result.data}));
+          .then (result => res.status (200).json ({[`${this.controller.name}s`]: result.data}));
       }
     });
   },
 
   update () {
     return Action.extend ({
+      stripe: service (),
 
+      execute (req, res) {
+        const { accountId, externalAccountId } = req.params;
+        const { 'stripe-external-account': update } = req.body;
+
+        return this.stripe.accounts.updateExternalAccount (accountId, externalAccountId, update)
+          .then (result => res.status (200).json ({ [this.controller.name]: result }));
+      }
     });
   },
 
