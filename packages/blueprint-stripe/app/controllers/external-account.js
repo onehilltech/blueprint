@@ -7,6 +7,19 @@ module.exports = ResourceController.extend ({
 
   },
 
+  getOne () {
+    return Action.extend ({
+      stripe: service (),
+
+      execute (req, res) {
+        const { accountId, externalAccountId } = req.params;
+
+        return this.stripe.accounts.retrieveExternalAccount (accountId, externalAccountId)
+          .then (result => res.status (200).json ({'stripe-external-account': result}));
+      }
+    })
+  },
+
   getAll () {
     return Action.extend ({
       schema: {
@@ -38,7 +51,14 @@ module.exports = ResourceController.extend ({
 
   delete () {
     return Action.extend ({
+      stripe: service (),
 
+      execute (req, res) {
+        const { accountId, externalAccountId } = req.params;
+
+        return this.stripe.accounts.deleteExternalAccount (accountId, externalAccountId)
+          .then (result => res.status (200).json (result.deleted));
+      }
     });
   }
 });
