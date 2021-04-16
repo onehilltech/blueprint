@@ -3,7 +3,14 @@ module.exports = {
     '/:accountId': {
       '/external-accounts': {
         resource: {
-          controller: 'external-account',
+          controller: 'stripe-external-account',
+          deny: ['count']
+        }
+      },
+
+      '/persons': {
+        resource: {
+          controller: 'stripe-person',
           deny: ['count']
         }
       }

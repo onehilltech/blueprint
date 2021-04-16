@@ -1,9 +1,13 @@
 const { ResourceController, Action, service } = require ('@onehilltech/blueprint');
 
+/**
+ * The resource controller for managing Stripe person objects on a Stripe
+ * Connect account.
+ */
 module.exports = ResourceController.extend ({
-  name: 'stripe-external-account',
+  name: 'stripe-person',
 
-  id: 'externalAccountId',
+  id: 'personId',
 
   create () {
     return Action.extend ({
