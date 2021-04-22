@@ -39,7 +39,7 @@ describe ('app | services | recaptcha', function () {
     it ('should failed because of bad secret', function () {
       let recaptcha = blueprint.lookup ('service:recaptcha');
 
-      const expectedErrorCodes = ['invalid-input-secret','invalid-input-response'];
+      const expectedErrorCodes = ['invalid-input-secret'];
 
       return recaptcha.verifyResponse ('bad-secret', 'random-response')
         .then (result => expect.fail (result, {success: false, 'error-codes': expectedErrorCodes}, 'The verification should have failed.'))

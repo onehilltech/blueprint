@@ -23,18 +23,14 @@ module.exports = {
     transport: {
       jsonTransport: true
     },
-
     views: {
-      options: {
-        extension: 'ejs'
-      }
+      locals: {
+        twitterHandle: 'onehilltech'
+      },
     },
     message: {
       from : 'no-reply@onehilltech.com',
-    },
-    locals: {
-      twitterHandle: 'onehilltech'
-    },
+    }
   },
 
   tokens: {

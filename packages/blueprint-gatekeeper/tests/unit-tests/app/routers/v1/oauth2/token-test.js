@@ -229,9 +229,10 @@ describe ('app | routers | oauth2 | token', function () {
         });
 
         it ('should fail because verification failed', function () {
-          const {recaptcha,accounts} = seed ('$default');
-          const client = recaptcha[1];
-          const account = accounts[0];
+          const {
+            recaptcha: [, client],
+            accounts: [account]
+          } = seed ();
 
           const data = {
             grant_type: 'password',
@@ -248,7 +249,6 @@ describe ('app | routers | oauth2 | token', function () {
                   status: '400',
                   meta: {
                     'error-codes': [
-                      'invalid-input-response',
                       'invalid-input-secret'
                     ]
                   } } ] });
@@ -617,8 +617,7 @@ describe ('app | routers | oauth2 | token', function () {
         });
 
         it ('should fail because verification failed', function () {
-          const {recaptcha} = seed ('$default');
-          const client = recaptcha[1];
+          const {recaptcha: [, client ]} = seed ();
 
           const data = {
             grant_type: 'client_credentials',
@@ -633,7 +632,6 @@ describe ('app | routers | oauth2 | token', function () {
                   status: '400',
                   meta: {
                     'error-codes': [
-                      'invalid-input-response',
                       'invalid-input-secret'
                     ]
                   } } ] });

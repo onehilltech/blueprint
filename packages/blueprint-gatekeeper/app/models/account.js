@@ -47,14 +47,17 @@ let definition = {
   scope: {type: [String], default: []},
 
   verification: {
-    /// The account must be verified before usage.
-    required: {type: Boolean, default: false},
-
     /// The date of the verification.
-    date: {type: Date},
+    date: { type: Date },
 
     /// The ip-address where the verification was initiated.
-    ip_address: {type: String}
+    ip_address: { type: String },
+
+    /// Id of the last email message sent regarding account verification.
+    last_email_id: { type: String },
+
+    /// The date the last email message was sent.
+    last_email_date: { type: Date },
   }
 };
 

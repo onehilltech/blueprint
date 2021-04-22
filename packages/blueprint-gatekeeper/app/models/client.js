@@ -60,7 +60,11 @@ let schema = new mongodb.Schema ({
 
   /// The url for resetting the password. If this is not present, then the
   /// client does not support resetting a user's password.
-  password_reset_url: {type: String}
+  password_reset_url: { type: String },
+
+  /// The url to use for activating an account. If the client does not provide
+  /// this url, then the client is not able to activate accounts.
+  activate_account_url: { type: String }
 }, options);
 
 

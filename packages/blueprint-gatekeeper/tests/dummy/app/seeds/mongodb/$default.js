@@ -29,7 +29,8 @@ module.exports = Seed.extend ({
           email: 'client1@gatekeeper.com',
           client_secret: 'client1',
           deny: [dab.ref ('accounts.6')],
-          password_reset_url: 'http://localhost:4200/auth/reset-password'
+          password_reset_url: 'http://localhost:4200/auth/reset-password',
+          activate_account_url: 'http://localhost:4200/activate'
         },
         {
           name: 'client2',

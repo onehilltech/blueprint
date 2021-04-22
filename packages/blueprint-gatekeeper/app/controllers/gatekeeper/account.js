@@ -58,18 +58,16 @@ module.exports = ResourceController.extend ({
     return this._super.call (this, ...arguments).extend ({
       session: service (),
       account: service (),
+      activation: service (),
 
       // Extend the default schema.
       schema,
 
-      init () {
-        this._super.call (this, ...arguments);
-      },
-
       prepareDocument (req, doc) {
-        // Prevent the client from setting the id.
-        if (doc._id)
+        if (doc._id) {
+          // Prevent the client from setting the id.
           delete doc._id;
+        }
 
         // Allow the application to create its own id for the account. This is useful if the
         // application needs to assign an existing id to an account. We do not have to worry
@@ -111,6 +109,13 @@ module.exports = ResourceController.extend ({
             return this.controller.Model.findOneAndUpdate (selection, update, {new: true})
               .then (account => !!account ? account : Promise.reject (new BadRequestError (`${field}_exists`, `An account with this ${field} already exists.`)));
           });
+      },
+
+      postCreateModel (req, account) {
+        // The account model has been successfully created. Let's send an account activation email
+        // for the account to the email address associated with this account.
+
+        return this.activation.sendEmail (account, req.accessToken.client);
       },
 
       prepareResponse (req, res, result) {

@@ -15,26 +15,21 @@
  */
 
 module.exports = {
-  baseUrl : 'http://localhost:5000/gatekeeper',
-
   activation: true,
 
   email : {
+    preview: true,
     transport: {
       jsonTransport: true
     },
-
     views: {
-      options: {
-        extension: 'ejs'
-      }
+      locals: {
+        appName: 'Gatekeeper',
+      },
     },
     message: {
       from : 'no-reply@onehilltech.com',
-    },
-    locals: {
-      twitterHandle: 'onehilltech'
-    },
+    }
   },
 
   tokens: {

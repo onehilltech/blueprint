@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-const { Service, model } = require ('@onehilltech/blueprint');
+const { Service, model, computed } = require ('@onehilltech/blueprint');
 const { get, forOwn, merge, transform } = require ('lodash');
+const Email = require ('email-templates');
+const path = require ('path');
 
 const TokenGenerator = require ('../../lib/token-generator');
 
@@ -41,6 +43,14 @@ const BUILTIN_TOKEN_GENERATORS = {
   }
 };
 
+const DEFAULT_EMAIL_OPTIONS = {
+  views: {
+    options: {
+      extension: 'ejs'
+    }
+  }
+};
+
 /**
  * @class GatekeeperService
  *
@@ -59,6 +69,8 @@ module.exports = Service.extend ({
 
   _granters: null,
 
+  _email: null,
+
   Client: model ('client'),
 
   init () {
@@ -74,8 +86,53 @@ module.exports = Service.extend ({
     Object.defineProperty (this, 'tokenGenerators', {
       get () { return this._tokenGenerators; }
     });
-
   },
+
+  configure () {
+    const { gatekeeper } = this.app.configs;
+
+    this._configureEmail (gatekeeper);
+  },
+
+  /**
+   * Configure the email service for the module.
+   *
+   * @private
+   */
+  _configureEmail (gatekeeper) {
+    if (gatekeeper.email === false) {
+      return;
+    }
+
+    let opts = merge (this.defaultEmailOptions, gatekeeper.email, {
+      views: {
+        root: path.resolve (__dirname, '../resources/email')
+      },
+    });
+
+    this._email = new Email (opts);
+  },
+
+  defaultEmailOptions: computed ({
+    get () {
+      return {
+        views: {
+          options: {
+            extension: 'ejs'
+          },
+          locals: {
+            appName: this.app.lookup ('config:app').name,
+            activateButton: {
+              label: 'Activate account'
+            },
+            style: {
+              primaryColor: '#4CAF50',
+            }
+          }
+        }
+      }
+    }
+  }),
 
   start () {
     const tokenGenerator = this._tokenGenerators['gatekeeper:access_token'];
@@ -168,5 +225,15 @@ module.exports = Service.extend ({
    */
   verifyToken (token, opts = {}) {
     return this._tokenGenerator.verifyToken (token, opts);
+  },
+
+  /**
+   * Send an email from this service.
+   *
+   * @param opts
+   * @returns {*}
+   */
+  sendEmail (opts) {
+    return !!this._email ? this._email.send (opts) : Promise.resolve (false);
   }
 });

@@ -23,9 +23,11 @@ module.exports = {
         readPreference: "primary",
         forceServerObjectId: false,
         w: 1,
-        autoReconnect: true,
         keepAlive: 1,
         poolSize: 5,
+        useUnifiedTopology: true,
+        useNewUrlParser: true,
+        useCreateIndex: true
       }
     },
 
@@ -36,9 +38,11 @@ module.exports = {
         readPreference: "primary",
         forceServerObjectId: false,
         w: 1,
-        autoReconnect: true,
         keepAlive: 1,
         poolSize: 5,
+        useUnifiedTopology: true,
+        useNewUrlParser: true,
+        useCreateIndex: true
       }
     }
   }

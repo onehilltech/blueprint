@@ -56,7 +56,7 @@ describe ('app | routers | account', function () {
     context ('POST', function () {
       const data = { username: 'tester1', password: '1aBcDeFg', email: 'JAMES@ONEHILLTECH.COM' };
 
-      it ('should create a new account with new id', function () {
+      it.only ('should create a new account with new id', function () {
         return request ()
           .post ('/v1/accounts')
           .send ({account: data})
