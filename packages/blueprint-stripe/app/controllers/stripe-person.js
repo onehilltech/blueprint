@@ -10,10 +10,10 @@ module.exports = StripeResourceController.extend ({
   create () {
     return StripeAction.extend ({
       execute (req, res) {
-        const { stripePersonId } = req.params;
+        const { stripeAccountId } = req.params;
         const { [this.controller.name]: data } = req.body;
 
-        return this.stripe.accounts.createPerson (stripePersonId, data)
+        return this.stripe.accounts.createPerson (stripeAccountId, data)
           .then (result => res.status (200).json ({[this.controller.resourceName]: result}));
       }
     });
@@ -22,9 +22,9 @@ module.exports = StripeResourceController.extend ({
   getOne () {
     return StripeAction.extend ({
       execute (req, res) {
-        const { stripePersonId, personId } = req.params;
+        const { stripeAccountId, stripePersonId } = req.params;
 
-        return this.stripe.accounts.retrievePerson (stripePersonId, personId)
+        return this.stripe.accounts.retrievePerson (stripeAccountId, stripePersonId)
           .then (result => res.status (200).json ({[this.controller.resourceName]: result}));
       }
     });
@@ -33,9 +33,9 @@ module.exports = StripeResourceController.extend ({
   getAll () {
     return StripeAction.extend ({
       execute (req, res) {
-        const { stripePersonId } = req.params;
+        const { stripeAccountId } = req.params;
 
-        return this.stripe.accounts.listPersons (stripePersonId)
+        return this.stripe.accounts.listPersons (stripeAccountId)
           .then (result => res.status (200).json ({[`${this.controller.resourceName}s`]: result.data}));
       }
     });
@@ -44,10 +44,10 @@ module.exports = StripeResourceController.extend ({
   update () {
     return StripeAction.extend ({
       execute (req, res) {
-        const { stripePersonId, personId } = req.params;
+        const { stripeAccountId, stripePersonId } = req.params;
         const { 'stripe-person': update } = req.body;
 
-        return this.stripe.accounts.updatePerson (stripePersonId, personId, update)
+        return this.stripe.accounts.updatePerson (stripeAccountId, stripePersonId, update)
           .then (result => res.status (200).json ({ [this.controller.resourceName]: result }));
       }
     });
@@ -56,9 +56,9 @@ module.exports = StripeResourceController.extend ({
   delete () {
     return StripeAction.extend ({
       execute (req, res) {
-        const { stripePersonId, personId } = req.params;
+        const { stripeAccountId, stripePersonId } = req.params;
 
-        return this.stripe.accounts.deletePerson (stripePersonId, personId)
+        return this.stripe.accounts.deletePerson (stripeAccountId, stripePersonId)
           .then (result => res.status (200).json (result.deleted));
       }
     });
