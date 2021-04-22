@@ -20,5 +20,15 @@ const { ResourceController } = require ('../../../../lib');
 module.exports = ResourceController.extend ({
   name: 'project',
 
-  Model: model ('project')
+  Model: model ('project'),
+
+  create () {
+    return this._super (this, ...arguments).extend ({
+      prepareDocument (req, doc) {
+        doc.date = new Date ();
+
+        return doc;
+      }
+    })
+  }
 });

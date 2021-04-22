@@ -35,9 +35,9 @@ module.exports = StripeResourceController.extend ({
   getOne () {
     return StripeAction.extend ({
       execute (req, res) {
-        const { accountId } = req.params;
+        const { stripeAccountId } = req.params;
 
-        return this.stripe.accounts.retrieve (accountId)
+        return this.stripe.accounts.retrieve (stripeAccountId)
           .then (result => res.status (200).json ({[this.controller.resourceName]: result}));
       }
     });
@@ -49,10 +49,10 @@ module.exports = StripeResourceController.extend ({
   update () {
     return StripeAction.extend ({
       execute (req, res) {
-        const { accountId } = req.params;
+        const { stripeAccountId } = req.params;
         const { 'stripe-account': update } = req.body;
 
-        return this.stripe.accounts.update (accountId, update)
+        return this.stripe.accounts.update (stripeAccountId, update)
           .then (result => res.status (200).json ({ [this.controller.resourceName]: result }));
       }
     });
@@ -66,9 +66,9 @@ module.exports = StripeResourceController.extend ({
   delete () {
     return StripeAction.extend ({
       execute (req, res) {
-        const { accountId } = req.params;
+        const { stripeAccountId } = req.params;
 
-        return this.stripe.accounts.del (accountId)
+        return this.stripe.accounts.del (stripeAccountId)
           .then (result => res.status (200).json (result.deleted));
       }
     });
