@@ -47,6 +47,10 @@ module.exports = StripeResourceController.extend ({
         const { stripeAccountId, stripePersonId } = req.params;
         const { 'stripe-person': update } = req.body;
 
+        // Make sure the account property is not part of the update since it comes
+        // from the parameter in the url.
+        delete update.account;
+
         return this.stripe.accounts.updatePerson (stripeAccountId, stripePersonId, update)
           .then (result => res.status (200).json ({ [this.controller.resourceName]: result }));
       }
