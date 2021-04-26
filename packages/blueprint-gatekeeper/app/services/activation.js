@@ -7,13 +7,12 @@ module.exports = Service.extend ({
 
   sendEmail (account, client) {
     if (!client.activate_account_url) {
-      console.warn (`${client.name} does not support activation emails`);
       return Promise.resolve (account);
     }
 
     let options = {
       sub: 'account.activation',
-      expiresIn: '7 days'
+      expiresIn: client.activate_expires_in
     };
 
     return this.issuer.issueUserToken (account, client, { }, options)

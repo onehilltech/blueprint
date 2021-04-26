@@ -64,7 +64,10 @@ let schema = new mongodb.Schema ({
 
   /// The url to use for activating an account. If the client does not provide
   /// this url, then the client is not able to activate accounts.
-  activate_account_url: { type: String }
+  activate_account_url: { type: String },
+
+  /// The expiration time for activating an account via this client.
+  activate_expires_in: { type : String, default: '7 days'}
 }, options);
 
 
