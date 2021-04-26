@@ -256,5 +256,25 @@ module.exports = ResourceController.extend ({
           .then (token => res.status (200).json (Object.assign ({token_type: 'Bearer'}, token)));
       }
     })
+  },
+
+  /**
+   * The user is verifying (of activating) their account.
+   */
+  verify () {
+    return Action.extend ({
+      execute (req, res) {
+        const { Model } = this.controller;
+        const { accountId } = req.params;
+
+        let update = {
+          'verification.date': new Date (),
+          'verification.ip_address': req.ip
+        };
+
+        return Model.findByIdAndUpdate (accountId, update, { new: true })
+          .then (account => !!account ? res.status (200).json ({ account }) : Promise.reject (new NotFoundError ('not_found', 'The account does not exist.')));
+      }
+    });
   }
 });

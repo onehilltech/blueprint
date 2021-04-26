@@ -6,13 +6,13 @@ module.exports = Service.extend ({
   gatekeeper: service (),
 
   sendEmail (account, client) {
-    if (!client.activate_account_url) {
+    if (!client.verify_account_url) {
       return Promise.resolve (account);
     }
 
     let options = {
       sub: 'account.activation',
-      expiresIn: client.activate_expires_in
+      expiresIn: client.verify_expires_in
     };
 
     return this.issuer.issueUserToken (account, client, { }, options)
@@ -26,7 +26,7 @@ module.exports = Service.extend ({
           },
           locals: {
             account: {
-              activationUrl: `${client.activate_account_url}?access_token=${accessToken}`
+              activationUrl: `${client.verify_account_url}?access_token=${accessToken}`
             }
           }
         };
