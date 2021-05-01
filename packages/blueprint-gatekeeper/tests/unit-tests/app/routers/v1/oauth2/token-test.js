@@ -978,9 +978,9 @@ describe ('app | routers | oauth2 | token', function () {
       });
     });
 
-    describe ('temp', function () {
+    describe.only ('temp', function () {
       context ('native', function () {
-        it ('should generate a temp token', function () {
+        it ('should generate a temp user token', function () {
           const {user_tokens, native} = seed ();
           const user_token = user_tokens[0];
           const client = native[0];
@@ -1009,6 +1009,7 @@ describe ('app | routers | oauth2 | token', function () {
               expect (accessToken.audience).to.equal ('temp');
               expect (accessToken.scope).to.eql (['online']);
               expect (accessToken.expiration).to.exist;
+              expect (accessToken.type).to.equal ('user_token');
             });
           });
         });
@@ -1066,6 +1067,37 @@ describe ('app | routers | oauth2 | token', function () {
         });
       });
 
+      context ('client_token', function () {
+        it.only ('should generate a temp client token', function () {
+          const {client_tokens: [ , , client_token ], native: [ , client ]} = seed ();
+
+          const { access_token } = client_token.serializeSync (...getTokenGenerators ());
+
+          const data = {
+            grant_type: 'temp',
+            access_token,
+            client_id: client.id,
+            client_secret: client.client_secret,
+            options: {
+              audience: 'temp',
+              expiration: '10 minutes'
+            }
+          };
+
+          return getToken (data).then (token => {
+            expect (token).to.have.all.keys (['token_type', 'access_token']);
+            expect (token).to.have.property ('token_type', 'Bearer');
+
+            const issuer = blueprint.lookup ('service:issuer');
+
+            return issuer.verifyToken (token.access_token).then (accessToken => {
+              expect (accessToken.audience).to.equal ('temp');
+              expect (accessToken.expiration).to.exist;
+              expect (accessToken.type).to.equal ('client_token');
+            });
+          });
+        });
+      })
     });
   });
 

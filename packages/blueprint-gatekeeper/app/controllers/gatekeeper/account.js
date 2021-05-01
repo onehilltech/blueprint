@@ -58,7 +58,7 @@ module.exports = ResourceController.extend ({
     return this._super.call (this, ...arguments).extend ({
       session: service (),
       account: service (),
-      activation: service (),
+      verification: service (),
 
       // Extend the default schema.
       schema,
@@ -115,7 +115,7 @@ module.exports = ResourceController.extend ({
         // The account model has been successfully created. Let's send an account activation email
         // for the account to the email address associated with this account.
 
-        return this.activation.sendEmail (account, req.accessToken.client);
+        return this.verification.sendEmail (account, req.accessToken.client);
       },
 
       prepareResponse (req, res, result) {
@@ -259,7 +259,7 @@ module.exports = ResourceController.extend ({
   },
 
   /**
-   * The user is verifying (of activating) their account.
+   * The current user is verifying (or activating) their account.
    */
   verify () {
     return Action.extend ({

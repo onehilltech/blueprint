@@ -11,7 +11,7 @@ module.exports = Service.extend ({
     }
 
     let options = {
-      sub: 'account.activation',
+      sub: 'account.verification',
       expiresIn: client.verify_expires_in
     };
 
@@ -20,13 +20,16 @@ module.exports = Service.extend ({
         const { access_token: accessToken } = result;
 
         const emailOptions = {
-          template: 'gatekeeper.account.activation',
+          template: 'gatekeeper.account.verification',
           message: {
             to: account.email,
           },
           locals: {
-            account: {
-              activationUrl: `${client.verify_account_url}?access_token=${accessToken}`
+            verification: {
+              url: `${client.verify_account_url}?access_token=${accessToken}`,
+              button: {
+                label: 'Verify account'
+              }
             }
           }
         };

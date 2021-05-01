@@ -56,18 +56,15 @@ describe ('app | routers | account', function () {
     context ('POST', function () {
       const data = { username: 'tester1', password: '1aBcDeFg', email: 'JAMES@ONEHILLTECH.COM' };
 
-      it.only ('should create a new account with new id', function () {
+      it ('should create a new account with new id', function () {
         return request ()
           .post ('/v1/accounts')
           .send ({account: data})
           .withClientToken (0)
           .expect (200)
           .then (res => {
-            let _id = res.body.account._id;
-
-            expect (res.body).to.eql ({
+            expect (res.body).to.deep.include ({
               account: {
-                _id,
                 enabled: true,
                 scope: [],
                 username: data.username,
@@ -76,7 +73,7 @@ describe ('app | routers | account', function () {
                 email: data.email.toLowerCase (),
 
                 verification: {
-                  required: false
+                  required: true
                 }
               }
             });

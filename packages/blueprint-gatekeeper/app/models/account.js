@@ -47,6 +47,9 @@ let definition = {
   scope: {type: [String], default: []},
 
   verification: {
+    /// The account must be verified.
+    required: { type: Boolean, required: true, default: true },
+
     /// The date of the verification.
     date: { type: Date },
 

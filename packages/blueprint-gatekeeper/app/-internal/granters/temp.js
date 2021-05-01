@@ -15,13 +15,9 @@
  */
 
 const Granter = require ('../granter');
-const { service, model } = require ('@onehilltech/blueprint');
-
-const {
-  Types: { ObjectId }
-} = require ('@onehilltech/blueprint-mongodb');
-
+const { service, BadRequestError } = require ('@onehilltech/blueprint');
 const { merge, omit } = require ('lodash');
+
 const ModelVisitor = require ('../../models/-visitor');
 
 /**
@@ -31,9 +27,6 @@ const ModelVisitor = require ('../../models/-visitor');
  */
 module.exports = Granter.extend ({
   name: 'temp',
-
-  UserToken: model ('user-token'),
-
   issuer: service (),
 
   schemaFor (client) {
@@ -70,7 +63,17 @@ module.exports = Granter.extend ({
 
         // Delete the options that are not allowed.
         let opts = omit (options, ['algorithm', 'jwtid', 'expiresIn']);
-        return this.issuer.issueUserToken (accessToken.account, accessToken.client, payload, opts, false);
+
+        switch (accessToken.type) {
+          case 'user_token':
+            return this.issuer.issueUserToken (accessToken.account, accessToken.client, payload, opts, false);
+
+          case 'client_token':
+            return this.issuer.issueClientToken (accessToken.client, payload, opts, false);
+
+          default:
+            return Promise.reject (new BadRequestError ('invalid_token', 'This token cannot create temporary tokens.'));
+        }
       });
   }
 });

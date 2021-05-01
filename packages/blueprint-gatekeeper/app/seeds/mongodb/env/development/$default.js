@@ -30,7 +30,8 @@ module.exports = Seed.extend ({
           client_secret: 'gatekeeper-android',
           email: 'james@onehilltech.com',
           scope: ['gatekeeper.account.create'],
-          password_reset_url: 'http://localhost:4200/auth/reset-password'
+          password_reset_url: 'http://localhost:4200/auth/reset-password',
+          expiration: '15 seconds'
         }
       ],
 
@@ -52,7 +53,8 @@ module.exports = Seed.extend ({
           recaptcha_secret: '6LdcLDcUAAAAAL8U9Im2z-kebfr9M1oqL1lLS0C7',
           email: 'james@onehilltech.com',
           scope: ['gatekeeper.account.create'],
-          origin: 'http://localhost:4200'
+          origin: 'http://localhost:4200',
+          expiration: '15 seconds'
         }
       ],
 

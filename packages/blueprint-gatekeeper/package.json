@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@onehilltech/blueprint-testing": "^4.28.18",
+    "chai": "^4.3.4",
     "coveralls": "^3.0.0",
     "istanbul": "^0.4.3",
     "mocha": "^6.2.0",
