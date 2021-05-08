@@ -1,23 +1,23 @@
 {
-  "name": "@onehilltech/blueprint-winston",
-  "description": "The blueprint module for winston.",
+  "name": "blueprint-deploy",
+  "description": "",
   "version": "4.35.0",
-  "private": false,
+  "private": true,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
-    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+    "install-service": "sudo -s forever-service install blueprint-deploy_d --script ./app/index.js -e 'NODE_ENV=production'",
+    "uninstall-service": "sudo -s forever-service delete blueprint-deploy_d"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.35.0",
-    "winston": "^3.2.1"
+    "@onehilltech/blueprint": "^4.35.0"
   },
   "devDependencies": {
     "@onehilltech/blueprint-cli": "^4.35.0",
     "@onehilltech/blueprint-testing": "^4.35.0"
   },
-  "main": "./index.js",
-  "license": "Apache-2.0",
+  "license": "",
   "engines": {
     "node": ">=6.0.0",
     "npm": ">=3.0.0"
@@ -25,6 +25,5 @@
   "keywords": [
     "blueprint",
     "blueprint-module"
-  ],
-  "gitHead": "6d4af417c417bad300c5208b446643f9e2b785eb"
+  ]
 }

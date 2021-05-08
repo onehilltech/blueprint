@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-stripe",
   "description": "Blueprint module for Stripe.",
-  "version": "4.33.5",
+  "version": "4.35.0",
   "private": false,
   "repository": "onehilltech/blueprint",
   "scripts": {
@@ -10,11 +10,11 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.28.20",
+    "@onehilltech/blueprint": "^4.35.0",
     "stripe": "^8.131.1"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^4.28.18"
+    "@onehilltech/blueprint-testing": "^4.35.0"
   },
   "license": "Apache-2.0",
   "engines": {
