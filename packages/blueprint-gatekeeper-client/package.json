@@ -13,7 +13,7 @@
     "uninstall-service": "sudo -s forever-service delete blueprint-gatekeeper-client_d"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.5.2",
+    "@onehilltech/blueprint": "^4.28.20",
     "jsonfile": "^4.0.0",
     "pug": "^2.0.3",
     "request": "^2.87.0",

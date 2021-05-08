@@ -24,8 +24,7 @@ module.exports = Service.extend ({
   _accessToken: null,
   _config: null,
 
-  init () {
-    this._super.call (this, ...arguments);
+  configure () {
     this._config = this.app.lookup ('config:gatekeeper');
   },
 
