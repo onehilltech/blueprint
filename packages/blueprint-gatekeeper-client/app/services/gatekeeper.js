@@ -24,10 +24,6 @@ module.exports = Service.extend ({
   _accessToken: null,
   _config: null,
 
-  configure () {
-    this._config = this.app.lookup ('config:gatekeeper');
-  },
-
   tempPath: computed ({
     get () {
       return path.resolve (this.app.tempPath, 'gatekeeper');
@@ -55,6 +51,7 @@ module.exports = Service.extend ({
    */
   configure () {
     this._super.call (this, ...arguments);
+    this._config = this.app.lookup ('config:gatekeeper');
 
     return fs.ensureDir (this.tempPath).then (() => {
       return this._loadToken ();
