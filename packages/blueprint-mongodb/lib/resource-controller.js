@@ -181,7 +181,7 @@ exports = module.exports = ResourceController.extend ({
             // any task before we insert the document into the database. After we
             // insert the document, allow the client to make any modifications to the
             // the inserted document.
-            return Promise.resolve (this.preCreateModel (req))
+            return Promise.resolve (this.preCreateModel (req, document))
               .then (() => this.createModel (req, document))
               .catch (this.translateErrorToHttpError.bind (this))
               .then (result => this.postCreateModel (req, result))
@@ -212,7 +212,7 @@ exports = module.exports = ResourceController.extend ({
         return doc;
       },
 
-      preCreateModel () {
+      preCreateModel (req, doc) {
         return null;
       },
 
