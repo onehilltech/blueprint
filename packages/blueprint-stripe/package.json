@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.35.0",
+    "@onehilltech/blueprint-mongodb": "^4.36.2",
     "stripe": "^8.131.1"
   },
   "devDependencies": {
