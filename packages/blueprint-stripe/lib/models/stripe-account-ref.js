@@ -7,6 +7,6 @@ const StripeAccountRefSchema = new Schema({
 
   /// The status of the Stripe account
   status: { type: String }
-}, options);
+});
 
 module.exports = StripeAccountRefSchema;
