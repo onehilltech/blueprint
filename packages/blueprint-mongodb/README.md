@@ -22,7 +22,7 @@ Usage
 Define the `mongodb.js` configuration file in your Blueprint.js application.
 
 ```javascript
-// mongodb.config.js
+// app/configs/mongodb.js
 
 module.exports = {
   connections: {
