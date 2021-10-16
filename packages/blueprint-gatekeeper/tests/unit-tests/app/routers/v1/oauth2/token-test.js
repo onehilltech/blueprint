@@ -1068,7 +1068,7 @@ describe ('app | routers | oauth2 | token', function () {
       });
 
       context ('client_token', function () {
-        it.only ('should generate a temp client token', function () {
+        it ('should generate a temp client token', function () {
           const {client_tokens: [ , , client_token ], native: [ , client ]} = seed ();
 
           const { access_token } = client_token.serializeSync (...getTokenGenerators ());
