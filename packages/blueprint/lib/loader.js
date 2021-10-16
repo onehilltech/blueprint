@@ -18,22 +18,27 @@ const all    = require ('require-all');
 const { BO } = require ('base-object');
 const _      = require ('lodash');
 const path   = require ('path');
-const fs     = require ('fs');
+const fs     = require ('fs').promises;
 const assert = require ('assert');
-const {env}    = require ('./environment');
+const {env}  = require ('./environment');
+const debug  = require ('debug') ('blueprint:loader');
 
 function load (opts) {
-  return new Promise ((resolve) => {
-    fs.stat (opts.dirname, (err, stats) => {
-      if (err || !stats.isDirectory ())
+  debug (`loading resources in ${opts.dirname}`);
+
+  return fs.stat (opts.dirname)
+    .then (stats => {
+      if (!stats.isDirectory ())
+        return {};
+
+      return all (opts);
+    })
+    .catch (err => {
+      return err && err.code !== 'ENOENT' ? Promise.reject (err) : {};
+
+      if (stats === undefined || !stats.isDirectory ())
         return resolve ({});
-
-      // Load all the objects in the directory.
-      let objects = all (opts);
-
-      resolve (objects);
     });
-  });
 }
 
 /**
