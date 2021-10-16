@@ -978,7 +978,7 @@ describe ('app | routers | oauth2 | token', function () {
       });
     });
 
-    describe.only ('temp', function () {
+    describe ('temp', function () {
       context ('native', function () {
         it ('should generate a temp user token', function () {
           const {user_tokens, native} = seed ();

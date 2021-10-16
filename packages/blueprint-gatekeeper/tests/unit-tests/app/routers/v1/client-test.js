@@ -27,7 +27,7 @@ describe ('app | routers | client', function () {
           .post ('/v1/clients')
           .withClientToken (0)
           .send ({client: client})
-          .expect (200, {client: lean (Object.assign (client, {enabled: true, scope: [], allow: [], deny: []}))});
+          .expect (200, {client: lean (Object.assign (client, {enabled: true, scope: [], allow: [], deny: [], verify_expires_in: '7 days'}))});
       });
     });
   });

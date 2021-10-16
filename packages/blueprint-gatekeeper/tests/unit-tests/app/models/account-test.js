@@ -42,7 +42,7 @@ describe ('app | models | account', function () {
           enabled: true,
           scope: [],
           verification: {
-            required: false
+            required: true
           }
         });
       });
