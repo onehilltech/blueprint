@@ -85,7 +85,8 @@ module.exports = BO.extend (Events, {
     return readJson (packageFile).then (packageObj => {
       // Do not continue if the module is not a Blueprint module, or we have
       // already loaded this module into memory.
-      if (!isBlueprintModule (packageObj))
+
+      if (!isBlueprintModule (packageObj) || !!this._modules[name])
         return;
 
       debug (`loading module ${name}`);
