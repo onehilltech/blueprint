@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-gatekeeper-client",
   "description": "Blueprint module for gatekeeper clients",
-  "version": "4.35.1",
+  "version": "4.37.0",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
@@ -13,7 +13,7 @@
     "uninstall-service": "sudo -s forever-service delete blueprint-gatekeeper-client_d"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.35.0",
+    "@onehilltech/blueprint": "^4.37.0",
     "jsonfile": "^4.0.0",
     "pug": "^2.0.3",
     "request": "^2.87.0",

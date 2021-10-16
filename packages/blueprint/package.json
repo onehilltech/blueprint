@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint",
   "author": "One Hill Technologies, LLC",
-  "version": "4.35.0",
+  "version": "4.37.0",
   "description": "lightweight, simple, elegant framework for building mean applications",
   "license": "Apache-2.0",
   "private": false,

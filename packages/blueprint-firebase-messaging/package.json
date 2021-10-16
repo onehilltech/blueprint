@@ -1,6 +1,6 @@
 {
   "name": "@onehilltech/blueprint-firebase-messaging",
-  "version": "4.36.6",
+  "version": "4.37.0",
   "description": "Google Firebase messaging module for Blueprint.js",
   "main": "lib/index.js",
   "private": false,
@@ -16,11 +16,11 @@
   "author": "James H. Hill",
   "license": "Apache-2.0",
   "dependencies": {
-    "@onehilltech/blueprint-gatekeeper": "^4.36.6",
+    "@onehilltech/blueprint-gatekeeper": "^4.37.0",
     "node-gcm": "^0.14.10"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^4.35.0",
+    "@onehilltech/blueprint-testing": "^4.37.0",
     "coveralls": "^3.0.0",
     "istanbul": "^0.4.5",
     "mocha": "^6.2.0",
