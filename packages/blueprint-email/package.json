@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-email",
   "description": "Blueprint module for sending emails via mailgun",
-  "version": "4.37.1",
+  "version": "4.37.2",
   "private": false,
   "repository": "onehilltech/blueprint",
   "scripts": {
@@ -10,9 +10,9 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.37.0",
+    "@onehilltech/blueprint": "^4.37.2",
     "@onehilltech/blueprint-cli": "^4.35.0",
-    "@onehilltech/blueprint-mongodb": "^4.37.1",
+    "@onehilltech/blueprint-mongodb": "^4.37.2",
     "email-templates": "^5.0.2",
     "nodemailer": "^5.0.0",
     "nodemailer-mailgun-transport": "^1.4.0",
