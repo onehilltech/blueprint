@@ -5,8 +5,11 @@ const StripeAccountRefSchema = new Schema({
   /// The id associated with the Stripe account.
   id: { type: String, required: true },
 
-  /// The status of the Stripe account
-  status: { type: String }
+  /// Charges are enabled on the Stripe account.
+  charges_enabled: { type: Boolean },
+
+  /// Payouts are enabled on the Stripe account.
+  payouts_enabled: { type: Boolean }
 });
 
 module.exports = StripeAccountRefSchema;
