@@ -3,7 +3,7 @@ const { Schema } = db;
 
 const StripeAccountRefSchema = new Schema({
   /// The id associated with the Stripe account.
-  account: { type: String, required: true },
+  account: { type: String },
 
   /// Charges are enabled on the Stripe account.
   charges_enabled: { type: Boolean },
