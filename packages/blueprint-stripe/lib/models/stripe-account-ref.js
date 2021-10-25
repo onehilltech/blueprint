@@ -2,9 +2,6 @@ const db = require ('@onehilltech/blueprint-mongodb');
 const { Schema } = db;
 
 const StripeAccountRefSchema = new Schema({
-  /// The id associated with the Stripe account.
-  id: { type: String, required: true },
-
   /// Charges are enabled on the Stripe account.
   charges_enabled: { type: Boolean },
 
