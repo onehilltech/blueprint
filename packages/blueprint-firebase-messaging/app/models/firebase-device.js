@@ -33,8 +33,7 @@ let schema = new mongodb.Schema ({
   session: { type: ObjectId, hidden: true },
 
   /// The Firebase registration token for the instance.
-  token: { type: String, required: true },
-
+  token: { type: String, required: true, unique: true },
 }, options);
 
 module.exports = mongodb.resource ('device', schema, 'firebase_devices');
