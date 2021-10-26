@@ -9,7 +9,11 @@ const StripeAccountRefSchema = new Schema({
   charges_enabled: { type: Boolean },
 
   /// Payouts are enabled on the Stripe account.
-  payouts_enabled: { type: Boolean }
+  payouts_enabled: { type: Boolean },
+
+  /// The requirements for the account. The content of this object is used
+  /// to inform the platform what information is needed about a Stripe account.
+  requirements: {}
 });
 
 module.exports = StripeAccountRefSchema;
