@@ -30,9 +30,10 @@ let schema = new mongodb.Schema ({
 
   /// The authentication session for the device token. This field is never serialized
   /// to the client.
-  session: { type: ObjectId, hidden: true },
+  session: { type: ObjectId, hidden: true, required: true },
 
-  /// The Firebase registration token for the instance.
+  /// The Firebase registration token for the instance. This token must always be unique or
+  /// it will result in user receiving a notification multiple times.
   token: { type: String, required: true, unique: true },
 }, options);
 

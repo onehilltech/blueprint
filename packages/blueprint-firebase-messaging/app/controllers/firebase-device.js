@@ -26,6 +26,11 @@ module.exports = ResourceController.extend ({
   namespace: 'firebase',
   Model: model ('firebase-device'),
 
+  /**
+   * Create a document in the collection.
+   *
+   * @returns {*}
+   */
   create () {
     return this._super.call (this, ...arguments).extend ({
       schema: {
@@ -35,18 +40,32 @@ module.exports = ResourceController.extend ({
 
         'device.client': {
           optional: true
+        },
+
+        'device.session': {
+          optional: true
         }
       },
 
       prepareDocument (req, doc) {
         const { user, accessToken } = req;
 
+        // Initialize the document with information about the current user.
         doc.client = accessToken.client._id;
         doc.account = user._id;
         doc.session = accessToken._id;
 
         return doc;
       }
-    })
+    });
+  },
+
+  /**
+   * Update a single document in the collection.
+   */
+  update () {
+    return this._super.call (this, ...arguments).then ({
+
+    });
   }
 });
