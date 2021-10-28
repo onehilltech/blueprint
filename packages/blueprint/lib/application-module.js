@@ -49,6 +49,8 @@ module.exports = BO.extend ({
   /// Collection of resources loaded by the application module.
   _resources: null,
 
+  __configure_Promise: null,
+
   viewsPath: computed ({
     get () {
       return path.join (this.modulePath, 'views');
@@ -76,10 +78,11 @@ module.exports = BO.extend ({
 
   init () {
     this._super.call (this, ...arguments);
-    this._resources = {};
 
     assert (!!this.app, "You must define the 'app' property.");
     assert (!!this.modulePath, "You must define the 'modulePath' property.");
+
+    this._resources = {};
 
     // The entities that are loaded by the application module. The order of the
     // entities is important because come classes of components will be dependent
@@ -126,38 +129,47 @@ module.exports = BO.extend ({
    * @returns {Promise<ApplicationModule>}
    */
   configure () {
+    // We should only load this module once. Once it is in the loaded state, we just need
+    // to return the loaded promise.
+    if (!!this.__configure_Promise)
+      return this.__configure_Promise;
+
     debug (`configuring the application module ${this.modulePath}`);
 
-    let promise = reduce (this._entities, (promise, entity) => {
-      return promise.then (() => {
-        // Compute the location of the resources we are loading. Then load the resources
-        // into memory and save the resources to our application module
-        let {name} = entity;
-        let location = entity.location || name;
-        let rcPath = path.resolve (this.modulePath, location);
-        let opts = merge ({dirname: rcPath}, entity.opts);
+    this.__configure_Promise = new Promise ((resolve, reject) => {
+      let promise = reduce (this._entities, (promise, entity) => {
+        return promise.then (() => {
+          // Compute the location of the resources we are loading. Then load the resources
+          // into memory and save the resources to our application module
+          let {name} = entity;
+          let location = entity.location || name;
+          let rcPath = path.resolve (this.modulePath, location);
+          let opts = merge ({dirname: rcPath}, entity.opts);
 
-        debug (`loading ${name} in ${rcPath}`);
-        let loader = entity.loader || this._defaultLoader;
+          debug (`loading ${name} in ${rcPath}`);
+          let loader = entity.loader || this._defaultLoader;
 
-        return loader.load (opts).then (resources => {
-          // Merge the resources into the application module, and then merge them
-          // into the parent application. This means we will have two copies of the
-          // resources, but that is fine. We need the ability to load a resource from
-          // its parent module, if necessary.
-          debug (`merging ${name} into both application module and application`);
-          const mergeable = get (entity, 'mergeable', true);
+          return loader.load (opts).then (resources => {
+            // Merge the resources into the application module, and then merge them
+            // into the parent application. This means we will have two copies of the
+            // resources, but that is fine. We need the ability to load a resource from
+            // its parent module, if necessary.
+            debug (`merging ${name} into both application module and application`);
+            const mergeable = get (entity, 'mergeable', true);
 
-          this._resources[name] = merge (this._resources[name] || {}, resources);
+            this._resources[name] = merge (this._resources[name] || {}, resources);
 
-          if (mergeable) {
-            this.app.resources[name] = merge (this.app.resources[name] || {}, resources);
-          }
+            if (mergeable) {
+              this.app.resources[name] = merge (this.app.resources[name] || {}, resources);
+            }
+          });
         });
-      });
-    }, Promise.resolve ());
+      }, Promise.resolve ());
 
-    return promise.then (() => this);
+      promise.then (resolve).catch (reject);
+    });
+
+    return this.__configure_Promise;
   },
 
   /**
