@@ -20,7 +20,7 @@ module.exports = {
 
     resource: {
       controller: 'firebase-device',
-      allow: ['create', 'delete', 'update'],
+      allow: ['create', 'getAll', 'delete', 'update'],
     },
   }
 };
