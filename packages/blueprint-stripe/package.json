@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-stripe",
   "description": "Blueprint module for Stripe.",
-  "version": "4.39.1",
+  "version": "4.39.2",
   "private": false,
   "main": "./lib",
   "repository": "onehilltech/blueprint",
