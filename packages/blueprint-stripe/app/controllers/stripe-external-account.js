@@ -6,7 +6,7 @@ const { StripeAction, StripeResourceController } = require ('../../lib');
  */
 module.exports = StripeResourceController.extend ({
   name: 'external-account',
-  
+
   create () {
     return StripeAction.extend ({
       execute (req, res) {
@@ -35,7 +35,9 @@ module.exports = StripeResourceController.extend ({
       schema: {
         type: {
           in: 'query',
-          options: ['card', 'bank_account'],
+          isIn: {
+            options: ['card', 'bank_account']
+          },
           errorMessage: 'You must provide either card or bank_account in your query.'
         }
       },
