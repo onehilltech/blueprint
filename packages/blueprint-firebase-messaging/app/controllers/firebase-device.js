@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { model } = require ('@onehilltech/blueprint');
+const { model, BadRequestError } = require ('@onehilltech/blueprint');
 const { ResourceController } = require ('@onehilltech/blueprint-gatekeeper');
 
 /**
@@ -25,6 +25,27 @@ const { ResourceController } = require ('@onehilltech/blueprint-gatekeeper');
 module.exports = ResourceController.extend ({
   namespace: 'firebase',
   Model: model ('firebase-device'),
+
+  /**
+   * Specialize the query operation to support lookup if a device for the given token.
+   */
+  getAll () {
+    return this._super.call (this, ...arguments).extend ({
+      getFilter (req, query) {
+        // Right now, we only allow this request if you provide the token. This means that
+        // we should only get a single device for each request.
+
+        if (!query.token)
+          throw new BadRequestError ('missing_parameter', 'You must provide the token query parameter');
+
+        // Add current user id to the query. We use the user id and not the session id because
+        // the saved session id may not be the same as the one us to authorize the request.
+        query.account = req.user._id;
+
+        return query;
+      }
+    });
+  },
 
   /**
    * Create a document in the collection.
