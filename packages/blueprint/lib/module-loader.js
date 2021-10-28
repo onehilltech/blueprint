@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { readJson, statSync } = require ('fs-extra');
+const { statSync } = require ('fs-extra');
 const path   = require ('path');
 const assert = require ('assert');
 const { BO } = require ('base-object');
@@ -46,25 +46,39 @@ module.exports = BO.extend (Events, {
   },
 
   load () {
-    let packageFile = path.resolve (this.app.appPath, '..', FILE_PACKAGE_JSON);
+    const packageFile = path.resolve (this.app.appPath, '..', FILE_PACKAGE_JSON);
+    const packageObj = require (packageFile);
 
-    return readJson (packageFile).then (packageObj => {
-      if (packageObj || packageObj.dependencies)
-        return this._handleDependencies (packageObj.dependencies);
-    });
+    return (packageObj || packageObj.dependencies) ? this._handleDependencies (packageObj.dependencies) : Promise.resolve ();
   },
 
+  /**
+   * Handle the dependencies in the module.
+   *
+   * @param dependencies
+   * @returns {Promise<unknown[]>}
+   * @private
+   */
   _handleDependencies (dependencies) {
     let promises = [];
 
+    debug (`dependencies: ${Object.keys (dependencies)}`);
     forEach (dependencies, (version, name) => promises.push (this._handleNodeModule (name, version)));
 
     return Promise.all (promises);
   },
 
+  /**
+   * Handle node-specific modules.
+   *
+   * @param name
+   * @param version
+   * @returns {*}
+   * @private
+   */
   _handleNodeModule (name, version) {
     // Do not process the module more than once.
-    if (this._modules[name])
+    if (!!this._modules[name])
       return;
 
     // Open the package.json file for this node module, and determine
@@ -81,31 +95,34 @@ module.exports = BO.extend (Events, {
     }
 
     const packageFile = path.resolve (modulePath, FILE_PACKAGE_JSON);
+    const packageObj = require (packageFile);
 
-    return readJson (packageFile).then (packageObj => {
-      // Do not continue if the module is not a Blueprint module, or we have
-      // already loaded this module into memory.
+    // Do not continue if the module is not a Blueprint module, or we have
+    // already loaded this module into memory.
 
-      if (!isBlueprintModule (packageObj) || !!this._modules[name])
-        return;
+    if (!isBlueprintModule (packageObj) || !!this._modules[name])
+      return;
 
-      debug (`loading module ${name}`);
+    debug (`first time seeing ${name}; adding to list of dependencies...`);
 
-      // Create a new application module.
-      const moduleAppPath = path.resolve (modulePath, 'app');
-      const module = new ApplicationModule ({name, app: this.app, modulePath: moduleAppPath});
+    // Create a new application module.
+    const moduleAppPath = path.resolve (modulePath, 'app');
+    const module = new ApplicationModule ({name, app: this.app, modulePath: moduleAppPath});
 
-      this._modules[name] = module;
+    // Save the module so we do not process it again.
+    this._modules[name] = module;
 
-      // Load the dependencies for this module, then configure this module, and
-      // then add this module to the application.
-      const {dependencies} = packageObj;
+    // Load the dependencies for this module, then configure this module, and
+    // then add this module to the application.
+    const { dependencies } = packageObj;
 
-      return this._handleDependencies (dependencies)
-        .then (() => this.emit ('loading', module))
-        .then (() => module.configure ())
-        .then (module => this.emit ('loaded', module))
-    });
+    return this._handleDependencies (dependencies)
+      .then (() => this.emit ('loading', module))
+      .then (() => {
+        debug (`configuring ${name}`);
+        return module.configure ();
+      })
+      .then (module => this.emit ('loaded', module));
   },
 
   _resolveModulePath (name) {
