@@ -15,22 +15,18 @@
  */
 
 
-const {
-  Service,
-  model,
-  service
-} = require ('@onehilltech/blueprint');
-
+const { Service, model, service } = require ('@onehilltech/blueprint');
 const assert = require ('assert');
 const gcm = require ('node-gcm');
 const debug = require ('debug') ('blueprint:firebase');
 
-const {
-  get,
-  isArray
-} = require ('lodash');
+const mongodb = require ('@onehilltech/blueprint-mongodb');
+const mongoose = require ('mongoose');
 
-const {fromCallback} = require ('bluebird');
+const { Types: { ObjectId }} = mongodb;
+
+const { get, isArray } = require ('lodash');
+const { fromCallback } = require ('bluebird');
 
 const MAX_RECIPIENTS = 1000;
 
@@ -45,6 +41,7 @@ module.exports = Service.extend ({
   _sender: null,
 
   FirebaseDevice: model ('firebase-device'),
+  Client: model ('client'),
 
   dryRun: true,
 
@@ -72,8 +69,9 @@ module.exports = Service.extend ({
    *
    * @param       recipient     Id, or an array of ids.
    * @param       msg           The message the send.
+   * @param       options       Additional options for the send method.
    */
-  send (recipient, msg) {
+  send (recipient, msg, options = {}) {
     debug (`sending message to ${recipient}`);
 
     if (!isArray (recipient))
@@ -82,12 +80,22 @@ module.exports = Service.extend ({
     // First, get all the tokens for the recipients. We have to remember that
     // a recipient can have more than one token since each device owned by the
     // user has its own token/registration.
-    const selection = { account: {$in: recipient} };
+    const selection = {account: {$in: recipient}};
+    const {clients = []} = options;
 
-    return this.FirebaseDevice
-      .find (selection)
-      .populate ('account', 'enabled')
-      .populate ('client', 'enabled').exec ()
+    // The sender has the option of restricting the message to a specific set of
+    // clients. If the clients option is specified, then only include users that
+    // have tokens for the specified clients.
+
+    return this._resolveClientIds (clients)
+      .then (clients => {
+        if (clients.length)
+          selection.client = {$in: clients};
+
+        return this.FirebaseDevice.find (selection)
+          .populate ('account', 'enabled')
+          .populate ('client', 'enabled').exec ();
+      })
       .then (devices => {
         // There is no need to continue if we do not have any users that match
         // the target recipients.
@@ -98,7 +106,7 @@ module.exports = Service.extend ({
         // is enabled, and the user is enabled, if applicable. We want to filter the
         // list before we start.
 
-        let message = new gcm.Message (Object.assign ({ dryRun : this.dryRun }, msg));
+        let message = new gcm.Message (Object.assign ({dryRun: this.dryRun}, msg));
 
         let enabled = devices.filter (device => {
           return device.client.enabled && (!device.user || device.user.enabled);
@@ -111,7 +119,7 @@ module.exports = Service.extend ({
 
         for (let i = 0, len = enabled.length; i < len; i += MAX_RECIPIENTS) {
           const registrationTokens = enabled.slice (i, i + MAX_RECIPIENTS).map (device => device.token);
-          const recipient = { registrationTokens };
+          const recipient = {registrationTokens};
 
           pending.push (this._sendMessage (recipient, message));
         }
@@ -141,6 +149,26 @@ module.exports = Service.extend ({
       recipient.condition = topic;
 
     return this._sendMessage (recipient, message);
+  },
+
+  /**
+   * Resolve the client ids from the array of clients.
+   *
+   * @param clients
+   * @returns {Promise<unknown[]>}
+   * @private
+   */
+  _resolveClientIds (clients) {
+    return Promise.all (clients.map (client => {
+      if (mongoose.isValidObjectId (client)) {
+        return client instanceof ObjectId ? client : new ObjectId (client);
+      }
+      else {
+        // At this point, we assume the client is the name of the client. We need
+        // to look up the client id and use that in place of the name.
+        return this.Client.findOne ({ name: client }).then (client => client._id);
+      }
+    }));
   },
 
   /**
