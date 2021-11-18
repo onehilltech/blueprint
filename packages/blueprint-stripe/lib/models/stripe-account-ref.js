@@ -13,7 +13,10 @@ const StripeAccountRefSchema = new Schema({
 
   /// The requirements for the account. The content of this object is used
   /// to inform the platform what information is needed about a Stripe account.
-  requirements: {}
+  requirements: {},
+
+  /// The settings for the Stripe account.
+  settings: {},
 }, { _id: false });
 
 module.exports = StripeAccountRefSchema;
