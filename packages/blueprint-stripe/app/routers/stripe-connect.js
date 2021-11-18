@@ -7,10 +7,8 @@ module.exports = {
 
     '/:stripeAccountId': {
       '/balance': {
-        resource: {
-          controller: 'stripe-balance',
-          allow: ['getOne']
-        }
+        policy: '?stripe.balance.getOne',
+        get: 'stripe-balance@get'
       },
 
       '/external-accounts': {
