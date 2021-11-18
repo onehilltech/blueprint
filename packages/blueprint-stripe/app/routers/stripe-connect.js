@@ -6,6 +6,13 @@ module.exports = {
     },
 
     '/:stripeAccountId': {
+      '/balance': {
+        resource: {
+          controller: 'stripe-balance',
+          allow: ['getOne']
+        }
+      },
+
       '/external-accounts': {
         resource: {
           controller: 'stripe-external-account',
