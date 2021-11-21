@@ -1,7 +1,4 @@
-const {
-  Controller,
-  Action
-} = require ('@onehilltech/blueprint');
+const { Controller, Action, service } = require ('@onehilltech/blueprint');
 
 /**
  * @class StripeController
@@ -15,9 +12,11 @@ module.exports = Controller.extend ({
    */
   emitStripeEvent () {
     return Action.extend ({
+      stripe: service (),
+
       execute (req, res) {
         // Emit the event internally for our listeners.
-        let event = req.body;
+        let event = this.stripe.constructEvent (req);
         let name = `stripe.${event.type}`;
 
         // We do not wait for the event to process because (1) we need to return

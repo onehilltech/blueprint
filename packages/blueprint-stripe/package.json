@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@onehilltech/blueprint-mongodb": "^4.39.1",
-    "stripe": "^8.131.1"
+    "stripe": "^8.191.0"
   },
   "devDependencies": {
     "@onehilltech/blueprint-testing": "^4.37.0"
