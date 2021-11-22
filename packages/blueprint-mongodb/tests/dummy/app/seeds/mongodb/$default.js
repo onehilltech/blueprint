@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-const { ref } = require ('@onehilltech/dab');
+const { ref, id } = require ('@onehilltech/dab');
 const Seed = require ('../../../../../lib/seed');
 
 module.exports = Seed.extend ({
   model () {
     return {
+      __mongodb: [
+        { _id: id ('619b0a46c8d6ae7eefd9665e'), version: 1}
+      ],
+
       authors: [
         {name: 'Jack Black'},
         {name: 'John Doe'},

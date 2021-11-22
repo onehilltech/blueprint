@@ -51,4 +51,6 @@ exports.populate = require ('./populate');
 exports.lean = lean;
 exports.seed = seed;
 
+exports.Migration = require ('./migration');
+
 exports.Seed = require ('./seed');

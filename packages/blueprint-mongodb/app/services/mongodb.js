@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { Service, computed, Loader } = require ('@onehilltech/blueprint');
+const { Service, computed, Loader, model } = require ('@onehilltech/blueprint');
 const { forOwn, mapValues, get, isPlainObject, map, pickBy } = require ('lodash');
 
 const { props } = require ('bluebird');
@@ -23,9 +23,12 @@ const assert = require ('assert');
 const mongoose = require ('mongoose');
 const debug = require ('debug')('blueprint-mongodb:mongodb');
 const path = require ('path');
+const fs = require ('fs-extra');
 
 const DEFAULT_CONNECTION_NAME = '$default';
 const SEEDS_RELATIVE_PATH = 'seeds/mongodb';
+
+const MONGODB_SCHEMA_ID = '619b0a46c8d6ae7eefd9665e';
 
 mongoose.Promise = Promise;
 
@@ -73,6 +76,8 @@ module.exports = Service.extend ({
     // setup the messaging.
     this._loadConfiguration ();
   },
+
+  __mongodb: model (),
 
   _loadConfiguration () {
     // Locate the module configuration in the application. If there is no
@@ -135,7 +140,7 @@ module.exports = Service.extend ({
   openConnections () {
     debug ('opening all connections to the database');
 
-    const {connections} = this.config;
+    const { connections } = this.config;
     const connecting = mapValues (connections, (config, name) => this.openConnection (name, config));
 
     return props (connecting);
@@ -149,7 +154,7 @@ module.exports = Service.extend ({
    * @returns {*}
    */
   openConnection (name, opts) {
-    let {uri, seed: seedData, options, clear = true} = opts;
+    let { version, uri, seed: seedData, options, clear = true} = opts;
     debug (`opening connection ${name}`);
 
     let conn = this._connections[name];
@@ -164,6 +169,7 @@ module.exports = Service.extend ({
 
     return conn.openUri (uri, options).then (conn => {
       return this.emit ('open', name, conn)
+        .then (() => version ? this._checkSchemaVersionAndMigrate (name, conn, version) : null)
         .then (() => seedData ? this.seedConnection (name, conn, clear) : null)
         .then (() => conn);
     });
@@ -275,5 +281,83 @@ module.exports = Service.extend ({
       if (conn.readyState !== 0)
         return conn.close (force);
     }));
+  },
+
+  /**
+   * Check the schema version of the database. The version diff, then we need to
+   * perform migration of the database.
+   *
+   * @private
+   */
+  _checkSchemaVersionAndMigrate (name, connection, version = 1) {
+    let app = this.app;
+
+    /**
+     * Run the migration script.
+     *
+     * @param fileName
+     * @returns {Promise<unknown>}
+     */
+    function runMigration (fileName) {
+      let Migration = require (fileName);
+      let migration = new Migration ({ app });
+
+      return Promise.resolve (migration.prepare (connection))
+        .then (migration.migrate (connection))
+        .then (migration.finalize (connection));
+    }
+
+    /**
+     * Upgrade the database by running a series of migration scripts.
+     */
+    function upgrade (appPath, from, to) {
+      if (from === to)
+        return Promise.resolve ();
+
+      let next = from + 1;
+      let migrationFile = path.resolve (appPath, `migrations/mongodb/up/${next}.js`);
+
+      return fs.pathExistsSync (migrationFile) ?
+        runMigration (migrationFile).then (() => upgrade (appPath, next, to)) :
+        upgrade (appPath, next, to);
+    }
+
+    /**
+     * Downgrade the database by running a series of migration scripts.
+     */
+    function downgrade (appPath, from, to) {
+      if (from === to)
+        return;
+
+      let next = from - 1;
+      let migrationFile = path.resolve (appPath, `migrations/mongodb/down/${next}.js`);
+
+      return fs.pathExistsSync (migrationFile) ?
+        runMigration (migrationFile).then (() => downgrade (appPath, next, to)) :
+        downgrade (appPath, next, to);
+    }
+
+    return this.__mongodb.findById (MONGODB_SCHEMA_ID)
+      .then (schema => {
+        if (!!schema) {
+          function migrate (appPath) {
+            if (version > schema.version)
+              return upgrade (appPath, schema.version, version);
+            else if (version < schema.version)
+              return downgrade (appPath, schema.version, version);
+          }
+
+          // The version of the database has changed. Let's give the application the
+          // option to migrate the data to the new version of the database.
+
+          if (version !== schema.version)
+            return migrate (this.app.appPath).then (() => Object.assign (schema, { version }).save ());
+        }
+        else {
+          // This is the first time we are seeing the schema id. Let's create insert
+          // a new document into the database for future reference.
+          return upgrade (this.app.appPath, 1, version).then (this.__mongodb.create ({ _id: MONGODB_SCHEMA_ID, version }));
+        }
+      });
   }
 });

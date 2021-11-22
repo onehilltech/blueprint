@@ -18,6 +18,7 @@ module.exports = {
   connections: {
     $default: {
       uri: 'mongodb://localhost/blueprint_mongodb',
+      version: 3,
       seed: false,
       options : {
         useNewUrlParser: true,
