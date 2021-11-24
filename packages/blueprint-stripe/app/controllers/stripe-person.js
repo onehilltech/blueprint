@@ -11,7 +11,7 @@ module.exports = StripeResourceController.extend ({
     return StripeAction.extend ({
       execute (req, res) {
         const { stripeAccountId } = req.params;
-        const { [this.controller.name]: data } = req.body;
+        const { 'stripe-person': data } = req.body;
 
         return this.stripe.accounts.createPerson (stripeAccountId, data)
           .then (result => res.status (200).json ({[this.controller.resourceName]: result}));

@@ -21,7 +21,7 @@ module.exports = StripeResourceController.extend ({
       },
 
       execute (req, res) {
-        const { [this.controller.name]: data } = req.body;
+        const { 'stripe-account': data } = req.body;
 
         return this.stripe.accounts.create (data)
           .then (result => res.status (200).json ({[this.controller.resourceName]: result}));
