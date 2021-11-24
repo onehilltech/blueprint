@@ -24,7 +24,7 @@ module.exports = StripeResourceController.extend ({
         const { 'stripe-account': data } = req.body;
 
         return this.stripe.accounts.create (data)
-          .then (result => res.status (200).json ({[this.controller.resourceName]: result}));
+          .then (result => res.status (200).json ({'stripe-account': result}));
       }
     });
   },
@@ -38,7 +38,7 @@ module.exports = StripeResourceController.extend ({
         const { stripeAccountId } = req.params;
 
         return this.stripe.accounts.retrieve (stripeAccountId)
-          .then (result => res.status (200).json ({[this.controller.resourceName]: result}));
+          .then (result => res.status (200).json ({'stripe-account': result}));
       }
     });
   },
@@ -53,7 +53,7 @@ module.exports = StripeResourceController.extend ({
         const { 'stripe-account': update } = req.body;
 
         return this.stripe.accounts.update (stripeAccountId, update)
-          .then (result => res.status (200).json ({ [this.controller.resourceName]: result }));
+          .then (result => res.status (200).json ({ 'stripe-account': result }));
       }
     });
   },
