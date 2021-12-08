@@ -21,6 +21,17 @@ const blueprint = require ('@onehilltech/blueprint');
 const { Service } = blueprint;
 
 /**
+ * Add the authorization header to the request.
+ *
+ * @param name
+ * @param value
+ * @returns {*}
+ */
+Test.prototype.withAuthorization = function (value) {
+  return this.set ('Authorization', value);
+}
+
+/**
  * Creates a Blueprint testing request that has already be initialized to a user.
  *
  * @param i       Index of user from dab file
@@ -36,7 +47,7 @@ Test.prototype.withUserToken = function (i, conn) {
 
   assert (!!accessToken, `The seed for ${conn} does not have a user_tokens.[${i}]`);
 
-  return this.set ('Authorization', `Bearer ${accessToken.access_token}`);
+  return this.withAuthorization ( `Bearer ${accessToken.access_token}`);
 };
 
 Test.prototype.fromUser = Test.prototype.withUserToken;
@@ -56,7 +67,7 @@ Test.prototype.withClientToken = function (i, conn) {
 
   assert (!!accessToken, `The seed for ${conn} does not have a client_tokens.[${i}]`);
 
-  return this.set ('Authorization', `Bearer ${accessToken.access_token}`);
+  return this.withAuthorization (`Bearer ${accessToken.access_token}`);
 };
 
 Test.prototype.fromClient = Test.prototype.withClientToken;

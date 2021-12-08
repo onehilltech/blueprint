@@ -1,10 +1,17 @@
 const {
   SingleViewAction,
-  Controller
+  Controller,
+  Action
 } = require ('@onehilltech/blueprint');
 
 module.exports = Controller.extend ({
   echoName () {
+    return Action.extend ({
+      execute (req, res) {
+
+      }
+    })
+
     return SingleViewAction.extend ({
       template: 'helloworld.pug',
 
