@@ -169,8 +169,8 @@ module.exports = Service.extend ({
 
     return conn.openUri (uri, options).then (conn => {
       return this.emit ('open', name, conn)
-        .then (() => version ? this._checkSchemaVersionAndMigrate (name, conn, version) : null)
         .then (() => seedData ? this.seedConnection (name, conn, clear) : null)
+        .then (() => version ? this._checkSchemaVersionAndMigrate (name, conn, version) : null)
         .then (() => conn);
     });
   },
