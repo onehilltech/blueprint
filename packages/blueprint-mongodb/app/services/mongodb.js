@@ -289,75 +289,86 @@ module.exports = Service.extend ({
    *
    * @private
    */
-  _checkSchemaVersionAndMigrate (name, connection, version = 1) {
-    let app = this.app;
-
+  async _checkSchemaVersionAndMigrate (name, connection, version = 1) {
     /**
      * Run the migration script.
      *
      * @param fileName
      * @returns {Promise<unknown>}
      */
-    function runMigration (fileName) {
-      let Migration = require (fileName);
-      let migration = new Migration ({ app });
+    const runMigration = async (fileName) => {
+      const Migration = require (fileName);
+      const migration = new Migration ({ app: this.app });
 
-      return Promise.resolve (migration.prepare (connection))
-        .then (migration.migrate (connection))
-        .then (migration.finalize (connection));
+      await migration.prepare (connection);
+      await migration.migrate (connection);
+      await migration.finalize (connection);
     }
 
     /**
      * Upgrade the database by running a series of migration scripts.
      */
-    function upgrade (appPath, from, to) {
+    const upgrade = async (from, to) => {
       if (from === to)
-        return Promise.resolve ();
+        return;
 
       let next = from + 1;
-      let migrationFile = path.resolve (appPath, `migrations/mongodb/up/${next}.js`);
+      let migrationFile = path.resolve (this.app.appPath, `migrations/mongodb/up/${next}.js`);
 
-      return fs.pathExistsSync (migrationFile) ?
-        runMigration (migrationFile).then (() => upgrade (appPath, next, to)) :
-        upgrade (appPath, next, to);
+      const exists = await fs.pathExists (migrationFile);
+
+      if (exists)
+        await runMigration (migrationFile);
+
+      return upgrade (next, to);
     }
 
     /**
      * Downgrade the database by running a series of migration scripts.
      */
-    function downgrade (appPath, from, to) {
+    const downgrade = async (from, to) => {
       if (from === to)
         return;
 
       let next = from - 1;
-      let migrationFile = path.resolve (appPath, `migrations/mongodb/down/${next}.js`);
+      let migrationFile = path.resolve (this.app.appPath, `migrations/mongodb/down/${next}.js`);
 
-      return fs.pathExistsSync (migrationFile) ?
-        runMigration (migrationFile).then (() => downgrade (appPath, next, to)) :
-        downgrade (appPath, next, to);
+      const exists = await fs.pathExists (migrationFile);
+
+      if (exists)
+        await runMigration (migrationFile);
+
+      return downgrade (next, to);
     }
 
-    return this.__mongodb.findById (MONGODB_SCHEMA_ID)
-      .then (schema => {
-        if (!!schema) {
-          function migrate (appPath) {
-            if (version > schema.version)
-              return upgrade (appPath, schema.version, version);
-            else if (version < schema.version)
-              return downgrade (appPath, schema.version, version);
-          }
+    const schema = await this.__mongodb.findById (MONGODB_SCHEMA_ID);
 
-          // The version of the database has changed. Let's give the application the
-          // option to migrate the data to the new version of the database.
+    if (!!schema) {
+      const migrate = async () => {
+        if (version > schema.version)
+          return upgrade (schema.version, version);
+        else if (version < schema.version)
+          return downgrade (schema.version, version);
+      }
 
-          if (version !== schema.version)
-            return migrate (this.app.appPath).then (() => Object.assign (schema, { version }).save ());
-        }
-        else {
-          // This is the first time we are seeing the schema id. Let's create insert
-          // a new document into the database for future reference.
-          return upgrade (this.app.appPath, 1, version).then (this.__mongodb.create ({ _id: MONGODB_SCHEMA_ID, version }));
-        }
-      });
+
+      if (version !== schema.version) {
+        // The version of the database has changed. Let's give the application the
+        // option to migrate the data to the new version of the database.
+
+        await migrate ();
+
+        // Update the schema version.
+        schema.version = version;
+        return await schema.save ();
+      }
+    }
+    else {
+      // This is the first time we are seeing the schema id. Let's create insert
+      // a new document into the database for future reference.
+      await upgrade (1, version);
+
+      return await this.__mongodb.create ({ _id: MONGODB_SCHEMA_ID, version });
+    }
   }
 });
