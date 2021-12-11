@@ -28,7 +28,8 @@
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=11.6.0",
+    "npm": ">=6.5.0"
   },
   "gitHead": "6d4af417c417bad300c5208b446643f9e2b785eb"
 }
