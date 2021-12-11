@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-greenlock",
   "description": "A blueprint module for Greenlock (TM).",
-  "version": "4.44.3",
+  "version": "4.46.0",
   "private": false,
   "main": "./lib",
   "repository": "onehilltech/blueprint",
@@ -11,13 +11,13 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.44.3",
+    "@onehilltech/blueprint": "^4.46.0",
     "greenlock": "^2.4.2",
     "le-challenge-dns": "^2.3.2",
     "redirect-https": "^1.1.6"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^4.37.0"
+    "@onehilltech/blueprint-testing": "^4.46.0"
   },
   "license": "Apache-2.0",
   "engines": {
