@@ -27,9 +27,10 @@ const SEEDS_RELATIVE_PATH = 'seeds/mongodb';
 
 mongoose.Promise = Promise;
 
-// Make Mongoose use `findOneAndUpdate()`. Note that this option is `true`
-// by default, you need to set it to false.
+// Fix deprecation warnings.
 mongoose.set ('useFindAndModify', false);
+mongoose.set ('useNewUrlParser', true);
+mongoose.set ('useCreateIndex', true);
 
 const Connection = require ('../../lib/connection');
 const Store = require ('../../lib/seed/store');
