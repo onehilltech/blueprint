@@ -21,11 +21,13 @@ module.exports = {
       version: 3,
       seed: false,
       options : {
+        useUnifiedTopology: true,
         useNewUrlParser: true,
         readPreference: "primary",
         forceServerObjectId: false,
-        w: 1,
-        autoReconnect: true,
+        writeConcern: {
+          w: 1,
+        },
         keepAlive: 1,
         poolSize: 5,
       }
@@ -35,11 +37,13 @@ module.exports = {
       uri: 'mongodb://localhost/blueprint_mongodb',
       seed: false,
       options : {
+        useUnifiedTopology: true,
         useNewUrlParser: true,
         readPreference: "primary",
         forceServerObjectId: false,
-        w: 1,
-        autoReconnect: true,
+        writeConcern: {
+          w: 1,
+        },
         keepAlive: 1,
         poolSize: 5,
       }
