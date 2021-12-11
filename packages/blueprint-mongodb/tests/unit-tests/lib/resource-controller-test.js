@@ -440,7 +440,7 @@ describe ('lib | ResourceController', function () {
         })
         .expect (200, {
           users: [u0.lean ()],
-          authors: [a1.lean (), a0.lean ()]
+          authors: [a0.lean (), a1.lean ()]
         });
     });
   });

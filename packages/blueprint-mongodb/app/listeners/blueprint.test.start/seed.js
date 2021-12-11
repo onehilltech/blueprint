@@ -23,7 +23,7 @@ module.exports = Listener.extend ({
   async handleEvent () {
     const mongodb = blueprint.lookup ('service:mongodb');
 
-    debug ('seeding all database connections');
-    return mongodb.seedConnections (true);
+    debug ('resetting all database connections');
+    return mongodb.resetConnections ();
   }
 });

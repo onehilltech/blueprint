@@ -16,9 +16,9 @@
 
 const path = require ("path");
 const mongoose = require ('mongoose');
-const { pickBy, merge } = require ('lodash');
+const { merge } = require ('lodash');
 
-const { seed, clear } = require ('@onehilltech/dab');
+const { clear } = require ('@onehilltech/dab');
 const backend = require ("@onehilltech/dab-mongodb");
 const debug = require ('debug')('blueprint-mongodb:mongodb');
 const fs = require ('fs-extra');
@@ -32,7 +32,7 @@ const MONGODB_SCHEMA_ID = '619b0a46c8d6ae7eefd9665e';
  *
  * Wrapper class for the Mongoose connection.
  */
-class Connection {
+module.exports = class Connection {
   constructor (service, name, config, conn) {
     this.service = service;
     this.name = name;
@@ -46,6 +46,7 @@ class Connection {
    * Open the connection to the database.
    *
    * @param config          Configuration overrides.
+   * @param reopen          Reopen the connection if already open
    */
   async open (config = {}) {
     if (this.isOpen)
@@ -54,7 +55,7 @@ class Connection {
     debug (`[${this.name}]: opening database connection`);
 
     const merged = merge ({}, this.config, config);
-    const { version, uri, seed, options, clear = true} = merged;
+    const { version, uri, seed, options } = merged;
 
     debug (`opening connection ${this.name}`);
     this.conn = await this.conn.openUri (uri, options);
@@ -63,7 +64,7 @@ class Connection {
       await this.seed ();
 
     if (version)
-      await this._checkSchemaVersionAndMigrate (version);
+      await this.migrate (version);
 
     return this;
   }
@@ -81,6 +82,23 @@ class Connection {
 
     if (this.conn.readyState !== 0)
       return this.conn.close (force);
+  }
+
+  /**
+   * Reset the database connection. This will reseed the database and
+   * apply migrations.
+   */
+  async reset (config = {}) {
+    const merged = merge ({}, this.config, config);
+    const { version, seed } = merged;
+
+    if (seed)
+      await this.seed ();
+
+    if (version)
+      await this.migrate (version);
+
+    return this;
   }
 
   /**
@@ -126,7 +144,7 @@ class Connection {
    *
    * @private
    */
-  async _checkSchemaVersionAndMigrate (version = 1) {
+  async migrate (version = 1) {
     debug ('checking schema version and migrating if necessary');
 
     /**
@@ -225,5 +243,3 @@ class Connection {
     return this.conn.once (...arguments);
   }
 }
-
-module.exports = Connection;

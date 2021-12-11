@@ -139,28 +139,29 @@ module.exports = Service.extend ({
   },
 
   /**
-   * Open the existing connections.
+   * Open all connections known to the service.
    */
-  openConnections () {
+  openConnections (reopen = false) {
     debug ('opening all connections to the database');
 
-    return props (mapValues (this._connections, (conn) => conn.open ()));
+    return props (mapValues (this._connections, (conn) => conn.open ({}, reopen)));
   },
 
   /**
    * Open a single connection.
    *
-   * @param name      Name of connection
-   * @param config    Open options
+   * @param name                Name of connection
+   * @param config              Open options
+   * @param forceCloseIfOpen    Force close a connection if already open
    * @returns {*}
    */
-  async openConnection (name, config) {
+  async openConnection (name, config, reopen = false) {
     const conn = this._connections[name]
 
     if (!conn)
       throw new Error (`${name} connection does not exist`);
 
-    return conn.open (config);
+    return conn.open (config, reopen);
   },
 
   /**
@@ -192,7 +193,7 @@ module.exports = Service.extend ({
    * @param clear         Clear the database before seeding
    * @returns {*}
    */
-  async seedConnections (clear) {
-    return props (mapValues (this.connections, conn => conn.seed (true)))
+  async resetConnections () {
+    return props (mapValues (this.connections, conn => conn.reset ()))
   }
 });
