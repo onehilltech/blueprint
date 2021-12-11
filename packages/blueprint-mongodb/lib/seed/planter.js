@@ -23,8 +23,6 @@ module.exports = class Planter {
     this.seed = seed;
   }
 
-  models = null;
-
   /**
    * Cleanup the connection.
    */

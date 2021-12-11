@@ -37,9 +37,6 @@ module.exports = class Store {
     this.planters = {};
   }
 
-  /// The collection of planters known to this store.
-  planters = null;
-
   /**
    * Get the singleton Planter instance.
    */
