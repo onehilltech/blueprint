@@ -15,14 +15,11 @@
  */
 
 const blueprint = require ('@onehilltech/blueprint');
+const Store = require ('../seed/store');
 
 function seed (name) {
-  let mongodb = blueprint.lookup ('service:mongodb');
-  let connName = name || mongodb.defaultConnectionName;
-
-  return mongodb.seeds[connName];
+  name = name || blueprint.lookup ('service:mongodb').defaultConnectionName;
+  return Store.getInstance ().planters[name].models;
 }
 
 module.exports = seed;
-
-

@@ -68,7 +68,7 @@ describe ('lib | ResourceController', function () {
     });
 
     it ('should not create duplicate resources', function () {
-      const {authors} = seed ('$default');
+      const { authors } = seed ();
       const author = authors[0];
 
       return request ()

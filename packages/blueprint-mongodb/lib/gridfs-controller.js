@@ -104,7 +104,7 @@ module.exports = ResourceController.extend ({
       if (!this._connection)
         throw new Error ('There is no connection to the database.');
 
-      if (this._connection.readyState !== 1)
+      if (!this._connection.isOpen)
         throw new Error ('The connection to the database is not open.');
 
       let opts = {
@@ -118,7 +118,7 @@ module.exports = ResourceController.extend ({
       if (this.readPreference)
         opts.readPreference = this.readPreference;
 
-      this._bucket = new GridFSBucket (this._connection.db, opts);
+      this._bucket = new GridFSBucket (this._connection.conn.db, opts);
 
       return this._bucket;
     }

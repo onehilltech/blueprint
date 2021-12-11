@@ -23,6 +23,6 @@ describe ('app | services | mongodb', function () {
   it ('bootstrapping should configure the service', function () {
     const service = blueprint.lookup ('service:mongodb');
     expect (service.connections).to.have.keys (['$default', 'secondary']);
-    expect (service.defaultConnection).to.equal (mongoose.connections[0]);
+    expect (service.defaultConnection.conn).to.equal (mongoose.connections[0]);
   });
 });

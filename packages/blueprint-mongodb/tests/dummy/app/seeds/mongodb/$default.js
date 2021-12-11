@@ -15,7 +15,7 @@
  */
 
 const { ref, id } = require ('@onehilltech/dab');
-const Seed = require ('../../../../../lib/seed');
+const { Seed } = require ('../../../../../lib');
 
 module.exports = Seed.extend ({
   model () {

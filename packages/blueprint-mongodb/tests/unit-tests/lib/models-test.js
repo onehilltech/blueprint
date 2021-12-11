@@ -16,7 +16,7 @@ describe ('lib | models', function () {
       let Person = model ('person', schema);
 
       const connection = blueprint.lookup ('service:mongodb').defaultConnection;
-      expect (connection).to.have.nested.property ('models.person', Person);
+      expect (connection.conn).to.have.nested.property ('models.person', Person);
     });
   });
 
@@ -26,7 +26,7 @@ describe ('lib | models', function () {
       let Person = modelOn ('secondary', 'person', schema);
 
       const connection = blueprint.lookup ('service:mongodb').get ('connections.secondary');
-      expect (connection).to.have.nested.property ('models.person', Person);
+      expect (connection.conn).to.have.nested.property ('models.person', Person);
     });
 
     it ('should not create model on non-existent connection', function () {
@@ -44,7 +44,7 @@ describe ('lib | models', function () {
       expect (Novel).to.have.nested.property ('schema.options.resource', true);
 
       const connection = blueprint.lookup ('service:mongodb').defaultConnection;
-      expect (connection).to.have.nested.property ('models.novel', Novel);
+      expect (connection.conn).to.have.nested.property ('models.novel', Novel);
     });
   });
 
@@ -55,7 +55,7 @@ describe ('lib | models', function () {
       expect (Book).to.have.nested.property ('schema.options.resource', true);
 
       const connection = blueprint.lookup ('service:mongodb').get ('connections.secondary');
-      expect (connection).to.have.nested.property ('models.book', Book);
+      expect (connection.conn).to.have.nested.property ('models.book', Book);
     });
 
     it ('should not create resource on non-existent connection', function () {
