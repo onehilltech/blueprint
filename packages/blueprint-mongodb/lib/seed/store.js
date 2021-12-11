@@ -15,12 +15,12 @@
  */
 
 /// The singleton instance.
-const path = require ("path");
 const assert = require ("assert");
 const debug = require ('debug')('blueprint-mongodb:lib:seed:store');
 const { Loader } = require ('@onehilltech/blueprint');
 
-const { merge, isPlainObject } = require ('lodash');
+const { merge, isPlainObject, mapValues } = require ('lodash');
+const { props } = require ('bluebird');
 
 let singleton = null;
 
@@ -67,6 +67,8 @@ module.exports = class Store {
     // Load the seeds and place them into packets.
     const loader = new Loader ();
     const planters = await loader.load (opts);
+
+    await props (mapValues (planters, (planter => planter.configure ())));
 
     // Merge the new packets with our current packets.
     merge (this.planters, planters);

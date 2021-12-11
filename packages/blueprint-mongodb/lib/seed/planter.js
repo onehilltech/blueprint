@@ -23,6 +23,10 @@ module.exports = class Planter {
     this.seed = seed;
   }
 
+  async configure () {
+    return this.seed.configure ();
+  }
+
   /**
    * Cleanup the connection.
    */
