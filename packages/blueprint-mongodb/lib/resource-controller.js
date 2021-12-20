@@ -130,11 +130,11 @@ exports = module.exports = ResourceController.extend ({
          * @returns {Promise<*>}
          */
         async execute (req, res) {
-          const id = req.params[this.id];
-          const { Model } = this.controller;
+          const { Model, id } = this.controller;
+          const rcId = req.params[id];
 
           // Lookup the registration by the provided id.
-          const model = await Model.findById (id);
+          const model = await Model.findById (rcId);
 
           if (!model)
             throw new NotFoundError ('not_found', 'The registration does not exist.');
