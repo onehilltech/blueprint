@@ -26,7 +26,8 @@ const {
   ResourceController,
   HttpError,
   InternalServerError,
-  computed
+  computed,
+  NotFoundError
 } = blueprint;
 
 const validation = require ('./validation');
@@ -120,6 +121,38 @@ exports = module.exports = ResourceController.extend ({
             }
           }
         },
+
+        /**
+         * Default implementation of the execute method.
+         *
+         * @param req
+         * @param res
+         * @returns {Promise<*>}
+         */
+        async execute (req, res) {
+          const id = req.params[this.id];
+          const { Model } = this.controller;
+
+          // Lookup the registration by the provided id.
+          const model = await Model.findById (id);
+
+          if (!model)
+            throw new NotFoundError ('not_found', 'The registration does not exist.');
+
+          return this.executeFor (model, req, res);
+        },
+
+        /**
+         * Run the execute for the specified model. The model is the one that matches
+         * the parameter id.
+         *
+         * @param model
+         * @param req
+         * @param res
+         */
+        executeFor (model, req, res) {
+
+        }
       })
     }
   }),
