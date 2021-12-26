@@ -277,7 +277,20 @@ exports = module.exports = ResourceController.extend ({
     const {validators,sanitizers} = this.app.resources;
 
     return DatabaseAction.extend ({
-      schema: validation (this.Model.schema, extend ({}, this._defaultValidationOptions, {allOptional:true, validators, sanitizers, scope: false})),
+      schema: Object.assign (
+        validation (this.Model.schema, extend ({}, this._defaultValidationOptions, {allOptional:true, validators, sanitizers, scope: false})),
+        {
+          '_.limit': {
+            in: 'query',
+            optional: { options: { nullable: true } },
+            isInt: true, toInt: true
+          },
+          '_.sort.*': {
+            in: 'query',
+            optional: { options: { nullable: true } },
+            isInt: true, toInt: true
+          }
+        }),
 
       execute (req, res) {
         let query = Object.assign ({}, req.query || {});
