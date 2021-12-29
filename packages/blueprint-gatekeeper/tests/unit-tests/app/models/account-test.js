@@ -111,4 +111,8 @@ describe ('app | models | account', function () {
         });
     });
   });
+
+  describe ('verified', function () {
+
+  });
 });

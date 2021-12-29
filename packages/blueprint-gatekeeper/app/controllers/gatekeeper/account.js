@@ -235,27 +235,18 @@ module.exports = ResourceController.extend ({
       /// The session service for generating tokens.
       session: service (),
 
-      execute (req, res) {
+      async execute (req, res) {
         const { accountId } = req.params;
 
-        return this.controller.Model.findById (accountId)
-          .then (account => {
-            // We need to know what account/user is doing the impersonation. We also need to
-            // know that the access token (or session) is an impersonation of someone.
+        const account = await this.controller.Model.findById (accountId);
+        const payload = { impersonator: req.user.id };
+        const options = { scope: ['gatekeeper.session.impersonation'] };
 
-            const payload = {
-              impersonator: req.user.id,
-            };
+        const token = await this.session.issueToken (req.accessToken.client._id, account, payload, options);
 
-            const options = {
-              scope: ['gatekeeper.session.impersonation']
-            };
-
-            return this.session.issueToken (req.accessToken.client._id, account, payload, options);
-          })
-          .then (token => res.status (200).json (Object.assign ({token_type: 'Bearer'}, token)));
+        return res.status (200).json (Object.assign ({token_type: 'Bearer'}, token));
       }
-    })
+    });
   },
 
   /**

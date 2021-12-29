@@ -26,7 +26,11 @@ options.softDelete = true;
 const SALT_WORK_FACTOR = 10;
 
 const {
-  usernameIsEmail = false
+  /// The username is the same as the email address.
+  usernameIsEmail = false,
+
+  /// The account should be verified before usage.
+  verificationRequired = false
 } = gatekeeper;
 
 let definition = {
@@ -48,7 +52,7 @@ let definition = {
 
   verification: {
     /// The account must be verified.
-    required: { type: Boolean, required: true, default: true },
+    required: { type: Boolean, required: true, default: verificationRequired },
 
     /// The date of the verification.
     date: { type: Date },
@@ -102,6 +106,13 @@ schema.methods.verifyPassword = function (password) {
 schema.methods.verifyPasswordSync = function (password) {
   return bcrypt.compareSync (password, this.password);
 };
+
+/**
+ * Test if the account is verified.
+ */
+schema.virtual ('verified').get (function () {
+  return !this.verification || (this.verification && (!this.verification.required || !!this.verification.date));
+});
 
 /**
  * Get the client id, which is an alias for created_by.

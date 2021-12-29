@@ -19,11 +19,11 @@ const { lean, seed, Types: { ObjectId } } = require ('@onehilltech/blueprint-mon
 const blueprint = require ('@onehilltech/blueprint');
 const { request } = require ('@onehilltech/blueprint-testing');
 
-describe ('app | routers | account', function () {
+describe.only ('app | routers | account', function () {
   describe ('/v1/accounts', function () {
     context ('GET', function () {
       it ('should return all the accounts for glob scope', function () {
-        const {accounts} = seed ('$default');
+        const { accounts } = seed ();
 
         return request ()
           .get ('/v1/accounts')
@@ -56,28 +56,28 @@ describe ('app | routers | account', function () {
     context ('POST', function () {
       const data = { username: 'tester1', password: '1aBcDeFg', email: 'JAMES@ONEHILLTECH.COM' };
 
-      it ('should create a new account with new id', function () {
-        return request ()
+      it ('should create a new account with new id', async function () {
+        const res = await request ()
           .post ('/v1/accounts')
           .send ({account: data})
           .withClientToken (0)
-          .expect (200)
-          .then (res => {
-            expect (res.body).to.deep.include ({
-              account: {
-                enabled: true,
-                scope: [],
-                username: data.username,
+          .expect (200);
 
-                // the email address should be normalized
-                email: data.email.toLowerCase (),
+        expect (res.body)
+          .to.have.property ('account')
+          .to.deep.include ({
+          enabled: true,
+          scope: [],
+          username: data.username,
 
-                verification: {
-                  required: true
-                }
-              }
-            });
-          });
+          // the email address should be normalized
+          email: data.email.toLowerCase (),
+        });
+
+        const { account } = res.body;
+
+        expect (account).to.have.property ('verification')
+          .to.include ({ required: true });
       });
 
       it ('should not allow client to set account id', function () {
@@ -93,74 +93,52 @@ describe ('app | routers | account', function () {
           });
       });
 
-      it ('should create a new account, and login the user', function () {
+      it ('should create a new account, and login the user', async function () {
         const autoLogin = {
           username: 'auto-login',
           password: '1aBcDeFg',
           email: 'auto-login@onehilltech.com'
         };
 
-        let expected = Object.assign ({
-          scope: [],
-          enabled: true,
-          verification: {
-            required: false
-          }
-        }, {username: autoLogin.username, email: autoLogin.email});
-
-        return request ()
+        const res = await request ()
           .post ('/v1/accounts')
           .query ({login: true})
           .send ({account: autoLogin})
           .withClientToken (0)
-          .expect (200)
-          .then (res => {
-            const { account: {_id}} = res.body;
-            expected._id = _id.toString ();
+          .expect (200);
 
-            expect (res.body.account).to.eql (expected);
-            expect (res.body).to.have.property ('token');
-
-            expect (res.body.token).to.have.keys (['token_type', 'access_token', 'refresh_token']);
-            expect (res.body.token).to.have.property ('token_type', 'Bearer');
-          });
+        expect (res.body).to.have.keys (['account', 'token']);
+        expect (res.body.token).to.have.keys (['token_type', 'access_token', 'refresh_token']);
+        expect (res.body.token).to.have.property ('token_type', 'Bearer');
       });
 
-      it ('should restore a deleted account', function () {
+      it ('should restore a deleted account', async function () {
         const { accounts: [account]} = seed ();
 
-        return request ()
+        await request ()
           .delete (`/v1/accounts/${account.id}`)
           .withUserToken (0)
-          .expect (200, 'true')
-          .then (() => {
-            const data = { username: account.username, password: '1aBcDeFg', email: account.email };
+          .expect (200, 'true');
 
-            return request ()
-              .post ('/v1/accounts')
-              .withClientToken (0)
-              .send ({account: data})
-              .expect (200, {
-                account: {
-                  _id: account.id,
-                  email: account.email,
-                  username: account.username,
-                  enabled: true,
-                  scope: [],
-                  verification: {
-                    required: false
-                  }
-                }
-              })
-              .then (() => {
-                const Account = blueprint.lookup ('model:account');
+        const data = { username: account.username, password: '1aBcDeFg', email: account.email };
 
-                return Account.findById (account.id).then (expected => {
-                  expect (expected._stat.deleted_at).to.equal (undefined);
-                  expect (expected.password).to.not.equal (account.username);
-                });
-              })
-          });
+        const res = await request ()
+          .post ('/v1/accounts')
+          .withClientToken (0)
+          .send ({account: data})
+          .expect (200);
+
+        expect (res.body).to.have.property ('account').to.deep.include ({
+          _id: account.id,
+          email: account.email,
+          username: account.username,
+          enabled: true,
+          scope: []
+        });
+
+        const expected = await blueprint.lookup ('model:account').findById (account.id);
+        expect (expected._stat.deleted_at).to.equal (undefined);
+        expect (expected.password).to.not.equal (account.username);
       });
 
       it ('should not create an account [invalid password]', function () {
@@ -496,13 +474,16 @@ describe ('app | routers | account', function () {
 
   describe ('/v1/accounts/:accountId/impersonate', function () {
     context ('POST', function () {
-      it ('should impersonate an account', function () {
+      it ('should impersonate an account', async function () {
         const { accounts: [, account]} = seed ();
 
-        return request ()
+        const res = await request ()
           .post (`/v1/accounts/${account.id}/impersonate`)
           .withUserToken (0)
-          .expect (200, {});
+          .expect (200);
+
+        expect (res.body).to.have.property ('token_type', 'Bearer');
+        expect (res.body).to.have.property ('access_token');
       });
 
       it ('should fail to impersonate an account', function () {
@@ -510,8 +491,16 @@ describe ('app | routers | account', function () {
 
         return request ()
           .post (`/v1/accounts/${account.id}/impersonate`)
-          .withUserToken (0)
-          .expect (403, {});
+          .withUserToken (1)
+          .expect (403, {
+            errors: [
+              {
+                code: 'invalid_scope',
+                detail: 'This request does not have a valid scope.',
+                status: '403'
+              }
+            ]
+          });
       });
     })
   });

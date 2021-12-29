@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 One Hill Technologies, LLC
+ * Copyright (c) 2021 One Hill Technologies, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-const {
-  policies: { check, all }
-} = require ('@onehilltech/blueprint');
+const { Policy } = require ('@onehilltech/blueprint');
 
-module.exports = all ([
-  check ('gatekeeper.scope', 'gatekeeper.account.impersonate'),
-], 'cannot_impersonate', 'The user cannot impersonate other users.');
+/**
+ * @policy verified
+ *
+ * Check if the request is from a verified account.
+ */
+module.exports = Policy.extend ({
+  failureCode: 'not_verified',
+  failureMessage: 'The account must be verified to execute this action.',
 
-
+  runCheck (req) {
+    return !!req.user && req.user.verified;
+  }
+});

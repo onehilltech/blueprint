@@ -15,8 +15,6 @@
  */
 
 module.exports = {
-  activation: true,
-
   email : {
     preview: true,
     transport: {
@@ -41,5 +39,6 @@ module.exports = {
     }
   },
 
-  usernameIsEmail: false
+  usernameIsEmail: false,
+  verificationRequired: true
 };
