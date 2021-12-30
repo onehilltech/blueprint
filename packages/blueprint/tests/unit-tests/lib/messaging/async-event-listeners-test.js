@@ -14,35 +14,21 @@
  * limitations under the License.
  */
 
-const AsyncListener = require ('../../../../lib/messaging/async-listener');
+const BackgroundListener = require ('../../../../lib/messaging/background-listener');
 const { expect } = require ('chai');
 
-describe ('lib | messaging | AsyncListener', function () {
-  it ('should create an async event listener', function () {
-    const listener = AsyncListener.create ({
-      asyncHandleEvent (ev) {
-
-      }
-    });
-
-    expect (listener).to.not.equal (null);
-  });
-
-  it ('should throw exception if missing asyncHandleEvent() method', function () {
-    expect (() => AsyncListener.create ()).to.throw ('The asynchronous listener must implement the asyncHandleEvent() method.');
-  });
-
-  it ('should have the event asynchronously', function (done) {
-    const listener = AsyncListener.create ({
-      value: null,
-
-      asyncHandleEvent (n) {
+describe ('lib | messaging | BackgroundListener', function () {
+  it ('should handle the event in the background', function (done) {
+    const L = class extends BackgroundListener {
+      handleBackgroundEvent (n) {
         expect (n).to.equal (5);
         this.value = 5;
 
         return n;
       }
-    });
+    };
+
+    const listener = new L ();
 
     expect (listener.handleEvent (5)).to.equal (undefined);
 

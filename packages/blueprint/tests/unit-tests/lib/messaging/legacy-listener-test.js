@@ -1,24 +1,24 @@
 const expect = require ('chai').expect;
-const LegacyListener = require ('../../../../lib/messaging/legacy-listener');
+const SimpleListener = require ('../../../../lib/messaging/simple-listener');
 
 
-describe ('lib | LegacyListener', function () {
+describe ('lib | SimpleListener', function () {
   function foo (p1, p2) {
     this.p1 = p1;
     this.p2 = p2;
   }
 
   context ('create()', function () {
-    it ('should create a LegacyListener object', function () {
-      let legacyListener = new LegacyListener ({listener: foo});
+    it ('should create a SimpleListener object', function () {
+      let legacyListener = new SimpleListener ({listener: foo});
 
-      expect (legacyListener).to.be.instanceof (LegacyListener);
+      expect (legacyListener).to.be.instanceof (SimpleListener);
     });
   });
 
   context ('event()', function () {
     it ('should call the legacy listener function', function () {
-      let legacyListener = new LegacyListener ({listener: foo});
+      let legacyListener = new SimpleListener (foo);
       legacyListener.handleEvent (5, 10);
 
       expect (foo.p1).to.equal (5);

@@ -28,7 +28,7 @@ describe ('lib | messaging | ListenerHandle', function () {
         }
       };
 
-      let handle = new ListenerHandle ({listeners, index: 7});
+      let handle = new ListenerHandle (listeners, 7);
       handle.close ();
 
       expect (listeners.removed).to.equal (7);
@@ -41,7 +41,7 @@ describe ('lib | messaging | ListenerHandle', function () {
         }
       };
 
-      let handle = new ListenerHandle ({listeners, index: 7});
+      let handle = new ListenerHandle (listeners, 7);
       handle.close ();
       handle.close ();
     });

@@ -17,4 +17,4 @@
 exports.Events = require ('./events');
 
 exports.Listener = require ('./listener');
-exports.AsyncListener = require ('./async-listener');
+exports.BackgroundListener = require ('./background-listener');

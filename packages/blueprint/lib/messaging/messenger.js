@@ -14,56 +14,48 @@
  * limitations under the License.
  */
 
-const { BO } = require ('base-object');
 const EventListeners = require ('./event-listeners');
 
 /**
  * @class Messenger
  *
- * Wrapper class for the events.EventEmitter class to that provides more
+ * Wrapper class for the events.EventEmitter class that provides more
  * domain-specific operations.
  */
-module.exports = BO.extend ({
-  init () {
-    this._super.call (this, ...arguments);
-    this._eventListeners = {};
-  },
+module.exports = class Messenger {
+  constructor (eventListeners = {}) {
+    this._eventListeners = eventListeners;
+  }
 
   /**
    * Lookup the event listeners container for an event.
    *
-   * @param ev      The name of the event
-   * @returns {*}
+   * @param name      The name of the event.
+   * @returns         EventListeners for name.
    */
-  lookup (ev) {
-    let listeners = this._eventListeners[ev];
-
-    if (listeners)
-      return listeners;
-
-    return this._eventListeners[ev] = new EventListeners ({name: ev});
-  },
+  lookup (name) {
+    return this._eventListeners[name] || (this._eventListeners[name] = new EventListeners (name));
+  }
 
   /**
    * Register a listener with the messenger.
    *
-   * @param ev
+   * @param name
    * @param listener
    */
-  on (ev, listener) {
-    return this.lookup (ev).on (listener);
-  },
+  on (name, listener) {
+    return this.lookup (name).on (listener);
+  }
 
   /**
    * Register a listener for a single invocation of an event.
    *
-   * @param ev
+   * @param name
    * @param listener
-   * @returns {Emitter|*|EventEmitter}
    */
-  once (ev, listener) {
-    return this.lookup (ev).once (listener);
-  },
+  once (name, listener) {
+    return this.lookup (name).once (listener);
+  }
 
   /**
    * Emit an event to the messenger. The event is sent to all registered
@@ -71,30 +63,27 @@ module.exports = BO.extend ({
    *
    * @returns {Promise}
    */
-  emit () {
+  async emit () {
     let [name, ...args] = arguments;
-    let listeners = this._eventListeners[name];
-
-    return listeners ? listeners.emit (...args) : Promise.resolve ();
-  },
+    return this.lookup (name).emit (...args);
+  }
 
   /**
    * Get the listeners for an event.
    *
-   * @param ev
-   * @returns {*}
+   * @param name
    */
-  getListeners (ev) {
-    return this._eventListeners[ev].listeners;
-  },
+  getListeners (name) {
+    return this._eventListeners[name].listeners;
+  }
 
   /**
-   * Test if the event has listeners.
+   * Test if the event has any registered listeners.
    *
-   * @param ev
+   * @param name
    * @returns {boolean}
    */
-  hasListeners (ev) {
-    return (ev in this._eventListeners);
+  hasListeners (name) {
+    return (name in this._eventListeners);
   }
-});
+};

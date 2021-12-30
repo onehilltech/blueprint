@@ -18,28 +18,30 @@ const Listener = require ('./listener');
 const assert = require ('assert');
 
 /**
- * @class AsyncListener
+ * @class BackgroundListener
  *
  * Listener that handles events asynchronously. This means the client code that
  * emitted the original event will not wait until this event listener is complete
  * to continue moving forward.
  */
-module.exports = Listener.extend ({
-  /// The asynchronous method called by the listener. The subclass must
-  /// implement this method.
-  asyncHandleEvent: null,
-
-  init () {
-    this._super.call (this, ...arguments);
-
-    assert (!!this.asyncHandleEvent, 'The asynchronous listener must implement the asyncHandleEvent() method.');
-  },
-
+module.exports = class BackgroundListener extends Listener {
+  /**
+   * Handle the event. This method will call handleBackgroundEvent() on the
+   * next tick for the process.
+   */
   handleEvent () {
     let args = arguments;
 
     process.nextTick (() => {
-      this.asyncHandleEvent (...args);
+      this.handleBackgroundEvent (...args);
     });
-  },
-});
+  }
+
+  /**
+   * Event handler for the listener. The number of arguments will depend on the
+   * number of arguments passed to the emit() method.
+   */
+  handleBackgroundEvent () {
+    assert (false, 'The subclass must implement the handleBackgroundEvent() method');
+  }
+};

@@ -28,7 +28,7 @@ const {
   forOwn
 } = require ('lodash');
 
-const LegacyListener = require ('./messaging/legacy-listener');
+const SimpleListener = require ('./messaging/simple-listener');
 
 /**
  * @class ListenerLoader
@@ -111,8 +111,8 @@ module.exports = Loader.extend ({
         resolve (listener) {
           // The listener exported from this module is a Listener class. We need to
           // instantiate the type and store it. Otherwise, we are working with a legacy
-          // listener and need to wrap it in a LegacyListener object.
-          return listener.prototype && !!listener.prototype.handleEvent ? new listener ({app}) : new LegacyListener ({app, listener});
+          // listener and need to wrap it in a SimpleListener object.
+          return listener.prototype && !!listener.prototype.handleEvent ? new listener ({app}) : new SimpleListener ({app, listener});
         }
       });
     });

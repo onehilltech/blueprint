@@ -29,7 +29,7 @@ describe ('lib | ListenerLoader', function () {
       let loader = new ListenerLoader ({app: messenger});
 
       return loader.load ({dirname}).then (results => {
-        expect (results).to.have.property ('blueprint.app.init').that.has.keys (['echo','legacy']);
+        expect (results).to.have.property ('blueprint.app.init').that.has.keys (['echo','simple']);
 
         expect (messenger.hasListeners ('blueprint.app.init')).to.be.true;
         expect (messenger.getListeners ('blueprint.app.init')).to.have.length (2);

@@ -33,23 +33,50 @@ module.exports = Mixin.create ({
       this._messenger = new Messenger ();
   },
 
+  /**
+   * Register a listener for an event.
+   *
+   * @returns {*}
+   */
   on () {
     return this._messenger.on (...arguments);
   },
 
+  /**
+   * Register a listener to handle an event once. After the event is handled, the
+   * listener will automatically remove itself.
+   *
+   * @returns {*}
+   */
   once () {
     return this._messenger.once (...arguments);
   },
 
+  /**
+   * Emit an event to all listeners.
+   *
+   * @returns {*}
+   */
   emit () {
     return this._messenger.emit (...arguments);
   },
 
-  getListeners (ev) {
-    return this._messenger.getListeners (ev);
+  /**
+   * Get the listeners for an event.
+   *
+   * @param eventName
+   * @returns {*}
+   */
+  getListeners (eventName) {
+    return this._messenger.getListeners (eventName);
   },
 
-  hasListeners (ev) {
-    return this._messenger.hasListeners (ev);
+  /**
+   * Test if the object has listeners for the event.
+   * @param eventName
+   * @returns {*}
+   */
+  hasListeners (eventName) {
+    return this._messenger.hasListeners (eventName);
   }
 });

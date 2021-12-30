@@ -22,7 +22,7 @@ const expect = require ('chai').expect;
 describe ('lib | messaging | EventListeners', function () {
   describe ('create', function () {
     it ('should create an EventListener object', function () {
-      let listeners = new EventListeners ({name: 'foo'});
+      let listeners = new EventListeners ('foo');
 
       expect (listeners).to.deep.include ({name: 'foo', _on: [], _once: []});
     });
@@ -62,18 +62,10 @@ describe ('lib | messaging | EventListeners', function () {
       let e1;
       let e2;
 
-      let listeners = new EventListeners ({name: 'foo'});
-      listeners.on (new Listener ({
-        handleEvent (e) {
-          e1 = e;
-        }
-      }));
+      const listeners = new EventListeners ('foo');
 
-      listeners.once (new Listener ({
-        handleEvent (e) {
-          e2 = e;
-        }
-      }));
+      listeners.on ((e) => e1 = e);
+      listeners.once ((e) => e2 = e);
 
       return listeners.emit (5).then (() => {
         expect (e1).to.equal (5);

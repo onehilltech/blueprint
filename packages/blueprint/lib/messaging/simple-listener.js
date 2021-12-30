@@ -15,29 +15,29 @@
  */
 
 const Listener = require ('./listener');
-const assert = require ('assert');
 
 /**
- * @class LegacyListener
+ * @class SimpleListener
  *
- * Adapter for porting legacy listener function to Listener objects. The LegacyListener
+ * Adapter for porting listener functions to Listener objects. The SimpleListener
  * object is provided for backwards compatibility support.
  *
- * The constructor takes a single function, which is mapped to the doEvent() method
+ * The constructor takes a single function, which is mapped to the handleEvent() method
  * on the Listener class.
  *
  * This object is used internally by the Blueprint framework.
  */
-module.exports = Listener.extend ({
-  listener: null,
+module.exports = class SimpleListener extends Listener {
+  constructor (listener) {
+    super ();
 
-  init () {
-    this._super.call (this, ...arguments);
+    this.listener = listener;
+  }
 
-    assert (!!this.listener, "You must define the 'listener' property");
-  },
-
+  /**
+   * Handle the event.
+   */
   handleEvent () {
     return this.listener.call (this.listener, ...arguments);
   }
-});
+};

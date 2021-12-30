@@ -14,33 +14,39 @@
  * limitations under the License.
  */
 
-const { BO, computed } = require ('base-object');
 const assert = require ('assert');
 const { concat } = require ('lodash');
 
 const ListenerHandle = require ('./listener-handle');
 const Listener = require ('./listener');
-const LegacyListener = require ('./legacy-listener');
+const SimpleListener = require ('./simple-listener');
+const { isFunction } = require ('lodash');
 
 /**
  * Wrapper class for a set of listeners for an event.
  */
-module.exports = BO.extend ({
-  /// Name of the event the listeners handle.
-  name: null,
+module.exports = class EventListeners {
+  /**
+   * Constructor
+   *
+   * @param name        The name of the event listeners.
+   */
+  constructor (name) {
+    assert (!!name, 'You must define the name property.');
 
-  listeners: computed ({
-    get () { return concat (this._once, this._on); }
-  }),
-
-  init () {
-    this._super.call (this, ...arguments);
-
-    assert (this.name, 'You must define the name property.');
-
+    this.name = name;
     this._on = [];
     this._once = [];
-  },
+  }
+
+  /**
+   * Get the collection of listeners, which includes once only listeners.
+   *
+   * @returns {*}
+   */
+  get listeners () {
+    return concat (this._once, this._on);
+  }
 
   /**
    * Register a new listener for the event.
@@ -48,12 +54,14 @@ module.exports = BO.extend ({
    * @param listener
    */
   on (listener) {
-    if (!(listener instanceof Listener))
-      listener = new LegacyListener ({listener});
+    assert ((listener instanceof Listener) || isFunction (listener), 'The listener must be a instance of Listener or a function.');
+
+    if (isFunction (listener))
+      listener = new SimpleListener (listener);
 
     const index = this._on.push (listener) - 1;
-    return ListenerHandle.create ({listeners: this, index});
-  },
+    return new ListenerHandle (this, index);
+  }
 
   /**
    * Register a listener that is only called once. Once the listener is executed,
@@ -62,22 +70,24 @@ module.exports = BO.extend ({
    * @param listener
    */
   once (listener) {
-    if (!(listener instanceof Listener))
-      listener = LegacyListener.create ({listener});
+    assert ((listener instanceof Listener) || isFunction (listener), 'The listener must be a instance of Listener or a function.');
+
+    if (isFunction (listener))
+      listener = new SimpleListener (listener);
 
     this._once.push (listener);
-  },
+  }
 
   /**
    * Emit a new event. The order the event is emitted to the registered listeners
    * is non-deterministic.
    */
-  emit () {
+  async emit () {
     // Make a copy of the once array, and erase it contents. Then, add the current
     // listeners from _on. This will prevent listeners added while processing an
     // event from firing until the next event is emitted.
-    let once = this._once.splice (0);
-    let listeners = concat (once, this._on);
+    const once = this._once.splice (0);
+    const listeners = concat (once, this._on);
 
     // The listeners have the option of returning a Promise if they want to allow
     // the client to wait until the event handling is complete. We therefore need
@@ -85,13 +95,10 @@ module.exports = BO.extend ({
     // the event will be synchronous. The client just has the option of waiting
     // until the event has been emitted to all listeners.
 
-    let pending = [];
-
-    for (let i = 0, len = listeners.length; i < len; ++ i)
-      pending.push (listeners[i].handleEvent (...arguments));
-
-    return Promise.all (pending);
-  },
+    for await (const listener of listeners) {
+      listener.handleEvent (...arguments);
+    }
+  }
 
   /**
    * Remove the listener at the specified index.
@@ -101,5 +108,5 @@ module.exports = BO.extend ({
   removeListenerAt (index) {
     this._on.splice (index, 1);
   }
-});
+};
 

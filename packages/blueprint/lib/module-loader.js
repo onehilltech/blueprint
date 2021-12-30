@@ -21,7 +21,7 @@ const { BO } = require ('base-object');
 const ApplicationModule = require ('./application-module');
 const Events = require ('./messaging/events');
 
-const { forEach, find } = require ('lodash');
+const { forEach, find, isEmpty } = require ('lodash');
 const debug = require ('debug') ('blueprint:module-loader');
 
 const KEYWORD_BLUEPRINT_MODULE = 'blueprint-module';
@@ -45,27 +45,29 @@ module.exports = BO.extend (Events, {
     assert (!!this.app, 'You must define the app property');
   },
 
-  load () {
+  /**
+   * Load the Blueprint modules in the application path.
+   */
+  async load () {
     const packageFile = path.resolve (this.app.appPath, '..', FILE_PACKAGE_JSON);
     const packageObj = require (packageFile);
 
-    return (packageObj || packageObj.dependencies) ? this._handleDependencies (packageObj.dependencies) : Promise.resolve ();
+    if (packageObj || packageObj.dependencies)
+      await this._handleDependencies (packageObj.dependencies);
   },
 
   /**
    * Handle the dependencies in the module.
    *
    * @param dependencies
-   * @returns {Promise<unknown[]>}
    * @private
    */
-  _handleDependencies (dependencies) {
-    let promises = [];
+  async _handleDependencies (dependencies) {
+    if (isEmpty (dependencies))
+      return;
 
     debug (`dependencies: ${Object.keys (dependencies)}`);
-    forEach (dependencies, (version, name) => promises.push (this._handleNodeModule (name, version)));
-
-    return Promise.all (promises);
+    forEach (dependencies, async (version, name) => await this._handleNodeModule (name, version));
   },
 
   /**
@@ -76,7 +78,7 @@ module.exports = BO.extend (Events, {
    * @returns {*}
    * @private
    */
-  _handleNodeModule (name, version) {
+  async _handleNodeModule (name, version) {
     // Do not process the module more than once.
     if (!!this._modules[name])
       return;
@@ -116,16 +118,20 @@ module.exports = BO.extend (Events, {
     // then add this module to the application.
     const { dependencies } = packageObj;
 
-    return this._handleDependencies (dependencies)
-      .then (() => this.emit ('loading', module))
-      .then (() => {
-        debug (`configuring ${name}`);
-        return module.configure ();
-      })
-      .then (module => this.emit ('loaded', module));
+    await this._handleDependencies (dependencies);
+    await this.emit ('loading', module);
+    await module.configure ();
+    await this.emit ('loaded', module)
   },
 
-  _resolveModulePath (name) {
+  /**
+   * Resolve the full location of the modules path.
+   *
+   * @param name
+   * @returns {Promise<string>}
+   * @private
+   */
+  async _resolveModulePath (name) {
     // Let's make sure the node_modules for the application appear on the path. This is
     // important for examples applications that reside within an existing application
     const paths = [path.resolve (this.app.appPath, '../node_modules'), ...module.paths];

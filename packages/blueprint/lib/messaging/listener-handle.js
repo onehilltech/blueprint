@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-const { BO } = require ('base-object');
-const assert = require ('assert');
-
 /**
  * @class ListenerHandle
  *
  * Handle to a registered listener. The handle allows you to remove a listener
  * from the registry.
  */
-module.exports = BO.extend ({
-  init () {
-    this._super.call (this, ...arguments);
-
-    assert (!!this.listeners, 'The listeners parameter is required');
-    assert (this.index !== undefined && this.index !== null, 'The index of the listener is required');
-  },
+module.exports = class ListenerHandle {
+  /**
+   * Constructor.
+   *
+   * @param listeners       Array of listeners
+   * @param index           Index listener in listeners array
+   */
+  constructor (listeners, index) {
+    this.listeners = listeners;
+    this.index = index;
+  }
 
   /**
    * Close the listener.
@@ -41,4 +42,4 @@ module.exports = BO.extend ({
     this.listeners.removeListenerAt (this.index);
     this.listeners = null;
   }
-});
+};

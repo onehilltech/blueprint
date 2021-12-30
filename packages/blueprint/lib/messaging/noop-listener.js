@@ -21,8 +21,8 @@ const Listener = require ('./listener');
  *
  * A listener that does nothing.
  */
-module.exports = Listener.extend ({
+module.exports = class NoopListener extends Listener {
   handleEvent () {
 
   }
-});
+};
