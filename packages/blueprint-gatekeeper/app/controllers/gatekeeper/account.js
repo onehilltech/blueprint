@@ -85,7 +85,7 @@ module.exports = ResourceController.extend ({
         // If the account has been deleted, then we need to restore the account.
 
         try {
-          return this._super.call (this, ...arguments);
+          return await this._super.call (this, ...arguments);
         }
         catch (err) {
           if (err.code !== 11000)
