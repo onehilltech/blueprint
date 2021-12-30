@@ -15,39 +15,29 @@
  */
 
 const blueprint = require ('@onehilltech/blueprint');
-
-const {
-  seed, lean,
-  Types: { ObjectId }
-} = require ('@onehilltech/blueprint-mongodb');
-
+const { seed, Types: { ObjectId } } = require ('@onehilltech/blueprint-mongodb');
 const { request } = require ('@onehilltech/blueprint-testing');
 const { expect } = require ('chai');
 
 describe ('app | routers | verification', function () {
-  function getTokenGenerator () {
-    let gatekeeper = blueprint.lookup ('service:gatekeeper');
-    return gatekeeper.getTokenGenerator ('gatekeeper:account_verification');
+  async function generateToken (account, client) {
+    return blueprint.lookup ('service:verification').generateToken (account, client);
   }
 
-  describe ('/v1/verify', function () {
-    it ('should verify an account', function () {
-      const {accounts} = seed ('$default');
-      const account = accounts[0];
+  describe.only ('/v1/verify', function () {
+    it ('should verify an account', async function () {
+      const { accounts: [ , account ], native: [ client ]} = seed ();
+      const token = await generateToken (account, client);
 
-      return getTokenGenerator ().generateToken ({jti: account.id})
-        .then (token => {
-          return request ()
-            .get ('/v1/verify')
-            .query ({token, redirect: 'https://localhost'})
-            .expect (301, {})
-        })
-        .then (() => blueprint.lookup ('model:account').findById (account._id))
-        .then (account => {
-          expect (account.verification.required).to.be.false;
-          expect (account.verification.date).to.be.a ('date');
-          expect (account.verification.ip_address).to.equal ('::ffff:127.0.0.1');
-        });
+      await request ()
+        .get ('/v1/verify')
+        .query ({token, redirect: 'https://localhost'})
+        .expect (301);
+
+      const updated = await blueprint.lookup ('model:account').findById (account._id);
+      expect (updated.verification.required).to.be.true;
+      expect (updated.verification.date).to.be.a ('date');
+      expect (updated.verification.ip_address).to.equal ('::ffff:127.0.0.1');
     });
 
     it ('should fail because of missing parameters', function () {
@@ -81,49 +71,58 @@ describe ('app | routers | verification', function () {
         .expect (403, { errors: [ { code: 'invalid_token', detail: 'jwt malformed', status: '403' } ] });
     });
 
-    it ('should fail because of unknown account', function () {
-      return getTokenGenerator ().generateToken ({jti: new ObjectId ()})
-        .then (token => {
-          return request ()
-            .get ('/v1/verify')
-            .query ({token, redirect: 'https://localhost'})
-            .expect (403, { errors:
-                [ { code: 'unknown_account',
-                  detail: 'The account is unknown.',
-                  status: '403' } ] });
+    it ('should fail because of unknown account', async function () {
+      const { native: [ client ]} = seed ();
+      const token = await generateToken ({ id: new ObjectId ().toString () }, client);
+
+      return request ()
+        .get ('/v1/verify')
+        .query ({token, redirect: 'https://localhost'})
+        .expect (400, {
+          errors: [
+            {
+              code: 'verification_failed',
+              detail: 'The account is unknown.',
+              status: '400'
+            }
+          ]
         });
     });
 
-    it ('should fail because of disabled account', function () {
-      const {accounts} = seed ('$default');
-      const account = accounts[4];
+    it ('should fail because of disabled account', async function () {
+      const { native: [ client ], accounts: [,,,,account]} = seed ();
+      const token = await generateToken ({ id: account.id }, client);
 
-      return getTokenGenerator ().generateToken ({jti: account.id})
-        .then (token => {
-          return request ()
-            .get ('/v1/verify')
-            .query ({token, redirect: 'https://localhost'})
-            .expect (403, { errors:
-                [ { code: 'account_disabled',
-                  detail: 'The account is disabled.',
-                  status: '403' } ] });
+      return request ()
+        .get ('/v1/verify')
+        .query ({token, redirect: 'https://localhost'})
+        .expect (400, {
+          errors: [
+            {
+              code: 'verification_failed',
+              detail: 'The account is disabled.',
+              status: '400'
+            }
+          ]
         });
+
     });
 
-    it ('should fail because account is verified', function () {
-      const {accounts} = seed ('$default');
-      const account = accounts[5];
+    it ('should fail because account is verified', async function () {
+      const { accounts: [ account ], native: [ client ]} = seed ();
+      const token = await generateToken (account, client);
 
-      return getTokenGenerator ().generateToken ({jti: account.id})
-        .then (token => {
-          return request ()
-            .get ('/v1/verify')
-            .query ({token, redirect: 'https://localhost'})
-            .expect (403, { errors:
-                [ { code: 'already_verified',
-                  detail: 'The account has already been verified.',
-                  status: '403',
-                  meta: { verification: lean (account.verification) }} ] });
+      await request ()
+        .get ('/v1/verify')
+        .query ({token, redirect: 'https://localhost'})
+        .expect (400, {
+          errors: [
+            {
+              code: 'verification_failed',
+              detail: 'The account has already been verified.',
+              status: '400'
+            }
+          ]
         });
     });
   });

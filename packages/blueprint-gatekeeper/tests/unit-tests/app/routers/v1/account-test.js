@@ -19,7 +19,7 @@ const { lean, seed, Types: { ObjectId } } = require ('@onehilltech/blueprint-mon
 const blueprint = require ('@onehilltech/blueprint');
 const { request } = require ('@onehilltech/blueprint-testing');
 
-describe.only ('app | routers | account', function () {
+describe ('app | routers | account', function () {
   describe ('/v1/accounts', function () {
     context ('GET', function () {
       it ('should return all the accounts for glob scope', function () {

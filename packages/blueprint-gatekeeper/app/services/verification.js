@@ -1,51 +1,117 @@
-const { Service, service } = require ('@onehilltech/blueprint');
+/*
+ * Copyright (c) 2021 One Hill Technologies, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const { Service, service, model } = require ('@onehilltech/blueprint');
 
 module.exports = Service.extend ({
-  issuer: service (),
-
+  // Reference to the gatekeeper service for sending emails.
   gatekeeper: service (),
 
-  sendEmail (account, client) {
-    if (!client.verify_account_url) {
-      return Promise.resolve (account);
-    }
+  // Reference to the account model.
+  Account: model ('account'),
 
-    let options = {
-      sub: 'account.verification',
-      expiresIn: client.verify_expires_in
+  /// The token generator used for the service to generate/verify tokens.
+  _tokenGenerator: null,
+
+  /**
+   * Configure the service.
+   */
+  configure () {
+    this._tokenGenerator = this.app.lookup ('service:gatekeeper').makeTokenGenerator ({
+      subject: 'account.verification',
+    });
+  },
+
+  /**
+   * Generate a verification token for the account targeting the specified client.
+   *
+   * @param account
+   * @param client
+   */
+  async generateToken (account, client) {
+    if (!client.enabled)
+      throw new Error ('The client is disabled.');
+
+    return this._tokenGenerator.generateToken ({ },{ jwtid: account.id, expiresIn: client.verify_expires_in });
+  },
+
+  /**
+   * Send an email to the user so they can verify their account.
+   *
+   * @param account
+   * @param client
+   * @returns {Promise<unknown>}
+   */
+  async sendEmail (account, client) {
+    if (!client.verify_account_url)
+      throw new Error ('The client does not support account verification.');
+
+    // Send an email to the user so they can verify their account.
+    const accessToken = await this.generateToken (account, client);
+
+    const emailOptions = {
+      template: 'gatekeeper.account.verification',
+      message: { to: account.email },
+      locals: {
+        verification: {
+          url: `${client.verify_account_url}?access_token=${accessToken}`,
+          button: { label: 'Verify account' }
+        }
+      }
     };
 
-    return this.issuer.issueUserToken (account, client, { }, options)
-      .then (result => {
-        const { access_token: accessToken } = result;
+    const email = await this.gatekeeper.sendEmail (emailOptions);
 
-        const emailOptions = {
-          template: 'gatekeeper.account.verification',
-          message: {
-            to: account.email,
-          },
-          locals: {
-            verification: {
-              url: `${client.verify_account_url}?access_token=${accessToken}`,
-              button: {
-                label: 'Verify account'
-              }
-            }
-          }
-        };
+    // Log the result of sending the activation email to the user for the newly
+    // created account.
 
-        return this.gatekeeper.sendEmail (emailOptions);
-      })
-      .then (result => {
-        // Log the result of sending the activation email to the user for the newly
-        // created account.
+    account.verification.last_email_id = email.messageId;
+    account.verification.last_email_date = new Date ();
 
-        const { messageId } = result;
+    return account.save ();
+  },
 
-        account.verification.last_email_id = messageId;
-        account.verification.last_email_date = new Date ();
+  /**
+   * Verify an account.
+   *
+   * @param token       Token for the account to verify
+   * @param req         Source request object
+   * @returns {Promise<*>}
+   */
+  async verify (token, req) {
+    const payload = await this._tokenGenerator.verifyToken (token);
+    const account = await this.Account.findById (payload.jti);
 
-        return account.save ();
-      });
+    // Let's make sure the account exist, the account is not disabled, and
+    // the account has not been verified.
+    if (!account)
+      throw new Error ('The account is unknown.');
+
+    if (!account.enabled)
+      throw new Error ('The account is disabled.');
+
+    if (!!account.verification.date)
+      throw new Error ('The account has already been verified.');
+
+    // Save the verification details.
+    account.verification.date = new Date ();
+
+    if (req)
+      account.verification.ip_address = req.ip;
+
+    return account.save ();
   }
 });

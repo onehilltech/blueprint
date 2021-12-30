@@ -20,7 +20,8 @@ const {
   model,
   service,
   env,
-  ForbiddenError
+  ForbiddenError,
+  BadRequestError
 } = require ('@onehilltech/blueprint');
 
 /**
@@ -29,20 +30,6 @@ const {
  * The controller for verifying user accounts.
  */
 module.exports = Controller.extend ({
-  /// The account model.
-  Account: model ('account'),
-
-  /// The gatekeeper service with the token generators.
-  gatekeeper: service (),
-
-  /// The token generator for used to verify account verification tokens.
-  _tokenGenerator: null,
-
-  init () {
-    this._super.call (this, ...arguments);
-    this._tokenGenerator = this.gatekeeper.getTokenGenerator ('gatekeeper:account_verification');
-  },
-
   /**
    * The one and only action of the controller that verifies an account.
    *
@@ -69,6 +56,9 @@ module.exports = Controller.extend ({
         }
       },
 
+      /// Reference to the verification service.
+      verification: service (),
+
       /**
        * Execute the action.
        *
@@ -83,42 +73,30 @@ module.exports = Controller.extend ({
        * @param res
        * @return {*}
        */
-      execute (req, res) {
-        const {token, redirect} = req.query;
+      async execute (req, res) {
+        const { token, redirect } = req.query;
 
-        return this.controller._tokenGenerator.verifyToken (token)
-          .then (payload => this.controller.Account.findById (payload.jti))
-          .then (account => {
-            // Let's make sure the account exist, the account is not disabled, and
-            // the account has not been verified.
-            if (!account)
-              return Promise.reject (new ForbiddenError ('unknown_account', 'The account is unknown.'));
+        try {
+          // Verify the account using the provided token.
+          const account = await this.verification.verify (token, req);
 
-            if (!account.enabled)
-              return Promise.reject (new ForbiddenError ('account_disabled', 'The account is disabled.'));
+          // Notify all the account has been verified.
+          await this.emit ('gatekeeper.account.verified', account);
 
-            if (!!account.verification.date)
-              return Promise.reject (new ForbiddenError ('already_verified', 'The account has already been verified.', {verification: account.verification}));
+          if (redirect)
+            res.redirect (301, `${redirect}?account=${account.id}`);
+          else
+            res.status (200).json ({message: `The account for ${account.email} has been verified.`});
+        }
+        catch (err) {
+          if (err.name === 'TokenExpiredError')
+            throw new ForbiddenError ('token_expired', 'The access token has expired.');
 
-            // Save the verification details.
-            account.verification.date = new Date ();
-            account.verification.ip_address = req.ip;
+          if (err.name === 'JsonWebTokenError')
+            throw new ForbiddenError ('invalid_token', err.message);
 
-            return account.save ();
-          })
-          .then (account => this.emit ('gatekeeper.account.verified', account))
-          .then (() => res.redirect (301, redirect))
-          .catch (err => {
-            // Translate the error, if necessary. We have to check the name because the error
-            // could be related to token verification.
-            if (err.name === 'TokenExpiredError')
-              err = new ForbiddenError ('token_expired', 'The access token has expired.');
-
-            if (err.name === 'JsonWebTokenError')
-              err = new ForbiddenError ('invalid_token', err.message);
-
-            return Promise.reject (err);
-          });
+          throw new BadRequestError ('verification_failed', err.message);
+        }
       }
     })
   }

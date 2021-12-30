@@ -79,46 +79,54 @@ module.exports = ResourceController.extend ({
         return this.account.prepareId (doc);
       },
 
-      createModel (req, doc) {
+      async createModel (req, doc) {
         // Allow the controller to create the model. If the creation fails because of a
         // duplicate email address, then we need to check if the account has been deleted.
         // If the account has been deleted, then we need to restore the account.
 
-        return this._super.call (this, ...arguments)
-          .catch (err => {
-            if (err.code !== 11000)
-              return Promise.reject (err);
+        try {
+          return this._super.call (this, ...arguments);
+        }
+        catch (err) {
+          if (err.code !== 11000)
+            throw err;
 
-            // Extract the index that caused the duplicate key error. This will determine
-            // the best course of action for correcting the problem.
+          // Extract the index that caused the duplicate key error. This will determine
+          // the best course of action for correcting the problem.
 
-            const [, field] = err.message.match (/index:\s+(\w+)_\d*/);
+          const [, field] = err.message.match (/index:\s+(\w+)_\d*/);
 
-            // Since we got a duplicate exception, this means an account with either the
-            // username or email address already exists. Let's attempt to restore the
-            // account if the account is deleted.
+          // Since we got a duplicate exception, this means an account with either the
+          // username or email address already exists. Let's attempt to restore the
+          // account if the account is deleted.
 
-            const selection = {[field]: doc[field], '_stat.deleted_at': {$exists: true}};
+          const selection = {[field]: doc[field], '_stat.deleted_at': {$exists: true}};
 
-            const update = {
-              $unset: {
-                '_stat.deleted_at': ''
-              }
-            };
+          const update = {
+            $unset: { '_stat.deleted_at': '' }
+          };
 
-            return this.controller.Model.findOneAndUpdate (selection, update, {new: true})
-              .then (account => !!account ? account : Promise.reject (new BadRequestError (`${field}_exists`, `An account with this ${field} already exists.`)));
-          });
+          const account = await this.controller.Model.findOneAndUpdate (selection, update, {new: true});
+
+          if (!!account)
+            return account;
+
+          throw new BadRequestError (`${field}_exists`, `An account with this ${field} already exists.`);
+        }
       },
 
-      postCreateModel (req, account) {
-        // The account model has been successfully created. Let's send an account activation email
-        // for the account to the email address associated with this account.
+      async postCreateModel (req, account) {
+        // The account model has been successfully created. Let's send an account verification
+        // email for the account to the email address associated with this account.
+        const { client } = req.accessToken;
 
-        return this.verification.sendEmail (account, req.accessToken.client);
+        if (!!account.verification && !!account.verification.required && !!client.verify_account_url)
+          await this.verification.sendEmail (account, client);
+
+        return account;
       },
 
-      prepareResponse (req, res, result) {
+      async prepareResponse (req, res, result) {
         // If the origin request wanted to login the user, then we need to
         // return to login the user for the account and return the access
         // token for the corresponding login.
@@ -132,8 +140,8 @@ module.exports = ResourceController.extend ({
         const payload = {};
         const options = { origin, refreshable: true };
 
-        return this.session.issueToken (req.user, result.account, payload, options)
-          .then (token => Object.assign (result, { token: Object.assign ({}, token, { token_type: 'Bearer' }) }));
+        const token = await this.session.issueToken (req.user, result.account, payload, options);
+        return Object.assign (result, { token: Object.assign ({}, token, { token_type: 'Bearer' }) });
       }
     });
   },

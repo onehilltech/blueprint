@@ -113,6 +113,16 @@ describe ('app | models | account', function () {
   });
 
   describe ('verified', function () {
+    it ('should list the account as verified', function () {
+      const { accounts: [ account ]} = seed ();
 
+      expect (account.verified).to.be.true;
+    });
+
+    it ('should list the account as not verified', function () {
+      const { accounts: [ , account ]} = seed ();
+
+      expect (account.verified).to.be.false;
+    });
   });
 });

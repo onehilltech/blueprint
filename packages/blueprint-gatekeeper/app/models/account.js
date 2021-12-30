@@ -111,7 +111,7 @@ schema.methods.verifyPasswordSync = function (password) {
  * Test if the account is verified.
  */
 schema.virtual ('verified').get (function () {
-  return !this.verification || (this.verification && (!this.verification.required || !!this.verification.date));
+  return !this.verification || !this.verification.required || !!this.verification.date;
 });
 
 /**

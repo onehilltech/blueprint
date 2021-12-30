@@ -89,6 +89,10 @@ module.exports = Seed.extend ({
           email: 'hilljh82@gmail.com',
           username: 'account1',
           password: 'account1',
+          verification: {
+            date: new Date (),
+            ip_address: '127.0.0.1'
+          }
         },
         {
           email: 'account2@gatekeeper.com',
@@ -116,11 +120,7 @@ module.exports = Seed.extend ({
           email: 'account6@gatekeeper.com',
           username: 'account6',
           password: 'account6',
-          enabled: true,
-          verification: {
-            date: new Date (),
-            ip_address: '127.0.0.1'
-          }
+          enabled: true
         },
 
         {

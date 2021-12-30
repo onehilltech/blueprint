@@ -98,9 +98,10 @@ const Issuer = BlueprintObject.extend ({
    * Verify an JSON web token.
    *
    * @param token
+   * @param opts
    * @returns A promise that resolves the payload in the token.
    */
-  verifyToken (token, opts) {
+  async verifyToken (token, opts) {
     return this.tokenGenerator.verifyToken (token, opts)
       .then (payload => this.AccessToken.findById (payload.jti).populate ('client account').exec ())
       .then (accessToken => this._checkAccessToken (accessToken, opts))
