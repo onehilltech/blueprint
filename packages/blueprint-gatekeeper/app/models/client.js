@@ -86,6 +86,13 @@ schema.virtual ('restricted').get (function () {
   return !isEmpty (this.allow) || !isEmpty (this.deny);
 });
 
+/**
+ * Test if the account is verified.
+ */
+schema.virtual ('verified').get (function () {
+  return true;
+});
+
 
 schema.methods.allowed = function (account) {
   return (isEmpty (this.allow) && isEmpty (this.deny)) ||

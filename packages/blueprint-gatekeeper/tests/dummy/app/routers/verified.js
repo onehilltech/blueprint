@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-const { Router, policies: { check, all, any } } = require ('@onehilltech/blueprint');
+const { Router, policies: { any, all } } = require ('@onehilltech/blueprint');
 const gatekeeper = require ('../../../../lib');
 
 module.exports = Router.extend ({
   specification: {
     '/verified': {
       use: [gatekeeper.cors ()],
-      policy: any (['gatekeeper.request.client', 'gatekeeper.account.verified']),
+      policy: all.ordered ([
+        'gatekeeper.auth.bearer',
+        any (['gatekeeper.request.client', 'gatekeeper.account.verified'])
+      ]),
 
       post: 'verified'
     }

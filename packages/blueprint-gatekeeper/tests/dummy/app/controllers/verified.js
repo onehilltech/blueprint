@@ -4,7 +4,7 @@ module.exports = Controller.extend ({
   __invoke () {
     return Action.extend ({
       execute (req, res) {
-        return res.status (200).json ({ message: req.params.message });
+        return res.status (200).json ({ message: req.body.message });
       }
     });
   }
