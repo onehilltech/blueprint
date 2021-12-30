@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-const Policy = require ('../../../../lib/policy');
+const Policy = require ('../../../../lib/policies/policy');
 
-module.exports = Policy.extend ({
-  value: null,
-
+module.exports = class IdentityPolicy extends Policy {
   setParameters (value) {
     this.value = value;
-  },
+  }
 
-  runCheck () {
+  runCheck (req) {
     return this.value;
   }
-});
+}

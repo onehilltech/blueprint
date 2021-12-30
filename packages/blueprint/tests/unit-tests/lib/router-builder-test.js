@@ -4,7 +4,7 @@ const express  = require ('express');
 
 const RouterBuilder = require ('../../../lib/router-builder');
 const HttpError = require ('../../../lib/http-error');
-const Policy = require ('../../../lib/policy');
+const Policy = require ('../../../lib/policies/policy');
 
 const policies = require ('../../../lib/policies');
 const blueprint = require ('../../../lib');

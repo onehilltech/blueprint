@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-const Policy = require ('../../../../../lib/policy');
+const { Policy } = require ('../../../../../lib');
 
-module.exports = Policy.extend ({
-  failureCode: 'create_failed',
-  failureMessage: 'The create policy failed.',
+module.exports = class UserCreatePolicy extends Policy {
+  constructor () {
+    super ('create_failed', 'The create policy failed.');
+  }
 
-  runCheck () {
+  runCheck (req) {
     this.app.emit ('user.create', true);
     return true;
   }
-});
+}
+

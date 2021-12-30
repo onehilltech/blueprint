@@ -18,7 +18,7 @@ const events = require ('../../../../lib/messaging/events');
 const expect = require ('chai').expect;
 
 
-describe.only ('lib | messaging | events', function () {
+describe ('lib | messaging | events', function () {
   describe ('@events', function () {
     it ('should decorate an object with event support', function () {
       const Foo = events.decorate (class Foo {});

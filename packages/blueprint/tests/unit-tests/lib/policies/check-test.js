@@ -14,27 +14,38 @@
  * limitations under the License.
  */
 
-const {
-  expect
-} = require ('chai');
+const chai = require ('chai');
+chai.use (require ('chai-as-promised'))
+const { expect } = chai;
 
-const Policy = require ('../../../../lib/policy');
-const check = require ('../../../../lib/policies/check');
 const blueprint = require ('../../../../lib');
+const { Policy, policies: { check }} = blueprint;
 
-describe ('lib | policies | check', function () {
-  it ('should create a policy check', function () {
-    let policy = check ('identity', true).createPolicy (blueprint.app);
+describe.only ('lib | policies | check', function () {
+  it ('should create a policy check', async function () {
+    let policy = check ('identity', true);
 
-    expect (policy).to.be.instanceof (Policy);
-    expect (policy.runCheck ()).to.be.true;
+    expect (policy).to.be.instanceOf (Policy)
+    expect (policy).to.respondsTo ('runCheck');
+
+    // Configure the policy for this application.
+    policy.configure (blueprint.app);
+    const result = await policy.runCheck ();
+
+    expect (result).to.be.true;
   });
 
-  it ('should error because policy is not found', function () {
-    expect (() => { check ('does-not-exist', true).createPolicy (blueprint.app); }).to.throw (Error);
+  it ('should error because policy is not found', async function () {
+    await expect (check ('does-not-exist', true).configure (blueprint.app)).to.be.rejectedWith (Error)
   });
 
-  it ('should not error on optional policy not found', function () {
-    expect (check ('?does-not-exist', true).createPolicy (blueprint.app)).to.be.null;
+  it ('should not error on optional policy not found', async function () {
+    const policy = check ('?does-not-exist', true);
+    await policy.configure (blueprint.app);
+
+    await expect (policy).to.be.instanceOf (Policy);
+    const result = await policy.runCheck ();
+
+    expect (result).to.be.true;
   });
 });

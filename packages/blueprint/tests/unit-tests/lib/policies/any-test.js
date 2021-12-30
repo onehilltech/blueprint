@@ -23,46 +23,43 @@ const {
 } = blueprint;
 
 describe ('lib | policies | any', function () {
-  it ('should pass any policies', function () {
+  it ('should pass any policies', async function () {
     let Policy = any ([
       check ('identity', true),
       check ('identity', true)
     ]);
 
-    let policy = new Policy ({app: blueprint.app});
+    const policy = new Policy ();
+    const result = await policy.runCheck ();
 
-    return policy.runCheck ().then (result => {
-      expect (result).to.be.true;
-    });
+    expect (result).to.be.true;
   });
 
-  it ('should fail since one policy fails', function () {
+  it ('should fail since one policy fails', async function () {
     let Policy = any ([
       check ('identity', true),
       check ('identity', false)
     ]);
 
-    let policy = new Policy ({app: blueprint.app});
+    const policy = new Policy ();
+    const result = await policy.runCheck ();
 
-    return policy.runCheck ().then (result => {
-      expect (result).to.be.true;
-    });
+    expect (result).to.be.true;
   });
 
-  it ('should fail since all policies fail', function () {
+  it ('should fail since all policies fail', async function () {
     let Policy = any ([
       check ('identity', false),
       check ('identity', false)
     ]);
 
-    let policy = new Policy ({app: blueprint.app});
+    const policy = new Policy ();
+    const result = await policy.runCheck ();
 
-    return policy.runCheck ().then (result => {
-      expect (result).to.be.false;
-    });
+    expect (result).to.be.false;
   });
 
-  it ('should support nested policies', function () {
+  it ('should support nested policies', async function () {
     let Policy = any ([
       check ('identity', false),
       check ('identity', false),
@@ -73,32 +70,34 @@ describe ('lib | policies | any', function () {
       ])
     ]);
 
-    let policy = new Policy ({app: blueprint.app});
+    const policy = new Policy ();
+    const result = await policy.runCheck ();
 
-    return policy.runCheck ().then (result => {
-      expect (result).to.be.true;
-    });
+    expect (result).to.be.true;
   });
 
   context ('ordered', function () {
-    const SimplePolicy = Policy.extend ({
-      value: null,
+    class SimplePolicy extends Policy {
+      constructor (value, result) {
+        super ();
 
-      result: null,
+        this.value = value;
+        this.result = result;
+      }
 
       runCheck (req) {
         req.values.push (this.value);
 
         return this.result;
       }
-    });
+    }
 
     it ('should evaluate the policies in order', function () {
       let policies = [
-        new SimplePolicy ({value: 1, result: false}),
-        new SimplePolicy ({value: 2, result: false}),
-        new SimplePolicy ({value: 3, result: true}),
-        new SimplePolicy ({value: 4, result: false}),
+        new SimplePolicy (1, false),
+        new SimplePolicy (2, false),
+        new SimplePolicy (3, true),
+        new SimplePolicy (4, false),
       ];
 
       const Policy = any.ordered (policies);

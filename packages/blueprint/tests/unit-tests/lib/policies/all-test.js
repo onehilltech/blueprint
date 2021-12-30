@@ -23,26 +23,26 @@ const {
 } = blueprint;
 
 describe ('lib | policies | all', function () {
-  it ('should pass all policies', function () {
+  it ('should pass all policies', async function () {
     const Policy = all ([
       check ('identity', true),
       check ('identity', true)
     ]);
 
-    const policy = new Policy ({app: blueprint.app});
+    const policy = new Policy ();
+    await policy.configure ();
 
-    return policy.runCheck ().then (result => {
-      expect (result).to.be.true;
-    });
+    const result = await policy.runCheck ();
+    expect (result).to.be.true;
   });
 
   it ('should fail since one policy fails', function () {
     let Policy = all ([
       check ('identity', true),
       check ('identity', false)
-    ], 'second_failed', 'The second policy failed.');
+    ]);
 
-    let policy = new Policy ({app: blueprint.app});
+    let policy = new Policy ();
 
     return policy.runCheck ().then (result => {
       expect (result).to.eql ({
@@ -71,16 +71,18 @@ describe ('lib | policies | all', function () {
   });
 
   context ('ordered', function () {
-    const SimplePolicy = Policy.extend ({
-      value: null,
+    class SimplePolicy extends Policy {
+      constructor (value) {
+        super ();
 
-      result: true,
+        this.value = value;
+      }
 
       runCheck (req) {
         req.values.push (this.value);
         return this.result;
       }
-    });
+    }
 
     it ('should execute the policies in order', function () {
       let policies = [

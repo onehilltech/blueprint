@@ -47,7 +47,8 @@ const {
   actionValidator
 } = require ('./middleware');
 
-const { check, policyMaker } = require ('./policies');
+const check = require ('./policies/check');
+const policyFactory = require ('./policies/policy-factory');
 
 const SINGLE_ACTION_CONTROLLER_METHOD = '__invoke';
 const SINGLE_RESOURCE_BASE_PATH = '/:rcId';
@@ -675,7 +676,7 @@ module.exports = BO.extend ({
    * @private
    */
   _makePolicyMiddleware (definition) {
-    let policy = policyMaker (definition, this.app);
+    let policy = policyFactory (definition, this.app);
     return policy !== null ? [checkPolicy (policy)] : [];
   },
 
