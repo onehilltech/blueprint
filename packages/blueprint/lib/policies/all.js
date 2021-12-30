@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const Policy = require ('../policy');
+const Policy = require ('./policy');
 const policyFactory = require ('./policy-factory');
 const handlePolicyFailure = require ('./-handle-policy-failure')
 

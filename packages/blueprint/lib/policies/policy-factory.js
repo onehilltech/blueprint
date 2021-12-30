@@ -17,7 +17,6 @@
 const { isString } = require ('lodash');
 const Policy = require ('./policy');
 const check = require ('./check');
-const Check = require ('./-check');
 
 /**
  * Create a policy for the target application.
