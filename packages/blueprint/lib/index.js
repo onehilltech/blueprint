@@ -43,7 +43,6 @@ exports.NotFoundError = require ('./not-found-error');
 exports.UnauthorizedError = require ('./unauthorized-error');
 exports.InternalServerError = require ('./internal-server-error');
 
-exports.Policy = require ('./policy');
 exports.Router = require ('./router');
 
 exports.Protocol = require ('./server/protocol');
@@ -61,7 +60,8 @@ exports.FieldsUploadAction = require ('./fields-upload-action');
 exports.TextOnlyUploadAction = require ('./text-only-upload-action');
 exports.Service = require ('./service');
 
-// policy builders
+// policy framework
+exports.Policy = require ('./policies/policy');
 exports.policies = require ('./policies');
 
 // computed/bound attributes

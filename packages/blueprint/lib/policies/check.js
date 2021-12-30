@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const Check = require ('./-check');
+const CheckPolicy = require ('./check-policy');
 
 /**
  * The check policy builder will lookup an existing policy by name. The first
@@ -27,11 +27,11 @@ const Check = require ('./-check');
  *
  * @returns {*}
  */
-module.exports = function () {
+module.exports = function check () {
   const [name, ...params] = arguments;
   const optional = name[0] === '?';
   const negate = name[0] === '!';
   const policyName = (optional || negate) ? name.slice (1) : name;
 
-  return new Check ({policyName, params, optional, negate});
+  return new CheckPolicy (policyName, { params, optional, negate });
 };

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+exports.policy = require ('./policy');
 exports.check = require ('./check');
 exports.all = require ('./all');
 exports.any = require ('./any');

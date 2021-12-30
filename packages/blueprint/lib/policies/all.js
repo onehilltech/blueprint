@@ -15,93 +15,81 @@
  */
 
 const Policy = require ('../policy');
-const policyMaker = require ('./policy-maker');
-const { findIndex, compact } = require ('lodash');
+const policyFactory = require ('./policy-factory');
+const handlePolicyFailure = require ('./-handle-policy-failure')
 
 /**
  * Aggregate of policies that all must pass for this policy to pass.
  *
  * @param       definitions       Array of policy definitions
- * @param       failureCode       Failure code
- * @param       failureMessage    Failure message
- * @param       resources
  */
-function all (definitions, failureCode = 'policy_failed', failureMessage = 'All of the policies failed.') {
-  return Policy.extend ({
-    failureCode,
-
-    failureMessage,
-
-    /// Collection of policies to check.
-    policies: null,
-
-    init () {
-      this._super.call (this, ...arguments);
-
-      this.policies = compact (definitions.map (policy => policyMaker (policy, this.app)));
-    },
-
-    runCheck (req) {
-      return Promise.all (this.policies.map (policy => policy.runCheck (req)))
-        .then (results => {
-          // Locate the first policy that failed. If we cannot find a failed policy, then
-          // all policies passed.
-
-          let index = findIndex (results, result => result !== true);
-
-          if (index === -1)
-            return true;
-
-          const {failureCode, failureMessage} = this.policies[index];
-
-          return {failureCode, failureMessage};
-        });
+function all (definitions) {
+  return class AllPolicy extends Policy {
+    constructor () {
+      super ();
     }
-  });
+
+    async configure (app) {
+      this.policies = await Promise.all (definitions.map (policy => policyFactory (policy, app)));
+    }
+
+    async runCheck (req) {
+      // Run check on all the policies.
+      const results = await Promise.all (this.policies.map (policy => policy.runCheck (req)));
+
+      // Review the results. If we find one policy that failed (i.e., the value is not true)
+      // then the all policy has failed.
+
+      const index = results.findIndex (result => result !== true);
+
+      if (index === -1)
+        return true;
+
+      const result = results[index];
+      const policy = this.policies[index];
+
+      return handlePolicyFailure (result, policy);
+    }
+  }
 }
 
 /**
  * Similar to all(), but the definitions will be executed in order, not all
  * at once.
  *
- * @param definitions
- * @param failureCode
- * @param failureMessage
- * @return {*}
+ * @param definitions       The policy definitions
  */
-all.ordered = function (definitions, failureCode = 'failed_policy', failureMessage = 'All of the policies failed.') {
-  return Policy.extend ({
-    /// The failure code.
-    failureCode,
+all.ordered = function (definitions) {
+  return class AllOrderPolicy extends Policy {
+    constructor () {
+      super ();
+    }
 
-    /// The failure message.
-    failureMessage,
+    async configure (app) {
+      this.policies = await Promise.all (definitions.map (policy => policyFactory (policy, app)));
+    }
 
-    /// List of policies to evaluate.
-    policies: null,
+    async runCheck (req) {
+      return this._runCheck (req, 0);
+    }
 
-    init () {
-      this._super.call (this, ...arguments);
-
-      this.policies = compact (definitions.map (policy => policyMaker (policy, this.app)));
-    },
-
-    runCheck (req) {
-      return new Promise ((resolve, reject) => this._runCheck (req, 0).then (resolve).catch (reject));
-    },
-
-    _runCheck (req, i) {
+    async _runCheck (req, i) {
       // We have reach the end of the policy list. This means that all policies
       // have passed and we mark the entire policy as passed.
       if (i >= this.policies.length)
-        return Promise.resolve (true);
+        return true;
 
       // We need to resolve the next policy on our list. After the policy is resolved,
       // we continue to the next policy if the current policies passes.
-      let result = this.policies[i].runCheck (req);
-      return Promise.resolve (result).then (result => result === true ? this._runCheck (req, i + 1) : result);
+      const policy = this.policies[i];
+      const result = await policy.runCheck (req);
+
+      if (result === true)
+        return this._runCheck (req, i + 1);
+
+      return handlePolicyFailure (result, policy);
     }
-  });
+  }
 };
 
 module.exports = all;

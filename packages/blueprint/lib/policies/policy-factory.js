@@ -14,29 +14,30 @@
  * limitations under the License.
  */
 
-const {
-  isString
-} = require ('lodash');
-
-const Policy = require ('../policy');
+const { isString } = require ('lodash');
+const Policy = require ('./policy');
 const check = require ('./check');
 const Check = require ('./-check');
 
-function policyMaker (policy, app) {
+/**
+ * Create a policy for the target application.
+ *
+ * @param policy
+ * @param app
+ */
+module.exports = async function policyFactory (policy, app) {
+  if (isString (policy))
+    return check (policy);
+
   if ((policy instanceof Policy))
     return policy;
-
-  if ((policy instanceof Check))
-    return policy.createPolicy (app);
 
   // In both cases, we recursively call ourselves just in case we need to
   // add logic around creating the policy middleware when using an instance
   // of the policy, which is expected.
 
-  if (isString (policy))
-    return policyMaker (check (policy), app);
+  const policyObj = new Policy ();
+  await policyObj.configure (app);
 
-  return new policy ({app});
+  return policyObj;
 }
-
-module.exports = policyMaker;

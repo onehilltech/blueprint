@@ -14,20 +14,29 @@
  * limitations under the License.
  */
 
-const { BO } = require ('base-object');
-
 /**
  * @class Policy
  *
  * Base class for all policies. All policies must override the runCheck()
  * method, which is used to evaluate the policy.
  */
-module.exports = BO.extend ({
-  /// The default code for a policy failure.
-  failureCode: 'policy_failed',
+module.exports = class Policy {
+  /**
+   * Constructor
+   */
+  constructor (code, message) {
+    this.code = code || 'policy_failed';
+    this.message = message || 'The request did not satisfy a required policy.';
+  }
 
-  /// The default message for a policy failure.
-  failureMessage: 'The request did not satisfy a required policy.',
+  /**
+   * Configure the policy for this application.
+   *
+   * @param app
+   */
+  configure (app) {
+    this.app = app;
+  }
 
   /**
    * Set the parameters of the policy. The arguments to this method will be the
@@ -35,7 +44,7 @@ module.exports = BO.extend ({
    */
   setParameters () {
 
-  },
+  }
 
   /**
    * Run the policy check. This method can be evaluated either synchronously or
@@ -51,6 +60,8 @@ module.exports = BO.extend ({
    * @params req                  Incoming request
    * @return {Boolean|Promise}    Policy evaluation
    */
-  runCheck: null
-});
+  async runCheck (req) {
+    throw new Error ('You must implement the runCheck() method.');
+  }
+}
 
