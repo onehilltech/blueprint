@@ -504,4 +504,37 @@ describe ('app | routers | account', function () {
       });
     })
   });
+
+  describe ('/v1/accounts/:accountId/verify', function () {
+    context ('POST', function () {
+      it ('should verify an account', async function () {
+        const { accounts: [,account]} = seed ();
+
+        const res = await request ()
+          .post (`/v1/accounts/${account.id}/verify`)
+          .withUserToken (8)
+          .expect (200);
+
+        expect (res.body).to.have.nested.property ('account.verification')
+          .to.have.keys (['required', 'date', 'ip_address']);
+      });
+
+      it ('should fail because of invalid user request', function () {
+        const { accounts: [, account]} = seed ();
+
+        return request ()
+          .post (`/v1/accounts/${account.id}/verify`)
+          .withUserToken (1)
+          .expect (403, {
+            errors: [
+              {
+                code: 'verify_failed',
+                detail: 'An account can be verified only by its owner.',
+                status: '403'
+              }
+            ]
+          });
+      });
+    })
+  });
 });

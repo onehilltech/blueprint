@@ -24,7 +24,7 @@ describe ('app | routers | verification', function () {
     return blueprint.lookup ('service:verification').generateToken (account, client);
   }
 
-  describe.only ('/v1/verify', function () {
+  describe ('/v1/verify', function () {
     it ('should verify an account', async function () {
       const { accounts: [ , account ], native: [ client ]} = seed ();
       const token = await generateToken (account, client);

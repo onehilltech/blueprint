@@ -18,7 +18,7 @@ module.exports = {
   connections: {
     $default: {
       uri: 'mongodb://localhost/blueprint_gatekeeper',
-      seed: false,
+      seed: true,
       options : {
         readPreference: "primary",
         forceServerObjectId: false,

@@ -162,58 +162,6 @@ module.exports = ResourceController.extend ({
     });
   },
 
-  changePassword () {
-    return Action.extend ({
-      schema: {
-        [this.resourceId]: {
-          in: 'params',
-          isMongoIdOrMe: true,
-          toMongoId: true
-        },
-
-        'password.current': {
-          in: 'body',
-          isLength: {
-            options: {min: 1}
-          }
-        },
-
-        'password.new': {
-          in: 'body',
-          isLength: {
-            options: {min: 1}
-          }
-        }
-      },
-
-      execute (req, res) {
-        const currentPassword = req.body.password.current;
-        const newPassword = req.body.password.new;
-        const {accountId} = req.params;
-
-        return this.controller.Model.findById (accountId)
-          .then (account => {
-            if (!account)
-              return Promise.reject (new NotFoundError ('unknown_account', 'The account does not exist.'));
-
-            return account.verifyPassword (currentPassword)
-              .then (match => {
-                // If the password does not match, then we can just return an
-                // error message to the client, and stop processing the request.
-                if (!match)
-                  return Promise.reject (new BadRequestError ('invalid_password', 'The current password is invalid.'));
-
-                account.password = newPassword;
-                return account.save ();
-              })
-              .then (() => {
-                res.status (200).json (true);
-              });
-          });
-      }
-    });
-  },
-
   /**
    * Authenticate an existing account. This method is used to authenticate a
    * user who is currently logged into the system.
@@ -236,17 +184,56 @@ module.exports = ResourceController.extend ({
   },
 
   /**
+   * Change the password for the user.
+   *
+   * @returns {*}
+   */
+  changePassword () {
+    return this.SingleResourceAction.extend ({
+      schema: {
+        'password.current': {
+          in: 'body',
+          isLength: {
+            options: {min: 1}
+          }
+        },
+
+        'password.new': {
+          in: 'body',
+          isLength: {
+            options: {min: 1}
+          }
+        }
+      },
+
+      async executeFor (account, req, res) {
+        // Verify the current password. If the password does not match, then we can
+        // just return error message to the client, and stop processing the request.
+
+        const { password: { current: currentPassword, new: newPassword }} = req.body;
+        const match = await account.verifyPassword (currentPassword);
+
+        if (!match)
+          throw new BadRequestError ('invalid_password', 'The current password is invalid.');
+
+        // Update the old password with the new password.
+        account.password = newPassword;
+        await account.save ();
+
+        return res.status (200).json (true);
+      }
+    });
+  },
+
+  /**
    * Allow the current user to impersonate the target account.
    */
   impersonate () {
-    return Action.extend ({
+    return this.SingleResourceAction.extend ({
       /// The session service for generating tokens.
       session: service (),
 
-      async execute (req, res) {
-        const { accountId } = req.params;
-
-        const account = await this.controller.Model.findById (accountId);
+      async executeFor (account, req, res) {
         const payload = { impersonator: req.user.id };
         const options = { scope: ['gatekeeper.session.impersonation'] };
 
@@ -261,18 +248,14 @@ module.exports = ResourceController.extend ({
    * The current user is verifying (or activating) their account.
    */
   verify () {
-    return Action.extend ({
-      execute (req, res) {
-        const { Model } = this.controller;
-        const { accountId } = req.params;
+    return this.SingleResourceAction.extend ({
+      async executeFor (account, req, res) {
+        // Update the verification information for the account.
+        account.verification.date = new Date ();
+        account.verification.ip_address = req.ip;
+        await account.save ();
 
-        let update = {
-          'verification.date': new Date (),
-          'verification.ip_address': req.ip
-        };
-
-        return Model.findByIdAndUpdate (accountId, update, { new: true })
-          .then (account => !!account ? res.status (200).json ({ account }) : Promise.reject (new NotFoundError ('not_found', 'The account does not exist.')));
+        return res.status (200).json ({ account });
       }
     });
   }

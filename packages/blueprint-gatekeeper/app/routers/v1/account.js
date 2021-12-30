@@ -40,6 +40,10 @@ module.exports = {
 
       '/impersonate': {
         post: { action: 'gatekeeper.account@impersonate', policy: 'gatekeeper.account.impersonate'}
+      },
+
+      '/verify': {
+        post: { action: 'gatekeeper.account@verify', policy: 'gatekeeper.account.verify' }
       }
     }
   }
