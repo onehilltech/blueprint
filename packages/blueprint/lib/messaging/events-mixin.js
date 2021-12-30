@@ -14,25 +14,33 @@
  * limitations under the License.
  */
 
-const decorator = require ('@onehilltech/decorator');
+const { Mixin } = require ('base-object');
 const Messenger = require ('./messenger');
 
 /**
- * Apply the event decorator to the target class.
+ * @mixin Events
  *
- * @param target        The target class
+ * Mixin for adding event support to an object type.
  */
-function applyToTarget (target) {
-  Object.defineProperty (target.prototype, '_messenger', {
-    get () { return this.__messenger || (this.__messenger = new Messenger ())}
-  });
+module.exports = Mixin.create ({
+  /// The underlying messaging for the object.
+  _messenger: null,
+
+  init () {
+    this._super.call (this, ...arguments);
+
+    if (!this._messenger)
+      this._messenger = new Messenger ();
+  },
 
   /**
    * Register a listener for an event.
+   *
+   * @returns {*}
    */
-  target.prototype.on = function () {
+  on () {
     return this._messenger.on (...arguments);
-  }
+  },
 
   /**
    * Register a listener to handle an event once. After the event is handled, the
@@ -40,48 +48,35 @@ function applyToTarget (target) {
    *
    * @returns {*}
    */
-  target.prototype.once = function () {
+  once () {
     return this._messenger.once (...arguments);
-  }
+  },
 
   /**
    * Emit an event to all listeners.
    *
    * @returns {*}
    */
-  target.prototype.emit = function () {
+  emit () {
     return this._messenger.emit (...arguments);
-  }
+  },
 
   /**
    * Get the listeners for an event.
    *
    * @param eventName
+   * @returns {*}
    */
-  target.prototype.getListeners = function (eventName) {
+  getListeners (eventName) {
     return this._messenger.getListeners (eventName);
-  }
+  },
 
   /**
    * Test if the object has listeners for the event.
    * @param eventName
    * @returns {*}
    */
-  target.prototype.hasListeners = function (eventName) {
+  hasListeners (eventName) {
     return this._messenger.hasListeners (eventName);
   }
-
-  return target;
-}
-
-
-/**
- * @mixin Events
- *
- * Mixin for adding event support to an object type.
- */
-module.exports = exports = decorator (function evented (target, name, descriptor, options) {
-  applyToTarget (target);
 });
-
-exports.decorate = applyToTarget;

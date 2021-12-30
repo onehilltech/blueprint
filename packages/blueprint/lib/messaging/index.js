@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-exports.Events = require ('./events');
-
+exports.events = require ('./events');
+exports.Events = require ('./events-mixin');
 exports.Listener = require ('./listener');
 exports.BackgroundListener = require ('./background-listener');

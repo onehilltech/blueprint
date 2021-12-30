@@ -19,7 +19,7 @@ const path   = require ('path');
 const assert = require ('assert');
 const { BO } = require ('base-object');
 const ApplicationModule = require ('./application-module');
-const Events = require ('./messaging/events');
+const Events = require ('./messaging/events-mixin');
 
 const { forEach, find, isEmpty } = require ('lodash');
 const debug = require ('debug') ('blueprint:module-loader');
