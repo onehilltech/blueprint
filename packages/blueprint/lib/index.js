@@ -35,9 +35,7 @@ exports.Events = Events;
 exports.Controller = require ('./controller');
 exports.ResourceController = require ('./resource-controller');
 
-exports.barrier = require ('./barrier');
 exports.BlueprintError = require ('./error');
-
 exports.HttpError = require ('./http-error');
 exports.BadRequestError = require ('./bad-request-error');
 exports.ForbiddenError = require ('./forbidden-error');
