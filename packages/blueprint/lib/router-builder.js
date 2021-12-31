@@ -144,9 +144,9 @@ module.exports = class RouterBuilder {
       await this._processRouterSpecification (this.basePath, spec);
 
     // Add the routes to the mix.
-    for await (const router of this._routers) {
+    for await (const { path, router } of this._routers) {
       const result = await router.build (this.app);
-      this._router.use (router.path, result);
+      this._router.use (path, result);
     }
 
     return this._router;

@@ -111,7 +111,7 @@ module.exports = BO.extend ({
         mergeable: false,
         opts: {
           resolve (router) {
-            return router.prototype && !!router.prototype.build ? new router () : new Router ({specification: router});
+            return router.prototype && !!router.prototype.build ? new router () : Router.create ({specification: router});
           }
         }
       }

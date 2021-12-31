@@ -298,16 +298,14 @@ module.exports = BO.extend (Events, {
    *
    * @param routerName
    */
-  mount (routerName) {
+  async mount (routerName) {
     debug (`mounting router ${routerName}`);
 
     const router = this.lookup (`router:${routerName}`);
     assert (!!router, `The router {${routerName}} does not exist.`);
 
-    const builder = new RouterBuilder ({app: this});
-    builder.addRouter ('/', router);
-
-    return builder.build ();
+    const builder = new RouterBuilder (this);
+    return builder.addRouter ('/', router).build ();
   },
 
   /**

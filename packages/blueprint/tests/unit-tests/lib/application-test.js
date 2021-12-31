@@ -48,17 +48,17 @@ describe ('lib | Application', function () {
     });
 
     it ('should lookup a resource in a module', function () {
-      let controllerA = blueprint.app.lookup ('controller:mod_a:empty');
+      const controllerA = blueprint.app.lookup ('controller:mod_a:empty');
       expect (controllerA.name).to.equal ('mod_a');
 
-      let controllerB = blueprint.app.lookup ('controller:mod_b:empty');
+      const controllerB = blueprint.app.lookup ('controller:mod_b:empty');
       expect (controllerB.name).to.equal ('mod_b');
     });
   });
 
   describe ('mount', function () {
     it ('should mount a router', async function () {
-      const router = blueprint.app.mount ('main');
+      const router = await blueprint.app.mount ('main');
       const server = express ();
 
       server.use (router);
@@ -66,10 +66,8 @@ describe ('lib | Application', function () {
       return request (server).get ('/main').expect (200, "true");
     });
 
-    it ('should mount an inner router', function () {
-      let app = blueprint.app;
-
-      const router = app.mount ('inner.main');
+    it ('should mount an inner router', async function () {
+      const router = await blueprint.app.mount ('inner.main');
       const server = express ();
 
       server.use (router);
