@@ -6,14 +6,13 @@
  * @returns {Function}
  */
 module.exports = function (action) {
-  return function __blueprint_execute_action (req, res, next) {
+  return async function __blueprint_execute_action (req, res, next) {
     try {
-      Promise.resolve (action.execute (req, res))
-        .then (() => next ())
-        .catch (next);
+      await action.execute (req, res);
+      next ();
     }
-    catch (ex) {
-      next (ex);
+    catch (err) {
+      next (err);
     }
   }
 };
