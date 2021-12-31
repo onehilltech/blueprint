@@ -22,7 +22,7 @@ const blueprint = require ('../../../../lib');
 const { Policy, policies: { check }} = blueprint;
 
 describe.only ('lib | policies | check', function () {
-  it ('should create a policy check', async function () {
+  it.only ('should create a policy check', async function () {
     let policy = check ('identity', true);
 
     expect (policy).to.be.instanceOf (Policy)

@@ -16,44 +16,41 @@
 
 const { expect } = require ('chai');
 const blueprint = require ('../../../../lib');
+const { Policy, policies: { all, check } } = blueprint;
 
-const {
-  Policy,
-  policies: {all, check}
-} = blueprint;
-
-describe ('lib | policies | all', function () {
+describe.only ('lib | policies | all', function () {
   it ('should pass all policies', async function () {
-    const Policy = all ([
+    const TestPolicy = all ([
       check ('identity', true),
       check ('identity', true)
     ]);
 
-    const policy = new Policy ();
-    await policy.configure ();
+    const policy = new TestPolicy ();
+    await policy.configure (blueprint.app);
 
     const result = await policy.runCheck ();
     expect (result).to.be.true;
   });
 
-  it ('should fail since one policy fails', function () {
-    let Policy = all ([
+  it ('should fail since one policy fails', async function () {
+    let TestPolicy = all ([
       check ('identity', true),
       check ('identity', false)
     ]);
 
-    let policy = new Policy ();
+    let policy = new TestPolicy ();
+    await policy.configure (blueprint.app);
 
-    return policy.runCheck ().then (result => {
-      expect (result).to.eql ({
-        failureCode: 'policy_failed',
-        failureMessage: 'The request did not satisfy a required policy.'
-      })
-    });
+    const result = await policy.runCheck ();
+
+    expect (result).to.eql ({
+      code: 'policy_failed',
+      message: 'The request did not satisfy a required policy.'
+    })
   });
 
-  it ('should support nested policies', function () {
-    let Policy = all ([
+  it ('should support nested policies', async function () {
+    let TestPolicy = all ([
       check ('identity', true),
       check ('identity', true),
 
@@ -63,19 +60,21 @@ describe ('lib | policies | all', function () {
       ])
     ]);
 
-    let policy = new Policy ({app: blueprint.app});
+    let policy = new TestPolicy ();
+    await policy.configure (blueprint.app);
 
-    return policy.runCheck ().then (result => {
-      expect (result).to.be.true;
-    });
+    const result = await policy.runCheck ();
+
+    expect (result).to.be.true;
   });
 
   context ('ordered', function () {
     class SimplePolicy extends Policy {
-      constructor (value) {
+      constructor (value, result) {
         super ();
 
         this.value = value;
+        this.result = result;
       }
 
       runCheck (req) {
@@ -84,46 +83,46 @@ describe ('lib | policies | all', function () {
       }
     }
 
-    it ('should execute the policies in order', function () {
-      let policies = [
-        new SimplePolicy ({value: 1}),
-        new SimplePolicy ({value: 2}),
-        new SimplePolicy ({value: 3}),
-        new SimplePolicy ({value: 4})
-      ];
+    it.only ('should execute the policies in order', async function () {
+      const TestPolicy = all.ordered ([
+        new SimplePolicy (1, true),
+        new SimplePolicy (2, true),
+        new SimplePolicy (3, true),
+        new SimplePolicy (4, true)
+      ]);
 
-      const Policy = all.ordered (policies);
-      const policy = new Policy ();
+      const policy = new TestPolicy ();
+      await policy.configure (blueprint.app);
 
       let req = {
         values: []
       };
 
-      return policy.runCheck (req).then (result => {
-        expect (result).to.be.true;
-        expect (req.values).to.eql ([1, 2, 3, 4]);
-      })
+      const result = await policy.runCheck (req);
+
+      expect (result).to.be.true;
+      expect (req.values).to.eql ([1, 2, 3, 4]);
     });
 
-    it ('should fail', function () {
-      let policies = [
+    it ('should fail', async function () {
+      const TestPolicy = all.ordered ([
         new SimplePolicy ({value: 1}),
         new SimplePolicy ({value: 2}),
         new SimplePolicy ({value: 3, result: false}),
         new SimplePolicy ({value: 4})
-      ];
+      ]);
 
-      const Policy = all.ordered (policies);
-      const policy = new Policy ();
+      const policy = new TestPolicy ();
+      await policy.configure (blueprint.app);
 
       let req = {
         values: []
       };
 
-      return policy.runCheck (req).then (result => {
-        expect (result).to.be.false;
-        expect (req.values).to.eql ([1, 2, 3]);
-      })
+      const result = await policy.runCheck (req);
+
+      expect (result).to.be.false;
+      expect (req.values).to.eql ([1, 2, 3]);
     });
   });
 });

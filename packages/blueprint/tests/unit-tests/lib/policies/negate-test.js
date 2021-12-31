@@ -21,32 +21,28 @@ const {
 const check = require ('../../../../lib/policies/check');
 const blueprint = require ('../../../../lib');
 
-describe ('lib | policies | negate', function () {
-  it ('should negate a true to false', function (done) {
-    let policy = check ('!identity', true).createPolicy (blueprint.app);
+describe.only ('lib | policies | negate', function () {
+  it ('should negate a true to false', async function () {
+    const policy = check ('!identity', true);
+    await policy.configure (blueprint.app);
 
-    policy.runCheck ().then (result => {
-      expect (result).to.be.false;
-      return done (null);
-    }).catch (done);
+    const result = await policy.runCheck ();
+    expect (result).to.be.false;
   });
 
-  it ('should negate a false to true', function (done) {
-    let policy = check ('!identity', false).createPolicy (blueprint.app);
+  it ('should negate a false to true', async function () {
+    const policy = check ('!identity', false);
+    await policy.configure (blueprint.app);
 
-    policy.runCheck ().then (result => {
-      expect (result).to.be.true;
-      return done (null);
-    }).catch (done);
+    const result = await policy.runCheck ();
+    expect (result).to.be.true;
   });
 
-  it ('should negate a failure object to true', function (done) {
-    let ck = check ('!identity', {failureCode: 'failed', failureMessage: 'The message'});
-    let policy = ck.createPolicy (blueprint.app);
+  it ('should negate a failure object to true', async function () {
+    const policy = check ('!identity', { code: 'failed', message: 'The message'});
+    await policy.configure (blueprint.app);
 
-    policy.runCheck ().then (result => {
-      expect (result).to.be.true;
-      return done (null);
-    }).catch (done);
+    const result = await policy.runCheck ();
+    expect (result).to.be.true;
   });
 });

@@ -25,18 +25,17 @@ const check = require ('./check');
  * @param app
  */
 module.exports = async function policyFactory (policy, app) {
-  if (isString (policy))
-    return check (policy);
+  if ((policy instanceof Policy)) {
+    // Configure the policy instance for the target application.
+    if (policy.app !== app)
+      await policy.configure (app);
 
-  if ((policy instanceof Policy))
     return policy;
+  }
 
-  // In both cases, we recursively call ourselves just in case we need to
-  // add logic around creating the policy middleware when using an instance
-  // of the policy, which is expected.
+  // Create a new policy instance, and configure it.
+  const obj = isString (policy) ? check (policy) : new policy ();
+  await obj.configure (app);
 
-  const policyObj = new Policy ();
-  await policyObj.configure (app);
-
-  return policyObj;
+  return obj;
 }

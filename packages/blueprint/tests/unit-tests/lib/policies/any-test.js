@@ -16,51 +16,52 @@
 
 const { expect } = require ('chai');
 const blueprint = require ('../../../../lib');
+const { Policy, policies: {any, check} } = blueprint;
 
-const {
-  Policy,
-  policies: {any, check}
-} = blueprint;
-
-describe ('lib | policies | any', function () {
-  it ('should pass any policies', async function () {
-    let Policy = any ([
+describe.only ('lib | policies | any', function () {
+  it ('should pass because all policies pass', async function () {
+    const TestPolicy = any ([
       check ('identity', true),
       check ('identity', true)
     ]);
 
-    const policy = new Policy ();
+    const policy = new TestPolicy ();
+    await policy.configure (blueprint.app);
     const result = await policy.runCheck ();
 
     expect (result).to.be.true;
   });
 
-  it ('should fail since one policy fails', async function () {
-    let Policy = any ([
+  it ('should pass because at least one policy passes', async function () {
+    const TestPolicy = any ([
       check ('identity', true),
       check ('identity', false)
     ]);
 
-    const policy = new Policy ();
+    const policy = new TestPolicy ();
+    await policy.configure (blueprint.app);
+
     const result = await policy.runCheck ();
 
     expect (result).to.be.true;
   });
 
   it ('should fail since all policies fail', async function () {
-    let Policy = any ([
+    const TestPolicy = any ([
       check ('identity', false),
       check ('identity', false)
     ]);
 
-    const policy = new Policy ();
+    const policy = new TestPolicy ();
+    await policy.configure (blueprint.app);
+
     const result = await policy.runCheck ();
 
     expect (result).to.be.false;
   });
 
   it ('should support nested policies', async function () {
-    let Policy = any ([
+    const TestPolicy = any ([
       check ('identity', false),
       check ('identity', false),
 
@@ -70,13 +71,15 @@ describe ('lib | policies | any', function () {
       ])
     ]);
 
-    const policy = new Policy ();
+    const policy = new TestPolicy ();
+    await policy.configure (blueprint.app);
+
     const result = await policy.runCheck ();
 
     expect (result).to.be.true;
   });
 
-  context ('ordered', function () {
+  context.only ('ordered', function () {
     class SimplePolicy extends Policy {
       constructor (value, result) {
         super ();
@@ -92,7 +95,7 @@ describe ('lib | policies | any', function () {
       }
     }
 
-    it ('should evaluate the policies in order', function () {
+    it ('should evaluate the policies in order', async function () {
       let policies = [
         new SimplePolicy (1, false),
         new SimplePolicy (2, false),
@@ -102,37 +105,39 @@ describe ('lib | policies | any', function () {
 
       const Policy = any.ordered (policies);
       const policy = new Policy ();
+      await policy.configure (blueprint.app);
+
 
       let req = {
         values: []
       };
 
-      return policy.runCheck (req).then (result => {
-        expect (result).to.be.true;
-        expect (req.values).to.eql ([1, 2, 3]);
-      })
+      const result = await policy.runCheck (req);
+
+      expect (result).to.be.true;
+      expect (req.values).to.eql ([1, 2, 3]);
     });
 
-    it ('should fail', function () {
+    it ('should fail', async function () {
       let policies = [
-        new SimplePolicy ({value: 1, result: false}),
-        new SimplePolicy ({value: 2, result: false}),
-        new SimplePolicy ({value: 3, result: false}),
-        new SimplePolicy ({value: 4, result: false}),
+        new SimplePolicy (1, false),
+        new SimplePolicy (2, false),
+        new SimplePolicy (3, false),
+        new SimplePolicy (4, false),
       ];
 
       const Policy = any.ordered (policies);
       const policy = new Policy ();
+      await policy.configure (blueprint.app);
 
       let req = {
         values: []
       };
 
-      return policy.runCheck (req).then (result => {
-        expect (result).to.be.false;
-        expect (req.values).to.eql ([1, 2, 3, 4]);
-      })
-    });
+      const result = await policy.runCheck (req);
 
+      expect (result).to.be.false;
+      expect (req.values).to.eql ([1, 2, 3, 4]);
+    });
   });
 });
