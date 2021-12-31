@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
+/**
+ * Validate the action. This middleware calls the validate() method
+ * on an action.
+ *
+ * @param action
+ */
 module.exports = function (action) {
-  return function __blueprint_action_validate (req, res, next) {
-    Promise.resolve (action.validate (req))
-      .then (() => next ())
-      .catch (next);
+  return async function __blueprint_action_validate (req, res, next) {
+    try {
+      await action.validate (req);
+      return next ();
+    }
+    catch (err) {
+      return next (err);
+    }
   }
 };
