@@ -22,7 +22,7 @@ const request  = require ('supertest');
 const express  = require ('express');
 const path     = require ('path');
 
-describe ('lib | ArrayUploadAction', function () {
+describe.only ('lib | ArrayUploadAction', function () {
   describe ('constructor', function () {
     it ('should create an ArrayUploadAction object', function () {
       let action = new ArrayUploadAction ({

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const blueprint = require ('../../../lib');
 const SingleFileUploadAction = require ('../../../lib/single-file-upload-action');
 const executeAction = require ('../../../lib/middleware/execute-action');
 
@@ -25,18 +26,19 @@ const path     = require ('path');
 describe ('lib | SingleFileUploadAction', function () {
   describe ('constructor', function () {
     it ('should create an SingleFileUploadAction object', function () {
-      let action = new SingleFileUploadAction ({
+      const action = new SingleFileUploadAction ({
         uploadPath: './temp',
         name: 'avatar'
       });
 
+      action.configure ({ app: blueprint.app } );
       expect (action).to.have.property ('name', 'avatar');
     });
   });
 
   describe ('execute', function () {
-    it ('should upload a file', function () {
-      let action = SingleFileUploadAction.create ({
+    it ('should upload a file', async function () {
+      const action = SingleFileUploadAction.create ({
         uploadPath: './temp',
         name: 'avatar',
         uploadCompleteCalled: false,
@@ -59,19 +61,20 @@ describe ('lib | SingleFileUploadAction', function () {
         }
       });
 
-      let app = express ();
+      action.configure ({ app: blueprint.app } );
+
+      const app = express ();
       app.post ('/profile', executeAction (action));
 
       const avatarPng = path.resolve (__dirname, '../../files/avatar.png');
 
-      return request (app)
+      await request (app)
         .post ('/profile')
         .field ('name', 'James Hill')
         .attach ('avatar', avatarPng)
-        .expect (200, {comment: 'The upload is complete!'})
-        .then (() => {
-          expect (action).to.have.property ('uploadCompleteCalled').to.be.true;
-        });
+        .expect (200, {comment: 'The upload is complete!'});
+
+      expect (action).to.have.property ('uploadCompleteCalled').to.be.true;
     });
   });
 });

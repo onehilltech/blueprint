@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const { BO }  = require ('base-object');
 const assert  = require ('assert');
 const debug   = require ('debug')('blueprint:RouterBuilder');
 const express = require ('express');
@@ -121,7 +120,7 @@ module.exports = class RouterBuilder {
    */
   addRouter (route, router) {
     if (isPlainObject (router)) {
-      this.addSpecification (router);
+      forOwn (router, (value, key) => this.addRouter (`${route}${key}/`, value));
     }
     else if (isRouter (router)) {
       this._routers.push ({ path: route, router });
@@ -144,10 +143,11 @@ module.exports = class RouterBuilder {
       await this._processRouterSpecification (this.basePath, spec);
 
     // Add the routes to the mix.
-    for await (const { path, router } of this._routers) {
+    await Promise.all (this._routers.map (async (item) => {
+      const { router, path } = item;
       const result = await router.build (this.app);
       this._router.use (path, result);
-    }
+    }));
 
     return this._router;
   }

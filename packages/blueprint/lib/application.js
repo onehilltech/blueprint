@@ -128,8 +128,8 @@ module.exports = BO.extend (Events, {
       // an application module.
       .then (() => this._appModule.hasViews ? this._server.importViews (this._appModule.viewsPath) : null)
       .then (() => {
-        const builder = new RouterBuilder ({app: this});
-        const {routers} = this.resources;
+        const { routers } = this.resources;
+        const builder = new RouterBuilder (this);
 
         return builder.addRouter ('/', routers).build ();
       })

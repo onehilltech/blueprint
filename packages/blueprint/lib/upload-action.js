@@ -16,11 +16,11 @@
 
 const multer = require ('multer');
 const Action = require ('./action');
-const framework = require ('./-framework');
 const { resolve } = require ('path');
-const { merge, get } = require ('lodash');
+const { merge } = require ('lodash');
 const { computed } = require ('base-object');
 const { ensureDirSync } = require ('fs-extra');
+const { fromCallback } = require ('bluebird');
 
 /**
  * @class UploadAction
@@ -36,20 +36,24 @@ module.exports = Action.extend ({
   /// The other options for multer.
   uploadOptions: null,
 
+  // The middleware for completing the upload.
   _middleware: null,
 
   storageType: computed ({
     get () { return this._options.dest ? 'disk' : 'memory'; }
   }),
 
-  init () {
-    this._super.call (this, ...arguments);
+  /**
+   * @override
+   */
+  async configure (controller) {
+    await this._super.call (this, ...arguments);
 
     if (!this.uploadPath)
-      this.uploadPath = resolve (framework.app.tempPath, 'uploads');
+      this.uploadPath = resolve (this.app.tempPath, 'uploads');
 
-    let baseOptions = {};
-    let storage = get (this.uploadOptions, 'storage');
+    const baseOptions = {};
+    const { storage } = this.uploadOptions || {};
 
     if (!storage) {
       // Configure the upload path, and make sure the directory exists.
@@ -67,22 +71,9 @@ module.exports = Action.extend ({
    * @param req     The request object.
    * @param res     The response object.
    */
-  execute (req, res) {
-    return this._uploadFile (req, res).then (() => this.onUploadComplete (req, res));
-  },
-
-  /**
-   * Upload the file.
-   *
-   * @param req     The request object.
-   * @param res     The response object.
-   */
-  _uploadFile (req, res) {
-    return new Promise ((resolve,reject) => {
-      this._middleware (req, res, err => {
-        return !err ? resolve () : reject (err);
-      })
-    });
+  async execute (req, res) {
+    await fromCallback (callback => this._middleware (req, res, callback));
+    return this.onUploadComplete (req, res);
   },
 
   /**
@@ -92,7 +83,7 @@ module.exports = Action.extend ({
    * @param res     The response object.
    * @returns {null}
    */
-  onUploadComplete (req, res) {
+  async onUploadComplete (req, res) {
     return null;
   }
 });
