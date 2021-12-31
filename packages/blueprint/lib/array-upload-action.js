@@ -11,10 +11,8 @@ module.exports = UploadAction.extend ({
   /// The name of the field that will contain the uploaded files.
   name: null,
 
-  init () {
-    this._super.call (this, ...arguments);
-
-    assert (!!this.name, "You must define the 'name' property.");
+  async configure () {
+    await this._super.call (this, ...arguments);
 
     this._middleware = this._upload.array (this.name);
   }

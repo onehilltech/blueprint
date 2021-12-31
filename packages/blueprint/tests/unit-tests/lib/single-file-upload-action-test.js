@@ -25,13 +25,13 @@ const path     = require ('path');
 
 describe ('lib | SingleFileUploadAction', function () {
   describe ('constructor', function () {
-    it ('should create an SingleFileUploadAction object', function () {
+    it ('should create an SingleFileUploadAction object', async function () {
       const action = new SingleFileUploadAction ({
         uploadPath: './temp',
         name: 'avatar'
       });
 
-      action.configure ({ app: blueprint.app } );
+      await action.configure ({ app: blueprint.app } );
       expect (action).to.have.property ('name', 'avatar');
     });
   });
@@ -61,7 +61,7 @@ describe ('lib | SingleFileUploadAction', function () {
         }
       });
 
-      action.configure ({ app: blueprint.app } );
+      await action.configure ({ app: blueprint.app } );
 
       const app = express ();
       app.post ('/profile', executeAction (action));

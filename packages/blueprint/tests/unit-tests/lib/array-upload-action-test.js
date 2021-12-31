@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const blueprint = require ('../../../lib');
 const ArrayUploadAction = require ('../../../lib/array-upload-action');
 const executeAction = require ('../../../lib/middleware/execute-action');
 
@@ -22,21 +23,23 @@ const request  = require ('supertest');
 const express  = require ('express');
 const path     = require ('path');
 
-describe.only ('lib | ArrayUploadAction', function () {
+describe ('lib | ArrayUploadAction', function () {
   describe ('constructor', function () {
-    it ('should create an ArrayUploadAction object', function () {
-      let action = new ArrayUploadAction ({
+    it ('should create an ArrayUploadAction object', async function () {
+      const action = new ArrayUploadAction ({
         uploadPath: './temp',
         name: 'avatar'
       });
+
+      await action.configure ({ app: blueprint.app } );
 
       expect (action).to.have.property ('name', 'avatar');
     });
   });
 
   describe ('execute', function () {
-    it ('should upload an array of files', function () {
-      let action = ArrayUploadAction.create ({
+    it ('should upload an array of files', async function () {
+      const action = ArrayUploadAction.create ({
         uploadPath: './temp',
         name: 'avatar',
         uploadCompleteCalled: false,
@@ -57,20 +60,21 @@ describe.only ('lib | ArrayUploadAction', function () {
         }
       });
 
-      let app = express ();
+      await action.configure ({ app: blueprint.app } );
+
+      const app = express ();
       app.post ('/profile', executeAction (action));
 
       const avatarPng = path.resolve ('./tests/files/avatar.png');
 
-      return request (app)
+      await request (app)
         .post ('/profile')
         .field ('name', 'James Hill')
         .attach ('avatar', avatarPng)
         .attach ('avatar', avatarPng)
-        .expect (200, {comment: 'The upload is complete!'})
-        .then (() => {
-          expect (action).to.have.property ('uploadCompleteCalled').to.be.true;
-        });
+        .expect (200, {comment: 'The upload is complete!'});
+
+      expect (action).to.have.property ('uploadCompleteCalled').to.be.true;
     });
   });
 });
