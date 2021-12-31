@@ -24,12 +24,6 @@ const assert = require ('assert');
  * of the request it is processing.
  */
 module.exports = Action.extend ({
-  init () {
-    this._super.call (this, ...arguments);
-
-    assert (!!this.view, "The 'view(req)' method must be defined by the subclass.");
-  },
-
   /**
    * Get the view template for the action. The view is used to render a
    * response to the caller.
@@ -37,7 +31,9 @@ module.exports = Action.extend ({
    * @params req        The request object
    * @returns {String|Promise}
    */
-  view: null,
+  async view (req) {
+    throw new Error ('You must override the view() method.');
+  },
 
   /**
    * Get the data model used to populate the template.
@@ -45,7 +41,7 @@ module.exports = Action.extend ({
    * @params req        The request object
    * @returns Promise
    */
-  model (req) {
+  async model (req) {
     return null;
   },
 
@@ -55,15 +51,11 @@ module.exports = Action.extend ({
    * @param res       The response object
    * @returns {Promise}
    */
-  execute (req, res) {
+  async execute (req, res) {
     // Get the new and the model from the subclass.
-    let vp = this.view (req);
-    let mp = this.model (req);
+    const [view, model] = await Promise.all ([ this.view (req), this.model (req) ]);
 
-    return Promise.all ([vp,mp]).then (results => {
-      let [view, model] = results;
-
-      res.render (view, model);
-    });
+    // Render the view using the provided model.
+    return res.render (view, model);
   }
 });

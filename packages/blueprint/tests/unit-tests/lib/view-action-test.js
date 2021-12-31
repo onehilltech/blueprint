@@ -5,16 +5,12 @@ const ViewAction = require ('../../../lib/view-action')
 describe ('lib | ViewAction', function () {
   context ('create()', function () {
     it ('should create an ViewAction', function () {
-      let action = new ViewAction ({view () { return 'helloworld.pug'; }});
+      const action = new ViewAction ({ view () { return 'helloworld.pug'; }});
       expect (action).to.be.instanceof (ViewAction);
     });
   });
 
   context ('execute(req, res)', function () {
-    it ('should throw an Error if missing view()', function () {
-      expect (() => { new ViewAction () }).to.throw (Error);
-    });
-
     it ('should send a response from a view template', function () {
       let req = {};
 

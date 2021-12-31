@@ -45,6 +45,12 @@ module.exports = BO.extend ({
    */
   validate: null,
 
+  /**
+   * Configure the action.
+   *
+   * @param controller
+   * @returns {Promise<void>}
+   */
   async configure (controller) {
     this.controller = controller;
   },

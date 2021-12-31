@@ -541,7 +541,7 @@ module.exports = class RouterBuilder {
 
       if (!plainObject) {
         // Create the action object, and configure it.
-        result = new result ();
+        result = result.create ();
 
         if (isFunction (result.configure))
           await result.configure (controllerAction.obj);
