@@ -46,7 +46,7 @@ module.exports = function (policy) {
         return next (new ForbiddenError (code, message));
       }
       else {
-        return next (new InternalServerError ('policy_error', 'Unexpected error occurred while running policy checks.'));
+        return next (new InternalServerError ('policy_error', 'Unexpected error occurred while running policy check.'));
       }
     }
     catch (err) {
