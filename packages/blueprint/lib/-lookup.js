@@ -17,7 +17,14 @@
 const { plural } = require('pluralize');
 const { get, isArray, isString } = require ('lodash');
 
-module.exports = function (resources, component) {
+/**
+ * Lookup a component in the set of resources.
+ *
+ * @param resources
+ * @param component
+ * @returns {*}
+ */
+module.exports = function lookup (resources, component) {
   let type, name;
 
   if (isString (component)) {
