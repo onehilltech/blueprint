@@ -172,8 +172,8 @@ describe ('lib | RouterBuilder', function () {
           .expect (200, {result: 'getActionWithValidate'});
       });
 
-      it ('should not build router with missing policy', async function () {
-        expect (() => {
+      it ('should not build router with missing policy', function () {
+        async function bad () {
           const r1 = {
             '/r1': {
               policy: policies.check ('missing'),
@@ -182,8 +182,10 @@ describe ('lib | RouterBuilder', function () {
           };
 
           const builder = new RouterBuilder (blueprint.app);
-          return builder.addSpecification (r1).build ();
-        }).to.throw (Error);
+          await builder.addSpecification (r1).build ();
+        }
+
+        expect (bad ()).to.be.rejectedWith (Error);
       });
     });
 
@@ -200,8 +202,7 @@ describe ('lib | RouterBuilder', function () {
 
         const builder = new RouterBuilder (blueprint.app);
         const router = await builder.addSpecification (users).build ();
-
-        let app = express ();
+        const app = express ();
         app.use (router);
 
         let requests = [
