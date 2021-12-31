@@ -20,8 +20,6 @@ const debug   = require ('debug')('blueprint:RouterBuilder');
 const express = require ('express');
 const { checkSchema } = require ('express-validator/check');
 const path    = require ('path');
-const Router  = require ('./router');
-const util = require ('util');
 
 const {
   forOwn,
@@ -42,8 +40,6 @@ const {
   executeAction,
   handleValidationResult,
   render,
-  legacySanitizer,
-  legacyValidator,
   actionValidator
 } = require ('./middleware');
 
@@ -87,16 +83,13 @@ class MethodCall {
   }
 }
 
+/**
+ * @class RouterBuilder
+ *
+ * Build express routers from router specifications.
+ */
 module.exports = class RouterBuilder {
   basePath = '/';
-
-  _router = null;
-
-  validators = null;
-
-  sanitizers = null;
-
-  app = null
 
   constructor (app) {
     this.app = app;
