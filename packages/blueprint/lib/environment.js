@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-const {BO} = require ('base-object');
-
-module.exports = BO.create ({
+module.exports = {
   env: process.env.NODE_ENV || 'development'
-});
+};
+
