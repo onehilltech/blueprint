@@ -209,8 +209,7 @@ const Server = BO.extend ({
   _configureValidatorsAndSanitizers () {
     // Load the validators and sanitizers.
     const validator = require ('express-validator');
-
-    const {validators,sanitizers} = this.app.resources;
+    const { validators, sanitizers } = this.app.resources;
     const config = merge ({}, {customValidators: validators, customSanitizers: sanitizers});
 
     this._express.use (validator (config));
