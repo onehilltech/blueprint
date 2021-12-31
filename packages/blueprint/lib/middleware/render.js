@@ -24,10 +24,17 @@ const { fromCallback } = require ('bluebird');
  * @returns {Function}
  */
 module.exports = function render (view) {
-  return function __blueprint_render (req, res, next) {
-    return fromCallback (callback => res.render (view, callback))
-      .then (html => res.status (200).send (html))
-      .then (() => next ())
-      .catch (next);
+  return async function __blueprint_render (req, res, next) {
+    try {
+      // Render the view, and send the result to the client. We are going to stop
+      // the req-res callback cycle here. This will prevent the server from trying
+      // to update a complete request.
+
+      const html = await fromCallback (callback => res.render (view, callback));
+      res.status (200).send (html);
+    }
+    catch (err) {
+      return next (err);
+    }
   };
 };
