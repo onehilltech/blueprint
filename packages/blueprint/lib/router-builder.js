@@ -515,7 +515,7 @@ module.exports = class RouterBuilder {
     if (opts.options)
       params.options = opts.options;
 
-    const result = controllerAction.invoke (params);
+    let result = controllerAction.invoke (params);
 
     if (isFunction (result) && (result.length === 2 || result.length === 3)) {
       // Push the function/array onto the middleware stack. If there is a policy,
