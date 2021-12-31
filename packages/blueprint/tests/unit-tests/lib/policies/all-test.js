@@ -18,7 +18,7 @@ const { expect } = require ('chai');
 const blueprint = require ('../../../../lib');
 const { Policy, policies: { all, check } } = blueprint;
 
-describe.only ('lib | policies | all', function () {
+describe ('lib | policies | all', function () {
   it ('should pass all policies', async function () {
     const TestPolicy = all ([
       check ('identity', true),

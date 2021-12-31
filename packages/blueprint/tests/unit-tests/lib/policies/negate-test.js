@@ -21,7 +21,7 @@ const {
 const check = require ('../../../../lib/policies/check');
 const blueprint = require ('../../../../lib');
 
-describe.only ('lib | policies | negate', function () {
+describe ('lib | policies | negate', function () {
   it ('should negate a true to false', async function () {
     const policy = check ('!identity', true);
     await policy.configure (blueprint.app);

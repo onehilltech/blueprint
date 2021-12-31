@@ -18,7 +18,7 @@ const { expect } = require ('chai');
 const blueprint = require ('../../../../lib');
 const { Policy, policies: {any, check} } = blueprint;
 
-describe.only ('lib | policies | any', function () {
+describe ('lib | policies | any', function () {
   it ('should pass because all policies pass', async function () {
     const TestPolicy = any ([
       check ('identity', true),
@@ -79,7 +79,7 @@ describe.only ('lib | policies | any', function () {
     expect (result).to.be.true;
   });
 
-  context.only ('ordered', function () {
+  context ('ordered', function () {
     class SimplePolicy extends Policy {
       constructor (value, result) {
         super ();

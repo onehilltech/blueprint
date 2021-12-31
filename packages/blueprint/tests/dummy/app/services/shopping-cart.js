@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-const Service = require ('../../../../lib/service');
+const { Service } = require ('../../../../lib');
 
-module.exports = Service.extend ({
-  init () {
-    this._super.call (this, ...arguments);
+module.exports = class ShoppingCartService extends Service {
+  constructor () {
+    super ();
 
     this.items = [];
   }
-});
+}
