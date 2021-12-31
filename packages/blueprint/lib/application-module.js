@@ -96,7 +96,7 @@ module.exports = BO.extend ({
           resolve: this._instantiateComponent.bind (this)
         }
       },
-      { name: 'listeners', loader: new ListenerLoader ({app: this.app}) },
+      { name: 'listeners', loader: new ListenerLoader (this.app) },
       {
         name: 'controllers',
         opts: {

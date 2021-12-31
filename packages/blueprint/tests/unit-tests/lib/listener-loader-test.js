@@ -26,7 +26,7 @@ describe ('lib | ListenerLoader', function () {
     it ('should load listeners', function () {
       const dirname = path.resolve (__dirname, '../../dummy/app/listeners');
       let messenger = BO.create (Events);
-      let loader = new ListenerLoader ({app: messenger});
+      let loader = new ListenerLoader (messenger);
 
       return loader.load ({dirname}).then (results => {
         expect (results).to.have.property ('blueprint.app.init').that.has.keys (['echo','simple']);

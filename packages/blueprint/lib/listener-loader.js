@@ -35,86 +35,94 @@ const SimpleListener = require ('./messaging/simple-listener');
  *
  * Loader class designed for loading application listeners.
  */
-module.exports = Loader.extend ({
-  /// The target messenger where the listeners are loaded. The messenger
-  /// must support the following interface/methods:
-  ///
-  /// * emit
-  /// * on
-  /// * once
-  ///
-  app: null,
+module.exports = class ListenerLoader extends Loader {
+  constructor (app) {
+    super ();
 
-  init () {
-    this._super.call (this, ...arguments);
+    this.app = app;
+  }
 
-    assert (!!this.app, "You must define the 'app' property");
-  },
-
-  load (opts) {
-    let {dirname} = opts;
+  /**
+   * Load the listeners into memory.
+   *
+   * @param opts
+   * @returns {Promise<*>}
+   */
+  async load (opts) {
+    const { dirname } = opts;
 
     assert (!!dirname, 'Your options must have a `dirname` property');
 
-    return stat (dirname).then (stats => {
-      return stats.isDirectory () ? readdir (dirname) : {};
-    }).then (eventNames => {
-      // The name of each directory represents the name of an event. Each file
-      // inside the directory is a listener for the event.
+    try {
+      // Determine if the path is a directory. If it is a directory, then
+      // we need to read the names.
 
-      let promises = [];
-      let listeners = {};
+      const stats = await stat (dirname);
 
-      // Load the listeners for each event in parallel.
-
-      eventNames.forEach (eventName => {
-        const eventPath = path.join (dirname, eventName);
-        promises.push (this._loadListenersFromPath (eventPath));
-      });
-
-      // Merge the loaded listeners into a single object.
-
-      return Promise.all (promises).then (results => {
-        eventNames.forEach ((eventName, i) => {
-          let loaded = results[i];
-          listeners[eventName] = loaded;
-
-          forOwn (loaded, (listener, name) => {
-            listener.name = name;
-
-            this.app.on (eventName, listener);
-          })
-        });
-
-        return listeners;
-      });
-    }).catch (err => {
-      if (err.code && err.code === 'ENOENT')
-        return {};
-
-      return Promise.reject (err);
-    });
-  },
-
-  _loadListenersFromPath (eventPath) {
-    const app = this.app;
-
-    return stat (eventPath).then (stats => {
       if (!stats.isDirectory ())
         return {};
 
-      let loader = new Loader ();
+      // The name of each directory represents the name of an event. Each file
+      // inside the directory is a listener for the event.
 
-      return loader.load ({
-        dirname: eventPath,
-        recursive: false,
-        resolve (listener) {
-          // The listener exported from this module is a Listener class. We need to
-          // instantiate the type and store it. Otherwise, we are working with a legacy
-          // listener and need to wrap it in a SimpleListener object.
-          return listener.prototype && !!listener.prototype.handleEvent ? new listener ({app}) : new SimpleListener ({app, listener});
-        }
-      });
+      const eventNames = await readdir (dirname);
+
+      // Load the listeners for each event in parallel.
+      const results = await Promise.all (
+        eventNames.map (eventName => {
+          const eventPath = path.join (dirname, eventName);
+          return this._loadListenersFromPath (eventPath);
+        }));
+
+      // Merge the loaded listeners into a single object. In the process, register
+      // the listener for the target event.
+
+      return eventNames.reduce ((listeners, eventName, i) => {
+        // Map the results to the listener hash, and then catch the listeners
+        // so we can use them later.
+
+        const loaded = listeners[eventName] = results[i];
+
+        forOwn (loaded, (listener, name) => {
+          // Let's name the listener for debugging purposes.
+          if (!listener.name)
+            listener.name = name;
+
+          // Listen for events.
+          this.app.on (eventName, listener);
+        });
+
+        return listeners;
+      }, {});
+    }
+    catch (err) {
+      if (err.code && err.code === 'ENOENT')
+        return {};
+
+      throw err;
+    }
+  }
+
+  /**
+   * Helper method to load listeners from a given path.
+   *
+   * @param eventPath
+   * @private
+   */
+  async _loadListenersFromPath (eventPath) {
+    const app = this.app;
+
+    return super.load ({
+      dirname: eventPath,
+      recursive: false,
+      resolve (listener) {
+        // The listener exported from this module is a Listener class. We need to
+        // instantiate the type and store it. Otherwise, we are working with a legacy
+        // listener and need to wrap it in a SimpleListener object.
+        return listener.prototype && !!listener.prototype.handleEvent ?
+          new listener ({ app }) :
+          new SimpleListener ({ app, listener });
+      }
     });
   }
-});
+}
