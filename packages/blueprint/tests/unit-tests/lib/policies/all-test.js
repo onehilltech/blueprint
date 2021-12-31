@@ -43,10 +43,7 @@ describe.only ('lib | policies | all', function () {
 
     const result = await policy.runCheck ();
 
-    expect (result).to.eql ({
-      code: 'policy_failed',
-      message: 'The request did not satisfy a required policy.'
-    })
+    expect (result).to.be.false;
   });
 
   it ('should support nested policies', async function () {
@@ -83,7 +80,7 @@ describe.only ('lib | policies | all', function () {
       }
     }
 
-    it.only ('should execute the policies in order', async function () {
+    it ('should execute the policies in order', async function () {
       const TestPolicy = all.ordered ([
         new SimplePolicy (1, true),
         new SimplePolicy (2, true),
@@ -106,10 +103,10 @@ describe.only ('lib | policies | all', function () {
 
     it ('should fail', async function () {
       const TestPolicy = all.ordered ([
-        new SimplePolicy ({value: 1}),
-        new SimplePolicy ({value: 2}),
-        new SimplePolicy ({value: 3, result: false}),
-        new SimplePolicy ({value: 4})
+        new SimplePolicy (1, true),
+        new SimplePolicy (2, true),
+        new SimplePolicy (3, false),
+        new SimplePolicy (4, true)
       ]);
 
       const policy = new TestPolicy ();

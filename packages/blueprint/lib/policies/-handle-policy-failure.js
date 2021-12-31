@@ -22,23 +22,14 @@
  * @returns {{code, message}}
  */
 
-const { isPlainObject } = require ('lodash');
+const { isBoolean } = require ('lodash');
 
 module.exports = function handlePolicyFailure (result, policy) {
-  let code, message;
+  if (isBoolean (result))
+    return result;
 
-  if (isPlainObject (result)) {
-    // Try and get the code and message from the result object.
-    code = result.code;
-    message = result.message;
-  }
-
-  // Fallback to the code and message in the policy instance.
-  if (!code)
-    code = policy.code;
-
-  if (!message)
-    message = policy.message;
-
-  return { code, message };
+  return {
+    code: result.code || policy.code,
+    message: result.message || policy.message
+  };
 }
