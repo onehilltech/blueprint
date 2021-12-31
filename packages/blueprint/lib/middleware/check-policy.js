@@ -16,10 +16,7 @@
 
 const InternalServerError = require ('../internal-server-error');
 const ForbiddenError = require ('../forbidden-error');
-
-const {
-  isObjectLike,
-} = require ('lodash');
+const { isObjectLike } = require ('lodash');
 
 /**
  * Factory method for creating a policy middleware for a request.
@@ -28,29 +25,32 @@ const {
  * @returns {Function}
  */
 module.exports = function (policy) {
-  return function __blueprint_check_policy (req, res, next) {
-    let result = policy.runCheck (req);
+  return async function __blueprint_check_policy (req, res, next) {
+    try {
+      const result = await policy.runCheck (req);
 
-    return Promise.resolve (result).then (result => {
       if (result === true)
         return next ();
 
       if (result === false) {
         // The policy result was a boolean value. This means that we are to use
         // the default failure code and message as the policy error.
-        const {failureCode, failureMessage} = policy;
-        return next (new ForbiddenError (failureCode, failureMessage));
+        const { code, message } = policy;
+        return next (new ForbiddenError (code, message));
       }
       else if (isObjectLike (result)) {
         // The result is an object. This means we are to use the result
         // as-is for the policy error.
-        const {failureCode, failureMessage} = result;
-        return next (new ForbiddenError (failureCode, failureMessage));
+        const {code = policy.code, message = policy.message} = result;
+
+        return next (new ForbiddenError (code, message));
       }
       else {
-        console.error (`Policy ${policy.name} returned a bad result.`);
-        return next (new InternalServerError ('bad_result', 'The policy returned a bad result.'));
+        return next (new InternalServerError ('policy_error', 'Unexpected error occurred while running policy checks.'));
       }
-    }).catch (next);
+    }
+    catch (err) {
+      return next (err);
+    }
   };
 };
