@@ -20,6 +20,7 @@
  *
  * @param action
  */
+
 module.exports = function (action) {
   return async function __blueprint_action_validate (req, res, next) {
     try {
