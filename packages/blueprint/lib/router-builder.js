@@ -135,15 +135,13 @@ module.exports = class RouterBuilder {
 
   /**
    * Build the router.
-   *
-   * @returns {Promise<null>}
    */
   async build () {
     this._router = express.Router ();
 
     // Add each specification and pre-built router to the router.
     for await (const spec of this._specs)
-      this._processRouterSpecification (this.basePath, spec);
+      await this._processRouterSpecification (this.basePath, spec);
 
     // Add the routes to the mix.
     for await (const router of this._routers) {
