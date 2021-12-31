@@ -1,8 +1,5 @@
 const HttpError = require ('../http-error');
-
-const {
-  validationResult
-} = require ('express-validator/check');
+const { validationResult } = require ('express-validator/check');
 
 /**
  * Handle the validation results.
@@ -18,5 +15,6 @@ module.exports = function (req, res, next) {
   if (errors.isEmpty ())
     return next ();
 
-  return next (new HttpError (400, 'validation_failed', 'The request validation failed.', {validation: errors.mapped ()}));
+  const validation = errors.mapped ();
+  return next (new HttpError (400, 'validation_failed', 'The request validation failed.', { validation }));
 };
