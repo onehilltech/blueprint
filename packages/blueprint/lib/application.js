@@ -305,7 +305,9 @@ module.exports = BO.extend (Events, {
     assert (!!router, `The router {${routerName}} does not exist.`);
 
     const builder = new RouterBuilder ({app: this});
-    return builder.addRouter ('/', router).build ();
+    builder.addRouter ('/', router);
+
+    return builder.build ();
   },
 
   /**

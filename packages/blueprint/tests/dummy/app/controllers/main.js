@@ -67,27 +67,6 @@ module.exports = Controller.extend ({
     ]
   },
 
-  getLegacyObjectWithValidateFunction () {
-    return {
-      validate (req, callback) { callback (null); },
-      sanitize (req, callback) { callback (null); },
-      execute (req, res, next) {
-        res.status (200).json ({result: 'getLegacyObjectWithValidateFunction'});
-        next ();
-      }
-    }
-  },
-
-  getLegacyObjectWithValidateSchema () {
-    return {
-      validate: {},
-      execute (req, res, next) {
-        res.status (200).json ({result: 'getLegacyObjectWithValidateSchema'});
-        next ();
-      }
-    }
-  },
-
   getActionWithSchema () {
     return Action.extend ({
       schema: {
@@ -120,9 +99,8 @@ module.exports = Controller.extend ({
           .normalizeEmail()
       ],
 
-      execute (req, res, next) {
+      execute (req, res) {
         res.status (200).json ({result: 'getActionWithValidate'});
-        next ();
       }
     });
   },

@@ -25,8 +25,8 @@ const NotFoundError  = require ('./not-found-error');
  * @class NotFound
  */
 const NotFound = Action.extend ({
-  execute () {
-    return Promise.reject (new NotFoundError ('not_found', 'Not found'));
+  async execute () {
+    throw new NotFoundError ('not_found', 'Not found');
   }
 });
 
@@ -42,21 +42,31 @@ const NotFound = Action.extend ({
  * = delete
  */
 module.exports = Controller.extend ({
+  init (options) {
+    this._super.call (this, ...arguments);
+
+    assert (!!this.name, 'You must define the name of the resource.');
+
+    if (!this.id)
+      this.id = `${this.name}Id`;
+  },
+
   /// Name of the resource managed by the resource controller.
   name: null,
+
+  /// Id for the resource. If the id is not provided, it is generated from
+  /// the name of the resource.
+  id: null,
 
   /// The namespace for the resource controller. The namespace is used to
   /// assist with scoping the resource and preventing collisions with like
   /// named resources.
   namespace: null,
 
-  /// Id for the resource. If the id is not provided, it is generated from
-  /// the name of the resource.
-  id: null,
-
+  /// List the properties that can be merged.
   mergedProperties: ['_actions'],
 
-  _actions: {
+  _actions: Object.freeze ({
     // CRUD operations
     create: {verb: 'post', method: 'create'},
     getAll: {verb: 'get', method: 'getAll'},
@@ -66,24 +76,15 @@ module.exports = Controller.extend ({
 
     // support operations
     count: {verb: 'get', path: '/count', method: 'count'}
-  },
+  }),
 
   resourceId: computed ({
-    get () { return this.id; }
+    get () { return this.id }
   }),
 
   actions: computed ({
     get () { return this._actions; }
   }),
-
-  init () {
-    this._super.call (this, ...arguments);
-
-    assert (!!this.name, 'You must provide a \'name\' property.');
-
-    if (!this.id)
-      this.id = `${this.name}Id`;
-  },
 
   create () {
     return NotFound;

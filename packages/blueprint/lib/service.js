@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-const { events } = require ('./messaging');
+const { BaseObject } = require ('base-object');
+const { Events } = require ('./messaging');
 
 /**
  * @class Service
@@ -22,7 +23,7 @@ const { events } = require ('./messaging');
  * The service represents an abstraction that runs in the background while the
  * application is live.
  */
-module.exports = events.decorate (class Service {
+module.exports = BaseObject.extend (Events, {
   /**
    * Configure the service.
    *
@@ -30,14 +31,14 @@ module.exports = events.decorate (class Service {
    */
   async configure (app) {
     this.app = app;
-  }
+  },
 
   /**
    * Start the service.
    */
   async start () {
 
-  }
+  },
 
   /**
    * Destroy the service.

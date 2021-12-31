@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-const { events } = require ('./messaging');
+const { BaseObject } = require ('base-object');
 
 /**
  * @class Controller
  *
  * Base class for all controllers.
  */
-module.exports = events.decorate (class Controller {
-  constructor () {
-    this.app = null;
-  }
+module.exports = BaseObject.extend ({
+  /// The application the controller is bound to.
+  app: null,
 
   /**
    * Configure the controller for the app.

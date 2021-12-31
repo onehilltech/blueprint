@@ -24,6 +24,7 @@ const assert = require ('assert');
  * Base class for all routers.
  */
 module.exports = BO.extend ({
+  /// The router specification.
   specification: null,
 
   init () {
@@ -37,9 +38,8 @@ module.exports = BO.extend ({
    *
    * @param app
    */
-  build (app) {
-    return new RouterBuilder ({app})
-      .addSpecification (this.specification)
-      .build ();
+  async build (app) {
+    const builder = new RouterBuilder (app);
+    return builder.addSpecification (this.specification).build ();
   }
 });

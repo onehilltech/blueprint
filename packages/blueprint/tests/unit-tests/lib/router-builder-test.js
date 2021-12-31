@@ -1,85 +1,48 @@
-const {expect} = require ('chai');
+const chai = require ('chai');
+const { expect } = chai;
+chai.use (require ('chai-as-promised'))
+
 const request  = require ('supertest');
 const express  = require ('express');
 
 const RouterBuilder = require ('../../../lib/router-builder');
 const HttpError = require ('../../../lib/http-error');
-const Policy = require ('../../../lib/policies/policy');
 
 const policies = require ('../../../lib/policies');
 const blueprint = require ('../../../lib');
 
-
 describe ('lib | RouterBuilder', function () {
   describe ('build', function () {
-    context ('deprecated', function () {
-      it ('should build router containing legacy object with validate function', function () {
-        const r1 = {
-          '/r1': {
-            get: {action: 'main@getLegacyObjectWithValidateFunction'},
-          }
-        };
-
-        let builder = new RouterBuilder ({app: blueprint.app});
-        let router = builder.addSpecification (r1).build ();
-        let app = express ();
-
-        app.use (router);
-
-        return request (app)
-          .get ('/r1')
-          .expect (200, {result: 'getLegacyObjectWithValidateFunction'});
-      });
-
-      it ('should build router containing legacy object with validate schema', function () {
-        const r1 = {
-          '/r1': {
-            get: {action: 'main@getLegacyObjectWithValidateSchema'},
-          }
-        };
-
-        const builder = new RouterBuilder ({app: blueprint.app});
-        const router = builder.addSpecification (r1).build ();
-        const app = express ();
-
-        app.use (router);
-
-        return request (app)
-          .get ('/r1')
-          .expect (200, {result: 'getLegacyObjectWithValidateSchema'});
-      });
-    });
-
     context ('middleware', function () {
-      it ('should build router containing action with single function', function () {
+      it ('should build router containing action with single function', async function () {
         const r1 = {
           '/r1': {
             get: {action: 'main@getFunction'},
           }
         };
 
-        const builder = new RouterBuilder ({app: blueprint.app});
-        const router = builder.addSpecification (r1).build ();
-        const app = express ();
+        let builder = new RouterBuilder (blueprint.app);
+        builder.addSpecification (r1);
 
-        app.use (router);
+        const app = express ();
+        app.use (await builder.build ());
 
         return request (app)
           .get ('/r1')
           .expect (200, {result: 'getFunction'});
       });
 
-      it ('should build router containing action with function array', function () {
+      it ('should build router containing action with function array', async function () {
         const r1 = {
           '/r1': {
             get: {action: 'main@getFunctionArray'},
           }
         };
 
-        const builder = new RouterBuilder ({app: blueprint.app});
-        const router = builder.addSpecification (r1).build ();
-        const app = express ();
+        const builder = new RouterBuilder (blueprint.app);
+        const router = await builder.addSpecification (r1).build ();
 
+        const app = express ();
         app.use (router);
 
         return request (app)
@@ -87,7 +50,7 @@ describe ('lib | RouterBuilder', function () {
           .expect (200, {result: 'getFunctionArray'});
       });
 
-      it ('should build router with sub-routes', function () {
+      it ('should build router with sub-routes', async function () {
         const r1 = {
           '/s1': {
             '/r1': {
@@ -96,10 +59,10 @@ describe ('lib | RouterBuilder', function () {
           }
         };
 
-        const builder = new RouterBuilder ({app: blueprint.app});
-        const router = builder.addSpecification (r1).build ();
-        const app = express ();
+        const builder = new RouterBuilder (blueprint.app);
+        const router = await builder.addSpecification (r1).build ();
 
+        const app = express ();
         app.use (router);
 
         return request (app)
@@ -109,15 +72,15 @@ describe ('lib | RouterBuilder', function () {
     });
 
     context ('validation', function () {
-      it ('should build router containing controller action with schema', function () {
+      it ('should build router containing controller action with schema', async function () {
         const r1 = {
           '/r1': {
             get: {action: 'main@getActionWithSchema'},
           }
         };
 
-        const builder = new RouterBuilder ({app: blueprint.app});
-        const router = builder.addSpecification (r1).build ();
+        const builder = new RouterBuilder (blueprint.app);
+        const router = await builder.addSpecification (r1).build ();
         const app = express ();
 
         app.use (router);
@@ -127,15 +90,15 @@ describe ('lib | RouterBuilder', function () {
           .expect (200, {result: 'getActionWithSchema'});
       });
 
-      it ('should build router containing controller action with validate', function () {
+      it ('should build router containing controller action with validate', async function () {
         const r1 = {
           '/r1': {
             get: {action: 'main@getActionWithValidate'},
           }
         };
 
-        const builder = new RouterBuilder ({app: blueprint.app});
-        const router = builder.addSpecification (r1).build ();
+        const builder = new RouterBuilder (blueprint.app);
+        const router = await builder.addSpecification (r1).build ();
 
         let app = express ();
         app.use (router);
@@ -145,18 +108,19 @@ describe ('lib | RouterBuilder', function () {
           .expect (200, {result: 'getActionWithValidate'});
       });
 
-      it ('should build router that fails its validation phase', function () {
+      it ('should build router that fails its validation phase', async function () {
         const r1 = {
           '/r1': {
             post: {action: 'main@postActionWithValidateFail'},
           }
         };
 
-        const builder = new RouterBuilder ({app: blueprint.app});
-        const router = builder.addSpecification (r1).build ();
+        const builder = new RouterBuilder (blueprint.app);
+        const router = await builder.addSpecification (r1).build ();
         const app = express ();
 
         app.use (router);
+
         app.use ((err, req, res, next) => {
           expect (err).to.be.instanceof (HttpError);
           expect (err.message).to.equal ('The request validation failed.');
@@ -172,7 +136,7 @@ describe ('lib | RouterBuilder', function () {
     });
 
     context ('policies', function () {
-      it ('should build router with successful policy', function () {
+      it ('should build router with successful policy', async function () {
         const r1 = {
           '/r1': {
             policy: policies.check ('identity', true),
@@ -180,10 +144,9 @@ describe ('lib | RouterBuilder', function () {
           }
         };
 
-        const builder = new RouterBuilder ({app: blueprint.app});
-        const router = builder.addSpecification (r1).build ();
+        const builder = new RouterBuilder (blueprint.app);
+        const router = await builder.addSpecification (r1).build ();
         const app = express ();
-
         app.use (router);
 
         return request (app)
@@ -191,7 +154,7 @@ describe ('lib | RouterBuilder', function () {
           .expect (200, {result: 'getActionWithValidate'});
       });
 
-      it ('should build router with optional policy', function () {
+      it ('should build router with optional policy', async function () {
         const r1 = {
           '/r1': {
             policy: policies.check ('?optional'),
@@ -199,10 +162,9 @@ describe ('lib | RouterBuilder', function () {
           }
         };
 
-        let builder = new RouterBuilder ({app: blueprint.app});
-        let router = builder.addSpecification (r1).build ();
-        let app = express ();
-
+        const builder = new RouterBuilder (blueprint.app);
+        const router = await builder.addSpecification (r1).build ();
+        const app = express ();
         app.use (router);
 
         return request (app)
@@ -210,7 +172,7 @@ describe ('lib | RouterBuilder', function () {
           .expect (200, {result: 'getActionWithValidate'});
       });
 
-      it ('should not build router with missing policy', function () {
+      it ('should not build router with missing policy', async function () {
         expect (() => {
           const r1 = {
             '/r1': {
@@ -219,14 +181,14 @@ describe ('lib | RouterBuilder', function () {
             }
           };
 
-          let builder = new RouterBuilder ({app: blueprint.app});
-          builder.addSpecification (r1).build ();
-        }).to.throw ('We could not locate the policy missing.');
+          const builder = new RouterBuilder (blueprint.app);
+          return builder.addSpecification (r1).build ();
+        }).to.throw (Error);
       });
     });
 
     context ('resource', function () {
-      it ('should build router with resource', function () {
+      it ('should build router with resource', async function () {
 
         const users = {
           '/users': {
@@ -236,8 +198,8 @@ describe ('lib | RouterBuilder', function () {
           }
         };
 
-        let builder = new RouterBuilder ({app: blueprint.app});
-        let router = builder.addSpecification (users).build ();
+        const builder = new RouterBuilder (blueprint.app);
+        const router = await builder.addSpecification (users).build ();
 
         let app = express ();
         app.use (router);
@@ -253,7 +215,7 @@ describe ('lib | RouterBuilder', function () {
         return Promise.all (requests);
       });
 
-      it ('should allow a subset of actions', function () {
+      it ('should allow a subset of actions', async function () {
         const users = {
           '/users': {
             resource: {
@@ -263,8 +225,8 @@ describe ('lib | RouterBuilder', function () {
           }
         };
 
-        let builder = new RouterBuilder ({app: blueprint.app});
-        let router = builder.addSpecification (users).build ();
+        let builder = new RouterBuilder (blueprint.app);
+        let router = await builder.addSpecification (users).build ();
         let app = express ();
 
         app.use (router);
@@ -277,7 +239,7 @@ describe ('lib | RouterBuilder', function () {
         return Promise.all (requests);
       });
 
-      it ('should deny a subset of actions', function () {
+      it ('should deny a subset of actions', async function () {
         const users = {
           '/users': {
             resource: {
@@ -287,8 +249,8 @@ describe ('lib | RouterBuilder', function () {
           }
         };
 
-        let builder = new RouterBuilder ({app: blueprint.app});
-        let router = builder.addSpecification (users).build ();
+        let builder = new RouterBuilder (blueprint.app);
+        let router = await builder.addSpecification (users).build ();
 
         let app = express ();
         app.use (router);
@@ -301,7 +263,7 @@ describe ('lib | RouterBuilder', function () {
         return Promise.all (requests);
       });
 
-      it ('should build router with resource and policy', function () {
+      it ('should build router with resource and policy', async function () {
         const users = {
           '/users': {
             resource: {
@@ -310,10 +272,10 @@ describe ('lib | RouterBuilder', function () {
           }
         };
 
-        let builder = new RouterBuilder ({app: blueprint.app});
-        let router = builder.addSpecification (users).build ();
-        let app = express ();
+        const builder = new RouterBuilder (blueprint.app);
+        const router = await builder.addSpecification (users).build ();
 
+        let app = express ();
         app.use (router);
 
         let called = false;
@@ -329,7 +291,7 @@ describe ('lib | RouterBuilder', function () {
           });
       });
 
-      it ('should build router with namespace resource and policy', function () {
+      it ('should build router with namespace resource and policy', async function () {
         const users = {
           '/users': {
             resource: {
@@ -338,11 +300,12 @@ describe ('lib | RouterBuilder', function () {
           }
         };
 
-        let builder = new RouterBuilder ({app: blueprint.app});
-        let router = builder.addSpecification (users).build ();
-        let app = express ();
+        const builder = new RouterBuilder (blueprint.app);
+        const router = await builder.addSpecification (users).build ();
+
         let called = false;
 
+        const app = express ();
         app.use (router);
 
         blueprint.once ('test.user.create', (value) => {
@@ -358,4 +321,4 @@ describe ('lib | RouterBuilder', function () {
       });
     });
   });
-});
+})

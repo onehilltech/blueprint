@@ -57,10 +57,8 @@ describe ('lib | Application', function () {
   });
 
   describe ('mount', function () {
-    it ('should mount a router', function () {
-      let app = blueprint.app;
-
-      const router = app.mount ('main');
+    it ('should mount a router', async function () {
+      const router = blueprint.app.mount ('main');
       const server = express ();
 
       server.use (router);

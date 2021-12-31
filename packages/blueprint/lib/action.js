@@ -45,6 +45,10 @@ module.exports = BO.extend ({
    */
   validate: null,
 
+  async configure (controller) {
+    this.controller = controller;
+  },
+
   /**
    * Execute the request.
    *
@@ -52,10 +56,10 @@ module.exports = BO.extend ({
    *
    * This method has the option of returning a Promise, which informs the framework
    * that completion of the request is pending.
-   *
-   * @returns {Promise|null}
    */
-  execute: null,
+  async execute (req, res) {
+    throw new Error ('You must implement the execute(req, res) method.');
+  },
 
   /// The hosting controller for the action.
   controller: null,

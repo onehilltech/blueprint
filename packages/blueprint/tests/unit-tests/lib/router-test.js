@@ -21,17 +21,17 @@ const blueprint  = require ('../../../lib');
 
 describe ('lib | Router', function () {
   describe ('build', function () {
-    it ('should build router containing action with single function', function () {
+    it ('should build router containing action with single function', async function () {
       const r1 = {
         '/r1': {
           get: {action: 'main@getFunction'},
         }
       };
 
-      const router = new Router ({specification: r1}).build (blueprint.app);
+      const router = new Router ({specification: r1});
 
       let app = express ();
-      app.use (router);
+      app.use (await router.build (blueprint.app));
 
       return request (app)
         .get ('/r1')

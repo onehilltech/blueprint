@@ -16,10 +16,9 @@
 
 const { Service } = require ('../../../../lib');
 
-module.exports = class ShoppingCartService extends Service {
-  constructor () {
-    super ();
-
+module.exports = Service.extend ({
+  init () {
+    this._super.call (this, ...arguments);
     this.items = [];
   }
-}
+});
