@@ -522,10 +522,8 @@ module.exports = class RouterBuilder {
       // then we need to push that before we push the function onto the middleware
       // stack.
 
-      if (opts.policy) {
-        const policy = await this._processMiddlewarePolicy (opts.policy);
-        middleware.push (policy);
-      }
+      if (opts.policy)
+        middleware.push (await this._processMiddlewarePolicy (opts.policy));
 
       middleware.push (result);
     }
