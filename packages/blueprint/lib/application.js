@@ -62,7 +62,9 @@ module.exports = BO.extend (Events, {
 
   /// Resource loaded by the application.
   resources: computed ({
-    get () { return this._appModule.resources; }
+    get () {
+      return this._appModule.resources;
+    }
   }),
 
   /// The server used by the application.
@@ -80,12 +82,7 @@ module.exports = BO.extend (Events, {
 
     // First, make sure the temp directory for the application exist. Afterwards,
     // we can progress with configuring the application.
-    this._appModule = new ApplicationModule ({
-      name: APPLICATION_MODULE_NAME,
-      app: this,
-      modulePath: this.appPath
-    });
-
+    this._appModule = new ApplicationModule (this, APPLICATION_MODULE_NAME, this.appPath);
     this._server = new Server ({app: this});
   },
 

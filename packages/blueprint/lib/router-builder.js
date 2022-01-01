@@ -384,7 +384,7 @@ module.exports = class RouterBuilder {
       throw new Error (`${controllerName} controller does not exist`);
 
     // Get the actions of the controller.
-    let {actions, namespace, name} = controller;
+    let { actions, namespace, name } = controller;
 
     if (!actions)
       throw new Error (`${controllerName} must define actions property`);

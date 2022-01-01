@@ -14,74 +14,28 @@
  * limitations under the License.
  */
 
-const { BO, computed } = require ('base-object');
 const debug  = require ('debug') ('blueprint:application-module');
 const path   = require ('path');
-const assert = require ('assert');
 
 const lookup = require ('./-lookup');
 
-const { merge, reduce, omit, get } = require ('lodash');
+const { merge, omit } = require ('lodash');
 const { readFile, readFileSync, statSync } = require ('fs-extra');
 
 const Loader = require ('./loader');
 const ListenerLoader = require ('./listener-loader');
 const Router = require ('./router');
 
-module.exports = BO.extend ({
-  /// Name of the application module.
-  name: null,
+/**
+ * @class ApplicationModule
+ */
+module.exports = class ApplicationModule {
+  constructor (app, name, modulePath) {
+    this.app = app;
+    this.name = name;
+    this.modulePath = modulePath;
 
-  /// Application hosting the module.
-  app: null,
-
-  /// The path for the application module.
-  modulePath: null,
-
-  /// The path where the views are located.
-  _viewsPath: null,
-
-  /// The loader used by the application module.
-  _defaultLoader: new Loader (),
-
-  _entities: null,
-
-  /// Collection of resources loaded by the application module.
-  _resources: null,
-
-  __configure_Promise: null,
-
-  viewsPath: computed ({
-    get () {
-      return path.join (this.modulePath, 'views');
-    }
-  }),
-
-  hasViews: computed ({
-    get () {
-      try {
-        return statSync (this.viewsPath).isDirectory ();
-      }
-      catch (ex) {
-        return false;
-      }
-    }
-  }),
-
-  assetsPath: computed ({
-    get () { return path.resolve (this.modulePath, 'assets') }
-  }),
-
-  resources: computed ({
-    get () { return this._resources; }
-  }),
-
-  init () {
-    this._super.call (this, ...arguments);
-
-    assert (!!this.app, "You must define the 'app' property.");
-    assert (!!this.modulePath, "You must define the 'modulePath' property.");
-
+    this._defaultLoader = new Loader ();
     this._resources = {};
 
     // The entities that are loaded by the application module. The order of the
@@ -111,16 +65,39 @@ module.exports = BO.extend ({
         mergeable: false,
         opts: {
           resolve (router) {
-            return router.prototype && !!router.prototype.build ? new router () : Router.create ({specification: router});
+            return router.prototype && !!router.prototype.build ?
+              new router () :
+              Router.create ({specification: router});
           }
         }
       }
     ];
-  },
+  }
+
+  get viewsPath () {
+    return path.join (this.modulePath, 'views');
+  }
+
+  get hasViews () {
+    try {
+      return statSync (this.viewsPath).isDirectory ();
+    }
+    catch (ex) {
+      return false;
+    }
+  }
+
+  get assetsPath () {
+    return path.resolve (this.modulePath, 'assets')
+  }
+
+  get resources () {
+    return this._resources;
+  }
 
   _instantiateComponent (Component) {
     return new Component ({app: this.app});
-  },
+  }
 
   /**
    * Configure the application module. This method will load all the resource
@@ -128,49 +105,38 @@ module.exports = BO.extend ({
    *
    * @returns {Promise<ApplicationModule>}
    */
-  configure () {
-    // We should only load this module once. Once it is in the loaded state, we just need
-    // to return the loaded promise.
-    if (!!this.__configure_Promise)
-      return this.__configure_Promise;
+  async configure () {
+    debug (`configuring application module ${this.modulePath}`);
 
-    debug (`configuring the application module ${this.modulePath}`);
+    for await (const entity of this._entities) {
+      // Compute the location of the resources we are loading. Then load the
+      // resources into memory and save the resources to our application module.
 
-    this.__configure_Promise = new Promise ((resolve, reject) => {
-      let promise = reduce (this._entities, (promise, entity) => {
-        return promise.then (() => {
-          // Compute the location of the resources we are loading. Then load the resources
-          // into memory and save the resources to our application module
-          let {name} = entity;
-          let location = entity.location || name;
-          let rcPath = path.resolve (this.modulePath, location);
-          let opts = merge ({dirname: rcPath}, entity.opts);
+      const {
+        name,
+        location = name,
+        loader = this._defaultLoader,
+        mergeable = true
+      } = entity;
 
-          debug (`loading ${name} in ${rcPath}`);
-          let loader = entity.loader || this._defaultLoader;
+      const rcPath = path.resolve (this.modulePath, location);
+      const opts = merge ({dirname: rcPath}, entity.opts);
 
-          return loader.load (opts).then (resources => {
-            // Merge the resources into the application module, and then merge them
-            // into the parent application. This means we will have two copies of the
-            // resources, but that is fine. We need the ability to load a resource from
-            // its parent module, if necessary.
-            debug (`merging ${name} into both application module and application`);
-            const mergeable = get (entity, 'mergeable', true);
+      // Merge the resources into the application module, and then merge them
+      // into the parent application. This means we will have two copies of the
+      // resources, but that is fine. We need the ability to load a resource from
+      // its parent module, if necessary.
 
-            this._resources[name] = merge (this._resources[name] || {}, resources);
+      debug (`loading ${name} in ${rcPath}`);
 
-            if (mergeable) {
-              this.app.resources[name] = merge (this.app.resources[name] || {}, resources);
-            }
-          });
-        });
-      }, Promise.resolve ());
+      const resources = await loader.load (opts);
+      this._resources[name] = merge (this._resources[name] || {}, resources);
 
-      promise.then (resolve).catch (reject);
-    });
-
-    return this.__configure_Promise;
-  },
+      if (mergeable) {
+        this.app.resources[name] = merge (this.app.resources[name] || {}, resources);
+      }
+    }
+  }
 
   /**
    * Lookup a loaded component. The format of the name is
@@ -185,7 +151,7 @@ module.exports = BO.extend ({
    */
   lookup (component) {
     return lookup (this.resources, component);
-  },
+  }
 
   /**
    * Read an application asset. If the callback is undefined, then the data in the
@@ -193,15 +159,15 @@ module.exports = BO.extend ({
    *
    * @returns {*}
    */
-  asset (filename, opts) {
+  async asset (filename, opts) {
     let fullPath = path.resolve (this.assetsPath, filename);
     return readFile (fullPath, opts);
-  },
+  }
 
   assetSync (filename, opts) {
     let fullPath = path.resolve (this.assetsPath, filename);
     return readFileSync (fullPath, opts);
-  },
+  }
 
   /**
    * Merge an module with this module. It will copy all the entities from the
@@ -211,6 +177,15 @@ module.exports = BO.extend ({
    * @param module
    */
   merge (module) {
-    return merge (this._resources, omit (module.resources, ['routers']));
+    const names = this._entities.reduce ((names, entity) => {
+      const { name, mergeable = true } = entity;
+
+      if (!mergeable)
+        names.push (name);
+
+      return names;
+    }, []);
+
+    return merge (this._resources, omit (module.resources, names));
   }
-});
+}

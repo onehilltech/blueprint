@@ -109,7 +109,7 @@ module.exports = BO.extend (Events, {
 
     // Create a new application module.
     const moduleAppPath = path.resolve (modulePath, 'app');
-    const module = new ApplicationModule ({name, app: this.app, modulePath: moduleAppPath});
+    const module = new ApplicationModule (this.app, name, moduleAppPath);
 
     // Save the module so we do not process it again.
     this._modules[name] = module;
