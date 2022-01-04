@@ -26,7 +26,7 @@ const {
   differenceWith,
   flattenDeep,
   mapValues,
-  values,
+  compact,
   isEmpty,
 } = require ('lodash');
 
@@ -134,6 +134,9 @@ module.exports = BO.extend ({
    * @param ids
    */
   _saveUnseenIds (type, ids) {
+    // Remove any undefined ids.
+    ids = compact (ids);
+
     const arrOfIds = this._ids[type];
     const unseen = differenceWith (ids, ...arrOfIds, (l, r) => l.equals (r));
 
