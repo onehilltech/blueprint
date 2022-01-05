@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-const {
-  model,
-  NotFoundError,
-  BadRequestError,
-  service,
-  Action
-} = require ('@onehilltech/blueprint');
-
+const { model, BadRequestError, service, Action } = require ('@onehilltech/blueprint');
 const { get } = require ('lodash');
 const ResourceController = require ('../../../lib/resource-controller');
 
