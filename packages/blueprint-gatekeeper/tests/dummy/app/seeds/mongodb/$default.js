@@ -103,18 +103,28 @@ module.exports = Seed.extend ({
           email: 'account3@gatekeeper.com',
           username: 'account3',
           password: 'account3',
+          verification: {
+            required: false
+          }
         },
         {
           email: 'account4@gatekeeper.com',
           username: 'account4',
           password: 'account4',
-          scope: ['gatekeeper.account.update.scope']
+          scope: ['gatekeeper.account.update.scope'],
+          verification: {
+            required: true
+          }
         },
         {
           email: 'account5@gatekeeper.com',
           username: 'account5',
           password: 'account5',
-          enabled: false
+          enabled: false,
+          verification: {
+            required: true,
+            date: new Date ()
+          }
         },
         {
           email: 'account6@gatekeeper.com',

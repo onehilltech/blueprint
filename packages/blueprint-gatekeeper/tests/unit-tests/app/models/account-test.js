@@ -112,17 +112,35 @@ describe ('app | models | account', function () {
     });
   });
 
-  describe ('verified', function () {
-    it ('should list the account as verified', function () {
+  describe.only ('verified', function () {
+    it ('should be verified [default required, has date]', function () {
       const { accounts: [ account ]} = seed ();
 
       expect (account.verified).to.be.true;
     });
 
-    it ('should list the account as not verified', function () {
+    it ('should not be verified [required]', function () {
       const { accounts: [ , account ]} = seed ();
 
       expect (account.verified).to.be.false;
+    });
+
+    it ('should be verified [not required]', function () {
+      const { accounts: [ ,, account ]} = seed ();
+
+      expect (account.verified).to.be.true;
+    });
+
+    it ('should not be verified [required, but no date]', function () {
+      const { accounts: [ ,,, account ]} = seed ();
+
+      expect (account.verified).to.be.false;
+    });
+
+    it ('should not verified [required, has date]', function () {
+      const { accounts: [ ,,,, account ]} = seed ();
+
+      expect (account.verified).to.be.true;
     });
   });
 });
