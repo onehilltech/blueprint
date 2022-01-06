@@ -1,5 +1,5 @@
 {
-  "name": "@onehilltech/blueprint-email",
+  "name": "@onehilltech/blueprint-mailer",
   "description": "Blueprint module for sending emails via mailgun",
   "version": "4.49.1",
   "private": false,
@@ -13,7 +13,11 @@
     "@onehilltech/blueprint": "^4.46.0",
     "@onehilltech/blueprint-cli": "^4.46.0",
     "@onehilltech/blueprint-mongodb": "^4.49.1",
-    "email-templates": "^5.0.2",
+    "email-templates": "^8.0.8",
+    "gulp": "^4.0.2",
+    "gulp-dart-sass": "^1.0.2",
+    "handlebars": "^4.7.7",
+    "juice-resources-promise": "0.0.2",
     "nodemailer": "^5.0.0",
     "nodemailer-mailgun-transport": "^1.4.0",
     "pug": "^2.0.3"
