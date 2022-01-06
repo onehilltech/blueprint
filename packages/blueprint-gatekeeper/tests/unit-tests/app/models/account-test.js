@@ -112,7 +112,7 @@ describe ('app | models | account', function () {
     });
   });
 
-  describe.only ('verified', function () {
+  describe ('verified', function () {
     it ('should be verified [default required, has date]', function () {
       const { accounts: [ account ]} = seed ();
 
