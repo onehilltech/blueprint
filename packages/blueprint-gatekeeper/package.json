@@ -48,7 +48,7 @@
   "bin": {
     "gatekeeper-setup": "./bin/gatekeeper-setup"
   },
-  "gitHead": "6d4af417c417bad300c5208b446643f9e2b785eb",
+  "gitHead": "ba21179bad703a28528cc09c2b9ff6f9592254a6",
   "engines": {
     "node": ">=11.6.0",
     "npm": ">=6.5.0"
