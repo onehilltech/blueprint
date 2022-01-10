@@ -47,7 +47,8 @@ module.exports = Populate.extend ({
    * @returns {*}
    */
   populate (id) {
-    return this.Model.findById (id);
+    const { [this.modelName]: options = {}} = (this.options || {});
+    return this.Model.findById (id, options);
   },
 
   accept (v) {

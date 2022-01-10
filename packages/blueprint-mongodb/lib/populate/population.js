@@ -187,7 +187,7 @@ module.exports = BO.extend ({
   processId (populator, value) {
     if (!value)
       return null;
-    
+
     // Determine the ids that we need to populate at this point in time. If we
     // have seen all the ids, then there is no need to populate the value(s).
 

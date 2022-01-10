@@ -34,7 +34,7 @@ function populateModel (model, options = {}) {
   const Model = getModel (model);
 
   // Create a new register, and add the root Model to it.
-  const registry = new ModelRegistry ();
+  const registry = new ModelRegistry ({ options });
   registry.addModel (Model);
 
   // Create a new population for this registry. Then, add the
@@ -50,7 +50,7 @@ function populateModel (model, options = {}) {
  * @param options
  */
 function populateModels (models, options = {}) {
-  const registry = new ModelRegistry ();
+  const registry = new ModelRegistry ({ options });
 
   // Add the model types to the registry.
   models.forEach (model => {

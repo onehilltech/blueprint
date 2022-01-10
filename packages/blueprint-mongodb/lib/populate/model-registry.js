@@ -101,7 +101,7 @@ const ModelRegistry = BO.extend ({
     // being processed multiple times.
     debug (`creating populator for ${key}`);
 
-    this._models[key] = new RegistryItem ({Model});
+    this._models[key] = new RegistryItem ({ Model });
     this._models[key].populators = this._makePopulate (Model.db, Model.schema);
   },
 
@@ -135,7 +135,7 @@ const ModelRegistry = BO.extend ({
         const Model = db.models[ref];
         const key = ModelRegistry.getKeyFromModel (Model);
 
-        populate[pathName] = new PopulateElement ({Model, key});
+        populate[pathName] = new PopulateElement ({ Model, key, options: this.options});
 
         this.addModel (Model);
       }
@@ -152,14 +152,14 @@ const ModelRegistry = BO.extend ({
           let populators = this._makePopulate (db, type);
 
           if (!isEmpty (populators))
-            populate[pathName] = new PopulateEmbeddedArray ({populators});
+            populate[pathName] = new PopulateEmbeddedArray ({ populators, options: this.options});
         }
         else if (type.ref) {
           // We have an array of document references.
           const Model = db.models[type.ref];
           const key = ModelRegistry.getKeyFromModel (Model);
 
-          populate[pathName] = new PopulateArray ({Model, key});
+          populate[pathName] = new PopulateArray ({Model, key, options: this.options});
 
           this.addModel (Model);
         }
@@ -168,7 +168,7 @@ const ModelRegistry = BO.extend ({
         let populators = this._makePopulate (db, path.schema);
 
         if (!isEmpty (populators))
-          populate[pathName] = new PopulateEmbedded ({populators});
+          populate[pathName] = new PopulateEmbedded ({populators, options: this.options});
       }
     });
 
