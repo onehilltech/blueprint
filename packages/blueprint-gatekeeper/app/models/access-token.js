@@ -16,7 +16,9 @@
 
 const discriminatorKey = 'type';
 
+const mm = require ('micromatch');
 const mongodb  = require ('@onehilltech/blueprint-mongodb');
+
 const Schema   = mongodb.Schema;
 const ref = mongodb.Schema.Types.ref;
 
@@ -66,6 +68,10 @@ let schema = new Schema ({
 schema.methods.maxUsageLimit = function () {
   return !!this.usage.max && this.usage.current >= this.usage.max;
 };
+
+schema.methods.supports = function (list) {
+  return mm.some (list, this.scope);
+}
 
 const MODEL_NAME = 'access_token';
 const COLLECTION_NAME = 'gatekeeper_access_tokens';
