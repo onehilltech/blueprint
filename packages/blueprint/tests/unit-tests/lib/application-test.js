@@ -56,7 +56,7 @@ describe ('lib | Application', function () {
     });
   });
 
-  describe ('mount', function () {
+  describe.only ('mount', function () {
     it ('should mount a router', async function () {
       const router = await blueprint.app.mount ('main');
       const server = express ();

@@ -14,32 +14,21 @@
  * limitations under the License.
  */
 
-const { BO } = require ('base-object');
-const RouterBuilder = require ('./router-builder');
+const Router = require ('./router');
 
 /**
- * @class Router
+ * @class SimpleRouter
  *
- * Base class for all routers.
+ * A simple router definition. The simple router specification is a simple
+ * hash of the routes.
  */
-module.exports = BO.extend ({
-  /// The router specification.
-  async specification () {
-    throw new Error ('You must override the specification() method');
+module.exports = Router.extend ({
+  init () {
+    this._super.call (this, ...arguments);
   },
 
-  /**
-   * Build the router.
-   *
-   * @param app
-   */
-  async build (app) {
-    // Get the specification for the router.
-    const spec = await this.specification ();
-
-    // Build the router.
-    return new RouterBuilder (app)
-      .addSpecification (spec)
-      .build ();
+  /// The router specification.
+  async specification () {
+    return this.definition;
   }
 });

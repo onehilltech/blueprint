@@ -24,7 +24,7 @@ const { readFile, readFileSync, statSync } = require ('fs-extra');
 
 const Loader = require ('./loader');
 const ListenerLoader = require ('./listener-loader');
-const Router = require ('./router');
+const SimpleRouter = require ('./simple-router');
 
 /**
  * @class ApplicationModule
@@ -65,9 +65,10 @@ module.exports = class ApplicationModule {
         mergeable: false,
         opts: {
           resolve (router) {
-            return router.prototype && !!router.prototype.build ?
-              new router () :
-              Router.create ({specification: router});
+            if (router.prototype && !!router.prototype.build)
+              return new router ();
+            else
+              return SimpleRouter.create ({ definition: router });
           }
         }
       }
