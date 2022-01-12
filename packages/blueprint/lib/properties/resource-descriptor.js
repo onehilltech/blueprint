@@ -22,7 +22,7 @@ const {PropertyDescriptor} = require ('base-object');
  * Define a property on an object that is bound to a service.
  */
 class ResourceDescriptor extends PropertyDescriptor {
-  constructor ({type, name}) {
+  constructor (type, name) {
     super ();
 
     this.type = type;

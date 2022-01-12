@@ -24,7 +24,7 @@ const ResourceDescriptor = require ('./resource-descriptor');
  * @param   name      Optional name of service.
  */
 function model (name) {
-  return new ResourceDescriptor ({type: 'model', name});
+  return new ResourceDescriptor ('model', name);
 }
 
 module.exports = model;
