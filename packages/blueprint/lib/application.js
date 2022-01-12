@@ -68,7 +68,7 @@ class Application {
     return path.resolve (this.appPath, '.blueprint');
   }
 
-  get viewPaths () {
+  get viewsPath () {
     console.log ('viewsPath');
 
     return this._appModule.viewsPath;
