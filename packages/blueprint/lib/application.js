@@ -25,12 +25,11 @@ const { BO, computed } = require ('base-object');
 const BPromise = require ('bluebird');
 
 const ApplicationModule = require ('./application-module');
-const ModuleLoader      = require ('./module-loader');
-const RouterBuilder     = require ('./router-builder');
-const Server            = require ('./server');
-const Loader            = require ('./loader');
-
-const { Events } = require ('./messaging');
+const ModuleLoader = require ('./module-loader');
+const RouterBuilder = require ('./router-builder');
+const Server = require ('./server');
+const Loader = require ('./loader');
+const events = require ('./messaging/events');
 
 const DEFAULT_APPLICATION_NAME = '<unnamed>';
 const APPLICATION_MODULE_NAME = '$';
@@ -40,118 +39,133 @@ const APPLICATION_MODULE_NAME = '$';
  *
  * The main application.
  */
-module.exports = BO.extend (Events, {
-  /// The started state of the application.
-  started: false,
-
-  /// The application module for the application.
-  _appModule: null,
-
-  /// The loader used by the application module.
-  _defaultLoader: new Loader (),
-
-  /// The temporary path for the application.
-  tempPath: computed ({
-    configurable: true,
-    get () { return path.resolve (this.appPath, '.blueprint'); }
-  }),
-
-  viewsPath: computed ({
-    get () { return this._appModule.viewsPath; }
-  }),
-
-  /// Resource loaded by the application.
-  resources: computed ({
-    get () {
-      return this._appModule.resources;
-    }
-  }),
-
-  /// The server used by the application.
-  server: computed ({
-    get () { return this._server; }
-  }),
-
-  module: computed ({
-    get () { return this._appModule; }
-  }),
-
-  init () {
-    this._super.call (this, ...arguments);
+class Application {
+  constructor (appPath) {
+    this._appPath = appPath;
     this._modules = {};
 
     // First, make sure the temp directory for the application exist. Afterwards,
     // we can progress with configuring the application.
-    this._appModule = new ApplicationModule (this, APPLICATION_MODULE_NAME, this.appPath);
+    this._appModule = new ApplicationModule (this, APPLICATION_MODULE_NAME, this._appPath);
     this._server = new Server ({app: this});
-  },
+  }
+
+  /// The started state of the application.
+  started = false;
+
+  /// The application module for the application.
+  _appModule = null;
+
+  /// The default loader used by the application module.
+  _defaultLoader = new Loader ();
+
+  /// The temporary path for the application.
+  get appPath () {
+    return this._appPath;
+  }
+
+  get tempPath () {
+    return path.resolve (this.appPath, '.blueprint');
+  }
+
+  get viewPaths () {
+    console.log ('viewsPath');
+
+    return this._appModule.viewsPath;
+  }
+
+  /// Resource loaded by the application.
+  get resources () {
+    return this._appModule.resources;
+  }
+
+  /// The server used by the application.
+  get server () {
+    return this._server;
+  }
+
+  get module () {
+    return this._appModule;
+  }
 
   /**
    * Configure the application.
    */
-  configure () {
-    return ensureDir (this.tempPath)
-      .then (() => this._loadConfigurationFiles ())
-      .then (configs => {
-        // Store the loaded configuration files.
-        this.configs = configs;
-        this.name = get (configs, 'app.name', DEFAULT_APPLICATION_NAME);
+  async configure () {
+    // Make sure the temporary directory for blueprint exists. This is the location
+    // where modules can add the files to improve performance or track state.
+    await ensureDir (this.tempPath);
 
-        // Load all the modules for the application that appear in the node_modules
-        // directory. We consider these the auto-loaded modules for the application.
-        // We handle these before the modules that are explicitly loaded by the application.
+    // Load the configuration files.
+    this.configs = await this._loadConfigurationFiles ();
 
-        let moduleLoader = new ModuleLoader ({app: this});
-        moduleLoader.on ('loading', module => this._modules[module.name] = module);
+    // Set the name of the application. If the name does not exists, then we set it to
+    // the default name.
+    this.name = get (this.configs, 'app.name', DEFAULT_APPLICATION_NAME);
 
-        return moduleLoader.load ();
-      })
-      // Now, we can configure the module portion of the application since we know all
-      // dependent artifacts needed by the application will be loaded.
-      .then (() => this._appModule.configure ())
-      .then (() => {
-        // Allow the loaded services to configure themselves.
-        let {services} = this.resources;
+    // Load all the modules for the application that appear in the node_modules
+    // directory. We consider these the auto-loaded modules for the application.
+    // We handle these before the modules that are explicitly loaded by the application.
 
-        return BPromise.props (mapValues (services, (service, name) => {
-          debug (`configuring service ${name}`);
+    const moduleLoader = new ModuleLoader ({app: this});
+    moduleLoader.on ('loading', module => this._modules[module.name] = module);
 
-          return service.configure ();
-        }));
-      })
-      .then (() => this._server.configure (this.configs.server))
-      // Import the views of the application into the server. The views of the
-      // application will overwrite any views previously imported when we loaded
-      // an application module.
-      .then (() => this._appModule.hasViews ? this._server.importViews (this._appModule.viewsPath) : null)
-      .then (() => {
-        const { routers } = this.resources;
-        const builder = new RouterBuilder (this);
+    await moduleLoader.load ();
 
-        return builder.addRouter ('/', routers).build ();
-      })
-      .then (router => {
-        // Install the built router into the server.
-        this._server.setMainRouter (router);
-        return this.emit ('blueprint.app.initialized', this);
-      })
-      .then (() => this);
-  },
+    // Now, we can configure the module portion of the application since we know all
+    // dependent artifacts needed by the application will be loaded.
+    await this._appModule.configure (this);
+
+    // Allow the loaded services to configure themselves.
+    let {services} = this.resources;
+
+    await BPromise.props (mapValues (services, (service, name) => {
+      debug (`configuring service ${name}`);
+
+      return service.configure ();
+    }));
+
+    // Configure the server, if present.
+    const { server: serverConfig } = this.configs;
+
+    if (serverConfig)
+      await this._server.configure (serverConfig);
+
+    // Import the views of the application into the server. The views of the
+    // application will overwrite any views previously imported when we loaded
+    // an application module.
+
+    if (this._appModule.hasViews)
+      await this._server.importViews (this._appModule.viewsPath);
+
+    // Now, we can build the routers for the application. The final router will be
+    // set as the main router on the application server.
+    const { routers } = this.resources;
+    const builder = new RouterBuilder (this);
+    const router = await builder.addRouter ('/', routers).build ();
+
+    this._server.setMainRouter (router);
+
+    // Notify all listeners the application has been initialized.
+    await this.emit ('blueprint.app.initialized', this);
+
+    return this;
+  }
 
   /**
    * Destroy the application.
    */
-  destroy () {
-    return this._server.close ().then (() => {
-      // Instruct each service to destroy itself.
-      let { services } = this.resources;
+  async destroy () {
+    await this._server.close ();
 
-      return BPromise.props (mapValues (services, (service, name) => {
-        debug (`destroying service ${name}`);
-        return service.destroy ();
-      }));
-    });
-  },
+    // Instruct each service to destroy itself.
+    const { services } = this.resources;
+
+    return BPromise.props (mapValues (services, (service, name) => {
+      debug (`destroying service ${name}`);
+      return service.destroy ();
+    }));
+  }
 
   /**
    * Add an application module to the application. An application module can only
@@ -159,57 +173,57 @@ module.exports = BO.extend (Events, {
    * name, not module path. This will ensure we do not have the same module in
    * different location added to the application more than once.
    */
-  addModule (name, appModule) {
+  async addModule (name, appModule) {
     if (this._modules.hasOwnProperty (name))
       throw new Error (`duplicate module ${name}`);
 
-    return this._importViewsFromModule (appModule)
-      .then (() => { this._appModule.merge (appModule) })
-      .then (() => {
-        this._modules[name] = appModule;
-        return this;
-      });
-  },
+    await this._importViewsFromModule (appModule);
+    await this._appModule.merge (appModule);
+    this._modules[name] = appModule;
 
-  _importViewsFromModule (appModule) {
-    if (!appModule.hasViews)
-      return Promise.resolve ();
+    return this;
+  }
 
-    return this._server.importViews (appModule.viewsPath);
-  },
+  async _importViewsFromModule (appModule) {
+    if (appModule.hasViews)
+      return this._server.importViews (appModule.viewsPath);
+  }
 
   /**
    * Start the application. This method connects to the database, creates a
    * new server, and starts listening for incoming messages.
    */
-  start () {
+  async start () {
     // Notify the listeners that we are able to start the application. This
     // will allow them to do any preparations.
-    this.emit ('blueprint.app.starting', this);
+    await this.emit ('blueprint.app.starting', this);
 
     // Start all the services.
-    let {services} = this.resources;
-    let promises = mapValues (services, (service, name) => {
+    const { services } = this.resources;
+    const promises = mapValues (services, (service, name) => {
       debug (`starting service ${name}`);
 
       return service.start ();
     });
 
-    return BPromise.props (promises)
-      .then (() => this._server.listen ())
-      .then (() => {
-        // Notify all listeners that the application has started.
-        this.started = true;
-        return this.emit ('blueprint.app.started', this);
-      });
-  },
+    await BPromise.props (promises);
+    await this._server.listen ();
+    this.started = true;
+
+    // Notify all listeners that the application has started.
+    await this.emit ('blueprint.app.started', this);
+
+    return this;
+  }
 
   /**
    * Restart the application.
    */
-  restart () {
-    return this.emit ('blueprint.app.restart', this);
-  },
+  async restart () {
+    await this.emit ('blueprint.app.restart', this);
+
+    return this;
+  }
 
   /**
    * Lookup a component, including configurations, in the application. The component can
@@ -271,7 +285,7 @@ module.exports = BO.extend (Events, {
         throw new Error ('The component name is invalid.');
       }
     }
-  },
+  }
 
   /**
    * Load an application asset.
@@ -283,11 +297,11 @@ module.exports = BO.extend (Events, {
    */
   asset (filename, opts) {
     return this._appModule.asset (filename, opts);
-  },
+  }
 
   assetSync (filename, opts) {
     return this._appModule.assetSync (filename, opts);
-  },
+  }
 
   /**
    * Mount a router. The returned router is an Express router that can be
@@ -302,8 +316,8 @@ module.exports = BO.extend (Events, {
     assert (!!router, `The router {${routerName}} does not exist.`);
 
     const builder = new RouterBuilder (this);
-    return builder.addRouter ('/', router).build ();
-  },
+    return await builder.addRouter ('/', router).build ();
+  }
 
   /**
    * Load the configuration files for the application. All configuration files are located
@@ -316,4 +330,7 @@ module.exports = BO.extend (Events, {
     const dirname = path.resolve (this.appPath, 'configs');
     return this._defaultLoader.load ({dirname});
   }
-});
+}
+
+module.exports = events.decorate (Application);
+

@@ -42,14 +42,12 @@ describe ('lib | server | Server', function () {
   });
 
   describe ('importViews', function () {
-    it ('should import view for use by the server', function () {
-      let server = new Server ({app: blueprint.app});
+    it ('should import view for use by the server', async function () {
+      const server = new Server ({app: blueprint.app});
+      await server.configure ({});
+      await server.importViews (blueprint.app.viewsPath);
 
-      return server.configure ({})
-        .then (() => server.importViews (blueprint.app.viewsPath))
-        .then (() => {
-          expect (server._engines).to.eql (['handlebars']);
-        });
+      expect (server._engines).to.eql (['handlebars'])
     });
   });
 });

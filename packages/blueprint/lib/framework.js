@@ -17,10 +17,8 @@
 const assert    = require ('assert');
 const program   = require ('commander');
 
-const { BO, computed} = require ('base-object');
-
 const { env } = require ('./environment');
-const {version} = require ('../package.json');
+const { version } = require ('../package.json');
 const ClusterApplication = require ('./cluster');
 const Application = require ('./application');
 
@@ -29,27 +27,26 @@ const Application = require ('./application');
  *
  * Wrapper class for the Blueprint framework that hosts the application.
  */
-module.exports = BO.extend ({
-  version,
-
-  /// The application installed in the framework.
-  _app: null,
-
-  /// The execution environment for the framework.
-  env,
-
-  app: computed ({
-    get () { return this._app; }
-  }),
-
-  hasApplication: computed ({
-    get () { return !!this._app; }
-  }),
-
-  init () {
-    this._super.call (this, ...arguments);
+module.exports = class Framework {
+  constructor () {
     this._parseCommandLineOptions ();
-  },
+  }
+
+  get env ()  {
+    return env;
+  }
+
+  get version () {
+    return version
+  }
+
+  get app () {
+    return this._app;
+  }
+
+  get hasApplication () {
+    return !!this._app;
+  }
 
   /**
    * Parse the command-line options.
@@ -62,7 +59,7 @@ module.exports = BO.extend ({
       .parse (process.argv);
 
     this.cluster = program.cluster;
-  },
+  }
 
   /**
    * Create an application in the framework.
@@ -75,35 +72,30 @@ module.exports = BO.extend ({
     if (this.cluster)
       this._app = new ClusterApplication ({appPath, cluster: this.cluster});
     else
-      this._app = new Application ({appPath});
+      this._app = new Application (appPath);
 
     return this._app.configure ();
-  },
+  }
 
   /**
    * Create an application in the framework as start it.
    *
    * @param appPath
    */
-  createApplicationAndStart (appPath) {
-    return this.createApplication (appPath).then (app => {
-      return app.start ();
-    });
-  },
+  async createApplicationAndStart (appPath) {
+    const app = await this.createApplication (appPath);
+    return app.start ();
+  }
 
   /**
    * Destroy the application.
-   *
-   * @returns {Promise<any>}
    */
-  destroyApplication () {
-    if (!this._app)
-      return Promise.resolve ();
-
-    return this._app.destroy ().then (() => {
+  async destroyApplication () {
+    if (this.hasApplication) {
+      await this._app.destroy ();
       this._app = null;
-    });
-  },
+    }
+  }
 
   /**
    * Lookup a loaded component.
@@ -120,7 +112,7 @@ module.exports = BO.extend ({
   lookup (component) {
     assert (this._app, 'The application has not been created.');
     return this._app.lookup (component);
-  },
+  }
 
   /**
    * Load an asset from the main application.
@@ -131,14 +123,14 @@ module.exports = BO.extend ({
    * @returns {*}
    */
   asset (filename, opts, callback) {
-    assert (this._app, 'The application has not been created.');
+    assert (this.hasApplication, 'The application has not been created.');
     return this._app.asset (filename, opts, callback);
-  },
+  }
 
   assetSync (filename, opts) {
     assert (this._app, 'The application has not been created.');
     return this._app.assetSync (filename, opts);
-  },
+  }
 
   /**
    * Mount a router. The returned router is an Express router that can be
@@ -147,34 +139,34 @@ module.exports = BO.extend ({
    * @param routerName
    */
   mount (routerName) {
-    assert (this._app, 'The application has not been created.');
+    assert (this.hasApplication, 'The application has not been created.');
     return this._app.mount (routerName);
-  },
+  }
 
   // Events
 
   on () {
-    assert (this._app, 'The application has not been created.');
+    assert (this.hasApplication, 'The application has not been created.');
     return this._app.on (...arguments);
-  },
+  }
 
   once () {
-    assert (this._app, 'The application has not been created.');
+    assert (this.hasApplication, 'The application has not been created.');
     return this._app.once (...arguments);
-  },
+  }
 
   emit () {
-    assert (this._app, 'The application has not been created.');
+    assert (this.hasApplication, 'The application has not been created.');
     return this._app.emit (...arguments);
-  },
+  }
 
   getListeners (ev) {
-    assert (this._app, 'The application has not been created.');
+    assert (this.hasApplication, 'The application has not been created.');
     return this._app.getListeners (ev);
-  },
+  }
 
   hasListeners (ev) {
-    assert (this._app, 'The application has not been created.');
+    assert (this.hasApplication, 'The application has not been created.');
     return this._app.hasListeners (ev);
   }
-});
+}
