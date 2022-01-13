@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-http",
   "description": "Blueprint module for adding internet (http) capabilities",
-  "version": "",
+  "version": "0.0.0",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
