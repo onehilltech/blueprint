@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-const blueprint = require ('../../../../lib');
+const { Policy } = require ('../../../../../lib');
 
-const {
-  expect
-} = require ('chai');
+module.exports = class UserCreatePolicy extends Policy {
+  constructor () {
+    super ('create_failed', 'The create policy failed.');
+  }
 
-describe.skip ('lib | properties | model', function () {
-  it ('should bind a property to a model', function () {
-    let person = blueprint.lookup ('model:person');
-    let main = blueprint.lookup ('controller:main');
+  runCheck (req) {
+    this.app.emit ('user.create', true);
+    return true;
+  }
+}
 
-    expect (main.person).to.equal (person);
-    expect (main.model).to.equal (person);
-  });
-});

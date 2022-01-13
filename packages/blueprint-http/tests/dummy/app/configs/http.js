@@ -16,16 +16,25 @@
 
 const blueprint = require ('../../../../lib');
 
-const {
-  expect
-} = require ('chai');
+module.exports = {
+  // using protocols is the legacy method configuring server ports
+  connections : {
+    insecure : { protocol: 'http', port: 8080 },
 
-describe.skip ('lib | properties | model', function () {
-  it ('should bind a property to a model', function () {
-    let person = blueprint.lookup ('model:person');
-    let main = blueprint.lookup ('controller:main');
+    secure : {
+      port: 8443,
+      protocol: 'https',
+      options : {
+        key  : blueprint.assetSync ('ssl/dummy.key'),
+        cert : blueprint.assetSync ('ssl/dummy.crt')
+      }
+    }
+  },
 
-    expect (main.person).to.equal (person);
-    expect (main.model).to.equal (person);
-  });
-});
+  middleware : {
+    bodyParser : {
+      json : { },
+      urlencoded : { extended: false }
+    }
+  }
+};

@@ -17,7 +17,7 @@
 const assert = require ('assert');
 const { computed } = require ('base-object');
 
-const Action     = require ('./action');
+const Action = require ('./action');
 const Controller = require ('./controller');
 const NotFoundError  = require ('./not-found-error');
 

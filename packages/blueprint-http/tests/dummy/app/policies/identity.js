@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-const blueprint = require ('../../../../lib');
+const Policy = require ('../../../../lib/policies/policy');
 
-const {
-  expect
-} = require ('chai');
+module.exports = class IdentityPolicy extends Policy {
+  setParameters (value) {
+    this.value = value;
+  }
 
-describe.skip ('lib | properties | model', function () {
-  it ('should bind a property to a model', function () {
-    let person = blueprint.lookup ('model:person');
-    let main = blueprint.lookup ('controller:main');
-
-    expect (main.person).to.equal (person);
-    expect (main.model).to.equal (person);
-  });
-});
+  runCheck (req) {
+    return this.value;
+  }
+}

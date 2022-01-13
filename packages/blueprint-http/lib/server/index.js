@@ -20,8 +20,8 @@ const assert = require ('assert');
 const bodyParser  = require ('body-parser');
 const consolidate = require ('consolidate');
 const express = require ('express');
-const path    = require ('path');
-const klaw    = require ('klaw');
+const path = require ('path');
+const klaw = require ('klaw');
 const handleError = require ('./handle-error');
 const util = require ('util');
 const BluebirdPromise = require ('bluebird');
@@ -35,10 +35,11 @@ const {
   omit
 } = require ('lodash');
 
-const Protocol = require ('./protocol');
 
 const { ensureDir, copy } = require ('fs-extra');
-const { env } = require ('../environment');
+const { env } = require ('@onehilltech/blueprint');
+
+const Protocol = require ('./protocol');
 const defaultProtocols  = require ('./protocols');
 
 const VIEW_CACHE_PATH = 'views';

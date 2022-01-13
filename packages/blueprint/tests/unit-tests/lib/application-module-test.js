@@ -24,35 +24,25 @@ describe ('lib | ApplicationModule', function () {
     it ('should load an application module into memory', function () {
       const app = blueprint.app;
 
-      expect (app.module.resources).to.have.nested.property ('controllers.main');
-      expect (app.module.resources).to.have.nested.property ('controllers.namespace-user');
-      expect (app.module.resources).to.have.nested.property ('controllers.user');
-
       expect (app.module.resources).to.have.nested.property ('listeners.blueprint\\.app\\.init');
 
       expect (app.module.resources).to.have.nested.property ('models.person');
       expect (app.module.resources).to.not.have.nested.property ('models.-options');
       expect (app.module.resources).to.not.have.nested.property ('models.options');
 
-      expect (app.module.resources).to.have.nested.property ('policies.identity');
-
       expect (app.module.resources).to.have.nested.property ('services.cart');
       expect (app.module.resources).to.have.nested.property ('services.shopping-cart');
-
-      expect (app.module.resources).to.have.nested.property ('routers.main');
-      expect (app.module.resources).to.have.nested.property ('routers.users');
-      expect (app.module.resources).to.have.nested.property ('routers.inner.main');
     });
   });
 
-  describe ('viewsPath', function () {
+  describe.skip ('viewsPath', function () {
     it ('should get the viewPaths property', function () {
       let app = blueprint.app;
       expect (app.module.viewsPath).to.equal (path.join (app.appPath, 'views'));
     });
   });
 
-  describe ('hasViews', function () {
+  describe.skip ('hasViews', function () {
     it ('should test if the module has views', function () {
       let app = blueprint.app;
       expect (app.module.hasViews).to.be.true;
@@ -63,18 +53,18 @@ describe ('lib | ApplicationModule', function () {
     context ('string', function () {
       it ('should lookup an entity', function () {
         let app = blueprint.app;
-        let controller = app.module.lookup ('controller:main');
+        let cart = app.module.lookup ('service:cart');
 
-        expect (controller).to.equal (app.module.resources.controllers.main);
+        expect (cart).to.equal (app.module.resources.services.cart);
       });
     });
 
     context ('array', function () {
       it ('should lookup an entity', function () {
-        let app = blueprint.app;
-        let controller = app.module.lookup (['controller', 'main']);
+        const app = blueprint.app;
+        const cart = app.module.lookup (['service', 'cart']);
 
-        expect (controller).to.equal (app.module.resources.controllers.main);
+        expect (cart).to.equal (app.module.resources.services.cart);
       });
     });
   });

@@ -1,0 +1,32 @@
+{
+  "name": "@onehilltech/blueprint-http",
+  "description": "Blueprint module for adding internet (http) capabilities",
+  "version": "",
+  "private": false,
+  "scripts": {
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
+    "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+    "install-service": "sudo -s forever-service install blueprint-http_d --script ./app/index.js -e 'NODE_ENV=production'",
+    "uninstall-service": "sudo -s forever-service delete blueprint-http_d"
+  },
+  "dependencies": {
+    "@onehilltech/blueprint": "^4.46.0",
+    "pug": "^2.0.4"
+  },
+  "devDependencies": {
+    "@onehilltech/blueprint-cli": "^4.46.0",
+    "@onehilltech/blueprint-testing": "^4.46.0",
+    "chai-as-promised": "^7.1.1"
+  },
+  "main": "./lib",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=6.0.0",
+    "npm": ">=3.0.0"
+  },
+  "keywords": [
+    "blueprint",
+    "blueprint-module"
+  ]
+}

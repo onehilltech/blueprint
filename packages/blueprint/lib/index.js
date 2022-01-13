@@ -26,46 +26,16 @@ exports.PropertyDescriptor = PropertyDescriptor;
 const { AsyncListener, Listener, Events } = require ('./messaging');
 
 exports.Loader = require ('./loader');
+exports.Service = require ('./service');
 
 // message framework classes
 exports.AsyncListener = AsyncListener;
 exports.Listener = Listener;
 exports.Events = Events;
 
-exports.Controller = require ('./controller');
-exports.ResourceController = require ('./resource-controller');
-
 exports.BlueprintError = require ('./error');
-exports.HttpError = require ('./http-error');
-exports.BadRequestError = require ('./bad-request-error');
-exports.ForbiddenError = require ('./forbidden-error');
-exports.NotFoundError = require ('./not-found-error');
-exports.UnauthorizedError = require ('./unauthorized-error');
-exports.InternalServerError = require ('./internal-server-error');
-
-exports.Router = require ('./router');
-
-exports.Protocol = require ('./server/protocol');
-
-// built-in actions
-exports.Action = require ('./action');
-
-exports.ViewAction = require ('./view-action');
-exports.SingleViewAction = require ('./single-view-action');
-
-exports.UploadAction = require ('./upload-action');
-exports.SingleFileUploadAction = require ('./single-file-upload-action');
-exports.ArrayUploadAction = require ('./array-upload-action');
-exports.FieldsUploadAction = require ('./fields-upload-action');
-exports.TextOnlyUploadAction = require ('./text-only-upload-action');
-exports.Service = require ('./service');
-
-// policy framework
-exports.Policy = require ('./policies/policy');
-exports.policies = require ('./policies');
 
 // computed/bound attributes
-
 const { service, model } = require ('./properties');
 
 exports.service = service;

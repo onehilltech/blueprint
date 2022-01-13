@@ -14,26 +14,15 @@
  * limitations under the License.
  */
 
-const assert       = require ('assert');
-const UploadAction = require ('./upload-action');
+const { Policy } = require ('../../../../../../lib');
 
-/**
- * @class FieldsUploadAction
- *
- * Action for accepting a mix of files.
- */
-module.exports = UploadAction.extend ({
-  /// The name of the field that will contain the uploaded file.
-  fields: null,
-
-  /**
-   * @override
-   */
-  async configure () {
-    await this._super.call (this, ...arguments);
-
-    assert (!!this.fields, "You must define the 'fields' property.");
-
-    this._middleware = this._upload.fields (this.fields);
+module.exports = class UserCreatePolicy extends Policy {
+  constructor () {
+    super ('create_failed', 'The create policy failed.');
   }
-});
+
+  runCheck (req) {
+    this.app.emit ('test.user.create', true);
+    return true;
+  }
+}

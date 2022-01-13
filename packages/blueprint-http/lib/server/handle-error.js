@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-const BlueprintError = require ('../error');
-const {
-  isObjectLike,
-  isString
-} = require ('lodash');
+const { BlueprintError } = require ('@onehilltech/blueprint');
+const { isObjectLike, isString } = require ('lodash');
 
 module.exports = function (err, req, res, next) {
   if (isString (err)) {

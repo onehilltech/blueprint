@@ -19,12 +19,11 @@ const path   = require ('path');
 
 const lookup = require ('./-lookup');
 
-const { merge, omit } = require ('lodash');
+const { merge } = require ('lodash');
 const { readFile, readFileSync, statSync } = require ('fs-extra');
 
 const Loader = require ('./loader');
 const ListenerLoader = require ('./listener-loader');
-const SimpleRouter = require ('./simple-router');
 
 /**
  * @class ApplicationModule
@@ -51,27 +50,6 @@ module.exports = class ApplicationModule {
         }
       },
       { name: 'listeners', loader: new ListenerLoader (this.app) },
-      {
-        name: 'controllers',
-        opts: {
-          resolve: this._instantiateComponent.bind (this)
-        }
-      },
-      { name: 'policies'},
-      { name: 'validators'},
-      { name: 'sanitizers'},
-      {
-        name: 'routers',
-        mergeable: false,
-        opts: {
-          resolve (router) {
-            if (router.prototype && !!router.prototype.build)
-              return new router ();
-            else
-              return SimpleRouter.create ({ definition: router });
-          }
-        }
-      }
     ];
   }
 
@@ -171,22 +149,12 @@ module.exports = class ApplicationModule {
   }
 
   /**
-   * Merge an module with this module. It will copy all the entities from the
-   * source module into this module. Any entity in the source module will overwrite
-   * the entity in this module.
+   * Import resources into the module.  Any entity in the resources will overwrite
+   * the current resources in the module.
    *
-   * @param module
+   * @param resources
    */
-  merge (module) {
-    const names = this._entities.reduce ((names, entity) => {
-      const { name, mergeable = true } = entity;
-
-      if (!mergeable)
-        names.push (name);
-
-      return names;
-    }, []);
-
-    return merge (this._resources, omit (module.resources, names));
+  import (resources) {
+    merge (this._resources, resources);
   }
 }

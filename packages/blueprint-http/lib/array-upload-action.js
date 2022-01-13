@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
-const blueprint = require ('../../../../lib');
+const assert = require ('assert');
+const UploadAction = require ('./upload-action');
 
-const {
-  expect
-} = require ('chai');
+/**
+ * @class ArrayUploadAction
+ *
+ * Action for uploading an array files. The files will be available on req.files
+ * in onUploadComplete(req,res).
+ */
+module.exports = UploadAction.extend ({
+  /// The name of the field that will contain the uploaded files.
+  name: null,
 
-describe.skip ('lib | properties | model', function () {
-  it ('should bind a property to a model', function () {
-    let person = blueprint.lookup ('model:person');
-    let main = blueprint.lookup ('controller:main');
+  /**
+   * @override
+   */
+  async configure () {
+    await this._super.call (this, ...arguments);
 
-    expect (main.person).to.equal (person);
-    expect (main.model).to.equal (person);
-  });
+    assert (!!this.name, "You must define the 'name' property.");
+
+    this._middleware = this._upload.array (this.name);
+  }
 });

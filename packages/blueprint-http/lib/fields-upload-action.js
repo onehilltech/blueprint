@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-const blueprint = require ('../../../../lib');
+const assert = require ('assert');
+const UploadAction = require ('./upload-action');
 
-const {
-  expect
-} = require ('chai');
+/**
+ * @class FieldsUploadAction
+ *
+ * Action for accepting a mix of files.
+ */
+module.exports = UploadAction.extend ({
+  /// The name of the field that will contain the uploaded file.
+  fields: null,
 
-describe.skip ('lib | properties | model', function () {
-  it ('should bind a property to a model', function () {
-    let person = blueprint.lookup ('model:person');
-    let main = blueprint.lookup ('controller:main');
+  /**
+   * @override
+   */
+  async configure () {
+    await this._super.call (this, ...arguments);
 
-    expect (main.person).to.equal (person);
-    expect (main.model).to.equal (person);
-  });
+    assert (!!this.fields, "You must define the 'fields' property.");
+
+    this._middleware = this._upload.fields (this.fields);
+  }
 });
