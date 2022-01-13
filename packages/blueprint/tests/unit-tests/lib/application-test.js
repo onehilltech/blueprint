@@ -23,18 +23,17 @@ const request = require ('supertest');
 describe ('lib | Application', function () {
   describe ('configure', function () {
     it ('should configure the application', function () {
-      expect (blueprint.app).to.have.nested.property ('resources.controllers').to.have.keys (['empty','main','namespace-user','user']);
       expect (blueprint.app).to.have.nested.property ('resources.listeners').to.have.property ('blueprint\\.app\\.init').to.have.keys (['echo','simple']);
-      expect (blueprint.app).to.have.nested.property ('resources.policies').to.have.keys (['identity','test','user']);
-      expect (blueprint.app).to.have.nested.property ('resources.routers').to.have.keys (['main','users','inner']);
+
+      expect (blueprint.app).to.have.nested.property ('resources.services').to.have.property ('cart');
+      expect (blueprint.app).to.have.nested.property ('resources.services').to.have.property ('shopping-cart');
     });
   });
 
   describe ('lookup', function () {
     it ('should lookup a loaded component', function () {
-      let mainController = blueprint.app.lookup ('controller:main');
-
-      expect (mainController).to.equal (blueprint.app.resources.controllers.main);
+      const cart = blueprint.app.lookup ('service:cart');
+      expect (cart).to.equal (blueprint.app.resources.services.cart);
     });
 
     it ('should lookup a loaded configuration', function () {
@@ -43,16 +42,16 @@ describe ('lib | Application', function () {
     });
 
     it ('should lookup a duplicate resource', function () {
-      let controller = blueprint.app.lookup ('controller:empty');
+      let controller = blueprint.app.lookup ('service:cart');
       expect (controller.name).to.equal ('mod_a');
     });
 
     it ('should lookup a resource in a module', function () {
-      const controllerA = blueprint.app.lookup ('controller:mod_a:empty');
-      expect (controllerA.name).to.equal ('mod_a');
+      const serviceA = blueprint.app.lookup ('service:mod_a:cart');
+      expect (serviceA.name).to.equal ('mod_a');
 
-      const controllerB = blueprint.app.lookup ('controller:mod_b:empty');
-      expect (controllerB.name).to.equal ('mod_b');
+      const serviceB = blueprint.app.lookup ('service:mod_b:cart');
+      expect (serviceB.name).to.equal ('mod_b');
     });
   });
 
