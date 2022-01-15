@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const ResourceController = require ('../../../../lib/resource-controller');
+const { ResourceController } = require ('@onehilltech/blueprint-http');
 
 function simpleHandler (method) {
   return (req, res, next) => {

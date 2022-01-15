@@ -21,7 +21,7 @@ const {
   Action,
   service,
   model
-} = require ('../../../../lib');
+} = require ('@onehilltech/blueprint-http');
 
 module.exports = Controller.extend ({
   cart: service (),
