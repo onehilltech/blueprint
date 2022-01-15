@@ -98,8 +98,13 @@ all.ordered = function (definitions, failureCode = 'failed_policy', failureMessa
 
       // We need to resolve the next policy on our list. After the policy is resolved,
       // we continue to the next policy if the current policies passes.
-      let result = this.policies[i].runCheck (req);
-      return Promise.resolve (result).then (result => result === true ? this._runCheck (req, i + 1) : result);
+      const policy = this.policies[i];
+      const result = policy.runCheck (req);
+
+      return Promise.resolve (result).then (result => result === true ? this._runCheck (req, i + 1) : {
+        failureCode: policy.failureCode,
+        failureMessage: policy.failureMessage
+      });
     }
   });
 };
