@@ -87,7 +87,6 @@ describe ('app | routers | account', function () {
           last_email: email.id,
           last_email_date: email.date.toISOString ()
         });
-
       });
 
       it ('should not allow client to set account id', function () {
