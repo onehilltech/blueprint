@@ -61,7 +61,7 @@ describe ('app | routers | account', function () {
           .post ('/v1/accounts')
           .send ({account: data})
           .withClientToken (0)
-          .expect (500, {});
+          .expect (200);
 
         expect (res.body)
           .to.have.property ('account')
@@ -76,8 +76,18 @@ describe ('app | routers | account', function () {
 
         const { account } = res.body;
 
-        expect (account).to.have.property ('verification')
-          .to.include ({ required: true });
+        // The system should have send an email.
+        const emails = await blueprint.lookup ('model:email').find ();
+        expect (emails).to.have.length (1);
+
+        const [email] = emails;
+
+        expect (account).to.have.property ('verification').to.include ({
+          required: true,
+          last_email: email.id,
+          last_email_date: email.date.toISOString ()
+        });
+
       });
 
       it ('should not allow client to set account id', function () {

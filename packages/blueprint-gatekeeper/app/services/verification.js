@@ -79,7 +79,7 @@ module.exports = Service.extend ({
     // Log the result of sending the activation email to the user for the newly
     // created account.
 
-    account.verification.last_email_id = email._id;
+    account.verification.last_email = email._id;
     account.verification.last_email_date = email.date;
 
     return account.save ();
