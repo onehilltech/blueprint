@@ -119,7 +119,11 @@ describe ('lib | policies | all', function () {
       };
 
       return policy.runCheck (req).then (result => {
-        expect (result).to.be.false;
+        expect (result).to.eql ({
+          failureCode: 'policy_failed',
+          failureMessage: 'The request did not satisfy a required policy.'
+        });
+
         expect (req.values).to.eql ([1, 2, 3]);
       })
     });

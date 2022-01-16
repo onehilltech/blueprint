@@ -21,7 +21,7 @@ const { BO } = require ('base-object');
 const ApplicationModule = require ('./application-module');
 const Events = require ('./messaging/events');
 
-const { forEach, find } = require ('lodash');
+const { forEach, find, isEmpty } = require ('lodash');
 const debug = require ('debug') ('blueprint:module-loader');
 
 const KEYWORD_BLUEPRINT_MODULE = 'blueprint-module';
@@ -61,6 +61,9 @@ module.exports = BO.extend (Events, {
    */
   _handleDependencies (dependencies) {
     let promises = [];
+
+    if (isEmpty (dependencies))
+      return Promise.all (promises);
 
     debug (`dependencies: ${Object.keys (dependencies)}`);
     forEach (dependencies, (version, name) => promises.push (this._handleNodeModule (name, version)));

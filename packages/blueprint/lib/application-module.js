@@ -166,7 +166,7 @@ module.exports = BO.extend ({
         });
       }, Promise.resolve ());
 
-      promise.then (resolve).catch (reject);
+      promise.then (() => resolve (this)).catch (reject);
     });
 
     return this.__configure_Promise;

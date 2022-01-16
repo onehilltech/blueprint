@@ -15,7 +15,7 @@
  */
 
 const path  = require ('path');
-const {ensureDir} = require ('fs-extra');
+const fse = require ('fs-extra');
 const debug  = require ('debug')('blueprint:app');
 const assert = require ('assert');
 const { forOwn, get, isArray, mapValues } = require ('lodash');
@@ -93,7 +93,7 @@ module.exports = BO.extend (Events, {
    * Configure the application.
    */
   configure () {
-    return ensureDir (this.tempPath)
+    return fse.ensureDir (this.tempPath)
       .then (() => this._loadConfigurationFiles ())
       .then (configs => {
         // Store the loaded configuration files.
@@ -105,13 +105,15 @@ module.exports = BO.extend (Events, {
         // We handle these before the modules that are explicitly loaded by the application.
 
         let moduleLoader = new ModuleLoader ({app: this});
-        moduleLoader.on ('loading', module => this._modules[module.name] = module);
+        //moduleLoader.on ('loading', module => this._modules[module.name] = module);
+        moduleLoader.on ('loaded', module => this.addModule (module.name, module));
 
         return moduleLoader.load ();
       })
       // Now, we can configure the module portion of the application since we know all
       // dependent artifacts needed by the application will be loaded.
       .then (() => this._appModule.configure ())
+      .then (() => this._importResources (this.appPath))
       .then (() => {
         // Allow the loaded services to configure themselves.
         let {services} = this.resources;
@@ -162,16 +164,43 @@ module.exports = BO.extend (Events, {
    * name, not module path. This will ensure we do not have the same module in
    * different location added to the application more than once.
    */
-  addModule (name, appModule) {
+  async addModule (name, appModule) {
     if (this._modules.hasOwnProperty (name))
       throw new Error (`duplicate module ${name}`);
 
-    return this._importViewsFromModule (appModule)
-      .then (() => { this._appModule.merge (appModule) })
-      .then (() => {
-        this._modules[name] = appModule;
-        return this;
-      });
+    // Import the resources from the module into the application space.
+    await this._importResources (appModule.modulePath);
+    await this._importViewsFromModule (appModule);
+    await this._appModule.merge (appModule);
+
+    this._modules[name] = appModule;
+
+    return this;
+  },
+
+  /**
+   * Import the resources from the application path.
+   *
+   * @param appPath
+   * @private
+   */
+  async _importResources (appPath) {
+    // Check if the source application has a resource directory. If it does not, then
+    // we can just bail at this point in time.
+
+    const src = path.resolve (appPath, 'resources');
+
+    if (!await fse.pathExists (src))
+      return;
+
+    // Make sure the target resource path exists.
+    const dest = path.resolve (this.tempPath, 'resources');
+    await fse.ensureDir (dest);
+
+    // Copy the resources from the app path to this path. We allow resources
+    // to overwrite other resources. This gives the application the ability to
+    // customize resources used by modules.
+    await fse.copy (src, dest, { overwrite: true });
   },
 
   _importViewsFromModule (appModule) {
