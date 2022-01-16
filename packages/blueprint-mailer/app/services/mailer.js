@@ -1,4 +1,4 @@
-const { Service, computed, BO } = require ('@onehilltech/blueprint');
+const { Service, computed, model } = require ('@onehilltech/blueprint');
 const path = require ('path');
 const Promise = require ('bluebird');
 const fs = Promise.promisifyAll (require ('fs'));
@@ -7,13 +7,11 @@ const Handlebars = require ('handlebars');
 const Email = require ('email-templates');
 const _ = require ('lodash');
 
-const gulp = require ('gulp');
-const sass = require ('gulp-dart-sass');
-
 const juiceResources = require ('juice-resources-promise');
 
 const MAILER_ASSETS_PATH = 'assets/mailer';
 
+const TemplateCompiler = require ('../../lib/template-compliler');
 
 /**
  * @class mailer
@@ -29,6 +27,9 @@ module.exports = Service.extend ({
   _templateCompiler: null,
 
   _email: null,
+
+  // Reference to the email model.
+  Email: model ('email'),
 
   /**
    * Initialize the instance.
@@ -52,7 +53,7 @@ module.exports = Service.extend ({
     // Initialize the template compiler.
     const templatePath = path.resolve (this.mailerPath, 'templates');
     const handlebars = await this._initHandlebars ();
-    this._templateCompiler = new TemplateCompiler ({ handlebars, templatePath });
+    this._templateCompiler = new TemplateCompiler (templatePath, handlebars);
   },
 
   /**
@@ -149,7 +150,10 @@ module.exports = Service.extend ({
   async send (template, options) {
     const opts = Object.assign ({ template }, options);
 
-    return this._email.send (opts);
+    const result = await this._email.send (opts);
+    const { messageId, envelope: { from, to }, originalMessage: { subject } } = result;
+
+    return this.Email.create ({ message_id: messageId, from, to, subject });
   },
 
   /**
@@ -188,50 +192,5 @@ module.exports = Service.extend ({
 
   async _lookupTemplate (path) {
     return this._templates[path] || (this._templates[path] = this._templateCompiler.compile (path));
-  }
-});
-
-/**
- * @class TemplateCompiler
- *
- * Utility class responsible for compiling an email template for usage.
- */
-const TemplateCompiler = BO.extend ({
-  async compile (name) {
-    const basename = path.resolve (this.templatePath, name);
-    const pathname = basename + '.hbs';
-
-    const exists = await fse.pathExists (pathname);
-
-    if (!exists)
-      return null;
-
-    await this.compileScss (basename);
-    const content = await fs.readFileAsync (pathname, 'utf-8');
-
-    return this.handlebars.compile (content);
-  },
-
-  /**
-   * Compile the sass/scss file, if one exists.
-   *
-   * @param basename
-   */
-  async compileScss (basename) {
-    const pathname = basename + '.scss';
-    const exists = await fse.pathExists (pathname);
-
-    if (!exists)
-      return null;
-
-    return new Promise ((resolve, reject) => {
-      gulp.src (pathname)
-        .pipe (sass ({
-          includePaths: [`${process.cwd ()}/node_modules`],
-          quiet: true
-        }).on ('error', reject))
-        .pipe (gulp.dest (path.dirname (pathname)))
-        .on ('end', resolve);
-    });
   }
 });

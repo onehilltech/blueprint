@@ -12,6 +12,7 @@
   "dependencies": {
     "@onehilltech/blueprint": "^4.50.3",
     "@onehilltech/blueprint-cli": "^4.46.0",
+    "@onehilltech/blueprint-mongodb": "^4.50.3",
     "email-templates": "^8.0.8",
     "gulp": "^4.0.2",
     "gulp-dart-sass": "^1.0.2",
