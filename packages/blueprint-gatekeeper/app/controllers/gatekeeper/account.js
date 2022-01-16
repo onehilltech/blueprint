@@ -113,7 +113,7 @@ module.exports = ResourceController.extend ({
         // email for the account to the email address associated with this account.
         const { client } = req.accessToken;
 
-        if (!!account.verification && !!account.verification.required && !!client.verify_account_url)
+        if (!!account.verification && !!client.verify_account_url)
           await this.verification.sendEmail (account, client);
 
         return account;
