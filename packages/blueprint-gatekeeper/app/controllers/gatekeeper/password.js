@@ -22,6 +22,8 @@ const {
   ForbiddenError,
 } = require ('@onehilltech/blueprint');
 
+const { defaultsDeep } = require ('lodash');
+
 /**
  * @class PasswordController
  *
@@ -31,6 +33,7 @@ module.exports = Controller.extend ({
   tokenGenerator: null,
 
   gatekeeper: service (),
+  mailer: service (),
 
   Account: model ('account'),
 
@@ -65,30 +68,37 @@ module.exports = Controller.extend ({
         }
       },
 
-      execute (req, res) {
-        const {email} = req.body;
+      async execute (req, res) {
+        const { email } = req.body;
 
         if (!req.user.password_reset_url)
           return Promise.reject (new ForbiddenError ('no_password_reset', 'This client is not allowed to reset passwords.'));
 
-        return this.controller.Account.findOne ({email})
-          .then (account => {
-            if (!account)
-              return Promise.reject (new ForbiddenError ('unknown_account', 'The email address does not have an account.'));
+        const account = await this.controller.Account.findOne ({email});
 
-            if (!account.enabled)
-              return Promise.reject (new ForbiddenError ('account_disabled', 'The account is disabled.'));
+        if (!account)
+          return Promise.reject (new ForbiddenError ('unknown_account', 'The email address does not have an account.'));
 
-            const payload = { jti: account.id };
+        if (!account.enabled)
+          return Promise.reject (new ForbiddenError ('account_disabled', 'The account is disabled.'));
 
-            return this.controller.tokenGenerator.generateToken (payload)
-              .then (token => {
-                this.emit ('gatekeeper.password.forgot', req.user, account, token);
-              });
-          })
-          .then (() => {
-            res.status (200).json (true);
-          });
+        const payload = { jti: account.id };
+        const token = await this.controller.tokenGenerator.generateToken (payload);
+        const { accessToken: { client: { password_reset_url }}} = req;
+        const url = `${password_reset_url}&token=${token}`;
+
+        // Send the forgot password email to the user.
+        await this.controller.mailer.send ('gatekeeper.password.reset', {
+          message: {
+            to: account.email
+          },
+          locals: {
+            account,
+            url,
+          }
+        });
+
+        return res.status (200).json (true);
       }
     });
   },
