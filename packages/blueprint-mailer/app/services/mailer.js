@@ -9,7 +9,7 @@ const _ = require ('lodash');
 
 const juiceResources = require ('juice-resources-promise');
 
-const MAILER_ASSETS_PATH = 'assets/mailer';
+const MAILER_RESOURCE_PATH = 'resources/mailer';
 
 const TemplateCompiler = require ('../../lib/template-compliler');
 
@@ -67,7 +67,7 @@ module.exports = Service.extend ({
    * Get the mailer path.
    */
   mailerPath: computed ({
-    get () { return path.resolve (this.app.appPath, MAILER_ASSETS_PATH); }
+    get () { return path.resolve (this.app.tempPath, MAILER_RESOURCE_PATH); }
   }),
 
   /**
