@@ -53,10 +53,10 @@ describe ('app | routers | account', function () {
       });
     });
 
-    context.only ('POST', function () {
+    context ('POST', function () {
       const data = { username: 'tester1', password: '1aBcDeFg', email: 'JAMES@ONEHILLTECH.COM' };
 
-      it.only ('should create a new account with new id', async function () {
+      it ('should create a new account with new id', async function () {
         const res = await request ()
           .post ('/v1/accounts')
           .send ({account: data})
