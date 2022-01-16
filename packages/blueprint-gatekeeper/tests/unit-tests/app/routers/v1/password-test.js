@@ -19,14 +19,14 @@ const blueprint = require ('@onehilltech/blueprint');
 const { seed, Types: { ObjectId } } = require ('@onehilltech/blueprint-mongodb');
 const { request } = require ('@onehilltech/blueprint-testing');
 
-describe.only ('app | routers | password', function () {
+describe ('app | routers | password', function () {
   function getTokenGenerator () {
     const gatekeeper = blueprint.lookup ('service:gatekeeper');
     return gatekeeper.getTokenGenerator ('gatekeeper:password_reset');
   }
 
   describe ('/v1/password/forgot', function () {
-    it.only ('should initiate forgot password sequence', function () {
+    it ('should initiate forgot password sequence', function () {
       let {accounts} = seed ('$default');
       const account = accounts[0];
 

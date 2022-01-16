@@ -39,13 +39,10 @@ describe ('app | policies | gatekeeper | account | verified', function () {
       .send ({ message: 'This is a message.' })
       .withUserToken (8)
       .expect (403, {
-        errors: [
-          {
-            code: 'failed_policy',
-            detail: 'All of the policies failed.',
+        errors: [{
+            code: 'policy_failed',
+            detail: 'The request did not satisfy any required policy.',
             status: '403'
-          }
-        ]
-      })
+          }]});
   });
 });
