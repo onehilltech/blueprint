@@ -26,6 +26,9 @@ module.exports = Service.extend ({
   /// The token generator used for the service to generate/verify tokens.
   _tokenGenerator: null,
 
+  /// Reference to the mailer service.
+  mailer: service (),
+
   /**
    * Configure the service.
    */
@@ -60,26 +63,24 @@ module.exports = Service.extend ({
       throw new Error ('The client does not support account verification.');
 
     // Send an email to the user so they can verify their account.
-    const accessToken = await this.generateToken (account, client);
-
-    const emailOptions = {
-      template: 'gatekeeper.account.verification',
-      message: { to: account.email },
-      locals: {
-        verification: {
-          url: `${client.verify_account_url}?access_token=${accessToken}`,
-          button: { label: 'Verify account' }
+    const token = await this.generateToken (account, client);
+    const email = await this.mailer.send ('gatekeeper.account.verification', {
+        message: {
+          to: account.email
+        },
+        locals: {
+          verification: {
+            url: `${client.verify_account_url}?token=${token}`,
+            button: {label: 'Verify'}
+          }
         }
-      }
-    };
-
-    const email = await this.gatekeeper.sendEmail (emailOptions);
+      });
 
     // Log the result of sending the activation email to the user for the newly
     // created account.
 
-    account.verification.last_email_id = email.messageId;
-    account.verification.last_email_date = new Date ();
+    account.verification.last_email_id = email._id;
+    account.verification.last_email_date = email.date;
 
     return account.save ();
   },

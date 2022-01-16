@@ -53,15 +53,15 @@ describe ('app | routers | account', function () {
       });
     });
 
-    context ('POST', function () {
+    context.only ('POST', function () {
       const data = { username: 'tester1', password: '1aBcDeFg', email: 'JAMES@ONEHILLTECH.COM' };
 
-      it ('should create a new account with new id', async function () {
+      it.only ('should create a new account with new id', async function () {
         const res = await request ()
           .post ('/v1/accounts')
           .send ({account: data})
           .withClientToken (0)
-          .expect (200);
+          .expect (500, {});
 
         expect (res.body)
           .to.have.property ('account')

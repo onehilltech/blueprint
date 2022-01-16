@@ -17,7 +17,6 @@
 const {
   Controller,
   Action,
-  model,
   service,
   env,
   ForbiddenError,
