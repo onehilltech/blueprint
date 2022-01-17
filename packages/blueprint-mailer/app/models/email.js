@@ -20,8 +20,14 @@ const schema = new Schema ({
   /// Sender of the email.
   from: { type: String },
 
-  /// Recipient(s) of the email.
-  to: { type: [String] },
+  /// List of recipients that appear in the to: field.
+  to: { type: String },
+
+  /// List of recipients that appear in the cc: field.
+  cc: { type: String },
+
+  /// List of recipients that appear in the bcc: field.
+  bcc: { type: String },
 
   /// Subject of the email.
   subject: { type: String }
