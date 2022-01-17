@@ -48,6 +48,7 @@ module.exports = Controller.extend ({
 
         redirect: {
           in: 'query',
+          optional: { options: { nullable: true } },
           isURL: {
             errorMessage: 'This field is not a URL.',
             options: [{require_tld: env === 'production'}]

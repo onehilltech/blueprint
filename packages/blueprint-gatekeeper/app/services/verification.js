@@ -64,13 +64,18 @@ module.exports = Service.extend ({
 
     // Send an email to the user so they can verify their account.
     const token = await this.generateToken (account, client);
+    let url = `${client.verify_account_url}?token=${token}`;
+
+    if (!!client.verify_account_redirect_url)
+      url += `&redirect=${encodeURIComponent (client.verify_account_redirect_url)}`;
+
     const email = await this.mailer.send ('gatekeeper.account.verification', {
         message: {
           to: account.email
         },
         locals: {
           verification: {
-            url: `${client.verify_account_url}?token=${token}`,
+            url,
             button: {label: 'Verify'}
           }
         }
