@@ -175,6 +175,28 @@ module.exports = ResourceController.extend ({
   },
 
   /**
+   * @override
+   */
+  getAll () {
+    return this._super.call (this, ...arguments).extend ({
+      prepareResponse (req, res, result) {
+        const { accounts } = result;
+
+        // Replace the verification document with the verified virtual.
+        result.accounts = accounts.map (account => {
+          const obj = account.toObject ();
+          obj.verified = account.verified;
+          delete obj.verification;
+
+          return obj;
+        });
+
+        return result;
+      }
+    })
+  },
+
+  /**
    * Authenticate an existing account. This method is used to authenticate a
    * user who is currently logged into the system.
    */

@@ -26,21 +26,36 @@ describe ('app | routers | account', function () {
       it ('should return all the accounts for glob scope', function () {
         const { accounts } = seed ();
 
+        const expected = accounts.map ((account) => {
+          const obj = account.lean ();
+          delete obj.verification;
+          obj.verified = account.verified;
+
+          return obj;
+        });
+
         return request ()
           .get ('/v1/accounts')
           .withUserToken (0)
           .query ({_: {sort: {username: 1}}})
-          .expect (200, {'accounts': lean (accounts)});
+          .expect (200, { accounts: expected });
       });
 
       it ('should return all the accounts for valid scope', function () {
         const {accounts} = seed ('$default');
+        const expected = accounts.map ((account) => {
+          const obj = account.lean ();
+          delete obj.verification;
+          obj.verified = account.verified;
+
+          return obj;
+        });
 
         return request ()
           .get ('/v1/accounts')
           .query ({_: {sort: {username: 1}}})
           .withUserToken (1)
-          .expect (200, {'accounts': lean (accounts)});
+          .expect (200, { accounts: expected });
       });
 
       it ('should not allow request', function () {
