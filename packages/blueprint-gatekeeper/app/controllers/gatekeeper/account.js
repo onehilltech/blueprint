@@ -153,7 +153,24 @@ module.exports = ResourceController.extend ({
 
       getId (req, id) {
         return id === 'me' ? req.user._id : id;
-      }
+      },
+
+      /**
+       * @override
+       */
+      prepareResponse (req, res, result) {
+        const { account } = result;
+
+        // Prepare the response. We are going to remove the verification sub-document,
+        // and only return of the account has been verified.
+        const obj = account.toObject ();
+        obj.verified = account.verified;
+        delete obj.verification;
+
+        result.account = obj;
+
+        return result;
+      },
     });
   },
 

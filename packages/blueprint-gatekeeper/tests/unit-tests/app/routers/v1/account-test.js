@@ -18,6 +18,7 @@ const { expect } = require ('chai');
 const { lean, seed, Types: { ObjectId } } = require ('@onehilltech/blueprint-mongodb');
 const blueprint = require ('@onehilltech/blueprint');
 const { request } = require ('@onehilltech/blueprint-testing');
+const { omit } = require ('lodash');
 
 describe ('app | routers | account', function () {
   describe ('/v1/accounts', function () {
@@ -293,29 +294,31 @@ describe ('app | routers | account', function () {
 
   describe ('/v1/accounts/:accountId', function () {
     context ('GET', function () {
-      it ('should return the owner account', function () {
+      it ('should return the owner account', async function () {
         const {accounts} = seed ('$default');
         const account = accounts[0];
+        const expected = Object.assign (omit (account.lean (), ['verification']), { verified: true });
 
-        return request ()
+        const res = await request ()
           .get (`/v1/accounts/${account.id}`)
           .withUserToken (2)
-          .expect (200, {account: account.lean ()});
+          .expect (200, { account: expected });
       });
 
       it ('should return the account for me', function () {
         const {accounts} = seed ('$default');
         const account = accounts[0];
+        const expected = Object.assign (omit (account.lean (), ['verification']), { verified: true });
 
         return request ()
           .get ('/v1/accounts/me')
           .withUserToken (2)
-          .expect (200, {account: account.lean ()});
+          .expect (200, { account: expected });
       });
 
       context ('get_all', function () {
         it ('should return account for a different user', function () {
-          const {accounts} = seed ('$default');
+          const {accounts} = seed ();
           const account = accounts[1];
 
           request ()
@@ -327,7 +330,7 @@ describe ('app | routers | account', function () {
 
       context ('!get_all', function () {
         it ('should not return account for different user', function () {
-          const {accounts} = seed ('$default');
+          const {accounts} = seed ();
           const account = accounts[1];
 
           return request ()
