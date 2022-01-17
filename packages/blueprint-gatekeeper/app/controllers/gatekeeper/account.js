@@ -144,8 +144,10 @@ module.exports = ResourceController.extend ({
       schema: {
         [this.resourceId]: {
           in: 'params',
-          isMongoId: false,
-          isMongoIdOrMe: true
+          custom: {
+            options: this.app.lookup ('validator:isMongoIdOrMe'),
+            errorMessage: 'The id is not valid.',
+          }
         }
       },
 
