@@ -306,7 +306,7 @@ module.exports = ResourceController.extend ({
           throw new BadRequestError ('already_verified', 'The account has already been verified');
 
         // Send the verification email for this account.
-        await this.verification.sendEmail (account, req.accessToken.client);
+        account = await this.verification.sendEmail (account, req.accessToken.client);
 
         return res.status (200).json ({ account });
       }
