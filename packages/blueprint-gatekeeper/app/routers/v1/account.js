@@ -44,6 +44,10 @@ module.exports = {
 
       '/verify': {
         post: { action: 'gatekeeper.account@verify', policy: 'gatekeeper.account.verify' }
+      },
+
+      '/resend': {
+        post: { action: 'gatekeeper.account@resend', policy: 'gatekeeper.account.verify' }
       }
     }
   }

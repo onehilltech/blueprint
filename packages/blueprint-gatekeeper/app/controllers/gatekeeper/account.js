@@ -292,5 +292,24 @@ module.exports = ResourceController.extend ({
         return res.status (200).json ({ account });
       }
     });
+  },
+
+  /**
+   * Resend the verification email for the account.
+   */
+  resend () {
+    return this.SingleResourceAction.extend ({
+      verification: service (),
+
+      async executeFor (account, req, res) {
+        if (account.verified)
+          throw new BadRequestError ('already_verified', 'The account has already been verified');
+
+        // Send the verification email for this account.
+        await this.verification.sendEmail (account, req.accessToken.client);
+
+        return res.status (200).json ({ account });
+      }
+    });
   }
 });
