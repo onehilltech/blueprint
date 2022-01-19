@@ -534,7 +534,7 @@ describe ('app | routers | account', function () {
 
   describe ('/v1/accounts/:accountId/verify', function () {
     context ('POST', function () {
-      it ('should verify an account', async function () {
+      it.only ('should verify an account', async function () {
         const { accounts: [,account]} = seed ();
 
         const res = await request ()

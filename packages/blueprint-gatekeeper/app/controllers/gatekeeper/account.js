@@ -289,7 +289,19 @@ module.exports = ResourceController.extend ({
         account.verification.ip_address = req.ip;
         await account.save ();
 
+        // Let's also send a real-time notification to the client.
+        await this._emitIO (account);
+
         return res.status (200).json ({ account });
+      },
+
+      async _emitIO (account) {
+        const { configs: { gatekeeper: { io: bucket } } } = this.app;
+
+        if (!!bucket) {
+          const io = this.app.lookup ('service:io').connection (bucket);
+          await io.to (account.id).emit ('verified');
+        }
       }
     });
   },
@@ -299,6 +311,7 @@ module.exports = ResourceController.extend ({
    */
   resend () {
     return this.SingleResourceAction.extend ({
+      // Reference to the verification service.
       verification: service (),
 
       async executeFor (account, req, res) {

@@ -40,5 +40,8 @@ module.exports = {
   },
 
   usernameIsEmail: false,
-  verificationRequired: true
+  verificationRequired: true,
+
+  // Connection to use for SocketIO.
+  io: 'insecure'
 };
