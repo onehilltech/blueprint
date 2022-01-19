@@ -12,6 +12,7 @@
   "dependencies": {
     "@onehilltech/blueprint-mailer": "^4.54.2",
     "@onehilltech/blueprint-mongodb": "^4.52.0",
+    "@onehilltech/blueprint-socket.io": "^4.52.0",
     "bcrypt": "^5.0.0",
     "commander": "^2.11.0",
     "cors": "^2.8.5",
