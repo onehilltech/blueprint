@@ -85,7 +85,7 @@ module.exports = Controller.extend ({
         const payload = { jti: account.id };
         const token = await this.controller.tokenGenerator.generateToken (payload);
         const { accessToken: { client: { password_reset_url }}} = req;
-        const url = `${password_reset_url}&token=${token}`;
+        const url = `${password_reset_url}?token=${token}`;
 
         // Send the forgot password email to the user.
         await this.controller.mailer.send ('gatekeeper.password.reset', {
