@@ -20,6 +20,7 @@ const {
   model,
   service,
   ForbiddenError,
+  BadRequestError
 } = require ('@onehilltech/blueprint');
 
 const { defaultsDeep } = require ('lodash');
@@ -107,8 +108,6 @@ module.exports = Controller.extend ({
    * The user wants to reset their password. This method works in conjunction with
    * forgotPassword(). We are expecting the query for this request to contain a
    * valid token that was issued by forgotPassword().
-   *
-   * @return {*}
    */
   resetPassword () {
     return Action.extend ({
@@ -129,37 +128,60 @@ module.exports = Controller.extend ({
         }
       },
 
-      execute (req, res) {
+      /**
+       * @override
+       */
+      async execute (req, res) {
         const {token, password} = req.body['reset-password'];
+        const payload = await this._verifyToken (token);
+        const account = await this.controller.Account.findById (payload.jti);
 
-        return this.controller.tokenGenerator.verifyToken (token)
-          .then (payload => this.controller.Account.findById (payload.jti))
-          .then (account => {
-            if (!account)
-              return Promise.reject (new ForbiddenError ('unknown_account', 'The account does not exist.'));
+        if (!account)
+          throw new BadRequestError ('unknown_account', 'The account does not exist.');
 
-            if (!account.enabled)
-              return Promise.reject (new ForbiddenError ('account_disabled', 'The account is disabled.'));
+        if (!account.enabled)
+          throw new BadRequestError ('account_disabled', 'The account is disabled.');
 
-            account.password = password;
-            return account.save ();
-          })
-          .then (account => {
-            this.emit ('gatekeeper.password.reset', account);
+        // Replace the password, and save it. After we save the password, we are going to
+        // emit an event and send an email to the account owner.
 
-            res.status (200).json (true);
-          })
-          .catch (err => {
-            // Translate the error, if necessary. We have to check the name because the error
-            // could be related to token verification.
-            if (err.name === 'TokenExpiredError')
-              err = new ForbiddenError ('token_expired', 'The access token has expired.');
+        account.password = password;
+        await account.save ();
 
-            if (err.name === 'JsonWebTokenError')
-              err = new ForbiddenError ('invalid_token', err.message);
+        await this.emit ('gatekeeper.password.changed', account);
+        await this.controller.mailer.send ('gatekeeper.password.changed', {
+          message: {
+            to: account.email
+          },
+          locals: {
+            account
+          }
+        });
 
-            return Promise.reject (err);
-          });
+        return res.status (200).json (true);
+      },
+
+      /**
+       * Verify the access token.
+       *
+       * @param token
+       * @private
+       */
+      async _verifyToken (token) {
+        try {
+          return await this.controller.tokenGenerator.verifyToken (token);
+        }
+        catch (err) {
+          // Translate the error, if necessary. We have to check the name because the error
+          // could be related to token verification.
+          if (err.name === 'TokenExpiredError')
+            throw new ForbiddenError ('token_expired', 'The access token has expired.');
+
+          if (err.name === 'JsonWebTokenError')
+            throw new ForbiddenError ('invalid_token', err.message);
+
+          throw err;
+        }
       }
     });
   }
