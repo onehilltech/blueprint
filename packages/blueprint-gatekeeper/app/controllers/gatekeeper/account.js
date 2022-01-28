@@ -240,6 +240,9 @@ module.exports = ResourceController.extend ({
         }
       },
 
+      /// Reference to the mailer service for sending emails.
+      mailer: service (),
+
       async executeFor (account, req, res) {
         // Verify the current password. If the password does not match, then we can
         // just return error message to the client, and stop processing the request.
@@ -250,9 +253,21 @@ module.exports = ResourceController.extend ({
         if (!match)
           throw new BadRequestError ('invalid_password', 'The current password is invalid.');
 
-        // Update the old password with the new password.
+        // Update the old password with the new password. After we change the password,
+        // we are going to send out notifications.
+
         account.password = newPassword;
         await account.save ();
+
+        await this.emit ('gatekeeper.password.changed', account);
+        await this.mailer.send ('gatekeeper.password.changed', {
+          message: {
+            to: account.email
+          },
+          locals: {
+            account
+          }
+        });
 
         return res.status (200).json (true);
       }
