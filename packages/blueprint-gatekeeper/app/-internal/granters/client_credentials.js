@@ -17,7 +17,7 @@
 const Granter = require ('../granter');
 const { model } = require ('@onehilltech/blueprint');
 const moment = require ('moment');
-
+const { union } = require ('lodash');
 /**
  * @class ClientCredentials
  *
@@ -34,11 +34,14 @@ module.exports = Granter.extend ({
    * @param req
    */
   onCreateToken (req) {
-    const {gatekeeperClient: client} = req;
+    const {
+      gatekeeperClient: client,
+      body: { scope = [] }
+    } = req;
 
     const doc = {
       client: client._id,
-      scope : client.scope,
+      scope: union (client.scope, scope),
     };
 
     if (!!client.expiration) {
