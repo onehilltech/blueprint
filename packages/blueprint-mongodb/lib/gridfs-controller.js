@@ -171,7 +171,7 @@ module.exports = ResourceController.extend ({
         ];
 
         return Promise.all (promises)
-          .then (([options,metadata]) => {
+          .then (([options, metadata]) => {
             return Promise.resolve (this.preWriteUpload (req))
               .then (() => {
                 if (Object.keys (metadata).length !== 0)
@@ -239,11 +239,11 @@ module.exports = ResourceController.extend ({
         }
       },
 
-      execute (req, res) {
-        return Promise.resolve (this.preGetItem (req))
-          .then (() => this.getItem (req))
-          .then (item => this.postGetItem (req, item))
-          .then (item => this._downloadItem (req, res, item));
+      async execute (req, res) {
+        await this.preGetItem (req);
+        const item = await this.getItem (req);
+        await this.postGetItem (req, item);
+        await this.downloadItem (req, res, item);
       },
 
       preGetItem (req) {
@@ -275,12 +275,17 @@ module.exports = ResourceController.extend ({
         return item;
       },
 
-      _downloadItem (req, res, item) {
+      downloadItem (req, res, item) {
         const id = req.params[this.controller.id];
 
-        return new Promise ((resolve,reject) => {
-          let download = this.controller.bucket.openDownloadStream (id);
+        return new Promise ((resolve, reject) => {
+          const download = this.controller.bucket.openDownloadStream (id);
 
+          // We know this resource will never be updated because there is no update action
+          // supported by the GridFS controller. Let's instruct the browser to cache this
+          // resource forever by setting its expiration to 1 year.
+
+          res.set ('Cache-Control', 'max-age: 31536000, immutable');
           res.type (item.contentType);
 
           download
