@@ -16,6 +16,7 @@
 
 const assert = require ('assert');
 const { computed } = require ('base-object');
+const { camelCase } = require ('lodash');
 
 const Action     = require ('./action');
 const Controller = require ('./controller');
@@ -82,7 +83,7 @@ module.exports = Controller.extend ({
     assert (!!this.name, 'You must provide a \'name\' property.');
 
     if (!this.id)
-      this.id = `${this.name}Id`;
+      this.id = `${camelCase (this.name)}Id`;
   },
 
   create () {
