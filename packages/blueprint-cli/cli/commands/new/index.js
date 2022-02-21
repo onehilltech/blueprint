@@ -27,6 +27,7 @@ const { fromCallback } = require ('bluebird');
 const { EntityGenerator, TemplatePath, ProgramContext } = require ('../../../lib');
 
 const run = process.platform === 'win32' ? spawn : execFile;
+const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 const NewGenerator = EntityGenerator.extend ({
   helpers: {
@@ -69,7 +70,7 @@ class NewCommand extends Command {
         [ 'bin' ]
       ];
 
-      let promises = Promise.all (commands.map (command => fromCallback (callback => run ('npm', command, {cwd: outputPath}, callback))));
+      let promises = Promise.all (commands.map (command => fromCallback (callback => run (npm, command, {cwd: outputPath}, callback))));
       ora.promise (promises, 'installing node modules...');
 
       return promises;
