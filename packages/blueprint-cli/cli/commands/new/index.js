@@ -22,9 +22,11 @@ const handlebars = require ('handlebars');
 
 const { ensureDir } = require ('fs-extra');
 const { kebabCase } = require ('lodash');
-const { execFile } = require ('child_process');
+const { execFile, spawn } = require ('child_process');
 const { fromCallback } = require ('bluebird');
 const { EntityGenerator, TemplatePath, ProgramContext } = require ('../../../lib');
+
+const run = process.platform === 'win32' ? spawn : execFile;
 
 const NewGenerator = EntityGenerator.extend ({
   helpers: {
@@ -67,7 +69,7 @@ class NewCommand extends Command {
         [ 'bin' ]
       ];
 
-      let promises = Promise.all (commands.map (command => fromCallback (callback => execFile ('npm', command, {cwd: outputPath}, callback))));
+      let promises = Promise.all (commands.map (command => fromCallback (callback => run ('npm', command, {cwd: outputPath}, callback))));
       ora.promise (promises, 'installing node modules...');
 
       return promises;
