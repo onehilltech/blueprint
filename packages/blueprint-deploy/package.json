@@ -1,7 +1,7 @@
 {
   "name": "blueprint-deploy",
   "description": "",
-  "version": "4.56.4",
+  "version": "4.56.5",
   "private": true,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
@@ -14,7 +14,7 @@
     "@onehilltech/blueprint": "^4.56.3"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-cli": "^4.56.4",
+    "@onehilltech/blueprint-cli": "^4.56.5",
     "@onehilltech/blueprint-testing": "^4.46.0"
   },
   "license": "",
