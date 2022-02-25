@@ -20,7 +20,6 @@ const debug   = require ('debug')('blueprint:RouterBuilder');
 const express = require ('express');
 const { checkSchema } = require ('express-validator/check');
 const path    = require ('path');
-const Router  = require ('./router');
 const util = require ('util');
 
 const {

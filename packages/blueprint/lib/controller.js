@@ -24,5 +24,31 @@ const { Events } = require ('./messaging');
  */
 module.exports = BO.extend (Events, {
   /// The hosting application for the controller.
-  app: null
+  app: null,
+
+  _registered: null,
+
+  _configured: false,
+
+  init () {
+    this._super.call (this, ...arguments);
+    this._registered = [];
+  },
+
+  registerAction (action) {
+    this._registered.push (action);
+
+    if (this._configured)
+      action.configure ();
+  },
+
+  /**
+   * Configure the controller.
+   *
+   * @returns {Promise<void>}
+   */
+  async configure () {
+    for await (const action of this._registered)
+      await action.configure ();
+  }
 });

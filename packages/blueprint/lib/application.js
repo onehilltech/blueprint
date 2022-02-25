@@ -116,12 +116,22 @@ module.exports = BO.extend (Events, {
       .then (() => this._importResources (this.appPath))
       .then (() => {
         // Allow the loaded services to configure themselves.
-        let {services} = this.resources;
+        const {services} = this.resources;
 
         return BPromise.props (mapValues (services, (service, name) => {
           debug (`configuring service ${name}`);
 
           return service.configure ();
+        }));
+      })
+      .then (() => {
+        // Allow the loaded controllers to configure themselves.
+        const {controllers} = this.resources;
+
+        return BPromise.props (mapValues (controllers, (controller, name) => {
+          debug (`configuring controller ${name}`);
+
+          return controller.configure ();
         }));
       })
       .then (() => this._server.configure (this.configs.server))

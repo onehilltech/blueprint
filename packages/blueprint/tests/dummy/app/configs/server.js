@@ -19,7 +19,7 @@ const blueprint = require ('../../../../lib');
 module.exports = {
   // using protocols is the legacy method configuring server ports
   connections : {
-    insecure : { protocol: 'http', port: 8080 },
+    insecure : { protocol: 'http', port: 10000 },
 
     secure : {
       port: 8443,

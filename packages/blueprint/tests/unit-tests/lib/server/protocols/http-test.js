@@ -10,7 +10,7 @@ describe ('lib | server | protocols | Http', function () {
       const { server: { connections: { insecure } } } = blueprint.app;
 
       expect (insecure).to.be.instanceof (Http);
-      expect (insecure).to.have.property ('options').to.deep.include ({port: 8080});
+      expect (insecure).to.have.property ('options').to.deep.include ({port: 10000});
       expect (insecure).to.have.property ('server').instanceof (http.Server);
     });
   });
