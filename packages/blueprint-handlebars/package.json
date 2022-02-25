@@ -1,17 +1,18 @@
 {
-  "name": "@onehilltech/blueprint-urls",
-  "description": "Blueprint module for defining and managing urls.",
-  "version": "4.57.0",
+  "name": "@onehilltech/blueprint-handlebars",
+  "description": "blueprint module for integrating handlebars templates",
+  "version": "0.0.0",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "install-service": "sudo -s forever-service install blueprint-urls_d --script ./app/index.js -e 'NODE_ENV=production'",
-    "uninstall-service": "sudo -s forever-service delete blueprint-urls_d"
+    "install-service": "sudo -s forever-service install blueprint-handlebars_d --script ./app/index.js -e 'NODE_ENV=production'",
+    "uninstall-service": "sudo -s forever-service delete blueprint-handlebars_d"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.57.0"
+    "@onehilltech/blueprint": "^4.57.0",
+    "handlebars": "^4.7.7"
   },
   "devDependencies": {
     "@onehilltech/blueprint-cli": "^4.57.0",
@@ -23,9 +24,6 @@
     "npm": ">=3.0.0"
   },
   "keywords": [
-    "blueprint",
-    "blueprint-module",
-    "urls"
-  ],
-  "gitHead": "f96f446f744b128554dd97142c000f562baa1ba4"
+    "blueprint"
+  ]
 }
