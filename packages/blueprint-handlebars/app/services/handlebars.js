@@ -5,7 +5,7 @@ const fs = Promise.promisifyAll (require ('fs'));
 const fse = require ('fs-extra');
 const Handlebars = require ('handlebars');
 const _ = require ('lodash');
-const TemplateCompiler = require ('../../lib/template-compliler');
+const TemplateCompiler = require ('../../lib/template-compiler');
 
 const HANDLEBARS_RESOURCE_PATH = 'resources/mailer';
 
@@ -39,7 +39,7 @@ module.exports = Service.extend ({
   /**
    * Get the mailer path.
    */
-  templatePath: computed ({
+  handlebarsPath: computed ({
     get () { return path.resolve (this.app.tempPath, HANDLEBARS_RESOURCE_PATH); }
   }),
 
@@ -67,7 +67,7 @@ module.exports = Service.extend ({
    * @private
    */
   async _initHandlebarsPartials () {
-    const partialsPath = path.resolve (this.mailerPath, 'partials');
+    const partialsPath = path.resolve (this.handlebarsPath, 'partials');
     const exists = await fse.pathExists (partialsPath);
 
     if (!exists)
@@ -89,7 +89,7 @@ module.exports = Service.extend ({
    * @private
    */
   async _initHandlebarsHelpers () {
-    const helpersPath = path.resolve (this.mailerPath, 'helpers');
+    const helpersPath = path.resolve (this.handlebarsPath, 'helpers');
     const exists = await fse.pathExists (helpersPath);
 
     if (!exists)
