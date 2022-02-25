@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-schedule",
   "description": "Blueprint.js module for node-schedule",
-  "version": "4.57.0",
+  "version": "4.58.0",
   "main": "./lib",
   "private": false,
   "scripts": {
@@ -10,12 +10,12 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.57.0",
-    "@onehilltech/blueprint-cli": "^4.57.0",
+    "@onehilltech/blueprint": "^4.58.0",
+    "@onehilltech/blueprint-cli": "^4.58.0",
     "node-schedule": "^1.3.2"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^4.57.0"
+    "@onehilltech/blueprint-testing": "^4.58.0"
   },
   "license": "",
   "engines": {

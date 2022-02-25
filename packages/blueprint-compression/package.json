@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-compression",
   "description": "Blueprint add-on for adding compression support to a Blueprint application.",
-  "version": "4.57.0",
+  "version": "4.58.0",
   "private": false,
   "repository": "onehilltech/blueprint",
   "scripts": {
@@ -10,11 +10,11 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.57.0",
+    "@onehilltech/blueprint": "^4.58.0",
     "compression": "^1.7.3"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^4.57.0"
+    "@onehilltech/blueprint-testing": "^4.58.0"
   },
   "license": "Apache-2.0",
   "engines": {
