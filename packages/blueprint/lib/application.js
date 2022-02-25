@@ -124,16 +124,7 @@ module.exports = BO.extend (Events, {
           return service.configure ();
         }));
       })
-      .then (() => {
-        // Allow the loaded controllers to configure themselves.
-        const {controllers} = this.resources;
 
-        return BPromise.props (mapValues (controllers, (controller, name) => {
-          debug (`configuring controller ${name}`);
-
-          return controller.configure ();
-        }));
-      })
       .then (() => this._server.configure (this.configs.server))
       // Import the views of the application into the server. The views of the
       // application will overwrite any views previously imported when we loaded
@@ -148,6 +139,16 @@ module.exports = BO.extend (Events, {
       .then (router => {
         // Install the built router into the server.
         this._server.setMainRouter (router);
+
+        // Allow the loaded controllers to configure themselves.
+        const { controllers } = this.resources;
+
+        return BPromise.props (mapValues (controllers, (controller, name) => {
+          debug (`configuring controller ${name}`);
+
+          return controller.configure ();
+        }));
+
         return this.emit ('blueprint.app.initialized', this);
       })
       .then (() => this);
