@@ -25,6 +25,6 @@ module.exports = class TemplateCompiler {
       return null;
 
     const content = await fs.readFileAsync (path, 'utf-8');
-    return await this.handlebars.compile (content);
+    return this.handlebars.compile (content);
   }
 }

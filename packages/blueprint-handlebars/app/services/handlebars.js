@@ -7,7 +7,7 @@ const Handlebars = require ('handlebars');
 const _ = require ('lodash');
 const TemplateCompiler = require ('../../lib/template-compiler');
 
-const HANDLEBARS_RESOURCE_PATH = 'resources/mailer';
+const HANDLEBARS_RESOURCE_PATH = 'resources/handlebars';
 
 /**
  * @class handlebars
@@ -49,7 +49,7 @@ module.exports = Service.extend ({
    * @param path
    * @returns {*}
    */
-  compile (path) {
+  async compile (path) {
     return this._templateCompiler.compile (path);
   },
 
