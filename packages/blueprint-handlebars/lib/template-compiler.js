@@ -14,9 +14,9 @@ module.exports = class TemplateCompiler {
   }
 
   /**
-   * Compile the template
-   * @param name
-   * @returns {Promise<null|*>}
+   * Compile the template.
+   *
+   * @param path        Path to template file.
    */
   async compile (path) {
     const exists = await fse.pathExists (path);

@@ -44,6 +44,16 @@ module.exports = Service.extend ({
   }),
 
   /**
+   * Compile a template.
+   *
+   * @param path
+   * @returns {*}
+   */
+  compile (path) {
+    return this._templateCompiler.compile (path);
+  },
+
+  /**
    * Initialize the handlebars environment instance.
    *
    * @private
