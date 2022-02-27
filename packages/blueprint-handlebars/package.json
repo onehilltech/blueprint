@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-handlebars",
   "description": "blueprint module for integrating handlebars templates",
-  "version": "4.59.2",
+  "version": "4.60.0",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
@@ -11,12 +11,12 @@
     "uninstall-service": "sudo -s forever-service delete blueprint-handlebars_d"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.59.1",
+    "@onehilltech/blueprint": "^4.60.0",
     "handlebars": "^4.7.7"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-cli": "^4.58.1",
-    "@onehilltech/blueprint-testing": "^4.58.1"
+    "@onehilltech/blueprint-cli": "^4.60.0",
+    "@onehilltech/blueprint-testing": "^4.60.0"
   },
   "license": "Apache-2.0",
   "engines": {

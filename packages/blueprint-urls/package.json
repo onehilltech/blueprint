@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-urls",
   "description": "Blueprint module for defining and managing urls.",
-  "version": "4.59.1",
+  "version": "4.60.0",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
@@ -11,11 +11,11 @@
     "uninstall-service": "sudo -s forever-service delete blueprint-urls_d"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.59.1"
+    "@onehilltech/blueprint": "^4.60.0"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-cli": "^4.58.1",
-    "@onehilltech/blueprint-testing": "^4.58.1"
+    "@onehilltech/blueprint-cli": "^4.60.0",
+    "@onehilltech/blueprint-testing": "^4.60.0"
   },
   "license": "Apache-2.0",
   "engines": {
