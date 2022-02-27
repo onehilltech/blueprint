@@ -2,7 +2,8 @@
   "name": "@onehilltech/blueprint-emberjs",
   "description": "Blueprint module for hosting an EmberJS application.",
   "version": "4.60.0",
-  "private": true,
+  "private": false,
+  "main": "./lib",
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
