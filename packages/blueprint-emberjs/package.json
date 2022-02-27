@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.60.0",
-    "@onehilltech/blueprint-handlebars": "^4.60.0"
+    "@onehilltech/blueprint-handlebars": "^4.60.0",
+    "mime": "^3.0.0"
   },
   "devDependencies": {
     "@onehilltech/blueprint-cli": "^4.60.0",
