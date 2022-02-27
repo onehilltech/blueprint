@@ -1,0 +1,27 @@
+{
+  "name": "@onehilltech/blueprint-emberjs",
+  "description": "Blueprint module for hosting an EmberJS application.",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
+    "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+  },
+  "dependencies": {
+    "@onehilltech/blueprint": "^4.59.1",
+    "@onehilltech/blueprint-handlebars": "^4.59.2"
+  },
+  "devDependencies": {
+    "@onehilltech/blueprint-cli": "^4.58.1",
+    "@onehilltech/blueprint-testing": "^4.58.1"
+  },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=6.0.0",
+    "npm": ">=3.0.0"
+  },
+  "keywords": [
+    "blueprint"
+  ]
+}
