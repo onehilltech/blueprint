@@ -23,6 +23,8 @@
     "npm": ">=3.0.0"
   },
   "keywords": [
-    "blueprint"
+    "blueprint",
+    "blueprint-module",
+    "emberjs"
   ]
 }
