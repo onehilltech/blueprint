@@ -1,6 +1,6 @@
 module.exports = {
   connections : {
-    insecure: { protocol: 'http', port: 8080 }
+    insecure: { protocol: 'http' }
   },
 
   middleware : {

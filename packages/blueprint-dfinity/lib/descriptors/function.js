@@ -28,7 +28,7 @@ class FunctionDescriptor extends PropertyDescriptor {
   defineProperty (actor, name) {
     // Define this action on the actor. This will allow the actor to create an
     // instance of itself.
-    actor.registerAction (name, this.definition);
+    actor.defineAction (name, this.definition);
 
     // The property definition is the signature the IDL.Func expects for this action.
     Object.defineProperty (actor, name, {

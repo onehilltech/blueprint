@@ -17,4 +17,5 @@
 module.exports = exports = {};
 
 exports.Actor = require ('./actor');
-exports.ActorBuilder = require ('./actor-builder');
+exports.update = require ('./descriptors/update');
+exports.query = require ('./descriptors/query');

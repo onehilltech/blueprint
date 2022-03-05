@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const BO = require ('@onehilltech/blueprint');
+const { BO, computed } = require ('@onehilltech/blueprint');
 const Actor = require("@dfinity/agent").Actor;
 const { mapValues } = require ('lodash');
 
@@ -24,12 +24,13 @@ const { mapValues } = require ('lodash');
  * The base class for actor objects.
  */
 module.exports = BO.extend ({
-  init () {
-    this._super.call (this, ...arguments);
-
-    /// The actions known to the actor.
-    this._actions = [];
-  },
+  /**
+   *
+   * @return {null}
+   */
+  idl: computed ({
+    get () { return this._idl_ }
+  }),
 
   /**
    * Create an instance of this actor.
@@ -47,8 +48,8 @@ module.exports = BO.extend ({
    * @param definition       The IDL definition for the action.
    * @private
    */
-  registerAction (name, definition) {
-    this._actions[name] = definition;
+  defineAction (name, definition) {
+    (this._idl_ = this._idl_ || {})[name] = definition;
   },
 
   /**
@@ -58,7 +59,7 @@ module.exports = BO.extend ({
    * @returns {*}
    * @private
    */
-  _createIdlFactory (IDL) {
+  _createIdlFactory ({ IDL }) {
     /**
      * Make the string definition to the IDL definition.
      *
@@ -86,7 +87,7 @@ module.exports = BO.extend ({
     // Map each of the actions defined in this actor to its IDL definition. We then
     // use the collection of definitions to instantiate the actor service.
 
-    const service = mapValues (this._actions, (definition) => {
+    const service = mapValues (this._idl_, (definition) => {
       const [input, output, type] = definition;
       const inputDefinition = mapDefinition (input);
       const outputDefinition = mapDefinition (output)
@@ -98,5 +99,5 @@ module.exports = BO.extend ({
   },
 
   /// The actions known to the actor.
-  _actions: null,
+  _idl_: null,
 });
