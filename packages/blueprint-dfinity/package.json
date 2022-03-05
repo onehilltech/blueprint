@@ -1,0 +1,32 @@
+{
+  "name": "blueprint-dfinity",
+  "description": "Blueprint module for integrating with the Internet Computer",
+  "version": "0.0.0",
+  "private": false,
+  "main": "./lib",
+  "scripts": {
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
+    "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+  },
+  "dependencies": {
+    "@dfinity/agent": "^0.10.3",
+    "@dfinity/candid": "^0.10.3",
+    "@dfinity/principal": "^0.10.3",
+    "@onehilltech/blueprint": "^4.60.0",
+    "node-fetch": "^3.2.1"
+  },
+  "devDependencies": {
+    "@onehilltech/blueprint-cli": "^4.60.0",
+    "@onehilltech/blueprint-testing": "^4.60.3"
+  },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=6.0.0",
+    "npm": ">=3.0.0"
+  },
+  "keywords": [
+    "blueprint",
+    "blueprint-module"
+  ]
+}

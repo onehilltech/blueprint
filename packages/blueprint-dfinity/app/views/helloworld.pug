@@ -1,0 +1,32 @@
+doctype html
+html(lang="en")
+    head
+        title Blueprint.js - Hello, World!
+
+        link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css")
+        link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css")
+        script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js")
+
+    body
+        div.container
+            h1 Blueprint.js
+
+            p
+                | This example illustrates how a simple web application in Blueprint.js that
+                | use both <strong>GET</strong> and <strong>PUT</strong> verbs with either a
+                | controller or view.
+
+            form.form-horizontal(method='post', action='/')
+                div.form-group
+                    label.col-sm-2.control-label(for="name") Name
+                    div.col-sm-10
+                        input#name.form-control(type="text", name="name", placeholder="Type name here")
+
+                div.form-group
+                    div.col-sm-offset-2.col-sm-10
+                        button.btn.btn-default(type="submit") Submit
+
+            - if (name)
+                p The POST method uses a controller to handle the action.
+
+                blockquote Hello, #{name}! How are you doing?
