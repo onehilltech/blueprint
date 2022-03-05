@@ -12,11 +12,11 @@ const HelloActorFactory = Actor.extend ({
 describe ('lib | Actor', function () {
   it ('should define an actor', function () {
     expect (HelloActorFactory.prototype).to.have.property ('_idl_')
-      .to.include.keys (['greet', 'greetq', 'whoami']);
+      .to.have.keys (['greet', 'greetq', 'whoami']);
 
     const hello = new HelloActorFactory ();
     expect (hello).to.have.property ('_idl_')
-      .to.include.keys (['greet', 'greetq', 'whoami']);
+      .to.have.keys (['greet', 'greetq', 'whoami']);
   });
 
   it ('should create an actor instance', function () {
@@ -25,5 +25,8 @@ describe ('lib | Actor', function () {
 
     const factory = new HelloActorFactory ();
     const hello = factory.createInstance ({ agent, canisterId });
+
+    expect (hello).to.include.keys (['greet', 'greetq', 'whoami']);
+
   });
 });
