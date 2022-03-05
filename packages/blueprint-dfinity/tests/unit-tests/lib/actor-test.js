@@ -3,18 +3,18 @@ const { expect } = require ('chai');
 
 const HttpAgent = require('@dfinity/agent').HttpAgent;
 
-const HelloActor = Actor.extend ({
+const HelloActorFactory = Actor.extend ({
   greet: update ('text', 'text'),
   greetq: query ('text', 'text'),
-  whoami: query (null, 'principal'),
+  whoami: query (undefined, 'principal'),
 });
 
 describe ('lib | Actor', function () {
   it ('should define an actor', function () {
-    expect (HelloActor.prototype).to.have.property ('_idl_')
+    expect (HelloActorFactory.prototype).to.have.property ('_idl_')
       .to.include.keys (['greet', 'greetq', 'whoami']);
 
-    const hello = new HelloActor ();
+    const hello = new HelloActorFactory ();
     expect (hello).to.have.property ('_idl_')
       .to.include.keys (['greet', 'greetq', 'whoami']);
   });
@@ -23,7 +23,7 @@ describe ('lib | Actor', function () {
     const canisterId = 'rrkah-fqaaa-aaaaa-aaaaq-cai';
     const agent = new HttpAgent ({ host: 'http://localhost:8000' });
 
-    const hello = new HelloActor ();
-    hello.createInstance ({ agent, canisterId });
+    const factory = new HelloActorFactory ();
+    const hello = factory.createInstance ({ agent, canisterId });
   });
 });

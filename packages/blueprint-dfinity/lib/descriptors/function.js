@@ -18,8 +18,8 @@ class FunctionDescriptor extends PropertyDescriptor {
     super ();
 
     this._type = type;
-    this._input = isArray (input) ? input : [input];
-    this._output = isArray (output) ? output : [output];
+    this._input = input ? (isArray (input) ? input : [input]) : [];
+    this._output = output ? (isArray (output) ? output : [output]) : [];
   }
 
   /**
