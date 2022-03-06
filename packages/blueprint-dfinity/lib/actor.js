@@ -19,6 +19,62 @@ const Actor = require("@dfinity/agent").Actor;
 const { mapValues } = require ('lodash');
 
 /**
+ * Make the string definition to the IDL definition.
+ *
+ * @param IDL            Current IDL version
+ * @param definition      String definition
+ * @return               IDL definition
+ */
+function mapDefinition (IDL, definition) {
+  return definition.map (term => {
+    // Use a simple map. We may want to replace the switch for a function that transforms
+    // the text term into to an IDL property.
+
+    switch (term) {
+      case 'text': return IDL.Text;
+      case 'blob': return IDL.Vec (IDL.Nat8);
+
+      case 'principal': return IDL.Principal;
+
+      case 'nat': return IDL.Nat;
+      case 'nat8': return IDL.Nat8;
+      case 'nat16': return IDL.Nat16;
+      case 'nat32': return IDL.Nat32;
+      case 'nat64': return IDL.Nat64;
+
+      case 'int': return IDL.Int;
+      case 'int8': return IDL.Int8;
+      case 'int16': return IDL.Int16;
+      case 'int32': return IDL.Int32;
+      case 'int64': return IDL.Int64;
+
+      case 'float32': return IDL.Float32;
+      case 'float64': return IDL.Float64;
+
+      case 'bool': return IDL.Bool;
+      case 'null': return IDL.Null;
+
+      case 'reserved': return IDL.Reserved;
+      case 'empty': return IDL.Empty;
+
+      default:
+        // Let's try to handle the more complex type definitions.
+        if (term.startsWith ('vec')) {
+          const vectorType = term.substring (0, 3);
+          return IDL.Vec (mapDefinition (IDL, vectorType));
+        }
+        else if (term.startsWith ('opt')) {
+          const optType = term.substring (0, 3);
+          return IDL.Opt (mapDefinition (IDL, optType));
+        }
+        else {
+          throw new Error (`We do not understand '${term}' IDL definition type.`);
+        }
+    }
+  })
+}
+
+/**
  * @class Actor
  *
  * The base class for actor objects.
@@ -60,37 +116,13 @@ module.exports = BO.extend ({
    * @private
    */
   _createIdlFactory ({ IDL }) {
-    /**
-     * Make the string definition to the IDL definition.
-     *
-     * @param definition      String definition
-     * @return               IDL definition
-     */
-    function mapDefinition (definition) {
-      return definition.map (term => {
-        // Use a simple map. We may want to replace the switch for a function that transforms
-        // the text term into to an IDL property.
-
-        switch (term) {
-          case 'text':
-            return IDL.Text;
-
-          case 'principal':
-            return IDL.Principal;
-
-          default:
-            throw new Error (`We do not understand '${term}' IDL definition type.`);
-        }
-      })
-    }
-
     // Map each of the actions defined in this actor to its IDL definition. We then
     // use the collection of definitions to instantiate the actor service.
 
     const service = mapValues (this._idl_, (definition) => {
       const [input, output, type] = definition;
-      const inputDefinition = mapDefinition (input);
-      const outputDefinition = mapDefinition (output)
+      const inputDefinition = mapDefinition (IDL, input);
+      const outputDefinition = mapDefinition (IDL, output)
 
       return IDL.Func (inputDefinition, outputDefinition, type);
     });
