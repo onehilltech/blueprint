@@ -10,16 +10,17 @@ const HelloFactory = Actor.extend ({
   record: query (undefined, { record: { name: 'text' }}),
   service: query (undefined, { service: { name: 'text' }}),
   variant: query (undefined, { variant: { name: 'text' }}),
+  function: query (undefined, { function: ['text', 'text']}),
 });
 
 describe ('lib | Actor', function () {
   it ('should define an actor', function () {
     expect (HelloFactory.prototype).to.have.property ('_idl_')
-      .to.have.keys (['greet', 'greetq', 'whoami', 'record', 'service', 'variant']);
+      .to.have.keys (['greet', 'greetq', 'whoami', 'record', 'service', 'variant', 'function']);
 
     const hello = new HelloFactory ();
     expect (hello).to.have.property ('_idl_')
-      .to.have.keys (['greet', 'greetq', 'whoami', 'record', 'service', 'variant']);
+      .to.have.keys (['greet', 'greetq', 'whoami', 'record', 'service', 'variant', 'function']);
   });
 
   it ('should create an actor instance', function () {
@@ -29,6 +30,6 @@ describe ('lib | Actor', function () {
     const factory = new HelloFactory ();
     const hello = factory.createInstance ({ agent, canisterId });
 
-    expect (hello).to.include.keys (['greet', 'greetq', 'whoami', 'record', 'service', 'variant']);
+    expect (hello).to.include.keys (['greet', 'greetq', 'whoami', 'record', 'service', 'variant', 'function']);
   });
 });

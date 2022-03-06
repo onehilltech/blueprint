@@ -16,7 +16,7 @@
 
 const { BO, computed } = require ('@onehilltech/blueprint');
 const Actor = require("@dfinity/agent").Actor;
-const { mapValues, isString, isPlainObject } = require ('lodash');
+const { mapValues, isString, isArray, isPlainObject } = require ('lodash');
 
 /**
  * Make the string definition to the IDL definition.
@@ -73,22 +73,44 @@ function mapType (IDL, definition) {
     }
   }
   else if (isPlainObject (definition)) {
-    const { record, service, variant } = definition;
+    const { record, service, variant, function: func } = definition;
 
     if (record) {
+      // We are defining a record type.
       const fields = mapValues (record, value => mapType (IDL, value));
       return IDL.Record (fields);
     }
     else if (service) {
+      // We are defining a service type.
       const fields = mapValues (service, value => mapType (IDL, value))
       return IDL.Service (fields);
     }
     else if (variant) {
+      // We are defining a variant type.
       const fields = mapValues (variant, value => mapType (IDL, value));
       return IDL.Variant (fields);
     }
+    else if (func) {
+      // We are defining a function type.
+      let [params, output, annotations] = func;
+
+      if (!isArray (params))
+        params = [params];
+
+      if (!isArray (output))
+        output = [output];
+
+      if (!isArray (annotations))
+        annotations = [annotations];
+
+      return IDL.Func (
+        params.map (type => mapType (IDL, type)),
+        output.map (type => mapType (IDL, type)),
+        annotations
+      );
+    }
     else {
-      throw new Error (`The object envelope must be one of the following types: record, service, variant.`);
+      throw new Error (`The object envelope must be one of the following types: function, record, service, variant.`);
     }
   }
   else {
