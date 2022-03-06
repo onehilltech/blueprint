@@ -16,7 +16,7 @@
 
 const { BO, computed } = require ('@onehilltech/blueprint');
 const Actor = require("@dfinity/agent").Actor;
-const { mapValues } = require ('lodash');
+const { mapValues, isString, isPlainObject } = require ('lodash');
 
 /**
  * Make the string definition to the IDL definition.
@@ -25,12 +25,12 @@ const { mapValues } = require ('lodash');
  * @param definition      String definition
  * @return               IDL definition
  */
-function mapDefinition (IDL, definition) {
-  return definition.map (term => {
-    // Use a simple map. We may want to replace the switch for a function that transforms
-    // the text term into to an IDL property.
+function mapType (IDL, definition) {
+  // Use a simple map. We may want to replace the switch for a function that transforms
+  // the text term into to an IDL property.
 
-    switch (term) {
+  if (isString (definition)) {
+    switch (definition) {
       case 'text': return IDL.Text;
       case 'blob': return IDL.Vec (IDL.Nat8);
 
@@ -59,19 +59,26 @@ function mapDefinition (IDL, definition) {
 
       default:
         // Let's try to handle the more complex type definitions.
-        if (term.startsWith ('vec')) {
+        if (definition.startsWith ('vec')) {
           const vectorType = term.substring (0, 3);
-          return IDL.Vec (mapDefinition (IDL, vectorType));
+          return IDL.Vec (mapType (IDL, vectorType));
         }
-        else if (term.startsWith ('opt')) {
-          const optType = term.substring (0, 3);
-          return IDL.Opt (mapDefinition (IDL, optType));
+        else if (definition.startsWith ('opt')) {
+          const optType = definition.substring (0, 3);
+          return IDL.Opt (mapType (IDL, optType));
         }
         else {
-          throw new Error (`We do not understand '${term}' IDL definition type.`);
+          throw new Error (`We do not understand '${definition}' IDL definition type.`);
         }
     }
-  })
+  }
+  else if (isPlainObject (definition)) {
+    const fields = mapValues (definition, value => mapType (IDL, value));
+    return IDL.Record (fields);
+  }
+  else {
+    throw new Error (`We do not understand '${definition}' IDL definition type.`);
+  }
 }
 
 /**
@@ -121,10 +128,10 @@ module.exports = BO.extend ({
 
     const service = mapValues (this._idl_, (definition) => {
       const [input, output, type] = definition;
-      const inputDefinition = mapDefinition (IDL, input);
-      const outputDefinition = mapDefinition (IDL, output)
+      const inputTypes = input.map (type => mapType (IDL, type));
+      const outputTypes = output.map (type => mapType (IDL, type));
 
-      return IDL.Func (inputDefinition, outputDefinition, type);
+      return IDL.Func (inputTypes, outputTypes, type);
     });
 
     return IDL.Service (service);
