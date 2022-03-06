@@ -1,4 +1,4 @@
-const { Actor, update, query, IDL } = require ('../../../lib');
+const { Actor, update, query } = require ('../../../lib');
 const { expect } = require ('chai');
 
 const HttpAgent = require('@dfinity/agent').HttpAgent;
