@@ -73,8 +73,23 @@ function mapType (IDL, definition) {
     }
   }
   else if (isPlainObject (definition)) {
-    const fields = mapValues (definition, value => mapType (IDL, value));
-    return IDL.Record (fields);
+    const { record, service, variant } = definition;
+
+    if (record) {
+      const fields = mapValues (record, value => mapType (IDL, value));
+      return IDL.Record (fields);
+    }
+    else if (service) {
+      const fields = mapValues (service, value => mapType (IDL, value))
+      return IDL.Service (fields);
+    }
+    else if (variant) {
+      const fields = mapValues (variant, value => mapType (IDL, value));
+      return IDL.Variant (fields);
+    }
+    else {
+      throw new Error (`The object envelope must be one of the following types: record, service, variant.`);
+    }
   }
   else {
     throw new Error (`We do not understand '${definition}' IDL definition type.`);
