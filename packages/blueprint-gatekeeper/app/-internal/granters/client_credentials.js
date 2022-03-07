@@ -36,7 +36,7 @@ module.exports = Granter.extend ({
   onCreateToken (req) {
     const {
       gatekeeperClient: client,
-      body: { scope = [] }
+      body: { subject, audience, scope = [] }
     } = req;
 
     const doc = {
@@ -56,6 +56,12 @@ module.exports = Granter.extend ({
 
     if (!!origin)
       doc.origin = origin;
+
+    if (!!audience)
+      doc.audience = audience;
+
+    if (!!subject)
+      doc.subject = subject;
 
     return this.ClientToken.create (doc);
   }

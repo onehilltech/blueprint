@@ -2,7 +2,7 @@
   "name": "blueprint-dfinity",
   "description": "Blueprint module for integrating with the Internet Computer",
   "version": "0.0.0",
-  "private": false,
+  "private": true,
   "main": "./lib",
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
