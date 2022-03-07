@@ -18,7 +18,7 @@ const path  = require ('path');
 const fse = require ('fs-extra');
 const debug  = require ('debug')('blueprint:app');
 const assert = require ('assert');
-const { forOwn, get, isArray, mapValues } = require ('lodash');
+const { get, isArray, mapValues } = require ('lodash');
 
 const lookup = require ('./-lookup');
 const { BO, computed } = require ('base-object');
@@ -143,13 +143,19 @@ module.exports = BO.extend (Events, {
         // Allow the loaded controllers to configure themselves.
         const { controllers } = this.resources;
 
-        return BPromise.props (mapValues (controllers, (controller, name) => {
+        function configure (controller, name) {
           debug (`configuring controller ${name}`);
 
-          return controller.configure ();
-        }));
+          if (!!controller.configure) {
+            return controller.configure ();
+          }
+          else {
+            return mapValues (controller, configure);
+          }
+        }
 
-        return this.emit ('blueprint.app.initialized', this);
+        return BPromise.props (mapValues (controllers, configure))
+          .then (() => this.emit ('blueprint.app.initialized', this));
       })
       .then (() => this);
   },
