@@ -82,10 +82,10 @@ schema.methods.check = function (options) {
   const audience = options.aud || options.audience;
   const subject = options.sub || options.subject;
 
-  if (!!this.audience && this.audience !== audience)
+  if (!!audience && !!this.audience && audience !== this.audience)
     return false;
 
-  if (!!this.subject && this.subject !== subject)
+  if (!!subject && !!this.subject && subject !== this.subject)
     return false;
 
   return true;
