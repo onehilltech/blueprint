@@ -73,6 +73,24 @@ schema.methods.supports = function (list) {
   return mm.some (list, this.scope);
 }
 
+/**
+ * Check the access token matches the required options.
+ *
+ * @param options         The options to check.
+ */
+schema.methods.check = function (options) {
+  const audience = options.aud || options.audience;
+  const subject = options.sub || options.subject;
+
+  if (!!this.audience && this.audience !== audience)
+    return false;
+
+  if (!!this.subject && this.subject !== subject)
+    return false;
+
+  return true;
+};
+
 const MODEL_NAME = 'access_token';
 const COLLECTION_NAME = 'gatekeeper_access_tokens';
 
