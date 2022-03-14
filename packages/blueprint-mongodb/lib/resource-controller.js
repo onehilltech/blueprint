@@ -544,7 +544,8 @@ exports = module.exports = ResourceController.extend ({
               this.emit (this.eventName, model);
 
               // Set the headers for the response.
-              res.set (LAST_MODIFIED, model.last_modified.toUTCString ());
+              if (model.last_modified)
+                res.set (LAST_MODIFIED, model.last_modified.toUTCString ());
 
               return this.postUpdateModel (req, model);
             })
