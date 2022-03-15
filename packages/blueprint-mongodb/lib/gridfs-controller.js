@@ -285,7 +285,7 @@ module.exports = ResourceController.extend ({
           // supported by the GridFS controller. Let's instruct the browser to cache this
           // resource forever by setting its expiration to 1 year.
 
-          res.set ('Cache-Control', 'max-age: 31536000, immutable');
+          res.set ('Cache-Control', this.getCacheControl (req, item));
           res.type (item.contentType);
 
           download
@@ -293,6 +293,10 @@ module.exports = ResourceController.extend ({
             .once ('error', reject)
             .once ('finish', resolve);
         });
+      },
+
+      getCacheControl (req, item) {
+        return 'public, max-age=31536000, immutable'
       }
     });
   },
