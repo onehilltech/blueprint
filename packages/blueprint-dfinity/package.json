@@ -1,7 +1,7 @@
 {
   "name": "blueprint-dfinity",
   "description": "Blueprint module for integrating with the Internet Computer",
-  "version": "4.61.1",
+  "version": "4.62.2",
   "private": true,
   "main": "./lib",
   "scripts": {
