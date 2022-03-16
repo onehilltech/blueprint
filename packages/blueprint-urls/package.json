@@ -3,6 +3,7 @@
   "description": "Blueprint module for defining and managing urls.",
   "version": "4.61.1",
   "private": false,
+  "main": "./lib",
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
@@ -11,7 +12,8 @@
     "uninstall-service": "sudo -s forever-service delete blueprint-urls_d"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.61.1"
+    "@onehilltech/blueprint-mongodb": "^4.62.2",
+    "nanoid": "^3.3.1"
   },
   "devDependencies": {
     "@onehilltech/blueprint-cli": "^4.61.0",

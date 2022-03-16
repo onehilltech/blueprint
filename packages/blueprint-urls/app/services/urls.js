@@ -5,10 +5,14 @@ const { forOwn } = require ('lodash');
  * @class urls
  */
 module.exports = Service.extend ({
+  /**
+   * Configure the service.
+   */
   configure () {
     const { configs: { urls = {} }} = this.app;
+    const { aliases = {} } = urls;
 
-    forOwn (urls, (value, key) => {
+    forOwn (aliases, (value, key) => {
       Object.defineProperty (this, key, { value });
     });
   }
