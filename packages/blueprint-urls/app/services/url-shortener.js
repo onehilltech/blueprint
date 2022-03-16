@@ -29,7 +29,7 @@ module.exports = Service.extend ({
   shorten (url, options = {}) {
     const domain = options.domain || this.config.domain;
     const redirect_status = options.redirect_status || this.config.redirect_status;
-    const document = { original_url: url };
+    const document = { url };
 
     // The user has the option of providing a domain. This can allow a short code
     // to be use more than once.
@@ -74,6 +74,6 @@ module.exports = Service.extend ({
     const { redirect_status } = options;
     const status = redirect_status || shortUrl.redirect_status || this.config.redirect_status || DEFAULT_REDIRECT_STATUS;
 
-    return res.redirect (status, shortUrl.original_url);
+    return res.redirect (status, shortUrl.url);
   }
 });
