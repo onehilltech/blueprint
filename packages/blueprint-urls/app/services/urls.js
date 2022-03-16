@@ -10,9 +10,9 @@ module.exports = Service.extend ({
    */
   configure () {
     const { configs: { urls = {} }} = this.app;
-    const { aliases = {} } = urls;
+    const { alias = {} } = urls;
 
-    forOwn (aliases, (value, key) => {
+    forOwn (alias, (value, key) => {
       Object.defineProperty (this, key, { value });
     });
   }
