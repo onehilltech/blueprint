@@ -22,5 +22,20 @@ describe ('model | short-url', function () {
     const ShortUrl = blueprint.lookup ('model:short-url');
     const url1 = await ShortUrl.create ({ domain: 'd1', url: 'https://www.onehilltech.com' });
     const url2 = await ShortUrl.create ({ domain: 'd2', url: 'https://www.onehilltech.com' });
-  })
+
+    expect (url1._id).to.not.eql (url2._id);
+  });
+
+  it ('should fail to create same url on a same domains', async function () {
+    try {
+      const ShortUrl = blueprint.lookup ('model:short-url');
+      await ShortUrl.create ({ url: 'https://www.onehilltech.com' });
+      await ShortUrl.create ({ url: 'https://www.onehilltech.com' });
+
+      expect.fail ('You should not be able to create the same url on the same domain');
+    }
+    catch (err) {
+
+    }
+  });
 });

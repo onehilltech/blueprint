@@ -59,6 +59,9 @@ schema.index ({domain: 1, short_code: 1}, {unique: true});
 // Do not allow duplicate urls (or hashes) on the same domain.
 schema.index ({domain: 1, hash: 1}, {unique: true});
 
+/**
+ * Auto-generate a short id if a short code is not provided.
+ */
 schema.pre ('validate', function (next) {
   if (!this.short_code)
     this.short_code = shortId ();
