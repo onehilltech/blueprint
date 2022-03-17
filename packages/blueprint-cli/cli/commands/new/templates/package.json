@@ -5,7 +5,7 @@
   "private": true,
 
   "scripts": {
-    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
+    "test": "env NODE_ENV=test mocha ./tests/unit-tests --recursive --file ./tests/unit-tests/bootstrap.js",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
