@@ -20,7 +20,9 @@ const { Seed } = require ('@onehilltech/blueprint-mongodb');
 module.exports = Seed.extend ({
   model () {
     return {
-
+      'short-urls': [
+        { url: 'https://www.onehilltech.com/demo' }
+      ]
     }
   }
 });

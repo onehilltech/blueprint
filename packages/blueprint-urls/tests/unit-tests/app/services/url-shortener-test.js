@@ -8,14 +8,14 @@ function urlShortener () {
 describe ('services | url-shortener', function () {
   context ('no domain', function () {
     it ('should shorten a url', async function () {
-      const shortUrl = await urlShortener ().shorten ('https://www.donatians.com/share');
+      const shortUrl = await urlShortener ().shorten ('https://www.onehilltech.com/contact');
 
-      expect (shortUrl.url).to.equal ('https://www.donatians.com/share');
+      expect (shortUrl.url).to.equal ('https://www.onehilltech.com/contact');
       expect (shortUrl.domain).to.be.undefined;
     });
 
     it ('should redirect a short url', async function () {
-      const shortUrl = await urlShortener ().shorten ('https://www.donatians.com/share');
+      const shortUrl = await urlShortener ().shorten ('https://www.onehilltech.com/contact');
 
       const req = {
         baseUrl: shortUrl.short_code,
@@ -56,14 +56,14 @@ describe ('services | url-shortener', function () {
 
   context ('domain', function () {
     it ('should shorten a url for a domain', async function () {
-      const shortUrl = await urlShortener ().shorten ('https://www.donatians.com/share', { domain: 'demo'} );
+      const shortUrl = await urlShortener ().shorten ('https://www.onehilltech.com/contact', { domain: 'demo'} );
 
-      expect (shortUrl.url).to.equal ('https://www.donatians.com/share');
+      expect (shortUrl.url).to.equal ('https://www.onehilltech.com/contact');
       expect (shortUrl.domain).to.equal ('demo');
     });
 
     it ('should redirect a short url', async function () {
-      const shortUrl = await urlShortener ().shorten ('https://www.donatians.com/share', { domain: 'demo'});
+      const shortUrl = await urlShortener ().shorten ('https://www.onehilltech.com/contact', { domain: 'demo'});
 
       const req = {
         baseUrl: shortUrl.short_code,
@@ -102,7 +102,7 @@ describe ('services | url-shortener', function () {
     });
 
     it ('should fail to redirect because invalid domain', async function () {
-      const shortUrl = await urlShortener ().shorten ('https://www.donatians.com/share', { domain: 'demo'});
+      const shortUrl = await urlShortener ().shorten ('https://www.onehilltech.com/contact', { domain: 'demo'});
 
       const req = {
         baseUrl: shortUrl.short_code,
