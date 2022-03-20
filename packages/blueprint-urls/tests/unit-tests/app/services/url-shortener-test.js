@@ -33,8 +33,6 @@ describe ('services | url-shortener', function () {
     });
 
     it ('should fail because invalid short code', async function () {
-      const shortUrl = await urlShortener ().shorten ('https://www.donatians.com/share', { domain: 'demo'});
-
       const req = {
         baseUrl: '00000000',
         query: { domain: 'invalid' }
@@ -83,8 +81,6 @@ describe ('services | url-shortener', function () {
     });
 
     it ('should fail because invalid short code', async function () {
-      const shortUrl = await urlShortener ().shorten ('https://www.donatians.com/share', { domain: 'demo'});
-
       const req = {
         baseUrl: '00000000',
         query: { domain: 'demo' }
