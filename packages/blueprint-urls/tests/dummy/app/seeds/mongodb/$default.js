@@ -21,7 +21,7 @@ module.exports = Seed.extend ({
   model () {
     return {
       'short-urls': [
-        { url: 'https://www.onehilltech.com/demo' }
+        { url: 'https://www.onehilltech.com/projects' }
       ]
     }
   }

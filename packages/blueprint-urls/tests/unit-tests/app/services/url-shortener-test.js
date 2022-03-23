@@ -18,7 +18,7 @@ describe ('services | url-shortener', function () {
       const shortUrl = await urlShortener ().shorten ('https://www.onehilltech.com/contact');
 
       const req = {
-        baseUrl: shortUrl.short_code,
+        params: [shortUrl.short_code],
         query: {}
       };
 
@@ -34,7 +34,7 @@ describe ('services | url-shortener', function () {
 
     it ('should fail because invalid short code', async function () {
       const req = {
-        baseUrl: '00000000',
+        params: ['00000000'],
         query: { domain: 'invalid' }
       };
 
@@ -66,7 +66,7 @@ describe ('services | url-shortener', function () {
       const shortUrl = await urlShortener ().shorten ('https://www.onehilltech.com/contact', { domain: 'demo'});
 
       const req = {
-        baseUrl: shortUrl.short_code,
+        params: [shortUrl.short_code],
         query: { domain: 'demo' }
       };
 
@@ -82,7 +82,7 @@ describe ('services | url-shortener', function () {
 
     it ('should fail because invalid short code', async function () {
       const req = {
-        baseUrl: '00000000',
+        params: ['00000000'],
         query: { domain: 'demo' }
       };
 
@@ -105,7 +105,7 @@ describe ('services | url-shortener', function () {
       const shortUrl = await urlShortener ().shorten ('https://www.onehilltech.com/contact', { domain: 'demo'});
 
       const req = {
-        baseUrl: shortUrl.short_code,
+        params: [shortUrl.short_code],
         query: { domain: 'invalid' }
       };
 

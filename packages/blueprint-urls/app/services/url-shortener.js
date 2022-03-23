@@ -55,7 +55,7 @@ module.exports = Service.extend ({
     // to throw the not found exception. This will allow the server to respond to the client
     // with the status and error message.
 
-    const criteria = { short_code: req.baseUrl };
+    const criteria = { short_code: req.params[0] };
 
     const {
       domain = options.domain || this.config.domain
