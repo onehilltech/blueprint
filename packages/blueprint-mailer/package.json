@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-mailer",
   "description": "Blueprint module for sending emails via mailgun",
-  "version": "4.62.2",
+  "version": "4.63.0",
   "private": false,
   "repository": "onehilltech/blueprint",
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.61.1",
-    "@onehilltech/blueprint-cli": "^4.61.0",
+    "@onehilltech/blueprint-cli": "^4.63.0",
     "@onehilltech/blueprint-mongodb": "^4.62.2",
     "email-templates": "^8.0.8",
     "gulp": "^4.0.2",
