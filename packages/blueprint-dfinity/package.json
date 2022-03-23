@@ -1,7 +1,7 @@
 {
   "name": "blueprint-dfinity",
   "description": "Blueprint module for integrating with the Internet Computer",
-  "version": "4.63.0",
+  "version": "4.63.1",
   "private": true,
   "main": "./lib",
   "scripts": {
@@ -13,7 +13,7 @@
     "@dfinity/agent": "^0.10.3",
     "@dfinity/candid": "^0.10.3",
     "@dfinity/principal": "^0.10.3",
-    "@onehilltech/blueprint": "^4.61.1",
+    "@onehilltech/blueprint": "^4.63.1",
     "node-fetch": "^2.6.7"
   },
   "devDependencies": {
