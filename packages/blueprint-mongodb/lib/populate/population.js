@@ -28,6 +28,7 @@ const {
   mapValues,
   compact,
   isEmpty,
+  get,
 } = require ('lodash');
 
 const {
@@ -231,8 +232,12 @@ module.exports = BO.extend ({
       // Get the value at the current path. The value can be either a single element or an
       // array of elements. We only need to continue if something exists.
 
-      const value = data[path];
-      return populator.valueExists (value) ? this.processId (populator, value) : null;
+      const value = get (data, path);
+
+      if ( populator.valueExists (value))
+        return this.processId (populator, value);
+      else
+        return null;
     });
 
     return props (mapping);
