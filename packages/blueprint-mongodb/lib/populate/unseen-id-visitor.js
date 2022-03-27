@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-const {
-  transform,
-  isEmpty
-} = require ('lodash');
-
+const { transform, isEmpty, get } = require ('lodash');
 const PopulateVisitor = require ('./populate-visitor');
 
 /**
@@ -41,7 +37,7 @@ const UnseenIdVisitor = PopulateVisitor.extend ({
 
   visitPopulateEmbedded (item) {
     this.unseen = transform (item.populators, (result, populator, name) => {
-      let value = this.value[name];
+      let value = get (this.value, name);
       let v = new UnseenIdVisitor ({population: this.population, value});
 
       populator.accept (v);
