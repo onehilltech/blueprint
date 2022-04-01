@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-swagger",
   "description": "Blueprint.js module for Swagger UI",
-  "version": "4.61.0",
+  "version": "4.64.0",
   "private": false,
   "author": "One Hill Technologies, LLC",
   "scripts": {
@@ -13,7 +13,7 @@
     "swagger-ui-dist": "^3.34.0"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^4.61.0",
+    "@onehilltech/blueprint-testing": "^4.64.0",
     "chai": "^3.5.0",
     "mocha": "^3.1.2",
     "superagent": "^2.3.0",

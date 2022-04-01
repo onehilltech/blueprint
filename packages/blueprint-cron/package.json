@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-cron",
   "description": "Blueprint module for node-cron.",
-  "version": "4.63.1",
+  "version": "4.64.0",
   "private": false,
   "repository": "onehilltech/blueprint",
   "main": "./lib",
@@ -11,11 +11,11 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.63.1",
+    "@onehilltech/blueprint": "^4.64.0",
     "cron": "^1.4.1"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^4.61.0"
+    "@onehilltech/blueprint-testing": "^4.64.0"
   },
   "license": "Apache-2.0 ",
   "engines": {
