@@ -1,14 +1,12 @@
 {
-  "name": "blueprint-python",
-  "description": "",
-  "version": "",
-  "private": true,
+  "name": "@onehilltech/blueprint-python",
+  "description": "Run Python scripts for a Blueprint application.",
+  "version": "0.0.0",
+  "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
     "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
-    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "install-service": "sudo -s forever-service install blueprint-python_d --script ./app/index.js -e 'NODE_ENV=production'",
-    "uninstall-service": "sudo -s forever-service delete blueprint-python_d"
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
     "@onehilltech/blueprint": "^4.63.1"
@@ -17,6 +15,7 @@
     "@onehilltech/blueprint-cli": "^4.63.0",
     "@onehilltech/blueprint-testing": "^4.61.0"
   },
+  "repository": "onehilltech/blueprint",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=6.0.0",
