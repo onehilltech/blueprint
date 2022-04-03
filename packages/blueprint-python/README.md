@@ -6,7 +6,7 @@ Run Python scripts from a Blueprint application
 Installation
 --------------
 
-    npm install @onehilltech/blueprint-gatekeeper --save
+    npm install @onehilltech/blueprint-python --save
 
 Getting Started
 ----------------
