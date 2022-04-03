@@ -66,7 +66,6 @@ module.exports = Controller.extend ({
 The last parameter of `run (args, options)` are options for configuring the execution
 process that runs the Python script. The options supported are the same as the options
 from [`process.spawn`](https://nodejs.org/api/child_process.html#child_processspawncommand-args-options).
-This allows you to configure the working directory of the script, set environment variables
-for the script's process, or detach the script.
+
 
 Happy Coding!
