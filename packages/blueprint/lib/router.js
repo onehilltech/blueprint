@@ -17,6 +17,7 @@
 const { BO } = require ('base-object');
 const RouterBuilder = require ('./router-builder');
 const assert = require ('assert');
+const { isFunction } = require ('lodash');
 
 /**
  * @class Router
@@ -24,22 +25,32 @@ const assert = require ('assert');
  * Base class for all routers.
  */
 module.exports = BO.extend ({
-  specification: null,
-
-  init () {
-    this._super.call (this, ...arguments);
-
-    assert (!!this.specification, 'You must define the "specification" property.');
+  /**
+   * Define the router specification.
+   *
+   * @param options
+   */
+  specification (options) {
+    throw new Error ('You must overload the specification() method.');
   },
 
   /**
    * Build the router.
    *
-   * @param app
+   * @param app           The Blueprint application.
+   * @param options       Router options for mount point.
    */
-  build (app) {
+  build (app, options = {}) {
+    // Get the router specification. We specification property is here for backwards
+    // compatibility. We will eventually drop support for the property in favor of
+    // the specification function.
+
+    const specification = isFunction (this.specification) ?
+      this.specification (options) :
+      this.specification;
+
     return new RouterBuilder ({app})
-      .addSpecification (this.specification)
+      .addSpecification (specification)
       .build ();
   }
 });
