@@ -14,7 +14,7 @@ Getting Started
 ### Running a Python script
 
 You run a Python script by first injecting the `python` service into a Blueprint component,
-such as a controller, action, service, policy, etc. After injecting the service, call the
+such as a controller, action, service, or policy. After injecting the service, call the
 `run (args, options)` method on the service. This is an asynchronous method. The return 
 value is the standard output (_i.e._, stdout) of the script.
 
