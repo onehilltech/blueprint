@@ -171,7 +171,10 @@ const Server = BO.extend ({
 
   _configureMiddleware (config = {}) {
     this._configureMorganMiddleware (config.morgan);
-    this._configureBodyParserMiddleware (config.bodyParser);
+
+    const { defaultBodyParser = true } = config;
+    this._configureBodyParserMiddleware (config.bodyParser, defaultBodyParser);
+
     this._configureValidatorsAndSanitizers ();
     this._configureOptionalMiddleware (config);
   },
@@ -190,8 +193,19 @@ const Server = BO.extend ({
     this._express.use (middleware);
   },
 
-  _configureBodyParserMiddleware (config = {}) {
-    const { bodyParser: bodyParserConfig } = config;
+  _configureBodyParserMiddleware (config = {}, defaultBodyParser) {
+    // Include backwards compatability with including the default body parsers that
+    // always come with Blueprint. This will be removed in future versions since
+    // the body parser will be defined at the router level, not the application level.
+
+    const defaults = {
+      json: {},
+      urlencoded: {extended: false}
+    };
+
+    const bodyParserConfig = Object.assign ({},
+      (defaultBodyParser ? defaults : {}),
+      config.bodyParser);
 
     forOwn (bodyParserConfig, (config, type) => {
       let middleware = bodyParser[type];

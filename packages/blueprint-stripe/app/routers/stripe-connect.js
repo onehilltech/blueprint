@@ -1,3 +1,4 @@
+const { Router } = require ('@onehilltech/blueprint');
 const bodyParser = require ('body-parser');
 
 module.exports = {
@@ -29,5 +30,10 @@ module.exports = {
         }
       }
     }
+  },
+
+  '/webhooks': {
+    use: bodyParser.raw (),
+    post: { action: 'stripe@emitStripeEvent', options: { secret: 'secret' } }
   }
 };

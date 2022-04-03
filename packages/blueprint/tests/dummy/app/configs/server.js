@@ -32,9 +32,6 @@ module.exports = {
   },
 
   middleware : {
-    bodyParser : {
-      json : { },
-      urlencoded : { extended: false }
-    }
+    defaultBodyParser: true,
   }
 };
