@@ -1,5 +1,9 @@
+const bodyParser = require ('body-parser');
+
 module.exports = {
   '/accounts': {
+    use: [bodyParser.json (), bodyParser.urlencoded ({extended: false})],
+
     resource: {
       controller: 'stripe-account',
       deny: ['count', 'getAll'],

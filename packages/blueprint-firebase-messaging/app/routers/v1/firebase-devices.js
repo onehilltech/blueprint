@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+const bodyParser = require ('body-parser');
+
 module.exports = {
   '/devices': {
+    use: [bodyParser.json (), bodyParser.urlencoded ({extended: false})],
     policy: 'gatekeeper.auth.bearer',
 
     resource: {

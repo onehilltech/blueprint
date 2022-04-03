@@ -191,10 +191,7 @@ const Server = BO.extend ({
   },
 
   _configureBodyParserMiddleware (config = {}) {
-    let bodyParserConfig = merge ({
-      json: {},
-      urlencoded: {extended: false}
-    }, config.bodyParser);
+    const { bodyParser: bodyParserConfig } = config;
 
     forOwn (bodyParserConfig, (config, type) => {
       let middleware = bodyParser[type];

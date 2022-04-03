@@ -1,6 +1,8 @@
+const bodyParser = require ('body-parser');
+
 module.exports = {
   '/webhooks': {
-    //policy: check ('request.ips', blueprint.lookup ('config:stripe').ips),
+    use: bodyParser.raw (),
     post: { action: 'stripe@emitStripeEvent' }
   }
 }
