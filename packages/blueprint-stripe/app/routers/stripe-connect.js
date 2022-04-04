@@ -1,9 +1,9 @@
-const { Router } = require ('@onehilltech/blueprint');
 const bodyParser = require ('body-parser');
 
 module.exports = {
   '/accounts': {
     use: [bodyParser.json (), bodyParser.urlencoded ({extended: false})],
+    policy: '?stripe.connect.accounts',
 
     resource: {
       controller: 'stripe-account',
@@ -33,7 +33,7 @@ module.exports = {
   },
 
   '/webhooks': {
-    use: bodyParser.raw (),
-    post: { action: 'stripe@emitStripeEvent', options: { secret: 'secret' } }
+    use: bodyParser.raw ({type: 'application/json'}),
+    post: { action: 'stripe@emitStripeEvent', options: { webhook: '$connect' } }
   }
 };

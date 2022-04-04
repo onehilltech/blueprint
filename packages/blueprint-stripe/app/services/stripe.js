@@ -1,23 +1,24 @@
 const { Service, BO, env } = require ('@onehilltech/blueprint');
 const Stripe = require ('stripe');
-const { forOwn } = require ('lodash');
+const { forOwn, mapValues } = require ('lodash');
+const { props } = require ('bluebird');
+const path = require ('path');
+const fs = require ('fs-extra')
 
+/**
+ * @class StripeService
+ */
 module.exports = Service.extend ({
   _stripe: null,
-  _eventConstructor: null,
-
+  _webhooks: null,
   /**
    * Initialize the service.
    */
   init () {
     this._super.call (this, ...arguments);
 
-    const { secretKey, apiVersion, endpointSecret } = this.app.lookup ('config:stripe');
-
+    const { secretKey, apiVersion } = this.app.lookup ('config:stripe');
     this._stripe = new Stripe (secretKey, { apiVersion });
-    this._eventConstructor = endpointSecret ?
-      VerifyEventConstructor.create ({stripe: this._stripe, endpointSecret}) :
-      SimpleEventConstructor.create ();
 
     // Now, map all properties on the stripe object that has a resourcePath to a
     // property definition on this class.
@@ -28,47 +29,79 @@ module.exports = Service.extend ({
         });
       }
     });
+
+    // Create an empty collection of webhooks.
+    this._webhooks = {};
+  },
+
+  /**
+   * Configure the service.
+   */
+  async configure () {
+    await this._configureWebhooks ();
   },
 
 
+  constructEvent (req, name) {
+    const webhook = this._webhooks[name];
+
+    if (!!webhook)
+      return webhook.constructEvent (req);
+  },
+
   /**
-   * Construct a stripe event from the request.
+   * Configure webhooks for the application.
    *
-   * @param req
-   * @returns {Stripe.Event}
+   * @private
    */
-  constructEvent (req) {
-    return this._eventConstructor.constructEvent (req);
-  }
-});
+  async _configureWebhooks () {
+    const { configs: { stripe = {} } } = this.app;
+    const { webhooks = {} } = stripe;
 
-const EventConstructor = BO.extend ({
-  constructEvent: null,
+    // Construct the temp path, and make sure the path exists.
+    const tempPath = path.resolve (this.app.tempPath, 'stripe/webhooks');
+    await fs.ensureDir (tempPath);
+
+    const results = mapValues (webhooks, async (options, name) => {
+      // Let's see if we have a temp file for this webhook with the secret. If we already
+      // have a temp file, then load the webhook details from there. Otherewise, we need
+      // to register a new webhook.
+
+      const tempFile = path.resolve (tempPath, name);
+      const exists = await fs.pathExists (tempFile);
+
+      if (exists) {
+        const endpoint = await fs.readJson (tempFile);
+        return new Webhook (this._stripe, endpoint);
+      }
+      else {
+        const { url, enabled_events = ['*']} = options;
+        const endpoint = await this._stripe.webhookEndpoints.create ({ url, enabled_events });
+
+        // Let's write the endpoint to a file to save it.
+        await fs.writeJson (tempFile, endpoint, { spaces: '\t' });
+
+        return new Webhook (this._stripe, endpoint);
+      }
+    });
+
+    this._webhooks = await props (results);
+  },
 });
 
 /**
- * Implementation of the event constructor that simply returns the Stripe event.
+ * @class Webhook
+ *
+ * Wrapper facade for interating with Stripe Webhooks.
  */
-const SimpleEventConstructor = EventConstructor.extend ({
-  constructEvent (req) {
-    if (env === 'production')
-      console.warn ('Your Stripe webhook is insecure. Please set the endpointSecret property in configs/stripe.js to secure your webhook.');
-
-    return req.body;
+class Webhook {
+  constructor (stripe, endpoint) {
+    this.stripe = stripe;
+    this.endpoint = endpoint;
   }
-});
-
-/**
- * Implementation of the event constructor that verifies the Stripe event.
- */
-const VerifyEventConstructor = EventConstructor.extend ({
-  stripe: null,
-  endpointSecret: null,
 
   constructEvent (req) {
     const sig = req.get ('stripe-signature');
-    const str = JSON.stringify (req.body);
-
-    return this.stripe.webhooks.constructEvent (str, sig, this.endpointSecret);
+    return this.stripe.webhooks.constructEvent (req.body, sig, this.endpoint.secret);
   }
-});
+}
