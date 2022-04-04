@@ -14,7 +14,7 @@ Getting Started
 ### Running a Python script
 
 You run a Python script by first injecting the `python` service into a Blueprint component,
-such as a controller, action, service, policy, etc. After injecting the service, call the
+such as a controller, action, service, or policy. After injecting the service, call the
 `run (args, options)` method on the service. This is an asynchronous method. The return 
 value is the standard output (_i.e._, stdout) of the script.
 
@@ -64,9 +64,8 @@ module.exports = Controller.extend ({
 ### Passing options to the execution process
 
 The last parameter of `run (args, options)` are options for configuring the execution
-process that runs the Python script. The options supported as the same as the options
+process that runs the Python script. The options supported are the same as the options
 from [`process.spawn`](https://nodejs.org/api/child_process.html#child_processspawncommand-args-options).
-This allows you to configure the working directory of the script, set environment variables
-for the script's process, or detach the script.
+
 
 Happy Coding!
