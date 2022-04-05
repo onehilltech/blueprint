@@ -75,8 +75,8 @@ module.exports = Service.extend ({
         return new Webhook (this._stripe, endpoint);
       }
       else {
-        const { url, enabled_events = ['*']} = options;
-        const endpoint = await this._stripe.webhookEndpoints.create ({ url, enabled_events });
+        const { url, enabled_events = ['*'], connect = false } = options;
+        const endpoint = await this._stripe.webhookEndpoints.create ({ url, enabled_events, connect });
 
         // Let's write the endpoint to a file to save it.
         await fs.writeJson (tempFile, endpoint, { spaces: '\t' });
@@ -85,14 +85,15 @@ module.exports = Service.extend ({
       }
     });
 
-    this._webhooks = await props (results);
+    const result = await props (results);
+    this._webhooks = result;
   },
 });
 
 /**
  * @class Webhook
  *
- * Wrapper facade for interating with Stripe Webhooks.
+ * Wrapper facade for interacting with Stripe Webhooks.
  */
 class Webhook {
   constructor (stripe, endpoint) {
