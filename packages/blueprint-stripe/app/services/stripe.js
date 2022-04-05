@@ -85,8 +85,7 @@ module.exports = Service.extend ({
       }
     });
 
-    const result = await props (results);
-    this._webhooks = result;
+    this._webhooks = await props (results);
   },
 });
 
