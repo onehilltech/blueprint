@@ -1,4 +1,5 @@
 const lean = require ('../utils/lean');
+const { isArray, get, set, forOwn } = require ('lodash');
 
 /**
  * Plugin that adds lean() method to all model instances. The lean() method
@@ -12,7 +13,30 @@ const lean = require ('../utils/lean');
  * @constructor
  */
 module.exports = function (schema) {
-  schema.methods.lean = function () {
-    return lean (this);
+  const defaultVirtuals = [];
+
+  forOwn (schema.virtuals, (type, key) => {
+    if (type.getters)
+      defaultVirtuals.push (key);
+  });
+
+  schema.methods.lean = function (options = {}) {
+    let { virtuals = false } = options;
+    const obj = lean (this);
+
+    if (virtuals === false)
+      return obj;
+
+    if (virtuals === true)
+      virtuals = defaultVirtuals;
+
+    return virtuals.reduce ((obj, name) => {
+      const value = get (this, name);
+
+      if (value)
+        set (obj, name, value);
+
+      return obj;
+    }, obj);
   };
 };
