@@ -19,6 +19,7 @@ const mongoose = require ('mongoose');
 const { merge } = require ('lodash');
 
 const { clear } = require ('@onehilltech/dab');
+const { env } = require ('@onehilltech/blueprint');
 const backend = require ("@onehilltech/dab-mongodb");
 const debug = require ('debug')('blueprint-mongodb:mongodb');
 const fs = require ('fs-extra');
@@ -60,8 +61,12 @@ module.exports = class Connection {
     debug (`opening connection ${this.name}`);
     this.conn = await this.conn.openUri (uri, options);
 
-    if (seed)
+    if (seed) {
+      if (env === 'production')
+        throw new Error ('You cannot seed the production environment.');
+
       await this.seed ();
+    }
 
     if (version)
       await this.migrate (version);
