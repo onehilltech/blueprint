@@ -18,7 +18,7 @@ const { NotFoundError } = require ('@onehilltech/blueprint');
 const ResourceController = require ('./resource-controller');
 const validation = require ('./validation');
 const pluralize = require ('pluralize');
-const { extend, camelCase } = require ('lodash');
+const { extend, camelCase, mapKeys, get } = require ('lodash');
 
 /**
  * @class SubdocumentResourceController
@@ -101,7 +101,23 @@ exports = module.exports = ResourceController.extend ({
    * @returns {*}
    */
   update () {
-    return this._super.call (this, ...arguments);
+    return this._super.call (this, ...arguments).extend ({
+      async updateModel (req, id, update, options) {
+        const { path, Model } = this.controller;
+        const condition = { [`${path}._id`]: id};
+
+        if (update.$set)
+          update.$set = mapKeys (update.$set, (value, key) => `${path}.$.${key}`);
+
+        if (update.$unset)
+          update.$unset = mapKeys (update.$unset, (value, key) => `${path}.$.${key}`)
+
+        // Locate the subdocument in the parent model. If there is no model, then
+        // we need to let the client know.
+        const model = await Model.findOneAndUpdate (condition, update, options);
+        return !!model ? get (model, path).id (id) : null;
+      }
+    })
   },
 
   /**
@@ -114,7 +130,7 @@ exports = module.exports = ResourceController.extend ({
         const { path, Model } = this.controller;
         const condition = { [`${path}._id`]: id};
 
-        // Locate the subdocument in the parent model. // If there is no model, then
+        // Locate the subdocument in the parent model. If there is no model, then
         // we need to let the client know.
         const model = await Model.findOne (condition);
 
@@ -122,7 +138,7 @@ exports = module.exports = ResourceController.extend ({
           return Promise.reject (new NotFoundError ('not_found', 'Not found'));
 
         // Remove the subdocument from the model.
-        model[path].id (id).remove ();
+        get (model, path).id (id).remove ();
 
         return model.save ();
       },
