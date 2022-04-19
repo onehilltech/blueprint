@@ -35,7 +35,7 @@ module.exports = ResourceController.extend ({
         in: ['body'],
         errorMessage: 'Not a valid email address.',
         isEmail: true,
-        normalizeEmail: true
+        //normalizeEmail: true
       }
     };
 
@@ -44,7 +44,7 @@ module.exports = ResourceController.extend ({
         in: ['body'],
         errorMessage: 'Not a valid email address.',
         isEmail: true,
-        normalizeEmail: true
+        //normalizeEmail: true
       }
     }
 

@@ -65,7 +65,7 @@ module.exports = Controller.extend ({
           isEmail: {
             errorMessage: 'The provided email address is not valid.'
           },
-          normalizeEmail: true
+          //normalizeEmail: true
         }
       },
 
