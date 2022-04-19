@@ -28,14 +28,14 @@ module.exports = ResourceController.extend ({
 
   create () {
     const { gatekeeper } = this.app.configs;
-    const { usernameIsEmail = false } = gatekeeper;
+    const { usernameIsEmail = false, normalizeEmail = true } = gatekeeper;
 
     let schema = {
       'account.email': {
         in: ['body'],
         errorMessage: 'Not a valid email address.',
         isEmail: true,
-        //normalizeEmail: true
+        normalizeEmail
       }
     };
 
@@ -44,7 +44,7 @@ module.exports = ResourceController.extend ({
         in: ['body'],
         errorMessage: 'Not a valid email address.',
         isEmail: true,
-        //normalizeEmail: true
+        normalizeEmail
       }
     }
 

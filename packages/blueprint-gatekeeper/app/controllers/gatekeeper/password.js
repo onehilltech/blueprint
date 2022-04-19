@@ -54,6 +54,9 @@ module.exports = Controller.extend ({
    * @return {*}
    */
   forgotPassword () {
+    const { gatekeeper } = this.app.configs;
+    const { normalizeEmail = true } = gatekeeper;
+
     return Action.extend ({
       schema: {
         email: {
@@ -65,7 +68,7 @@ module.exports = Controller.extend ({
           isEmail: {
             errorMessage: 'The provided email address is not valid.'
           },
-          //normalizeEmail: true
+          normalizeEmail
         }
       },
 
