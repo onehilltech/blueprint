@@ -293,5 +293,39 @@ module.exports = Controller.extend ({
         });
       }
     });
+  },
+
+  /**
+   * Verify an access token.
+   *
+   * This can be used to verify if a token was sent from the server when the public
+   * key verification is not working on the client.
+   */
+  verify () {
+    return Action.extend ({
+      schema: {
+        token: {
+          in: 'body'
+        }
+      },
+
+      /// Reference to the issuer service for token verification.
+      gatekeeper: service (),
+
+      /**
+       * @override
+       */
+      async execute (req, res) {
+        const { token, options } = req.body;
+
+        try {
+          await this.gatekeeper.verifyToken (token, options);
+          return res.status (200).json (true);
+        }
+        catch (err) {
+          return res.status (200).json (false);
+        }
+      }
+    });
   }
 });
