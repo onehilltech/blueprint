@@ -320,10 +320,10 @@ module.exports = Controller.extend ({
 
         try {
           await this.gatekeeper.verifyToken (token, options);
-          return res.status (200).json ({ result: true });
+          return res.status (200).json ({ verified: true });
         }
         catch (reason) {
-          return res.status (200).json ({ result: false, reason });
+          return res.status (200).json ({ verified: false, reason });
         }
       }
     });
