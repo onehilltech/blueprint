@@ -26,6 +26,7 @@ module.exports = {
   },
 
   '/verify': {
+    policy: '?gatekeeper.oauth2.verify',
     post: { action : 'gatekeeper.oauth2.token@verify' }
   }
 };
