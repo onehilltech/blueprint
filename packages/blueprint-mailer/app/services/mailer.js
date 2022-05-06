@@ -11,7 +11,7 @@ const juiceResources = require ('juice-resources-promise');
 
 const MAILER_RESOURCE_PATH = 'resources/mailer';
 
-const TemplateCompiler = require ('../../lib/template-compliler');
+const TemplateCompiler = require ('../../lib/template-compiler');
 
 /**
  * @class mailer
