@@ -153,7 +153,7 @@ module.exports = Service.extend ({
 
     // Create a document for the sent email.
     const { messageId, originalMessage: { subject, to, from, cc, bcc } } = result;
-    return this.Email.create ({ message_id: messageId, to, from, cc, bcc, subject });
+    return this.Email.create ({ message_id: messageId, type: template, to, from, cc, bcc, subject });
   },
 
   /**
