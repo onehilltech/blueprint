@@ -18,11 +18,14 @@ Getting Started
 
 First, we need to setup Gatekeeper from the Blueprint application directory:
 
-    ./bin/gatekeeper-setup
+    gatekeeper-setup
     
 This will register the `gatekeeper-cli` with the current service, and allow you
 to run the `gatekeeper-cli` to manage what client and account has access to your
 service.
+
+> Use the `NODE_ENV` environment variable to register the `gatekeeper-cli` on 
+> different environments.
 
 ### Adding a client
 
