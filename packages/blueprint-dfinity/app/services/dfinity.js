@@ -60,25 +60,7 @@ module.exports = Service.extend ({
 
     // Load the agents and canister ids into memory.
     await (map (dfinity.agents, async (agentOptions, name) => {
-      // The source agent can be a named agent. If it is a named agent, replace the
-      // name (or string) with an agent.
-
-      if (agentOptions.source && isString (agentOptions.source))
-        agentOptions.source = this._lookupAgent (agentOptions.source);
-
-      // Load the identity if there is one defined. The identity could be a private
-      // key or a seed phrase.
-
-      if (agentOptions.identity && isString (agentOptions.identity))
-        agentOptions.identity = await this._loadIdentity (agentOptions.identity);
-
-      const agent = new HttpAgent (agentOptions);
-
-      // Needed for update calls on local dev env, shouldn't be used in production!
-      if (env !== 'production')
-        await agent.fetchRootKey ();
-
-      this.agents[name] = agent;
+      this.agents[name] = await this.createHttpAgent (agentOptions);
     }));
 
     forOwn (dfinity.canisters, (canisterId, name) => {
@@ -94,6 +76,36 @@ module.exports = Service.extend ({
       return path.resolve (this.app.appPath, ACTORS_DIRNAME);
     }
   }),
+
+  /**
+   * Create a HttpAgent from the options.
+   *
+   * @param options             Http agent options
+   * @param fetchRootKey        Fetch root key (only applies in non-production environments)
+   */
+  async createHttpAgent (options, fetchRootKey = true) {
+    const opts = Object.assign ({}, options);
+
+    // The source agent can be a named agent. If it is a named agent, replace the
+    // name (or string) with an agent.
+
+    if (opts.source && isString (opts.source))
+      opts.source = this._lookupAgent (opts.source);
+
+    // Load the identity if there is one defined. The identity could be a private
+    // key or a seed phrase.
+
+    if (opts.identity && isString (opts.identity))
+      opts.identity = await this._loadIdentity (opts.identity);
+
+    const agent = new HttpAgent (opts);
+
+    // Needed for update calls on local dev env, shouldn't be used in production!
+    if (env !== 'production' && fetchRootKey)
+      await agent.fetchRootKey ();
+
+    return agent;
+  },
 
   /**
    * Create an instance of an actor.
