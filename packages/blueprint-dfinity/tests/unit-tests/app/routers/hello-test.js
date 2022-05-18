@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-module.exports = exports = {};
+const blueprint = require ('@onehilltech/blueprint');
+const { request } = require ('@onehilltech/blueprint-testing');
 
-exports.Actor = require ('./actor');
-exports.update = require ('./descriptors/update');
-exports.query = require ('./descriptors/query');
+const { expect } = require ('chai');
 
-exports.actor = require ('./properties/actor');
+describe ('app | routers | hello', function () {
+  it ('should invoke greet method on the deployed canister', async function () {
+    this.timeout (10000);
+
+    await request ()
+      .post ('/hello')
+      .send ({ name: 'OneHillTech'})
+      .expect (200, { message: 'Hello, OneHillTech!' });
+  });
+});
