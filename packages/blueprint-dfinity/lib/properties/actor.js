@@ -49,6 +49,12 @@ class ActorDescriptor extends PropertyDescriptor {
   _instance = null;
 }
 
+/**
+ * Factory method that creates the actor descriptor.
+ *
+ * @param type          IDL type
+ * @param options       Actor creation options
+ */
 function actor (type, options) {
   return new ActorDescriptor (type, options);
 }
