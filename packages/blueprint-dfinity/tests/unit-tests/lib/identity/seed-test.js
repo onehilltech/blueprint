@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-const { fromSeed } = require ('../../../../lib/identity');
+const { fromSeedFile } = require ('../../../../lib/identity');
 const { expect } = require ('chai');
+const path = require ("path");
+const blueprint = require ('@onehilltech/blueprint');
 
-const SEED_PHRASE = 'early cinnamon crucial teach mobile just toast real rebel around card priority spike aerobic result account marble hero action intact inside elbow wrestle oval';
-
-describe ('lib | identity | seed', function () {
+describe.only ('lib | identity | seed', function () {
   it ('should load an identity from a seed phrase', async function () {
-    const identity = await fromSeed (SEED_PHRASE);
+    const file = path.resolve (blueprint.app.appPath, 'assets/seed.txt');
+    const identity = await fromSeedFile (file);
 
     expect (identity).to.not.be.undefined;
   });

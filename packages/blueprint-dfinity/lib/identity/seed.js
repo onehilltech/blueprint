@@ -17,16 +17,35 @@
 const { Secp256k1KeyIdentity } = require ('@dfinity/identity');
 const hdkey = require ('hdkey');
 const bip39 = require ('bip39');
+const fs = require ("fs");
+const { fromCallback } = require ('bluebird');
+
+module.exports = exports = {};
 
 /**
  * Load an identity from a seed phrase.
  *
  * @param phrase
  */
-module.exports = async function identityFromSeed (phrase) {
+async function fromSeed (phrase) {
   const seed = await bip39.mnemonicToSeed (phrase);
   const root = hdkey.fromMasterSeed (seed);
   const node = root.derive ("m/44'/223'/0'/0/0");
 
   return Secp256k1KeyIdentity.fromSecretKey (node.privateKey);
 }
+
+/**
+ * Load an identity from a file with the seed phrase.
+ *
+ * @param file
+ */
+async function fromSeedFile (file) {
+  const buffer = await fromCallback (callback => fs.readFile (file, callback));
+  const phrase = buffer.toString ().trim ();
+
+  return fromSeed (phrase);
+}
+
+exports.fromSeed = fromSeed;
+exports.fromSeedFile = fromSeedFile;
