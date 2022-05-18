@@ -15,6 +15,8 @@
     "@dfinity/identity": "^0.11.1",
     "@dfinity/principal": "^0.11.1",
     "@onehilltech/blueprint": "^4.65.0",
+    "bip39": "^3.0.4",
+    "hdkey": "^2.0.1",
     "node-fetch": "^2.6.7",
     "p12-pem": "^1.0.5",
     "sha256": "^0.2.0"
