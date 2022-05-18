@@ -2,10 +2,15 @@ const { Controller, Action } = require ('@onehilltech/blueprint');
 const { actor } = require ('../../../../lib');
 
 module.exports = Controller.extend ({
+  /**
+   * The default action for the controller.
+   */
   __invoke () {
     return Action.extend ({
       /// Reference to the hello Internet Computer actor.
       hello: actor ('hello'),
+
+      // helloExplicit: actor ('hello', { agent: '$default', canisterId: '$default' }),
 
       /**
        * Execute the action for this route.
