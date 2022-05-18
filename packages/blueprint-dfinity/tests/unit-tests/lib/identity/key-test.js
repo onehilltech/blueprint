@@ -16,13 +16,13 @@
 
 const blueprint = require ('@onehilltech/blueprint');
 const path = require ('path');
-const { fromFile } = require ('../../../../lib/identity');
+const { fromKeyFile } = require ('../../../../lib/identity');
 const { expect } = require ('chai');
 
-describe ('lib | identity | file', function () {
-  it ('should load an identity from a private key', async function () {
+describe.only ('lib | identity | key', function () {
+  it ('should load an identity from a private key file', async function () {
     const privateKey = path.resolve (blueprint.app.appPath, 'assets/dummy.pem');
-    const identity = await fromFile (privateKey);
+    const identity = await fromKeyFile (privateKey);
 
     expect (identity).to.not.be.undefined;
   });

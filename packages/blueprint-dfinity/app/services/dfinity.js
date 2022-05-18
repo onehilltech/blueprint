@@ -15,6 +15,8 @@
  */
 
 const { Service, env, computed, Loader } = require ('@onehilltech/blueprint');
+const { identity } = require ('../../lib');
+
 const { forOwn, map, get, isString } = require ('lodash');
 const { HttpAgent } = require('@dfinity/agent');
 const path = require ('path');
@@ -24,6 +26,9 @@ global.fetch = require ('node-fetch');
 global.TextEncoder = require ('util').TextEncoder;
 
 const ACTORS_DIRNAME = 'actors';
+
+const IDENTITY_KEY_PROTOCOL = 'key://';
+const IDENTITY_PHRASE_PROTOCOL = 'phrase://';
 
 /**
  * @class dfinity
@@ -55,6 +60,18 @@ module.exports = Service.extend ({
 
     // Load the agents and canister ids into memory.
     await (map (dfinity.agents, async (agentOptions, name) => {
+      if (agentOptions.identity) {
+        if (agentOptions.identity.startsWith (IDENTITY_KEY_PROTOCOL)) {
+          const filename = agentOptions.identity.slice (IDENTITY_KEY_PROTOCOL.length);
+        }
+        else if (agentOptions.identity.startsWith (IDENTITY_PHRASE_PROTOCOL)) {
+          const filename = agentOptions.identity.slice (IDENTITY_PHRASE_PROTOCOL.length);
+        }
+        else {
+          throw new Error (`The identity for agent ${name} is an unsupported type.`);
+        }
+      }
+
       const agent = new HttpAgent (agentOptions);
 
       // Needed for update calls on local dev env, shouldn't be used in production!

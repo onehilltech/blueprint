@@ -5,11 +5,13 @@ module.exports = {
     },
 
     seed: {
-      host: 'http://localhost:8000'
+      host: 'http://localhost:8000',
+      identify: 'phrase://./assets/seed.txt'
     },
 
     pem: {
-      host: 'http://localhost:8000'
+      host: 'http://localhost:8000',
+      identify: 'key://./assets/dummy.pem'
     }
   },
 

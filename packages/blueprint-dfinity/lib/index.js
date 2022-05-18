@@ -21,3 +21,5 @@ exports.update = require ('./descriptors/update');
 exports.query = require ('./descriptors/query');
 
 exports.actor = require ('./properties/actor');
+
+exports.identity = require ('./identity');

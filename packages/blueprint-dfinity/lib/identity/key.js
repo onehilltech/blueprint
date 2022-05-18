@@ -19,17 +19,31 @@ const fs = require ('fs');
 const sha256 = require ('sha256');
 const { fromCallback } = require ('bluebird');
 
-/**
- * Load an identity from a private key.
- *
- * @param path
- * @return {Promise<Identity>}
- */
-module.exports = async function identityFromFile (path) {
-  const pem = await fromCallback (callback => fs.readFile (path, callback));
+module.exports = exports = {};
 
+/**
+ * Load the Identify from a private key.
+ *
+ * @param pem             The private key
+ * @return {Secp256k1KeyIdentity}
+ */
+function fromKey (pem) {
   const { buffer } = Uint8Array.from (pem);
   const privateKey = Uint8Array.from (sha256 (buffer, { asBytes: true }));
 
   return Secp256k1KeyIdentity.fromSecretKey (privateKey);
 }
+
+/**
+ * Load the Identity from a private key file.
+ *
+ * @param file            Private key file
+ * @return {Promise<Secp256k1KeyIdentity>}
+ */
+async function fromKeyFile (file) {
+  const pem = await fromCallback (callback => fs.readFile (file, callback));
+  return fromKey (pem);
+}
+
+exports.fromKey = fromKey;
+exports.fromKeyFile = fromKeyFile;

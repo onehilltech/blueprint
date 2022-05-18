@@ -1,4 +1,8 @@
 module.exports = exports = {};
 
-exports.fromFile = require ('./file');
+const { fromKey, fromKeyFile } = require ('./key');
+
+exports.fromKey = fromKey;
+exports.fromKeyFile = fromKeyFile;
+
 exports.fromSeed = require ('./seed');
