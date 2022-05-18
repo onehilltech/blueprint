@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-const { Service } = require ('@onehilltech/blueprint');
-const { forOwn } = require ('lodash');
+const { Service, env, computed, Loader } = require ('@onehilltech/blueprint');
+const { forOwn, map, get, isString } = require ('lodash');
 const { HttpAgent } = require('@dfinity/agent');
+const path = require ('path');
 
 // set the globals
 global.fetch = require ('node-fetch');
 global.TextEncoder = require ('util').TextEncoder;
+
+const ACTORS_DIRNAME = 'actors';
 
 /**
  * @class dfinity
@@ -35,6 +38,7 @@ module.exports = Service.extend ({
 
     this.canisters = {};
     this.agents = {};
+    this._idls = {}
   },
 
   /// A collection of named agents for connecting to the Internet Computer.
@@ -46,16 +50,91 @@ module.exports = Service.extend ({
   /**
    * Configure the dfinity service.
    */
-  configure () {
+  async configure () {
     const { dfinity } = this.app.configs;
 
     // Load the agents and canister ids into memory.
-    forOwn (dfinity.agents, (agentOptions, name) => {
-      this.agents[name] = new HttpAgent (agentOptions);
-    });
+    await (map (dfinity.agents, async (agentOptions, name) => {
+      const agent = new HttpAgent (agentOptions);
+
+      // Needed for update calls on local dev env, shouldn't be used in production!
+      if (env !== 'production')
+        await agent.fetchRootKey ();
+
+      this.agents[name] = agent;
+    }));
 
     forOwn (dfinity.canisters, (canisterId, name) => {
       this.canisters[name] = canisterId;
+    });
+
+    // Now, load the idl factories into memory.
+    await this._loadActorFactories ();
+  },
+
+  actorsPath: computed ({
+    get () {
+      return path.resolve (this.app.appPath, ACTORS_DIRNAME);
+    }
+  }),
+
+  /**
+   * Create an instance of an actor.
+   *
+   * @param idlType
+   * @param options
+   */
+  createInstance (idlType, options = {}) {
+    const factory = get (this._idls, idlType);
+
+    if (!factory)
+      throw new Error (`${idlType} actor does not exist.`);
+
+    if (!options.canisterId) {
+      options.canisterId = this.canisters.$default;
+    }
+    else {
+      // This can either be a valid canister id, or a named canister. To be a valid
+      // canister id, the id must have 5 parts. This is probably not the best way to
+      // check for this, but it suffices for now.
+
+      if (options.canisterId.split ('-').length !== 5)
+        options.canisterId = this.canisters[options.canisterId];
+    }
+
+    if (!options.agent) {
+      // There is no agent. We are going to use the default agent.
+      options.agent = this.agents.$default;
+    }
+    else if (isString (options.agent)) {
+      options.agent = this.agents[options.agent];
+    }
+
+    if (!options.canisterId)
+      throw new Error ('You must define a canisterId, or define a default canisterId in app/configs/dfinity.js');
+
+    if (!options.agent)
+      throw new Error ('You must define an agent, or define a default canisterId in app/configs/dfinity.js');
+
+    return factory.createInstance (options);
+  },
+
+  /// The loaded IDL definitions for defined actors.
+  _idls: null,
+
+  /**
+   * Load the IDL factories into memory.
+   *
+   * @private
+   */
+  async _loadActorFactories () {
+    const loader = new Loader ();
+
+    this._idls = await loader.load ({
+      dirname: this.actorsPath,
+      resolve (Actor) {
+        return new Actor ();
+      }
     });
   }
 });

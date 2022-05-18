@@ -1,5 +1,5 @@
 {
-  "name": "blueprint-dfinity",
+  "name": "@onehilltech/blueprint-dfinity",
   "description": "Blueprint module for integrating with the Internet Computer",
   "version": "4.65.0",
   "private": true,
