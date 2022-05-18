@@ -27,8 +27,8 @@ global.TextEncoder = require ('util').TextEncoder;
 
 const ACTORS_DIRNAME = 'actors';
 
-const IDENTITY_KEY_PROTOCOL = 'key://';
-const IDENTITY_PHRASE_PROTOCOL = 'phrase://';
+const IDENTITY_KEY_PROTOCOL = 'key';
+const IDENTITY_PHRASE_PROTOCOL = 'phrase';
 
 /**
  * @class dfinity
@@ -60,10 +60,16 @@ module.exports = Service.extend ({
 
     // Load the agents and canister ids into memory.
     await (map (dfinity.agents, async (agentOptions, name) => {
-      if (agentOptions.source && isString (agentOptions.source))
-        agentOptions.source = this.agents[agentOptions.source];
+      // The source agent can be a named agent. If it is a named agent, replace the
+      // name (or string) with an agent.
 
-      if (agentOptions.identity)
+      if (agentOptions.source && isString (agentOptions.source))
+        agentOptions.source = this._lookupAgent (agentOptions.source);
+
+      // Load the identity if there is one defined. The identity could be a private
+      // key or a seed phrase.
+
+      if (agentOptions.identity && isString (agentOptions.identity))
         agentOptions.identity = await this._loadIdentity (agentOptions.identity);
 
       const agent = new HttpAgent (agentOptions);
@@ -152,29 +158,47 @@ module.exports = Service.extend ({
   /**
    * Loads the identify to be used in the http agent.
    *
-   * @param identity
+   * @param descriptor
    * @return {Promise<*>}
    * @private
    */
-  async _loadIdentity (identity) {
-    if (identity.startsWith (IDENTITY_KEY_PROTOCOL)) {
-      let filename = identity.slice (IDENTITY_KEY_PROTOCOL.length);
+  async _loadIdentity (descriptor) {
+    // Split the identity string into a protocol and filename. If there is no
+    // protocol and filename, then we can assume the string is some kind of
+    // directly supported identity string, which should not work.
 
+    const parts = descriptor.split ('://');
+
+    if (parts.length !== 2)
+      return descriptor;
+
+    let [ protocol, filename ] = parts;
+
+    if (protocol === IDENTITY_KEY_PROTOCOL) {
+      // The identity is a private key.
       if (!path.isAbsolute (filename))
         filename = path.resolve (this.app.appPath, filename);
 
       return await identity.fromKeyFile (filename);
     }
-    else if (identity.startsWith (IDENTITY_PHRASE_PROTOCOL)) {
-      let filename = identity.slice (IDENTITY_PHRASE_PROTOCOL.length);
-
+    else if (protocol === IDENTITY_PHRASE_PROTOCOL) {
+      // The identity is a seed phrase.
       if (!path.isAbsolute (filename))
         filename = path.resolve (this.app.appPath, filename);
 
       return await identity.fromSeedFile (filename);
     }
     else {
-      throw new Error (`The identity for agent ${name} is an unsupported type.`);
+      throw new Error (`The identify protocol ${protocol} is not supported.`);
     }
+  },
+
+  _lookupAgent (name, failIfNotFound = true) {
+    const agent = this.agents[name];
+
+    if (!agent && failIfNotFound)
+      throw new Error (`The agent ${name} does not exist.`);
+
+    return agent;
   }
 });
