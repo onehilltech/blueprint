@@ -19,7 +19,7 @@ const { expect } = require ('chai');
 const path = require ("path");
 const blueprint = require ('@onehilltech/blueprint');
 
-describe.only ('lib | identity | seed', function () {
+describe ('lib | identity | seed', function () {
   it ('should load an identity from a seed phrase', async function () {
     const file = path.resolve (blueprint.app.appPath, 'assets/seed.txt');
     const identity = await fromSeedFile (file);

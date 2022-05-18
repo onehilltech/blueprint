@@ -60,17 +60,8 @@ module.exports = Service.extend ({
 
     // Load the agents and canister ids into memory.
     await (map (dfinity.agents, async (agentOptions, name) => {
-      if (agentOptions.identity) {
-        if (agentOptions.identity.startsWith (IDENTITY_KEY_PROTOCOL)) {
-          const filename = agentOptions.identity.slice (IDENTITY_KEY_PROTOCOL.length);
-        }
-        else if (agentOptions.identity.startsWith (IDENTITY_PHRASE_PROTOCOL)) {
-          const filename = agentOptions.identity.slice (IDENTITY_PHRASE_PROTOCOL.length);
-        }
-        else {
-          throw new Error (`The identity for agent ${name} is an unsupported type.`);
-        }
-      }
+      if (agentOptions.identity)
+        agentOptions.identity = await this._loadIdentity (agentOptions.identity);
 
       const agent = new HttpAgent (agentOptions);
 
@@ -153,5 +144,34 @@ module.exports = Service.extend ({
         return new Actor ();
       }
     });
+  },
+
+  /**
+   * Loads the identify to be used in the http agent.
+   *
+   * @param identity
+   * @return {Promise<*>}
+   * @private
+   */
+  async _loadIdentity (identity) {
+    if (identity.startsWith (IDENTITY_KEY_PROTOCOL)) {
+      let filename = identity.slice (IDENTITY_KEY_PROTOCOL.length);
+
+      if (!path.isAbsolute (filename))
+        filename = path.resolve (this.app.appPath, filename);
+
+      return await identity.fromKeyFile (filename);
+    }
+    else if (identity.startsWith (IDENTITY_PHRASE_PROTOCOL)) {
+      let filename = identity.slice (IDENTITY_PHRASE_PROTOCOL.length);
+
+      if (!path.isAbsolute (filename))
+        filename = path.resolve (this.app.appPath, filename);
+
+      return await identity.fromSeedFile (filename);
+    }
+    else {
+      throw new Error (`The identity for agent ${name} is an unsupported type.`);
+    }
   }
 });

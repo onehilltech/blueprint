@@ -4,14 +4,14 @@ module.exports = {
       host: 'http://localhost:8000'
     },
 
-    seed: {
-      host: 'http://localhost:8000',
-      identify: 'phrase://./assets/seed.txt'
-    },
-
-    pem: {
+    key: {
       host: 'http://localhost:8000',
       identify: 'key://./assets/dummy.pem'
+    },
+
+    phrase: {
+      host: 'http://localhost:8000',
+      identify: 'phrase://./assets/seed.txt'
     }
   },
 

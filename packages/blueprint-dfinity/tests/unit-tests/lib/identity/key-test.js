@@ -19,7 +19,7 @@ const path = require ('path');
 const { fromKeyFile } = require ('../../../../lib/identity');
 const { expect } = require ('chai');
 
-describe.only ('lib | identity | key', function () {
+describe ('lib | identity | key', function () {
   it ('should load an identity from a private key file', async function () {
     const privateKey = path.resolve (blueprint.app.appPath, 'assets/dummy.pem');
     const identity = await fromKeyFile (privateKey);

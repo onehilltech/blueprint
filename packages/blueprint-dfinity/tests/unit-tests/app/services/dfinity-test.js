@@ -21,7 +21,7 @@ describe ('app | services | dfinity', function () {
   it ('should initialize the service', function () {
     const dfinity = blueprint.lookup ('service:dfinity');
 
-    expect (dfinity.agents).to.have.keys (['$default']);
+    expect (dfinity.agents).to.have.keys (['$default', 'key', 'phrase']);
     expect (dfinity.agents.$default._host.toString ()).to.equal ('http://localhost:8000/');
 
     expect (dfinity.canisters).to.eql ({
