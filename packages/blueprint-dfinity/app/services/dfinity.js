@@ -60,6 +60,9 @@ module.exports = Service.extend ({
 
     // Load the agents and canister ids into memory.
     await (map (dfinity.agents, async (agentOptions, name) => {
+      if (agentOptions.source && isString (agentOptions.source))
+        agentOptions.source = this.agents[agentOptions.source];
+
       if (agentOptions.identity)
         agentOptions.identity = await this._loadIdentity (agentOptions.identity);
 
