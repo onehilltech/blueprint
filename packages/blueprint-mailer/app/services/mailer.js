@@ -43,13 +43,28 @@ module.exports = Service.extend ({
    * @override
    */
   async configure () {
+    this._configureEmailClient ();
+    await this._configureTemplateCompiler ();
+  },
+
+  /**
+   * Configure the email client used by the service.
+   * @private
+   */
+  _configureEmailClient () {
     const options = _.merge ({}, this.app.configs.mailer, {
       render: this.render.bind (this),
     });
 
-    // Initialize the email client.
     this._email = new Email (options);
+  },
 
+  /**
+   * Configure the template compiler used to compile email templates.
+   *
+   * @private
+   */
+  async _configureTemplateCompiler () {
     // Initialize the template compiler.
     const templatePath = path.resolve (this.mailerPath, 'templates');
     const handlebars = await this._initHandlebars ();
