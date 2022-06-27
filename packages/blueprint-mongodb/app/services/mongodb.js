@@ -64,8 +64,10 @@ module.exports = Service.extend ({
     this._seeds = {};
     this._seedDefs = null;
 
-    // setup the messaging.
-    this._loadConfiguration ();
+    this.config = this.get ('app.configs.mongodb');
+
+    if (this.config)
+      this._loadConfiguration (this.config);
   },
 
   /**
@@ -73,18 +75,13 @@ module.exports = Service.extend ({
    *
    * @private
    */
-  _loadConfiguration () {
+  _loadConfiguration (config) {
     // Locate the module configuration in the application. If there is no
     // configuration, then we need to stop processing. This brings attention
     // to the developer to resolve the problem.
 
-    this.config = this.get ('app.configs.mongodb');
-
-    if (!this.config)
-      throw new Error ('The application does not define a mongodb configuration.');
-
-    this._defaultName = get (this.config, 'defaultConnection', DEFAULT_CONNECTION_NAME);
-    const { connections } = this.config;
+    this._defaultName = get (config, 'defaultConnection', DEFAULT_CONNECTION_NAME);
+    const { connections } = config;
 
     if (!connections || connections.length === 0)
       throw new Error ('You must define at least 1 connection in the configuration.');
