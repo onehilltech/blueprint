@@ -161,10 +161,8 @@ exports = module.exports = ResourceController.extend ({
    * Initialize the resource controller.
    */
   init (opts = {}) {
-    if (this.model) {
-      console.warn (`*** deprecated: use {Model} property instead of {model} property when defining ${this.name} resource controller`);
-      this.Model = this.model;
-    }
+    if (!this.Model)
+      return;
 
     const {modelName} = this.Model;
 
