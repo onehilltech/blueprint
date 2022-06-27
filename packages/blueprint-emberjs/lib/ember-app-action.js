@@ -126,7 +126,6 @@ module.exports = Action.extend ({
     this._indexTemplate = await this.handlebars.compile (tempTemplateFilePath);
   },
 
-
   /// The pre-compiled index template.
   _indexTemplate: null,
 });
