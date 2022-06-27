@@ -41,10 +41,5 @@ module.exports = function (resources, component) {
   if (!entities)
     throw new Error (`${type} is not a valid type.`);
 
-  let entity = get (entities, name);
-
-  if (!entity)
-    throw new Error (`${component} does not exist.`);
-
-  return entity;
+  return get (entities, name);
 };

@@ -17,14 +17,8 @@ const {
  * @returns {*}
  */
 function model (name, schema, collection) {
-  let mongodb = blueprint.lookup ('service:mongodb');
-
-  // Install the default
-  schema.plugin (HiddenPlugin);
-  schema.plugin (ConstPlugin);
-  schema.plugin (LeanPlugin);
-
-  return mongodb.defaultConnection.model (name, schema, collection);
+  const mongodb = blueprint.lookup ('service:mongodb');
+  return modelOnConnection (mongodb.defaultConnection, name, schema, collection);
 }
 
 /**
@@ -39,18 +33,22 @@ function model (name, schema, collection) {
  * @param collection    Name of the model collection
  */
 function modelOn (connName, name, schema, collection) {
-  let mongodb = blueprint.lookup ('service:mongodb');
-  let connection = mongodb.connections[connName];
+  const mongodb = blueprint.lookup ('service:mongodb');
+  const connection = mongodb.connections[connName];
 
-  if (!connection)
-    return null;
+  return modelOnConnection (connection, name, schema, collection);
+}
+
+function modelOnConnection (conn, name, schema, collection) {
+  if (!conn)
+    return;
 
   // Install the default
   schema.plugin (HiddenPlugin);
   schema.plugin (ConstPlugin);
   schema.plugin (LeanPlugin);
 
-  return connection.model (name, schema, collection);
+  return conn.model (name, schema, collection);
 }
 
 /**
@@ -62,6 +60,9 @@ function modelOn (connName, name, schema, collection) {
  * @param collection      Name of collection
  */
 function createResource (conn, name, schema, collection) {
+  if (!conn)
+    return null;
+
   Object.defineProperty (schema.options, 'resource', { enumerable: true, writable: false, value: true });
 
   // Install the default
@@ -81,7 +82,7 @@ function createResource (conn, name, schema, collection) {
  * @param collection
  */
 function resource (name, schema, collection) {
-  let mongodb = blueprint.lookup ('service:mongodb');
+  const mongodb = blueprint.lookup ('service:mongodb');
   return createResource (mongodb.defaultConnection, name, schema, collection);
 }
 

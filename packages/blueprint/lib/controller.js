@@ -48,7 +48,7 @@ module.exports = BO.extend (Events, {
    * @returns {Promise<void>}
    */
   async configure () {
-    for await (const action of this._registered)
+    for await (const action of (this._registered || []))
       await action.configure ();
   }
 });
