@@ -128,7 +128,7 @@ const { models } = require ('@onehilltech/blueprint');
  * Resource controller for the person resource models.
  */
 module.exports = ResourceController.extend ({
-  models: models ('person')
+  Model: model ('person')
 });
 ```
 
@@ -176,7 +176,7 @@ in your subclass of the `ResourceController`, and overloading the appropriate me
 
 ```javascript
 const { ResourceController } = require ('@onehilltech/blueprint-mongodb');
-const { models } = require ('@onehilltech/blueprint');
+const { model } = require ('@onehilltech/blueprint');
 
 /**
  * @class PersonController 
@@ -184,7 +184,7 @@ const { models } = require ('@onehilltech/blueprint');
  * Resource controller for the person resource models.
  */
 module.exports = ResourceController.extend ({
-  models: models ('person'),
+  Model: model ('person'),
   
   create () {
     return this._super.call (this, ...arguments).extend ({
