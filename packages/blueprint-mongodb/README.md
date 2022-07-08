@@ -290,3 +290,57 @@ in the database associated with the connection.
 See [`GridFSController`](https://github.com/onehilltech/blueprint-mongodb/blob/master/lib/gridfs-controller.js) 
 for the optional properties to configure the controller's behavior.
 
+## Seeding Database for Testing
+
+The `@onehilltech/blueprint-mongodb` module provides support for seeding the database
+defined in your connection. When paired with [fakerjs](https://fakerjs.dev/), you 
+can create realistic environments/scenario for development and testing purposes.
+
+> You cannot seed a `production` database because seeding can be a destructive operation.
+
+The database seed is located (or placed) in `app/seeds/mongodb`. The database seed is defined using
+[dab](https://github.com/onehilltech/dab/tree/master/packages/dab). Last, the name of the seed file
+matches the name of the database connection you want to seed. Using our example `Person` schema
+from above, here is a dab definition that seeds the default database connection with 2 people.
+
+```javascript
+// app/seeds/mongodb/default.js
+
+module.exports = {
+  person: [
+    { first_name: 'Tom', last_name: 'Thumb' },
+    { first_name: 'Jill', last_name: 'Wilson' } 
+  ]
+};
+```
+
+Here is another example of using the `dab.times` generator and [fakerjs](https://fakerjs.dev/)
+to add 50 people to the database.
+
+
+```javascript
+// app/seeds/mongodb/default.js
+
+const dab = require ('@onehilltech/dab');
+const faker = require ('faker');
+
+module.exports = {
+  person: dab.times (50, i => ({
+    first_name: faker.name.firstName (),
+    last_name: faker.name.lastName ()
+  })
+};
+```
+
+### Seeding database for an specific runtime environment
+
+`NODE_ENV` is used to define the runtime environmet for a NodeJS process. It is possible to
+seed a database connection based on the value of `NODE_ENV`. You do this by placing the
+database seed in 
+
+    app/seeds/mongodb/[env]/
+    
+where env is the expected value of `NODE_ENV`. For example, place the seed in `app/seeds/mongodb/development` 
+if you want to seed the `NODE_ENV=development` environment, which is the default environment if nothing is 
+specified. Likewise, place the seed in `app/seeds/mongodb/test` if you want to seed the `NODE_ENV=test` 
+environment.
