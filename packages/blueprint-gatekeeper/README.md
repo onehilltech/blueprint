@@ -107,11 +107,11 @@ the request to access a protected route. For example, here is an example of sett
 the user making the request as the owner of a created resource.
 
 ```javascript
-const { models } = require ('@onehilltech/blueprint');
+const { model } = require ('@onehilltech/blueprint');
 const { ResourceController } = require ('@onehilltech/blueprint-mongodb');
 
 module.exports = ResourceController.extend ({
-  Model: models ('tweet'),
+  Model: model ('tweet'),
   
   create () {
     return this._super (this, ...arguments).extend ({
