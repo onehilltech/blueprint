@@ -306,12 +306,18 @@ from above, here is a dab definition that seeds the default database connection 
 ```javascript
 // app/seeds/mongodb/default.js
 
-module.exports = {
-  person: [
-    { first_name: 'Tom', last_name: 'Thumb' },
-    { first_name: 'Jill', last_name: 'Wilson' } 
-  ]
-};
+const { Seed } = require ('@onehilltech/blueprint-mongodb');
+
+module.exports = Seed.extend ({
+  model () {
+    return {
+      person: [
+        { first_name: 'Tom', last_name: 'Thumb' },
+        { first_name: 'Jill', last_name: 'Wilson' } 
+      ]
+    }
+  }
+});
 ```
 
 Here is another example of using the `dab.times` generator and [fakerjs](https://fakerjs.dev/)
@@ -321,15 +327,21 @@ to add 50 people to the database.
 ```javascript
 // app/seeds/mongodb/default.js
 
+const { Seed } = require ('@onehilltech/blueprint-mongodb');
 const dab = require ('@onehilltech/dab');
 const faker = require ('faker');
 
-module.exports = {
-  person: dab.times (50, i => ({
-    first_name: faker.name.firstName (),
-    last_name: faker.name.lastName ()
-  })
-};
+
+module.exports = Seed.extend ({
+  model () {
+    return {
+      person: dab.times (50, i => ({
+        first_name: faker.name.firstName (),
+        last_name: faker.name.lastName ()
+      })
+    }
+  }
+});
 ```
 
 ### Seeding database for an specific runtime environment
