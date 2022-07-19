@@ -10,12 +10,12 @@ const { props } = require ('bluebird');
  */
 module.exports = Service.extend ({
   async configure () {
-    const { mailgun } = this.app.configs;
+    const { mailgun: config } = this.app.configs;
 
-    if (!mailgun)
+    if (!config)
       return;
 
-    const { url, auth = {}, webhooks } = mailgun;
+    const { url, auth = {}, webhooks } = config;
     const { key, api_key, domain } = auth;
 
     this._mg = mailgun.client ({username: 'api', key: key || api_key, url });
