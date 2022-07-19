@@ -33,7 +33,7 @@ describe ('lib | models', function () {
       const schema = new Schema ({ first_name: String, last_name: String });
       let Person = modelOn ('primary', 'person', schema);
 
-      expect (Person).to.be.null;
+      expect (Person).to.be.undefined;
     });
   });
 
