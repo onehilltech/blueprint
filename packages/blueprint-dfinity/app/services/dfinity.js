@@ -205,6 +205,13 @@ module.exports = Service.extend ({
     }
   },
 
+  /**
+   * Helper method that lookups an existing agent.
+   *
+   * @param name                Name of the agent
+   * @param failIfNotFound      Fail if not found
+   * @private
+   */
   _lookupAgent (name, failIfNotFound = true) {
     const agent = this.agents[name];
 
