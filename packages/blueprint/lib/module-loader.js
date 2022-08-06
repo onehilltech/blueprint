@@ -191,7 +191,7 @@ module.exports = BO.extend (Events, {
 
     // Load each module into memory.
     for (const blueprintModule of modules) {
-      const module = new ApplicationModule ({app: this.app, name: blueprintModule.name, modulePath: blueprintModule.appPath});
+      const module = new ApplicationModule (this.app, blueprintModule.name, blueprintModule.appPath);
 
       await this.emit ('loading', module);
       await module.configure ();

@@ -37,13 +37,13 @@ describe ('lib | Application', function () {
     });
 
     it ('should lookup a loaded configuration', function () {
-      let appConfig = blueprint.app.lookup ('config:app');
+      const appConfig = blueprint.app.lookup ('config:app');
       expect (appConfig).to.equal (blueprint.app.configs.app);
     });
 
-    it ('should lookup a duplicate resource', function () {
-      let controller = blueprint.app.lookup ('service:cart');
-      expect (controller.name).to.equal ('mod_a');
+    it ('should lookup the original resource', function () {
+      const service = blueprint.app.lookup ('service:cart');
+      expect (service.name).to.equal ('original');
     });
 
     it ('should lookup a resource in a module', function () {
