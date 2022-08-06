@@ -133,7 +133,9 @@ You can now run the Blueprint.js application as normal.
 
     node ./app
 
-## Advanced Usage
+
+Advanced Usage
+-------------------
 
 ### Binding to named agents and canisters
 
@@ -250,5 +252,11 @@ module.exports = {
 
 In the example above, we will auto-generate the default private key. But, the `$default` agent
 will not use the default private key.
+
+
+Next Steps
+--------------------
+
+Check out the `/examples` directory for example actor definitions.
 
 Happy Coding!
