@@ -16,10 +16,12 @@ Usage
 Getting Started
 -------------------
 
-This walks through using Blueprint.js to invoke the actor from the
+This walkthrough uses Blueprint.js to invoke the actor from the
 [Hello World](https://internetcomputer.org/docs/current/developer-docs/quickstart/hello10mins/) 
-example. The Internet Computer must be running in your local development environment, and the 
-actor must be deployed to a canister within this environment.
+example. 
+
+> The Internet Computer must be running in your local development environment, and the 
+> actor must be deployed to a canister within this environment.
 
 ### Defining the actor(s)
 
