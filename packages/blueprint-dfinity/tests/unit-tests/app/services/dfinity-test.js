@@ -18,7 +18,7 @@ const blueprint = require ('@onehilltech/blueprint');
 const { expect } = require ('chai');
 
 describe ('app | services | dfinity', function () {
-  it.only ('should initialize the service', function () {
+  it ('should initialize the service', function () {
     const dfinity = blueprint.lookup ('service:dfinity');
 
     expect (dfinity.agents).to.have.keys (['$default', 'key', 'phrase']);

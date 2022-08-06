@@ -23,6 +23,6 @@ describe ('app | routers | hello', function () {
     await request ()
       .post ('/hello')
       .send ({ name: 'OneHillTech'})
-      .expect (500, { message: 'Hello, OneHillTech!' });
+      .expect (200, { message: 'Hello, OneHillTech!' });
   });
 });
