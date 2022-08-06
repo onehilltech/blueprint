@@ -21,7 +21,9 @@ const { BO } = require ('base-object');
 const ApplicationModule = require ('./application-module');
 const Events = require ('./messaging/events-mixin');
 
-const { forEach, find, isEmpty } = require ('lodash');
+const { find, isEmpty, map } = require ('lodash');
+const { props } = require ('bluebird');
+
 const debug = require ('debug') ('blueprint:module-loader');
 
 const KEYWORD_BLUEPRINT_MODULE = 'blueprint-module';
@@ -31,56 +33,76 @@ function isBlueprintModule (packageObj) {
   return packageObj.keywords && packageObj.keywords.indexOf (KEYWORD_BLUEPRINT_MODULE) !== -1;
 }
 
-module.exports = BO.extend (Events, {
-  /// The target application for the loader.
-  app: null,
+/**
+ * @class BlueprintModule
+ *
+ * A simple representation of a Blueprint module.
+ */
+class BlueprintModule {
+  constructor (name, path) {
+    this.name = name;
+    this.path = path;
+  }
 
-  /// Collection of loaded modules.
-  _modules: null,
+  get appPath () {
+    return path.resolve (this.path, 'app')
+  }
+}
 
-  init () {
-    this._super.call (this, ...arguments);
-    this._modules = {};
-
-    assert (!!this.app, 'You must define the app property');
-  },
+/**
+ * @class BlueprintModuleCollector
+ *
+ * A utility class that gathers Blueprint modules.
+ */
+class BlueprintModuleCollector {
+  constructor (appPath) {
+    this.appPath = appPath;
+    this.modules = [];
+    this._seen = {};
+  }
 
   /**
-   * Load the Blueprint modules in the application path.
+   * Gather the collection of Blueprint modules for the given application path.
+   *
+   * @param appPath
    */
-  async load () {
-    const packageFile = path.resolve (this.app.appPath, '..', FILE_PACKAGE_JSON);
+  async gather (appPath) {
+    // First, locate all the modules that we need to load.
+    const packageFile = path.resolve (appPath, '..', FILE_PACKAGE_JSON);
     const packageObj = require (packageFile);
 
-    if (packageObj || packageObj.dependencies)
-      await this._handleDependencies (packageObj.dependencies);
-  },
+    if (packageObj && packageObj.dependencies)
+      await this._searchDependencies (packageObj.dependencies);
+
+    return this.modules;
+  }
 
   /**
-   * Handle the dependencies in the module.
-   *
+   * Search the dependencies for Blueprint modules.
    * @param dependencies
    * @private
    */
-  async _handleDependencies (dependencies) {
+
+  async _searchDependencies (dependencies) {
     if (isEmpty (dependencies))
       return;
 
-    debug (`dependencies: ${Object.keys (dependencies)}`);
-    forEach (dependencies, async (version, name) => await this._handleNodeModule (name, version));
-  },
+    debug (`searching dependencies: ${Object.keys (dependencies)}`);
+
+    const promises = map (dependencies, (version, name) => this._handleNodeModule (name, version));
+    await props (promises);
+  }
 
   /**
-   * Handle node-specific modules.
+   * Handle processing a node module.
    *
    * @param name
    * @param version
-   * @returns {*}
    * @private
    */
   async _handleNodeModule (name, version) {
     // Do not process the module more than once.
-    if (!!this._modules[name])
+    if (this._seen[name])
       return;
 
     // Open the package.json file for this node module, and determine
@@ -90,51 +112,36 @@ module.exports = BO.extend (Events, {
     if (version.startsWith ('file:')) {
       // The file location is relative to the blueprint application.
       let relativePath = version.slice (5);
-      modulePath = path.resolve (this.app.appPath, '..', relativePath);
+      modulePath = path.resolve (this.appPath, '..', relativePath);
     }
     else {
-      modulePath = this._resolveModulePath (name);
+      modulePath = await this._resolveModulePath (name);
     }
 
     const packageFile = path.resolve (modulePath, FILE_PACKAGE_JSON);
     const packageObj = require (packageFile);
 
-    // Do not continue if the module is not a Blueprint module, or we have
-    // already loaded this module into memory.
+    // If the module is a Blueprint module, let's save it. We then need to
+    // process the dependencies of the found Blueprint module.
 
-    if (!isBlueprintModule (packageObj) || !!this._modules[name])
-      return;
+    if (isBlueprintModule (packageObj) && !this._seen[name]) {
+      this.modules.push (new BlueprintModule (name, modulePath));
+      this._seen[name] = true;
 
-    debug (`first time seeing ${name}; adding to list of dependencies...`);
-
-    // Create a new application module.
-    const moduleAppPath = path.resolve (modulePath, 'app');
-    const module = new ApplicationModule (this.app, name, moduleAppPath);
-
-    // Save the module so we do not process it again.
-    this._modules[name] = module;
-
-    // Load the dependencies for this module, then configure this module, and
-    // then add this module to the application.
-    const { dependencies } = packageObj;
-
-    await this._handleDependencies (dependencies);
-    await this.emit ('loading', module);
-    await module.configure ();
-    await this.emit ('loaded', module)
-  },
+      await this._searchDependencies (packageObj.dependencies);
+    }
+  }
 
   /**
    * Resolve the full location of the modules path.
    *
    * @param name
-   * @returns {Promise<string>}
    * @private
    */
   async _resolveModulePath (name) {
     // Let's make sure the node_modules for the application appear on the path. This is
     // important for examples applications that reside within an existing application
-    const paths = [path.resolve (this.app.appPath, '../node_modules'), ...module.paths];
+    const paths = [path.resolve (this.appPath, '../node_modules'), ...module.paths];
 
     let basename = find (paths, basename => {
       let modulePath = path.resolve (basename, name, 'package.json');
@@ -152,4 +159,43 @@ module.exports = BO.extend (Events, {
 
     return path.resolve (basename, name);
   }
+}
+
+/**
+ * @class ModuleLoader
+ *
+ * Utility class for loading Blueprint modules into an application.
+ */
+module.exports = BO.extend (Events, {
+  /// The target application for the loader.
+  app: null,
+
+  init () {
+    this._super.call (this, ...arguments);
+    this._modules = {};
+
+    assert (!!this.app, 'You must define the app property');
+  },
+
+  /**
+   * Load the Blueprint modules in the application path.
+   */
+  async load () {
+    // First, locate all the modules that we need to load.
+    const collector = new BlueprintModuleCollector (this.app.appPath);
+    const modules = await collector.gather (this.app.appPath);
+
+    // Topologically sort the module by reversing the array. This will ensure
+    // that we load the modules in correct order of dependency.
+    modules.reverse ();
+
+    // Load each module into memory.
+    for (const blueprintModule of modules) {
+      const module = new ApplicationModule ({app: this.app, name: blueprintModule.name, modulePath: blueprintModule.appPath});
+
+      await this.emit ('loading', module);
+      await module.configure ();
+      await this.emit ('loaded', module);
+    }
+  },
 });

@@ -1,0 +1,30 @@
+{
+  "name": "@onehilltech/blueprint-python",
+  "description": "Run Python scripts for a Blueprint application.",
+  "version": "4.65.11",
+  "private": false,
+  "scripts": {
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
+    "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+  },
+  "dependencies": {
+    "@onehilltech/blueprint": "^4.65.11"
+  },
+  "devDependencies": {
+    "@onehilltech/blueprint-cli": "^4.64.1",
+    "@onehilltech/blueprint-testing": "^4.64.1"
+  },
+  "repository": "onehilltech/blueprint",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=6.0.0",
+    "npm": ">=3.0.0"
+  },
+  "keywords": [
+    "blueprint",
+    "blueprint-module",
+    "python"
+  ],
+  "gitHead": "3fa9d1898f478215e947cceb53313d6bd2cf93a5"
+}

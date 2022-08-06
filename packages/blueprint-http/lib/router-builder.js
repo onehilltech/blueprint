@@ -18,7 +18,7 @@ const assert  = require ('assert');
 const debug   = require ('debug')('blueprint:RouterBuilder');
 const express = require ('express');
 const { checkSchema } = require ('express-validator/check');
-const path    = require ('path');
+const path = require ('path');
 
 const {
   forOwn,

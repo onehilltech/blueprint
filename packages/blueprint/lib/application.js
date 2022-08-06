@@ -15,10 +15,12 @@
  */
 
 const path  = require ('path');
-const {ensureDir} = require ('fs-extra');
+const fse = require ('fs-extra');
 const debug  = require ('debug')('blueprint:app');
 const assert = require ('assert');
+
 const { merge, get, isArray, mapValues } = require ('lodash');
+
 
 const lookup = require ('./-lookup');
 const { BO, computed } = require ('base-object');
@@ -86,7 +88,7 @@ class Application {
   async configure () {
     // Make sure the temporary directory for blueprint exists. This is the location
     // where modules can add the files to improve performance or track state.
-    await ensureDir (this.tempPath);
+    await fse.ensureDir (this.tempPath);
 
     // Load the configuration files.
     this.configs = await this._loadConfigurationFiles ();
@@ -125,27 +127,6 @@ class Application {
       return service.configure ();
     }));
 
-    // // Configure the server, if present.
-    // const { server: serverConfig } = this.configs;
-    //
-    // if (serverConfig)
-    //   await this._server.configure (serverConfig);
-    //
-    // // Import the views of the application into the server. The views of the
-    // // application will overwrite any views previously imported when we loaded
-    // // an application module.
-    //
-    // if (this._appModule.hasViews)
-    //   await this._server.importViews (this._appModule.viewsPath);
-    //
-    // // Now, we can build the routers for the application. The final router will be
-    // // set as the main router on the application server.
-    // const { routers } = this.resources;
-    // const builder = new RouterBuilder (this);
-    // const router = await builder.addRouter ('/', routers).build ();
-    //
-    // this._server.setMainRouter (router);
-
     // Notify all listeners the application has been initialized.
     await this.emit ('blueprint.app.initialized', this);
 
@@ -156,8 +137,6 @@ class Application {
    * Destroy the application.
    */
   async destroy () {
-    //await this._server.close ();
-
     // Instruct each service to destroy itself.
     const { services } = this.resources;
 
@@ -177,7 +156,7 @@ class Application {
     if (this._modules.hasOwnProperty (name))
       throw new Error (`duplicate module ${name}`);
 
-    await this._importViewsFromModule (appModule);
+    //await this._importViewsFromModule (appModule);
     await this._appModule.merge (appModule);
     this._modules[name] = appModule;
 

@@ -15,9 +15,10 @@
  */
 
 const cors = require ('../../lib/cors');
+const bodyParser = require ('body-parser');
 
 module.exports = {
   '/v1': {
-    use: [cors ()]
+    use: [cors (), bodyParser.json (), bodyParser.urlencoded ({extended: false})],
   }
 };

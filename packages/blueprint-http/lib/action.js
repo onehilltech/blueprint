@@ -75,6 +75,20 @@ module.exports = BO.extend ({
 
   /// @{ Events
 
+  init () {
+    this._super.call (this, ...arguments);
+
+    if (this.controller)
+      this.controller.registerAction (this);
+  },
+
+  /**
+   * Configure the action.
+   */
+  async configure () {
+
+  },
+
   emit () {
     return this.app.emit (...arguments);
   },

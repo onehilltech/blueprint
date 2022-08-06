@@ -31,7 +31,9 @@ class SocketDescriptor extends PropertyDescriptor {
     const connectionName = this.connection || name;
 
     Object.defineProperty (obj, name, {
-      get () { return this.app.lookup ('service:io').connection (connectionName); }
+      get () {
+        return this.app.lookup ('service:io').connection (connectionName);
+      }
     });
   }
 

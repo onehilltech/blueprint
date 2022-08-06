@@ -26,8 +26,9 @@ const {
   differenceWith,
   flattenDeep,
   mapValues,
-  values,
+  compact,
   isEmpty,
+  get,
 } = require ('lodash');
 
 const {
@@ -134,6 +135,9 @@ module.exports = BO.extend ({
    * @param ids
    */
   _saveUnseenIds (type, ids) {
+    // Remove any undefined ids.
+    ids = compact (ids);
+
     const arrOfIds = this._ids[type];
     const unseen = differenceWith (ids, ...arrOfIds, (l, r) => l.equals (r));
 
@@ -184,7 +188,7 @@ module.exports = BO.extend ({
   processId (populator, value) {
     if (!value)
       return null;
-    
+
     // Determine the ids that we need to populate at this point in time. If we
     // have seen all the ids, then there is no need to populate the value(s).
 
@@ -228,8 +232,12 @@ module.exports = BO.extend ({
       // Get the value at the current path. The value can be either a single element or an
       // array of elements. We only need to continue if something exists.
 
-      const value = data[path];
-      return populator.valueExists (value) ? this.processId (populator, value) : null;
+      const value = get (data, path);
+
+      if ( populator.valueExists (value))
+        return this.processId (populator, value);
+      else
+        return null;
     });
 
     return props (mapping);

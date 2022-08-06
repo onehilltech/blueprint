@@ -14,7 +14,7 @@
     "compression": "^1.7.3"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^4.46.0"
+    "@onehilltech/blueprint-testing": "^4.64.1"
   },
   "license": "Apache-2.0",
   "engines": {
@@ -26,6 +26,5 @@
     "blueprint-module",
     "express",
     "compression"
-  ],
-  "gitHead": "6d8d1668f749ba929cc927530c47f68df04f4abd"
+  ]
 }

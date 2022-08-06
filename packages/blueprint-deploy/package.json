@@ -14,8 +14,8 @@
     "@onehilltech/blueprint": "^5.0.0-alpha.0"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-cli": "^4.46.0",
-    "@onehilltech/blueprint-testing": "^4.46.0"
+    "@onehilltech/blueprint-cli": "^4.64.1",
+    "@onehilltech/blueprint-testing": "^4.64.1"
   },
   "license": "",
   "engines": {

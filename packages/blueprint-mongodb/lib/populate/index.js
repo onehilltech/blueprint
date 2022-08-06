@@ -16,10 +16,27 @@
 
 const ModelRegistry = require ('./model-registry');
 const Population = require ('./population');
+const { reduce, omit, isEmpty } = require ('lodash');
 
 function getModel (model) {
   let modelName = model.constructor.modelName;
   return model.db.models[modelName];
+}
+
+/**
+ * Helper function that compacts the models by remove empty entries.
+ *
+ * @param models
+ */
+function compact (models) {
+  const omittable = reduce (models, (result, value, key) => {
+    if (isEmpty (value))
+      result.push (key);
+
+    return result;
+  }, []);
+
+  return omit (models, omittable);
 }
 
 /**
@@ -29,18 +46,20 @@ function getModel (model) {
  * @param   options
  * @return  Promise <Population>
  */
-function populateModel (model, options = {}) {
+async function populateModel (model, options = {}) {
   // Get the registered model type.
   const Model = getModel (model);
 
   // Create a new register, and add the root Model to it.
-  const registry = new ModelRegistry ();
+  const registry = new ModelRegistry ({ options });
   registry.addModel (Model);
 
   // Create a new population for this registry. Then, add the
   // root model to the population.
   const population = new Population ({registry, options});
-  return population.addModel (model).then (population => population.models);
+  const result = await population.addModel (model);
+
+  return compact (result.models);
 }
 
 /**
@@ -49,8 +68,8 @@ function populateModel (model, options = {}) {
  * @param models
  * @param options
  */
-function populateModels (models, options = {}) {
-  const registry = new ModelRegistry ();
+async function populateModels (models, options = {}) {
+  const registry = new ModelRegistry ({ options });
 
   // Add the model types to the registry.
   models.forEach (model => {
@@ -61,7 +80,9 @@ function populateModels (models, options = {}) {
   // Create a new population for this registry. Then, add the
   // root model to the population.
   const population = new Population ({registry, options});
-  return population.addModels (models).then (population => population.models);
+  const result = await population.addModels (models);
+
+  return compact (result.models);
 }
 
 exports.populateModel = populateModel;

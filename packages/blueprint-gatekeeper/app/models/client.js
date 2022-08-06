@@ -66,6 +66,9 @@ let schema = new mongodb.Schema ({
   /// this url, then the client is not able to verify accounts.
   verify_account_url: { type: String },
 
+  /// The redirection url for account verification.
+  verify_account_redirect_url: { type: String },
+
   /// The expiration time for activating an account via this client.
   verify_expires_in: { type : String, default: '7 days'}
 }, options);

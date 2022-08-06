@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-const {
-  model,
-  NotFoundError,
-  BadRequestError,
-  service,
-  Action
-} = require ('@onehilltech/blueprint');
-
+const { model, BadRequestError, service, Action } = require ('@onehilltech/blueprint');
 const { get } = require ('lodash');
 const ResourceController = require ('../../../lib/resource-controller');
 
@@ -35,14 +28,14 @@ module.exports = ResourceController.extend ({
 
   create () {
     const { gatekeeper } = this.app.configs;
-    const { usernameIsEmail = false } = gatekeeper;
+    const { usernameIsEmail = false, normalizeEmail = true } = gatekeeper;
 
     let schema = {
       'account.email': {
         in: ['body'],
         errorMessage: 'Not a valid email address.',
         isEmail: true,
-        normalizeEmail: true
+        normalizeEmail
       }
     };
 
@@ -51,7 +44,7 @@ module.exports = ResourceController.extend ({
         in: ['body'],
         errorMessage: 'Not a valid email address.',
         isEmail: true,
-        normalizeEmail: true
+        normalizeEmail
       }
     }
 
@@ -151,15 +144,56 @@ module.exports = ResourceController.extend ({
       schema: {
         [this.resourceId]: {
           in: 'params',
-          isMongoId: false,
-          isMongoIdOrMe: true
+          custom: {
+            options: this.app.lookup ('validator:isMongoIdOrMe'),
+            errorMessage: 'The id is not valid.',
+          }
         }
       },
 
       getId (req, id) {
         return id === 'me' ? req.user._id : id;
-      }
+      },
+
+      /**
+       * @override
+       */
+      prepareResponse (req, res, result) {
+        const { account } = result;
+
+        // Prepare the response. We are going to remove the verification sub-document,
+        // and only return of the account has been verified.
+        const obj = account.toObject ();
+        obj.verified = account.verified;
+        delete obj.verification;
+
+        result.account = obj;
+
+        return result;
+      },
     });
+  },
+
+  /**
+   * @override
+   */
+  getAll () {
+    return this._super.call (this, ...arguments).extend ({
+      prepareResponse (req, res, result) {
+        const { accounts } = result;
+
+        // Replace the verification document with the verified virtual.
+        result.accounts = accounts.map (account => {
+          const obj = account.toObject ();
+          obj.verified = account.verified;
+          delete obj.verification;
+
+          return obj;
+        });
+
+        return result;
+      }
+    })
   },
 
   /**
@@ -206,6 +240,9 @@ module.exports = ResourceController.extend ({
         }
       },
 
+      /// Reference to the mailer service for sending emails.
+      mailer: service (),
+
       async executeFor (account, req, res) {
         // Verify the current password. If the password does not match, then we can
         // just return error message to the client, and stop processing the request.
@@ -216,9 +253,21 @@ module.exports = ResourceController.extend ({
         if (!match)
           throw new BadRequestError ('invalid_password', 'The current password is invalid.');
 
-        // Update the old password with the new password.
+        // Update the old password with the new password. After we change the password,
+        // we are going to send out notifications.
+
         account.password = newPassword;
         await account.save ();
+
+        await this.emit ('gatekeeper.password.changed', account);
+        await this.mailer.send ('gatekeeper.password.changed', {
+          message: {
+            to: account.email
+          },
+          locals: {
+            account
+          }
+        });
 
         return res.status (200).json (true);
       }
@@ -254,6 +303,38 @@ module.exports = ResourceController.extend ({
         account.verification.date = new Date ();
         account.verification.ip_address = req.ip;
         await account.save ();
+
+        // Let's also send a real-time notification to the client.
+        await this._emitIO (account);
+
+        return res.status (200).json ({ account });
+      },
+
+      async _emitIO (account) {
+        const { configs: { gatekeeper: { io: bucket } } } = this.app;
+
+        if (!!bucket) {
+          const io = this.app.lookup ('service:io').connection (bucket);
+          await io.to (account.id).emit ('verified');
+        }
+      }
+    });
+  },
+
+  /**
+   * Resend the verification email for the account.
+   */
+  resend () {
+    return this.SingleResourceAction.extend ({
+      // Reference to the verification service.
+      verification: service (),
+
+      async executeFor (account, req, res) {
+        if (account.verified)
+          throw new BadRequestError ('already_verified', 'The account has already been verified');
+
+        // Send the verification email for this account.
+        account = await this.verification.sendEmail (account, req.accessToken.client);
 
         return res.status (200).json ({ account });
       }

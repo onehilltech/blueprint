@@ -16,6 +16,7 @@
 
 const bcrypt  = require ('bcrypt');
 const mongodb = require ('@onehilltech/blueprint-mongodb');
+const { Schema: { Types: { refersTo }}} = mongodb;
 
 const { gatekeeper } = require ('@onehilltech/blueprint').app.configs;
 const { isEmail } = require ('validator');
@@ -61,7 +62,7 @@ let definition = {
     ip_address: { type: String },
 
     /// Id of the last email message sent regarding account verification.
-    last_email_id: { type: String },
+    last_email: refersTo ('email'),
 
     /// The date the last email message was sent.
     last_email_date: { type: Date },

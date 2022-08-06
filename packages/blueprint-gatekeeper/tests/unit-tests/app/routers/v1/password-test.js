@@ -112,10 +112,10 @@ describe ('app | routers | password', function () {
           return request ()
             .post ('/v1/password/reset')
             .send ({'reset-password': {token: token, password: '1234567890'}})
-            .expect (403, { errors:
+            .expect (400, { errors:
                 [ { code: 'unknown_account',
                   detail: 'The account does not exist.',
-                  status: '403' } ] });
+                  status: '400' } ] });
         });
       });
 
@@ -127,10 +127,10 @@ describe ('app | routers | password', function () {
           return request ()
             .post ('/v1/password/reset')
             .send ({'reset-password': {token: token, password: '1234567890'}})
-            .expect (403, { errors:
+            .expect (400, { errors:
                 [ { code: 'account_disabled',
                   detail: 'The account is disabled.',
-                  status: '403' } ] });
+                  status: '400' } ] });
         });
       });
     });

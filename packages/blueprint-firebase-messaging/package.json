@@ -20,13 +20,12 @@
     "node-gcm": "^0.14.10"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^4.46.0",
+    "@onehilltech/blueprint-testing": "^4.64.1",
     "coveralls": "^3.0.0",
     "istanbul": "^0.4.5",
     "mocha": "^6.2.0",
     "mocha-lcov-reporter": "^1.3.0"
   },
-  "gitHead": "6d8d1668f749ba929cc927530c47f68df04f4abd",
   "engines": {
     "node": ">=11.6.0",
     "npm": ">=6.5.0"

@@ -40,12 +40,16 @@ module.exports = Populate.extend ({
 
   populate (unseen) {
     let pending = mapValues (this.populators, (populator, name) => {
-      const values = unseen[name];
+      const plural = populator.plural;
+      const values = unseen[plural];
 
       if (isEmpty (values))
         return null;
 
       const ids = flattenDeep (values);
+
+      if (isEmpty (ids))
+        return null;
 
       return populator.populate (ids).exec ();
     });

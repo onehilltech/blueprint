@@ -18,6 +18,7 @@ const { computed, Service } = require ('@onehilltech/blueprint');
 const path = require ('path');
 const fs = require ('fs-extra');
 const request = require ('request-promise-native');
+const { merge } = require ('lodash');
 
 module.exports = Service.extend ({
   /// The current access token for the client.
@@ -38,9 +39,6 @@ module.exports = Service.extend ({
     get () { return this._accessToken; }
   }),
 
-  /// The request wrapper for this service.
-  _request: null,
-
   _refreshTokenPromise: null,
 
   /**
@@ -49,13 +47,12 @@ module.exports = Service.extend ({
    * The service will make sure the temp directory exists, and then attempt to load
    * the existing access token.
    */
-  configure () {
+  async configure () {
     this._super.call (this, ...arguments);
     this._config = this.app.lookup ('config:gatekeeper');
 
-    return fs.ensureDir (this.tempPath).then (() => {
-      return this._loadToken ();
-    });
+    await fs.ensureDir (this.tempPath);
+    await this._loadToken ();
   },
 
   /**
@@ -66,9 +63,13 @@ module.exports = Service.extend ({
    *
    * @return {*}
    */
-  start () {
+  async start () {
     this._super.call (this, ...arguments);
-    return !this._request ? this._requestToken ().then (this._useToken.bind (this)) : null;
+
+    if (!this._accessToken) {
+      const accessToken = await this._requestToken ();
+      this._useToken (accessToken);
+    }
   },
 
   /**
@@ -76,10 +77,10 @@ module.exports = Service.extend ({
    *
    * @return {*}
    */
-  destroy () {
+  async destroy () {
     this._super.call (this, ...arguments);
 
-    return this._saveTokenToFile ();
+    await this._saveTokenToFile ();
   },
 
   /**
@@ -88,23 +89,35 @@ module.exports = Service.extend ({
    *
    * @param options
    */
-  request (options) {
-    return this._request (options).catch (err => {
+  async request (options) {
+    if (!!this._accessToken) {
+      options = merge (options, {
+        headers: {
+          Authorization: `Bearer ${this._accessToken.access_token}`
+        }
+      });
+    }
+
+    try {
+      return await request (options);
+    }
+    catch (reason) {
       // If the token has expired, then we are going to request a new access token
       // and then make the request again.
 
-      if (err.statusCode !== 403)
-        return Promise.reject (err);
+      if (reason.statusCode !== 403)
+        throw reason;
 
-      const {
-        errors: [{code}]
-      } = err.error;
+      const err = JSON.parse (reason.error);
+      const { errors: [{ code }] } = err;
 
       if (code !== 'token_expired' && code !== 'unknown_token' && code !== 'invalid_token')
-        return Promise.reject (err);
+        throw err;
 
-      return this._refreshToken ().then (() => this._request (options));
-    });
+      // Refresh the token, then make the request again.
+      await this._refreshToken ();
+      return this.request (options);
+    }
   },
 
   _refreshToken () {
@@ -127,10 +140,13 @@ module.exports = Service.extend ({
    * @return {*}
    * @private
    */
-  _loadToken () {
-    return fs.exists (this._accessTokenFilename)
-      .then (exists => exists ? fs.readJson (this._accessTokenFilename) : null)
-      .then (this._useToken.bind (this));
+  async _loadToken () {
+    const exists = await fs.exists (this._accessTokenFilename);
+
+    if (exists) {
+      const accessToken = await fs.readJson (this._accessTokenFilename);
+      this._useToken (accessToken);
+    }
   },
 
   /**
@@ -164,18 +180,15 @@ module.exports = Service.extend ({
    * @private
    */
   _useToken (accessToken = null) {
+    // Remove the old token file if one exists.
+    if (!!this._accessToken)
+      this._removeTokenFile ();
+
+    // Replace the old token with the new token, and save it to disk.
     this._accessToken = accessToken;
 
-    if (!this._accessToken)
-      return this._removeTokenFile ();
-
-    this._request = request.defaults ({
-      headers: {
-        Authorization: `Bearer ${this._accessToken.access_token}`
-      }
-    });
-
-    return this._saveTokenToFile ();
+    if (!!this._accessToken)
+      return this._saveTokenToFile ();
   },
 
   /**
@@ -183,8 +196,11 @@ module.exports = Service.extend ({
    *
    * @private
    */
-  _removeTokenFile () {
-    return fs.exists (this._accessTokenFilename).then (exists => exists ? fs.unlink (this._accessTokenFilename) : null);
+  async _removeTokenFile () {
+    const exists = await fs.exists (this._accessTokenFilename);
+
+    if (exists)
+      await fs.unlink (this._accessTokenFilename);
   },
 
   /**
@@ -192,7 +208,8 @@ module.exports = Service.extend ({
    *
    * @private
    */
-  _saveTokenToFile () {
-    return !!this._accessToken ? fs.writeJson (this._accessTokenFilename, this._accessToken) : Promise.resolve ();
+  async _saveTokenToFile () {
+    if (!!this._accessToken)
+      await fs.writeJson (this._accessTokenFilename, this._accessToken, { spaces: 2 });
   }
 });

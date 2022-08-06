@@ -18,6 +18,7 @@ const { expect } = require ('chai');
 const { lean, seed, Types: { ObjectId } } = require ('@onehilltech/blueprint-mongodb');
 const blueprint = require ('@onehilltech/blueprint');
 const { request } = require ('@onehilltech/blueprint-testing');
+const { omit } = require ('lodash');
 
 describe ('app | routers | account', function () {
   describe ('/v1/accounts', function () {
@@ -25,21 +26,36 @@ describe ('app | routers | account', function () {
       it ('should return all the accounts for glob scope', function () {
         const { accounts } = seed ();
 
+        const expected = accounts.map ((account) => {
+          const obj = account.lean ();
+          delete obj.verification;
+          obj.verified = account.verified;
+
+          return obj;
+        });
+
         return request ()
           .get ('/v1/accounts')
           .withUserToken (0)
           .query ({_: {sort: {username: 1}}})
-          .expect (200, {'accounts': lean (accounts)});
+          .expect (200, { accounts: expected });
       });
 
       it ('should return all the accounts for valid scope', function () {
         const {accounts} = seed ('$default');
+        const expected = accounts.map ((account) => {
+          const obj = account.lean ();
+          delete obj.verification;
+          obj.verified = account.verified;
+
+          return obj;
+        });
 
         return request ()
           .get ('/v1/accounts')
           .query ({_: {sort: {username: 1}}})
           .withUserToken (1)
-          .expect (200, {'accounts': lean (accounts)});
+          .expect (200, { accounts: expected });
       });
 
       it ('should not allow request', function () {
@@ -76,8 +92,17 @@ describe ('app | routers | account', function () {
 
         const { account } = res.body;
 
-        expect (account).to.have.property ('verification')
-          .to.include ({ required: true });
+        // The system should have send an email.
+        const emails = await blueprint.lookup ('model:email').find ();
+        expect (emails).to.have.length (1);
+
+        const [email] = emails;
+
+        expect (account).to.have.property ('verification').to.include ({
+          required: true,
+          last_email: email.id,
+          last_email_date: email.date.toISOString ()
+        });
       });
 
       it ('should not allow client to set account id', function () {
@@ -284,29 +309,31 @@ describe ('app | routers | account', function () {
 
   describe ('/v1/accounts/:accountId', function () {
     context ('GET', function () {
-      it ('should return the owner account', function () {
+      it ('should return the owner account', async function () {
         const {accounts} = seed ('$default');
         const account = accounts[0];
+        const expected = Object.assign (omit (account.lean (), ['verification']), { verified: true });
 
-        return request ()
+        const res = await request ()
           .get (`/v1/accounts/${account.id}`)
           .withUserToken (2)
-          .expect (200, {account: account.lean ()});
+          .expect (200, { account: expected });
       });
 
       it ('should return the account for me', function () {
         const {accounts} = seed ('$default');
         const account = accounts[0];
+        const expected = Object.assign (omit (account.lean (), ['verification']), { verified: true });
 
         return request ()
           .get ('/v1/accounts/me')
           .withUserToken (2)
-          .expect (200, {account: account.lean ()});
+          .expect (200, { account: expected });
       });
 
       context ('get_all', function () {
         it ('should return account for a different user', function () {
-          const {accounts} = seed ('$default');
+          const {accounts} = seed ();
           const account = accounts[1];
 
           request ()
@@ -318,7 +345,7 @@ describe ('app | routers | account', function () {
 
       context ('!get_all', function () {
         it ('should not return account for different user', function () {
-          const {accounts} = seed ('$default');
+          const {accounts} = seed ();
           const account = accounts[1];
 
           return request ()

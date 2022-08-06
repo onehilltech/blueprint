@@ -1,0 +1,40 @@
+{
+  "name": "@onehilltech/blueprint-mailer",
+  "description": "Blueprint module for sending emails via mailgun",
+  "version": "5.0.0-alpha.0",
+  "private": false,
+  "repository": "onehilltech/blueprint",
+  "scripts": {
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
+    "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+  },
+  "dependencies": {
+    "@onehilltech/blueprint": "^5.0.0-alpha.0",
+    "@onehilltech/blueprint-cli": "^4.46.0",
+    "@onehilltech/blueprint-mongodb": "^5.0.0-alpha.0",
+    "email-templates": "^5.0.2",
+    "gulp": "^4.0.2",
+    "gulp-dart-sass": "^1.0.2",
+    "handlebars": "^4.7.7",
+    "juice-resources-promise": "0.0.2",
+    "nodemailer": "^5.0.0",
+    "nodemailer-mailgun-transport": "^1.4.0",
+    "pug": "^2.0.3"
+  },
+  "devDependencies": {
+    "@onehilltech/blueprint-testing": "^4.64.1"
+  },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=11.6.0",
+    "npm": ">=6.5.0"
+  },
+  "keywords": [
+    "blueprint",
+    "blueprint-module",
+    "email",
+    "nodemailer",
+    "mailgun"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "name": "@onehilltech/blueprint-urls",
+  "description": "Blueprint module for defining and managing urls.",
+  "version": "4.65.14",
+  "private": false,
+  "main": "./lib",
+  "scripts": {
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
+    "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+    "install-service": "sudo -s forever-service install blueprint-urls_d --script ./app/index.js -e 'NODE_ENV=production'",
+    "uninstall-service": "sudo -s forever-service delete blueprint-urls_d"
+  },
+  "dependencies": {
+    "@onehilltech/blueprint-mongodb": "^4.65.14",
+    "md5": "^2.3.0",
+    "nanoid": "^3.3.1"
+  },
+  "devDependencies": {
+    "@onehilltech/blueprint-cli": "^4.64.1",
+    "@onehilltech/blueprint-testing": "^4.64.1"
+  },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=6.0.0",
+    "npm": ">=3.0.0"
+  },
+  "keywords": [
+    "blueprint",
+    "blueprint-module",
+    "urls"
+  ],
+  "gitHead": "3fa9d1898f478215e947cceb53313d6bd2cf93a5"
+}

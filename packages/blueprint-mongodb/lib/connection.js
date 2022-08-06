@@ -19,11 +19,13 @@ const mongoose = require ('mongoose');
 const { merge } = require ('lodash');
 
 const { clear } = require ('@onehilltech/dab');
+const { env } = require ('@onehilltech/blueprint');
 const backend = require ("@onehilltech/dab-mongodb");
 const debug = require ('debug')('blueprint-mongodb:mongodb');
 const fs = require ('fs-extra');
 
 const Store = require ('./seed/store');
+const { GridFSBucket } = require ('mongodb');
 
 const MONGODB_SCHEMA_ID = '619b0a46c8d6ae7eefd9665e';
 
@@ -60,8 +62,12 @@ module.exports = class Connection {
     debug (`opening connection ${this.name}`);
     this.conn = await this.conn.openUri (uri, options);
 
-    if (seed)
+    if (seed) {
+      if (env === 'production')
+        throw new Error ('You cannot seed the production environment.');
+
       await this.seed ();
+    }
 
     if (version)
       await this.migrate (version);
@@ -241,5 +247,15 @@ module.exports = class Connection {
 
   once () {
     return this.conn.once (...arguments);
+  }
+
+  /**
+   * Create a GridFS bucket on this connection.
+   *
+   * @param name
+   * @param options
+   */
+  bucket (name, options = {}) {
+    return new GridFSBucket (this.conn.db, options);
   }
 }

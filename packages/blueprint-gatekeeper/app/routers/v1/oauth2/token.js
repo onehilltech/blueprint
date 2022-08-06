@@ -23,5 +23,10 @@ module.exports = {
   '/logout' : {
     policy: 'gatekeeper.auth.bearer',
     post: { action : 'gatekeeper.oauth2.token@logout' }
+  },
+
+  '/verify': {
+    policy: '?gatekeeper.oauth2.verify',
+    post: { action : 'gatekeeper.oauth2.token@verify' }
   }
 };

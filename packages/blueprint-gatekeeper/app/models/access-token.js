@@ -16,7 +16,9 @@
 
 const discriminatorKey = 'type';
 
+const mm = require ('micromatch');
 const mongodb  = require ('@onehilltech/blueprint-mongodb');
+
 const Schema   = mongodb.Schema;
 const ref = mongodb.Schema.Types.ref;
 
@@ -65,6 +67,28 @@ let schema = new Schema ({
 
 schema.methods.maxUsageLimit = function () {
   return !!this.usage.max && this.usage.current >= this.usage.max;
+};
+
+schema.methods.supports = function (list) {
+  return mm.some (list, this.scope);
+}
+
+/**
+ * Check the access token matches the required options.
+ *
+ * @param options         The options to check.
+ */
+schema.methods.check = function (options) {
+  const audience = options.aud || options.audience;
+  const subject = options.sub || options.subject;
+
+  if (!!audience && !!this.audience && audience !== this.audience)
+    return false;
+
+  if (!!subject && !!this.subject && subject !== this.subject)
+    return false;
+
+  return true;
 };
 
 const MODEL_NAME = 'access_token';

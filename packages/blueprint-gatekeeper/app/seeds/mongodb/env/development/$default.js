@@ -31,7 +31,7 @@ module.exports = Seed.extend ({
           email: 'james@onehilltech.com',
           scope: ['gatekeeper.account.create'],
           password_reset_url: 'http://localhost:4200/auth/reset-password',
-          expiration: '15 seconds'
+          expiration: '10 minutes'
         }
       ],
 
@@ -54,7 +54,7 @@ module.exports = Seed.extend ({
           email: 'james@onehilltech.com',
           scope: ['gatekeeper.account.create'],
           origin: 'http://localhost:4200',
-          expiration: '15 seconds'
+          expiration: '10 minutes'
         }
       ],
 

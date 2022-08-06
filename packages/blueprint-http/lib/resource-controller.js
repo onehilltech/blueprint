@@ -16,6 +16,7 @@
 
 const assert = require ('assert');
 const { computed } = require ('base-object');
+const { camelCase } = require ('lodash');
 
 const Action = require ('./action');
 const Controller = require ('./controller');
@@ -42,13 +43,13 @@ const NotFound = Action.extend ({
  * = delete
  */
 module.exports = Controller.extend ({
-  init (options) {
+  init () {
     this._super.call (this, ...arguments);
 
-    assert (!!this.name, 'You must define the name of the resource.');
+    assert (!!this.name, 'You must provide a name property.');
 
     if (!this.id)
-      this.id = `${this.name}Id`;
+      this.id = `${camelCase (this.name)}Id`;
   },
 
   /// Name of the resource managed by the resource controller.

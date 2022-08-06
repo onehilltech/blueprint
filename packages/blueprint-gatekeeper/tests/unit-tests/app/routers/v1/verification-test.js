@@ -49,12 +49,6 @@ describe ('app | routers | verification', function () {
               status: '400',
               meta: {
                 validation: {
-                  redirect: {
-                    location: 'query',
-                    msg: 'This field is not a URL.',
-                    param: 'redirect'
-                  },
-
                   token: {
                     location: 'query',
                     msg: 'This field is required.',

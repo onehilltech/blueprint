@@ -18,10 +18,8 @@ const blueprint = require ('@onehilltech/blueprint');
 const { Service } = blueprint;
 const { mapValues } = require ('lodash');
 
-const SocketIO = require ('socket.io');
-const debug = require ('debug')('blueprint-socketio:service:io');
-
-const DEFAULT_NAMESPACE = '/';
+const { Server: SocketIO } = require("socket.io");
+const debug = require ('debug')('blueprint-socket.io:service:io');
 
 /**
  * The service that manages connections for SocketIO.
@@ -30,17 +28,18 @@ module.exports = Service.extend ({
   _connections: {},
 
   configure () {
-
+    console.log ('configuring the io service');
   },
 
   start () {
+    console.log ('starting the io service');
     const connections = blueprint.app.server.connections;
 
     this._connections = mapValues (connections, ({server}, name)=> {
       debug (`opening Socket.IO connection on ${name}`);
 
       // Make a new Socket IO instance.
-      let io = SocketIO (server);
+      const io = new SocketIO (server);
 
       // Listen for connections on this instance.
       io.on ('connection', socket => this._connection (name, socket));

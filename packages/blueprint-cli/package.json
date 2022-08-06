@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-cli",
   "description": "command-line interface for Blueprint.js",
-  "version": "4.46.0",
+  "version": "4.64.1",
   "private": false,
   "author": "One Hill Technologies, LLC",
   "repository": "onehilltech/blueprint",
@@ -24,5 +24,5 @@
   "bin": {
     "blueprint": "./bin/blueprint"
   },
-  "gitHead": "6d4af417c417bad300c5208b446643f9e2b785eb"
+  "gitHead": "3fa9d1898f478215e947cceb53313d6bd2cf93a5"
 }

@@ -2,5 +2,9 @@
   "packages": [
     "packages/blueprint*"
   ],
+<<<<<<< HEAD
   "version": "5.0.0-alpha.0"
+=======
+  "version": "4.65.15"
+>>>>>>> master
 }

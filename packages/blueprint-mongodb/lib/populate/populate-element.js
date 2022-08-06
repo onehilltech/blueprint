@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-const {
-  computed
-} = require ('@onehilltech/blueprint');
-
+const { computed } = require ('@onehilltech/blueprint');
 const pluralize = require ('pluralize');
+const { isArray } = require ('lodash');
+
 const Populate  = require ('./populate');
 
 /**
@@ -47,7 +46,18 @@ module.exports = Populate.extend ({
    * @returns {*}
    */
   populate (id) {
-    return this.Model.findById (id);
+    // Normalize the id. There are cases where will be passed an array of ids
+    // when dealing with embedded documents, but there will be only one or zero
+    // ids in the collection.
+
+    if (isArray (id))
+      id = id[0];
+
+    if (id === null || id === undefined)
+      return null;
+
+    const { [this.modelName]: options = {}} = (this.options || {});
+    return this.Model.findById (id, options);
   },
 
   accept (v) {

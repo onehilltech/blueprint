@@ -10,23 +10,25 @@ module.exports = Controller.extend ({
    * Handle an event from the Stripe platform. The event is eventually published
    * internally under the 'stripe.' namespace so listeners can handle it.
    */
-  emitStripeEvent () {
+  emitStripeEvent (params = {}) {
+    const { options = {} } = params;
+    const { webhook: name } = options;
+
     return Action.extend ({
       stripe: service (),
 
-      execute (req, res) {
-        // Emit the event internally for our listeners.
-        let event = this.stripe.constructEvent (req);
-        let name = `stripe.${event.type}`;
+      async execute (req, res) {
+        try {
+          // Emit the event internally for our listeners.
+          const event = this.stripe.constructEvent (req, name);
+          const eventName = `stripe.${event.type}`;
 
-        // We do not wait for the event to process because (1) we need to return
-        // control to Stripe ASAP (per their documentation); and (2) any error that
-        // occurs because of processing is no concern to Stripe.
-
-        this.emit (name, event).catch (err => console.warn (err.message));
-
-        // Notify the Stripe.js platform that we received the event.
-        res.sendStatus (200);
+          await this.emit (eventName, event);
+          res.sendStatus (200);
+        }
+        catch (err) {
+          res.sendStatus (500);
+        }
       }
     });
   }

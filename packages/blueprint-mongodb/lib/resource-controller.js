@@ -161,10 +161,8 @@ exports = module.exports = ResourceController.extend ({
    * Initialize the resource controller.
    */
   init (opts = {}) {
-    if (this.model) {
-      console.warn (`*** deprecated: use {Model} property instead of {model} property when defining ${this.name} resource controller`);
-      this.Model = this.model;
-    }
+    if (!this.Model)
+      return;
 
     const {modelName} = this.Model;
 
@@ -544,7 +542,8 @@ exports = module.exports = ResourceController.extend ({
               this.emit (this.eventName, model);
 
               // Set the headers for the response.
-              res.set (LAST_MODIFIED, model.last_modified.toUTCString ());
+              if (model.last_modified)
+                res.set (LAST_MODIFIED, model.last_modified.toUTCString ());
 
               return this.postUpdateModel (req, model);
             })

@@ -11,27 +11,24 @@
   "repository": "onehilltech/blueprint",
   "dependencies": {
     "@onehilltech/blueprint-mongodb": "^5.0.0-alpha.0",
+    "@onehilltech/blueprint-mailer": "^5.0.0-alpha.0",
+    "@onehilltech/blueprint-socket.io": "^5.0.0-alpha.0",
     "bcrypt": "^5.0.0",
     "commander": "^2.11.0",
     "cors": "^2.8.5",
-    "ejs": "^2.6.1",
-    "email-templates": "^3.1.5",
     "jsonfile": "^4.0.0",
     "jsonwebtoken": "^8.2.1",
     "micromatch": "^4.0.2",
-    "nodemailer": "^4.3.1",
-    "nodemailer-mailgun-transport": "^1.4.0",
     "nonce": "^1.0.4",
     "path": "^0.12.7",
     "prompt": "^1.0.0",
-    "pug": "^2.0.0-rc.4",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
     "uid-safe": "^2.1.5",
     "yargs": "^10.0.3"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^4.46.0",
+    "@onehilltech/blueprint-testing": "^4.64.1",
     "chai": "^4.3.4",
     "coveralls": "^3.0.0",
     "istanbul": "^0.4.3",
@@ -48,7 +45,6 @@
   "bin": {
     "gatekeeper-setup": "./bin/gatekeeper-setup"
   },
-  "gitHead": "6d8d1668f749ba929cc927530c47f68df04f4abd",
   "engines": {
     "node": ">=11.6.0",
     "npm": ">=6.5.0"

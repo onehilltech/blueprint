@@ -88,6 +88,9 @@ const AddModelVisitor = PopulateVisitor.extend ({
     let promises = mapValues (item.populators, (populator, name) => {
       let models = this.populated[name];
 
+      if (isEmpty (models))
+        return null;
+
       let v = new AddModelVisitor ({population: this.population, populated: models});
       populator.accept (v);
 

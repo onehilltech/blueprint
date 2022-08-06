@@ -16,6 +16,7 @@
 
 const { BO } = require ('base-object');
 const RouterBuilder = require ('./router-builder');
+const { isFunction } = require ('lodash');
 
 /**
  * @class Router
@@ -31,14 +32,20 @@ module.exports = BO.extend ({
   /**
    * Build the router.
    *
-   * @param app
+   * @param app           The Blueprint application.
+   * @param options       Router options for mount point.
    */
-  async build (app) {
-    // Get the specification for the router.
-    const spec = await this.specification ();
+  async build (app, options = {}) {
 
-    // Build the router.
-    return new RouterBuilder (app)
+    // Get the router specification. We specification property is here for backwards
+    // compatibility. We will eventually drop support for the property in favor of
+    // the specification function.
+
+    const spec = isFunction (this.specification) ?
+      await this.specification (options) :
+      this.specification;
+
+    return new RouterBuilder (app, options)
       .addSpecification (spec)
       .build ();
   }

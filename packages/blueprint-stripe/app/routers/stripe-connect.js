@@ -1,5 +1,10 @@
+const bodyParser = require ('body-parser');
+
 module.exports = {
   '/accounts': {
+    use: [bodyParser.json (), bodyParser.urlencoded ({extended: false})],
+    policy: '?stripe.connect.accounts',
+
     resource: {
       controller: 'stripe-account',
       deny: ['count', 'getAll'],
@@ -25,5 +30,10 @@ module.exports = {
         }
       }
     }
+  },
+
+  '/webhooks': {
+    use: bodyParser.raw ({type: 'application/json'}),
+    post: { action: 'stripe@emitStripeEvent', options: { webhook: '$connect' } }
   }
 };

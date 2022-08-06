@@ -18,7 +18,7 @@ const { NotFoundError } = require ('@onehilltech/blueprint');
 const ResourceController = require ('./resource-controller');
 const validation = require ('./validation');
 const pluralize = require ('pluralize');
-const { extend } = require ('lodash');
+const { extend, camelCase, mapKeys, get } = require ('lodash');
 
 /**
  * @class SubdocumentResourceController
@@ -35,6 +35,9 @@ exports = module.exports = ResourceController.extend ({
     this._super.call (this, Object.assign ({
       name: pluralize.singular (this.path)
     }, opts));
+
+    const { modelName } = this.Model;
+    this.parentId = `${camelCase (modelName)}Id`;
   },
 
   create () {
@@ -42,26 +45,30 @@ exports = module.exports = ResourceController.extend ({
     const schema = validation (this.Model.schema.paths[this.path].schema, extend ({}, this._defaultValidationOptions, {validators, sanitizers}))
 
     return this._super.call (this, { schema }).extend ({
-      createModel (req, document) {
+      async createModel (req, document) {
         const { Model, path } = this.controller;
         const { modelName } = Model;
 
-        const { [modelName]: modelId , ...subdocument } = document;
+        // Get the id for the parent so we can locate the parent.
+        const parentId = this.controller.getParentId (req);
+        const parentModel = await Model.findById (parentId);
 
-        return Model.findById (modelId)
-          .then (parentModel => {
-            if (!parentModel)
-              throw new NotFoundError ('not_found', `The ${modelName} with id ${modelId} does not exist.`);
+        if (!parentModel)
+          throw new NotFoundError ('not_found', `The ${modelName} with id ${modelId} does not exist.`);
 
-            // Create the new student, and mark the subdocument as modified. We can
-            // then save the document to the database.
-            let model = parentModel[path].create (subdocument);
-            parentModel[path].push (model);
+        // Create the new student, and mark the subdocument as modified. We can
+        // then save the document to the database.
+        const model = parentModel[path].create (document);
+        parentModel[path].push (model);
 
-            return parentModel.save ().then (() => model);
-          });
+        await parentModel.save ();
+        return model;
       }
     });
+  },
+
+  getParentId (req) {
+    return req.params[this.parentId];
   },
 
   getAll () {
@@ -94,7 +101,23 @@ exports = module.exports = ResourceController.extend ({
    * @returns {*}
    */
   update () {
-    return this._super.call (this, ...arguments);
+    return this._super.call (this, ...arguments).extend ({
+      async updateModel (req, id, update, options) {
+        const { path, Model } = this.controller;
+        const condition = { [`${path}._id`]: id};
+
+        if (update.$set)
+          update.$set = mapKeys (update.$set, (value, key) => `${path}.$.${key}`);
+
+        if (update.$unset)
+          update.$unset = mapKeys (update.$unset, (value, key) => `${path}.$.${key}`)
+
+        // Locate the subdocument in the parent model. If there is no model, then
+        // we need to let the client know.
+        const model = await Model.findOneAndUpdate (condition, update, options);
+        return !!model ? get (model, path).id (id) : null;
+      }
+    })
   },
 
   /**
@@ -103,19 +126,21 @@ exports = module.exports = ResourceController.extend ({
    */
   delete () {
     return this._super.call (this, ...arguments).extend ({
-      deleteModel (req, id) {
+      async deleteModel (req, id) {
         const { path, Model } = this.controller;
         const condition = { [`${path}._id`]: id};
 
-        return Model.findOne (condition)
-          .then (model => {
-            // If there is no model, then we need to let the client know.
-            if (!model)
-              return Promise.reject (new NotFoundError ('not_found', 'Not found'));
+        // Locate the subdocument in the parent model. If there is no model, then
+        // we need to let the client know.
+        const model = await Model.findOne (condition);
 
-            model[path].id (id).remove ();
-            return model.save ();
-          });
+        if (!model)
+          return Promise.reject (new NotFoundError ('not_found', 'Not found'));
+
+        // Remove the subdocument from the model.
+        get (model, path).id (id).remove ();
+
+        return model.save ();
       },
     });
   },

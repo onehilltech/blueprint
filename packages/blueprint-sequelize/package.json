@@ -17,7 +17,7 @@
     "sequelize": "^5.2.1"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^4.46.0",
+    "@onehilltech/blueprint-testing": "^4.64.1",
     "sqlite3": "^4.0.6"
   },
   "license": "",
@@ -29,5 +29,9 @@
     "blueprint",
     "blueprint-module"
   ],
+<<<<<<< HEAD
   "gitHead": "6d8d1668f749ba929cc927530c47f68df04f4abd"
+=======
+  "gitHead": "3fa9d1898f478215e947cceb53313d6bd2cf93a5"
+>>>>>>> master
 }
