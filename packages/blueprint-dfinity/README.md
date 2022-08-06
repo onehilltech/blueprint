@@ -13,7 +13,15 @@ Installation
 Usage
 ========
 
-## Defining the actor(s)
+Getting Started
+-------------------
+
+This walks through using Blueprint.js to invoke the actor from the
+[Hello World](https://internetcomputer.org/docs/current/developer-docs/quickstart/hello10mins/) 
+example. The Internet Computer must be running in your local development environment, and the 
+actor must be deployed to a canister within this environment.
+
+### Defining the actor(s)
 
 First, define the IDL for the Internet Computer actor that you want to invoke from
 the Blueprint.js application. Each actor is defined in its own file in `app/actors`.
