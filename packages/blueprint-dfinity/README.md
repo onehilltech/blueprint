@@ -24,6 +24,7 @@ actor must be deployed to a canister within this environment.
 > If you are new to the Internet Computer, we strongly encourage you to review the 
 > Hello World example referenced above before continuing.
 
+
 ### Defining the actor(s)
 
 First, define the IDL for the Internet Computer actor that you want to invoke from
@@ -47,11 +48,12 @@ module.exports = Actor.extend ({
 
 ```
 
-## Using the actor in Blueprint.js components
 
-After you define your actors, you can use the actors in any Blueprint.js component
-by binding it to an object property. Here is an example of using the actor in 
-a Blueprint.js controller.
+### Using the actor in Blueprint.js components
+
+After defining your actors, you can use the actors in any Blueprint.js component
+by binding it to an object property. Here is an example of using the `hello` actor 
+in a Blueprint.js controller.
 
 ```javascript
 // app/controllers/hello.js
@@ -76,15 +78,14 @@ module.exports = Controller.extend ({
       /// Reference to the hello Internet Computer actor. The name parameter is 
       /// optional if the binding property and the target actor have the same name.
       hello: actor ('hello'),
-      
+
       /**
-       * Execute the action for this route.
+       * @override
        */
       async execute (req, res) {
         const { name } = req.body;
         
-        // This invokes the greet action on the hello actor deployed in the default
-        // canister.
+        // This invokes greet action on the hello actor deployed in the default canister.
         const message = await this.hello.greet (name);
 
         return res.status (200).json ( { message });
@@ -94,29 +95,34 @@ module.exports = Controller.extend ({
 });
 ```
 
-> This controller is invoked when a route that has the controller action is executed.
-
 If we bind this controller action to `POST /hello`, then this HTTP request will delegate
 the request to the target Internet Computer actor.
 
-## Define the configuration file
 
-Define the `dfinity.js` configuration file in your Blueprint.js application. This
-configuration file must contain, at a minimum, the `$default` agent and canister 
-options as shown below.
+### Define the configuration file
+
+Lastly, define the `dfinity.js` configuration file. This configuration file must contain, at a 
+minimum, the `$default` agent and canister options as shown below.
 
 ```javascript
 // app/configs/dfinity.js
 
 module.exports = {
   agents: {
+    // This is the default named agent. It will be used if you do not explicitly
+    // provide a named agent in the actor binding (see advanced usage below).
+    
     $default: {
-      host: 'http://localhost:8000'
+      // This property is required. It must be set to the location of the dfx server.
+      host: 'http://localhost:8000'               
     }
   },
 
   canisters: {
-    $default: 'rrkah-fqaaa-aaaaa-aaaaq-cai',
+    // This is the default named canister. It will be used if you do not explicitly
+    // provide a named canister in the actor binding (see advanced usage below).
+    
+    $default: 'rrkah-fqaaa-aaaaa-aaaaq-cai',   
   }
 };
 ```
