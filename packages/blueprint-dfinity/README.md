@@ -18,10 +18,11 @@ Getting Started
 
 This walkthrough uses Blueprint.js to invoke the actor from the
 [Hello World](https://internetcomputer.org/docs/current/developer-docs/quickstart/hello10mins/) 
-example. 
+example. The Internet Computer must be running in your local development environment, and the 
+actor must be deployed to a canister within this environment.
 
-> The Internet Computer must be running in your local development environment, and the 
-> actor must be deployed to a canister within this environment.
+> If you are new to the Internet Computer, we strongly encourage you to review the 
+> Hello World example referenced above before continuing.
 
 ### Defining the actor(s)
 
