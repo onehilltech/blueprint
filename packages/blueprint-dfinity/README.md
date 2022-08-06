@@ -251,9 +251,4 @@ module.exports = {
 In the example above, we will auto-generate the default private key. But, the `$default` agent
 will not use the default private key.
 
-What Next?
-======================
-
-Check out the `examples` directory for more use cases.
-
 Happy Coding!
