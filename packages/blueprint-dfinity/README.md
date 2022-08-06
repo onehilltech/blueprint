@@ -196,6 +196,61 @@ module.exports = Controller.extend ({
 })
 ```
 
+### Using your own private key or phrase
+
+The default behavior of this module is to auto-generate a private key for your
+application. This key is used as the default key for all agents. You can supply
+your own private key or phrase instead of using the default private key we create.
+You use your own private key by setting the `privateKey` property in the configuration
+file, or your own phrase by setting the `phrase` property in the configuration file.
+
+```javascript
+// app/configs/dfinity.js
+
+module.exports = {
+  privateKey: 'path to private key file',
+  phrase: 'path to phrase file',
+  
+  agents: {
+    $default: {
+      host: 'http://localhost:8000'               
+    }
+  },
+
+  canisters: {
+    $default: 'rrkah-fqaaa-aaaaa-aaaaq-cai',
+  }
+};
+```
+
+The value of `privateKey` and `phrase` is absolute or relative path. Also, the `privateKey`
+property takes precedence over the `phrase` property.
+
+> Set `privateKey: false` to disable generation of the default private key.
+
+You can also override the private key and/or phrase for each agent by setting the `privateKey`
+and/or `phrase` property within its scope.
+
+```javascript
+// app/configs/dfinity.js
+
+module.exports = {
+  agents: {
+    $default: {
+      host: 'http://localhost:8000',
+      privateKey: 'path to private key file',
+    }
+  },
+
+  canisters: {
+    $default: 'rrkah-fqaaa-aaaaa-aaaaq-cai',
+  }
+};
+```
+
+In the example above, we will auto-generate the default private key. But, the `$default` agent
+will not use the default private key.
+
 What Next?
 ======================
 
