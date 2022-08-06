@@ -18,18 +18,3 @@ module.exports = Actor.extend ({
   whoami: query (null, 'principal'),
 });
 
-/**
- This version of the actor definition will be used once NodeJS supports decorators
- by default.
-
-module.exports = class HelloActor extends Actor {
-  @update ('text', 'text')
-  greet;
-
-  @query ('text', 'text')
-  greetq;
-
-  @query (null, 'principal')
-  whoami;
-}
- */
