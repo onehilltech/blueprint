@@ -133,6 +133,68 @@ You can now run the Blueprint.js application as normal.
 
     node ./app
 
+## Advanced Usage
+
+### Binding to named agents and canisters
+
+You can explicitly bind to a named agent and canister instead of always binding to
+the default ones. First, define the named agent and/or canister in your `dfinity.js` 
+configuration file.
+
+```javascript
+// app/configs/dfinity.js
+
+module.exports = {
+  agents: {
+    // This is the default named agent. It will be used if you do not explicitly
+    // provide a named agent in the actor binding (see advanced usage below).
+    
+    $default: {
+      // This property is required. It must be set to the location of the dfx server.
+      host: 'http://localhost:8000'               
+    },
+    
+    other: {
+      host: 'http://localhost:8080'
+    }
+  },
+
+  canisters: {
+    // This is the default named canister. It will be used if you do not explicitly
+    // provide a named canister in the actor binding (see advanced usage below).
+    
+    $default: 'rrkah-fqaaa-aaaaa-aaaaq-cai',
+    friends: 'rrkah-fqaaa-aaaaa-aaaaq-caj',
+  }
+};
+```
+
+In the example above, we created a named agent labeled `other`, and a named canister
+labeled `friends`. Now, we can use either in our `actor` binding.
+
+```javascript
+// app/controllers/hello.js
+
+const { Controller, Action } = require ('@onehilltech/blueprint');
+const { actor } = require ('../../../../lib');
+
+module.exports = Controller.extend ({
+  /**
+   * The default action for the controller.
+   */
+  __invoke () {
+    return Action.extend ({
+      /// Bind to a named agent and a named canister. We do not have to provide
+      /// both a named agent and canister. When we do not provide one, the default
+      /// is used.
+      
+      hello: actor ('hello', { agent: 'other', canisterId: 'friends' }),
+
+      /// ...
+    });
+  }
+})
+```
 
 What Next?
 ======================
