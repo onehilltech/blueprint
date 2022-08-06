@@ -6,12 +6,12 @@ module.exports = {
 
     key: {
       host: 'http://localhost:8000',
-      identity: 'key://./assets/dummy.pem'
+      privateKey: './assets/dummy.pem',
     },
 
     phrase: {
       host: 'http://localhost:8000',
-      identity: 'phrase://./assets/seed.txt'
+      phrase: './assets/seed.txt'
     }
   },
 

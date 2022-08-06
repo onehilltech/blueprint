@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-const blueprint = require ('@onehilltech/blueprint');
 const { request } = require ('@onehilltech/blueprint-testing');
-
-const { expect } = require ('chai');
 
 describe ('app | routers | hello', function () {
   it ('should invoke greet method on the deployed canister', async function () {
@@ -26,6 +23,6 @@ describe ('app | routers | hello', function () {
     await request ()
       .post ('/hello')
       .send ({ name: 'OneHillTech'})
-      .expect (200, { message: 'Hello, OneHillTech!' });
+      .expect (500, { message: 'Hello, OneHillTech!' });
   });
 });

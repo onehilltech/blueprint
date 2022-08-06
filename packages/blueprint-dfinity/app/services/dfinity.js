@@ -20,6 +20,8 @@ const { identity } = require ('../../lib');
 const { forOwn, map, get, isString } = require ('lodash');
 const { HttpAgent } = require('@dfinity/agent');
 const path = require ('path');
+const fs = require ('fs-extra');
+const { spawn } = require('child_process');
 
 // set the globals
 global.fetch = require ('node-fetch');
@@ -52,15 +54,42 @@ module.exports = Service.extend ({
   /// A collection of named canisters for connecting ot the Internet Computer.
   canisters: null,
 
+  /// The default identity of the application.
+  defaultIdentity: null,
+
   /**
    * Configure the dfinity service.
    */
   async configure () {
     const { dfinity } = this.app.configs;
 
+    if (!dfinity)
+      return;
+
+    // We need to make sure the dfinity application directory exists.
+    await fs.ensureDir (`${this.app.tempPath}/dfinity`);
+
+    // Load the default identity for the application. The private key takes precedence
+    // over the seed. Additionally, you can opt-out of generating the default private key.
+
+    const { privateKey = true, phrase } = dfinity;
+
+    if (privateKey !== false) {
+      // Load the default identity into memory. If the private key is a string, then
+      // it is the location of the private key.
+
+      if (isString (privateKey))
+        this.defaultIdentity = await this._loadIdentity (`key://${privateKey}`);
+      else
+        this.defaultIdentity = await this._loadDefaultIdentity ();
+    }
+    else if (phrase) {
+      this.defaultIdentity = await this._loadIdentity (`phrase://${seed}`);
+    }
+
     // Load the agents and canister ids into memory.
-    await (map (dfinity.agents, async (agentOptions, name) => {
-      this.agents[name] = await this.createHttpAgent (agentOptions);
+    await Promise.all (map (dfinity.agents, async (options, name) => {
+      this.agents[name] = await this.createHttpAgent (options);
     }));
 
     forOwn (dfinity.canisters, (canisterId, name) => {
@@ -95,8 +124,23 @@ module.exports = Service.extend ({
     // Load the identity if there is one defined. The identity could be a private
     // key or a seed phrase.
 
-    if (opts.identity && isString (opts.identity))
-      opts.identity = await this._loadIdentity (opts.identity);
+    const { privateKey, phrase } = options;
+
+    if (privateKey || phrase) {
+      if (privateKey) {
+        // Load the identity from a private key, and delete the privateKey option.
+        opts.identity = this._loadIdentity (`key://${privateKey}`);
+        delete opts.privateKey;
+      }
+      else {
+        // Load the identity from a seed file, and delete the seed option.
+        opts.identity = this._loadIdentity (`phrase://${phrase}`);
+        delete opts.seed;
+      }
+    }
+    else {
+      opts.identity = this.defaultIdentity;
+    }
 
     const agent = new HttpAgent (opts);
 
@@ -201,7 +245,7 @@ module.exports = Service.extend ({
       return await identity.fromSeedFile (filename);
     }
     else {
-      throw new Error (`The identify protocol ${protocol} is not supported.`);
+      throw new Error (`The identity protocol ${protocol} is not supported.`);
     }
   },
 
@@ -219,5 +263,55 @@ module.exports = Service.extend ({
       throw new Error (`The agent ${name} does not exist.`);
 
     return agent;
+  },
+
+  /**
+   * Load the local identify for the application.
+   *
+   * @private
+   */
+  async _loadDefaultIdentity () {
+    // First, let's see if there is a local identity file.
+    const privateKeyFile = path.resolve (this.app.tempPath, 'dfinity/identity.pem');
+    const exists = await fs.pathExists (privateKeyFile);
+    const descriptor = `key://${privateKeyFile}`;
+
+    if (exists)
+      return this._loadIdentity (descriptor);
+
+    const privateKeyBuffer = await generatePrivateKey ();
+    await fs.writeFile (privateKeyFile, privateKeyBuffer);
+
+    // The private key file does not exist. We need to create a new one for this node
+    // instance since we need to make sure each instance has a unique identity. We
+    // are going to use openssl to generate the private key.
+
+    return this._loadIdentity (descriptor);
+  },
+
+  defaultPrivateKeyFile: computed ({
+    get () {
+      return path.resolve (this.app.tempPath, 'dfinity/identity.pem');
+    }
+  }),
+
+  async _generatePrivateKey (location) {
+    const privateKey = await generatePrivateKey ();
   }
 });
+
+/**
+ * Helper function that generate a private key for the node application.
+ */
+function generatePrivateKey () {
+  return new Promise ((resolve, reject) => {
+    const openssl = spawn ('openssl', 'ecparam -name secp256k1 -genkey -noout'.split (' '));
+
+    const buffers = [];
+
+    openssl.stdout.on ('data', (data) => buffers.push (data));
+    openssl.stderr.on ('data', (data) => reject (new Error (data)));
+    openssl.on ('close', (code) => resolve (Buffer.concat (buffers)));
+  });
+}
+
