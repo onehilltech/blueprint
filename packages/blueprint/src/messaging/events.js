@@ -84,4 +84,7 @@ module.exports = exports = decorator (function evented (target) {
   applyToTarget (target);
 });
 
+/// Allow client to apply events decorator to their classes without having to
+/// use the decorator syntax.
+
 exports.decorate = applyToTarget;
