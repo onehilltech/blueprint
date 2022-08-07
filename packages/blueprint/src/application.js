@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-const path  = require ('path');
 const fse = require ('fs-extra');
 const debug  = require ('debug')('blueprint:app');
 const assert = require ('assert');
+const path = require ('path');
 
-const { merge, get, isArray, mapValues } = require ('lodash');
-
+const { merge, get, isArray, mapValues, map } = require ('lodash');
 
 const lookup = require ('./-lookup');
-const { BO, computed } = require ('base-object');
 const BPromise = require ('bluebird');
 
 const ApplicationModule = require ('./application-module');
@@ -39,6 +37,7 @@ const APPLICATION_MODULE_NAME = '$';
  *
  * The main application.
  */
+@events
 class Application {
   constructor (appPath) {
     // The application has not started.
@@ -152,11 +151,6 @@ class Application {
     return this;
   }
 
-  async _importViewsFromModule (appModule) {
-    if (appModule.hasViews)
-      return this._server.importViews (appModule.viewsPath);
-  }
-
   /**
    * Start the application. This method connects to the database, creates a
    * new server, and starts listening for incoming messages.
@@ -168,14 +162,12 @@ class Application {
 
     // Start all the services.
     const { services } = this.resources;
-    const promises = mapValues (services, (service, name) => {
+
+    await Promise.all (map (services, (service, name) => {
       debug (`starting service ${name}`);
-
       return service.start ();
-    });
+    }));
 
-    await BPromise.props (promises);
-    //await this._server.listen ();
     this.started = true;
 
     // Notify all listeners that the application has started.
@@ -324,5 +316,5 @@ class Application {
   }
 }
 
-module.exports = events.decorate (Application);
+module.exports = Application;
 
