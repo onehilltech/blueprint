@@ -18,11 +18,7 @@ const assert = require ('assert');
 const path   = require ('path');
 
 const Loader = require ('./loader');
-
-const {
-  stat,
-  readdir
-} = require ('fs-extra');
+const { stat, readdir } = require ('fs-extra');
 
 const {
   forOwn
@@ -119,9 +115,10 @@ module.exports = class ListenerLoader extends Loader {
         // The listener exported from this module is a Listener class. We need to
         // instantiate the type and store it. Otherwise, we are working with a legacy
         // listener and need to wrap it in a SimpleListener object.
+
         return listener.prototype && !!listener.prototype.handleEvent ?
-          new listener ({ app }) :
-          new SimpleListener ({ app, listener });
+          new listener (app) :
+          new SimpleListener (app, listener);
       }
     });
   }

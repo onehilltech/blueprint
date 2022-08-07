@@ -15,7 +15,6 @@
  */
 
 const assert = require ('assert');
-const { BaseObject } = require ('base-object');
 
 /**
  * @class Listener
@@ -30,7 +29,16 @@ const { BaseObject } = require ('base-object');
  * file located in app/listeners. The name of the directory defines the event the
  * listener handles, and the name of the file defines the name of the listener.
  */
-module.exports = BaseObject.extend ({
+module.exports = class Listener {
+  /**
+   * Constructor.
+   *
+   * @param app           The application instance
+   */
+  constructor (app) {
+    this.app = app;
+  }
+
   /**
    * Event handler for the listener. The number of arguments will depend on the
    * number of arguments passed to the emit() method.
@@ -38,4 +46,4 @@ module.exports = BaseObject.extend ({
   handleEvent () {
     assert (false, 'The subclass must implement the handleEvent() method');
   }
-});
+}
