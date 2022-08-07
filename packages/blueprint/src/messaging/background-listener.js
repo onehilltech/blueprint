@@ -30,7 +30,7 @@ module.exports = class BackgroundListener extends Listener {
    * next tick for the process.
    */
   handleEvent () {
-    let args = arguments;
+    const args = arguments;
 
     process.nextTick (() => {
       this.handleBackgroundEvent (...args);
