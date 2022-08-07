@@ -80,7 +80,7 @@ function applyToTarget (target) {
  *
  * Mixin for adding event support to an object type.
  */
-module.exports = exports = decorator (function evented (target, name, descriptor, options) {
+module.exports = exports = decorator (function evented (target) {
   applyToTarget (target);
 });
 
