@@ -30,3 +30,5 @@ examples
 tutorials
 docs
 
+# Babel (transpile) source files
+src

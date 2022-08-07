@@ -58,3 +58,5 @@ Temporary Items
 !/tests/dummy/node_modules/
 
 .blueprint/
+
+lib

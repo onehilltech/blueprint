@@ -33,11 +33,15 @@
     "semver": "^6.3.0"
   },
   "scripts": {
-    "test": "env NODE_ENV=test mocha --recursive --reporter spec tests/unit-tests",
-    "cover": "env NODE_ENV=test istanbul cover _mocha --  tests/unit-tests --recursive",
-    "coveralls": "env NODE_ENV=test istanbul cover _mocha --report lcovonly -- tests/unit-tests --recursive && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "prepare": "babel src --out-dir lib",
+    "test": "npm run prepare && env NODE_ENV=test mocha --recursive --reporter spec tests/unit-tests",
+    "cover": "npm run prepare && env NODE_ENV=test istanbul cover _mocha --  tests/unit-tests --recursive",
+    "coveralls": "npm run prepare && env NODE_ENV=test istanbul cover _mocha --report lcovonly -- tests/unit-tests --recursive && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "devDependencies": {
+    "@babel/cli": "^7.18.10",
+    "@babel/core": "^7.18.10",
+    "@babel/preset-env": "^7.18.10",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "coveralls": "^3.0.0",

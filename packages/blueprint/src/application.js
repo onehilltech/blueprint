@@ -41,36 +41,25 @@ const APPLICATION_MODULE_NAME = '$';
  */
 class Application {
   constructor (appPath) {
+    // The application has not started.
+    this.started = false;
+
     this._appPath = appPath;
     this._modules = {};
 
     // First, make sure the temp directory for the application exist. Afterwards,
     // we can progress with configuring the application.
     this._appModule = new ApplicationModule (this, APPLICATION_MODULE_NAME, this._appPath);
+    this._defaultLoader = new Loader ();
   }
 
-  /// The started state of the application.
-  started = false;
-
-  /// The application module for the application.
-  _appModule = null;
-
-  /// The default loader used by the application module.
-  _defaultLoader = new Loader ();
-
-  /// The temporary path for the application.
   get appPath () {
     return this._appPath;
   }
 
+  /// The temporary path for the application.
   get tempPath () {
-    return path.resolve (this.appPath, '.blueprint');
-  }
-
-  get viewsPath () {
-    console.log ('viewsPath');
-
-    return this._appModule.viewsPath;
+    return path.resolve (this.appPath, '../.blueprint');
   }
 
   /// Resource loaded by the application.
@@ -267,6 +256,13 @@ class Application {
   }
 
   /**
+   * Get the asset path for the application.
+   */
+  get assetsPath () {
+    return this._appModule.assetsPath;
+  }
+
+  /**
    * Load an application asset.
    *
    * @param filename
@@ -278,6 +274,13 @@ class Application {
     return this._appModule.asset (filename, opts);
   }
 
+  /**
+   * Load an application asset synchronously.
+   *
+   * @param filename
+   * @param opts
+   * @return {*}
+   */
   assetSync (filename, opts) {
     return this._appModule.assetSync (filename, opts);
   }

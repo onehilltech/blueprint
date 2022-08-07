@@ -7,5 +7,15 @@
   "dependencies": {
     "@onehilltech/blueprint": "file:../..",
     "pug": "^2.0.1"
+  },
+  "scripts": {
+    "prepare": "babel src --out-dir app",
+    "start": "npm run prepare && node ./app"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.18.10",
+    "@babel/core": "^7.18.10",
+    "@babel/plugin-proposal-decorators": "^7.18.10",
+    "@babel/preset-env": "^7.18.10"
   }
 }

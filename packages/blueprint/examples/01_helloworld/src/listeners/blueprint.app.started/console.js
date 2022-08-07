@@ -2,6 +2,6 @@ const { Listener } = require ('@onehilltech/blueprint');
 
 module.exports = Listener.extend ({
   handleEvent () {
-    console.log ('The application is started.');
+    console.log ('The application has started');
   }
 });

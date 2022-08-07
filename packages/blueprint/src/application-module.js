@@ -67,7 +67,7 @@ module.exports = class ApplicationModule {
   }
 
   get assetsPath () {
-    return path.resolve (this.modulePath, 'assets')
+    return path.resolve (this.modulePath, '../assets')
   }
 
   get resources () {
