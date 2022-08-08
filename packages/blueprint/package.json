@@ -30,7 +30,8 @@
     "passport": "^0.4.1",
     "pluralize": "^8.0.0",
     "require-all": "^3.0.0",
-    "semver": "^6.3.0"
+    "semver": "^6.3.0",
+    "uuid": "^8.3.2"
   },
   "scripts": {
     "prepare": "babel src --out-dir lib",

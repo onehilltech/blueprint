@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-const { PropertyDescriptor } = require ('base-object');
+const decorator = require ('@onehilltech/decorator');
+
+function resourceDecorator (target, name, descriptor, options) {
+
+}
 
 /**
- * @class ResourceDescriptor
+ * @class ResourceDecorator
  *
  * Define a property on an object that is bound to a service.
  */
@@ -40,4 +44,9 @@ class ResourceDescriptor extends PropertyDescriptor {
   }
 }
 
-module.exports = ResourceDescriptor;
+module.exports = function (type) {
+  return decorator (function (target, name, descriptor, options) {
+
+  });
+}
+

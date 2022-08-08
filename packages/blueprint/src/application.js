@@ -19,7 +19,7 @@ const debug  = require ('debug')('blueprint:app');
 const assert = require ('assert');
 const path = require ('path');
 
-const { merge, get, isArray, mapValues, map } = require ('lodash');
+const { merge, get, isArray, mapValues, map, isFunction } = require ('lodash');
 
 const lookup = require ('./-lookup');
 const BPromise = require ('bluebird');
@@ -32,6 +32,14 @@ const events = require ('./messaging/events');
 const DEFAULT_APPLICATION_NAME = '<unnamed>';
 const APPLICATION_MODULE_NAME = '$';
 
+const { v4: uuidv4 } = require ('uuid');
+const registry = require ('./registry');
+const { singletonFactory } = require ('./factory');
+
+function isFactory (Factory) {
+  return !!Factory && isFunction (Factory.createInstance);
+}
+
 /**
  * @class Application
  *
@@ -43,17 +51,18 @@ class Application {
     // The application has not started.
     this.started = false;
 
-    this._appPath = appPath;
     this._modules = {};
+
+    Object.defineProperty (this, 'appPath', { value: appPath, writable: false });
+    Object.defineProperty (this, 'id', { value: uuidv4 (), writable: false });
 
     // First, make sure the temp directory for the application exist. Afterwards,
     // we can progress with configuring the application.
     this._appModule = new ApplicationModule (this, APPLICATION_MODULE_NAME, this._appPath);
     this._defaultLoader = new Loader ();
-  }
 
-  get appPath () {
-    return this._appPath;
+    // Register the built-in component types.
+    this.defineType ('service', { location: 'services' });
   }
 
   /// The temporary path for the application.
@@ -61,13 +70,27 @@ class Application {
     return path.resolve (this.appPath, '../.blueprint');
   }
 
-  /// Resource loaded by the application.
-  get resources () {
-    return this._appModule.resources;
+  /**
+   * Register a new type with the application.
+   *
+   * @param type
+   * @param options
+   */
+  defineType (type, options) {
+    registry (this.id).defineType (type, options);
   }
 
-  get module () {
-    return this._appModule;
+  /**
+   * Register a new type with the application.
+   *
+   * @param typename        Name of type to register
+   * @param Type            Type class for the registered type.
+   */
+  registerType (typename, Type) {
+    if (!isFactory (Type))
+      Type = singletonFactory (Type);
+
+    registry (this.id).registerType (typename, Type);
   }
 
   /**
