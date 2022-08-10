@@ -16,8 +16,8 @@
 
 const Listener = require ('../../../../../lib/messaging/listener');
 
-module.exports = Listener.extend ({
+module.exports = class extends Listener {
   handleEvent (msg) {
     console.log (msg);
   }
-});
+}

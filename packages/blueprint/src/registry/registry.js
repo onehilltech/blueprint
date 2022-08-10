@@ -38,12 +38,14 @@ class Registry {
    * @param options
    *
    */
-  defineType (type, options) {
+  defineType (type, options = {}) {
     if (this.types.has (type))
       throw new Error (`${type} type is already defined. You cannot define a type more than once.`);
 
-    const registry = new NamedTypes (type, options);
-    this.types.set (type, registry);
+    const { location, instantiate = false} = options;
+
+    const names = new NamedTypes (type, options);
+    this.types.set (type, { location, instantiate, names });
 
     return this;
   }
@@ -56,15 +58,14 @@ class Registry {
    */
   has (typename) {
     const [type, name] = typename.split (':');
-    const namedTypes = this.types.get (type);
+    const registration = this.types.get (type);
 
     if (!name)
-      return !!namedTypes;
+      return !!registration;
 
     // There is a name in the typename. We need to check if the name has been
     // registered with the named types registry.
-
-    return !!namedTypes && namedTypes.has (name);
+    return !!registration && registration.names.has (name);
   }
 
   /**
@@ -74,17 +75,18 @@ class Registry {
    * \a name is the name of the type to register. The \a Factory is a factory class for creating
    * an instance of the named type.
    *
-   * @param typename        Type name to register.
-   * @param Factory         The factory for creating instances of type.
+   * @param typename            Type name to register.
+   * @param Factory             The factory for creating instances of type.
+   * @param failIfDuplicate     Registration fails if duplicate
    */
-  register (typename, Factory) {
+  register (typename, Factory, failIfDuplicate = true) {
     const [type, name] = typename.split (':');
-    const registry = this.types.get (type);
+    const registration = this.types.get (type);
 
-    if (!registry)
+    if (!registration)
       throw new Error (`You must define the type ${type} before you can register components of type ${type}.`);
 
-    registry.register (name, Factory);
+    registration.names.register (name, Factory, failIfDuplicate);
 
     return this;
   }
@@ -99,12 +101,12 @@ class Registry {
    */
   createInstance (typename, app) {
     const [type, name] = typename.split (':');
-    const registry = this.types.get (type);
+    const registration = this.types.get (type);
 
-    if (!registry)
+    if (!registration)
       throw new Error (`${type} is not a registered type.`);
 
-    return registry.createInstance (name, app);
+    return registration.names.createInstance (name, app);
   }
 }
 

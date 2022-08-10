@@ -15,6 +15,7 @@
  */
 
 const assert = require ('assert');
+const path = require ('path');
 
 /**
  * @class NamedTypes
@@ -25,10 +26,7 @@ class NamedTypes {
   constructor (type, options = {}) {
     assert (!!type, 'You must provide the type parameter.');
 
-    const { location } = options;
-
     Object.defineProperty (this, 'type', { value: type, writable: false });
-    Object.defineProperty (this, 'location', { value: location, writable: false });
 
     this._namedTypes = new Map ();
     this._factories = new Map ();
@@ -38,16 +36,28 @@ class NamedTypes {
    * Register a new named type. This method throws an exception if the named type
    * already exists.
    *
-   * @param name
-   * @param Factory
+   * @param name                    Name of type to register
+   * @param Factory                 Factory for creating instances
+   * @param failIfDuplicate         Fail if name is a duplicate
    */
-  register (name, Factory) {
-    if (this._namedTypes.has (name))
-      throw new Error (`The named type ${name} already exists.`);
+  register (name, Factory, failIfDuplicate = true) {
+    if (this._namedTypes.has (name)) {
+      if (failIfDuplicate) {
+        throw new Error (`The named type ${name} already exists.`);
+      }
+      else {
+        console.warn (`${name} ${this.type} is already a registered name; ignoring...`);
+        return false;
+      }
+    }
 
     this._namedTypes.set (name, Factory);
 
     return this;
+  }
+
+  get names () {
+    return this._namedTypes;
   }
 
   /**

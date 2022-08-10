@@ -16,10 +16,7 @@
 
 const { statSync } = require ('fs-extra');
 const path   = require ('path');
-const assert = require ('assert');
-const { BO } = require ('base-object');
 const ApplicationModule = require ('./application-module');
-const Events = require ('./messaging/events-mixin');
 
 const { find, isEmpty, map } = require ('lodash');
 const { props } = require ('bluebird');
@@ -166,21 +163,17 @@ class BlueprintModuleCollector {
  *
  * Utility class for loading Blueprint modules into an application.
  */
-module.exports = BO.extend (Events, {
-  /// The target application for the loader.
-  app: null,
+class ModuleLoader {
+  constructor (app) {
+    this.app = app;
 
-  init () {
-    this._super.call (this, ...arguments);
     this._modules = {};
-
-    assert (!!this.app, 'You must define the app property');
-  },
+  }
 
   /**
    * Load the Blueprint modules in the application path.
    */
-  async load () {
+  async load (callback) {
     // First, locate all the modules that we need to load.
     const collector = new BlueprintModuleCollector (this.app.appPath);
     const modules = await collector.gather (this.app.appPath);
@@ -192,10 +185,11 @@ module.exports = BO.extend (Events, {
     // Load each module into memory.
     for (const blueprintModule of modules) {
       const module = new ApplicationModule (this.app, blueprintModule.name, blueprintModule.appPath);
-
-      await this.emit ('loading', module);
-      await module.configure ();
-      await this.emit ('loaded', module);
+      await callback (module);
     }
-  },
-});
+
+    return modules;
+  }
+}
+
+module.exports = ModuleLoader;

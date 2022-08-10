@@ -17,3 +17,25 @@
 exports.events = require ('./events');
 exports.Listener = require ('./listener');
 exports.BackgroundListener = require ('./background-listener');
+
+const Messenger = require ('./messenger');
+
+const __messengers__ = new Map ();
+
+/**
+ * Get a messenger instance.
+ *
+ * @param id
+ * @return {Messenger|any}
+ */
+module.exports = function (id) {
+  let messenger = __messengers__.get (id);
+
+  if (messenger)
+    return messenger;
+
+  messenger = new Messenger ();
+  __messengers__.set (id, messenger);
+
+  return messenger;
+}

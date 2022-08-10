@@ -19,15 +19,14 @@ const debug  = require ('debug')('blueprint:app');
 const assert = require ('assert');
 const path = require ('path');
 
-const { merge, get, isArray, mapValues, map, isFunction } = require ('lodash');
+const { merge, get, isArray, mapValues, map, isFunction, forEach } = require ('lodash');
 
 const lookup = require ('./-lookup');
 const BPromise = require ('bluebird');
 
 const ApplicationModule = require ('./application-module');
 const ModuleLoader = require ('./module-loader');
-const Loader = require ('./loader');
-const events = require ('./messaging/events');
+const messaging = require ('./messaging');
 
 const DEFAULT_APPLICATION_NAME = '<unnamed>';
 const APPLICATION_MODULE_NAME = '$';
@@ -35,6 +34,9 @@ const APPLICATION_MODULE_NAME = '$';
 const { v4: uuidv4 } = require ('uuid');
 const registry = require ('./registry');
 const { singletonFactory } = require ('./factory');
+
+const Loader = require ('./loader');
+const ListenerLoader = require ('./listener-loader');
 
 function isFactory (Factory) {
   return !!Factory && isFunction (Factory.createInstance);
@@ -45,29 +47,42 @@ function isFactory (Factory) {
  *
  * The main application.
  */
-@events
 class Application {
   constructor (appPath) {
     // The application has not started.
     this.started = false;
 
-    this._modules = {};
+    this._modules = [];
+    this._services = new Map ();
 
     Object.defineProperty (this, 'appPath', { value: appPath, writable: false });
     Object.defineProperty (this, 'id', { value: uuidv4 (), writable: false });
 
     // First, make sure the temp directory for the application exist. Afterwards,
     // we can progress with configuring the application.
-    this._appModule = new ApplicationModule (this, APPLICATION_MODULE_NAME, this._appPath);
-    this._defaultLoader = new Loader ();
+    this._appModule = new ApplicationModule (this, APPLICATION_MODULE_NAME, this.appPath);
 
     // Register the built-in component types.
     this.defineType ('service', { location: 'services' });
+    this.defineType ('listener', { location: 'listeners', loader: new ListenerLoader (this) });
   }
 
-  /// The temporary path for the application.
+  /**
+   * The temporary path for the application.
+   *
+   * @return {string}
+   */
   get tempPath () {
     return path.resolve (this.appPath, '../.blueprint');
+  }
+
+  /**
+   * The path for application resources.
+   *
+   * @return {string}
+   */
+  get resourcePath () {
+    return path.resolve (this.tempPath, 'resources');
   }
 
   /**
@@ -78,6 +93,8 @@ class Application {
    */
   defineType (type, options) {
     registry (this.id).defineType (type, options);
+
+    return this;
   }
 
   /**
@@ -91,6 +108,17 @@ class Application {
       Type = singletonFactory (Type);
 
     registry (this.id).registerType (typename, Type);
+
+    return this;
+  }
+
+  /**
+   * Create a new instance.
+   *
+   * @param typename
+   */
+  createInstance (typename) {
+    return registry (this.id).createInstance (typename, this);
   }
 
   /**
@@ -106,70 +134,38 @@ class Application {
 
     // Set the name of the application. If the name does not exists, then we set it to
     // the default name.
-    this.name = get (this.configs, 'app.name', DEFAULT_APPLICATION_NAME);
+
+    Object.defineProperty (this, 'name', {
+      value: get (this.configs, 'app.name', DEFAULT_APPLICATION_NAME),
+      writeable: false
+    });
 
     // Load all the modules for the application that appear in the node_modules
     // directory. We consider these the auto-loaded modules for the application.
     // We handle these before the modules that are explicitly loaded by the application.
 
-    const moduleLoader = ModuleLoader.create ({app: this});
-
-    moduleLoader.on ('loading', async (module) => {
-      // Save the module currently loading.
-      this._modules[module.name] = module;
-
-      // Send the notification to all listeners.
-      await this.emit ('blueprint.module.loading', module);
-    });
-
-    moduleLoader.on ('loaded', async (module) => await this.emit ('blueprint.module.loaded', module));
-    await moduleLoader.load ();
+    const moduleLoader = new ModuleLoader (this);
+    this._modules = await moduleLoader.load (this._handleModule.bind (this));
+    debug (this._modules);
 
     // Now, we can configure the module portion of the application since we know all
     // dependent artifacts needed by the application will be loaded.
-    await this._appModule.configure (this);
+    await this._handleModule (this._appModule);
 
-    // Allow the loaded services to configure themselves.
-    const { services } = this.resources;
+    // The service type is managed by the application. We are going to create the
+    // single instance of each service, and configure it.
 
-    await BPromise.props (mapValues (services, (service, name) => {
-      debug (`configuring service ${name}`);
+    const { names: services } = registry (this.id).types.get ('service');
 
-      return service.configure ();
-    }));
+    for (const [name] of services.names) {
+      const service = services.createInstance (name, this);
+      this._services.set (name, service);
+
+      await service.configure ();
+    }
 
     // Notify all listeners the application has been initialized.
-    await this.emit ('blueprint.app.initialized', this);
-
-    return this;
-  }
-
-  /**
-   * Destroy the application.
-   */
-  async destroy () {
-    // Instruct each service to destroy itself.
-    const { services } = this.resources;
-
-    return BPromise.props (mapValues (services, (service, name) => {
-      debug (`destroying service ${name}`);
-      return service.destroy ();
-    }));
-  }
-
-  /**
-   * Add an application module to the application. An application module can only
-   * be added once. Two application modules are different if they have the same
-   * name, not module path. This will ensure we do not have the same module in
-   * different location added to the application more than once.
-   */
-  async addModule (name, appModule) {
-    if (this._modules.hasOwnProperty (name))
-      throw new Error (`duplicate module ${name}`);
-
-    //await this._importViewsFromModule (appModule);
-    await this._appModule.merge (appModule);
-    this._modules[name] = appModule;
+    await this.emit ('blueprint.app.configured', this);
 
     return this;
   }
@@ -183,13 +179,11 @@ class Application {
     // will allow them to do any preparations.
     await this.emit ('blueprint.app.starting', this);
 
-    // Start all the services.
-    const { services } = this.resources;
-
-    await Promise.all (map (services, (service, name) => {
+    for (const [name, service] of this._services) {
       debug (`starting service ${name}`);
-      return service.start ();
-    }));
+
+      await service.start ();
+    }
 
     this.started = true;
 
@@ -197,6 +191,87 @@ class Application {
     await this.emit ('blueprint.app.started', this);
 
     return this;
+  }
+
+  /**
+   *
+   * @private
+   */
+  async _copyFilesFrom (fromPath) {
+    // Check if the source application has a resource directory. If it does not, then
+    // we can just bail at this point in time.
+
+    const src = path.resolve (fromPath, 'resources');
+
+    if (!await fse.pathExists (src))
+      return;
+
+    // Make sure the target resource path exists.
+    const dest = path.resolve (this.tempPath, 'resources');
+    await fse.ensureDir (dest);
+
+    // Copy the resources from the app path to this path. We allow resources
+    // to overwrite other resources. This gives the application the ability to
+    // customize resources used by modules.
+    await fse.copy (src, dest, { overwrite: true });
+  }
+
+  /**
+   * Handle loading of an application module.
+   *
+   * @param module
+   * @return {Promise<void>}
+   * @private
+   */
+  async _handleModule (module) {
+    debug (`module ${module.name} has been loaded into memory`);
+
+    // Auto-load the registered types from this module.
+    const loader = new Loader ();
+    const types = registry (this.id).types;
+
+    for (const [name, registration] of types) {
+      const { location } = registration;
+
+      if (location) {
+        debug (`registering ${name} resources from module ${module.name}`);
+        const { names } = registration;
+
+        // Get the full location of the types to load from the module. Then use that location
+        // to load all types into memory.
+
+        const dirname = path.resolve (module.modulePath, location);
+        const resources = await loader.load ({ dirname });
+
+        forEach (resources, (Type, name) => {
+          // Check if the type is a factory. If the type is not a factory, then we are going
+          // to provide a default factory.
+
+          if (!isFactory (Type))
+            Type = singletonFactory (Type);
+
+          names.register (name, Type, false);
+        });
+      }
+    }
+
+    // Copy the pertinent files from the module to the application.
+    const rcPath = path.resolve (module.modulePath, '..');
+    await this._copyFilesFrom (rcPath);
+  }
+
+  /**
+   * Destroy the application.
+   */
+  async destroy () {
+    // Destroy the loaded services. We do not need to call destroy on the listeners
+    // we loaded into the application.
+
+    for (const [name, service] of this._services) {
+      debug (`destroying service ${name}`);
+
+      await service.destroy ();
+    }
   }
 
   /**
@@ -324,18 +399,32 @@ class Application {
    * @private
    */
   _loadConfigurationFiles () {
+    const loader = new Loader ();
     const dirname = path.resolve (this.appPath, 'configs');
-    return this._defaultLoader.load ({dirname});
+
+    return loader.load ({dirname});
   }
 
-  /**
-   * Import resources into the module.  Any entity in the resources will overwrite
-   * the current resources in the module.
-   *
-   * @param resources
-   */
-  import (resources) {
-    merge (this._resources, resources);
+  /// Application Messaging
+
+  on () {
+    return messaging (this.id).on (...arguments);
+  }
+
+  once () {
+    return messaging (this.id).once (...arguments);
+  }
+
+  emit () {
+    return messaging (this.id).emit (...arguments);
+  }
+
+  getListeners () {
+    return messaging (this.id).getListeners (...arguments);
+  }
+
+  hasListeners () {
+    return messaging (this.id).hasListeners (...arguments);
   }
 }
 

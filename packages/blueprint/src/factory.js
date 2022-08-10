@@ -59,7 +59,7 @@ exports.SingletonFactory = SingletonFactory;
  * your subclass.
  */
 exports.singletonFactory = function singletonFactory (Type) {
-  return class extends SimpleFactory {
+  return class SingletonFactory extends SimpleFactory {
     constructor () {
       super (Type);
     }
