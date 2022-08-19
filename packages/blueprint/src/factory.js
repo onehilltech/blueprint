@@ -27,7 +27,11 @@ class SimpleFactory extends Factory {
   }
 
   createInstance (app) {
-    return isFunction (this.Type.create) ? this.Type.create ({ app }) : new this.Type (app);
+    if (isFunction (this.Type.create))
+      return this.Type.create ({ app })
+
+    const Type = this.Type;
+    return new Type (app);
   }
 }
 

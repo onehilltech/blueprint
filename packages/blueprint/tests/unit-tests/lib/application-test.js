@@ -17,61 +17,20 @@
 const { expect } = require ('chai');
 const blueprint = require ('../../../lib');
 
-const express = require ('express');
-const request = require ('supertest');
-
 describe ('lib | Application', function () {
   describe ('configure', function () {
-    it ('should configure the application', function () {
-      expect (blueprint.app).to.have.nested.property ('resources.listeners').to.have.property ('blueprint\\.app\\.init').to.have.keys (['echo','simple']);
-
-      expect (blueprint.app).to.have.nested.property ('resources.services').to.have.property ('cart');
-      expect (blueprint.app).to.have.nested.property ('resources.services').to.have.property ('shopping-cart');
+    it ('should load the modules', function () {
+      expect (blueprint.app.modules).to.have.keys (['mod_a', 'mod_b']);
     });
   });
 
   describe ('lookup', function () {
-    it ('should lookup a loaded component', function () {
-      const cart = blueprint.app.lookup ('service:cart');
-      expect (cart).to.equal (blueprint.app.resources.services.cart);
-    });
+    it ('should lookup application components', function () {
+      expect (blueprint.lookup ('service:cart')).to.exist;
+      expect (blueprint.lookup ('service:shopping-cart')).to.exist;
 
-    it ('should lookup a loaded configuration', function () {
-      const appConfig = blueprint.app.lookup ('config:app');
-      expect (appConfig).to.equal (blueprint.app.configs.app);
-    });
-
-    it ('should lookup the original resource', function () {
-      const service = blueprint.app.lookup ('service:cart');
-      expect (service.name).to.equal ('original');
-    });
-
-    it ('should lookup a resource in a module', function () {
-      const serviceA = blueprint.app.lookup ('service:mod_a:cart');
-      expect (serviceA.name).to.equal ('mod_a');
-
-      const serviceB = blueprint.app.lookup ('service:mod_b:cart');
-      expect (serviceB.name).to.equal ('mod_b');
-    });
-  });
-
-  describe.skip ('mount', function () {
-    it ('should mount a router', async function () {
-      const router = await blueprint.app.mount ('main');
-      const server = express ();
-
-      server.use (router);
-
-      return request (server).get ('/main').expect (200, "true");
-    });
-
-    it ('should mount an inner router', async function () {
-      const router = await blueprint.app.mount ('inner.main');
-      const server = express ();
-
-      server.use (router);
-
-      return request (server).get ('/main').expect (200, "true");
+      expect (blueprint.lookup ('listener:blueprint.app.init:echo')).to.exist;
+      expect (blueprint.lookup ('listener:blueprint.app.init:simple')).to.exist;
     });
   });
 });

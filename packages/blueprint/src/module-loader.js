@@ -183,12 +183,12 @@ class ModuleLoader {
     modules.reverse ();
 
     // Load each module into memory.
-    for (const blueprintModule of modules) {
+    return Promise.all (modules.map (async blueprintModule => {
       const module = new ApplicationModule (this.app, blueprintModule.name, blueprintModule.appPath);
       await callback (module);
-    }
 
-    return modules;
+      return module;
+    }));
   }
 }
 

@@ -16,56 +16,22 @@
 
 const path = require ('path');
 const { expect } = require ('chai');
-
 const blueprint = require ('../../../lib');
 
 describe ('lib | ApplicationModule', function () {
-  describe ('configure', function () {
-    it ('should load an application module into memory', function () {
-      const app = blueprint.app;
+  describe ('assetPath', function () {
+    it ('should define the path for the module assets', function () {
+      const mod_b = blueprint.app.modules['mod_b'];
+      const assetsPath = path.resolve (mod_b.modulePath, 'assets');
 
-      expect (app.module.resources).to.have.nested.property ('listeners.blueprint\\.app\\.init');
-
-      expect (app.module.resources).to.have.nested.property ('models.person');
-      expect (app.module.resources).to.not.have.nested.property ('models.-options');
-      expect (app.module.resources).to.not.have.nested.property ('models.options');
-
-      expect (app.module.resources).to.have.nested.property ('services.cart');
-      expect (app.module.resources).to.have.nested.property ('services.shopping-cart');
+      expect (mod_b.assetsPath).to.equal (assetsPath);
     });
   });
 
-  describe.skip ('viewsPath', function () {
-    it ('should get the viewPaths property', function () {
-      let app = blueprint.app;
-      expect (app.module.viewsPath).to.equal (path.join (app.appPath, 'views'));
-    });
-  });
-
-  describe.skip ('hasViews', function () {
-    it ('should test if the module has views', function () {
-      let app = blueprint.app;
-      expect (app.module.hasViews).to.be.true;
-    });
-  });
-
-  describe ('lookup', function () {
-    context ('string', function () {
-      it ('should lookup an entity', function () {
-        let app = blueprint.app;
-        let cart = app.module.lookup ('service:cart');
-
-        expect (cart).to.equal (app.module.resources.services.cart);
-      });
-    });
-
-    context ('array', function () {
-      it ('should lookup an entity', function () {
-        const app = blueprint.app;
-        const cart = app.module.lookup (['service', 'cart']);
-
-        expect (cart).to.equal (app.module.resources.services.cart);
-      });
-    });
+  describe ('asset', function () {
+    it ('should read an asset from the application module', async function () {
+      const asset = await blueprint.app.modules['mod_a'].asset ('helloworld.txt');
+      expect (asset.toString ()).to.equal ('Hello, World!');
+    })
   });
 });

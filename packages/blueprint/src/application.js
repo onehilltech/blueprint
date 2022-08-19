@@ -19,24 +19,24 @@ const debug  = require ('debug')('blueprint:app');
 const assert = require ('assert');
 const path = require ('path');
 
-const { merge, get, isArray, mapValues, map, isFunction, forEach } = require ('lodash');
-
-const lookup = require ('./-lookup');
-const BPromise = require ('bluebird');
+const { get, isArray, isFunction, forEach } = require ('lodash');
 
 const ApplicationModule = require ('./application-module');
 const ModuleLoader = require ('./module-loader');
+
 const messaging = require ('./messaging');
+const ListenerLoader = require ('./messaging/listener-loader');
 
 const DEFAULT_APPLICATION_NAME = '<unnamed>';
 const APPLICATION_MODULE_NAME = '$';
 
 const { v4: uuidv4 } = require ('uuid');
 const registry = require ('./registry');
+
 const { singletonFactory } = require ('./factory');
+const InstanceManager = require ('./instance-manager');
 
 const Loader = require ('./loader');
-const ListenerLoader = require ('./listener-loader');
 
 function isFactory (Factory) {
   return !!Factory && isFunction (Factory.createInstance);
@@ -52,11 +52,12 @@ class Application {
     // The application has not started.
     this.started = false;
 
-    this._modules = [];
     this._services = new Map ();
 
     Object.defineProperty (this, 'appPath', { value: appPath, writable: false });
     Object.defineProperty (this, 'id', { value: uuidv4 (), writable: false });
+    Object.defineProperty (this, '_instances', { value: new InstanceManager (this, registry (this.id)), writable: false } )
+    Object.defineProperty (this, 'modules', { value: {}, writable: false });
 
     // First, make sure the temp directory for the application exist. Afterwards,
     // we can progress with configuring the application.
@@ -64,7 +65,12 @@ class Application {
 
     // Register the built-in component types.
     this.defineType ('service', { location: 'services' });
-    this.defineType ('listener', { location: 'listeners', loader: new ListenerLoader (this) });
+
+    this.defineType ('listener', {
+      location: 'listeners',
+      loader: new ListenerLoader (this),
+      factoryForType: messaging.factoryForType
+    });
   }
 
   /**
@@ -145,8 +151,11 @@ class Application {
     // We handle these before the modules that are explicitly loaded by the application.
 
     const moduleLoader = new ModuleLoader (this);
-    this._modules = await moduleLoader.load (this._handleModule.bind (this));
-    debug (this._modules);
+    const modules = await moduleLoader.load (this._handleModule.bind (this));
+
+    debug (modules);
+
+    modules.forEach (module => this.modules[module.name] = module);
 
     // Now, we can configure the module portion of the application since we know all
     // dependent artifacts needed by the application will be loaded.
@@ -227,20 +236,19 @@ class Application {
     debug (`module ${module.name} has been loaded into memory`);
 
     // Auto-load the registered types from this module.
-    const loader = new Loader ();
     const types = registry (this.id).types;
 
     for (const [name, registration] of types) {
-      const { location } = registration;
+      const { location, loader = new Loader (), autoload = true, factoryForType = singletonFactory } = registration;
 
-      if (location) {
+      if (autoload && location) {
         debug (`registering ${name} resources from module ${module.name}`);
         const { names } = registration;
 
         // Get the full location of the types to load from the module. Then use that location
         // to load all types into memory.
 
-        const dirname = path.resolve (module.modulePath, location);
+        const dirname = path.resolve (module.appPath, location);
         const resources = await loader.load ({ dirname });
 
         forEach (resources, (Type, name) => {
@@ -248,7 +256,7 @@ class Application {
           // to provide a default factory.
 
           if (!isFactory (Type))
-            Type = singletonFactory (Type);
+            Type = factoryForType (Type);
 
           names.register (name, Type, false);
         });
@@ -298,7 +306,8 @@ class Application {
    *   model:a.b.user
    *   model:personal:a.b.user
    *
-   * @param component
+   * @param component         Component instance to lookup
+   *
    * @returns {*}
    */
   lookup (component) {
@@ -310,7 +319,7 @@ class Application {
       if (component[0] === 'config')
         return get (this.configs, component.slice (1));
       else
-        return lookup (this.resources, component);
+        return this.createInstance (component);
     }
     else if (component.startsWith ('config:')) {
       // The configuration components are a special case because we do not
@@ -319,29 +328,7 @@ class Application {
       return get (this.configs, name);
     }
     else {
-      // Split the component name into its parts. If there are 2 parts, then we
-      // can search the merged resources for the application. If there are 3 parts,
-      // then we need to locate the target module, and search its resources.
-
-      const parts = component.split (':');
-
-      if (parts.length === 2) {
-        return lookup (this.resources, component);
-      }
-      else if (parts.length === 3) {
-        // Look for the module.
-        const targetModule = this._modules[parts[1]];
-        assert (!!targetModule, `The module named ${targetModule} does not exist.`);
-
-        // Construct the name of the target component by discarding the module
-        // name from the original component name.
-
-        const name = `${parts[0]}:${parts[2]}`;
-        return targetModule.lookup (name);
-      }
-      else {
-        throw new Error ('The component name is invalid.');
-      }
+      return this.createInstance (component);
     }
   }
 

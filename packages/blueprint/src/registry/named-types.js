@@ -15,7 +15,6 @@
  */
 
 const assert = require ('assert');
-const path = require ('path');
 
 /**
  * @class NamedTypes
@@ -83,8 +82,9 @@ class NamedTypes {
 
     let factory = this._factories.get (name);
 
-    if (!!factory)
+    if (!!factory) {
       return factory.createInstance (app);
+    }
 
     // We could not locate the factory instance. This means it is the first
     // time we are creating an instance of this type. Let's locate the factory
@@ -93,8 +93,9 @@ class NamedTypes {
 
     const Factory = this._namedTypes.get (name);
 
-    if (!Factory)
-      throw new Error (`${this.type}:${name} is not a registered type.`);
+    if (!Factory) {
+      throw new Error (`${this.type}:${name} is not a registered ${this.type}.`);
+    }
 
     factory = new Factory ();
     this._factories.set (name, factory);

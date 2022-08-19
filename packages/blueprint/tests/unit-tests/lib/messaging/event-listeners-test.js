@@ -30,7 +30,7 @@ describe ('lib | messaging | EventListeners', function () {
 
   describe ('on', function () {
     it ('should add a new listener', function () {
-      let listeners = new EventListeners ({name: 'foo'});
+      let listeners = new EventListeners ('foo');
       listeners.on (new NoopListener ());
 
       expect (listeners._on).to.have.length (1);
@@ -39,7 +39,7 @@ describe ('lib | messaging | EventListeners', function () {
 
   describe ('once', function () {
     it ('should add a new listener', function () {
-      let listeners = new EventListeners ({name: 'foo'});
+      let listeners = new EventListeners ('foo');
       listeners.once (new NoopListener ());
 
       expect (listeners._once).to.have.length (1);
@@ -48,7 +48,7 @@ describe ('lib | messaging | EventListeners', function () {
 
   describe ('removeListenerAt', function () {
     it ('should remove a listener', function () {
-      let listeners = new EventListeners ({name: 'foo'});
+      let listeners = new EventListeners ('foo');
 
       listeners.on (new NoopListener ());
       listeners.removeListenerAt (0);
@@ -58,7 +58,7 @@ describe ('lib | messaging | EventListeners', function () {
   });
 
   describe ('emit', function () {
-    it ('should emit an event', function () {
+    it ('should emit an event', async function () {
       let e1;
       let e2;
 
@@ -67,11 +67,11 @@ describe ('lib | messaging | EventListeners', function () {
       listeners.on ((e) => e1 = e);
       listeners.once ((e) => e2 = e);
 
-      return listeners.emit (5).then (() => {
-        expect (e1).to.equal (5);
-        expect (e2).to.equal (5);
-        expect (listeners._once).to.have.length (0);
-      })
+      await listeners.emit (5);
+
+      expect (e1).to.equal (5);
+      expect (e2).to.equal (5);
+      expect (listeners._once).to.have.length (0);
     });
   });
 });

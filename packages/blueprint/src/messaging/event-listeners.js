@@ -57,7 +57,7 @@ module.exports = class EventListeners {
     assert ((listener instanceof Listener) || isFunction (listener), 'The listener must be a instance of Listener or a function.');
 
     if (isFunction (listener))
-      listener = new SimpleListener (listener);
+      listener = new SimpleListener (null, listener);
 
     const index = this._on.push (listener) - 1;
     return new ListenerHandle (this, index);

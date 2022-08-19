@@ -39,13 +39,14 @@ class Registry {
    *
    */
   defineType (type, options = {}) {
-    if (this.types.has (type))
+    if (this.types.has (type)) {
       throw new Error (`${type} type is already defined. You cannot define a type more than once.`);
+    }
 
-    const { location, instantiate = false} = options;
+    const { location, instantiate = false, loader, factoryForType } = options;
 
     const names = new NamedTypes (type, options);
-    this.types.set (type, { location, instantiate, names });
+    this.types.set (type, { location, instantiate, names, loader, factoryForType });
 
     return this;
   }
@@ -60,8 +61,9 @@ class Registry {
     const [type, name] = typename.split (':');
     const registration = this.types.get (type);
 
-    if (!name)
+    if (!name) {
       return !!registration;
+    }
 
     // There is a name in the typename. We need to check if the name has been
     // registered with the named types registry.
@@ -83,8 +85,9 @@ class Registry {
     const [type, name] = typename.split (':');
     const registration = this.types.get (type);
 
-    if (!registration)
+    if (!registration) {
       throw new Error (`You must define the type ${type} before you can register components of type ${type}.`);
+    }
 
     registration.names.register (name, Factory, failIfDuplicate);
 
@@ -100,13 +103,15 @@ class Registry {
    * @param app               Target application for instance
    */
   createInstance (typename, app) {
-    const [type, name] = typename.split (':');
+    const [type, ...names] = typename.split (':');
     const registration = this.types.get (type);
 
-    if (!registration)
+    if (!registration) {
       throw new Error (`${type} is not a registered type.`);
+    }
 
-    return registration.names.createInstance (name, app);
+    const instanceType = names.join (':');
+    return registration.names.createInstance (instanceType, app);
   }
 }
 

@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-exports.events = require ('./events');
-exports.Listener = require ('./listener');
-exports.BackgroundListener = require ('./background-listener');
-
 const Messenger = require ('./messenger');
+const Factory = require ('../factory');
 
 const __messengers__ = new Map ();
 
@@ -28,7 +25,7 @@ const __messengers__ = new Map ();
  * @param id
  * @return {Messenger|any}
  */
-module.exports = function (id) {
+module.exports = exports = function (id) {
   let messenger = __messengers__.get (id);
 
   if (messenger)
@@ -38,4 +35,16 @@ module.exports = function (id) {
   __messengers__.set (id, messenger);
 
   return messenger;
-}
+};
+
+exports.events = require ('./events');
+exports.Listener = require ('./listener');
+exports.BackgroundListener = require ('./background-listener');
+
+exports.factoryForType = function factoryForType (listener) {
+  return class extends Factory {
+    createInstance (app) {
+      return listener;
+    }
+  }
+};

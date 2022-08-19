@@ -17,14 +17,14 @@
 const assert = require ('assert');
 const path   = require ('path');
 
-const Loader = require ('./loader');
+const Loader = require ('../loader');
 const { stat, readdir } = require ('fs-extra');
 
 const {
   forOwn
 } = require ('lodash');
 
-const SimpleListener = require ('./messaging/simple-listener');
+const SimpleListener = require ('./simple-listener');
 
 /**
  * @class ListenerLoader
@@ -77,15 +77,15 @@ module.exports = class ListenerLoader extends Loader {
         // Map the results to the listener hash, and then catch the listeners
         // so we can use them later.
 
-        const loaded = listeners[eventName] = results[i];
-
-        forOwn (loaded, (listener, name) => {
+        forOwn (results[i], (listener, name) => {
           // Let's name the listener for debugging purposes.
           if (!listener.name)
             listener.name = name;
 
           // Listen for events.
           this.app.on (eventName, listener);
+
+          listeners[`${eventName}:${name}`] = listener;
         });
 
         return listeners;

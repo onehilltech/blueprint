@@ -14,74 +14,44 @@
  * limitations under the License.
  */
 
-const debug  = require ('debug') ('blueprint:application-module');
 const path   = require ('path');
-
-const lookup = require ('./-lookup');
-
-const { merge } = require ('lodash');
-const { readFile, readFileSync, statSync } = require ('fs-extra');
+const { readFile, readFileSync } = require ('fs-extra');
 
 /**
  * @class ApplicationModule
+ *
+ * The ApplicationModule is a collection of Blueprint components that provide some
+ * reusable functionality for a Blueprint application. The application module cannot
+ * operate on its own.
  */
 module.exports = class ApplicationModule {
-  constructor (app, name, modulePath) {
-    this.app = app;
-    this.name = name;
-    this.modulePath = modulePath;
+  constructor (app, name, appPath) {
+    Object.defineProperty (this, 'app', { value: app, writable: false });
+    Object.defineProperty (this, 'name', { value: name, writable: false });
+    Object.defineProperty (this, 'appPath', { value: appPath, writable: false });
   }
 
-  get tempPath () {
-    return this.app.tempPath;
+  get modulePath () {
+    return path.resolve (this.appPath, '..');
   }
 
   get assetsPath () {
-    return path.resolve (this.modulePath, '../assets')
-  }
-
-  get resourcePath () {
-    return this.app.resourcePath;
+    return path.resolve (this.modulePath, 'assets')
   }
 
   /**
-   * Lookup a loaded component. The format of the name is
-   *
-   *   type:name
-   *
-   * For example:
-   *
-   *   policy:a.b.c
-   *
-   * @param component
-   */
-  lookup (component) {
-    return lookup (this.resources, component);
-  }
-
-  /**
-   * Read an application asset. If the callback is undefined, then the data in the
-   * resource is returned to the caller.
-   *
-   * @returns {*}
+   * Read an application module asset.
    */
   async asset (filename, opts) {
-    let fullPath = path.resolve (this.assetsPath, filename);
+    const fullPath = path.resolve (this.assetsPath, filename);
     return readFile (fullPath, opts);
   }
 
-  assetSync (filename, opts) {
-    let fullPath = path.resolve (this.assetsPath, filename);
-    return readFileSync (fullPath, opts);
-  }
-
   /**
-   * Import resources into the module.  Any entity in the resources will overwrite
-   * the current resources in the module.
-   *
-   * @param resources
+   * Synchronously read an application module asset.
    */
-  import (resources) {
-    merge (this._resources, resources);
+  assetSync (filename, opts) {
+    const fullPath = path.resolve (this.assetsPath, filename);
+    return readFileSync (fullPath, opts);
   }
 }
