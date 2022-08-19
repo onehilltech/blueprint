@@ -34,10 +34,10 @@
     "uuid": "^8.3.2"
   },
   "scripts": {
-    "prepare": "babel src --out-dir lib",
-    "pretest": "npm run prepare && babel tests/dummy/src --out-dir tests/dummy/app",
-    "test": "env NODE_ENV=test mocha --recursive --reporter spec tests/unit-tests/dist",
-    "cover": "npm run prepare && env NODE_ENV=test istanbul cover _mocha --  tests/unit-tests/dist --recursive",
+    "prepare": "babel src -d lib",
+    "pretest": "npm run prepare && babel tests/dummy/src -d tests/dummy/app",
+    "test": "env NODE_ENV=test mocha --recursive --reporter spec tests/unit-tests",
+    "cover": "npm run prepare && env NODE_ENV=test istanbul cover _mocha --  tests/unit-tests --recursive",
     "coveralls": "npm run prepare && env NODE_ENV=test istanbul cover _mocha --report lcovonly -- tests/unit-tests --recursive && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "devDependencies": {

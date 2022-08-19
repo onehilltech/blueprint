@@ -14,13 +14,22 @@
  * limitations under the License.
  */
 
-const decorator = require ('@onehilltech/decorator');
 const blueprint = require ('../index');
 
-module.exports = decorator (function resource (target, name, descriptor, options) {
-  Object.defineProperty (name, target, {
-    get () {
-      return blueprint.lookup (options);
+module.exports = function (rcType, name) {
+  return function (target, key, descriptor) {
+    // Delete the original initializer, and make this property not writable. Instead, we should
+    // only enable get() accessor on the property.
+
+    delete descriptor.initializer;
+    delete descriptor.writable;
+
+    descriptor.get = function () {
+      name = name || key;
+      const lookupName = `${rcType}:${name}`;
+      return blueprint.lookup (lookupName);
     }
-  });
-});
+
+    return descriptor;
+  }
+}
