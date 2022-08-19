@@ -15,10 +15,7 @@
  */
 
 const blueprint = require ('../../../../lib');
-
-const {
-  expect
-} = require ('chai');
+const { expect } = require ('chai');
 
 describe.skip ('lib | properties | service', function () {
   it ('should bind a property to a service', function () {

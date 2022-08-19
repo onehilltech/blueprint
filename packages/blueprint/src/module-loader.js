@@ -185,7 +185,10 @@ class ModuleLoader {
     // Load each module into memory.
     return Promise.all (modules.map (async blueprintModule => {
       const module = new ApplicationModule (this.app, blueprintModule.name, blueprintModule.appPath);
-      await callback (module);
+
+      if (!!callback) {
+        await callback (module);
+      }
 
       return module;
     }));

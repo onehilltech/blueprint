@@ -19,36 +19,16 @@ const path = require ('path');
 const ModuleLoader = require ('../../../lib/module-loader');
 const Application = require ('../../../lib/application');
 const appPath = path.resolve ('./tests/dummy/app');
-const { BO } = require ('base-object');
 
-describe.skip ('lib | ModuleLoader', function () {
-  describe ('constructor', function () {
-    it ('should create a ModuleLoader', function () {
-      let app = new Application ({appPath});
-      let m = new ModuleLoader ({app});
-
-      expect (m).to.not.be.null;
-    });
-  });
-
+describe ('lib | ModuleLoader', function () {
   describe ('load', function () {
-    it ('should the application modules', function () {
-      // Make a mock application for the loader.
-      let app = BO.create ({
-        appPath,
-        resources: {},
-        modules: {}
-      });
+    it ('should the application modules', async function () {
+      const app = new Application (appPath);
+      const loader = new ModuleLoader (app);
+      const modules = await loader.load ();
 
-      let modules = {};
-
-      let loader = new ModuleLoader ({app});
-      loader.on ('loading', module => modules[module.name] = module);
-
-      return loader.load ().then (() => {
-        expect (modules).to.have.property ('mod_a');
-        expect (modules).to.have.property ('mod_b');
-      });
+      expect (modules).to.have.length (2);
+      expect (modules.map (module => module.name)).to.eql (['mod_b', 'mod_a']);
     });
   });
 });
