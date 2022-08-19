@@ -28,8 +28,8 @@ const Listener = require ('./listener');
  * This object is used internally by the Blueprint framework.
  */
 module.exports = class SimpleListener extends Listener {
-  constructor (app, listener) {
-    super (app);
+  constructor (listener) {
+    super (null);
 
     this.listener = listener;
   }
