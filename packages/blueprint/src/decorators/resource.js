@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-const blueprint = require ('../../../../lib');
-const { expect } = require ('chai');
+const decorator = require ('@onehilltech/decorator');
+const blueprint = require ('../index');
 
-describe.skip ('lib | properties | service', function () {
-  it ('should bind a property to a service', function () {
-    let cart = blueprint.lookup ('service:cart');
-    let shoppingCart = blueprint.lookup ('service:shopping-cart');
-
-    expect (main.cart).to.equal (cart);
-    expect (main.shoppingCart).to.equal (shoppingCart);
+module.exports = decorator (function resource (target, name, descriptor, options) {
+  Object.defineProperty (name, target, {
+    get () {
+      return blueprint.lookup (options);
+    }
   });
 });

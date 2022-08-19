@@ -35,8 +35,6 @@ exports.Events = Events;
 
 exports.BlueprintError = require ('./error');
 
-// computed/bound attributes
-const { service, model } = require ('./properties');
+// decorators
 
-exports.service = service;
-exports.model = model;
+exports.resource = require ('./decorators/resource');

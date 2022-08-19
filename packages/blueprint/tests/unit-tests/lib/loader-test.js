@@ -3,15 +3,15 @@ const path = require ('path');
 const Loader = require ('../../../lib/loader');
 
 describe ('lib | loader', function () {
-  it ('should load all the assets', function () {
-    let dirname = path.resolve ('./tests/helpers/loader-test');
-    let loader = new Loader ();
+  it ('should load all the assets', async function () {
+    const dirname = path.resolve ('./tests/helpers/loader-test');
+    const loader = new Loader ();
 
-    return loader.load ({dirname}).then (assets => {
-      expect (assets).to.deep.equal ({
-        a: { b: {c: 'c-override', d: 'd' } },
-        a1: 'a1'
-      });
+    const assets = await loader.load ({ dirname });
+
+    expect (assets).to.deep.equal ({
+      a: { b: {c: 'c-override', d: 'd' } },
+      a1: 'a1'
     });
   });
 });

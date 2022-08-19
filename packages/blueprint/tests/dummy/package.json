@@ -3,7 +3,8 @@
   "version": "1.0.0",
 
   "dependencies": {
-    "mod_a": "file:./node_modules/mod_a"
+    "mod_a": "file:./node_modules/mod_a",
+    "mod_b": "file:./node_modules/mod_b"
   },
 
   "keywords": [
