@@ -17,7 +17,7 @@
 const blueprint = require ('@onehilltech/blueprint');
 const { expect } = require ('chai');
 
-describe ('app | services | dfinity', function () {
+describe.only ('app | services | dfinity', function () {
   it ('should initialize the service', function () {
     const dfinity = blueprint.lookup ('service:dfinity');
 
@@ -28,7 +28,7 @@ describe ('app | services | dfinity', function () {
       $default: 'rrkah-fqaaa-aaaaa-aaaaq-cai'
     });
 
-    expect (dfinity._idls).to.have.keys (['hello']);
+    expect (dfinity.app.lookup ('actor:hello')).to.be.defined;
   });
 
   it ('should create a new instance', async function () {

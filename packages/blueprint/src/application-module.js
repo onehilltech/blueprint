@@ -15,7 +15,7 @@
  */
 
 const path   = require ('path');
-const { readFile, readFileSync } = require ('fs-extra');
+const { readFile, readFileSync, pathExistsSync } = require ('fs-extra');
 
 /**
  * @class ApplicationModule
@@ -29,6 +29,16 @@ module.exports = class ApplicationModule {
     Object.defineProperty (this, 'app', { value: app, writable: false });
     Object.defineProperty (this, 'name', { value: name, writable: false });
     Object.defineProperty (this, 'appPath', { value: appPath, writable: false });
+
+    this._initModule ();
+  }
+
+  _initModule () {
+    const indexFile = path.resolve (this.appPath, 'index.js');
+
+    if (pathExistsSync (indexFile)) {
+      require (indexFile) (this.app);
+    }
   }
 
   get modulePath () {

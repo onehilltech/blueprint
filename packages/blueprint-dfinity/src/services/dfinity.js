@@ -43,13 +43,9 @@ module.exports = class DfinityService extends Service {
   constructor (app) {
     super (...arguments);
 
-    // Define the types for this module.
-    app.defineType ('actor', { location: 'actors' });
-
     /// A collection of named agents for connecting to the Internet Computer.
     Object.defineProperty (this, 'canisters', { writable: false, value: {} });
     Object.defineProperty (this, 'agents', { writable: false, value: {} });
-    Object.defineProperty (this, '_idls', { writable: false, value: {} });
   }
 
   /// The default identity of the application.
@@ -59,10 +55,11 @@ module.exports = class DfinityService extends Service {
    * Configure the dfinity service.
    */
   async configure () {
-    const dfinity = this.app.lookup ('configs:dfinity');
+    const dfinity = this.app.lookup ('config:dfinity');
 
-    if (!dfinity)
+    if (!dfinity) {
       return;
+    }
 
     // We need to make sure the dfinity application directory exists.
     await fs.ensureDir (`${this.app.tempPath}/dfinity`);
@@ -93,9 +90,6 @@ module.exports = class DfinityService extends Service {
     forOwn (dfinity.canisters, (canisterId, name) => {
       this.canisters[name] = canisterId;
     });
-
-    // Now, load the idl factories into memory.
-    await this._loadActorFactories ();
   }
 
   get actorsPath () {
@@ -154,10 +148,11 @@ module.exports = class DfinityService extends Service {
    * @param options
    */
   createInstance (idlType, options = {}) {
-    const factory = get (this._idls, idlType);
+    const actor = this.app.lookup (`actor:${idlType}`);
 
-    if (!factory)
+    if (!actor) {
       throw new Error (`${idlType} actor does not exist.`);
+    }
 
     if (!options.canisterId) {
       options.canisterId = this.canisters.$default;
@@ -186,25 +181,6 @@ module.exports = class DfinityService extends Service {
       throw new Error ('You must define an agent, or define a default canisterId in app/configs/dfinity.js');
 
     return factory.createInstance (options);
-  }
-
-  /// The loaded IDL definitions for defined actors.
-  _idls;
-
-  /**
-   * Load the IDL factories into memory.
-   *
-   * @private
-   */
-  async _loadActorFactories () {
-    const loader = new Loader ();
-
-    this._idls = await loader.load ({
-      dirname: this.actorsPath,
-      resolve (Actor) {
-        return new Actor ();
-      }
-    });
   }
 
   /**
