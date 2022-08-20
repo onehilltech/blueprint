@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { Service, env, computed, Loader } = require ('@onehilltech/blueprint');
+const { Service, env, Loader } = require ('@onehilltech/blueprint');
 const { identity } = require ('../../lib');
 
 const { forOwn, map, get, isString } = require ('lodash');
@@ -39,29 +39,27 @@ const IDENTITY_PHRASE_PROTOCOL = 'phrase';
  * Computer. The service contains several registries that it easier to locate entities
  * needed to bootstrap Internet Computer actors.
  */
-module.exports = Service.extend ({
-  init () {
-    this._super.call (this, ...arguments);
+module.exports = class DfinityService extends Service {
+  constructor (app) {
+    super (...arguments);
 
-    this.canisters = {};
-    this.agents = {};
-    this._idls = {}
-  },
+    // Define the types for this module.
+    app.defineType ('actor', { location: 'actors' });
 
-  /// A collection of named agents for connecting to the Internet Computer.
-  agents: null,
-
-  /// A collection of named canisters for connecting ot the Internet Computer.
-  canisters: null,
+    /// A collection of named agents for connecting to the Internet Computer.
+    Object.defineProperty (this, 'canisters', { writable: false, value: {} });
+    Object.defineProperty (this, 'agents', { writable: false, value: {} });
+    Object.defineProperty (this, '_idls', { writable: false, value: {} });
+  }
 
   /// The default identity of the application.
-  defaultIdentity: null,
+  defaultIdentity;
 
   /**
    * Configure the dfinity service.
    */
   async configure () {
-    const { dfinity } = this.app.configs;
+    const dfinity = this.app.lookup ('configs:dfinity');
 
     if (!dfinity)
       return;
@@ -98,13 +96,11 @@ module.exports = Service.extend ({
 
     // Now, load the idl factories into memory.
     await this._loadActorFactories ();
-  },
+  }
 
-  actorsPath: computed ({
-    get () {
-      return path.resolve (this.app.appPath, ACTORS_DIRNAME);
-    }
-  }),
+  get actorsPath () {
+    return path.resolve (this.app.appPath, ACTORS_DIRNAME);
+  }
 
   /**
    * Create a HttpAgent from the options.
@@ -149,7 +145,7 @@ module.exports = Service.extend ({
       await agent.fetchRootKey ();
 
     return agent;
-  },
+  }
 
   /**
    * Create an instance of an actor.
@@ -190,10 +186,10 @@ module.exports = Service.extend ({
       throw new Error ('You must define an agent, or define a default canisterId in app/configs/dfinity.js');
 
     return factory.createInstance (options);
-  },
+  }
 
   /// The loaded IDL definitions for defined actors.
-  _idls: null,
+  _idls;
 
   /**
    * Load the IDL factories into memory.
@@ -209,7 +205,7 @@ module.exports = Service.extend ({
         return new Actor ();
       }
     });
-  },
+  }
 
   /**
    * Loads the identify to be used in the http agent.
@@ -247,7 +243,7 @@ module.exports = Service.extend ({
     else {
       throw new Error (`The identity protocol ${protocol} is not supported.`);
     }
-  },
+  }
 
   /**
    * Helper method that lookups an existing agent.
@@ -263,7 +259,7 @@ module.exports = Service.extend ({
       throw new Error (`The agent ${name} does not exist.`);
 
     return agent;
-  },
+  }
 
   /**
    * Load the local identify for the application.
@@ -287,18 +283,16 @@ module.exports = Service.extend ({
     // are going to use openssl to generate the private key.
 
     return this._loadIdentity (descriptor);
-  },
+  }
 
-  defaultPrivateKeyFile: computed ({
-    get () {
-      return path.resolve (this.app.tempPath, 'dfinity/identity.pem');
-    }
-  }),
+  get defaultPrivateKeyFile () {
+    return path.resolve (this.app.tempPath, 'dfinity/identity.pem');
+  }
 
   async _generatePrivateKey (location) {
     const privateKey = await generatePrivateKey ();
   }
-});
+}
 
 /**
  * Helper function that generate a private key for the node application.

@@ -3,8 +3,8 @@ const { Listener } = require ('@onehilltech/blueprint');
 /**
  * @class ConsoleListener
  */
-module.exports = Listener.extend ({
-  handleEvent (app) {
+module.exports = class extends Listener {
+  handleEvent () {
     console.log ('The application has started...');
   }
-});
+}

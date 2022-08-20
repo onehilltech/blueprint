@@ -1,0 +1,20 @@
+{
+  "plugins": [
+    ["@babel/plugin-proposal-decorators", {
+      "legacy": true
+    }],
+    ["@babel/plugin-proposal-class-properties", {
+      "decoratorsBeforeExport": true
+    }]
+  ],
+  "presets": [
+    [
+      "@babel/preset-env", {
+        "targets": {
+          "node": "16"
+        },
+        "modules": false
+      }
+    ]
+  ]
+}

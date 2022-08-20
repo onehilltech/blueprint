@@ -24,6 +24,10 @@ const events = require ('./messaging/events');
  */
 @events
 class Service {
+  constructor (app) {
+    this.app = app;
+  }
+
   /**
    * Configure the service.
    */
