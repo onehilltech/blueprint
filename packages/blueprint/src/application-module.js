@@ -30,14 +30,20 @@ module.exports = class ApplicationModule {
     Object.defineProperty (this, 'name', { value: name, writable: false });
     Object.defineProperty (this, 'appPath', { value: appPath, writable: false });
 
+    // Initialize the module
     this._initModule ();
   }
 
+  /**
+   * Helper method that initializes the module.
+   *
+   * @private
+   */
   _initModule () {
-    const indexFile = path.resolve (this.appPath, 'index.js');
+    const moduleFile = path.resolve(this.appPath, 'module.js');
 
-    if (pathExistsSync (indexFile)) {
-      require (indexFile) (this.app);
+    if (pathExistsSync(moduleFile)) {
+      require (moduleFile) (this.app);
     }
   }
 
