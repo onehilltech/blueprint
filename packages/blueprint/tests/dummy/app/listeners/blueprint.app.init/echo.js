@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const Listener = require('../../../../../lib/messaging/listener');
 
-const { Service } = require ('../../../../lib');
+module.exports = class extends Listener {
+  handleEvent(msg) {
+    console.log(msg);
+  }
 
-module.exports = class extends Service {
-  items = Object.freeze (['bread', 'eggs']);
-}
-
+};

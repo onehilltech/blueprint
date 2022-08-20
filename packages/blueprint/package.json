@@ -9,7 +9,7 @@
   "repository": "onehilltech/blueprint",
   "dependencies": {
     "@onehilltech/blueprint-cli-exts": "^4.28.18",
-    "@onehilltech/decorator": "^1.0.0",
+    "@onehilltech/decorator": "^2.0.0",
     "base-object": "^1.4.0",
     "body-parser": "^1.19.1",
     "commander": "^4.0.1",

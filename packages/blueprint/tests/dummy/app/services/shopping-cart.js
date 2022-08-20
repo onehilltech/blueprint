@@ -1,3 +1,5 @@
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 /*
  * Copyright (c) 2018 One Hill Technologies, LLC
  *
@@ -13,10 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const { Service } = require ('../../../../lib');
+const {
+  Service
+} = require('../../../../lib');
 
 module.exports = class extends Service {
-  items = Object.freeze (['bread', 'eggs']);
-}
+  constructor(...args) {
+    super(...args);
 
+    _defineProperty(this, "items", Object.freeze(['bread', 'eggs']));
+  }
+
+};

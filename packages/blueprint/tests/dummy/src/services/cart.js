@@ -17,11 +17,5 @@
 const { Service } = require ('../../../../lib');
 
 module.exports = class extends Service {
-  constructor () {
-    super (...arguments);
-
-    this.items = [];
-  }
-
   name = 'original';
 }

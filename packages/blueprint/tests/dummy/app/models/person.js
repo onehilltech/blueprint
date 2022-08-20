@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const {
+  BO
+} = require('base-object');
 
-const { Service } = require ('../../../../lib');
-
-module.exports = class extends Service {
-  items = Object.freeze (['bread', 'eggs']);
-}
-
+module.exports = BO.extend({
+  firstName: null,
+  lastName: null
+});

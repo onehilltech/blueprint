@@ -13,10 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const blueprint = require('../../../../lib');
 
-const { Service } = require ('../../../../lib');
-
-module.exports = class extends Service {
-  items = Object.freeze (['bread', 'eggs']);
-}
-
+module.exports = {
+  // using protocols is the legacy method configuring server ports
+  connections: {
+    insecure: {
+      protocol: 'http',
+      port: 10000
+    },
+    secure: {
+      port: 8443,
+      protocol: 'https',
+      options: {
+        key: blueprint.assetSync('ssl/dummy.key'),
+        cert: blueprint.assetSync('ssl/dummy.crt')
+      }
+    }
+  },
+  middleware: {
+    defaultBodyParser: true
+  }
+};

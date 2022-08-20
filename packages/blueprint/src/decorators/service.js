@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-const { Service } = require ('../../../../lib');
+const resource = require ('./resource');
 
-module.exports = class extends Service {
-  items = Object.freeze (['bread', 'eggs']);
-}
-
+module.exports = resource.decorator ('service');

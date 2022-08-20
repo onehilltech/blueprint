@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-const { Service } = require ('../../../../lib');
+const { Service, resource, service } = require ('../../../../lib');
 
-module.exports = class extends Service {
-  items = Object.freeze (['bread', 'eggs']);
+module.exports = class CompositionService extends Service {
+  a = 5;
+
+  @resource('service')
+  cart;
+
+  @resource('service', 'unknown')
+  missing;
+
+  @service
+  shoppingCart;
+
+  @service('shopping-cart')
+  anotherShoppingCart;
 }
-

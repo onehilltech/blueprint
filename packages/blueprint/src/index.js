@@ -38,3 +38,4 @@ exports.BlueprintError = require ('./error');
 // decorators
 
 exports.resource = require ('./decorators/resource');
+exports.service = require ('./decorators/service');

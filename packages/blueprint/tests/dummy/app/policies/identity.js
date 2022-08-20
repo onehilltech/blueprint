@@ -13,10 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const Policy = require('../../../../lib/policies/policy');
 
-const { Service } = require ('../../../../lib');
+module.exports = class IdentityPolicy extends Policy {
+  setParameters(value) {
+    this.value = value;
+  }
 
-module.exports = class extends Service {
-  items = Object.freeze (['bread', 'eggs']);
-}
+  runCheck(req) {
+    return this.value;
+  }
 
+};

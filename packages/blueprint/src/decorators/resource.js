@@ -14,22 +14,55 @@
  * limitations under the License.
  */
 
+const decorator = require ('@onehilltech/decorator');
 const blueprint = require ('../index');
 
-module.exports = function (rcType, name) {
-  return function (target, key, descriptor) {
-    // Delete the original initializer, and make this property not writable. Instead, we should
-    // only enable get() accessor on the property.
+const { isString, kebabCase } = require ('lodash');
 
-    delete descriptor.initializer;
-    delete descriptor.writable;
+function lookup (target, key, descriptor, params) {
+  let [type, name] = params;
 
-    descriptor.get = function () {
-      name = name || key;
-      const lookupName = `${rcType}:${name}`;
-      return blueprint.lookup (lookupName);
+  // This is the cached instance of the resource we looked up. This
+  // will optimize the cost of having to lookup a new instance.
+  let instance;
+
+  // Delete the original initializer, and make this property not writable. Instead, we should
+  // only enable get() accessor on the property.
+
+  delete descriptor.initializer;
+  delete descriptor.writable;
+
+  descriptor.get = function () {
+    if (instance) {
+      return instance;
     }
 
-    return descriptor;
+    name = isString (name) ? name : kebabCase (key);
+    const lookupName = `${type}:${name}`;
+    instance = blueprint.lookup (lookupName);
+
+    return instance;
   }
+
+  return descriptor;
 }
+
+/**
+ * Implementation of the generic resource decorator.
+ *
+ */
+module.exports = exports = decorator (function resource (target, key, descriptor, params) {
+  return lookup (target, key, descriptor, params);
+});
+
+/**
+ * Define decorator for a specific type of resource.
+ *
+ * @param type          Resource type
+ */
+exports.decorator = function (type) {
+  return decorator (function (target, key, descriptor, params) {
+    return lookup (target, key, descriptor, [type, ...params]);
+  })
+};
+
