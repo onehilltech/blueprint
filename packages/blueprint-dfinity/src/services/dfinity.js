@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-const { Service, env, Loader } = require ('@onehilltech/blueprint');
+const { Service, env } = require ('@onehilltech/blueprint');
 const { identity } = require ('../../lib');
 
-const { forOwn, map, get, isString } = require ('lodash');
+const { forOwn, map, isString } = require ('lodash');
 const { HttpAgent } = require('@dfinity/agent');
 const path = require ('path');
 const fs = require ('fs-extra');
@@ -162,8 +162,9 @@ module.exports = class DfinityService extends Service {
       // canister id, the id must have 5 parts. This is probably not the best way to
       // check for this, but it suffices for now.
 
-      if (options.canisterId.split ('-').length !== 5)
+      if (options.canisterId.split ('-').length !== 5) {
         options.canisterId = this.canisters[options.canisterId];
+      }
     }
 
     if (!options.agent) {
@@ -174,13 +175,15 @@ module.exports = class DfinityService extends Service {
       options.agent = this.agents[options.agent];
     }
 
-    if (!options.canisterId)
+    if (!options.canisterId) {
       throw new Error ('You must define a canisterId, or define a default canisterId in app/configs/dfinity.js');
+    }
 
-    if (!options.agent)
+    if (!options.agent) {
       throw new Error ('You must define an agent, or define a default canisterId in app/configs/dfinity.js');
+    }
 
-    return factory.createInstance (options);
+    return actor.createInstance (options);
   }
 
   /**
@@ -211,8 +214,9 @@ module.exports = class DfinityService extends Service {
     }
     else if (protocol === IDENTITY_PHRASE_PROTOCOL) {
       // The identity is a seed phrase.
-      if (!path.isAbsolute (filename))
+      if (!path.isAbsolute (filename)) {
         filename = path.resolve (this.app.appPath, filename);
+      }
 
       return await identity.fromSeedFile (filename);
     }

@@ -24,11 +24,9 @@ describe.only ('app | services | dfinity', function () {
     expect (dfinity.agents).to.have.keys (['$default', 'key', 'phrase']);
     expect (dfinity.agents.$default._host.toString ()).to.equal ('http://localhost:8000/');
 
-    expect (dfinity.canisters).to.eql ({
-      $default: 'rrkah-fqaaa-aaaaa-aaaaq-cai'
-    });
+    expect (dfinity.canisters).to.eql ({ $default: 'rrkah-fqaaa-aaaaa-aaaaq-cai' });
 
-    expect (dfinity.app.lookup ('actor:hello')).to.be.defined;
+    expect (dfinity.app.lookup ('actor:hello')).to.exist;
   });
 
   it ('should create a new instance', async function () {
