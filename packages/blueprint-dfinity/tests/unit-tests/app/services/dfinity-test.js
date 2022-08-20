@@ -17,7 +17,7 @@
 const blueprint = require ('@onehilltech/blueprint');
 const { expect } = require ('chai');
 
-describe.only ('app | services | dfinity', function () {
+describe ('app | services | dfinity', function () {
   it ('should initialize the service', function () {
     const dfinity = blueprint.lookup ('service:dfinity');
 

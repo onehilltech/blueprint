@@ -21,7 +21,7 @@ const blueprint = require ('@onehilltech/blueprint');
 
 describe ('lib | identity | seed', function () {
   it ('should load an identity from a seed phrase', async function () {
-    const file = path.resolve (blueprint.app.appPath, 'assets/seed.txt');
+    const file = path.resolve (blueprint.app.assetsPath, 'seed.txt');
     const identity = await fromSeedFile (file);
 
     expect (identity).to.not.be.undefined;
