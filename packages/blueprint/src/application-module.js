@@ -43,7 +43,7 @@ module.exports = class ApplicationModule {
     const moduleFile = path.resolve(this.appPath, 'module.js');
 
     if (pathExistsSync(moduleFile)) {
-      require (moduleFile) (this.app);
+      require (moduleFile) (this);
     }
   }
 
