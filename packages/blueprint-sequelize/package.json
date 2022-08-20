@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-sequelize",
   "description": "Blueprint module for sequelize",
-  "version": "5.0.0-alpha.1",
+  "version": "5.0.0-alpha.2",
   "private": false,
   "repository": "onehilltech/blueprint",
   "main": "./lib",
@@ -11,7 +11,7 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^5.0.0-alpha.1",
+    "@onehilltech/blueprint": "^5.0.0-alpha.2",
     "@onehilltech/blueprint-cli": "^5.0.0-alpha.1",
     "@onehilltech/dab": "^2.7.3",
     "sequelize": "^5.2.1"
