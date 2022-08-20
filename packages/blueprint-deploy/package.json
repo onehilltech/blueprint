@@ -1,7 +1,7 @@
 {
   "name": "blueprint-deploy",
   "description": "",
-  "version": "5.0.0-alpha.0",
+  "version": "5.0.0-alpha.1",
   "private": true,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
@@ -11,11 +11,11 @@
     "uninstall-service": "sudo -s forever-service delete blueprint-deploy_d"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^5.0.0-alpha.0"
+    "@onehilltech/blueprint": "^5.0.0-alpha.1"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-cli": "^4.64.1",
-    "@onehilltech/blueprint-testing": "^4.64.1"
+    "@onehilltech/blueprint-cli": "^5.0.0-alpha.1",
+    "@onehilltech/blueprint-testing": "^5.0.0-alpha.1"
   },
   "license": "",
   "engines": {

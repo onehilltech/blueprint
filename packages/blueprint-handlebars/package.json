@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-handlebars",
   "description": "blueprint module for integrating handlebars templates",
-  "version": "4.65.11",
+  "version": "5.0.0-alpha.1",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
@@ -15,8 +15,8 @@
     "handlebars": "^4.7.7"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-cli": "^4.64.1",
-    "@onehilltech/blueprint-testing": "^4.64.1"
+    "@onehilltech/blueprint-cli": "^5.0.0-alpha.1",
+    "@onehilltech/blueprint-testing": "^5.0.0-alpha.1"
   },
   "license": "Apache-2.0",
   "engines": {

@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-gatekeeper-cli",
   "description": "command-line interface for Gatekeeper",
-  "version": "4.65.9",
+  "version": "5.0.0-alpha.1",
   "private": false,
   "main": "./lib",
   "repository": "onehilltech/blueprint",
