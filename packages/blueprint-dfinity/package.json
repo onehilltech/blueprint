@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-dfinity",
   "description": "Blueprint module for integrating with the Internet Computer",
-  "version": "5.0.0-alpha.4",
+  "version": "5.0.0-alpha.5",
   "private": true,
   "main": "./lib",
   "scripts": {
@@ -16,7 +16,7 @@
     "@dfinity/candid": "^0.11.1",
     "@dfinity/identity": "^0.11.1",
     "@dfinity/principal": "^0.11.1",
-    "@onehilltech/blueprint": "^5.0.0-alpha.4",
+    "@onehilltech/blueprint": "^5.0.0-alpha.5",
     "bip39": "^3.0.4",
     "hdkey": "^2.0.1",
     "node-fetch": "^2.6.7",
