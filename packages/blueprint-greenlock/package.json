@@ -30,10 +30,5 @@
     "greenlock",
     "le",
     "letsencrypt"
-  ],
-<<<<<<< HEAD
-  "gitHead": "6d8d1668f749ba929cc927530c47f68df04f4abd"
-=======
-  "gitHead": "3fa9d1898f478215e947cceb53313d6bd2cf93a5"
->>>>>>> master
+  ]
 }
