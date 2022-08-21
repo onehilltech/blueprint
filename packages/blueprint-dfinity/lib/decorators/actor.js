@@ -53,7 +53,7 @@ module.exports = decorator (function (target, key, descriptor, params) {
     if (instance)
       return instance;
 
-    const dfinity = blueprint.lookup ('service:dfinity');
+    const dfinity = this.app.lookup ('service:dfinity');
     instance = dfinity.createInstance (type, options);
 
     return instance;
