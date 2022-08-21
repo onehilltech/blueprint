@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-const { BO, computed } = require ('@onehilltech/blueprint');
 const Actor = require("@dfinity/agent").Actor;
-const { mapValues, isString, isArray, isPlainObject } = require ('lodash');
+const { mapValues, isString, isArray, isPlainObject, compact } = require ('lodash');
 
 /**
  * Make the string definition to the IDL definition.
@@ -123,14 +122,14 @@ function mapType (IDL, definition) {
  *
  * The base class for actor objects.
  */
-module.exports = BO.extend ({
-  /**
-   *
-   * @return {null}
-   */
-  idl: computed ({
-    get () { return this._idl_ }
-  }),
+module.exports = class ActorDefinition {
+  constructor (app) {
+    this.app = app;
+  }
+
+  get idl () {
+    return this._idl_;
+  }
 
   /**
    * Create an instance of this actor.
@@ -139,7 +138,7 @@ module.exports = BO.extend ({
    */
   createInstance (options) {
     return Actor.createActor (this._createIdlFactory.bind (this), options);
-  },
+  }
 
   /**
    * Register an action on the actor.
@@ -150,7 +149,7 @@ module.exports = BO.extend ({
    */
   defineAction (name, definition) {
     (this._idl_ = this._idl_ || {})[name] = definition;
-  },
+  }
 
   /**
    * Create an IDL factory for this actor.
@@ -172,8 +171,5 @@ module.exports = BO.extend ({
     });
 
     return IDL.Service (service);
-  },
-
-  /// The actions known to the actor.
-  _idl_: null,
-});
+  }
+}

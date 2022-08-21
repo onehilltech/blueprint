@@ -1,18 +1,4 @@
-const FunctionDescriptor = require ('./function');
 
-/**
- * @class QueryDescriptor
- *
- * The descriptor for defining an updated function on an actor.
- */
-class QueryDescriptor extends FunctionDescriptor {
-  constructor (input, output) {
-    super ([], input, output);
-  }
-}
+const f = require ('./function');
 
-function query (input, output) {
-  return new QueryDescriptor (output, input);
-}
-
-module.exports = query;
+module.exports = f.decorator ([]);

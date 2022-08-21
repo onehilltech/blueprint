@@ -1,57 +1,37 @@
-const { PropertyDescriptor } = require ('@onehilltech/blueprint');
+const decorator = require ('@onehilltech/decorator');
 const { isArray } = require ('lodash');
 
-/**
- * @class FunctionDescriptor
- *
- * The base class for function descriptors.
- */
-class FunctionDescriptor extends PropertyDescriptor {
-  /**
-   * Construct the function descriptor.
-   *
-   * @param type            The function type
-   * @param input           The input values
-   * @param output          The output values
-   */
-  constructor (type, input, output) {
-    super ();
+function actorFunction (target, key, descriptor, params) {
+  let [type, input, output] = params;
 
-    this._type = type;
-    this._input = input ? (isArray (input) ? input : [input]) : [];
-    this._output = output ? (isArray (output) ? output : [output]) : [];
+  if (!isArray (input)) {
+    input = input !== undefined ? [input] : [];
   }
 
-  /**
-   * @override
-   */
-  defineProperty (actor, name) {
-    // Define this action on the actor. This will allow the actor to create an
-    // instance of itself.
-    actor.defineAction (name, this.definition);
-
-    // The property definition is the signature the IDL.Func expects for this action.
-    Object.defineProperty (actor, name, {
-      enumerable: true,
-      configurable: false,
-      writable: false,
-      value: this.definition
-    });
+  if (!isArray (output)) {
+    output = output !== undefined ? [output] : [];
   }
 
-  /// Get the function idl definition.
-  get definition () {
-    return [this._input, this._output, this._type];
-  }
+  // Let's delete the original initializer because we don't need it.
+  delete descriptor.initializer;
 
-  /// The function type.
-  _type;
+  // Define this action on the actor. This will allow the actor to create an
+  // instance of itself.
+  const definition = [input, output, type];
+  target.defineAction (key, definition);
 
-  /// The input values for the function.
-  _input;
+  descriptor.enumerable = true
+  descriptor.writable = false;
+  descriptor.configurable = false;
+  descriptor.value = definition;
 
-  /// The output values for the function.
-  _output;
+  return descriptor;
 }
 
-module.exports = FunctionDescriptor;
+module.exports = exports = decorator (actorFunction);
+
+exports.decorator = function (type) {
+  return decorator (function (target, key, descriptor, params) {
+    return actorFunction (target, key, descriptor, [type, ...params]);
+  });
+};

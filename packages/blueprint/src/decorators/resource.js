@@ -63,6 +63,6 @@ module.exports = exports = decorator (function resource (target, key, descriptor
 exports.decorator = function (type) {
   return decorator (function (target, key, descriptor, params) {
     return lookup (target, key, descriptor, [type, ...params]);
-  })
+  });
 };
 

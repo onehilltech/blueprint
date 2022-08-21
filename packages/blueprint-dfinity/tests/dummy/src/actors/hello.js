@@ -14,8 +14,27 @@
  * limitations under the License.
  */
 
-const { Actor, query } = require ('../../../../lib');
+const { Actor, query, update } = require ('../../../../lib');
 
-module.exports = Actor.extend ({
-  greet: query ('text', 'text')
-});
+module.exports = class HelloActor extends Actor {
+  @update ('text', 'text')
+  greet;
+
+  @query ('text', 'text')
+  greetq;
+
+  @query (undefined, 'principal')
+  whoami;
+
+  @query (undefined, { record: { name: 'text' }})
+  record;
+
+  @query (undefined, { service: { name: 'text' }})
+  service;
+
+  @query (undefined, { variant: { name: 'text' }})
+  variant;
+
+  @query (undefined, { function: ['text', 'text']})
+  function;
+};
