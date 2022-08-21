@@ -13,3 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+const decorator = require ('@onehilltech/decorator');
+const blueprint = require ('@onehilltech/blueprint');
+const { isString, isObjectLike } = require ('lodash');
+
+module.exports = decorator (function (target, key, descriptor, params) {
+  delete descriptor.writable;
+  delete descriptor.initializer;
+
+  let type, options = {};
+
+  switch (params.length) {
+    case 0:
+      type = key;
+      break;
+
+    case 1:
+      if (isString (params[0])) {
+        type = params[0];
+      }
+      else {
+        type = key;
+        options = params[0];
+      }
+      break;
+
+    case 2:
+      [type, options] = params;
+      break;
+
+    default:
+      throw new Error ('The @actor decorator cannot have more than 2 parameters.');
+  }
+
+  let instance;
+
+  descriptor.get = function () {
+    if (instance)
+      return instance;
+
+    const dfinity = blueprint.lookup ('service:dfinity');
+    instance = dfinity.createInstance (type, options);
+
+    return instance;
+  }
+
+  return descriptor;
+});
+
