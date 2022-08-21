@@ -4,5 +4,5 @@
  * @param module
  */
 module.exports = function (module) {
-  module.app.defineType('actor', { location: 'actors' });
+  module.app.defineType('actor', { location: 'dfx' });
 };

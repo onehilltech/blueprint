@@ -5,6 +5,6 @@
  */
 module.exports = function (module) {
   module.app.defineType('actor', {
-    location: 'actors'
+    location: 'dfx'
   });
 };
