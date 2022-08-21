@@ -41,10 +41,11 @@ const { update, query, Actor } = require ('@onehilltech/blueprint-dfinity');
  * @class HelloActor
  * 
  */
-module.exports = Actor.extend ({
+module.exports = class HelloActor extends Actor {
   /// Define the greet update method.
-  greet: update ('text', 'text')
-});
+  @update ('text', 'text')
+  greet;
+};
 
 ```
 
@@ -64,35 +65,35 @@ const { actor } = require ('@onehilltech/blueprint-dfinity');
 /**
  * @class HelloController
  * 
- * This is a Blueprint.js controller. We are demonstrating how to bind a
- * Internet Computer actor to a property in the controller. You can bind
- * the Internet Computer actor to a property in any Blueprint.js object,
- * such as routers, services, and policies. 
+ * This is a Blueprint.js controller. We are demonstrating how to bind an Internet Computer 
+ * actor to a property in the controller. You can bind the Internet Computer actor to a 
+ * property in any Blueprint.js object, such as routers, services, and policies. 
  */
-module.exports = Controller.extend ({
+module.exports = class HelloController extends Controller {
   /**
    * The default action for the controller.
    */
   __invoke () {
-    return Action.extend ({
+    return class extends Action {
       /// Reference to the hello Internet Computer actor. The name parameter is 
       /// optional if the binding property and the target actor have the same name.
-      hello: actor ('hello'),
+      @actor ('hello')
+      hello;
 
       /**
        * @override
        */
       async execute (req, res) {
         const { name } = req.body;
-        
+
         // This invokes greet action on the hello actor deployed in the default canister.
         const message = await this.hello.greet (name);
 
         return res.status (200).json ( { message });
       }
-    });
+    }
   }
-});
+};
 ```
 
 If we bind this controller action to `POST /hello`, then this HTTP request will delegate
@@ -180,22 +181,23 @@ labeled `friends`. Now, we can use either in our `actor` binding.
 const { Controller, Action } = require ('@onehilltech/blueprint');
 const { actor } = require ('../../../../lib');
 
-module.exports = Controller.extend ({
+module.exports = class HelloController extends Controller {
   /**
    * The default action for the controller.
    */
   __invoke () {
-    return Action.extend ({
+    return class extends Action {
       /// Bind to a named agent and a named canister. We do not have to provide
       /// both a named agent and canister. When we do not provide one, the default
       /// is used.
       
-      hello: actor ('hello', { agent: 'other', canisterId: 'friends' }),
+      @actor ('hello', { agent: 'other', canisterId: 'friends' })
+      hello;
 
       /// ...
-    });
+    };
   }
-})
+};
 ```
 
 ### Using your own private key or phrase
