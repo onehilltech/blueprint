@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
-const f = require ('./function');
+module.exports = exports = {};
 
-module.exports = f.decorator ([]);
+exports.query = require ('./query');
+exports.update = require ('./update');

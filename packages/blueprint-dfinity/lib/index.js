@@ -17,9 +17,11 @@
 module.exports = exports = {};
 
 exports.Actor = require ('./actor');
+
 exports.update = require ('./decorators/update');
 exports.query = require ('./decorators/query');
-
-exports.actor = require ('./properties/actor');
+exports.actor = require ('./decorators/actor');
 
 exports.identity = require ('./identity');
+exports.descriptors = require ('./descriptors');
+
