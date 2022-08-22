@@ -1,0 +1,10 @@
+{
+  "name": "testing",
+  "private": true,
+  "dependencies": {
+    "chai": "^4.3.6",
+    "chai-as-promised": "^7.1.1",
+    "chai-datetime": "^1.8.0",
+    "mocha": "^10.0.0"
+  }
+}
