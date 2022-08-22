@@ -15,8 +15,7 @@
  */
 
 const decorator = require ('@onehilltech/decorator');
-const blueprint = require ('@onehilltech/blueprint');
-const { isString, isObjectLike } = require ('lodash');
+const { isString, kebabCase } = require ('lodash');
 
 module.exports = decorator (function (target, key, descriptor, params) {
   delete descriptor.writable;
@@ -26,7 +25,7 @@ module.exports = decorator (function (target, key, descriptor, params) {
 
   switch (params.length) {
     case 0:
-      type = key;
+      type = kebabCase (key);
       break;
 
     case 1:
