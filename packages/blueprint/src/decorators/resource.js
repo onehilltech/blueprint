@@ -15,8 +15,6 @@
  */
 
 const decorator = require ('@onehilltech/decorator');
-const blueprint = require ('../index');
-
 const { isString, kebabCase } = require ('lodash');
 
 function lookup (target, key, descriptor, params) {
@@ -39,7 +37,7 @@ function lookup (target, key, descriptor, params) {
 
     name = isString (name) ? name : kebabCase (key);
     const lookupName = `${type}:${name}`;
-    instance = blueprint.lookup (lookupName);
+    instance = this.app.lookup (lookupName);
 
     return instance;
   }
