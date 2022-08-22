@@ -59,4 +59,5 @@ Temporary Items
 
 .blueprint/
 
+# The transpiled files from Babel
 lib
