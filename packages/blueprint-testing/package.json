@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "blueprint"
+    "blueprint",
     "testing"
   ],
   "author": "One Hill Technologies, LLC",
