@@ -38,13 +38,8 @@
   },
   "main": "./lib",
   "license": "Apache-2.0",
-  "engines": {
-    "node": ">=6.0.0",
-    "npm": ">=3.0.0"
-  },
   "keywords": [
     "blueprint",
     "blueprint-module"
-  ],
-  "gitHead": "6d8d1668f749ba929cc927530c47f68df04f4abd"
+  ]
 }

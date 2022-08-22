@@ -9,21 +9,16 @@
   },
   "keywords": [
     "blueprint"
+    "testing"
   ],
   "author": "One Hill Technologies, LLC",
   "license": "Apache-2.0",
   "dependencies": {
     "chai": "^4.3.6",
+    "chai-as-promised": "^7.1.1",
     "chai-datetime": "^1.8.0",
-    "path": "^0.12.7"
-  },
-  "engines": {
-    "node": ">=11.6.0",
-    "npm": ">=6.5.0"
-  },
-  "gitHead": "3fa9d1898f478215e947cceb53313d6bd2cf93a5",
-  "devDependencies": {
-    "mocha": "^9.2.1",
+    "mocha": "^10.0.0",
+    "path": "^0.12.7",
     "supertest": "^6.2.4"
   }
 }
