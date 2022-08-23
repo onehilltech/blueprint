@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-exports.request = require ('./request');
 exports.bootstrap = require ('./bootstrap');

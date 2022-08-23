@@ -1,6 +1,9 @@
 {
+  "$schema":"node_modules/lerna/schemas/lerna-schema.json",
   "packages": [
     "packages/blueprint*"
   ],
-  "version": "5.0.0-alpha.6"
+  "version": "5.0.0-alpha.6",
+  "useNx":true,
+  "useWorkspaces":true
 }
