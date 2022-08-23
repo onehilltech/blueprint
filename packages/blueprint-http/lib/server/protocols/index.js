@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-module.exports = {
-  http: require ('./http'),
-  https: require ('./https')
-};
+module.exports = exports = { };
+
+exports.http = require ('./http');
+exports.https = require ('./https');
+

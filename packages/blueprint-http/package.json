@@ -6,12 +6,10 @@
   "scripts": {
     "prepare": "babel src -d app",
     "pretest": "npm run prepare && babel tests/dummy/src -d tests/dummy/app",
-    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
-    "cover": "env NODE_ENV=test istanbul cover _mocha tests/unit-tests --recursive",
-    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^5.0.0-alpha.6",
+    "@onehilltech/blueprint": "*",
     "body-parser": "^1.19.1",
     "consolidate": "^0.15.0",
     "cookie-parser": "^1.4.3",
@@ -23,17 +21,14 @@
     "multer": "^1.3.0",
     "mustache": "^3.1.0",
     "node-mime": "^1.0.0",
-    "passport": "^0.4.1",
-    "pug": "^2.0.4"
+    "passport": "^0.4.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.18.10",
-    "@babel/core": "^7.18.10",
-    "@babel/plugin-proposal-class-properties": "^7.18.6",
-    "@babel/plugin-proposal-decorators": "^7.18.10",
-    "@babel/preset-env": "^7.18.10",
-    "@onehilltech/blueprint-cli": "^5.0.0-alpha.1",
-    "@onehilltech/blueprint-testing": "^5.0.0-alpha.1"
+    "@onehilltech/blueprint-cli": "*",
+    "@onehilltech/blueprint-testing": "*"
+  },
+  "peerDependencies": {
+    "pug": "^2.0.4"
   },
   "main": "./lib",
   "license": "Apache-2.0",

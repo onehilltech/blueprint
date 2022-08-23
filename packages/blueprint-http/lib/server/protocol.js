@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const { BO } = require ('base-object');
 const { fromCallback } = require ('bluebird');
 
 /**
@@ -22,32 +21,37 @@ const { fromCallback } = require ('bluebird');
  *
  * Base class for all protocols that can integrate with the server.
  */
-module.exports = BO.extend ({
-  /// The server object associated with the protocol.
-  server: null,
-
-  /// User-defined options for the protocol.
-  options: null,
+class Protocol {
+  /**
+   * Constructor
+   *
+   * @param server          The server
+   * @param options         Protocol options
+   */
+  constructor (server, options) {
+    Object.defineProperty (this, 'server', { writable: false, value: server });
+    Object.defineProperty (this, 'options', { writable: false, value: options });
+  }
 
   /**
-   * Start listening for incoming connections.
-   *
-   * @returns {Promise<any>}
+   * Start listening for connections.
+   * *
+   * @return {*}
    */
   listen () {
     return fromCallback (callback => {
       this.server.listen (this.options, callback);
     });
-  },
+  }
 
   /**
-   * Close the server connection.
+   * Close the protocol.
    *
-   * @returns {Promise<any>}
+   * @return {*}
    */
   close () {
     return fromCallback (callback => {
       this.server.close (callback);
     });
   }
-});
+}

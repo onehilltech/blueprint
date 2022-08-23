@@ -16,29 +16,31 @@
 
 const Protocol = require ('../protocol');
 const http = require ('http');
-const _ = require ('lodash');
+const { defaultsDeep } = require ('lodash');
 
 /**
  * @class Http
  *
- * Protocol implementation for Http.
+ * Protocol implementation for http.
  */
-const Http = Protocol.extend ({
+module.exports = class Http extends Protocol {
+  /**
+   * Constructor
+   */
+  constructor () {
+    super (...arguments);
+  }
 
-});
+  /**
+   * Factory method for creating a new Http protocol.
+   *
+   * @param app
+   * @param opts
+   */
+  static createProtocol (app, opts = {}) {
+    const server = http.createServer (app);
+    const options = defaultsDeep (opts, { port: 80 });
 
-/**
- * Factory method for creating a new Http protocol.
- *
- * @param app
- * @param opts
- * @returns {*}
- */
-Http.createProtocol = function (app, opts) {
-  let server = http.createServer (app);
-  let options = _.merge ({port: 80}, opts);
-
-  return new Http ({server, options});
-};
-
-module.exports = Http;
+    return new Http (server, options);
+  }
+}
