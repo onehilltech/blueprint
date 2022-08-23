@@ -13,34 +13,23 @@
     "@onehilltech/blueprint-mailer": "^5.0.0-alpha.6",
     "@onehilltech/blueprint-mongodb": "^5.0.0-alpha.6",
     "@onehilltech/blueprint-socket.io": "^5.0.0-alpha.6",
-    "bcrypt": "^5.0.0",
-    "commander": "^2.11.0",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "jsonfile": "^4.0.0",
     "jsonwebtoken": "^8.2.1",
-    "micromatch": "^4.0.2",
-    "nonce": "^1.0.4",
-    "path": "^0.12.7",
-    "prompt": "^1.0.0",
+    "micromatch": "^4.0.5",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
-    "uid-safe": "^2.1.5",
-    "yargs": "^10.0.3"
+    "uid-safe": "^2.1.5"
   },
   "devDependencies": {
     "@onehilltech/blueprint-testing": "^5.0.0-alpha.1",
     "chai": "^4.3.4",
-    "coveralls": "^3.0.0",
-    "istanbul": "^0.4.3",
-    "mocha": "^6.2.0",
-    "mocha-lcov-reporter": "^1.3.0",
+    "mocha": "^10.0.0",
     "nodemailer-stub-transport": "^1.0.0"
   },
   "scripts": {
     "start": "node ./app.js",
-    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive --reporter spec --exit",
-    "cover": "env NODE_ENV=test istanbul cover _mocha tests/tests --recursive --exit",
-    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
+    "test": "env NODE_ENV=test mocha tests/unit-tests --recursive --reporter spec --exit"
   },
   "bin": {
     "gatekeeper-setup": "./bin/gatekeeper-setup"
