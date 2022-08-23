@@ -136,9 +136,18 @@ class BlueprintModuleCollector {
    * @private
    */
   async _resolveModulePath (name) {
-    // Let's make sure the node_modules for the application appear on the path. This is
-    // important for examples applications that reside within an existing application
-    const paths = [path.resolve (this.appPath, '../node_modules'), ...module.paths];
+    // Determine the possible paths for the module. This will be the concatenation
+    // of this modules directory hierarchy and the modules hierarchy for blueprint.
+
+    let paths = [];
+    let currentPath = path.resolve(this.appPath, '../node_modules');
+
+    while (!module.paths.includes (currentPath) && currentPath !== '/node_modules') {
+      paths.push (currentPath);
+      currentPath = path.resolve (currentPath, '../../node_modules');
+    }
+
+    paths = [...paths, ...module.paths];
 
     let basename = find (paths, basename => {
       let modulePath = path.resolve (basename, name, 'package.json');
