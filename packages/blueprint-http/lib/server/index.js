@@ -14,118 +14,75 @@
  * limitations under the License.
  */
 
-const { BO, computed } = require ('base-object');
-const debug  = require ('debug') ('blueprint:server');
+const debug  = require ('debug') ('blueprint-http:server');
 const assert = require ('assert');
 const bodyParser  = require ('body-parser');
 const consolidate = require ('consolidate');
 const express = require ('express');
 const path = require ('path');
-const klaw = require ('klaw');
 const handleError = require ('./handle-error');
-const util = require ('util');
-const BluebirdPromise = require ('bluebird');
 
-const {
-  merge,
-  forOwn,
-  forEach,
-  difference,
-  mapValues,
-  omit
-} = require ('lodash');
+const { merge, forOwn, forEach, map, defaultsDeep } = require ('lodash');
 
-
-const { ensureDir, copy } = require ('fs-extra');
 const { env } = require ('@onehilltech/blueprint');
 
 const Protocol = require ('./protocol');
 const defaultProtocols  = require ('./protocols');
-
-const VIEW_CACHE_PATH = 'views';
 
 /**
  * @class Server
  *
  * The main abstraction representing the server managed by the application.
  */
-const Server = BO.extend ({
-  /// The hosting application.
-  app: null,
+module.exports = exports = class Server {
+  constructor (app) {
+    Object.defineProperty (this, 'app', { writable: false, value: app, configurable: false });
+    Object.defineProperty (this, 'protocols', { writable: false, value: { }, configurable: false });
+    Object.defineProperty (this, 'connections', { writable: false, value: { }, configurable: false });
+    Object.defineProperty (this, '_express', { writable: false, value: express () });
 
-  /// List of engines loaded by the server.
-  _engines: null,
-
-  /// Name connections for the server.
-  _connections: null,
-
-  /// Collection of protocols supported by the server.
-  _protocols: null,
-
-  viewCachePath: computed ({
-    get () {
-      return path.resolve (this.app.tempPath, VIEW_CACHE_PATH);
-    }
-  }),
-
-  express: computed ({
-    get () { return this._express; }
-  }),
-
-  connections: computed ({
-    get () { return this._connections; }
-  }),
-
-  protocols: computed ({
-    get () { return this._protocols; }
-  }),
-
-  init () {
-    this._super.call (this, ...arguments);
-
-    assert (!!this.app, 'You must initialize the app property');
-
-    this._express = express ();
     this._mainRouter = express.Router ();
     this._staticRouter = express.Router ();
     this._engines = [];
-    this._connections = {};
-    this._protocols = {};
 
     // Register the default protocols. We do not assign the protocols directly
     // to the protocols variable because we want to ensure the default protocols
     // have the expected interfaces.
-
     this._registerDefaultProtocols ();
-  },
+  }
 
+  get viewsPath () {
+    return path.resolve (this.app.tempPath, 'resources/views');
+  }
+
+  /**
+   * Helper method that register the default protocols
+   *
+   * @private
+   */
   _registerDefaultProtocols () {
     forOwn (defaultProtocols, (Protocol, name) => this.registerProtocol (name, Protocol));
-  },
+  }
 
   /**
    * Configure the server.
    */
-  configure (config = {}) {
-    return new Promise (resolve => {
-      // We always need to configure the middleware for the server, even if there
-      // is no explicit middleware property in the configuration file.
-      this._configureMiddleware (config.middleware);
+  async configure (config = {}) {
+    // We always need to configure the middleware for the server, even if there
+    // is no explicit middleware property in the configuration file.
+    this._configureMiddleware (config.middleware);
 
-      if (!!config.connections)
-        this._configureConnections (config.connections);
+    if (!!config.connections)
+      this._configureConnections (config.connections);
 
-      if (!!config.protocols)
-        this._configureProtocols (config.protocols);
+    /// Configure the static paths for the server.
+    if (!!config.statics)
+      this._configureStaticPaths (config.statics);
 
-      /// Configure the static paths for the server.
-      if (!!config.statics)
-        this._configureStaticPaths (config.statics);
+    await this._finalizeConfigure (config);
 
-      resolve (this);
-    }).then (server => server._finalizeConfigure (config))
-      .then (() => Promise.resolve (this));
-  },
+    return this;
+  }
 
   /**
    * Register a protocol with the server.
@@ -134,32 +91,35 @@ const Server = BO.extend ({
    * @param protocol          Protocol class to register
    */
   registerProtocol (name, protocol) {
-    assert (!this._protocols[name], `The ${name} protocol already exists.`);
-    assert (protocol.isSubclassOf (Protocol), 'The protocol must extend the Protocol class.');
+    assert (!this.protocols[name], `The ${name} protocol already exists.`);
     assert (!!protocol.createProtocol, `The ${name} protocol class must implement the createProtocol(app, opts) static function.`);
 
-    this._protocols[name] = protocol;
-  },
+    this.protocols[name] = protocol;
+  }
 
   /**
    * Allow the server to start listening for connections.
    */
   listen () {
-    return BluebirdPromise.props (mapValues (this._connections, (connection, name) => {
+    const promises = map (this.connections, (connection, name) => {
       debug (`${name}: listening...`);
       return connection.listen ();
-    }));
-  },
+    });
+
+    return Promise.all (promises);
+  }
 
   /**
    * Close the server and all its connections.
    */
   close () {
-    return BluebirdPromise.props (mapValues (this._connections, (connection, name) => {
+    const promises = map (this.connections, (connection, name) => {
       debug (`${name}: closing connection`);
       return connection.close ();
-    }));
-  },
+    });
+
+    return Promise.all (promises);
+  }
 
   /**
    * Set the main router for the server.
@@ -168,32 +128,48 @@ const Server = BO.extend ({
    */
   setMainRouter (router) {
     this._mainRouter.use (router);
-  },
+  }
 
+  /**
+   * Configure the middleware for the server.
+   * *
+   * @param config          Middleware configuration
+   * @private
+   */
   _configureMiddleware (config = {}) {
     this._configureMorganMiddleware (config.morgan);
 
     const { defaultBodyParser = true } = config;
     this._configureBodyParserMiddleware (config.bodyParser, defaultBodyParser);
-
-    this._configureValidatorsAndSanitizers ();
     this._configureOptionalMiddleware (config);
-  },
+  }
 
+  /**
+   * Configure the morgan middleware.
+   * @param config
+   * @private
+   */
   _configureMorganMiddleware (config = {}) {
-    const morganConfig = merge ({
+    const morganConfig = defaultsDeep (config,{
       format: (env === 'development' || env === 'test') ? 'dev' : 'combined',
-      options: {}
-    }, config);
+      options: { }
+    });
 
-    let {format, options} = morganConfig;
+    const { format, options } = morganConfig;
 
     const morgan = require ('morgan');
     const middleware = morgan (format, options);
 
     this._express.use (middleware);
-  },
+  }
 
+  /**
+   * Helper method to configure the body parser middleware.
+   *
+   * @param config
+   * @param defaultBodyParser
+   * @private
+   */
   _configureBodyParserMiddleware (config = {}, defaultBodyParser) {
     // Include backwards compatability with including the default body parsers that
     // always come with Blueprint. This will be removed in future versions since
@@ -204,28 +180,17 @@ const Server = BO.extend ({
       urlencoded: {extended: false}
     };
 
-    const bodyParserConfig = Object.assign ({},
-      (defaultBodyParser ? defaults : {}),
-      config.bodyParser);
+    const bodyParserConfig = defaultsDeep (config.bodyParser, (defaultBodyParser ? defaults : {}));
 
     forOwn (bodyParserConfig, (config, type) => {
-      let middleware = bodyParser[type];
+      const middleware = bodyParser[type];
 
       assert (!!middleware, `${type} is an unsupported bodyParser type`);
 
       debug (`bodyParser.${type}: ${config}`);
       this._express.use (middleware.call (bodyParser, config));
     });
-  },
-
-  _configureValidatorsAndSanitizers () {
-    // Load the validators and sanitizers.
-    const validator = require ('express-validator');
-    const { validators, sanitizers } = this.app.resources;
-    const config = merge ({}, {customValidators: validators, customSanitizers: sanitizers});
-
-    this._express.use (validator (config));
-  },
+  }
 
   _configureOptionalMiddleware (config) {
     // Configure the optional middleware for the server. Some of the middleware
@@ -235,17 +200,17 @@ const Server = BO.extend ({
     // are provided for it.
     const optional = {
       cookies : function (app, opts) {
-        let middleware = require ('cookie-parser');
+        const middleware = require ('cookie-parser');
         debug ('configuring support for cookie-parser middleware');
 
-        const {secret, options} = opts;
+        const { secret, options } = opts;
         app.use (middleware (secret, options));
       },
 
       session : function (app, opts) {
         debug ('configuring support for express-session middleware');
 
-        let middleware = require ('express-session');
+        const middleware = require ('express-session');
         app.use (middleware (opts));
       }
     };
@@ -267,8 +232,14 @@ const Server = BO.extend ({
     // Add the custom middleware to the end.
     if (config.custom)
       this._express.use (config.custom);
-  },
+  }
 
+  /**
+   * Configure the passport middleware.
+   *
+   * @param config
+   * @private
+   */
   _configurePassport (config) {
     if (!config.passport)
       return;
@@ -287,23 +258,7 @@ const Server = BO.extend ({
       passport.serializeUser (config.passport.session.serializer);
       passport.deserializeUser (config.passport.session.deserializer);
     }
-  },
-
-  /**
-   * Configure the protocols for the server.
-   *
-   * @param config
-   * @returns {Promise<any>}
-   * @private
-   */
-  _configureProtocols (config) {
-    this._connections = mapValues (config, (value, key) => {
-      const Protocol = this._protocols[key];
-      assert (!!Protocol, `${key} is not a valid protocol ${Object.keys (this._protocols)}`);
-
-      return Protocol.createProtocol (this._express, value);
-    });
-  },
+  }
 
   /**
    * Configure the connections for the server.
@@ -312,88 +267,31 @@ const Server = BO.extend ({
    * @private
    */
   _configureConnections (config) {
-    this._connections = mapValues (config, (connection, name) => {
-
-      // ECMAScript 2018: const { protocol, ...options } = connection;
-      const { protocol } = connection;
-      const options = omit (connection, ['protocol']);
-
-      const Protocol = this._protocols[protocol];
-      assert (!!Protocol, `${protocol} is not a valid protocol. The protocol must be one of the following: ${Object.keys (this._protocols)}`);
+    forEach (config, (connection, name) => {
+      const { protocol, ...options } = connection;
+      const Protocol = this.protocols[protocol];
+      assert (!!Protocol, `${protocol} is not a valid protocol. The protocol must be one of the following: ${Object.keys (this.protocols)}`);
 
       debug (`configuring ${name} connection using the ${protocol} protocol`);
-      return Protocol.createProtocol (this._express, options);
+      this.connections[name] = Protocol.createProtocol (this._express, options);
     });
-  },
+  }
 
+  /**
+   * Configure the static paths
+   *
+   * @param config
+   * @private
+   */
   _configureStaticPaths (config) {
-    forEach (config, ( item) => {
+    forEach (config, (item) => {
       // Calculate the full path of the static path.
       const staticPath = path.isAbsolute (item) ? item : path.resolve (this.app.appPath, item);
 
       debug (`static path: ${staticPath}`);
       this._staticRouter.use (express.static (staticPath));
     });
-  },
-
-  /**
-   * Import the views for use by the server.
-   *
-   * @param srcPath         Location of the view files.
-   * @returns Promise
-   */
-  importViews (srcPath) {
-    const options = { recursive: true, clobber: true };
-
-    // We need to walk the import path to copy the files into the view cache
-    // path and detect the different view engines. Ideally, we would like to
-    // complete both in a single pass. This, however, would require implementing
-    // an algorithm atop low-level functions since the copy functions do not let
-    // us know what files are copies in real-time. Making two passes is basically
-    // the same run-time complexity as a single pass. So, we are going to execute
-    // both tasks in parallel.
-    let promises = [];
-
-    promises.push (copy (srcPath, this.viewCachePath, options));
-
-    promises.push (new Promise ((resolve, reject) => {
-      // Walk the path. For each view we find, we need to copy the file and
-      // then create a view object of the file.
-      let engines = [];
-
-      klaw (srcPath).on ('data', item => {
-        if (!item.stats.isFile ())
-          return;
-
-        // The extension of the file is used to determine the view engine.
-        let ext = path.extname (item.path);
-
-        if (ext.length > 1) {
-          let engine = ext.slice (1);
-
-          if (engines.indexOf (engine) === -1)
-            engines.push (engine);
-        }
-      }).on ('end', () => {
-        // Remove from the list the engines that we have already seen. We do
-        // not want to replace the exiting renderer with the same renderer.
-        let unloaded = difference (engines, this._engines);
-
-        unloaded.forEach (ext => {
-          let renderer = consolidate[ext];
-
-          assert (!!renderer, `There is no view engine renderer for ${ext}`);
-
-          this._express.engine (ext, renderer);
-          this._engines.push (ext);
-        });
-
-        resolve (null);
-      }).on ('error', reject);
-    }));
-
-    return Promise.all (promises);
-  },
+  }
 
   _finalizeConfigure (config) {
     // The last thing we need to add to express is the main router. If the execution
@@ -404,19 +302,15 @@ const Server = BO.extend ({
     this._express.use (handleError);
 
     // Set the location of the views, and configure the view engine.
-    this._express.set ('views', this.viewCachePath);
+    this._express.set ('views', this.viewsPath);
 
-    const {
-      viewEngine,
-      locals,
-      engines
-    } = config;
+    const { viewEngine, locals, engines } = config;
 
     // Define the default view engine, if one exists.
     if (viewEngine)
       this._express.set ('view engine', viewEngine);
 
-    // Add the locals to the a
+    // Add the locals to the express application.
     if (locals)
       merge (this._express.locals, locals);
 
@@ -424,22 +318,8 @@ const Server = BO.extend ({
     // is not the same as the ones that are automatically detected from the extensions
     // of all the views in the /views directory.
     forEach (engines, (engine, ext) => { this._express.engine (ext, engine) });
-
-    // Make sure the view cache path exists.
-    let ensurePaths = [
-      ensureDir (this.viewCachePath)
-    ];
-
-    return Promise.all (ensurePaths);
   }
-});
-
-Server.prototype._configureProtocols = util.deprecate (
-  Server.prototype._configureProtocols,
-  'app/configs/ server.js: protocols configuration property has been replaced by connections configuration property',
-  'DEP0001');
-
-module.exports = Server;
+}
 
 // individual exports
 exports.Protocol = Protocol;
