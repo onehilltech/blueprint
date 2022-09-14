@@ -30,30 +30,54 @@ const { BO, computed } = require ('base-object');
  * events. We do not use the ApplicationMessaging mixin, however, because we can gain
  * access to the application object via the `controller` property.
  */
-module.exports = BO.extend ({
-  mergedProperties: ['schema'],
-
+module.exports = class Action {
   /**
-   * Optional express-validator schema for validating the request that
-   * trigger the action.
+   * Constructor
+   * *
+   * @param controller        The parent controller
    */
-  schema: null,
-
-  /**
-   * Optional middleware function(s) for validating the request that triggered
-   * the action.
-   */
-  validate: null,
+  constructor (controller) {
+    Object.defineProperty (this, 'controller', { writable: false, configurable: false, value: controller});
+  }
 
   /**
    * Configure the action.
-   *
-   * @param controller
-   * @returns {Promise<void>}
    */
-  async configure (controller) {
-    this.controller = controller;
-  },
+  async configure () {
+
+  }
+
+  /**
+   * Get the schema for the action.
+   */
+  get schema () {
+
+  }
+
+  /// The action has a dynamic validate method. When set to true, the validate()
+  /// method will be called to validate the request.
+  hasDynamicValidateMethod = false;
+
+  /**
+   * Optional middleware function for validating the request that triggered
+   * the action.
+   */
+  async validate (req) {
+
+  }
+
+  /// The action has a dynamic sanitize method. When set to true, the sanitize()
+  //   /// method will be called to validate the request.
+  hasDynamicSanitizeMethod = false;
+
+  /**
+   * Optional middleware function for sanitizing the request.
+   * *
+   * @param req
+   */
+  async sanitize (req) {
+
+  }
 
   /**
    * Execute the request.
@@ -65,49 +89,33 @@ module.exports = BO.extend ({
    */
   async execute (req, res) {
     throw new Error ('You must implement the execute(req, res) method.');
-  },
+  }
 
-  /// The hosting controller for the action.
-  controller: null,
-
-  /// Quick access to the application.
-  app: computed.alias ('controller.app'),
+  get app () {
+    return this.controller.app;
+  }
 
   /// @{ Events
 
-  init () {
-    this._super.call (this, ...arguments);
-
-    if (this.controller)
-      this.controller.registerAction (this);
-  },
-
-  /**
-   * Configure the action.
-   */
-  async configure () {
-
-  },
-
   emit () {
     return this.app.emit (...arguments);
-  },
+  }
 
   on () {
     return this.app.on (...arguments);
-  },
+  }
 
   once () {
     return this.app.once (...arguments);
-  },
+  }
 
   hasListeners (ev) {
     return this.app.hasListeners (ev);
-  },
+  }
 
   getListeners (ev) {
     return this.app.getListeners (ev);
   }
 
   /// @}
-});
+};

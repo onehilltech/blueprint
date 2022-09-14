@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
-const { BaseObject } = require ('base-object');
-
 /**
  * @class Controller
  *
  * Base class for all controllers.
  */
-module.exports = BaseObject.extend ({
-  /// The application the controller is bound to.
-  app: null,
+module.exports = class Controller {
+  constructor (app) {
+    Object.defineProperty (this, 'app', { writable: false, configurable: false, value: app});
+    Object.defineProperty (this, 'actions', { writable: false, configurable: false, value: []});
+  }
+
+  register (action) {
+    this.actions.push (action);
+  }
 
   /**
-   * Configure the controller for the app.
+   * Configure the controller.
    *
-   * @param app
+   * @returns {Promise<void>}
    */
-  async configure (app) {
-    this.app = app;
+  async configure () {
+    for await (const action of this.actions)
+      await action.configure ();
   }
-});
+}
 

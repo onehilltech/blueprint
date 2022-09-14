@@ -28,26 +28,28 @@ const { fromCallback } = require ('bluebird');
  * Base class for all upload actions. This action will initialize a new instance
  * of multer, and store it internally for subclasses to use.
  */
-module.exports = Action.extend ({
+module.exports = class UploadAction extends Action {
   /// The default upload path for all files. This will default to [appPath]/uploads,
   /// if nothing is provided.
-  uploadPath: null,
+  uploadPath;
 
   /// The other options for multer.
-  uploadOptions: null,
+  uploadOptions;
 
   // The middleware for completing the upload.
-  _middleware: null,
+  get middleware () {
 
-  storageType: computed ({
-    get () { return this._options.dest ? 'disk' : 'memory'; }
-  }),
+  }
+
+  get storageType () {
+    return this._options.dest ? 'disk' : 'memory';
+  }
 
   /**
    * @override
    */
-  async configure (controller) {
-    await this._super.call (this, ...arguments);
+  async configure () {
+    await super.configure (...arguments);
 
     if (!this.uploadPath)
       this.uploadPath = resolve (this.app.tempPath, 'uploads');
@@ -63,7 +65,7 @@ module.exports = Action.extend ({
 
     this._options = merge (baseOptions, this.uploadOptions);
     this._upload = multer (this._options);
-  },
+  }
 
   /**
    * Execute the action.
@@ -72,9 +74,9 @@ module.exports = Action.extend ({
    * @param res     The response object.
    */
   async execute (req, res) {
-    await fromCallback (callback => this._middleware (req, res, callback));
+    await fromCallback (callback => this.middleware (req, res, callback));
     return this.onUploadComplete (req, res);
-  },
+  }
 
   /**
    * Notify the subclass the upload is complete.
@@ -86,4 +88,4 @@ module.exports = Action.extend ({
   async onUploadComplete (req, res) {
     return null;
   }
-});
+}

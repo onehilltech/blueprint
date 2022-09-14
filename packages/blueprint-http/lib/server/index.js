@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const { env } = require ('@onehilltech/blueprint');
 const debug  = require ('debug') ('blueprint-http:server');
 const assert = require ('assert');
 const bodyParser  = require ('body-parser');
@@ -68,6 +69,10 @@ module.exports = exports = class Server {
    * Configure the server.
    */
   async configure (config = {}) {
+    if (env === 'production' || env === 'sandbox') {
+      this._express.set ('trust proxy', 'loopback')
+    }
+
     // We always need to configure the middleware for the server, even if there
     // is no explicit middleware property in the configuration file.
     this._configureMiddleware (config.middleware);
