@@ -7,7 +7,7 @@ A Blueprint.js module for interface with the Internet Computer from NodeJS
 Installation
 =============
 
-    npm install @onehilltech/blueprint-dfinity --save
+    npm install @onehilltech/blueprint-dfinity@^4.0.0 --save
 
 
 Usage
