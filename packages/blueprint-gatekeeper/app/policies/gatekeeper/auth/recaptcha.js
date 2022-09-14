@@ -16,10 +16,11 @@
 
 const {
   Policy,
-  BadRequestError,
   model,
   service,
 } = require ('@onehilltech/blueprint');
+
+const RECAPTCHA_SCHEME_REGEXP = /^recaptcha$/i;
 
 /**
  * Policy that verifies a Google recaptcha response.
@@ -33,18 +34,26 @@ module.exports = Policy.extend ({
   /// Load the recaptcha service.
   recaptcha: service (),
 
-  runCheck (req) {
+  async runCheck (req) {
+    const authorization = req.get ('authorization');
+
+    if (!authorization)
+      return { failureCode: 'invalid_authorization', failureMessage: 'The authorization header is missing.' };
+
+    const [scheme, response] = authorization.split (' ');
+
+    if (!RECAPTCHA_SCHEME_REGEXP.test (scheme))
+      return { failureCode: 'invalid_authorization', failureMessage: 'The authorization scheme is invalid.' };
+
     const origin = req.get ('origin');
-    const { response } = req.query;
+    const client = await this.Client.findOne ({ origin });
 
-    return this.Client.findOne ({origin})
-      .then (client => {
-        if (!client)
-          return Promise.reject (new BadRequestError ('invalid_client', 'The client is unknown.'));
+    if (!client)
+      return { failureCode: 'unknown_client', failureMessage: 'The client is unknown.' };
+    ;
 
-        // Make a request to google, and verify the response.
-        return this.recaptcha.verifyResponse (client.recaptcha_secret, response, req.ip);
-      })
-      .then (result => result.success);
+    // Make a request to google, and verify the response.
+    const result = await this.recaptcha.verifyResponse (client.recaptcha_secret, response, req.ip);
+    return result.success;
   }
 });
