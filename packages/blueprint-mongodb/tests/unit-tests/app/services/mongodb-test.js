@@ -26,7 +26,7 @@ describe ('app | services | mongodb', function () {
     expect (service.defaultConnection.conn).to.equal (mongoose.connections[0]);
   });
 
-  it.only ('should seed from the test', async function () {
+  it ('should seed from the test', async function () {
     const models = await this.seed ({
       authors: [ { name: 'Stephen King'}]
     });
