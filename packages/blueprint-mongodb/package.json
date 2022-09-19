@@ -18,13 +18,14 @@
   "repository": "onehilltech/blueprint",
   "dependencies": {
     "@onehilltech/blueprint": "^4.65.11",
-    "@onehilltech/dab-mongodb": "^2.11.1",
-    "moment": "^2.22.2"
+    "moment": "^2.22.2",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
     "@onehilltech/blueprint-testing": "^4.64.1",
-    "cors": "^2.8.5",
-    "istanbul": "^0.4.5"
+    "@onehilltech/dab-mongodb": "^2.11.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^9.2.2"
   },
   "license": "Apache-2.0",
   "engines": {
