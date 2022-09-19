@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-python",
   "description": "Run Python scripts for a Blueprint application.",
-  "version": "4.65.11",
+  "version": "4.65.19",
   "private": false,
   "scripts": {
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive",
@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@onehilltech/blueprint-cli": "^4.64.1",
-    "@onehilltech/blueprint-testing": "^4.64.1"
+    "@onehilltech/blueprint-testing": "^4.65.19"
   },
   "repository": "onehilltech/blueprint",
   "license": "Apache-2.0",

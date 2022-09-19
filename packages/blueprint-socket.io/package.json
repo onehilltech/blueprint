@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-socket.io",
   "description": "Socket.io module for Blueprint",
-  "version": "4.65.11",
+  "version": "4.65.19",
   "private": false,
   "main": "./lib",
   "repository": "onehilltech/blueprint",
@@ -15,7 +15,7 @@
     "socket.io": "^4.4.1"
   },
   "devDependencies": {
-    "@onehilltech/blueprint-testing": "^4.64.1",
+    "@onehilltech/blueprint-testing": "^4.65.19",
     "handlebars": "^4.0.12",
     "pug": "^2.0.3"
   },
