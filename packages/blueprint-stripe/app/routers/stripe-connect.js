@@ -11,6 +11,8 @@ module.exports = {
     },
 
     '/:stripeAccountId': {
+      policy: '?stripe.connect.account',
+
       '/balance': {
         policy: '?stripe.balance.getOne',
         get: 'stripe-balance@get'
