@@ -17,6 +17,7 @@
     "gulp": "^4.0.2",
     "gulp-dart-sass": "^1.0.2",
     "handlebars": "^4.7.7",
+    "juice": "^8.1.0",
     "juice-resources-promise": "0.0.2",
     "nodemailer": "^6.7.2",
     "nodemailer-mailgun-transport": "^2.1.3"
