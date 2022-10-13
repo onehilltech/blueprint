@@ -2,7 +2,9 @@
   "name": "blueprint",
   "license": "Apache-2.0",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "engines": {
     "node": ">=16.17.0",
     "npm": ">=8.15.0"
@@ -13,5 +15,10 @@
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/plugin-proposal-decorators": "^7.18.10",
     "@babel/preset-env": "^7.18.10"
+  },
+  "dependencies": {
+    "is-plain-obj": "^4.1.0",
+    "is-unicode-supported": "^1.3.0",
+    "yocto-queue": "^1.0.0"
   }
 }

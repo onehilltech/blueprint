@@ -10,6 +10,12 @@ module.exports = function (module) {
   module.app.defineType('policy', {
     location: 'policies'
   });
+  module.app.defineType('validator', {
+    location: 'validators'
+  });
+  module.app.defineType('sanitizer', {
+    location: 'sanitizers'
+  });
   module.app.defineType('controller', {
     location: 'controllers'
   });
