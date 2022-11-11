@@ -339,5 +339,27 @@ module.exports = ResourceController.extend ({
         return res.status (200).json ({ account });
       }
     });
+  },
+
+  /**
+   * Check if an account exists by an username or email address.
+   */
+  exists () {
+    return Action.extend ({
+      async execute (req, res) {
+        const { email, username } = req.query;
+        const criteria = {};
+
+        if (!!email)
+          criteria.email = email;
+
+        if (!!username)
+          criteria.username = username;
+
+        const account = await this.controller.Model.find (criteria);
+
+        return res.status (200).json (account.length === 1);
+      }
+    });
   }
 });
