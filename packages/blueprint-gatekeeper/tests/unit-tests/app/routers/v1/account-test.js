@@ -282,7 +282,7 @@ describe ('app | routers | account', function () {
     });
   });
 
-  describe.only ('/v1/accounts/exists', function () {
+  describe ('/v1/accounts/exists', function () {
     context ('GET', function () {
       it ('should show the account exists by username', function () {
         const { accounts: [account]} = seed ();

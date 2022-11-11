@@ -27,12 +27,7 @@ const debug = require ('debug')('blueprint-socket.io:service:io');
 module.exports = Service.extend ({
   _connections: {},
 
-  configure () {
-    console.log ('configuring the io service');
-  },
-
   start () {
-    console.log ('starting the io service');
     const connections = blueprint.app.server.connections;
 
     this._connections = mapValues (connections, ({server}, name)=> {
