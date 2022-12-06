@@ -18,13 +18,13 @@ const cors = require ('cors');
 const blueprint = require ('@onehilltech/blueprint');
 const { merge } = require ('lodash');
 
-function delegate (defaults) {
+function delegate (defaults = {}) {
   const Client = blueprint.lookup ('model:client');
   const { origin: defaultOrigin, allowNullOrigin = true } = defaults;
 
   return function (req, callback) {
     // If there is no origin in the request, then we can disable cors.
-    const origin = req.get ('origin');
+    const origin = req.get ? req.get ('origin') : req.headers ['origin'];
 
     if (origin === null || origin === 'null')
       return callback (null, {origin: allowNullOrigin});
@@ -41,6 +41,8 @@ function delegate (defaults) {
   };
 }
 
-module.exports = function (opts = {}) {
+module.exports = exports = function (opts = {}) {
   return cors (delegate (opts));
 };
+
+exports.delegate = delegate;
