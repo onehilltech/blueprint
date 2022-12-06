@@ -11,7 +11,7 @@
     "coveralls": "env NODE_ENV=test istanbul cover _mocha --exit --report lcovonly -- tests/unit-tests --recursive && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.65.11",
+    "@onehilltech/blueprint-gatekeeper": "^4.66.0",
     "socket.io": "^4.4.1"
   },
   "devDependencies": {

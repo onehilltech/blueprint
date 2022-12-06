@@ -20,6 +20,7 @@ const { mapValues } = require ('lodash');
 
 const { Server: SocketIO } = require("socket.io");
 const debug = require ('debug')('blueprint-socket.io:service:io');
+const { cors } = require ('@onehilltech/blueprint-gatekeeper');
 
 /**
  * The service that manages connections for SocketIO.
@@ -27,14 +28,19 @@ const debug = require ('debug')('blueprint-socket.io:service:io');
 module.exports = Service.extend ({
   _connections: {},
 
+  configure () {
+    console.log ('configuring the io service');
+  },
+
   start () {
+    console.log ('starting the io service');
     const connections = blueprint.app.server.connections;
 
-    this._connections = mapValues (connections, ({server}, name)=> {
+    this._connections = mapValues (connections, ({ server }, name )=> {
       debug (`opening Socket.IO connection on ${name}`);
 
       // Make a new Socket IO instance.
-      const io = new SocketIO (server);
+      const io = new SocketIO (server, { cors: cors.delegate () });
 
       // Listen for connections on this instance.
       io.on ('connection', socket => this._connection (name, socket));
