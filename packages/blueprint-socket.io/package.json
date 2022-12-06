@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-socket.io",
   "description": "Socket.io module for Blueprint",
-  "version": "4.66.2",
+  "version": "4.66.3",
   "private": false,
   "main": "./lib",
   "repository": "onehilltech/blueprint",
