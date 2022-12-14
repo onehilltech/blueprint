@@ -24,6 +24,10 @@ module.exports = {
   '/accounts' : {
     policy: check ('gatekeeper.auth.bearer'),
 
+    '/exists': {
+      get: 'gatekeeper.account@exists'
+    },
+
     resource: {
       controller: 'gatekeeper.account',
       deny: ['count'],

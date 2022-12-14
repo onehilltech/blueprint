@@ -16,7 +16,6 @@
 
 const {
   Policy,
-  BadRequestError,
   model,
   service,
 } = require ('@onehilltech/blueprint');

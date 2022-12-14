@@ -7,10 +7,12 @@ module.exports = {
 
     resource: {
       controller: 'stripe-account',
-      deny: ['count', 'getAll'],
+      deny: ['count', 'getAll', 'delete', 'create'],
     },
 
     '/:stripeAccountId': {
+      policy: '?stripe.connect.account',
+
       '/balance': {
         policy: '?stripe.balance.getOne',
         get: 'stripe-balance@get'

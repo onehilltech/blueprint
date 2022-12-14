@@ -20,11 +20,11 @@ module.exports = StripeResourceController.extend ({
         }
       },
 
-      execute (req, res) {
+      async execute (req, res) {
         const { 'stripe-account': data } = req.body;
 
-        return this.stripe.accounts.create (data)
-          .then (result => res.status (200).json ({'stripe-account': result}));
+        const result = await this.stripe.accounts.create (data);
+        return res.status (200).json ({'stripe-account': result});
       }
     });
   },
@@ -34,11 +34,11 @@ module.exports = StripeResourceController.extend ({
    */
   getOne () {
     return StripeAction.extend ({
-      execute (req, res) {
+      async execute (req, res) {
         const { stripeAccountId } = req.params;
 
-        return this.stripe.accounts.retrieve (stripeAccountId)
-          .then (result => res.status (200).json ({'stripe-account': result}));
+        const result = await this.stripe.accounts.retrieve (stripeAccountId);
+        return res.status (200).json ({'stripe-account': result});
       }
     });
   },
@@ -48,12 +48,12 @@ module.exports = StripeResourceController.extend ({
    */
   update () {
     return StripeAction.extend ({
-      execute (req, res) {
+      async execute (req, res) {
         const { stripeAccountId } = req.params;
         const { 'stripe-account': update } = req.body;
 
-        return this.stripe.accounts.update (stripeAccountId, update)
-          .then (result => res.status (200).json ({ 'stripe-account': result }));
+        const result = await this.stripe.accounts.update (stripeAccountId, update);
+        return res.status (200).json ({ 'stripe-account': result });
       }
     });
   },
@@ -65,11 +65,11 @@ module.exports = StripeResourceController.extend ({
    */
   delete () {
     return StripeAction.extend ({
-      execute (req, res) {
+      async execute (req, res) {
         const { stripeAccountId } = req.params;
 
-        return this.stripe.accounts.del (stripeAccountId)
-          .then (result => res.status (200).json (result.deleted));
+        const result = await this.stripe.accounts.del (stripeAccountId);
+        return res.status (200).json (result.deleted);
       }
     });
   }

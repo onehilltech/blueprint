@@ -13,7 +13,7 @@
     "@onehilltech/blueprint": "^5.0.0-alpha.6",
     "@onehilltech/blueprint-cli": "^5.0.0-alpha.1",
     "@onehilltech/blueprint-mongodb": "^5.0.0-alpha.6",
-    "email-templates": "^5.0.2",
+    "email-templates": "^8.0.8",
     "gulp": "^4.0.2",
     "gulp-dart-sass": "^1.0.2",
     "handlebars": "^4.7.7",
@@ -24,7 +24,11 @@
     "pug": "^2.0.3"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "@onehilltech/blueprint-testing": "^5.0.0-alpha.1"
+=======
+    "@onehilltech/blueprint-testing": "^4.65.19"
+>>>>>>> master
   },
   "license": "Apache-2.0",
   "engines": {

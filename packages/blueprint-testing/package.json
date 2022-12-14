@@ -1,6 +1,6 @@
 {
   "name": "@onehilltech/blueprint-testing",
-  "version": "5.0.0-alpha.1",
+  "version": "4.65.19",
   "description": "Testing module for BlueprintJS applications",
   "main": "lib/index.js",
   "repository": "onehilltech/blueprint",
@@ -8,23 +8,20 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "blueprint",
-    "testing"
+    "blueprint"
   ],
   "author": "One Hill Technologies, LLC",
   "license": "Apache-2.0",
   "dependencies": {
     "chai": "^4.3.6",
-    "chai-as-promised": "^7.1.1",
     "chai-datetime": "^1.8.0",
-    "mocha": "^10.0.0",
+    "mocha": "^9.2.1",
     "path": "^0.12.7",
-    "supertest": "^6.2.4"
+    "supertest": "^6.2.2"
   },
-  "devDependencies": {
-    "@onehilltech/blueprint": "*"
+  "engines": {
+    "node": ">=11.6.0",
+    "npm": ">=6.5.0"
   },
-  "peerDependencies": {
-    "@onehilltech/blueprint": "*"
-  }
+  "gitHead": "3fa9d1898f478215e947cceb53313d6bd2cf93a5"
 }

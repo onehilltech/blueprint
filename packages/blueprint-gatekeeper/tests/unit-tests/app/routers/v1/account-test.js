@@ -282,6 +282,61 @@ describe ('app | routers | account', function () {
     });
   });
 
+  describe ('/v1/accounts/exists', function () {
+    context ('GET', function () {
+      it ('should show the account exists by username', function () {
+        const { accounts: [account]} = seed ();
+
+        return request ()
+          .get ('/v1/accounts/exists')
+          .query ({ username: account.username})
+          .withClientToken (0)
+          .expect ('true');
+      });
+
+      it ('should show the account exists by email', function () {
+        const { accounts: [account]} = seed ();
+
+        return request ()
+          .get ('/v1/accounts/exists')
+          .query ({ email: account.email})
+          .withClientToken (0)
+          .expect ('true');
+      });
+
+      it ('should show the account does not exist by email', function () {
+        return request ()
+          .get ('/v1/accounts/exists')
+          .query ({ email: 'no.one@donatians.com'})
+          .withClientToken (0)
+          .expect ('false');
+      });
+
+      it ('should show the account does not exist by username', function () {
+        return request ()
+          .get ('/v1/accounts/exists')
+          .query ({ username: 'no.one'})
+          .withClientToken (0)
+          .expect ('false');
+      });
+
+      it ('should not allow request because of missing token', function () {
+        return request ()
+          .get ('/v1/accounts/exists')
+          .query ({ email: 'no.one@donatians.com'})
+          .expect (400, {
+            errors: [
+              {
+                code: 'missing_token',
+                detail: 'The access token is missing.',
+                status: '400'
+              }
+            ]
+          });
+      });
+    });
+  });
+
   describe ('/v1/accounts/authenticate', function () {
     context ('POST', function () {
       it ('should authenticate logged in user', function () {

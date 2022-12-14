@@ -16,6 +16,7 @@
 
 const { model, BadRequestError, service, Action } = require ('@onehilltech/blueprint');
 const { get } = require ('lodash');
+const { io } = require ('@onehilltech/blueprint-socket.io');
 const ResourceController = require ('../../../lib/resource-controller');
 
 /**
@@ -298,6 +299,13 @@ module.exports = ResourceController.extend ({
    */
   verify () {
     return this.SingleResourceAction.extend ({
+      configure () {
+        const {configs: {gatekeeper: {io: name}}} = this.app;
+
+        if (!!name)
+          this.io = this.app.lookup ('service:io').connection (name);
+      },
+
       async executeFor (account, req, res) {
         // Update the verification information for the account.
         account.verification.date = new Date ();
@@ -305,18 +313,10 @@ module.exports = ResourceController.extend ({
         await account.save ();
 
         // Let's also send a real-time notification to the client.
-        await this._emitIO (account);
+        if (!!this.io)
+          await this.io.to (`account:${account.id}`).emit ('verified')
 
         return res.status (200).json ({ account });
-      },
-
-      async _emitIO (account) {
-        const { configs: { gatekeeper: { io: bucket } } } = this.app;
-
-        if (!!bucket) {
-          const io = this.app.lookup ('service:io').connection (bucket);
-          await io.to (account.id).emit ('verified');
-        }
       }
     });
   },
@@ -337,6 +337,28 @@ module.exports = ResourceController.extend ({
         account = await this.verification.sendEmail (account, req.accessToken.client);
 
         return res.status (200).json ({ account });
+      }
+    });
+  },
+
+  /**
+   * Check if an account exists by an username or email address.
+   */
+  exists () {
+    return Action.extend ({
+      async execute (req, res) {
+        const { email, username } = req.query;
+        const criteria = {};
+
+        if (!!email)
+          criteria.email = email;
+
+        if (!!username)
+          criteria.username = username;
+
+        const account = await this.controller.Model.find (criteria);
+
+        return res.status (200).json (account.length === 1);
       }
     });
   }
