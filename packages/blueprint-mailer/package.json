@@ -24,11 +24,7 @@
     "pug": "^2.0.3"
   },
   "devDependencies": {
-<<<<<<< HEAD
     "@onehilltech/blueprint-testing": "^5.0.0-alpha.1"
-=======
-    "@onehilltech/blueprint-testing": "^4.65.19"
->>>>>>> master
   },
   "license": "Apache-2.0",
   "engines": {
