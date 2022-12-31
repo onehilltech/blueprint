@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const assert = require ('assert');
 const blueprint = require ('@onehilltech/blueprint');
 const { isString} = require ('lodash');
 
@@ -22,6 +21,7 @@ const {
   Model,
   Schema: {
     Types: {
+      DocumentArray,
       ObjectId
     }
   }
@@ -36,8 +36,18 @@ const {
 module.exports = function (model, opts = {}) {
   const M = isString (model) ? blueprint.lookup (`model:${model}`) : model;
 
-  assert ((M.prototype instanceof Model), 'The model is not an instance of a mongoose Model.');
+  if ((M.prototype instanceof Model)) {
+    // This is a reference to a top-level document.
+    const { modelName } = M;
+    return Object.assign ({}, opts, { type: ObjectId, ref: modelName });
+  }
+  else if ((M instanceof DocumentArray)) {
+    // This is a reference to a nested document. We cannot populate it because
+    // it does not have a stand-alone object id.
 
-  const {modelName} = M;
-  return Object.assign ({}, opts, {type: ObjectId, ref: modelName});
+    return Object.assign ({}, opts, { type: ObjectId });
+  }
+  else {
+    throw new Error (`${model} is not a value reference type.`);
+  }
 };
