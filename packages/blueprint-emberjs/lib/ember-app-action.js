@@ -46,6 +46,9 @@ module.exports = Action.extend ({
    * @param res         The response object
    */
   async execute (req, res) {
+    if (this.isEmberAppRoute (req))
+      return;
+
     // Get the model for the index page. The model will then be used to render
     // the html page we will send back to the client.
 
@@ -54,6 +57,16 @@ module.exports = Action.extend ({
     const html = this.render ({ meta, model });
 
     return res.status (200).send (html);
+  },
+
+  /**
+   * Test if the request is an ember route that should be handled on the client.
+   *
+   * @param req
+   * @return {boolean}
+   */
+  isEmberAppRoute (req) {
+    return false;
   },
 
   /**
