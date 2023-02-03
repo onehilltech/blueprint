@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 One Hill Technologies, LLC
+ * Copyright (c) 2023 One Hill Technologies, LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-const {
-  Policy,
-  ForbiddenError,
-  BadRequestError,
-  service,
-  model,
-} = require ('@onehilltech/blueprint');
-
+const { Policy, model, computed, UnauthorizedError } = require ('@onehilltech/blueprint');
 const basic = require ('basic-auth');
 
 /**
@@ -48,10 +41,21 @@ module.exports = Policy.extend ({
       return true;
     }
     else {
-      res.setHeader ('WWW-Authenticate', `Basic realm="${this.realm}"`);
-      return false;
+      res.setHeader ('WWW-Authenticate', this.authScheme);
+      throw new UnauthorizedError ('You must authenticate to access this url.');
     }
   },
+
+  authScheme: computed ({
+    get () {
+      let scheme = 'Basic';
+
+      if (this.realm)
+        scheme += ` realm="${this.realm}"`;
+
+      return scheme;
+    }
+  }),
 
   async _checkCredentials (credentials = {}) {
     const { name, pass } = credentials;
