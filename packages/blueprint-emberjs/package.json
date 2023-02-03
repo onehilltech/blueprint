@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-emberjs",
   "description": "Blueprint module for hosting an EmberJS application.",
-  "version": "4.66.5",
+  "version": "4.67.0",
   "private": false,
   "main": "./lib",
   "scripts": {
@@ -10,8 +10,8 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.65.11",
-    "@onehilltech/blueprint-handlebars": "^4.65.19",
+    "@onehilltech/blueprint": "^4.67.0",
+    "@onehilltech/blueprint-handlebars": "^4.67.0",
     "mime": "^3.0.0"
   },
   "devDependencies": {
