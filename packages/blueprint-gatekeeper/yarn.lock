@@ -97,14 +97,14 @@
     "ora" "^2.1.0"
     "winston" "^2.4.2"
 
-"@onehilltech/blueprint-mailer@^4.65.23":
-  "integrity" "sha512-G/FJB8RZS6lMSE9rW/cY1Z4QcL+a8ObTcyTNwfbZs3e26VM0e/0Wew1Mex7pFhTVhJd8VnRo6Hcc822nf9HnFA=="
-  "resolved" "https://registry.npmjs.org/@onehilltech/blueprint-mailer/-/blueprint-mailer-4.65.23.tgz"
-  "version" "4.65.23"
+"@onehilltech/blueprint-mailer@^4.66.5":
+  "integrity" "sha512-kJq9OZaMdvUm/zJKOj4w7ElWrYcijXLI/UXzBeTaag8ti9mZYUX4Py8gj7/P7CWIDGM389N0MDxjqi5EpmcdlQ=="
+  "resolved" "https://registry.npmjs.org/@onehilltech/blueprint-mailer/-/blueprint-mailer-4.66.5.tgz"
+  "version" "4.66.5"
   dependencies:
     "@onehilltech/blueprint" "^4.65.11"
     "@onehilltech/blueprint-cli" "^4.64.1"
-    "@onehilltech/blueprint-mongodb" "^4.65.20"
+    "@onehilltech/blueprint-mongodb" "^4.66.5"
     "email-templates" "^8.0.8"
     "gulp" "^4.0.2"
     "gulp-dart-sass" "^1.0.2"
@@ -114,20 +114,20 @@
     "nodemailer" "^6.7.2"
     "nodemailer-mailgun-transport" "^2.1.3"
 
-"@onehilltech/blueprint-mongodb@^4.65.20":
-  "integrity" "sha512-AgomO9W2owd3zKmgmrtYSb2plKdXUUgd5XCkvH9J3KMmXuMgnTzqTgA34fHs4iwxsMgJj+X+aGTbwPG0jKDNrg=="
-  "resolved" "https://registry.npmjs.org/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-4.65.20.tgz"
-  "version" "4.65.20"
+"@onehilltech/blueprint-mongodb@^4.66.5":
+  "integrity" "sha512-ysXVAOAbkfJzRI7jHCiMAHlsZp+XgIKFPqOmBcn1SdHUBR+SlVOL3ToRC2xEuhcKRqa3rIdDJKYazcQW8keXhA=="
+  "resolved" "https://registry.npmjs.org/@onehilltech/blueprint-mongodb/-/blueprint-mongodb-4.66.5.tgz"
+  "version" "4.66.5"
   dependencies:
     "@onehilltech/blueprint" "^4.65.11"
     "@onehilltech/dab-mongodb" "^2.11.1"
     "cors" "^2.8.5"
     "moment" "^2.22.2"
 
-"@onehilltech/blueprint-socket.io@^4.65.19":
-  "integrity" "sha512-hsKaX7PnR5zNBq5XBZ4/kRVJAWdF5I9gJHlCVtiL68/KGd6NshhC9hdXBzso4DDW76IXOUS9MJbcnyWJxM013w=="
-  "resolved" "https://registry.npmjs.org/@onehilltech/blueprint-socket.io/-/blueprint-socket.io-4.65.19.tgz"
-  "version" "4.65.19"
+"@onehilltech/blueprint-socket.io@^4.66.3":
+  "integrity" "sha512-poQyG3mLFcAYyk16WjFYFjg4lRmal6EPNUGPRTlVDh+vUlU5t2yEI4mjaf8X9m9NvWCXriUQDZYsmFpL1D/FQA=="
+  "resolved" "https://registry.npmjs.org/@onehilltech/blueprint-socket.io/-/blueprint-socket.io-4.66.3.tgz"
+  "version" "4.66.3"
   dependencies:
     "@onehilltech/blueprint" "^4.65.11"
     "socket.io" "^4.4.1"
@@ -709,7 +709,7 @@
   "resolved" "https://registry.npmjs.org/base64id/-/base64id-2.0.0.tgz"
   "version" "2.0.0"
 
-"basic-auth@~2.0.1":
+"basic-auth@^2.0.1", "basic-auth@~2.0.1":
   "integrity" "sha512-NF+epuEdnUYVlGuhaxbbq+dvJttwLnGY+YixlXlME5KpQ5W3CnXA5cVTneY3SPbPDRkcjMbifrwmFYcClgOZeg=="
   "resolved" "https://registry.npmjs.org/basic-auth/-/basic-auth-2.0.1.tgz"
   "version" "2.0.1"
