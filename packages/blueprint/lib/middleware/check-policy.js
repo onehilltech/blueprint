@@ -29,7 +29,7 @@ const {
  */
 module.exports = function (policy) {
   return function __blueprint_check_policy (req, res, next) {
-    let result = policy.runCheck (req);
+    let result = policy.runCheck (req, res);
 
     return Promise.resolve (result).then (result => {
       if (result === true)
