@@ -51,7 +51,7 @@ module.exports = Populate.extend ({
       if (isEmpty (ids))
         return null;
 
-      return populator.populate (ids).exec ();
+      return populator.populate (ids);
     });
 
     return BluebirdPromise.props (pending);

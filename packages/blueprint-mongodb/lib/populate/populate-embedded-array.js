@@ -41,19 +41,16 @@ module.exports = Populate.extend ({
     return !!value && value.length > 0;
   },
 
-  populate (unseen) {
-    let pending = mapValues (this.populators, (populator) => {
+  async populate (unseen) {
+    let pending = mapValues (this.populators, async (populator) => {
       const values = unseen[populator.plural];
 
       if (isEmpty (values))
         return null;
 
+      // Populate each of the ids in the array.
       const ids = flattenDeep (values);
-
-      // TODO I think ids is an array of ids, not a single id. We should map the ids using the populator, or
-      // the element populator should be able to handle an array id ids.
-
-      return populator.populate (ids).exec ();
+      return await Promise.all (ids.map (id => populator.populate (id)));
     });
 
     return BluebirdPromise.props (pending);

@@ -70,20 +70,22 @@ module.exports = BO.extend ({
    *
    * @param model
    */
-  addModel (model) {
+  async addModel (model) {
     const { collectionName, populators } = this.registry.lookup (model.constructor);
     const unseen = this._saveUnseenId (collectionName, model._id);
 
     if (!unseen)
-      return Promise.resolve (this);
+      return this;
 
     // Add the single model to the target collection.
     this._addModels (collectionName, [model]);
 
     if (isEmpty (populators))
-      return Promise.resolve (this);
+      return this;
 
-    return this._populate (populators, model).then (() => this);
+    await this._populate (populators, model);
+
+    return this;
   },
 
   /**
@@ -92,10 +94,12 @@ module.exports = BO.extend ({
    *
    * @param models
    */
-  addModels (models) {
+  async addModels (models) {
     // We must iterate over each element in the array just in case the elements
     // in the array are polymorphic.
-    return Promise.all (models.map (this.addModel.bind (this))).then (() => this);
+    await Promise.all (models.map (this.addModel.bind (this)));
+
+    return this;
   },
 
   /**
@@ -185,14 +189,14 @@ module.exports = BO.extend ({
    * @param value
    * @returns {null|*}
    */
-  processId (populator, value) {
+  async processId (populator, value) {
     if (!value)
       return null;
 
     // Determine the ids that we need to populate at this point in time. If we
     // have seen all the ids, then there is no need to populate the value(s).
 
-    let saveUnseenIds = new UnseenIdVisitor ({population: this, value});
+    const saveUnseenIds = new UnseenIdVisitor ({population: this, value});
     populator.accept (saveUnseenIds);
 
     const {unseen} = saveUnseenIds;
@@ -206,14 +210,13 @@ module.exports = BO.extend ({
     if (ignore.includes (modelName))
       return null;
 
-    return populator.populate (unseen).then (populated => {
-      // Add the populated models to our population.
+    const populated = await populator.populate (unseen);
 
-      const v = new AddModelVisitor ({population: this, populated});
-      populator.accept (v);
+    // Add the populated models to our population.
+    const v = new AddModelVisitor ({ population: this, populated });
+    populator.accept (v);
 
-      return v.promise;
-    });
+    return v.promise;
   },
 
   /**
@@ -224,9 +227,9 @@ module.exports = BO.extend ({
    * @returns {Promise|null}
    * @private
    */
-  _populate (populators, data) {
+  async _populate (populators, data) {
     if (!data)
-      return Promise.resolve (this);
+      return this;
 
     let mapping = mapValues (populators, (populator, path) => {
       // Get the value at the current path. The value can be either a single element or an
@@ -234,7 +237,7 @@ module.exports = BO.extend ({
 
       const value = get (data, path);
 
-      if ( populator.valueExists (value))
+      if (populator.valueExists (value))
         return this.processId (populator, value);
       else
         return null;

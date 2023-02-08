@@ -42,7 +42,7 @@ module.exports = Populate.extend ({
 
   populate (ids) {
     const { [this.modelName]: options = {}} = (this.options || {});
-    return this.Model.find ({_id: {$in: ids}}, options);
+    return this.Model.find ({_id: {$in: ids}}, options).exec ();
   },
 
   accept (v) {
