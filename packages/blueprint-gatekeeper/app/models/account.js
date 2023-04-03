@@ -18,6 +18,8 @@ const bcrypt  = require ('bcrypt');
 const mongodb = require ('@onehilltech/blueprint-mongodb');
 const { Schema: { Types: { refersTo }}} = mongodb;
 
+const Client = require ('./client');
+
 const { gatekeeper } = require ('@onehilltech/blueprint').app.configs;
 const { isEmail } = require ('validator');
 
@@ -46,6 +48,9 @@ let definition = {
 
   /// Enabled state for the account.
   enabled: { type: Boolean, required: true, default: true },
+
+  /// The client used to create the account.
+  created_by: refersTo (Client),
 
   /// The default scope for the account. This is applied to the access
   /// token for the account.

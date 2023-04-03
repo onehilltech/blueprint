@@ -58,10 +58,12 @@ module.exports = ResourceController.extend ({
       schema,
 
       prepareDocument (req, doc) {
-        if (doc._id) {
-          // Prevent the client from setting the id.
+        // Prevent the client from setting the id.
+        if (doc._id)
           delete doc._id;
-        }
+
+        // Set the client that is creating the account.
+        doc.created_by = req.user._id;
 
         // Allow the application to create its own id for the account. This is useful if the
         // application needs to assign an existing id to an account. We do not have to worry
