@@ -22,7 +22,7 @@ describe ('app | models | account', function () {
   describe ('create', function () {
     it ('should create and save a new account to the database', function () {
       const Account = blueprint.lookup ('model:account');
-      const {native} = seed ('$default');
+      const { native: [client] } = seed ('$default');
 
       let account = new Account ({
         email: 'test-account@gatekeeper.com',
@@ -30,7 +30,7 @@ describe ('app | models | account', function () {
         password: 'test-account'
       });
 
-      account.created_by = native[0]._id;
+      account.created_by = client._id;
 
       return account.save ().then (model => {
         expect (model.password).to.not.equal ('test-account');
@@ -39,6 +39,7 @@ describe ('app | models | account', function () {
           _id: model.id,
           username: account.username,
           email: account.email,
+          created_by: client.id,
           enabled: true,
           scope: [],
           verification: {
