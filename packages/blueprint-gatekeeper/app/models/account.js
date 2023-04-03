@@ -50,7 +50,7 @@ let definition = {
   enabled: { type: Boolean, required: true, default: true },
 
   /// The client used to create the account.
-  created_by: refersTo (Client),
+  created_by: refersTo (Client, { index: true }),
 
   /// The default scope for the account. This is applied to the access
   /// token for the account.
