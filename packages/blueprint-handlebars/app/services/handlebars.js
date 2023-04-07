@@ -49,8 +49,9 @@ module.exports = Service.extend ({
    * @param path
    * @returns {*}
    */
-  async compile (path) {
-    return this._templateCompiler.compile (path);
+  async compile (name) {
+    const filename = path.isAbsolute (name) ? name : path.resolve (this.handlebarsPath, "templates", name);
+    return this._templateCompiler.compile (filename);
   },
 
   /**
