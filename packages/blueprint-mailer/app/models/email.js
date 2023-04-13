@@ -37,7 +37,12 @@ const schema = new Schema ({
   subject: { type: String },
 
   /// The error message associated with the email.
-  error_message: { type: String }
+  error_message: { type: String },
+
+  /// The delivery results for the email.
+  delivery: {
+    
+  }
 }, options);
 
 module.exports = mongodb.resource ('email', schema);

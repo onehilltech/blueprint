@@ -167,8 +167,21 @@ module.exports = Service.extend ({
     const result = await this._email.send (opts);
 
     // Create a document for the sent email.
-    const { messageId, originalMessage: { subject, to, from, cc, bcc } } = result;
-    return this.Email.create ({ message_id: messageId, type: template, to, from, cc, bcc, subject });
+    const { messageId, originalMessage: { subject, to, from, cc, bcc }, accepted, rejected, pending } = result;
+    return this.Email.create ({
+      message_id: messageId,
+      type: template,
+      to,
+      from,
+      cc,
+      bcc,
+      subject,
+      delivery: {
+        accepted,
+        rejected,
+        pending
+      }
+    });
   },
 
   /**
