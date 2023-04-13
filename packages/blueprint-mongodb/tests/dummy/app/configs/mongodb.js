@@ -28,9 +28,7 @@ module.exports = {
         forceServerObjectId: false,
         writeConcern: {
           w: 1,
-        },
-        keepAlive: 1,
-        poolSize: 5,
+        }
       }
     },
 
@@ -44,9 +42,7 @@ module.exports = {
         forceServerObjectId: false,
         writeConcern: {
           w: 1,
-        },
-        keepAlive: 1,
-        poolSize: 5,
+        }
       }
     }
   }

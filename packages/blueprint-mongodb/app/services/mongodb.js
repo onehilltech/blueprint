@@ -27,11 +27,6 @@ const SEEDS_RELATIVE_PATH = 'seeds/mongodb';
 
 mongoose.Promise = Promise;
 
-// Fix deprecation warnings.
-mongoose.set ('useFindAndModify', false);
-mongoose.set ('useNewUrlParser', true);
-mongoose.set ('useCreateIndex', true);
-
 const Connection = require ('../../lib/connection');
 const Store = require ('../../lib/seed/store');
 

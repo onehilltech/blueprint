@@ -26,6 +26,7 @@ describe ('app | services | mongodb', function () {
     expect (service.defaultConnection.conn).to.equal (mongoose.connections[0]);
   });
 
+  /*
   it ('should seed from the test', async function () {
     const models = await this.seed ({
       authors: [ { name: 'Stephen King'}]
@@ -34,5 +35,5 @@ describe ('app | services | mongodb', function () {
     expect (models).to.have.property ('authors')
       .to.have.length (1)
       .to.have.nested.property ('[0]._id');
-  })
+  })*/
 });

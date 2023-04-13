@@ -17,7 +17,7 @@
 const pluralize = require ('pluralize');
 const assert = require ('assert');
 
-const { extend, forOwn, isEmpty } = require ('lodash');
+const { extend, forOwn, isEmpty, pick } = require ('lodash');
 
 const blueprint = require ('@onehilltech/blueprint');
 
@@ -34,6 +34,20 @@ const validation = require ('./validation');
 const populateHelper = require ('./populate');
 
 const LAST_MODIFIED = 'Last-Modified';
+
+const FIND_OPTIONS = [
+  'tailable',
+  'sort',
+  'limit',
+  'skip',
+  'allowDiskUse',
+  'batchSize',
+  'readPreference',
+  'hint',
+  'comment',
+  'snapshot',
+  'maxscan',
+];
 
 /**
  * Create the schema for validating the resource id.
@@ -372,14 +386,15 @@ exports = module.exports = ResourceController.extend ({
         return null;
       },
 
-      getModels (req, filter, projection, options) {
+      getModels (req, filter, projection, options = {}) {
         const directives = req.query._ || {};
         const { deleted } = directives;
 
         if (!deleted && this.controller._softDelete)
           filter['_stat.deleted_at'] = {$exists: false};
 
-        return this.controller.Model.find (filter, projection, options);
+        const opts = pick (options, FIND_OPTIONS);
+        return this.controller.Model.find (filter, projection, opts);
       },
 
       postGetModels (req, models) {
@@ -425,7 +440,10 @@ exports = module.exports = ResourceController.extend ({
         return Promise.all (preparations)
           .then (([id, projection, options]) => {
             return Promise.resolve (this.preGetModel (req))
-              .then (() => this.getModel (req, id, projection, options))
+              .then (() => {
+                const opts = pick (options, FIND_OPTIONS);
+                return this.getModel (req, id, projection, opts);
+              })
               .then (model => {
                 // There was nothing found. This is not the same as having an empty
                 // model set returned from the query.
@@ -469,13 +487,15 @@ exports = module.exports = ResourceController.extend ({
         return null;
       },
 
-      getModel (req, id, projection, options) {
+      getModel (req, id, projection, options = {}) {
+        const opts = pick (options, FIND_OPTIONS);
+
         if (this.controller._softDelete) {
           const selection = { _id: id, '_stat.deleted_at': { $exists: false }};
-          return this.controller.Model.findOne (selection, projection, options);
+          return this.controller.Model.findOne (selection, projection, opts);
         }
         else {
-          return this.controller.Model.findById (id, projection, options);
+          return this.controller.Model.findById (id, projection, opts);
         }
       },
 
@@ -587,13 +607,15 @@ exports = module.exports = ResourceController.extend ({
         return null;
       },
 
-      updateModel (req, id, update, options) {
+      updateModel (req, id, update, options = {}) {
+        const opts = Object.assign (pick (options, FIND_OPTIONS), { new: true });
+
         if (this.controller._softDelete) {
           const selection = { _id: id, '_stat.deleted_at': {$exists: false}};
-          return this.controller.Model.findOneAndUpdate (selection, update, options);
+          return this.controller.Model.findOneAndUpdate (selection, update, opts);
         }
         else {
-          return this.controller.Model.findByIdAndUpdate (id, update, options);
+          return this.controller.Model.findByIdAndUpdate (id, update, opts);
         }
       },
 
@@ -861,7 +883,8 @@ exports = module.exports = ResourceController.extend ({
         if (!deleted && this.controller._softDelete)
           query['_stat.deleted_at'] = {$exists: false};
 
-        return this.controller.Model.find (query, projection, options);
+        const opts = pick (options, FIND_OPTIONS);
+        return this.controller.Model.find (query, projection, opts);
       },
 
       postGetModels (req, models) {

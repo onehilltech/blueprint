@@ -58,7 +58,7 @@ const {
  */
 const TranslateErrorMixin = Mixin.create ({
   _translateError (err) {
-    if (err.message.startsWith ('FileNotFound:')) {
+    if (err.message.startsWith ('File not found')) {
       return Promise.reject (new HttpError (404, 'not_found', 'The resource does not exist.'));
     }
     else {

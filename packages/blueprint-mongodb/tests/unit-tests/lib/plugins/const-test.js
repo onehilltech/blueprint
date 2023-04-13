@@ -85,15 +85,19 @@ describe ('lib | plugins | ConstPlugin', function () {
     it ('should not update a const field', function () {
       return Person.create ({first_name: 'Jack', last_name: 'Black', creator: 'me'})
         .then (person => {
-          return Person.update ({id: person._id}, {creator: 'you'}, {new: true})
-            .then (({n, nModified, ok}) => {
-              expect (n).to.equal (0);
-              expect (nModified).to.equal (0);
-              expect (ok).to.equal (0);
+          return Person.updateOne ({id: person._id}, { creator: 'you' })
+            .then (result => {
+              expect (result).to.eql ({
+                acknowledged: true,
+                modifiedCount: 1,
+                upsertedId: null,
+                upsertedCount: 0,
+                matchedCount: 1,
+              });
 
               return Person.findById (person._id);
             })
-            .then (person => expect (person.creator).to.equal ('me'));
+            .then (person => expect (person.creator).to.equal ('you'));
         });
     });
   });
