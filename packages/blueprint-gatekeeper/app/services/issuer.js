@@ -116,7 +116,10 @@ const Issuer = BlueprintObject.extend ({
    */
   verifyRefreshToken (token, opts) {
     return this.tokenGenerator.verifyToken (token, opts)
-      .then (payload => this.AccessToken.findOne ({refresh_token: new ObjectId (payload.jti)}).populate ('client account').exec ())
+      .then (payload => {
+        const { db: { models: { user_token: UserToken }}} = this.AccessToken;
+        return UserToken.findOne ({ refresh_token: payload.jti }).populate ('client account').exec ();
+      })
       .then (accessToken => this._checkAccessToken (accessToken, opts))
       .catch (this._handleTokenError.bind (this));
   },
