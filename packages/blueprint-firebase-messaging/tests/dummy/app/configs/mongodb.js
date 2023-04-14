@@ -26,10 +26,7 @@ module.exports = {
         forceServerObjectId: false,
         useNewUrlParser: true,
         useUnifiedTopology: true,
-        useFindAndModify: false,
-        useCreateIndex: true,
-        keepAlive: 1,
-        poolSize: 5,
+        keepAlive: true
       }
     }
   }

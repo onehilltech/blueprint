@@ -18,23 +18,34 @@ const debug = require ('debug')('blueprint-testing:bootstrap');
 const blueprint = require ('@onehilltech/blueprint');
 
 module.exports = function (appPath) {
-  before (function () {
+  before (async function () {
     debug (`creating application: ${appPath}`);
-    return blueprint.createApplicationAndStart (appPath);
+
+    // Create and start the application.
+    await blueprint.createApplicationAndStart (appPath);
+    this.app = blueprint.app;
+
+    // Notify all we are are beginning the testing process.
+    await this.app.emit ('blueprint.test.begin');
   });
 
-  beforeEach (function () {
+  beforeEach (async function () {
     debug ('starting a new test');
-    return blueprint.emit ('blueprint.test.start')
+
+    await this.app.emit ('blueprint.test.start');
   });
 
-  afterEach (function () {
+  afterEach (async function () {
     debug ('ending the test');
-    return blueprint.emit ('blueprint.test.complete');
+
+    await this.app.emit ('blueprint.test.complete');
   });
 
-  after (function () {
+  after (async function () {
     debug (`destroying application: ${appPath}`);
-    return blueprint.destroyApplication ();
+
+    // Notify all we are are ending the testing process.
+    await this.app.emit ('blueprint.test.end');
+    await this.app.destroy ();
   });
 };
