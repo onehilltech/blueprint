@@ -70,7 +70,7 @@ module.exports = class Connection {
     }
 
     if (version)
-      await this.migrate (version);
+      await this.migrate ();
 
     return this;
   }
@@ -96,15 +96,16 @@ module.exports = class Connection {
    */
   async reset (config = {}) {
     const merged = merge ({}, this.config, config);
-    let { version, seed, models } = merged;
+    const { version, seed, models } = merged;
+    let results = {};
 
     if (seed || models)
-      models = await this.seed ( { clear: [], grow: !!seed, models });
+      results = await this.seed ( { clear: [], grow: !!seed, models });
 
     if (version)
       await this.migrate (version);
 
-    return { models };
+    return results;
   }
 
   /**
@@ -136,7 +137,7 @@ module.exports = class Connection {
     const planter = Store.getInstance ().planters[this.name];
 
     if (!planter)
-      return;
+      return {};
 
     // Clear the database connection.
     await planter.clear (this.conn, clear);

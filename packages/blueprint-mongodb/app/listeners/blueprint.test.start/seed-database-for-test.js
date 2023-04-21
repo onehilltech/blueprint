@@ -45,8 +45,8 @@ module.exports = Listener.extend ({
         await connection.reset ({ seed: false, version: false, models: rawModels });
       }
       else {
-        const { models } = await connection.reset ({ seed: true, version: true });
-        this._data[connection.name] = mapValues (models, (collection) => collection.map (model => model.toObject ()));
+        const results = await connection.reset ({ seed: true, version: true });
+        this._data[connection.name] = results.data;
       }
     }
   },

@@ -61,13 +61,8 @@ module.exports = class Planter {
     await this.seed.afterModel (supported);
 
     // Seed the connection with the models.
-    try {
-      this.models = await seed (conn, supported, { backend, resolved: true });
-    }
-    catch (err) {
-      console.error (err);
-    }
+    this.models = await seed (conn, supported, { backend, resolved: true });
 
-    return this.models;
+    return { data: supported, models: this.models };
   }
 };
