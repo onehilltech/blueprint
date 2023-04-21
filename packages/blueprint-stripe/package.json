@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-stripe",
   "description": "Blueprint module for Stripe.",
-  "version": "4.72.0",
+  "version": "4.72.1",
   "private": false,
   "main": "./lib",
   "repository": "onehilltech/blueprint",
@@ -11,7 +11,7 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
-    "@onehilltech/blueprint-mongodb": "^4.72.0",
+    "@onehilltech/blueprint-mongodb": "^4.72.1",
     "stripe": "^11.8.0"
   },
   "devDependencies": {
