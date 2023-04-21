@@ -102,7 +102,7 @@ describe ('lib | GridFSController', function () {
         });
     });
 
-    it.only ('should not delete the image again', function () {
+    it ('should not delete the image again', function () {
       let imageFile = path.resolve ('./tests/data/avatar1.png');
 
       return request ()

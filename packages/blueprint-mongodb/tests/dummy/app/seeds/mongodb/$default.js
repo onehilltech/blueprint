@@ -19,6 +19,8 @@ const { Seed } = require ('../../../../../lib');
 
 module.exports = Seed.extend ({
   model () {
+    console.log ('creating the seed model');
+
     return {
       __mongodb: [
         { _id: id ('619b0a46c8d6ae7eefd9665e'), version: 1}

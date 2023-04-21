@@ -182,10 +182,9 @@ module.exports = Service.extend ({
   /**
    * Seed all the database connections.
    *
-   * @param clear         Clear the database before seeding
-   * @returns {*}
+   * @param options         Clear the database before seeding
    */
-  async resetConnections () {
-    return props (mapValues (this.connections, conn => conn.reset ()))
+  async resetConnections (options) {
+    return props (mapValues (this.connections, conn => conn.reset (options)))
   }
 });

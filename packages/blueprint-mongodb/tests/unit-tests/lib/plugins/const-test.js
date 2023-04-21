@@ -82,23 +82,14 @@ describe ('lib | plugins | ConstPlugin', function () {
   });
 
   describe ('update', function () {
-    it ('should not update a const field', function () {
-      return Person.create ({first_name: 'Jack', last_name: 'Black', creator: 'me'})
-        .then (person => {
-          return Person.updateOne ({id: person._id}, { creator: 'you' })
-            .then (result => {
-              expect (result).to.eql ({
-                acknowledged: true,
-                modifiedCount: 1,
-                upsertedId: null,
-                upsertedCount: 0,
-                matchedCount: 1,
-              });
+    it ('should not update a const field', async function () {
+      const person = await Person.create ({first_name: 'Jack', last_name: 'Black', creator: 'me'});
+      const result = await Person.updateOne ({id: person._id}, { creator: 'you' });
 
-              return Person.findById (person._id);
-            })
-            .then (person => expect (person.creator).to.equal ('you'));
-        });
+      expect (result).to.eql ({ acknowledged: false });
+
+      const actual = await Person.findById (person._id);
+      expect (actual.creator).to.equal ('me');
     });
   });
 });

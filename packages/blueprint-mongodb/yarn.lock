@@ -739,10 +739,10 @@
     "handlebars" "^4.0.11"
     "lodash" "^4.17.10"
 
-"@onehilltech/blueprint-testing@^4.65.19":
-  "integrity" "sha512-ijPFskGmBJHrm7O6MAPRMSB/kCLp6WxDgTgwGKM791K1YTRVUgvAQJewERQGrIul8E+0OegCeiZlPAL4rvC+CA=="
-  "resolved" "https://registry.npmjs.org/@onehilltech/blueprint-testing/-/blueprint-testing-4.65.19.tgz"
-  "version" "4.65.19"
+"@onehilltech/blueprint-testing@^4.71.0":
+  "integrity" "sha512-JblSdEjHtTzabjKStbKHzaKIeSIGdKe/ZvuqtPaYFCY8sv282S2riuH7DzrryM2LX0fjJV+fUTDViVNqy6nwWw=="
+  "resolved" "https://registry.npmjs.org/@onehilltech/blueprint-testing/-/blueprint-testing-4.71.0.tgz"
+  "version" "4.71.0"
   dependencies:
     "chai" "^4.3.6"
     "chai-datetime" "^1.8.0"

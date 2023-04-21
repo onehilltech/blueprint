@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { pickBy } = require ('lodash');
+const { pickBy, forOwn } = require ('lodash');
 const { seed, build, clear } = require ('@onehilltech/dab');
 const backend = require ('@onehilltech/dab-mongodb');
 
@@ -42,23 +42,31 @@ module.exports = class Planter {
   /**
    * Grow the seed that is in the planter.
    */
-  async grow (conn) {
+  async grow (conn, options = {}) {
+    const { grow = true, models } = options;
+
     // Reset the seed.
     await this.seed.reset ();
 
-    // Inform the seed we are about to request its model.
+    // Inform the seed we are about to request its model, then get the model.
     await this.seed.beforeModel ();
+    const results = grow ? await this.seed.model () : {};
 
-    // Get the model from the seed.
-    const model = await this.seed.model ();
+    // Merge the additional models into the seed.
+    forOwn (models, (value, key) => results[key] = (results[key] || []).concat (value));
 
-    // Prune the models that we do not support on this connection.
-    const rawModels = await build (pickBy (model, (definition, name) => backend.supports (conn, name)), { backend });
-
-    await this.seed.afterModel (rawModels);
+    // Prune the models that we do not support on this connection. Then, let
+    // the seed do any post processing of the supported models.
+    const supported = await build (pickBy (results, (definition, name) => backend.supports (conn, name)), { backend });
+    await this.seed.afterModel (supported);
 
     // Seed the connection with the models.
-    this.models = await seed (conn, rawModels, { backend });
+    try {
+      this.models = await seed (conn, supported, { backend, resolved: true });
+    }
+    catch (err) {
+      console.error (err);
+    }
 
     return this.models;
   }

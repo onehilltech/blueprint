@@ -96,15 +96,15 @@ module.exports = class Connection {
    */
   async reset (config = {}) {
     const merged = merge ({}, this.config, config);
-    const { version, seed } = merged;
+    let { version, seed, models } = merged;
 
-    if (seed)
-      await this.seed ();
+    if (seed || models)
+      models = await this.seed ( { clear: [], grow: !!seed, models });
 
     if (version)
       await this.migrate (version);
 
-    return this;
+    return { models };
   }
 
   /**
@@ -121,10 +121,11 @@ module.exports = class Connection {
   /**
    * Seed the database connection with the specified data.
    *
-   * @param clear
+   * @param options         Seeding options
    */
-  async seed (clear = []) {
+  async seed (options = {}) {
     debug (`[${this.name}]: seeding database connection`);
+    let { clear = [], grow = true, models } = options;
 
     if (!!clear && clear === true)
       clear = [];
@@ -141,7 +142,7 @@ module.exports = class Connection {
     await planter.clear (this.conn, clear);
 
     // Grow the seed inside the planter.
-    return planter.grow (this.conn);
+    return planter.grow (this.conn, { grow, models });
   }
 
   /**
@@ -204,7 +205,12 @@ module.exports = class Connection {
       return downgrade (next, to);
     }
 
-    const schema = await this.conn.models.__mongodb.findById (MONGODB_SCHEMA_ID);
+    const { models: { __mongodb }} = this.conn;
+
+    if (!__mongodb)
+      return null;
+
+    const schema = await __mongodb.findById (MONGODB_SCHEMA_ID);
 
     if (!!schema) {
       const migrate = async () => {

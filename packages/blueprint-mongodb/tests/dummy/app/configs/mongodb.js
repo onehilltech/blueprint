@@ -17,7 +17,7 @@
 module.exports = {
   connections: {
     $default: {
-      uri: 'mongodb://localhost/blueprint_mongodb',
+      uri: 'mongodb://localhost/blueprint_mongodb_test',
       version: 3,
       seed: true,
 
@@ -33,7 +33,7 @@ module.exports = {
     },
 
     secondary : {
-      uri: 'mongodb://localhost/blueprint_mongodb',
+      uri: 'mongodb://localhost/blueprint_mongodb_test',
       seed: false,
       options : {
         useUnifiedTopology: true,

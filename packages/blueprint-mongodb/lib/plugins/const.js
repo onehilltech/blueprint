@@ -35,6 +35,10 @@ function ConstSchema (schema) {
   });
 }
 
+ConstSchema.prototype.required = function( ) {
+  return this._schema.required.apply (this._schema, arguments);
+};
+
 ConstSchema.prototype.validate = function( ) {
   return this._schema.validate.apply (this._schema, arguments);
 };
@@ -49,6 +53,10 @@ ConstSchema.prototype.applySetters = function (value, scope, init, priorVal, opt
 
 ConstSchema.prototype.applyGetters = function () {
   return this._schema.applyGetters.apply (this._schema, arguments);
+};
+
+ConstSchema.prototype.select = function( ) {
+  return this._schema.select.apply (this._schema, arguments);
 };
 
 ConstSchema.prototype.doValidate = function() {
@@ -67,17 +75,22 @@ ConstSchema.prototype.castForQuery = function() {
   return this._schema.castForQuery.apply (this._schema, arguments);
 };
 
-ConstSchema.prototype.checkRequired = function() {
-  return this._schema.checkRequired.apply (this._schema, arguments);
-};
-
 ConstSchema.prototype.castForQueryWrapper = function () {
   return this._schema.castForQueryWrapper.apply (this._schema, arguments);
+};
+
+ConstSchema.prototype.checkRequired = function() {
+  return this._schema.checkRequired.apply (this._schema, arguments);
 };
 
 ConstSchema.prototype.splitPath = function () {
   return this._schema.splitPath.apply (this._schema, arguments);
 };
+
+ConstSchema.prototype.clone = function () {
+  return this._schema.clone.apply (this._schema, arguments);
+};
+
 
 /**
  * Plugin that allows you to specify what fields are marked as constant. This
@@ -130,7 +143,7 @@ function ConstPlugin (schema) {
   // Middleware hooks for updating the document. When the document is
   // updated, we make sure to update the "updated_at" path.
   schema.pre ('findOneAndUpdate', onUpdate);
-  schema.pre ('update', onUpdate);
+  schema.pre ('updateOne', onUpdate);
 
   // Define some helper methods.
 
