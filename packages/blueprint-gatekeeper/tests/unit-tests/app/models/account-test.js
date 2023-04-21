@@ -79,13 +79,12 @@ describe ('app | models | account', function () {
   });
 
   describe ('authenticate', function () {
-    it ('should authenticate an account', function () {
-      let Account = blueprint.lookup ('model:account');
-      let {accounts} = seed ('$default');
+    it ('should authenticate an account', async function () {
+      const Account = this.app.lookup ('model:account');
+      const { accounts } = seed ();
 
-      return Account.authenticate ('account1', 'account1').then (account => {
-        expect (account._id).to.eql (accounts[0]._id);
-      });
+      const account = await Account.authenticate ('account1', 'account1');
+      expect (account._id).to.eql (accounts[0]._id);
     });
 
     it ('should not find the account', function () {

@@ -21,7 +21,7 @@ const {expect} = require ('chai');
 describe ('app | models | access-token', function () {
   describe ('create', function () {
     it ('should create an access token', function () {
-      const {native} = seed ('$default');
+      const { native } = seed ('$default');
       const AccessToken = blueprint.lookup ('model:access-token');
 
       let accessToken = new AccessToken ({
