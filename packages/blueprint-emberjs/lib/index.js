@@ -17,4 +17,5 @@
 module.exports = exports = {};
 
 exports.EmberApp = require ('./ember-app');
+exports.EmberRouter = require ('./ember-router');
 exports.EmberAppAction = require ('./ember-app-action');
