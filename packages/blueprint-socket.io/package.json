@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-socket.io",
   "description": "Socket.io module for Blueprint",
-  "version": "4.71.0",
+  "version": "4.74.1",
   "private": false,
   "main": "./lib",
   "repository": "onehilltech/blueprint",
@@ -11,7 +11,7 @@
     "coveralls": "env NODE_ENV=test istanbul cover _mocha --exit --report lcovonly -- tests/unit-tests --recursive && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "dependencies": {
-    "@onehilltech/blueprint": "^4.67.0",
+    "@onehilltech/blueprint": "^4.74.1",
     "socket.io": "^4.4.1"
   },
   "devDependencies": {
