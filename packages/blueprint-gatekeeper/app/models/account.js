@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const bcrypt  = require ('bcrypt');
+const bcrypt  = require ('bcryptjs');
 const mongodb = require ('@onehilltech/blueprint-mongodb');
 const { Schema: { Types: { refersTo }}} = mongodb;
 
