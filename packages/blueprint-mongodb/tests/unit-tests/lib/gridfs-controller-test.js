@@ -9,49 +9,53 @@ const {
   }
 } = require ('mongoose');
 
-describe ('lib | GridFSController', function () {
-  beforeEach (function () {
-    let imageController = blueprint.lookup ('controller:image');
+const imageFile1 = path.resolve ('./tests/data/avatar1.png');
+const imageFile2 = path.resolve ('./tests/data/avatar2.png');
 
-    return imageController.drop ().catch (err => {
+describe ('lib | GridFSController', function () {
+  beforeEach (async function () {
+    const imageController = blueprint.lookup ('controller:image');
+
+    try {
+      await imageController.drop ();
+    }
+    catch (err) {
       if (err.code === 26)
         return null;
 
-      return Promise.reject (err);
-    });
+      throw err;
+    }
   });
 
   describe ('create', function () {
-    it ('should upload file, and store in database', function () {
-      let imageFile = path.resolve ('./tests/data/avatar1.png');
+    it ('should upload file, and store in database', async function () {
 
-      return request ()
+      const res = await request ()
         .post ('/images')
-        .attach ('image', imageFile)
-        .expect (200)
-        .then (res => {
-          expect (res.body).to.have.keys (['image']);
-          expect (res.body.image).to.have.keys ('_id');
-        });
+        .attach ('image', imageFile1)
+        .expect (200);
+
+      expect (res.body).to.have.keys (['image']);
+      expect (res.body.image).to.have.keys ('_id');
     });
   });
 
-  describe ('getOne', function () {
-    it ('should get the image from the database', function () {
-      let imageFile = path.resolve ('./tests/data/avatar1.png');
+  describe ('getOne', async function () {
+    it ('should get the image from the database', async function () {
+      this.timeout (10000);
 
-      return request ()
+      const res1 = await request ()
         .post ('/images')
-        .attach ('image', imageFile)
-        .expect (200).then (res => {
-          const imageId = res.body.image._id;
+        .attach ('image', imageFile1)
+        .expect (200);
 
-          return request ()
-            .get (`/images/${imageId}`)
-            .expect (200).then (res => {
-              expect (res.type).to.equal ('image/png');
-            });
-        });
+      const { image: { _id: imageId }} = res1.body;
+
+      const res2 = await request ()
+        .get (`/images/${imageId}`)
+        .expect (200);
+
+      expect (res2.type).to.equal ('image/png');
     });
 
     it ('should not find the image', function () {
@@ -77,22 +81,21 @@ describe ('lib | GridFSController', function () {
   describe ('update', function () {
     it ('should not update the image', function (done) {
       const id = new ObjectId ();
-      const imageFile = path.resolve ('./tests/data/avatar2.png');
 
       request ()
         .put (`/images/${id}`)
-        .attach ('image', imageFile)
+        .attach ('image', imageFile2)
         .expect (404, done);
     });
   });
 
   describe ('delete', function () {
-    it ('should delete the image from the database', function () {
-      let imageFile = path.resolve ('./tests/data/avatar1.png');
+    this.timeout (10000);
 
+    it ('should delete the image from the database', function () {
       return request ()
         .post ('/images')
-        .attach ('image', imageFile)
+        .attach ('image', imageFile1)
         .then ((res) => {
           const imageId = res.body.image._id;
 
@@ -103,11 +106,9 @@ describe ('lib | GridFSController', function () {
     });
 
     it ('should not delete the image again', function () {
-      let imageFile = path.resolve ('./tests/data/avatar1.png');
-
       return request ()
         .post ('/images')
-        .attach ('image', imageFile)
+        .attach ('image', imageFile1)
         .expect (200)
         .then ((res) => {
           const imageId = res.body.image._id;

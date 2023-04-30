@@ -161,30 +161,32 @@ module.exports = ResourceController.extend ({
         this._write = this.storageType === 'memory' ? this._writeBuffer : this._writeFile;
       },
 
-      onUploadComplete (req, res) {
-        let options = { contentType: req.file.mimetype};
-        let metadata = {};
+      async onUploadComplete (req, res) {
+        // Prepare the options and metadata for insertion into the database.
+        const [options, metadata] = await Promise.all ([
+          this.prepareOptions (req, { contentType: req.file.mimetype}),
+          this.prepareMetadata (req, {  })
+        ]);
 
-        let promises = [
-          this.prepareOptions (req, options),
-          this.prepareMetadata (req, metadata)
-        ];
+        if (Object.keys (metadata).length !== 0)
+          options.metadata = metadata;
 
-        return Promise.all (promises)
-          .then (([options, metadata]) => {
-            return Promise.resolve (this.preWriteUpload (req))
-              .then (() => {
-                if (Object.keys (metadata).length !== 0)
-                  options.metadata = metadata;
+        // Notify the subclass we are about to upload the data. This gives the subclass
+        // to make any last minute changes, or do some pre-write processing.
+        await this.preWriteUpload (req, options);
 
-                let upload = this.controller.bucket.openUploadStream (req.file.originalname, options);
+        // Open the upload stream to the uploaded file. Then let the subclass perform
+        // the write operation for us.
+        const upload = this.controller.bucket.openUploadStream (req.file.originalname, options);
 
-                return this._write (req, upload)
-                  .then (() => this.postWriteUpload (req))
-                  .then (() => this.prepareResponse (res, {[this.controller.name]: {_id: upload.id}}))
-                  .then (response => res.status (200).json (response));
-              });
-          });
+        await this._write (req, upload);
+
+        // Notify the subclass we are done with the write operation. The subclass then
+        // has the option to prepare the response for the caller.
+        await this.postWriteUpload (req);
+        const result = await this.prepareResponse (res, {[this.controller.name]: {_id: upload.id}});
+
+        return res.status (200).json (result);
       },
 
       prepareOptions (req, options) {
