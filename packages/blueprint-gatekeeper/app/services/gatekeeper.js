@@ -18,6 +18,7 @@ const { Service, model, computed } = require ('@onehilltech/blueprint');
 const { get, forOwn, merge, transform } = require ('lodash');
 const Email = require ('email-templates');
 const path = require ('path');
+const cors = require ('../../lib/cors');
 
 const TokenGenerator = require ('../../lib/token-generator');
 
@@ -93,6 +94,10 @@ module.exports = Service.extend ({
 
     this._configureEmail (gatekeeper);
   },
+
+  cors: computed ({
+    get () { return cors }
+  }),
 
   /**
    * Configure the email service for the module.

@@ -15,18 +15,20 @@
  */
 
 const blueprint = require ('@onehilltech/blueprint');
-const { Service } = blueprint;
+const { Service, service } = blueprint;
 const { mapValues } = require ('lodash');
 
 const { Server: SocketIO } = require("socket.io");
 const debug = require ('debug')('blueprint-socket.io:service:io');
-const { cors } = require ('@onehilltech/blueprint-gatekeeper');
 
 /**
  * The service that manages connections for SocketIO.
  */
 module.exports = Service.extend ({
   _connections: {},
+
+  // Reference to the gatekeeper service for configuring CORS.
+  gatekeeper: service (),
 
   configure () {
     debug ('configuring the io service');
@@ -40,7 +42,8 @@ module.exports = Service.extend ({
       debug (`opening Socket.IO connection on ${name}`);
 
       // Make a new Socket IO instance.
-      const io = new SocketIO (server, { cors: cors.delegate () });
+      const options = { cors: this.gatekeeper.cors.delegate () };
+      const io = new SocketIO (server, options);
 
       // Listen for connections on this instance.
       io.on ('connection', socket => this._connection (name, socket));
