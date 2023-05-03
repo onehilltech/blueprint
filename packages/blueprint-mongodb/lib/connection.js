@@ -70,7 +70,7 @@ module.exports = class Connection {
     }
 
     if (version)
-      await this.migrate ();
+      await this.migrate (version);
 
     return this;
   }
