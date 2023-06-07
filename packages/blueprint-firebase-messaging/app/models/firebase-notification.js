@@ -41,4 +41,4 @@ let schema = new mongodb.Schema ({
   data: {},
 }, options);
 
-module.exports = mongodb.resource ('notification', schema, 'firebase_notifications');
+module.exports = mongodb.resource ('firebase-notification', schema, 'firebase_notifications');

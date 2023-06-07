@@ -37,4 +37,4 @@ let schema = new mongodb.Schema ({
   token: { type: String, required: true, unique: true },
 }, options);
 
-module.exports = mongodb.resource ('device', schema, 'firebase_devices');
+module.exports = mongodb.resource ('firebase-device', schema, 'firebase_devices');
