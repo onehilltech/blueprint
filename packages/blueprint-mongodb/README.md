@@ -356,3 +356,34 @@ where env is the expected value of `NODE_ENV`. For example, place the seed in `a
 if you want to seed the `NODE_ENV=development` environment, which is the default environment if nothing is 
 specified. Likewise, place the seed in `app/seeds/mongodb/test` if you want to seed the `NODE_ENV=test` 
 environment.
+
+### Test-specific database seeds
+
+It is possible to seed the database for individual unit tests. This is useful when you have data
+for a specific test case that does not belong in a general (global) seed. We use the `beforeEach()`
+hook and `seed()` method that is available on the `Context` in mocha.
+
+> The `seed()` method is added automatically to the `Context` by `blueprint-mongodb`.
+
+Here is an example of a mocha unit test where we include a test-specific seed.
+
+```javascript
+describe ('unit test', function () {
+  beforeEach (async function () {
+    // Apply the following seed before each test, and store it in the context
+    // for the unit test
+
+    this.models = await this.seed ({
+      // this is a dab seed
+    });
+  });
+
+  it ('unit test', async function () {
+    // Get the models from the context. You can use destructure assignment to get
+    // individual properties from the model
+
+    const models = this.models;
+  });
+});
+```
+
