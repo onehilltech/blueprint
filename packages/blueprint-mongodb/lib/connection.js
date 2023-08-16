@@ -103,7 +103,7 @@ module.exports = class Connection {
       results = await this.seed ( { clear: [], grow: !!seed, models });
 
     if (version)
-      await this.migrate ();
+      await this.migrate (version);
 
     return results;
   }
