@@ -45,7 +45,7 @@ module.exports = Listener.extend ({
         await connection.reset ({ seed: false, version: false, models: rawModels });
       }
       else {
-        const results = await connection.reset ({ seed: true, version: true });
+        const results = await connection.reset ({ seed: true });
         this._data[connection.name] = results.data;
       }
     }
