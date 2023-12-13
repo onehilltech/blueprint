@@ -250,7 +250,7 @@ exports = module.exports = ResourceController.extend ({
           // Initialize the result with the data. We are now going to give the
           // subclass a chance to add more content to the response.
           .then (data => this.prepareResponse (req, res, { [name]: data }))
-          .then (result => res.status (200).json (result));
+          .then (result => res.status (this.getStatusCode (req, result)).json (result));
       },
 
       prepareDocument (req, doc) {
@@ -272,6 +272,10 @@ exports = module.exports = ResourceController.extend ({
 
       prepareResponse (req, res, result) {
         return result;
+      },
+
+      getStatusCode (req, result) {
+        return 200;
       }
     });
   },
@@ -568,7 +572,7 @@ exports = module.exports = ResourceController.extend ({
               return this.postUpdateModel (req, model);
             })
             .then (model => this.prepareResponse (req, res, {[this.controller.name]: model}))
-            .then (result => res.status (200).json (result));
+            .then (result => res.status (this.getStatusCode (res, result)).json (result));
         });
       },
 
@@ -640,6 +644,10 @@ exports = module.exports = ResourceController.extend ({
        */
       prepareResponse (req, res, data) {
         return data;
+      },
+
+      getStatusCode (req, result) {
+        return 200;
       }
     });
   },
