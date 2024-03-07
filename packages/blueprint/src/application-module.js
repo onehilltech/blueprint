@@ -51,23 +51,23 @@ module.exports = class ApplicationModule {
     return path.resolve (this.appPath, '..');
   }
 
-  get assetsPath () {
-    return path.resolve (this.modulePath, 'assets')
+  get resourcePath () {
+    return path.resolve (this.modulePath, 'resources')
   }
 
   /**
    * Read an application module asset.
    */
-  async asset (filename, opts) {
-    const fullPath = path.resolve (this.assetsPath, filename);
+  async resource (filename, opts) {
+    const fullPath = path.resolve (this.resourcePath, filename);
     return readFile (fullPath, opts);
   }
 
   /**
    * Synchronously read an application module asset.
    */
-  assetSync (filename, opts) {
-    const fullPath = path.resolve (this.assetsPath, filename);
+  resourceSync (filename, opts) {
+    const fullPath = path.resolve (this.resourcePath, filename);
     return readFileSync (fullPath, opts);
   }
 }

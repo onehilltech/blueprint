@@ -347,8 +347,8 @@ class Application {
    * @param callback
    * @returns {*}
    */
-  asset (filename, opts) {
-    return this._appModule.asset (filename, opts);
+  resource (filename, opts) {
+    return this._appModule.resource (filename, opts);
   }
 
   /**
@@ -358,8 +358,8 @@ class Application {
    * @param opts
    * @return {*}
    */
-  assetSync (filename, opts) {
-    return this._appModule.assetSync (filename, opts);
+  resourceSync (filename, opts) {
+    return this._appModule.resourceSync (filename, opts);
   }
 
   /**

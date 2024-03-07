@@ -22,15 +22,15 @@ describe ('lib | ApplicationModule', function () {
   describe ('assetPath', function () {
     it ('should define the path for the module assets', function () {
       const mod_b = blueprint.app.modules['mod_b'];
-      const assetsPath = path.resolve (mod_b.modulePath, 'assets');
+      const resourcePath = path.resolve (mod_b.modulePath, 'resources');
 
-      expect (mod_b.assetsPath).to.equal (assetsPath);
+      expect (mod_b.resourcePath).to.equal (resourcePath);
     });
   });
 
   describe ('asset', function () {
     it ('should read an asset from the application module', async function () {
-      const asset = await blueprint.app.modules['mod_a'].asset ('helloworld.txt');
+      const asset = await blueprint.app.modules['mod_a'].resource ('helloworld.txt');
       expect (asset.toString ()).to.equal ('Hello, World!');
     })
   });

@@ -25,8 +25,8 @@ module.exports = {
       port: 8443,
       protocol: 'https',
       options : {
-        key  : blueprint.assetSync ('ssl/dummy.key'),
-        cert : blueprint.assetSync ('ssl/dummy.crt')
+        //key  : blueprint.assetSync ('ssl/dummy.key'),
+        //cert : blueprint.assetSync ('ssl/dummy.crt')
       }
     }
   },
