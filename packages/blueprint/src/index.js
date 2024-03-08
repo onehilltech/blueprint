@@ -28,6 +28,16 @@ const { AsyncListener, Listener, Events } = require ('./messaging');
 exports.Loader = require ('./loader');
 exports.Service = require ('./service');
 
+// registry classes
+
+const { SimpleFactory, simpleFactory, SingletonFactory, singletonFactory } = require ('./factory');
+
+exports.SimpleFactory = SimpleFactory;
+exports.simpleFactory = simpleFactory;
+
+exports.SingletonFactory = SingletonFactory;
+exports.singletonFactory = singletonFactory;
+
 // message framework classes
 exports.AsyncListener = AsyncListener;
 exports.Listener = Listener;
@@ -39,3 +49,4 @@ exports.BlueprintError = require ('./error');
 
 exports.resource = require ('./decorators/resource');
 exports.service = require ('./decorators/service');
+exports.model = require ('./decorators/model');

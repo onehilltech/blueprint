@@ -14,27 +14,6 @@
  * limitations under the License.
  */
 
-const blueprint = require ('../../../../lib');
+const resource = require ('./resource');
 
-module.exports = {
-  // using protocols is the legacy method configuring server ports
-  connections : {
-    insecure : { protocol: 'http', port: 8080 },
-
-    secure : {
-      port: 8443,
-      protocol: 'https',
-      options : {
-        key  : blueprint.assetSync ('ssl/dummy.key'),
-        cert : blueprint.assetSync ('ssl/dummy.crt')
-      }
-    }
-  },
-
-  middleware : {
-    bodyParser : {
-      json : { },
-      urlencoded : { extended: false }
-    }
-  }
-};
+module.exports = resource.decorator ('model');

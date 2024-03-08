@@ -21,13 +21,11 @@ const UploadAction = require ('./upload-action');
  *
  * Action for uploading text only.
  */
-module.exports = UploadAction.extend ({
+module.exports = class TextOnlyUploadAction extends UploadAction {
   /**
    * @override
    */
-  async configure () {
-    await this._super.call (this, ...arguments);
-
-    this._middleware = this._upload.none ();
+  createUploadMiddleware () {
+    return this._upload.none ();
   }
-});
+}

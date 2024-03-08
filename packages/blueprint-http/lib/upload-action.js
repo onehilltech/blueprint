@@ -18,7 +18,6 @@ const multer = require ('multer');
 const Action = require ('./action');
 const { resolve } = require ('path');
 const { merge } = require ('lodash');
-const { computed } = require ('base-object');
 const { ensureDirSync } = require ('fs-extra');
 const { fromCallback } = require ('bluebird');
 
@@ -35,11 +34,6 @@ module.exports = class UploadAction extends Action {
 
   /// The other options for multer.
   uploadOptions;
-
-  // The middleware for completing the upload.
-  get middleware () {
-
-  }
 
   get storageType () {
     return this._options.dest ? 'disk' : 'memory';
@@ -65,6 +59,15 @@ module.exports = class UploadAction extends Action {
 
     this._options = merge (baseOptions, this.uploadOptions);
     this._upload = multer (this._options);
+
+    // Create the upload middleware used by the upload action.
+    this._middleware = this.createUploadMiddleware (this.uploadOptions || {});
+  }
+
+  _middleware = null;
+
+  createUploadMiddleware (options) {
+
   }
 
   /**
@@ -74,7 +77,7 @@ module.exports = class UploadAction extends Action {
    * @param res     The response object.
    */
   async execute (req, res) {
-    await fromCallback (callback => this.middleware (req, res, callback));
+    await fromCallback (callback => this._middleware (req, res, callback));
     return this.onUploadComplete (req, res);
   }
 

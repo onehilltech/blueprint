@@ -23,18 +23,14 @@ const UploadAction = require ('./upload-action');
  * Action for uploading a single file. The file is expected to be part of a
  * multipart/form-data request.
  */
-module.exports = UploadAction.extend ({
+module.exports = class SingleFileUploadAction extends UploadAction {
   /// The name of the field that will contain the uploaded file.
-  name: null,
+  name = null;
 
-  /**
-   * @override
-   */
-  async configure (controller) {
-    await this._super.call (this, ...arguments);
+  createUploadMiddleware () {
+    assert (!!this.name, `You must define the 'name' property.`);
 
-    assert (!!this.name, "You must define the 'name' property.");
-
-    this._middleware = this._upload.single (this.name);
+    return this._upload.single (this.name);
   }
-});
+};
+

@@ -23,14 +23,32 @@ const request  = require ('supertest');
 const express  = require ('express');
 const path     = require ('path');
 
+class TestArrayUploadAction extends ArrayUploadAction {
+  uploadPath = './temp';
+  name = 'avatar';
+
+  uploadCompleteCalled = false;
+
+  async onUploadComplete (req, res) {
+    // check for the normal fields.
+    expect (req).to.have.property ('body').to.include ({
+      name: 'James Hill'
+    });
+
+    // check the upload file.
+    expect (req).to.have.property ('files').to.have.length (2);
+    expect (req).to.have.nested.property ('files[0]').to.include ({ fieldname: 'avatar', mimetype: 'image/jpeg', originalname: 'avatar.jpg' });
+    expect (req).to.have.nested.property ('files[1]').to.include ({ fieldname: 'avatar', mimetype: 'image/jpeg', originalname: 'avatar.jpg' });
+
+    res.status (200).json ({comment: 'The upload is complete!'});
+    this.uploadCompleteCalled = true;
+  }
+}
+
 describe ('lib | ArrayUploadAction', function () {
   describe ('constructor', function () {
     it ('should create an ArrayUploadAction object', async function () {
-      const action = new ArrayUploadAction ({
-        uploadPath: './temp',
-        name: 'avatar'
-      });
-
+      const action = new TestArrayUploadAction ();
       await action.configure ({ app: blueprint.app } );
 
       expect (action).to.have.property ('name', 'avatar');
@@ -39,33 +57,13 @@ describe ('lib | ArrayUploadAction', function () {
 
   describe ('execute', function () {
     it ('should upload an array of files', async function () {
-      const action = ArrayUploadAction.create ({
-        uploadPath: './temp',
-        name: 'avatar',
-        uploadCompleteCalled: false,
-
-        onUploadComplete (req, res) {
-          // check for the normal fields.
-          expect (req).to.have.property ('body').to.include ({
-            name: 'James Hill'
-          });
-
-          // check the upload file.
-          expect (req).to.have.property ('files').to.have.length (2);
-          expect (req).to.have.nested.property ('files[0]').to.include ({ fieldname: 'avatar', mimetype: 'image/png', originalname: 'avatar.png' });
-          expect (req).to.have.nested.property ('files[1]').to.include ({ fieldname: 'avatar', mimetype: 'image/png', originalname: 'avatar.png' });
-
-          res.status (200).json ({comment: 'The upload is complete!'});
-          this.uploadCompleteCalled = true;
-        }
-      });
-
+      const action = new TestArrayUploadAction ();
       await action.configure ({ app: blueprint.app } );
 
       const app = express ();
       app.post ('/profile', executeAction (action));
 
-      const avatarPng = path.resolve ('./tests/files/avatar.png');
+      const avatarPng = path.resolve ('./tests/files/avatar.jpg');
 
       await request (app)
         .post ('/profile')

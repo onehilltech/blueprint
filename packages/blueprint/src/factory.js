@@ -37,7 +37,21 @@ class SimpleFactory extends Factory {
 
 exports.SimpleFactory = SimpleFactory;
 
-  /**
+/**
+ * Helper function for defining a SingletonFactory. This helper method can be used
+ * if you do not need to override the default behavior of the SingletonFactory in
+ * your subclass.
+ */
+exports.simpleFactory = function simpleFactory (Type) {
+  return class extends SimpleFactory {
+    constructor () {
+      super (Type);
+    }
+  }
+};
+
+
+/**
  * @class SingletonFactory
  *
  * A factory that creates only one instance of its type. After the instance is first

@@ -21,12 +21,16 @@
  * method, which is used to evaluate the policy.
  */
 module.exports = class Policy {
-  /**
-   * Constructor
-   */
-  constructor (code, message) {
-    this.code = code || 'policy_failed';
-    this.message = message || 'The request did not satisfy a required policy.';
+  code = 'policy_failed';
+
+  message = 'The request did not satisfy a required policy.';
+
+  constructor (code = undefined, message = undefined) {
+    if (code)
+      this.code = code;
+
+    if (message)
+      this.message = message;
   }
 
   /**

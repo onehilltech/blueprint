@@ -2,29 +2,34 @@ const ViewAction = require ('../../../lib/view-action')
   , expect       = require ('chai').expect
   ;
 
+class TestViewAction extends ViewAction {
+  async view (req) { return 'helloworld.pug'; }
+
+  async model (req) {
+    return {
+      a: 1, b: 2
+    }
+  }
+}
+
 describe ('lib | ViewAction', function () {
   context ('create()', function () {
     it ('should create an ViewAction', function () {
-      const action = new ViewAction ({ view () { return 'helloworld.pug'; }});
-      expect (action).to.be.instanceof (ViewAction);
+      expect (new TestViewAction ()).to.be.instanceof (ViewAction);
     });
   });
 
   context ('execute(req, res)', function () {
     it ('should send a response from a view template', function () {
-      let req = {};
-
-      let res = {
+      const req = {};
+      const res = {
         render (view, data) {
           this.view = view;
           this.data = data;
         }
       };
 
-      let action = new ViewAction ({
-        view ()  { return 'helloworld.pug'; },
-        model () { return {a: 1, b: 2}}
-      });
+      const action = new TestViewAction ();
 
       return action.execute (req, res).then (() => {
         expect (res).to.have.property ('view', 'helloworld.pug');

@@ -1,3 +1,7 @@
+const {
+  simpleFactory
+} = require('@onehilltech/blueprint');
+
 /**
  * Main entry point for the module.
  *
@@ -8,7 +12,8 @@ module.exports = function (module) {
     location: 'models'
   });
   module.app.defineType('policy', {
-    location: 'policies'
+    location: 'policies',
+    factoryForType: simpleFactory
   });
   module.app.defineType('validator', {
     location: 'validators'

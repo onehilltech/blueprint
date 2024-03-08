@@ -22,18 +22,16 @@ const UploadAction = require ('./upload-action');
  *
  * Action for accepting a mix of files.
  */
-module.exports = UploadAction.extend ({
+module.exports = class FieldsUploadAction extends UploadAction {
   /// The name of the field that will contain the uploaded file.
-  fields: null,
+  fields = null;
 
   /**
    * @override
    */
-  async configure () {
-    await this._super.call (this, ...arguments);
-
+  createUploadMiddleware () {
     assert (!!this.fields, "You must define the 'fields' property.");
 
-    this._middleware = this._upload.fields (this.fields);
+    return this._upload.fields (this.fields);
   }
-});
+}

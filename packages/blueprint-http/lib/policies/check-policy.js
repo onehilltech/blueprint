@@ -24,7 +24,9 @@ const IdentityPolicy = require ('./identity');
  *
  * Policy check that delay loads the policy.
  */
-module.exports = class Check extends Policy {
+module.exports = class CheckPolicy extends Policy {
+  policy = null;
+
   /**
    * Constructor
    *
@@ -55,12 +57,21 @@ module.exports = class Check extends Policy {
    * Load the policy into memory.
    */
   _load (app) {
-    // The policy has never been loaded. Let's load the policy into memory. This
-    // is a one-time cost the first time the policy is evaluated.
+    if (!!this.policy)
+      return this.policy;
 
-    const Policy = get (app.resources.policies, this.name);
+    try {
+      // Create the policy. Negate the policy if necessary and then set its params.
+      const policy_type_name = `policy:${this.name}`;
+      this.policy = app.createInstance (policy_type_name);
 
-    if (!Policy) {
+      if (this.negate)
+        this.policy = new NegatePolicy (this.policy);
+
+      if (this.params)
+        this.policy.setParameters (...this.params);
+    }
+    catch (err) {
       // The policy cannot be located. We are going to see if the policy is optional.
       // If the policy is optional, then we can return null. Otherwise, we need to
       // raise an exception to stop the process.
@@ -69,19 +80,6 @@ module.exports = class Check extends Policy {
         throw new Error (`We could not locate policy ${this.name}.`);
 
       this.policy = new IdentityPolicy (true);
-    }
-    else {
-      // Create the policy. Then, we are going to negate it, if applicable.
-      // After we the valid policy instance, we are set the parameters and
-      // the instruct it to configure itself.
-
-      this.policy = new Policy ();
-
-      if (this.negate)
-        this.policy = new NegatePolicy (this.policy);
-
-      if (this.params)
-        this.policy.setParameters (...this.params);
     }
 
     return this.policy;

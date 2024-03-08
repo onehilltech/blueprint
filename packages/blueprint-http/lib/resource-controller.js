@@ -25,11 +25,11 @@ const NotFoundError  = require ('./not-found-error');
 /**
  * @class NotFound
  */
-const NotFound = Action.extend ({
+class NotFound extends Action {
   async execute () {
     throw new NotFoundError ('not_found', 'Not found');
   }
-});
+}
 
 /**
  * @class ResourceController
@@ -42,72 +42,83 @@ const NotFound = Action.extend ({
  * = update
  * = delete
  */
-module.exports = Controller.extend ({
-  init () {
-    this._super.call (this, ...arguments);
+module.exports = class ResourceController extends Controller {
+  constructor () {
+    super (...arguments);
 
     assert (!!this.name, 'You must provide a name property.');
 
     if (!this.id)
       this.id = `${camelCase (this.name)}Id`;
-  },
+
+    // Prepare the action table for the resource controller.
+    this._actions = this.prepareActionTable ({ });
+  }
 
   /// Name of the resource managed by the resource controller.
-  name: null,
+  name = null;
 
   /// Id for the resource. If the id is not provided, it is generated from
   /// the name of the resource.
-  id: null,
+  id = null;
 
   /// The namespace for the resource controller. The namespace is used to
   /// assist with scoping the resource and preventing collisions with like
   /// named resources.
-  namespace: null,
+  namespace = null;
 
-  /// List the properties that can be merged.
-  mergedProperties: ['_actions'],
+  /**
+   * Prepare the action table. A subclass can override this method to add custom actions to
+   * the resource controller.
+   *
+   * @param table
+   * @returns {any}
+   */
+  prepareActionTable (table) {
+    return Object.assign ({
+      // CRUD operations
+      create: {verb: 'post', method: 'create'},
+      getAll: {verb: 'get', method: 'getAll'},
+      getOne: {verb: 'get', path: '/:rcId', method: 'getOne'},
+      update: {verb: 'put', path: '/:rcId', method: 'update'},
+      delete: {verb: 'delete', path: '/:rcId', method: 'delete'},
 
-  _actions: Object.freeze ({
-    // CRUD operations
-    create: {verb: 'post', method: 'create'},
-    getAll: {verb: 'get', method: 'getAll'},
-    getOne: {verb: 'get', path: '/:rcId', method: 'getOne'},
-    update: {verb: 'put', path: '/:rcId', method: 'update'},
-    delete: {verb: 'delete', path: '/:rcId', method: 'delete'},
+      // support operations
+      count: {verb: 'get', path: '/count', method: 'count'}
+    }, table);
+  }
 
-    // support operations
-    count: {verb: 'get', path: '/count', method: 'count'}
-  }),
+  get resourceId () {
+    return this.id;
+  }
 
-  resourceId: computed ({
-    get () { return this.id }
-  }),
-
-  actions: computed ({
-    get () { return this._actions; }
-  }),
+  get actions () {
+    return this._actions;
+  }
 
   create () {
     return NotFound;
-  },
+  }
 
   getAll () {
     return NotFound;
-  },
+  }
 
   getOne () {
     return NotFound;
-  },
+  }
 
   update () {
     return NotFound;
-  },
+  }
 
   delete () {
     return NotFound;
-  },
+  }
 
   count () {
     return NotFound;
   }
-});
+}
+
+exports.NotFound = NotFound;

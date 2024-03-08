@@ -1,11 +1,15 @@
-const blueprint = require ('../../../lib');
-const { UploadAction }  = blueprint;
-const {expect} = require ('chai');
+const blueprint = require ('@onehilltech/blueprint');
+const { UploadAction } = require ('../../../lib');
+const { expect} = require ('chai');
+
+class TestUploadAction extends UploadAction {
+  uploadPath = './temp';
+}
 
 describe ('lib | UploadAction', function () {
   describe ('constructor', function () {
     it ('should create an UploadAction object', async function () {
-      let action = new UploadAction ({uploadPath: './temp'});
+      const action = new TestUploadAction ();
       await action.configure (blueprint.app);
 
       expect (action).to.have.property ('uploadPath', './temp');

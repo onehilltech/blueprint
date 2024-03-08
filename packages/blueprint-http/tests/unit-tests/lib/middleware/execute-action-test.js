@@ -5,14 +5,16 @@ const {expect} = require ('chai');
 
 describe ('lib | middleware | executeAction', function () {
   it ('should execute promise without error', function (done) {
-    let req = {};
-    let res = {};
-
-    let middleware = executeAction (new Action ({
-      execute () {
-        return Promise.resolve (true);
+    class TestAction extends Action {
+      async execute () {
+        return true;
       }
-    }));
+    }
+
+    const req = {};
+    const res = {};
+
+    const middleware = executeAction (new TestAction ());
 
     middleware (req, res, (err) => {
       expect (err).to.be.undefined;
@@ -21,14 +23,16 @@ describe ('lib | middleware | executeAction', function () {
   });
 
   it ('should execute promise that fails', function (done) {
-    let req = {};
-    let res = {};
-
-    let middleware = executeAction (new Action ({
-      execute () {
-        return Promise.reject (new Error ('This execution failed'))
+    class TestAction extends Action {
+      async execute () {
+        throw new Error ('This execution failed');
       }
-    }));
+    }
+
+    const req = {};
+    const res = {};
+
+    const middleware = executeAction (new TestAction ());
 
     middleware (req, res, (err) => {
       expect (err.message).to.equal ('This execution failed');

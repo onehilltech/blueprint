@@ -7,17 +7,21 @@ const assert = require ('assert');
  * Specialization of the ViewAction class that only supports a single view. Subclasses,
  * and instances of this class, must provide the template property.
  */
-module.exports = ViewAction.extend ({
-  init () {
-    this._super.call (this, ...arguments);
+module.exports = class SingleViewAction extends ViewAction {
+  constructor () {
+    super (...arguments)
 
-    assert (!!this.template, "You must define the 'template' property.");
-  },
+    assert (!!this.template, `You must define the 'template' property.`);
+  }
 
   /// Name of the view template to render for this action.
-  template: null,
+  template = null;
 
-  view () {
+  /**
+   * @override
+   */
+  async view (req) {
     return this.template;
   }
-});
+};
+

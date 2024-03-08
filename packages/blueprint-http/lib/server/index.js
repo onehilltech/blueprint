@@ -25,8 +25,6 @@ const handleError = require ('./handle-error');
 
 const { merge, forOwn, forEach, map, defaultsDeep } = require ('lodash');
 
-const { env } = require ('@onehilltech/blueprint');
-
 const Protocol = require ('./protocol');
 const defaultProtocols  = require ('./protocols');
 
@@ -47,7 +45,7 @@ module.exports = exports = class Server {
     this._engines = [];
 
     // Register the default protocols. We do not assign the protocols directly
-    // to the protocols variable because we want to ensure the default protocols
+    // to the protocol variable because we want to ensure the default protocols
     // have the expected interfaces.
     this._registerDefaultProtocols ();
   }

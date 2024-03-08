@@ -122,14 +122,14 @@ module.exports = class Framework {
    * @param callback
    * @returns {*}
    */
-  asset (filename, opts, callback) {
+  resource (filename, opts, callback) {
     assert (this.hasApplication, 'The application has not been created.');
-    return this._app.asset (filename, opts, callback);
+    return this._app.resource (filename, opts, callback);
   }
 
-  assetSync (filename, opts) {
+  resourceSync (filename, opts) {
     assert (this._app, 'The application has not been created.');
-    return this._app.assetSync (filename, opts);
+    return this._app.resourceSync (filename, opts);
   }
 
   /**

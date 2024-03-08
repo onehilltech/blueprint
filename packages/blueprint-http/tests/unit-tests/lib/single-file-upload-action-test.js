@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const blueprint = require ('../../../lib');
+const blueprint = require ('@onehilltech/blueprint');
 const SingleFileUploadAction = require ('../../../lib/single-file-upload-action');
 const executeAction = require ('../../../lib/middleware/execute-action');
 
@@ -23,50 +23,49 @@ const request  = require ('supertest');
 const express  = require ('express');
 const path     = require ('path');
 
+class TestSingleFileUploadAction extends SingleFileUploadAction {
+  uploadPath = './temp';
+  name = 'avatar';
+
+  uploadCompleteCalled = false;
+
+  async onUploadComplete (req, res) {
+    // check for the normal fields.
+    expect (req).to.have.property ('body').to.include ({
+      name: 'James Hill'
+    });
+
+    // check the upload file.
+    expect (req).to.have.property ('file').to.include ({
+      fieldname: 'avatar',
+      mimetype: 'image/jpeg',
+      originalname: 'avatar.jpg'
+    });
+
+    res.status (200).json ({comment: 'The upload is complete!'});
+    this.uploadCompleteCalled = true;
+  }
+}
+
 describe ('lib | SingleFileUploadAction', function () {
   describe ('constructor', function () {
     it ('should create an SingleFileUploadAction object', async function () {
-      const action = new SingleFileUploadAction ({
-        uploadPath: './temp',
-        name: 'avatar'
-      });
-
+      const action = new TestSingleFileUploadAction ();
       await action.configure ({ app: blueprint.app } );
+
       expect (action).to.have.property ('name', 'avatar');
     });
   });
 
   describe ('execute', function () {
     it ('should upload a file', async function () {
-      const action = SingleFileUploadAction.create ({
-        uploadPath: './temp',
-        name: 'avatar',
-        uploadCompleteCalled: false,
-
-        onUploadComplete (req, res) {
-          // check for the normal fields.
-          expect (req).to.have.property ('body').to.include ({
-            name: 'James Hill'
-          });
-
-          // check the upload file.
-          expect (req).to.have.property ('file').to.include ({
-              fieldname: 'avatar',
-              mimetype: 'image/png',
-              originalname: 'avatar.png'
-          });
-
-          res.status (200).json ({comment: 'The upload is complete!'});
-          this.uploadCompleteCalled = true;
-        }
-      });
-
+      const action = new TestSingleFileUploadAction ();
       await action.configure ({ app: blueprint.app } );
 
       const app = express ();
       app.post ('/profile', executeAction (action));
 
-      const avatarPng = path.resolve (__dirname, '../../files/avatar.png');
+      const avatarPng = path.resolve (__dirname, '../../files/avatar.jpg');
 
       await request (app)
         .post ('/profile')

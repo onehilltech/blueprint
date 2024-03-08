@@ -23,7 +23,7 @@ const assert = require ('assert');
  * A ViewAction is an action that generates a view based on the content
  * of the request it is processing.
  */
-module.exports = Action.extend ({
+module.exports = class ViewAction extends Action {
   /**
    * Get the view template for the action. The view is used to render a
    * response to the caller.
@@ -33,17 +33,16 @@ module.exports = Action.extend ({
    */
   async view (req) {
     throw new Error ('You must override the view() method.');
-  },
+  }
 
   /**
    * Get the data model used to populate the template.
    *
-   * @params req        The request object
-   * @returns Promise
+   * @params req              The request object
    */
   async model (req) {
     return null;
-  },
+  }
 
   /**
    *
@@ -58,4 +57,4 @@ module.exports = Action.extend ({
     // Render the view using the provided model.
     return res.render (view, model);
   }
-});
+};

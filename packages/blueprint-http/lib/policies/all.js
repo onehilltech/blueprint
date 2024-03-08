@@ -22,11 +22,13 @@ const handlePolicyFailure = require ('./-handle-policy-failure')
  * Aggregate of policies that all must pass for this policy to pass.
  *
  * @param       definitions       Array of policy definitions
+ * @param       code              Failure code
+ * @param       message           Failure message
  */
-function all (definitions) {
+function all (definitions, code, message) {
   return class AllPolicy extends Policy {
     constructor () {
-      super ();
+      super (code, message);
     }
 
     async configure (app) {
@@ -61,10 +63,6 @@ function all (definitions) {
  */
 all.ordered = function (definitions) {
   return class AllOrderPolicy extends Policy {
-    constructor () {
-      super ();
-    }
-
     async configure (app) {
       this.policies = await Promise.all (definitions.map (policy => policyFactory (policy, app)));
     }

@@ -15,8 +15,8 @@
  */
 
 const { expect } = require ('chai');
-const blueprint = require ('../../../../lib');
-const { Policy, policies: {any, check} } = blueprint;
+const blueprint = require ('@onehilltech/blueprint');
+const { Policy, policies: { any, check} } = require ('../../../../lib');
 
 describe ('lib | policies | any', function () {
   it ('should pass because all policies pass', async function () {

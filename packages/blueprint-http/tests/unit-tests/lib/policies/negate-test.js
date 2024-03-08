@@ -19,7 +19,7 @@ const {
 } = require ('chai');
 
 const check = require ('../../../../lib/policies/check');
-const blueprint = require ('../../../../lib');
+const blueprint = require ('@onehilltech/blueprint');
 
 describe ('lib | policies | negate', function () {
   it ('should negate a true to false', async function () {

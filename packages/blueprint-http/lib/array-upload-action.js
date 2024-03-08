@@ -23,18 +23,16 @@ const UploadAction = require ('./upload-action');
  * Action for uploading an array files. The files will be available on req.files
  * in onUploadComplete(req,res).
  */
-module.exports = UploadAction.extend ({
+module.exports = class ArrayUploadAction extends UploadAction {
   /// The name of the field that will contain the uploaded files.
-  name: null,
+  name = null;
 
   /**
    * @override
    */
-  async configure () {
-    await this._super.call (this, ...arguments);
-
+  createUploadMiddleware (options) {
     assert (!!this.name, "You must define the 'name' property.");
 
-    this._middleware = this._upload.array (this.name);
+    return this._upload.array (this.name);
   }
-});
+}

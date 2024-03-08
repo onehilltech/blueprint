@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const blueprint = require ('../../../../lib');
+const blueprint = require ('../../../lib');
 
 module.exports = {
   // using protocols is the legacy method configuring server ports
@@ -25,8 +25,8 @@ module.exports = {
       port: 8443,
       protocol: 'https',
       options : {
-        //key  : blueprint.assetSync ('ssl/dummy.key'),
-        //cert : blueprint.assetSync ('ssl/dummy.crt')
+        key  : blueprint.resourceSync ('ssl/dummy.key'),
+        cert : blueprint.resourceSync ('ssl/dummy.crt')
       }
     }
   },

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const { BO, computed } = require ('base-object');
-
 /**
  * @class Action
  *
@@ -31,15 +29,6 @@ const { BO, computed } = require ('base-object');
  * access to the application object via the `controller` property.
  */
 module.exports = class Action {
-  /**
-   * Constructor
-   * *
-   * @param controller        The parent controller
-   */
-  constructor (controller) {
-    Object.defineProperty (this, 'controller', { writable: false, configurable: false, value: controller});
-  }
-
   /**
    * Configure the action.
    */

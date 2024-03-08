@@ -30,13 +30,13 @@ function singleEntityHandler (method, param) {
   }
 }
 
-module.exports = ResourceController.extend ({
-  name: 'user',
+module.exports = class UserResourceController extends ResourceController {
+  name = 'user';
 
-  create () { return simpleHandler ('create'); },
-  getAll () { return simpleHandler ('getAll'); },
-  getOne () { return singleEntityHandler ('getOne', 'userId') },
-  update () { return singleEntityHandler ('update', 'userId') },
-  delete () { return singleEntityHandler ('delete', 'userId') },
+  create () { return simpleHandler ('create'); }
+  getAll () { return simpleHandler ('getAll'); }
+  getOne () { return singleEntityHandler ('getOne', 'userId') }
+  update () { return singleEntityHandler ('update', 'userId') }
+  delete () { return singleEntityHandler ('delete', 'userId') }
   count () { return simpleHandler ('count'); }
-});
+};

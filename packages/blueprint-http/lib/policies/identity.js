@@ -46,7 +46,7 @@ module.exports = class IdentityPolicy extends Policy {
   /**
    * @override
    */
-  runCheck (req) {
+  async runCheck (req) {
     return this.result;
   }
 }

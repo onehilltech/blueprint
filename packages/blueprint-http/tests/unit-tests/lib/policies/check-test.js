@@ -18,12 +18,12 @@ const chai = require ('chai');
 chai.use (require ('chai-as-promised'))
 const { expect } = chai;
 
-const blueprint = require ('../../../../lib');
-const { Policy, policies: { check }} = blueprint;
+const blueprint = require ('@onehilltech/blueprint');
+const { Policy, policies: { check }} = require ('../../../../lib');
 
 describe ('lib | policies | check', function () {
   it ('should create a policy check', async function () {
-    let policy = check ('identity', true);
+    const policy = check ('identity', true);
 
     expect (policy).to.be.instanceOf (Policy)
     expect (policy).to.respondsTo ('runCheck');

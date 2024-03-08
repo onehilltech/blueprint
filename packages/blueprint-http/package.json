@@ -4,8 +4,8 @@
   "version": "5.0.0-alpha.6",
   "private": false,
   "scripts": {
-    "prepare": "babel src -d app",
-    "pretest": "npm run prepare && babel tests/dummy/src -d tests/dummy/app",
+    "build": "babel src -d app",
+    "pretest": "npm run build && babel tests/dummy/src -d tests/dummy/app",
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive"
   },
   "dependencies": {

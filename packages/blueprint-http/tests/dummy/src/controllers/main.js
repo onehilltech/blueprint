@@ -15,47 +15,48 @@
  */
 
 const {check} = require ('express-validator/check');
+const { service, model } = require ('@onehilltech/blueprint');
+const { Controller, Action } = require ('@onehilltech/blueprint-http');
 
-const {
-  Controller,
-  Action,
-  service,
-  model
-} = require ('@onehilltech/blueprint-http');
+module.exports = class MainController extends Controller {
+  @service
+  cart;
 
-module.exports = Controller.extend ({
-  cart: service (),
-  shoppingCart: service ('shopping-cart'),
+  @service('shopping-cart')
+  shoppingCart;
 
-  person: model (),
-  model: model ('person'),
+  @model
+  person;
+
+  @model('person')
+  model;
 
   __invoke () {
-    return Action.extend ({
+    return class extendsAction {
       execute (req, res) {
         return res.status (200).json (true);
       }
-    });
-  },
+    };
+  }
 
   performGet () {
-    return Action.extend ({
+    return class extends Action {
       validate (req) {
 
-      },
+      }
 
       execute (req, res) {
         return res.status (200).json (true);
       }
-    });
-  },
+    };
+  }
 
   getFunction () {
     return function (req, res, next) {
       res.status (200).json ({result: 'getFunction'});
       next ();
     };
-  },
+  }
 
   getFunctionArray () {
     return [
@@ -65,11 +66,11 @@ module.exports = Controller.extend ({
         next ();
       }
     ]
-  },
+  }
 
   getActionWithSchema () {
-    return Action.extend ({
-      schema: {
+    return class extends Action {
+      schema = Object.freeze ({
         id: {
           // The location of the field, can be one or more of body, cookies, headers, params or query.
           // If omitted, all request locations will be checked
@@ -80,14 +81,14 @@ module.exports = Controller.extend ({
           // Sanitizers can go here as well
           toInt: true
         },
-      },
+      });
 
       execute (req, res, next) {
         res.status (200).json ({result: 'getActionWithSchema'});
         next ();
       }
-    });
-  },
+    };
+  }
 
   getActionWithValidate () {
     return Action.extend ({
@@ -103,7 +104,7 @@ module.exports = Controller.extend ({
         res.status (200).json ({result: 'getActionWithValidate'});
       }
     });
-  },
+  }
 
   postActionWithValidateFail ( ) {
     return Action.extend ({
@@ -120,4 +121,4 @@ module.exports = Controller.extend ({
       }
     });
   }
-});
+}

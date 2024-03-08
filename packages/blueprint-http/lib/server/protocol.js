@@ -21,7 +21,7 @@ const { fromCallback } = require ('bluebird');
  *
  * Base class for all protocols that can integrate with the server.
  */
-class Protocol {
+module.exports = class Protocol {
   /**
    * Constructor
    *
