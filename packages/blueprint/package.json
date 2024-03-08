@@ -21,7 +21,7 @@
     "uuid": "^8.3.2"
   },
   "scripts": {
-    "build": "babel src -d lib",
+    "build": "babel src/lib -d lib",
     "pretest": "npm run build && babel tests/dummy/src -d tests/dummy/app",
     "test": "env NODE_ENV=test mocha --recursive --reporter spec tests/unit-tests"
   },
