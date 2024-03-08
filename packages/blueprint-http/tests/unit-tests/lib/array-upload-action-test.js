@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-const blueprint = require ('../../../lib');
-const ArrayUploadAction = require ('../../../lib/array-upload-action');
-const executeAction = require ('../../../lib/middleware/execute-action');
+const blueprint = require ('../../../src/lib');
+const ArrayUploadAction = require ('../../../src/lib/array-upload-action');
+const executeAction = require ('../../../src/lib/middleware/execute-action');
 
 const {expect} = require ('chai');
 const request  = require ('supertest');

@@ -1,4 +1,4 @@
-const HttpError = require ('../../../lib/http-error');
+const HttpError = require ('../../../src/lib/http-error');
 const {expect} = require ('chai');
 
 describe ('lib | HttpError', function () {

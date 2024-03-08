@@ -1,5 +1,5 @@
-const executeAction = require ('../../../../lib/middleware/execute-action');
-const Action = require ('../../../../lib/action');
+const executeAction = require ('../../../../src/lib/middleware/execute-action');
+const Action = require ('../../../../src/lib/action');
 
 const {expect} = require ('chai');
 

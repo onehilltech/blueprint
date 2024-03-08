@@ -14,14 +14,31 @@
  * limitations under the License.
  */
 
-const Policy = require ('../../../../src/lib/policies/policy');
+const blueprint = require ('@onehilltech/blueprint');
 
-module.exports = class IdentityPolicy extends Policy {
-  setParameters (value) {
-    this.value = value;
-  }
+module.exports = {
+  connections: {
+    insecure: {
+      protocol: 'http',
+      port: 10000
+    },
 
-  runCheck (req) {
-    return this.value;
+    secure: {
+      protocol: 'https',
+      port: 8443,
+      options: {
+        key: blueprint.resourceSync('http/ssl/dummy.key'),
+        cert: blueprint.resourceSync('http/ssl/dummy.crt')
+      }
+    }
+  },
+
+  middleware: {
+    bodyParser: {
+      json: {},
+      urlencoded: {
+        extended: false
+      }
+    }
   }
-}
+};

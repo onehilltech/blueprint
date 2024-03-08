@@ -19,7 +19,7 @@ chai.use (require ('chai-as-promised'))
 const { expect } = chai;
 
 const blueprint = require ('@onehilltech/blueprint');
-const { Policy, policies: { check }} = require ('../../../../lib');
+const { Policy, policies: { check }} = require ('../../../../src/lib');
 
 describe ('lib | policies | check', function () {
   it ('should create a policy check', async function () {

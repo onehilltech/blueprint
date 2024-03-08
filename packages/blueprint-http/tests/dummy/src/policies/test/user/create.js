@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { Policy } = require ('../../../../../../lib');
+const { Policy } = require ('../../../../../../src/lib');
 
 module.exports = class UserCreatePolicy extends Policy {
   constructor () {

@@ -1,7 +1,7 @@
 let {expect} = require ('chai');
 let assert = require ('assert')
-let ResourceController = require ('../../../lib/resource-controller');
-let HttpError = require ('../../../lib/http-error');
+let ResourceController = require ('../../../src/lib/resource-controller');
+let HttpError = require ('../../../src/lib/http-error');
 
 function notFoundTest (method) {
   describe (method, function () {
@@ -21,12 +21,14 @@ function notFoundTest (method) {
 describe ('lib | ResourceController', function () {
   describe ('constructor', function () {
     it ('should create a ResourceController', function () {
-      let rc = new ResourceController ({name: 'book'});
+      const rc = new class extends ResourceController {
+        name = 'book';
+      };
 
       expect (rc).to.deep.include ({
         name: 'book',
         id: 'bookId',
-        _actions: {
+        actions: {
           create: {verb: 'post', method: 'create'},
           getAll: {verb: 'get', method: 'getAll'},
           getOne: {verb: 'get', path: '/:rcId', method: 'getOne'},
@@ -35,13 +37,7 @@ describe ('lib | ResourceController', function () {
           count: {verb: 'get', path: '/count', method: 'count'}
         }
       });
-
-      expect (rc.actions).to.equal (rc._actions);
     });
-
-    it ('should throw an exception because it is missing the name', function () {
-      expect (() => { new ResourceController ()}).to.throw (assert.AssertionError);
-    })
   });
 
   notFoundTest ('create');

@@ -15,8 +15,8 @@
  */
 
 const blueprint = require ('@onehilltech/blueprint');
-const SingleFileUploadAction = require ('../../../lib/single-file-upload-action');
-const executeAction = require ('../../../lib/middleware/execute-action');
+const SingleFileUploadAction = require ('../../../src/lib/single-file-upload-action');
+const executeAction = require ('../../../src/lib/middleware/execute-action');
 
 const {expect} = require ('chai');
 const request  = require ('supertest');

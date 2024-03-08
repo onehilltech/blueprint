@@ -21,9 +21,16 @@ const bodyParser  = require ('body-parser');
 const consolidate = require ('consolidate');
 const express = require ('express');
 const path = require ('path');
+const klaw    = require ('klaw');
 const handleError = require ('./handle-error');
 
-const { merge, forOwn, forEach, map, defaultsDeep } = require ('lodash');
+const {
+  merge,
+  forOwn,
+  forEach,
+  difference,
+  defaultsDeep
+} = require ('lodash');
 
 const Protocol = require ('./protocol');
 const defaultProtocols  = require ('./protocols');
@@ -51,7 +58,7 @@ module.exports = exports = class Server {
   }
 
   get viewsPath () {
-    return path.resolve (this.app.tempPath, 'resources/views');
+    return path.resolve (this.app.resourcePath, 'http/views');
   }
 
   /**
@@ -70,6 +77,9 @@ module.exports = exports = class Server {
     if (env === 'production' || env === 'sandbox') {
       this._express.set ('trust proxy', 'loopback')
     }
+
+    // Configure the view engines.
+    await this._configureEngines ();
 
     // We always need to configure the middleware for the server, even if there
     // is no explicit middleware property in the configuration file.
@@ -293,6 +303,61 @@ module.exports = exports = class Server {
 
       debug (`static path: ${staticPath}`);
       this._staticRouter.use (express.static (staticPath));
+    });
+  }
+
+  /**
+   * Configure the view engines for the server.
+   *
+   * @returns {Promise<Awaited<unknown>[]>}
+   * @private
+   */
+  _configureEngines () {
+    const options = { recursive: true, clobber: true };
+
+    // We need to walk the import path to copy the files into the view cache
+    // path and detect the different view engines. Ideally, we would like to
+    // complete both in a single pass. This, however, would require implementing
+    // an algorithm atop low-level functions since the copy functions do not let
+    // us know what files are copies in real-time. Making two passes is basically
+    // the same run-time complexity as a single pass. So, we are going to execute
+    // both tasks in parallel.
+
+    return new Promise ((resolve, reject) => {
+      // Walk the path. For each view we find, we need to copy the file and
+      // then create a view object of the file.
+      const engines = [];
+
+      klaw (this.viewsPath).on ('data', item => {
+        if (!item.stats.isFile ())
+          return;
+
+        // The extension of the file is used to determine the view engine.
+        const ext = path.extname (item.path);
+
+        if (ext.length > 1) {
+          const engine = ext.slice (1);
+
+          if (engines.indexOf (engine) === -1)
+            engines.push (engine);
+        }
+      }).on ('end', () => {
+        // Remove from the list the engines that we have already seen. Do not want
+        // to replace the existing renderer with the same renderer.
+
+        const unloaded = difference (engines, this._engines);
+
+        unloaded.forEach (ext => {
+          const renderer = consolidate[ext];
+
+          assert (!!renderer, `There is no view engine renderer for ${ext}`);
+
+          this._express.engine (ext, renderer);
+          this._engines.push (ext);
+        });
+
+        resolve ();
+      }).on ('error', reject);
     });
   }
 

@@ -1,5 +1,5 @@
 const blueprint = require ('@onehilltech/blueprint');
-const { UploadAction } = require ('../../../lib');
+const { UploadAction } = require ('../../../src/lib');
 const { expect} = require ('chai');
 
 class TestUploadAction extends UploadAction {

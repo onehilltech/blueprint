@@ -46,36 +46,11 @@ module.exports = class ResourceController extends Controller {
   constructor () {
     super (...arguments);
 
-    assert (!!this.name, 'You must provide a name property.');
+    // Prepare the action table for the resource controller. Make sure we assign the
+    // default actions to the table.
+    const actions = this.prepareActionTable (this.actions);
 
-    if (!this.id)
-      this.id = `${camelCase (this.name)}Id`;
-
-    // Prepare the action table for the resource controller.
-    this._actions = this.prepareActionTable ({ });
-  }
-
-  /// Name of the resource managed by the resource controller.
-  name = null;
-
-  /// Id for the resource. If the id is not provided, it is generated from
-  /// the name of the resource.
-  id = null;
-
-  /// The namespace for the resource controller. The namespace is used to
-  /// assist with scoping the resource and preventing collisions with like
-  /// named resources.
-  namespace = null;
-
-  /**
-   * Prepare the action table. A subclass can override this method to add custom actions to
-   * the resource controller.
-   *
-   * @param table
-   * @returns {any}
-   */
-  prepareActionTable (table) {
-    return Object.assign ({
+    Object.assign (actions, {
       // CRUD operations
       create: {verb: 'post', method: 'create'},
       getAll: {verb: 'get', method: 'getAll'},
@@ -85,15 +60,36 @@ module.exports = class ResourceController extends Controller {
 
       // support operations
       count: {verb: 'get', path: '/count', method: 'count'}
-    }, table);
+    });
+  }
+
+  /// Name of the resource managed by the resource controller.
+  name;
+
+  /// Id for the resource. If the id is not provided, it is generated from
+  /// the name of the resource.
+  get id () {
+    return `${camelCase (this.name)}Id`;
+  }
+
+  /// The namespace for the resource controller. The namespace is used to
+  /// assist with scoping the resource and preventing collisions with like
+  /// named resources.
+  namespace;
+
+  /**
+   * Prepare the action table. A subclass can override this method to add custom actions to
+   * the resource controller.
+   *
+   * @param table
+   * @returns {any}
+   */
+  prepareActionTable (table) {
+    return table;
   }
 
   get resourceId () {
     return this.id;
-  }
-
-  get actions () {
-    return this._actions;
   }
 
   create () {

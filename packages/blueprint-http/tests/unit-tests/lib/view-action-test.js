@@ -1,4 +1,4 @@
-const ViewAction = require ('../../../lib/view-action')
+const ViewAction = require ('../../../src/lib/view-action')
   , expect       = require ('chai').expect
   ;
 

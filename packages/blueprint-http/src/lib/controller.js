@@ -22,7 +22,7 @@
 module.exports = class Controller {
   constructor (app) {
     Object.defineProperty (this, 'app', { writable: false, configurable: false, value: app});
-    Object.defineProperty (this, 'actions', { writable: false, configurable: false, value: []});
+    Object.defineProperty (this, 'actions', { writable: false, configurable: false, value: {}});
   }
 
   register (action) {

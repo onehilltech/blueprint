@@ -5,11 +5,11 @@ chai.use (require ('chai-as-promised'))
 const request  = require ('supertest');
 const express  = require ('express');
 
-const RouterBuilder = require ('../../../lib/router-builder');
-const HttpError = require ('../../../lib/http-error');
+const RouterBuilder = require ('../../../src/lib/router-builder');
+const HttpError = require ('../../../src/lib/http-error');
 
-const policies = require ('../../../lib/policies');
-const blueprint = require ('../../../lib');
+const policies = require ('../../../src/lib/policies');
+const blueprint = require ('../../../src/lib');
 
 describe ('lib | RouterBuilder', function () {
   describe ('build', function () {

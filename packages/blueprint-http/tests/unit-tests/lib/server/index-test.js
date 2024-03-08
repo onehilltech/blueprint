@@ -15,17 +15,16 @@
  */
 
 const {expect} = require ('chai');
-const Server = require ('../../../../lib/server');
 const path = require ('path');
+const blueprint = require ('@onehilltech/blueprint');
 
-const blueprint = require ('../../../../lib');
+const Server = require ('../../../../src/lib/server');
 
 describe ('lib | server | Server', function () {
   describe ('constructor', function () {
     it ('should create a server object', function () {
       const app = {};
-
-      let server = new Server ({app});
+      const server = new Server (app);
 
       expect (server).to.not.be.null;
     });
@@ -33,21 +32,15 @@ describe ('lib | server | Server', function () {
 
   describe ('configure', function () {
     it ('should configure the server using default configurations', function () {
-      const { server } = blueprint.app;
+        const http = blueprint.lookup ('service:http');
 
-        expect (server.express).to.not.be.null;
-        expect (server._mainRouter).to.not.be.null;
-        expect (server.viewCachePath).to.equal (path.join (blueprint.app.tempPath, 'views'));
+        expect (http.server.express).to.not.be.null;
+        expect (http.server._mainRouter).to.not.be.null;
     });
-  });
 
-  describe ('importViews', function () {
-    it ('should import view for use by the server', async function () {
-      const server = new Server ({app: blueprint.app});
-      await server.configure ({});
-      await server.importViews (blueprint.app.viewsPath);
-
-      expect (server._engines).to.eql (['handlebars'])
+    it ('should load the corresponding view engines', async function () {
+      const http = blueprint.lookup ('service:http');
+      expect (http.server._engines).to.eql (['handlebars', 'pug'])
     });
   });
 });

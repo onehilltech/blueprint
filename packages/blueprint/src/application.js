@@ -79,7 +79,7 @@ class Application {
    * @return {string}
    */
   get tempPath () {
-    return path.resolve (this.appPath, '../.blueprint');
+    return path.resolve (this._appModule.modulePath, '.blueprint');
   }
 
   /**
@@ -88,7 +88,7 @@ class Application {
    * @return {string}
    */
   get resourcePath () {
-    return path.resolve (this.tempPath, 'resources');
+    return this._appModule.resourcePath;
   }
 
   /**
@@ -387,7 +387,7 @@ class Application {
    */
   _loadConfigurationFiles () {
     const loader = new Loader ();
-    const dirname = path.resolve (this.appPath, 'configs');
+    const dirname = path.resolve (this.appPath, '../configs');
 
     return loader.load ({dirname});
   }

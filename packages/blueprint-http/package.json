@@ -4,7 +4,7 @@
   "version": "5.0.0-alpha.6",
   "private": false,
   "scripts": {
-    "build": "babel src -d app",
+    "build": "babel src/app -d app && babel src/lib -d lib",
     "pretest": "npm run build && babel tests/dummy/src -d tests/dummy/app",
     "test": "env NODE_ENV=test mocha tests/unit-tests --recursive"
   },
@@ -29,7 +29,7 @@
   "peerDependencies": {
     "pug": "^2.0.4"
   },
-  "main": "./lib",
+  "main": "src/lib",
   "license": "Apache-2.0",
   "keywords": [
     "blueprint",

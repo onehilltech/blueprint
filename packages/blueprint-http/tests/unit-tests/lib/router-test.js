@@ -16,8 +16,8 @@
 
 const request    = require ('supertest');
 const express    = require ('express');
-const Router     = require ('../../../lib/router');
-const blueprint  = require ('../../../lib');
+const Router     = require ('../../../src/lib/router');
+const blueprint  = require ('../../../src/lib');
 
 describe ('lib | Router', function () {
   describe ('build', function () {

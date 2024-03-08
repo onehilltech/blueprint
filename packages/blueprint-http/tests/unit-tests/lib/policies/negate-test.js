@@ -18,7 +18,7 @@ const {
   expect
 } = require ('chai');
 
-const check = require ('../../../../lib/policies/check');
+const check = require ('../../../../src/lib/policies/check');
 const blueprint = require ('@onehilltech/blueprint');
 
 describe ('lib | policies | negate', function () {
