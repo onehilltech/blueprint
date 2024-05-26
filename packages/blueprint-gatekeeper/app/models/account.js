@@ -107,7 +107,6 @@ schema.pre ('findOneAndUpdate', async function () {
   }
 });
 
-
 /**
  * Verify the password provided by the user. The \@ password should not be
  * encrypted. This method will perform the hash of the password to verify its
