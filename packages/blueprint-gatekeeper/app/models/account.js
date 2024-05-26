@@ -98,6 +98,16 @@ schema.pre ('save', function () {
     })
 });
 
+schema.pre ('findOneAndUpdate', async function () {
+  const update = this.getUpdate ();
+
+  if (!!update.password) {
+    update.password = await bcrypt.hash (update.password, SALT_WORK_FACTOR);
+    this.setUpdate (update);
+  }
+});
+
+
 /**
  * Verify the password provided by the user. The \@ password should not be
  * encrypted. This method will perform the hash of the password to verify its
