@@ -134,10 +134,10 @@ module.exports = Service.extend ({
    * @param     topic     Target topic or condition.
    * @param     msg       The message to send.
    */
-  publish (topic, msg) {
+  async publish (topic, msg) {
     debug (`publishing message to ${topic}`);
 
-    let message = new gcm.Message (Object.assign ({ dryRun : this.dryRun }, msg));
+    const message = new gcm.Message (Object.assign ({ dryRun : this.dryRun }, msg));
     let recipient = {};
 
     // If the topic begins with a slash, then set the topic on the recipient
@@ -180,35 +180,32 @@ module.exports = Service.extend ({
    * @return {*}
    * @private
    */
-  _sendMessage (recipient, message) {
-    return fromCallback (callback => {
-      // Send the message to the cloud service.
-      this._sender.send (message, recipient, callback);
-    }).then (res => {
-      // Check for failures in the response. If there are no failures, then
-      // there is no need to continue.
-      if (res.failure === 0)
-        return;
+  async _sendMessage (recipient, message) {
+    const res = await fromCallback (callback => this._sender.send (message, recipient, callback));
 
-      let tasks = [];
+    // Check for failures in the response. If there are no failures, then
+    // there is no need to continue.
+    if (res.failure === 0)
+      return;
 
-      if (recipient.registrationTokens) {
-        // There were some failures. We need to check what the failure is, and
-        // remove registration information if the id is not registered.
+    let tasks = [];
 
-        let badTokens = res.results.reduce ((badTokens, result, index) => {
-          if (result.error === ERROR_NOT_REGISTERED)
-            badTokens.push (recipient.registrationTokens[index]);
+    if (recipient.registrationTokens) {
+      // There were some failures. We need to check what the failure is, and
+      // remove registration information if the id is not registered.
 
-          return badTokens;
-        }, []);
+      let badTokens = res.results.reduce ((badTokens, result, index) => {
+        if (result.error === ERROR_NOT_REGISTERED)
+          badTokens.push (recipient.registrationTokens[index]);
 
-        if (badTokens.length > 0) {
-          tasks.push (this.FirebaseDevice.deleteMany ({token: {$in: badTokens}}));
-        }
+        return badTokens;
+      }, []);
+
+      if (badTokens.length > 0) {
+        tasks.push (this.FirebaseDevice.deleteMany ({token: {$in: badTokens}}));
       }
+    }
 
-      return Promise.all (tasks);
-    });
+    return Promise.all (tasks);
   }
 });
