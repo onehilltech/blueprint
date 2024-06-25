@@ -113,7 +113,7 @@ module.exports = Service.extend ({
         });
 
         // We now need to break up the enabled group into MAX_RECIPIENTS, and then
-        // send the message the message to each group. This ensures that the message
+        // send the message to each group. This ensures that the message
         // is not rejected by the service.
         let pending = [];
 
