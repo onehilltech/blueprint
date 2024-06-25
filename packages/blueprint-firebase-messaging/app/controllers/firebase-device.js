@@ -65,24 +65,5 @@ module.exports = ResourceController.extend ({
         return doc;
       }
     });
-  },
-
-  /**
-   * Update a single document in the collection.
-   */
-  update () {
-    return this._super.call (this, ...arguments).extend ({
-      getUpdate (req, update) {
-        // The only property that can be provided in the update is the token. We are also
-        // going to update the session property just in case the token has been refreshed.
-
-        if (!update.$set)
-          update.$set = {};
-
-        update.$set.session = req.accessToken._id;
-
-        return update;
-      }
-    });
   }
 });

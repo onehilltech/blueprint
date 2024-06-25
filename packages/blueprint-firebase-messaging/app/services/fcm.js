@@ -109,7 +109,10 @@ module.exports = Service.extend ({
         let message = new gcm.Message (Object.assign ({dryRun: this.dryRun}, msg));
 
         let enabled = devices.filter (device => {
-          return (device.enabled || device.enabled === undefined) && device.client.enabled && (!device.user || device.user.enabled);
+          return !!device.token &&
+            (device.enabled === true || device.enabled === undefined) &&
+             device.client.enabled &&
+            (!device.account || device.account.enabled);
         });
 
         // We now need to break up the enabled group into MAX_RECIPIENTS, and then

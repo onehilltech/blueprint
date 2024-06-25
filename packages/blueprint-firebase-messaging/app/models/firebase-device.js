@@ -32,12 +32,12 @@ let schema = new mongodb.Schema ({
   /// to the client.
   session: refersTo ('user-token', { required: true, hidden: true, validation: { optional: true } }),
 
-  /// The Firebase registration token for the instance. This token must always be unique or
-  /// it will result in user receiving a notification multiple times.
-  token: { type: String, required: true, unique: true },
-
   /// The enabled status for the device.
   enabled: { type: Boolean, required: true, default: true },
+
+  /// The Firebase registration token for the instance. This token must always be unique or
+  /// it will result in user receiving a notification multiple times.
+  token: { type: String }
 }, options);
 
 module.exports = mongodb.resource ('firebase-device', schema, 'firebase_devices');
