@@ -1,7 +1,7 @@
 {
   "name": "@onehilltech/blueprint-dfinity",
   "description": "Blueprint module for integrating with the Internet Computer",
-  "version": "4.74.1",
+  "version": "4.76.5",
   "private": true,
   "main": "./lib",
   "scripts": {
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@onehilltech/blueprint-cli": "^4.64.1",
-    "@onehilltech/blueprint-testing": "^4.71.0"
+    "@onehilltech/blueprint-testing": "^4.76.5"
   },
   "license": "Apache-2.0",
   "engines": {
